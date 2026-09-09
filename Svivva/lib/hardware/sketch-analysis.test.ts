@@ -3,11 +3,10 @@ import { matchManufacturingMethod, normalizeToOptions } from "./sketch-analysis"
 
 describe("sketch-analysis helpers", () => {
   it("maps extracted materials to known options", () => {
-    const out = normalizeToOptions(["aluminum", "plastic (abs)"], [
-      "Aluminum",
-      "Plastic (ABS)",
-      "Steel",
-    ]);
+    const out = normalizeToOptions(
+      ["aluminum", "plastic (abs)"],
+      ["Aluminum", "Plastic (ABS)", "Steel"],
+    );
     expect(out).toContain("Aluminum");
     expect(out).toContain("Plastic (ABS)");
   });

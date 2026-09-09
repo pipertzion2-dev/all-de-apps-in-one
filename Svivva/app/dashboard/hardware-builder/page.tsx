@@ -263,7 +263,9 @@ export default function HardwareBuilderPage() {
     setUseCases(data.useCases);
     setRequirements(normalizeToOptions(data.requirements, requirementOptions));
     setMaterials(normalizeToOptions(data.materials, materialOptions));
-    setManufacturingMethod(matchManufacturingMethod(data.manufacturingMethod, manufacturingMethods));
+    setManufacturingMethod(
+      matchManufacturingMethod(data.manufacturingMethod, manufacturingMethods),
+    );
     setBudgetRange([
       Math.min(100000, Math.max(1000, Math.round(data.estimatedBudget / 1000) * 1000)),
     ]);
@@ -323,12 +325,7 @@ export default function HardwareBuilderPage() {
     } finally {
       setSketchAnalyzing(false);
     }
-  }, [
-    uploadedSketchBase64,
-    uploadedSketchMime,
-    sketchUploadNotes,
-    applySketchAnalysis,
-  ]);
+  }, [uploadedSketchBase64, uploadedSketchMime, sketchUploadNotes, applySketchAnalysis]);
 
   const handleNext = async () => {
     if (currentStep < steps.length - 1) {
@@ -1273,8 +1270,12 @@ export default function HardwareBuilderPage() {
                   ) : (
                     <div className="flex flex-col items-center gap-2 text-muted-foreground">
                       <Upload className="w-10 h-10" />
-                      <span className="text-sm font-medium">Drop your sketch or click to upload</span>
-                      <span className="text-xs">Photo, scan, or drawing — JPEG, PNG, WebP up to 6 MB</span>
+                      <span className="text-sm font-medium">
+                        Drop your sketch or click to upload
+                      </span>
+                      <span className="text-xs">
+                        Photo, scan, or drawing — JPEG, PNG, WebP up to 6 MB
+                      </span>
                     </div>
                   )}
                 </button>
@@ -1312,172 +1313,175 @@ export default function HardwareBuilderPage() {
         </Card>
 
         {(entryMode === "brief" || startedFromSketch) && (
-        <Card className="border-primary/30">
-          <CardHeader className="pb-4">
-            <div className="flex items-center justify-between gap-4 flex-wrap">
-              <div className="space-y-1">
-                <CardTitle className="text-lg">BUILD System</CardTitle>
-                <CardDescription>Bring Users Into Logical Delivery</CardDescription>
+          <Card className="border-primary/30">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                <div className="space-y-1">
+                  <CardTitle className="text-lg">BUILD System</CardTitle>
+                  <CardDescription>Bring Users Into Logical Delivery</CardDescription>
+                </div>
+                <Badge variant="outline">
+                  Step {currentStep + 1} of {steps.length}
+                </Badge>
               </div>
-              <Badge variant="outline">
-                Step {currentStep + 1} of {steps.length}
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="flex items-center gap-2 justify-between">
-              {steps.map((step, index) => (
-                <div
-                  key={step.id}
-                  className={`flex flex-col items-center gap-1 flex-1 ${
-                    index <= currentStep ? "opacity-100" : "opacity-40"
-                  }`}
-                >
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-center gap-2 justify-between">
+                {steps.map((step, index) => (
                   <div
-                    className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-sm sm:text-lg font-bold ${
-                      step.completed
-                        ? "bg-green-500 text-white"
-                        : index === currentStep
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted text-muted-foreground"
+                    key={step.id}
+                    className={`flex flex-col items-center gap-1 flex-1 ${
+                      index <= currentStep ? "opacity-100" : "opacity-40"
                     }`}
                   >
-                    {step.completed ? <CheckCircle2 className="w-5 h-5" /> : step.letter}
+                    <div
+                      className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-sm sm:text-lg font-bold ${
+                        step.completed
+                          ? "bg-green-500 text-white"
+                          : index === currentStep
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {step.completed ? <CheckCircle2 className="w-5 h-5" /> : step.letter}
+                    </div>
+                    <span className="text-xs text-center hidden sm:block">{step.title}</span>
                   </div>
-                  <span className="text-xs text-center hidden sm:block">{step.title}</span>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
 
-            <Progress value={progress} className="h-2" />
+              <Progress value={progress} className="h-2" />
 
-            {startedFromSketch && (
-              <div className="rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm">
-                <p className="font-medium text-green-700 dark:text-green-400">
-                  Pre-filled from your sketch
-                </p>
-                <p className="text-muted-foreground text-xs mt-1">
-                  Review each step, then run manufacturer research on Delivery. Hybridization is
-                  optional.
-                </p>
-                {sketchNotes && (
-                  <p className="text-xs mt-2 text-muted-foreground line-clamp-3" title={sketchNotes}>
-                    {sketchNotes}
+              {startedFromSketch && (
+                <div className="rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm">
+                  <p className="font-medium text-green-700 dark:text-green-400">
+                    Pre-filled from your sketch
                   </p>
-                )}
-              </div>
-            )}
-
-            <div className="pt-4">
-              <h2 className="text-xl font-semibold mb-2">
-                {steps[currentStep].letter}. {steps[currentStep].title}
-              </h2>
-              <p className="text-muted-foreground mb-6">{steps[currentStep].description}</p>
-
-              {renderStepContent()}
-            </div>
-          </CardContent>
-        </Card>
-        )}
-
-        {(entryMode === "brief" || startedFromSketch) && (
-        <Card className="border-[#5B8DA8]/30">
-          <CardHeader className="pb-3">
-            <button
-              type="button"
-              onClick={() => setShowSchematicHybridizer(!showSchematicHybridizer)}
-              className="flex items-center justify-between w-full text-left gap-2"
-              data-testid="button-toggle-schematic-hybridizer"
-            >
-              <div className="flex items-center gap-2">
-                <Merge className="w-5 h-5 text-[#5B8DA8]" />
-                <div>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    Schematic Hybridizer
-                    <Badge variant="secondary" className="text-[10px] font-normal">
-                      Optional
-                    </Badge>
-                  </CardTitle>
-                  <CardDescription>
-                    Fuse two systems for novel concepts — skip if you already know what you&apos;re
-                    building
-                  </CardDescription>
+                  <p className="text-muted-foreground text-xs mt-1">
+                    Review each step, then run manufacturer research on Delivery. Hybridization is
+                    optional.
+                  </p>
+                  {sketchNotes && (
+                    <p
+                      className="text-xs mt-2 text-muted-foreground line-clamp-3"
+                      title={sketchNotes}
+                    >
+                      {sketchNotes}
+                    </p>
+                  )}
                 </div>
-              </div>
-              {showSchematicHybridizer ? (
-                <ChevronUp className="w-5 h-5 shrink-0" />
-              ) : (
-                <ChevronDown className="w-5 h-5 shrink-0" />
               )}
-            </button>
-          </CardHeader>
-          {showSchematicHybridizer && (
-            <CardContent>
-              <HardwareSchematicHybridizer />
+
+              <div className="pt-4">
+                <h2 className="text-xl font-semibold mb-2">
+                  {steps[currentStep].letter}. {steps[currentStep].title}
+                </h2>
+                <p className="text-muted-foreground mb-6">{steps[currentStep].description}</p>
+
+                {renderStepContent()}
+              </div>
             </CardContent>
-          )}
-        </Card>
+          </Card>
         )}
 
         {(entryMode === "brief" || startedFromSketch) && (
-        <div className="flex flex-col sm:flex-row gap-3 sm:justify-between">
-          <Button
-            variant="outline"
-            onClick={handleBack}
-            disabled={currentStep === 0 || isProcessing}
-            className="gap-2 order-2 sm:order-1"
-            data-testid="button-back"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back
-          </Button>
+          <Card className="border-[#5B8DA8]/30">
+            <CardHeader className="pb-3">
+              <button
+                type="button"
+                onClick={() => setShowSchematicHybridizer(!showSchematicHybridizer)}
+                className="flex items-center justify-between w-full text-left gap-2"
+                data-testid="button-toggle-schematic-hybridizer"
+              >
+                <div className="flex items-center gap-2">
+                  <Merge className="w-5 h-5 text-[#5B8DA8]" />
+                  <div>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      Schematic Hybridizer
+                      <Badge variant="secondary" className="text-[10px] font-normal">
+                        Optional
+                      </Badge>
+                    </CardTitle>
+                    <CardDescription>
+                      Fuse two systems for novel concepts — skip if you already know what
+                      you&apos;re building
+                    </CardDescription>
+                  </div>
+                </div>
+                {showSchematicHybridizer ? (
+                  <ChevronUp className="w-5 h-5 shrink-0" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 shrink-0" />
+                )}
+              </button>
+            </CardHeader>
+            {showSchematicHybridizer && (
+              <CardContent>
+                <HardwareSchematicHybridizer />
+              </CardContent>
+            )}
+          </Card>
+        )}
 
-          {currentStep < steps.length - 1 ? (
+        {(entryMode === "brief" || startedFromSketch) && (
+          <div className="flex flex-col sm:flex-row gap-3 sm:justify-between">
             <Button
-              onClick={handleNext}
-              disabled={isProcessing}
-              className="gap-2 order-1 sm:order-2"
-              data-testid="button-next"
+              variant="outline"
+              onClick={handleBack}
+              disabled={currentStep === 0 || isProcessing}
+              className="gap-2 order-2 sm:order-1"
+              data-testid="button-back"
             >
-              {isProcessing ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <>
-                  Next
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
+              <ArrowLeft className="w-4 h-4" />
+              Back
             </Button>
-          ) : (
-            <Button
-              className="gap-2 order-1 sm:order-2"
-              data-testid="button-complete"
-              onClick={() => {
-                if (productName.trim()) {
-                  saveHardwareProduct({
-                    id: `hwp_${Date.now()}`,
-                    name: productName.trim(),
-                    description: productDescription.trim(),
-                    category: productCategory,
-                    targetUsers: targetUsers.trim(),
-                    useCases: useCases.trim(),
-                    requirements,
-                    materials,
-                    manufacturingMethod,
-                    budgetRange: budgetRange[0],
-                    createdAt: new Date().toISOString(),
-                  });
-                }
-                const updatedSteps = [...steps];
-                updatedSteps[currentStep].completed = true;
-                setSteps(updatedSteps);
-              }}
-            >
-              <CheckCircle2 className="w-4 h-4" />
-              Complete Build
-            </Button>
-          )}
-        </div>
+
+            {currentStep < steps.length - 1 ? (
+              <Button
+                onClick={handleNext}
+                disabled={isProcessing}
+                className="gap-2 order-1 sm:order-2"
+                data-testid="button-next"
+              >
+                {isProcessing ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    Next
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </Button>
+            ) : (
+              <Button
+                className="gap-2 order-1 sm:order-2"
+                data-testid="button-complete"
+                onClick={() => {
+                  if (productName.trim()) {
+                    saveHardwareProduct({
+                      id: `hwp_${Date.now()}`,
+                      name: productName.trim(),
+                      description: productDescription.trim(),
+                      category: productCategory,
+                      targetUsers: targetUsers.trim(),
+                      useCases: useCases.trim(),
+                      requirements,
+                      materials,
+                      manufacturingMethod,
+                      budgetRange: budgetRange[0],
+                      createdAt: new Date().toISOString(),
+                    });
+                  }
+                  const updatedSteps = [...steps];
+                  updatedSteps[currentStep].completed = true;
+                  setSteps(updatedSteps);
+                }}
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                Complete Build
+              </Button>
+            )}
+          </div>
         )}
       </div>
     </FeaturePageShell>

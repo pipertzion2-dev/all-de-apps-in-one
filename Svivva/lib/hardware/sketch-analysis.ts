@@ -36,10 +36,7 @@ export function buildSketchAnalysisPrompt(): string {
 Be practical. If the sketch is ambiguous, state assumptions in sketchNotes. estimatedBudget is USD prototype-to-small-batch range.`;
 }
 
-export function normalizeToOptions(
-  extracted: string[],
-  options: string[],
-): string[] {
+export function normalizeToOptions(extracted: string[], options: string[]): string[] {
   const lowerOptions = options.map((o) => o.toLowerCase());
   const matched = new Set<string>();
   for (const item of extracted) {
@@ -53,10 +50,7 @@ export function normalizeToOptions(
   return [...matched].slice(0, 8);
 }
 
-export function matchManufacturingMethod(
-  extracted: string,
-  methods: string[],
-): string {
+export function matchManufacturingMethod(extracted: string, methods: string[]): string {
   const lower = extracted.toLowerCase();
   const hit = methods.find(
     (m) =>
