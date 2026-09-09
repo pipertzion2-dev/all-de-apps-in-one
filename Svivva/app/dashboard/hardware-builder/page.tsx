@@ -1,9 +1,13 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import dynamic from "next/dynamic";
+import { useState, useCallback, useRef } from "react";
 import { FeaturePageShell } from "@/components/feature-page-shell";
 import Image from "next/image";
+import {
+  matchManufacturingMethod,
+  normalizeToOptions,
+  type SketchAnalysis,
+} from "@/lib/hardware/sketch-analysis";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -36,6 +40,8 @@ import {
   Search,
   ChevronDown,
   ChevronUp,
+  Upload,
+  PenLine,
 } from "lucide-react";
 import { HardwareSchematicHybridizer } from "@/components/hardware-schematic-hybridizer";
 
@@ -118,10 +124,56 @@ function saveHardwareProduct(product: SavedHardwareProduct) {
   } catch {}
 }
 
+const requirementOptions = [
+  "Durability",
+  "Lightweight",
+  "Waterproof",
+  "Heat resistant",
+  "Eco-friendly",
+  "Modular design",
+  "Easy assembly",
+  "Compact size",
+];
+
+const materialOptions = [
+  "Aluminum",
+  "Steel",
+  "Plastic (ABS)",
+  "Carbon fiber",
+  "Wood",
+  "Glass",
+  "Silicone",
+  "Titanium",
+];
+
+const manufacturingMethods = [
+  "3D Printing",
+  "CNC Machining",
+  "Injection Molding",
+  "Laser Cutting",
+  "Sheet Metal Fabrication",
+  "Hand Assembly",
+];
+
+type EntryMode = "sketch" | "brief";
+
 export default function HardwareBuilderPage() {
+  const [entryMode, setEntryMode] = useState<EntryMode>("sketch");
   const [currentStep, setCurrentStep] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [steps, setSteps] = useState<BuildStep[]>(buildSteps);
+  const sketchFileRef = useRef<HTMLInputElement>(null);
+
+  const [uploadedSketchBase64, setUploadedSketchBase64] = useState("");
+  const [uploadedSketchMime, setUploadedSketchMime] = useState<
+    "image/jpeg" | "image/png" | "image/webp" | "image/gif"
+  >("image/jpeg");
+  const [sketchUploadNotes, setSketchUploadNotes] = useState("");
+  const [sketchAnalyzing, setSketchAnalyzing] = useState(false);
+  const [sketchAnalyzeError, setSketchAnalyzeError] = useState("");
+  const [sketchNotes, setSketchNotes] = useState("");
+  const [startedFromSketch, setStartedFromSketch] = useState(false);
+  const [showSchematicHybridizer, setShowSchematicHybridizer] = useState(false);
 
   const [productName, setProductName] = useState("");
   const [productDescription, setProductDescription] = useState("");
@@ -203,36 +255,77 @@ export default function HardwareBuilderPage() {
   const [pdfGenerating, setPdfGenerating] = useState(false);
   const [expandedManufacturer, setExpandedManufacturer] = useState<number | null>(null);
 
-  const requirementOptions = [
-    "Durability",
-    "Lightweight",
-    "Waterproof",
-    "Heat resistant",
-    "Eco-friendly",
-    "Modular design",
-    "Easy assembly",
-    "Compact size",
-  ];
+  const applySketchAnalysis = useCallback((data: SketchAnalysis) => {
+    setProductName(data.productName);
+    setProductDescription(data.productDescription);
+    setProductCategory(data.productCategory);
+    setTargetUsers(data.targetUsers);
+    setUseCases(data.useCases);
+    setRequirements(normalizeToOptions(data.requirements, requirementOptions));
+    setMaterials(normalizeToOptions(data.materials, materialOptions));
+    setManufacturingMethod(
+      matchManufacturingMethod(data.manufacturingMethod, manufacturingMethods),
+    );
+    setBudgetRange([
+      Math.min(100000, Math.max(1000, Math.round(data.estimatedBudget / 1000) * 1000)),
+    ]);
+    setSketchNotes(data.sketchNotes);
+    setStartedFromSketch(true);
+    setGeneratedSketch(true);
+  }, []);
 
-  const materialOptions = [
-    "Aluminum",
-    "Steel",
-    "Plastic (ABS)",
-    "Carbon fiber",
-    "Wood",
-    "Glass",
-    "Silicone",
-    "Titanium",
-  ];
+  const handleSketchFile = useCallback((file: File) => {
+    if (!file.type.startsWith("image/")) {
+      setSketchAnalyzeError("Please upload an image (JPEG, PNG, or WebP).");
+      return;
+    }
+    if (file.size > 6 * 1024 * 1024) {
+      setSketchAnalyzeError("Image must be under 6 MB.");
+      return;
+    }
+    setSketchAnalyzeError("");
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      const comma = dataUrl.indexOf(",");
+      const base64 = comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl;
+      const mime = (file.type || "image/jpeg") as typeof uploadedSketchMime;
+      setUploadedSketchBase64(base64);
+      setUploadedSketchMime(mime);
+      setSketchImageSrc(dataUrl);
+    };
+    reader.onerror = () => setSketchAnalyzeError("Could not read that file.");
+    reader.readAsDataURL(file);
+  }, []);
 
-  const manufacturingMethods = [
-    "3D Printing",
-    "CNC Machining",
-    "Injection Molding",
-    "Laser Cutting",
-    "Sheet Metal Fabrication",
-    "Hand Assembly",
-  ];
+  const handleAnalyzeSketch = useCallback(async () => {
+    if (!uploadedSketchBase64) {
+      setSketchAnalyzeError("Upload a sketch first.");
+      return;
+    }
+    setSketchAnalyzing(true);
+    setSketchAnalyzeError("");
+    try {
+      const r = await fetch("/api/hardware/analyze-sketch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          imageBase64: uploadedSketchBase64,
+          mimeType: uploadedSketchMime,
+          notes: sketchUploadNotes,
+        }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || "Analysis failed");
+      applySketchAnalysis(data as SketchAnalysis);
+      setEntryMode("brief");
+      setCurrentStep(0);
+    } catch (err: unknown) {
+      setSketchAnalyzeError(err instanceof Error ? err.message : "Analysis failed");
+    } finally {
+      setSketchAnalyzing(false);
+    }
+  }, [uploadedSketchBase64, uploadedSketchMime, sketchUploadNotes, applySketchAnalysis]);
 
   const handleNext = async () => {
     if (currentStep < steps.length - 1) {
@@ -308,6 +401,9 @@ export default function HardwareBuilderPage() {
           manufacturingMethod,
           budgetRange: budgetRange[0],
           requirements,
+          sketchNotes,
+          sketchImageBase64: uploadedSketchBase64 || undefined,
+          sketchMimeType: uploadedSketchMime,
         }),
       });
       const data = await r.json();
@@ -326,6 +422,9 @@ export default function HardwareBuilderPage() {
     manufacturingMethod,
     budgetRange,
     requirements,
+    sketchNotes,
+    uploadedSketchBase64,
+    uploadedSketchMime,
   ]);
 
   const handleHybridize = useCallback(async () => {
@@ -385,6 +484,9 @@ export default function HardwareBuilderPage() {
           platforms: sourcingResults?.platforms || [],
           recommendation: sourcingResults?.recommendation || "",
           hybrids: hybridResults?.hybrids || [],
+          sketchNotes,
+          sketchImageBase64: uploadedSketchBase64 || undefined,
+          sketchMimeType: uploadedSketchMime,
         }),
       });
       if (!r.ok) throw new Error("PDF generation failed");
@@ -412,6 +514,9 @@ export default function HardwareBuilderPage() {
     budgetRange,
     sourcingResults,
     hybridResults,
+    sketchNotes,
+    uploadedSketchBase64,
+    uploadedSketchMime,
   ]);
 
   const toggleRequirement = (req: string) => {
@@ -606,7 +711,7 @@ export default function HardwareBuilderPage() {
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm flex items-center gap-2">
                     <Palette className="w-4 h-4 text-primary" />
-                    AI Sketch
+                    {startedFromSketch ? "Your sketch" : "AI Sketch"}
                     {generatedSketch && (
                       <CheckCircle2 className="w-3.5 h-3.5 text-green-500 ml-auto" />
                     )}
@@ -925,7 +1030,7 @@ export default function HardwareBuilderPage() {
                       Cross-Domain Hybridizer
                     </CardTitle>
                     <CardDescription>
-                      Combine two systems to discover hybrid innovations
+                      Optional — combine two systems to discover hybrid innovations
                     </CardDescription>
                   </div>
                   {showHybridizer ? (
@@ -1097,131 +1202,287 @@ export default function HardwareBuilderPage() {
     >
       <div className="max-w-4xl mx-auto space-y-5 sm:space-y-6 px-4 pb-4 relative z-10">
         <Card className="border-primary/30">
-          <CardHeader className="pb-4">
-            <div className="flex items-center justify-between gap-4 flex-wrap">
-              <div className="space-y-1">
-                <CardTitle className="text-lg">BUILD System</CardTitle>
-                <CardDescription>Bring Users Into Logical Delivery</CardDescription>
-              </div>
-              <Badge variant="outline">
-                Step {currentStep + 1} of {steps.length}
-              </Badge>
-            </div>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">How do you want to start?</CardTitle>
+            <CardDescription>
+              Upload a napkin sketch — we read it and pre-fill the build. Hybridization is optional
+              later.
+            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="flex items-center gap-2 justify-between">
-              {steps.map((step, index) => (
-                <div
-                  key={step.id}
-                  className={`flex flex-col items-center gap-1 flex-1 ${
-                    index <= currentStep ? "opacity-100" : "opacity-40"
-                  }`}
+          <CardContent className="space-y-4">
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant={entryMode === "sketch" ? "default" : "outline"}
+                size="sm"
+                className="gap-2"
+                onClick={() => setEntryMode("sketch")}
+                data-testid="button-entry-sketch"
+              >
+                <Upload className="w-4 h-4" /> I have a sketch
+              </Button>
+              <Button
+                variant={entryMode === "brief" ? "default" : "outline"}
+                size="sm"
+                className="gap-2"
+                onClick={() => setEntryMode("brief")}
+                data-testid="button-entry-brief"
+              >
+                <PenLine className="w-4 h-4" /> I have a written brief
+              </Button>
+            </div>
+
+            {entryMode === "sketch" && !startedFromSketch && (
+              <div className="space-y-4 pt-2">
+                <input
+                  ref={sketchFileRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleSketchFile(file);
+                  }}
+                  data-testid="input-sketch-file"
+                />
+                <button
+                  type="button"
+                  onClick={() => sketchFileRef.current?.click()}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const file = e.dataTransfer.files?.[0];
+                    if (file) handleSketchFile(file);
+                  }}
+                  className="w-full rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 p-6 sm:p-8 text-center hover:border-primary/60 transition-colors"
+                  data-testid="dropzone-sketch"
                 >
+                  {sketchImageSrc ? (
+                    <div className="relative mx-auto aspect-video max-h-64 w-full max-w-md overflow-hidden rounded-lg">
+                      <Image
+                        src={sketchImageSrc}
+                        alt="Uploaded sketch"
+                        fill
+                        className="object-contain"
+                        unoptimized
+                        data-testid="img-uploaded-sketch"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                      <Upload className="w-10 h-10" />
+                      <span className="text-sm font-medium">
+                        Drop your sketch or click to upload
+                      </span>
+                      <span className="text-xs">
+                        Photo, scan, or drawing — JPEG, PNG, WebP up to 6 MB
+                      </span>
+                    </div>
+                  )}
+                </button>
+                <Textarea
+                  placeholder="Optional: label parts, materials, or size notes the sketch doesn't show..."
+                  value={sketchUploadNotes}
+                  onChange={(e) => setSketchUploadNotes(e.target.value)}
+                  className="min-h-[60px] text-sm"
+                  data-testid="textarea-sketch-notes"
+                />
+                {sketchAnalyzeError && (
+                  <p className="text-sm text-red-400" data-testid="text-sketch-analyze-error">
+                    {sketchAnalyzeError}
+                  </p>
+                )}
+                <Button
+                  onClick={handleAnalyzeSketch}
+                  disabled={sketchAnalyzing || !uploadedSketchBase64}
+                  className="gap-2 w-full sm:w-auto"
+                  data-testid="button-analyze-sketch"
+                >
+                  {sketchAnalyzing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" /> Reading your sketch...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4" /> Analyze sketch &amp; start BUILD
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {(entryMode === "brief" || startedFromSketch) && (
+          <Card className="border-primary/30">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                <div className="space-y-1">
+                  <CardTitle className="text-lg">BUILD System</CardTitle>
+                  <CardDescription>Bring Users Into Logical Delivery</CardDescription>
+                </div>
+                <Badge variant="outline">
+                  Step {currentStep + 1} of {steps.length}
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-center gap-2 justify-between">
+                {steps.map((step, index) => (
                   <div
-                    className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-sm sm:text-lg font-bold ${
-                      step.completed
-                        ? "bg-green-500 text-white"
-                        : index === currentStep
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted text-muted-foreground"
+                    key={step.id}
+                    className={`flex flex-col items-center gap-1 flex-1 ${
+                      index <= currentStep ? "opacity-100" : "opacity-40"
                     }`}
                   >
-                    {step.completed ? <CheckCircle2 className="w-5 h-5" /> : step.letter}
+                    <div
+                      className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-sm sm:text-lg font-bold ${
+                        step.completed
+                          ? "bg-green-500 text-white"
+                          : index === currentStep
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {step.completed ? <CheckCircle2 className="w-5 h-5" /> : step.letter}
+                    </div>
+                    <span className="text-xs text-center hidden sm:block">{step.title}</span>
                   </div>
-                  <span className="text-xs text-center hidden sm:block">{step.title}</span>
-                </div>
-              ))}
-            </div>
-
-            <Progress value={progress} className="h-2" />
-
-            <div className="pt-4">
-              <h2 className="text-xl font-semibold mb-2">
-                {steps[currentStep].letter}. {steps[currentStep].title}
-              </h2>
-              <p className="text-muted-foreground mb-6">{steps[currentStep].description}</p>
-
-              {renderStepContent()}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-[#5B8DA8]/30">
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-2">
-              <Merge className="w-5 h-5 text-[#5B8DA8]" />
-              <div>
-                <CardTitle className="text-lg">Schematic Hybridizer</CardTitle>
-                <CardDescription>
-                  Cross-domain AI analysis — discover novel hybrid architectures from any two
-                  hardware schematics
-                </CardDescription>
+                ))}
               </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <HardwareSchematicHybridizer />
-          </CardContent>
-        </Card>
 
-        <div className="flex flex-col sm:flex-row gap-3 sm:justify-between">
-          <Button
-            variant="outline"
-            onClick={handleBack}
-            disabled={currentStep === 0 || isProcessing}
-            className="gap-2 order-2 sm:order-1"
-            data-testid="button-back"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back
-          </Button>
+              <Progress value={progress} className="h-2" />
 
-          {currentStep < steps.length - 1 ? (
-            <Button
-              onClick={handleNext}
-              disabled={isProcessing}
-              className="gap-2 order-1 sm:order-2"
-              data-testid="button-next"
-            >
-              {isProcessing ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <>
-                  Next
-                  <ArrowRight className="w-4 h-4" />
-                </>
+              {startedFromSketch && (
+                <div className="rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm">
+                  <p className="font-medium text-green-700 dark:text-green-400">
+                    Pre-filled from your sketch
+                  </p>
+                  <p className="text-muted-foreground text-xs mt-1">
+                    Review each step, then run manufacturer research on Delivery. Hybridization is
+                    optional.
+                  </p>
+                  {sketchNotes && (
+                    <p
+                      className="text-xs mt-2 text-muted-foreground line-clamp-3"
+                      title={sketchNotes}
+                    >
+                      {sketchNotes}
+                    </p>
+                  )}
+                </div>
               )}
-            </Button>
-          ) : (
+
+              <div className="pt-4">
+                <h2 className="text-xl font-semibold mb-2">
+                  {steps[currentStep].letter}. {steps[currentStep].title}
+                </h2>
+                <p className="text-muted-foreground mb-6">{steps[currentStep].description}</p>
+
+                {renderStepContent()}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {(entryMode === "brief" || startedFromSketch) && (
+          <Card className="border-[#5B8DA8]/30">
+            <CardHeader className="pb-3">
+              <button
+                type="button"
+                onClick={() => setShowSchematicHybridizer(!showSchematicHybridizer)}
+                className="flex items-center justify-between w-full text-left gap-2"
+                data-testid="button-toggle-schematic-hybridizer"
+              >
+                <div className="flex items-center gap-2">
+                  <Merge className="w-5 h-5 text-[#5B8DA8]" />
+                  <div>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      Schematic Hybridizer
+                      <Badge variant="secondary" className="text-[10px] font-normal">
+                        Optional
+                      </Badge>
+                    </CardTitle>
+                    <CardDescription>
+                      Fuse two systems for novel concepts — skip if you already know what
+                      you&apos;re building
+                    </CardDescription>
+                  </div>
+                </div>
+                {showSchematicHybridizer ? (
+                  <ChevronUp className="w-5 h-5 shrink-0" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 shrink-0" />
+                )}
+              </button>
+            </CardHeader>
+            {showSchematicHybridizer && (
+              <CardContent>
+                <HardwareSchematicHybridizer />
+              </CardContent>
+            )}
+          </Card>
+        )}
+
+        {(entryMode === "brief" || startedFromSketch) && (
+          <div className="flex flex-col sm:flex-row gap-3 sm:justify-between">
             <Button
-              className="gap-2 order-1 sm:order-2"
-              data-testid="button-complete"
-              onClick={() => {
-                if (productName.trim()) {
-                  saveHardwareProduct({
-                    id: `hwp_${Date.now()}`,
-                    name: productName.trim(),
-                    description: productDescription.trim(),
-                    category: productCategory,
-                    targetUsers: targetUsers.trim(),
-                    useCases: useCases.trim(),
-                    requirements,
-                    materials,
-                    manufacturingMethod,
-                    budgetRange: budgetRange[0],
-                    createdAt: new Date().toISOString(),
-                  });
-                }
-                const updatedSteps = [...steps];
-                updatedSteps[currentStep].completed = true;
-                setSteps(updatedSteps);
-              }}
+              variant="outline"
+              onClick={handleBack}
+              disabled={currentStep === 0 || isProcessing}
+              className="gap-2 order-2 sm:order-1"
+              data-testid="button-back"
             >
-              <CheckCircle2 className="w-4 h-4" />
-              Complete Build
+              <ArrowLeft className="w-4 h-4" />
+              Back
             </Button>
-          )}
-        </div>
+
+            {currentStep < steps.length - 1 ? (
+              <Button
+                onClick={handleNext}
+                disabled={isProcessing}
+                className="gap-2 order-1 sm:order-2"
+                data-testid="button-next"
+              >
+                {isProcessing ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    Next
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </Button>
+            ) : (
+              <Button
+                className="gap-2 order-1 sm:order-2"
+                data-testid="button-complete"
+                onClick={() => {
+                  if (productName.trim()) {
+                    saveHardwareProduct({
+                      id: `hwp_${Date.now()}`,
+                      name: productName.trim(),
+                      description: productDescription.trim(),
+                      category: productCategory,
+                      targetUsers: targetUsers.trim(),
+                      useCases: useCases.trim(),
+                      requirements,
+                      materials,
+                      manufacturingMethod,
+                      budgetRange: budgetRange[0],
+                      createdAt: new Date().toISOString(),
+                    });
+                  }
+                  const updatedSteps = [...steps];
+                  updatedSteps[currentStep].completed = true;
+                  setSteps(updatedSteps);
+                }}
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                Complete Build
+              </Button>
+            )}
+          </div>
+        )}
       </div>
     </FeaturePageShell>
   );

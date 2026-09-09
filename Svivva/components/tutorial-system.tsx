@@ -69,7 +69,7 @@ const tutorials: Record<string, TutorialConfig> = {
       {
         title: "The BUILD System",
         description:
-          "Follow 5 simple steps: Bring your vision → define Users → select materials (Into) → layout preview & optional sketch (Logical) → Delivery.",
+          "Start from a sketch upload (we read it and pre-fill) or a written brief. Then: Bring → Users → Into → Logical → Delivery. Hybridization is optional.",
       },
       {
         title: "Layout preview & optional sketch",
