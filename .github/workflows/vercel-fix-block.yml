@@ -1,0 +1,52 @@
+# Resume a paused Vercel project and redeploy production when GitHub shows
+# "Account is blocked" on Vercel – all-de-apps-in-one (usually spend-cap pause).
+#
+# Requires GitHub secrets: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID
+# Optional: VERCEL_DEPLOY_HOOK (used if token deploy fails)
+#
+# Run: Actions → "Fix Vercel block (resume + deploy)" → Run workflow
+name: Fix Vercel block (resume + deploy)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: Svivva/package-lock.json
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@53.3.1
+
+      - name: Resume paused project
+        working-directory: Svivva
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: node scripts/resume-vercel-project.mjs
+
+      - name: Clear queue and deploy latest
+        working-directory: Svivva
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_EVENT_NAME: workflow_dispatch
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+          VERCEL_CI_DEPLOY: "true"
+        run: node scripts/ci-vercel-deploy.mjs

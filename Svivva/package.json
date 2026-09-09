@@ -7,6 +7,7 @@
     "build": "tsx script/build.ts",
     "build:vercel": "node scripts/vercel-prebuild.mjs && npm run check && next build",
     "deploy:prod": "vercel deploy --prod --yes --scope zzai-zzai --project all-de-apps-in-one",
+    "vercel:resume": "node scripts/resume-vercel-project.mjs",
     "redeploy:prod": "node scripts/redeploy-prod.mjs",
     "clear-vercel-queue": "node scripts/clear-vercel-queue.mjs",
     "vercel:disconnect-deprecated": "node scripts/disconnect-deprecated-vercel-git.mjs",
