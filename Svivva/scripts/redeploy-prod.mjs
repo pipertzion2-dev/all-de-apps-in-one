@@ -28,6 +28,15 @@ console.log(
   `Redeploying ${vercelCanonical.teamSlug}/${vercelCanonical.projectName} → ${vercelCanonical.productionDomain}…`,
 );
 
+const resume = spawnSync("node", ["scripts/resume-vercel-project.mjs"], {
+  cwd: root,
+  stdio: "inherit",
+  env: process.env,
+});
+if (resume.status !== 0) {
+  console.warn("Resume skipped or failed (continuing with redeploy)…");
+}
+
 const clear = spawnSync("node", ["scripts/clear-vercel-queue.mjs"], {
   cwd: root,
   stdio: "inherit",

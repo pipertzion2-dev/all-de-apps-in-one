@@ -47,7 +47,16 @@ async function deployViaHook() {
   console.log(`Deploy hook accepted (${res.status}): ${text || "ok"}`);
 }
 
+async function resumeIfPaused() {
+  console.log("Ensuring Vercel project is not paused (spend-cap / blocked label)…");
+  const status = run("node", ["scripts/resume-vercel-project.mjs"]);
+  if (status !== 0) {
+    console.warn("Resume step skipped or failed (continuing)…");
+  }
+}
+
 async function deployViaCli() {
+  await resumeIfPaused();
   console.log("Clearing queued / in-progress Vercel deployments…");
   const clearStatus = run("node", ["scripts/clear-vercel-queue.mjs"]);
   if (clearStatus !== 0) {

@@ -26,6 +26,15 @@ Only the first one matters for production. The second pollutes CI until you disc
 
 If **`all-de-apps-in-one`** briefly shows “Account is blocked” but the dashboard looks normal, Vercel usually means **deployments are paused** (spend cap / billing), not a banned account. The label is misleading. `zzaizzai.com` may keep serving an **older deployment** until you **Resume** the project and redeploy.
 
+**Automated fix (once `VERCEL_TOKEN` is in GitHub secrets):**
+
+```bash
+# From Svivva/ with token exported:
+npm run vercel:resume && npm run redeploy:prod
+```
+
+Or GitHub **Actions → Fix Vercel block (resume + deploy) → Run workflow**.
+
 ## Fix: disconnect the wrong project (one-time)
 
 Do **both** if possible:
