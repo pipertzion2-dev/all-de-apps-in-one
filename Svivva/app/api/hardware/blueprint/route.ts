@@ -67,6 +67,12 @@ const reqSchema = z.object({
     )
     .optional()
     .default([]),
+  sketchNotes: z.string().max(2000).optional().default(""),
+  sketchImageBase64: z.string().max(8_000_000).optional(),
+  sketchMimeType: z
+    .enum(["image/jpeg", "image/png", "image/webp", "image/gif"])
+    .optional()
+    .default("image/jpeg"),
 });
 
 function drawLine(doc: PDFKit.PDFDocument, y: number) {
@@ -134,6 +140,28 @@ export async function POST(req: NextRequest) {
         .fontSize(10)
         .fillColor("#555555")
         .text(data.productDescription, 50, undefined, { width: 495 });
+    }
+
+    if (data.sketchImageBase64) {
+      sectionTitle(doc, "Reference Sketch");
+      try {
+        const imgBuf = Buffer.from(data.sketchImageBase64, "base64");
+        const maxW = 495;
+        const maxH = 280;
+        doc.image(imgBuf, 50, doc.y, {
+          fit: [maxW, maxH],
+          align: "center",
+        });
+        doc.moveDown(0.5);
+        if (data.sketchNotes) {
+          doc
+            .fontSize(9)
+            .fillColor("#666666")
+            .text(`Sketch notes: ${data.sketchNotes}`, { width: 495 });
+        }
+      } catch {
+        doc.fontSize(9).fillColor("#999999").text("(Sketch image could not be embedded)");
+      }
     }
 
     sectionTitle(doc, "1. Target Market & Use Cases");

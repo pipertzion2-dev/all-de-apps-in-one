@@ -11,6 +11,12 @@ const reqSchema = z.object({
   manufacturingMethod: z.string().max(200).optional().default(""),
   budgetRange: z.number().optional().default(5000),
   requirements: z.array(z.string()).optional().default([]),
+  sketchNotes: z.string().max(2000).optional().default(""),
+  sketchImageBase64: z.string().max(8_000_000).optional(),
+  sketchMimeType: z
+    .enum(["image/jpeg", "image/png", "image/webp", "image/gif"])
+    .optional()
+    .default("image/jpeg"),
 });
 
 export async function POST(req: NextRequest) {
@@ -23,24 +29,14 @@ export async function POST(req: NextRequest) {
     if (!parsed.success) return NextResponse.json({ error: "Invalid input." }, { status: 400 });
     const data = parsed.data;
 
-    const resp = await openai.chat.completions.create({
-      model: DEFAULT_MODEL,
-      temperature: 0.7,
-      max_tokens: 2000,
-      messages: [
-        {
-          role: "system",
-          content: `You are a manufacturing sourcing expert. Given a hardware product specification, suggest specific real-world manufacturers, suppliers, and online platforms where each component or the full product can be manufactured. Be specific with company names, websites, and why they're a good fit. Return JSON only.`,
-        },
-        {
-          role: "user",
-          content: `Product: "${data.productName}"
+    const textPrompt = `Product: "${data.productName}"
 Description: ${data.productDescription || "N/A"}
 Category: ${data.category || "General"}
 Materials: ${data.materials.join(", ") || "Not specified"}
 Manufacturing Method: ${data.manufacturingMethod || "Not specified"}
 Budget: $${data.budgetRange.toLocaleString()}
 Requirements: ${data.requirements.join(", ") || "None"}
+${data.sketchNotes ? `Sketch observations: ${data.sketchNotes}` : ""}
 
 Return a JSON object with this exact structure:
 {
@@ -73,7 +69,45 @@ Return a JSON object with this exact structure:
     }
   ],
   "recommendation": "A brief overall recommendation for the best manufacturing approach"
-}`,
+}`;
+
+    type MessageContent =
+      | string
+      | Array<
+          | { type: "text"; text: string }
+          | { type: "image_url"; image_url: { url: string; detail: "high" } }
+        >;
+
+    const userContent: MessageContent = data.sketchImageBase64
+      ? [
+          {
+            type: "text",
+            text:
+              textPrompt +
+              "\n\nReference the attached product sketch when recommending manufacturers.",
+          },
+          {
+            type: "image_url",
+            image_url: {
+              url: `data:${data.sketchMimeType};base64,${data.sketchImageBase64}`,
+              detail: "high",
+            },
+          },
+        ]
+      : textPrompt;
+
+    const resp = await openai.chat.completions.create({
+      model: DEFAULT_MODEL,
+      temperature: 0.7,
+      max_tokens: 2000,
+      messages: [
+        {
+          role: "system",
+          content: `You are a manufacturing sourcing expert. Given a hardware product specification${data.sketchImageBase64 ? " and reference sketch" : ""}, suggest specific real-world manufacturers, suppliers, and online platforms where each component or the full product can be manufactured. Be specific with company names, websites, and why they're a good fit. Return JSON only.`,
+        },
+        {
+          role: "user",
+          content: userContent,
         },
       ],
     });

@@ -219,12 +219,18 @@ Music composition and chord exploration tool with hardware-sampler UI aesthetic.
 - **Existing Chord Engine**: Neo-soul voicing generator via `lib/svivva-play/chord-engine.ts`
 - **API Routes**: `/api/svivva-play/analyze`, `/api/svivva-play/generate`, `/api/svivva-play/export`
 
+## Hardware Builder — Sketch-first entry
+
+- **Start from sketch**: Upload a photo/scan on `/dashboard/hardware-builder`; vision analysis pre-fills the BUILD wizard. API: `POST /api/hardware/analyze-sketch` (`lib/hardware/sketch-analysis.ts`).
+- **Sketch in Delivery**: Manufacturer research and PDF blueprint accept the uploaded sketch (`sketchImageBase64`) for vision-aware sourcing and embedded reference in the PDF.
+- **Hybridization**: Optional — Schematic Hybridizer collapsed by default; not required to complete a build.
+
 ## Hardware Builder — Logical step
 
 Step 4 (Logical) of the BUILD wizard:
 
 - **Layout preview**: `SchematicViewer` shows illustrative dimensions from the brief (not CAD / not AI 3D).
-- **Optional AI sketch**: Text-to-image via DALL-E 3 when the user is signed in and OpenAI is configured. API: `POST /api/hardware/sketch` (`lib/llm/openai.ts`). Spline iframe 3D preview was removed (unreliable / not AI-generated).
+- **Uploaded or AI sketch**: User uploads on entry, or optional text-to-image via DALL-E 3 (`POST /api/hardware/sketch`).
 
 ## Custom Checkout (`/dashboard/checkout`)
 
