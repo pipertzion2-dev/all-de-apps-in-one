@@ -919,9 +919,14 @@ export default function HardwareBuilderPage() {
                 {materialOptions.map((mat) => (
                   <Button
                     key={mat}
-                    variant={materials.includes(mat) ? "default" : "outline"}
+                    variant={materials.includes(mat) ? "default" : "secondary"}
                     size="sm"
                     onClick={() => toggleMaterial(mat)}
+                    className={
+                      materials.includes(mat)
+                        ? "shadow-sm"
+                        : "bg-card/80 border-border/70 text-foreground"
+                    }
                     data-testid={`button-material-${mat.toLowerCase().replace(/\s+/g, "-")}`}
                   >
                     {mat}
@@ -935,9 +940,14 @@ export default function HardwareBuilderPage() {
                 {manufacturingMethods.map((method) => (
                   <Button
                     key={method}
-                    variant={manufacturingMethod === method ? "default" : "outline"}
+                    variant={manufacturingMethod === method ? "default" : "secondary"}
                     size="sm"
                     onClick={() => setManufacturingMethod(method)}
+                    className={
+                      manufacturingMethod === method
+                        ? "shadow-sm"
+                        : "bg-card/80 border-border/70 text-foreground"
+                    }
                     data-testid={`button-method-${method.toLowerCase().replace(/\s+/g, "-")}`}
                   >
                     {method}
