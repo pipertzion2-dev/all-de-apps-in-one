@@ -9,6 +9,8 @@ import {
   normalizeToOptions,
   type SketchAnalysis,
 } from "@/lib/hardware/sketch-analysis";
+import { buildSketchAnalysisFallback } from "@/lib/hardware/sketch-fallback";
+import { buildSourcingFallback } from "@/lib/hardware/sourcing-fallback";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -348,7 +350,18 @@ export default function HardwareBuilderPage() {
       setEntryMode("brief");
       setCurrentStep(0);
     } catch (err: unknown) {
-      setSketchAnalyzeError(err instanceof Error ? err.message : "Analysis failed");
+      const message = err instanceof Error ? err.message : "Analysis failed";
+      if (/429|allowed words|word limit|easypeasy quota/i.test(message)) {
+        const fallback = buildSketchAnalysisFallback(sketchUploadNotes);
+        setSketchAnalysisWarning(
+          "AI word limit reached — pre-filled your brief from notes. Add a free Gemini key at Platform Secrets for full sketch vision.",
+        );
+        applySketchAnalysis(fallback);
+        setEntryMode("brief");
+        setCurrentStep(0);
+        return;
+      }
+      setSketchAnalyzeError(message);
     } finally {
       setSketchAnalyzing(false);
     }
@@ -448,8 +461,29 @@ export default function HardwareBuilderPage() {
         ),
       );
     } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Sourcing failed";
+      if (/429|allowed words|word limit|easypeasy quota/i.test(message)) {
+        const fallback = buildSourcingFallback({
+          productName: productName || "Hardware Product",
+          productDescription,
+          category: productCategory,
+          materials,
+          manufacturingMethod,
+          budgetRange: budgetRange[0],
+        });
+        setSourcingWarning(
+          "AI word limit reached — showing starter supplier list. Add a free Gemini key for tailored matches.",
+        );
+        setSourcingResults(fallback);
+        setChecklist((prev) =>
+          prev.map((item) =>
+            item.id === "2" || item.id === "5" ? { ...item, checked: true } : item,
+          ),
+        );
+        return;
+      }
       setSourcingResults(null);
-      setSourcingError(err instanceof Error ? err.message : "Sourcing failed");
+      setSourcingError(message);
     } finally {
       setSourcingLoading(false);
     }
