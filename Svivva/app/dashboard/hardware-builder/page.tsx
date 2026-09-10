@@ -45,6 +45,7 @@ import {
   PenLine,
 } from "lucide-react";
 import { HardwareSchematicHybridizer } from "@/components/hardware-schematic-hybridizer";
+import { authFetch } from "@/hooks/use-auth";
 
 interface BuildStep {
   id: string;
@@ -324,7 +325,7 @@ export default function HardwareBuilderPage() {
     setSketchAnalyzing(true);
     setSketchAnalyzeError("");
     try {
-      const r = await fetch("/api/hardware/analyze-sketch", {
+      const r = await authFetch("/api/hardware/analyze-sketch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -378,7 +379,7 @@ export default function HardwareBuilderPage() {
         ? `Hardware product sketch for "${productName}"${productCategory ? ` (${productCategory})` : ""}${materials.length ? `, materials: ${materials.join(", ")}` : ""}: `
         : "Hardware product sketch: ";
 
-      const r = await fetch("/api/hardware/sketch", {
+      const r = await authFetch("/api/hardware/sketch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: contextPrefix + text, quality: "standard" }),
@@ -408,7 +409,7 @@ export default function HardwareBuilderPage() {
   const handleFindManufacturers = useCallback(async () => {
     setSourcingLoading(true);
     try {
-      const r = await fetch("/api/hardware/manufacturers", {
+      const r = await authFetch("/api/hardware/manufacturers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -449,10 +450,9 @@ export default function HardwareBuilderPage() {
     if (!systemAName.trim() || !systemBName.trim()) return;
     setHybridLoading(true);
     try {
-      const r = await fetch("/api/hardware/hybridize", {
+      const r = await authFetch("/api/hardware/hybridize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({
           systemA: {
             name: systemAName,
@@ -484,7 +484,7 @@ export default function HardwareBuilderPage() {
   const handleDownloadBlueprint = useCallback(async () => {
     setPdfGenerating(true);
     try {
-      const r = await fetch("/api/hardware/blueprint", {
+      const r = await authFetch("/api/hardware/blueprint", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
