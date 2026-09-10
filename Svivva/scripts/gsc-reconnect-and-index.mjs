@@ -62,9 +62,8 @@ async function main() {
     if (!complete.res.ok) process.exit(1);
 
     console.log("\nRunning full indexing…\n");
-    const { spawnSync } = await import("node:child_process");
     const r = spawnSync("node", ["scripts/run-full-indexing.mjs"], {
-      cwd: new URL(".", import.meta.url).pathname.replace(/\/scripts\/.*$/, ""),
+      cwd: ROOT,
       stdio: "inherit",
       env: process.env,
     });
