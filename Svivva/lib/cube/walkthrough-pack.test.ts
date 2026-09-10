@@ -40,4 +40,16 @@ describe("walkthrough pack", () => {
     expect(csv).toContain("/seeds");
     expect(csv).toContain("/dashboard/hardware-builder");
   });
+
+  it("marks visited faces as done in checklist csv", () => {
+    const pack = buildWalkthroughPackFromInput(
+      { productName: "Widget" },
+      { visitedFaceIds: ["seeds", "api"] },
+    );
+    const csv = pack.files.find((f) => f.path === "checklist.csv")!.content;
+    expect(csv).toMatch(/seeds.*yes/);
+    expect(csv).toMatch(/api.*yes/);
+    const manifest = JSON.parse(pack.files.find((f) => f.path === "manifest.json")!.content);
+    expect(manifest.cubeProgress.visitedFaceIds).toEqual(["seeds", "api"]);
+  });
 });

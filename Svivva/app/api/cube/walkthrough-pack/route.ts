@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { buildMasterProductJourney } from "@/lib/cube/cube-faces";
+import { parseVisitedFacesParam } from "@/lib/cube/cube-face-progress";
 import {
   DEFAULT_MASTER_PRODUCT_JOURNEY,
   buildWalkthroughPack,
@@ -17,13 +18,19 @@ function journeyFromRequest(req: NextRequest) {
   return buildMasterProductJourney({ productName, productBrief });
 }
 
+function packOptionsFromRequest(req: NextRequest) {
+  const visited = parseVisitedFacesParam(req.nextUrl.searchParams.get("visited"));
+  return visited.length ? { visitedFaceIds: visited } : {};
+}
+
 /** JSON manifest of pack files (no zip). */
 export async function GET(req: NextRequest) {
   const format = req.nextUrl.searchParams.get("format");
   const journey = journeyFromRequest(req);
+  const packOptions = packOptionsFromRequest(req);
 
   if (format === "zip") {
-    const { buffer, filename } = await buildWalkthroughPackZipBuffer(journey);
+    const { buffer, filename } = await buildWalkthroughPackZipBuffer(journey, packOptions);
     return new NextResponse(new Uint8Array(buffer), {
       status: 200,
       headers: {
@@ -34,7 +41,7 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  const pack = buildWalkthroughPack(journey);
+  const pack = buildWalkthroughPack(journey, packOptions);
   return NextResponse.json({
     productName: pack.productName,
     slug: pack.slug,
