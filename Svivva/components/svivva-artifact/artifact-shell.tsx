@@ -1,7 +1,10 @@
 "use client";
 
 import { Suspense, lazy, useCallback } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Download, FileArchive } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { platformModeForCubeFace, usePlatform } from "@/lib/platform-context";
 import type { FeatureId } from "./feature-defs";
 import { FEATURES } from "./feature-defs";
