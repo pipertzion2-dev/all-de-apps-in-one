@@ -1,6 +1,13 @@
 import { PLATFORM_FEATURES, getFeature, type PlatformFeature } from "@/lib/platform/feature-graph";
 import { inferDomain, inferTopology } from "./adapters";
-import { pickDomainBridge, SCIENTIFIC_PROTOCOL_VERSION } from "./principles";
+import {
+  ANALYSIS_STEPS,
+  DOMAIN_BRIDGES,
+  REFERENCE_DESIGNS,
+  matchingDomainBridges,
+  pickDomainBridge,
+  SCIENTIFIC_PROTOCOL_VERSION,
+} from "./principles";
 import type {
   EngineeringDomain,
   HybridizationMode,
@@ -170,12 +177,20 @@ export function buildFeatureLabFallback(input: {
   lineage: string[];
 }): HybridizationResult {
   const bridge = pickDomainBridge(input.schematicA.domain, input.schematicB.domain);
+  const applicableBridges = matchingDomainBridges(
+    input.schematicA.domain,
+    input.schematicB.domain,
+  );
+  const bridgeSummary =
+    applicableBridges.length > 0
+      ? applicableBridges.map((b) => `${b.id}: ${b.principle}`).join(" | ")
+      : DOMAIN_BRIDGES.map((b) => b.id).join(", ");
   const power = input.order === 2 ? "²" : "¹";
   const name = `${input.schematicA.name.split(" ").slice(-1)[0]} × ${input.schematicB.name.split(" ").slice(-1)[0]} H${power}`;
   const lineageLabel = formatLineage(input.lineage);
 
   return {
-    topologicalBridge: `${bridge.id} mesh: ${input.schematicA.topology} topology couples to ${input.schematicB.topology} so the joint graph is neither parent.`,
+    topologicalBridge: `${bridge.id} mesh: ${input.schematicA.topology} topology couples to ${input.schematicB.topology} so the joint graph is neither parent. Applicable bridges: ${bridgeSummary.slice(0, 480)}${bridgeSummary.length > 480 ? "…" : ""}`,
     domainBridgingPrinciple: bridge.principle,
     materialCompatibilityNote:
       input.order === 2
@@ -226,13 +241,19 @@ export function buildFeatureLabFallback(input: {
     ],
     optimalHybridIndex: 0,
     requiredCharacterizationTests: [
+      ...ANALYSIS_STEPS.map((s) => s.title),
       "Name one behavior impossible in parent A alone",
       "Name one behavior impossible in parent B alone",
       input.order === 2
         ? "Show the H¹ parents remain visible in the lineage"
         : "Patch both parent hrefs from the hybrid",
     ],
-    referenceDesigns: [bridge.id, "OaaS patch bay", "ZZAI Hybrid² lab"],
+    referenceDesigns: [
+      bridge.id,
+      ...REFERENCE_DESIGNS.map((r) => r.name),
+      "OaaS patch bay",
+      "ZZAI Hybrid² lab",
+    ],
     nextSteps: [
       "List this blend on the Hybrid² marketplace floor",
       input.order === 1

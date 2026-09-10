@@ -39,6 +39,7 @@ const bodySchema = z.object({
     .enum(["complementary", "antagonistic", "emergent", "biomimetic"])
     .optional()
     .default("emergent"),
+  scientificDepth: z.enum(["prototype", "research", "production"]).optional(),
   targetApplication: z.string().max(500).optional(),
 });
 
@@ -84,6 +85,8 @@ export async function POST(request: NextRequest) {
     const order = nextHybridOrder(resolvedA.ref.order, resolvedB.ref.order);
     const lineage = mergeLineage(resolvedA.ref.lineage, resolvedB.ref.lineage);
     const mode = parsed.data.hybridizationMode as HybridizationMode;
+    const scientificDepth =
+      parsed.data.scientificDepth ?? (order === 2 ? "research" : "prototype");
     const targetApplication =
       parsed.data.targetApplication?.trim() ||
       defaultTargetApplication(order, resolvedA.ref.label, resolvedB.ref.label);
@@ -96,7 +99,7 @@ export async function POST(request: NextRequest) {
         schematicB: resolvedB.schematic,
         hybridizationMode: mode,
         targetApplication,
-        scientificDepth: order === 2 ? "research" : "prototype",
+        scientificDepth,
         surface: "hybrid-lab",
       });
       if (!result.hybrids.length) {

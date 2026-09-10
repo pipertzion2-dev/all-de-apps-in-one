@@ -1,9 +1,12 @@
 "use client";
 
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { platformModeForCubeFace, usePlatform } from "@/lib/platform-context";
+import { useCubeFaceProgress } from "@/hooks/use-cube-face-progress";
 import type { FeatureId } from "./feature-defs";
 import { FEATURES } from "./feature-defs";
+import { CubeDownloadPanel } from "./cube-download-panel";
 
 export { FEATURES as ARTIFACT_FEATURES } from "./feature-defs";
 export { FeatureSection } from "./feature-section";
@@ -28,13 +31,21 @@ type SvivvaArtifactProps = {
 
 export function SvivvaArtifact({ mountCanvas = true }: SvivvaArtifactProps) {
   const router = useRouter();
+  const { setMode } = usePlatform();
+  const { recordVisit } = useCubeFaceProgress();
 
-  const handleSelect = (id: FeatureId) => {
-    const target = FEATURES.find((f) => f.id === id);
-    if (!target) return;
-    router.push(target.cta.href);
-    window.scrollTo(0, 0);
-  };
+  const handleSelect = useCallback(
+    (id: FeatureId) => {
+      const target = FEATURES.find((f) => f.id === id);
+      if (!target) return;
+      recordVisit(id);
+      const busMode = platformModeForCubeFace(id);
+      if (busMode) setMode(busMode);
+      router.push(target.cta.href);
+      window.scrollTo(0, 0);
+    },
+    [router, setMode, recordVisit],
+  );
 
   return (
     <section
@@ -134,6 +145,8 @@ export function SvivvaArtifact({ mountCanvas = true }: SvivvaArtifactProps) {
           </button>
         ))}
       </nav>
+
+      <CubeDownloadPanel />
     </section>
   );
 }

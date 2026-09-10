@@ -10,6 +10,7 @@ import {
   placeOnFace,
 } from "@/lib/artwork-three";
 import { MEDIA } from "@/lib/media-assets";
+import { CUBE_GEOMETRY_FACE_ORDER } from "@/lib/cube/cube-faces";
 import type { FeatureId } from "./feature-defs";
 import { FEATURES, type FeatureDef } from "./feature-defs";
 
@@ -18,8 +19,7 @@ type Props = {
   onSelect: (id: FeatureId) => void;
 };
 
-// BoxGeometry face order: +x, -x, +y, -y, +z, -z
-const FACE_ORDER: FeatureId[] = ["api", "security", "play", "hardware", "seeds", "orbit"];
+const FACE_ORDER: FeatureId[] = [...CUBE_GEOMETRY_FACE_ORDER];
 
 const ZC_FACE_FONT = '"Zc", sans-serif';
 

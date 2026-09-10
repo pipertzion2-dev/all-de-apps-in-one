@@ -79,15 +79,94 @@ export const MODE_GUIDANCE: Record<string, string> = {
     "Use a biological structural motif as the merger template — name the organism and the measurable physical principle.",
 };
 
-export function pickDomainBridge(
+/** Canonical reference hybrids cited in the protocol (not user-saved recipes). */
+export const REFERENCE_DESIGNS = [
+  {
+    id: "vapor-chamber-pcb",
+    name: "iPhone vapor chamber × PCB copper plane",
+    principle:
+      "Heat-pipe topology (two-phase loop) isomorphically mapped to planar copper power distribution — shared Laplace potential field.",
+  },
+  {
+    id: "phononic-heatsink",
+    name: "Phononic crystal heatsink",
+    principle:
+      "Photonic bandgap engineering applied to thermal phonon transport — forbidden frequency bands block heat flux vectors.",
+  },
+  {
+    id: "fractal-pcb",
+    name: "Fractal PCB power plane",
+    principle:
+      "Murray's law venation (biological transport optimization) × power distribution graph — minimizes IR drop under current conservation.",
+  },
+  {
+    id: "magnetocaloric-cooler",
+    name: "Magnetocaloric cooler",
+    principle:
+      "Magnetic Brayton cycle coupled to Stirling recuperator — entropy flux cycles across coupled thermodynamic domains.",
+  },
+] as const;
+
+/** Required analysis pipeline — every hybrid run must address each step. */
+export const ANALYSIS_STEPS = [
+  {
+    id: "topology-isomorphism",
+    title: "Topology isomorphism",
+    description:
+      "Map parent graphs G_A and G_B; identify node correspondence, shared degree sequences, and spectral invariants.",
+  },
+  {
+    id: "domain-bridging",
+    title: "Domain bridging",
+    description:
+      "Name the governing PDE or transport law unifying both engineering domains; cite isomorphic flux–gradient structure.",
+  },
+  {
+    id: "interface-compatibility",
+    title: "Interface compatibility",
+    description:
+      "Materials (CTE, galvanic, adhesion) or digital contracts (schema, latency, auth) at the boundary.",
+  },
+  {
+    id: "emergent-property",
+    title: "Emergent property",
+    description:
+      "At least one capability impossible in either parent alone — non-additive, falsifiable.",
+  },
+  {
+    id: "falsifiable-tests",
+    title: "Falsifiable tests",
+    description:
+      "requiredCharacterizationTests must be measurable with named instruments, metrics, and pass/fail thresholds.",
+  },
+] as const;
+
+/** Graph-theoretic invariants used across domain bridges. */
+export const GRAPH_INVARIANTS = [
+  "degree sequence",
+  "spectral gap",
+  "algebraic connectivity (Fiedler value)",
+  "betweenness centrality at interface nodes",
+  "flux conservation at cut sets",
+  "potential continuity across matched boundaries",
+] as const;
+
+export function matchingDomainBridges(
   domainA: string,
   domainB: string,
-): (typeof DOMAIN_BRIDGES)[number] {
-  const hit = DOMAIN_BRIDGES.find(
+): (typeof DOMAIN_BRIDGES)[number][] {
+  return DOMAIN_BRIDGES.filter(
     (b) =>
       (b.domains as readonly string[]).includes(domainA) &&
       (b.domains as readonly string[]).includes(domainB),
   );
-  if (hit) return hit;
+}
+
+export function pickDomainBridge(
+  domainA: string,
+  domainB: string,
+): (typeof DOMAIN_BRIDGES)[number] {
+  const hits = matchingDomainBridges(domainA, domainB);
+  if (hits.length > 0) return hits[0];
   return DOMAIN_BRIDGES[DOMAIN_BRIDGES.length - 1];
 }

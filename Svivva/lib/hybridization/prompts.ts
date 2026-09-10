@@ -1,10 +1,11 @@
 import type { SchematicInput } from "./types";
+import { MODE_GUIDANCE, SCIENTIFIC_PROTOCOL_VERSION, pickDomainBridge } from "./principles";
 import {
-  BIOMIMETIC_LIBRARY,
-  MODE_GUIDANCE,
-  SCIENTIFIC_PROTOCOL_VERSION,
-  pickDomainBridge,
-} from "./principles";
+  formatAllDomainBridgesForPrompt,
+  formatAnalysisStepsForPrompt,
+  formatBiomimeticLibraryForPrompt,
+  formatReferenceDesignsForPrompt,
+} from "./scientific-catalog";
 
 export const HYBRIDIZATION_SYSTEM_PROMPT = `You are the ZZAI Cross-Domain Hybridization Engine (protocol v${SCIENTIFIC_PROTOCOL_VERSION}).
 
@@ -38,11 +39,17 @@ export function buildHybridizationUserPrompt(
   const bridge = pickDomainBridge(schematicA.domain, schematicB.domain);
   const propsA = schematicA.physicalProperties ?? {};
   const propsB = schematicB.physicalProperties ?? {};
-  const biomimetic = BIOMIMETIC_LIBRARY.map((b) => `- ${b.name}: ${b.principle}`).join("\n");
+  const allBridges = formatAllDomainBridgesForPrompt();
+  const biomimetic = formatBiomimeticLibraryForPrompt();
+  const referenceDesigns = formatReferenceDesignsForPrompt();
+  const analysisSteps = formatAnalysisStepsForPrompt();
 
   return `SCIENTIFIC PROTOCOL v${SCIENTIFIC_PROTOCOL_VERSION}
 
-PREFERRED DOMAIN BRIDGE (${bridge.id}):
+FULL DOMAIN-BRIDGE CATALOG (use any applicable bridge — do not invent laws outside this set without citing first principles):
+${allBridges}
+
+PREFERRED DOMAIN BRIDGE for ${schematicA.domain} × ${schematicB.domain} (${bridge.id}):
 ${bridge.principle}
 Invariants: ${bridge.invariants.join(", ")}
 
@@ -71,15 +78,14 @@ ${depth === "production" ? "Emphasize manufacturing readiness, supply chain, qua
 ${depth === "research" ? "Emphasize novel mechanisms, experiments, theoretical models." : ""}
 ${depth === "prototype" ? "Emphasize off-the-shelf parts and near-term validation." : ""}
 
-BIOMIMETIC LIBRARY (use when relevant):
+BIOMIMETIC LIBRARY (full catalog — cite by name when used):
 ${biomimetic}
 
+CANONICAL REFERENCE DESIGNS (patterns, not user-saved blends):
+${referenceDesigns}
+
 REQUIRED ANALYSIS STEPS:
-1. TOPOLOGY ISOMORPHISM — map G_A and G_B; node correspondence; shared invariants
-2. DOMAIN BRIDGING — name the governing PDE / transport law unifying both domains
-3. INTERFACE COMPATIBILITY — materials OR digital contracts / data schemas at the boundary
-4. EMERGENT PROPERTY — at least one capability impossible in either parent alone
-5. FALSIFIABLE TESTS — requiredCharacterizationTests must be measurable
+${analysisSteps}
 
 Return this exact JSON:
 {

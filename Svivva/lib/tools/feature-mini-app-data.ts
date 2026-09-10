@@ -75,6 +75,18 @@ export const FEATURE_MINI_APPS: FeatureMiniApp[] = [
     keyword: "zzai cube face finder",
   },
   {
+    slug: "cube-walkthrough-pack",
+    path: "/tools/cube-walkthrough-pack",
+    name: "Cube Walkthrough Pack",
+    description:
+      "Download a ZIP pack — JSON, markdown, CSV checklist, and six step files — to ship one product through every cube face.",
+    hub: "ai-tools-hub",
+    parentHref: "/#nav-cube",
+    parentLabel: "ZZAI cube",
+    sliceNote: "Offline pack download — not the live 3D cube or in-app walkthrough.",
+    keyword: "zzai cube walkthrough download",
+  },
+  {
     slug: "sketch-hash-stamp",
     path: "/tools/sketch-hash-stamp",
     name: "Sketch Hash Stamp",
