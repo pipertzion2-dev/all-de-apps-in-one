@@ -861,7 +861,6 @@ export default function HardwareBuilderPage() {
                 ))}
               </div>
             </div>
-            {renderSupplierSourcing(true)}
           </div>
         );
 
@@ -1033,8 +1032,6 @@ export default function HardwareBuilderPage() {
                 </div>
               </CardContent>
             </Card>
-
-            {renderSupplierSourcing()}
 
             <Card className="border-[#6B2C4E]/30">
               <CardHeader>
@@ -1434,8 +1431,8 @@ export default function HardwareBuilderPage() {
                     Pre-filled from your sketch
                   </p>
                   <p className="text-muted-foreground text-xs mt-1">
-                    Review each step, then run manufacturer research on Delivery. Hybridization is
-                    optional.
+                    Review each step, then use Suggest Manufacturers & Suppliers below.
+                    Hybridization is optional.
                   </p>
                   {sketchNotes && (
                     <p
@@ -1455,6 +1452,10 @@ export default function HardwareBuilderPage() {
                 <p className="text-muted-foreground mb-6">{steps[currentStep].description}</p>
 
                 {renderStepContent()}
+
+                <div className="mt-8 pt-6 border-t border-border/40">
+                  {renderSupplierSourcing(true)}
+                </div>
               </div>
             </CardContent>
           </Card>
