@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth/session";
+import { canUseHardwareBuilder, HARDWARE_ACCESS_DENIED } from "@/lib/hardware/access";
 import PDFDocument from "pdfkit";
 import { z } from "zod";
 
@@ -90,8 +90,9 @@ function sectionTitle(doc: PDFKit.PDFDocument, title: string) {
 
 export async function POST(req: NextRequest) {
   try {
-    const user = await getSession();
-    if (!user) return NextResponse.json({ error: "Sign in required." }, { status: 401 });
+    if (!(await canUseHardwareBuilder(req))) {
+      return NextResponse.json({ error: HARDWARE_ACCESS_DENIED }, { status: 401 });
+    }
 
     const body = await req.json();
     const parsed = reqSchema.safeParse(body);

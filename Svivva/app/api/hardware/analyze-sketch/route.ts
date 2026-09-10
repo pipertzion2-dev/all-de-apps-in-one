@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth/session";
+import { canUseHardwareBuilder, HARDWARE_ACCESS_DENIED } from "@/lib/hardware/access";
 import { openai, DEFAULT_MODEL } from "@/lib/llm/openai";
 import {
   SKETCH_ANALYSIS_SYSTEM,
@@ -19,9 +19,8 @@ const reqSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
-    const user = await getSession();
-    if (!user) {
-      return NextResponse.json({ error: "Sign in to analyze sketches." }, { status: 401 });
+    if (!(await canUseHardwareBuilder(req))) {
+      return NextResponse.json({ error: HARDWARE_ACCESS_DENIED }, { status: 401 });
     }
 
     const body = await req.json();

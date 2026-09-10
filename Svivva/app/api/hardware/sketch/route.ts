@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { openai } from "@/lib/llm/openai";
-import { getSession } from "@/lib/auth/session";
+import { canUseHardwareBuilder, HARDWARE_ACCESS_DENIED } from "@/lib/hardware/access";
 
 const ALLOWED_SIZES = new Set(["1024x1024", "1792x1024", "1024x1792"]);
 
 export async function POST(req: NextRequest) {
   try {
-    const user = await getSession();
-    if (!user) {
-      return NextResponse.json({ error: "Sign in to generate sketches." }, { status: 401 });
+    if (!(await canUseHardwareBuilder(req))) {
+      return NextResponse.json({ error: HARDWARE_ACCESS_DENIED }, { status: 401 });
     }
 
     const body = await req.json();
