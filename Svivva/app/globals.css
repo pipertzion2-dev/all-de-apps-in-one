@@ -34,6 +34,10 @@
     --sidebar-accent-foreground: 180 15% 15%;
     --sidebar-border: 189 15% 88%;
     --sidebar-ring: 189 100% 45%;
+    --button-outline: hsl(189 20% 72%);
+    --primary-border: hsl(197 45% 42%);
+    --secondary-border: hsl(189 20% 82%);
+    --destructive-border: hsl(340 65% 30%);
 
     /* Motion tokens — custom curves have more punch than CSS defaults */
     --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
@@ -69,6 +73,10 @@
     --sidebar-accent-foreground: 170 15% 90%;
     --sidebar-border: 180 15% 12%;
     --sidebar-ring: 189 100% 55%;
+    --button-outline: hsl(180 15% 28%);
+    --primary-border: hsl(197 50% 40%);
+    --secondary-border: hsl(180 15% 22%);
+    --destructive-border: hsl(340 60% 38%);
   }
 }
 

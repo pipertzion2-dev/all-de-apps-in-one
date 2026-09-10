@@ -22,6 +22,8 @@ type Props = {
   children: React.ReactNode;
   /** Show stats + scroll-band 3D hero (default true on feature routes). */
   showHero?: boolean;
+  /** Skip the tall 520px scroll-band — keep headline + stats (dashboard builders). */
+  heroCompact?: boolean;
   subtitle?: string;
   className?: string;
 };
@@ -31,6 +33,7 @@ export function FeaturePageShell({
   variant,
   children,
   showHero = true,
+  heroCompact = false,
   subtitle,
   className = "",
 }: Props) {
@@ -46,7 +49,9 @@ export function FeaturePageShell({
         className="relative z-10 px-4 sm:px-6 pb-0 [&_.border]:bg-card/40 [&_.border]:backdrop-blur-md [&_.border]:border-border/50"
         data-feature-content
       >
-        {showHero ? <FeaturePageHero variant={variant} subtitle={subtitle} /> : null}
+        {showHero ? (
+          <FeaturePageHero variant={variant} subtitle={subtitle} compact={heroCompact} />
+        ) : null}
         {children}
       </div>
     </div>

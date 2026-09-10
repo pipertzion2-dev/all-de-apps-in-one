@@ -631,7 +631,7 @@ export default function HardwareBuilderPage() {
         <Button
           onClick={handleFindManufacturers}
           disabled={sourcingLoading}
-          className="gap-2 w-full"
+          className="gap-2 w-full shadow-md border border-primary/30"
           data-testid="button-find-manufacturers"
         >
           {sourcingLoading ? (
@@ -875,9 +875,14 @@ export default function HardwareBuilderPage() {
                 {requirementOptions.map((req) => (
                   <Button
                     key={req}
-                    variant={requirements.includes(req) ? "default" : "outline"}
+                    variant={requirements.includes(req) ? "default" : "secondary"}
                     size="sm"
                     onClick={() => toggleRequirement(req)}
+                    className={
+                      requirements.includes(req)
+                        ? "shadow-sm"
+                        : "bg-card/80 border-border/70 text-foreground"
+                    }
                     data-testid={`button-requirement-${req.toLowerCase().replace(/\s+/g, "-")}`}
                   >
                     {req}
@@ -1293,9 +1298,14 @@ export default function HardwareBuilderPage() {
     <FeaturePageShell
       variant="hardware"
       subtitle="AI schematics, supplier matching, and tangible product workflows."
+      heroCompact
       className="pb-4"
     >
-      <div className="max-w-4xl mx-auto space-y-5 sm:space-y-6 px-4 pb-4 relative z-10">
+      <div
+        className={`max-w-4xl mx-auto space-y-5 sm:space-y-6 px-4 relative z-10 ${
+          briefStarted || startedFromSketch ? "pb-28 sm:pb-4" : "pb-4"
+        }`}
+      >
         <Card className="border-primary/30">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg">How do you want to start?</CardTitle>
@@ -1307,9 +1317,9 @@ export default function HardwareBuilderPage() {
           <CardContent className="space-y-4">
             <div className="flex flex-wrap gap-2">
               <Button
-                variant={entryMode === "sketch" ? "default" : "outline"}
+                variant={entryMode === "sketch" ? "default" : "secondary"}
                 size="sm"
-                className="gap-2"
+                className={`gap-2 min-h-10 ${entryMode === "sketch" ? "shadow-sm" : "bg-card/80 border-border/70"}`}
                 onClick={() => {
                   setEntryMode("sketch");
                   setBriefStarted(false);
@@ -1319,9 +1329,9 @@ export default function HardwareBuilderPage() {
                 <Upload className="w-4 h-4" /> I have a sketch
               </Button>
               <Button
-                variant={entryMode === "brief" ? "default" : "outline"}
+                variant={entryMode === "brief" ? "default" : "secondary"}
                 size="sm"
-                className="gap-2"
+                className={`gap-2 min-h-10 ${entryMode === "brief" ? "shadow-sm" : "bg-card/80 border-border/70"}`}
                 onClick={() => {
                   setEntryMode("brief");
                   setStartedFromSketch(false);
@@ -1361,7 +1371,7 @@ export default function HardwareBuilderPage() {
                 <Button
                   onClick={handleStartBrief}
                   disabled={!productDescription.trim() && !productName.trim()}
-                  className="gap-2 w-full sm:w-auto"
+                  className="gap-2 w-full sm:w-auto min-h-11 shadow-md border border-primary/30"
                   data-testid="button-start-brief"
                 >
                   <ArrowRight className="w-4 h-4" />
@@ -1448,7 +1458,7 @@ export default function HardwareBuilderPage() {
                 <Button
                   onClick={handleAnalyzeSketch}
                   disabled={sketchCompressing || sketchAnalyzing || !uploadedSketchBase64}
-                  className="gap-2 w-full sm:w-auto"
+                  className="gap-2 w-full sm:w-auto min-h-11 shadow-md border border-primary/30"
                   data-testid="button-analyze-sketch"
                 >
                   {sketchCompressing ? (
@@ -1599,12 +1609,12 @@ export default function HardwareBuilderPage() {
         )}
 
         {(briefStarted || startedFromSketch) && (
-          <div className="flex flex-col sm:flex-row gap-3 sm:justify-between sticky bottom-0 z-20 py-3 -mx-4 px-4 sm:mx-0 sm:px-0 bg-background/80 backdrop-blur-md sm:bg-transparent sm:backdrop-blur-none border-t border-border/40 sm:border-0">
+          <div className="fixed bottom-0 left-0 right-0 z-30 flex flex-col sm:static sm:z-auto gap-3 sm:flex-row sm:justify-between py-3 px-4 sm:px-0 border-t border-border/60 bg-background/95 backdrop-blur-lg shadow-[0_-8px_24px_rgba(0,0,0,0.35)] sm:bg-transparent sm:backdrop-blur-none sm:border-0 sm:shadow-none pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:pb-0">
             <Button
-              variant="outline"
+              variant="secondary"
               onClick={handleBack}
               disabled={currentStep === 0 || isProcessing}
-              className="gap-2 order-2 sm:order-1"
+              className="gap-2 order-2 sm:order-1 min-h-11 bg-card/90 border-border/70 shadow-sm"
               data-testid="button-back"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -1615,7 +1625,7 @@ export default function HardwareBuilderPage() {
               <Button
                 onClick={handleNext}
                 disabled={isProcessing}
-                className="gap-2 order-1 sm:order-2"
+                className="gap-2 order-1 sm:order-2 min-h-11 shadow-md border border-primary/40"
                 data-testid="button-next"
               >
                 {isProcessing ? (
@@ -1629,7 +1639,7 @@ export default function HardwareBuilderPage() {
               </Button>
             ) : (
               <Button
-                className="gap-2 order-1 sm:order-2"
+                className="gap-2 order-1 sm:order-2 min-h-11 shadow-md border border-primary/40"
                 data-testid="button-complete"
                 onClick={() => {
                   if (productName.trim()) {
