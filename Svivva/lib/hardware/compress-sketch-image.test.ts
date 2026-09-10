@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  SKETCH_IMAGE_MAX_EDGE,
-  computeScaledDimensions,
-} from "./compress-sketch-image";
+import { SKETCH_IMAGE_MAX_EDGE, computeScaledDimensions } from "./compress-sketch-image";
 
 describe("compress-sketch-image helpers", () => {
   it("keeps small images at original size", () => {

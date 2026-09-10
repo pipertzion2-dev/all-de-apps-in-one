@@ -10,7 +10,6 @@ const nextConfig = {
       bodySizeLimit: "8mb",
     },
     proxyClientMaxBodySize: "8mb",
-    middlewareClientMaxBodySize: "8mb",
   },
   allowedDevOrigins: ["*.vercel.app", "127.0.0.1", "localhost", "192.168.*", "10.*", "172.*"],
   images: {
