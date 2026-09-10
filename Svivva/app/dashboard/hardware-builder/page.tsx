@@ -178,6 +178,7 @@ export default function HardwareBuilderPage() {
   const [sketchCompressing, setSketchCompressing] = useState(false);
   const [sketchAnalyzing, setSketchAnalyzing] = useState(false);
   const [sketchAnalyzeError, setSketchAnalyzeError] = useState("");
+  const [sketchAnalysisWarning, setSketchAnalysisWarning] = useState("");
   const [sketchNotes, setSketchNotes] = useState("");
   const [startedFromSketch, setStartedFromSketch] = useState(false);
   const [showSchematicHybridizer, setShowSchematicHybridizer] = useState(false);
@@ -219,6 +220,7 @@ export default function HardwareBuilderPage() {
   const [sourcingResults, setSourcingResults] = useState<SourcingResult | null>(null);
   const [sourcingLoading, setSourcingLoading] = useState(false);
   const [sourcingError, setSourcingError] = useState("");
+  const [sourcingWarning, setSourcingWarning] = useState("");
 
   const [showHybridizer, setShowHybridizer] = useState(false);
   const [systemAName, setSystemAName] = useState("");
@@ -310,6 +312,7 @@ export default function HardwareBuilderPage() {
     }
     setSketchAnalyzing(true);
     setSketchAnalyzeError("");
+    setSketchAnalysisWarning("");
     try {
       const r = await authFetch("/api/hardware/analyze-sketch", {
         method: "POST",
@@ -333,9 +336,15 @@ export default function HardwareBuilderPage() {
             "That photo is too large to upload. We compress images automatically — try re-uploading, or use a smaller photo.",
           );
         }
-        throw new Error(data.error || raw || "Analysis failed");
+        const hint = (data as { hint?: { detail?: string } }).hint;
+        throw new Error(hint?.detail || data.error || raw || "Analysis failed");
       }
-      applySketchAnalysis(JSON.parse(raw) as SketchAnalysis);
+      const analysis = JSON.parse(raw) as SketchAnalysis & {
+        warning?: string;
+        usedHeuristicFallback?: boolean;
+      };
+      if (analysis.warning) setSketchAnalysisWarning(analysis.warning);
+      applySketchAnalysis(analysis);
       setEntryMode("brief");
       setCurrentStep(0);
     } catch (err: unknown) {
@@ -408,6 +417,7 @@ export default function HardwareBuilderPage() {
   const handleFindManufacturers = useCallback(async () => {
     setSourcingLoading(true);
     setSourcingError("");
+    setSourcingWarning("");
     try {
       const r = await authFetch("/api/hardware/manufacturers", {
         method: "POST",
@@ -426,7 +436,11 @@ export default function HardwareBuilderPage() {
         }),
       });
       const data = await r.json();
-      if (!r.ok) throw new Error(data.error || "Sourcing failed");
+      if (!r.ok) {
+        const hint = data.hint as { detail?: string } | undefined;
+        throw new Error(hint?.detail || data.error || "Sourcing failed");
+      }
+      if (data.warning) setSourcingWarning(String(data.warning));
       setSourcingResults(data as SourcingResult);
       setChecklist((prev) =>
         prev.map((item) =>
@@ -600,6 +614,21 @@ export default function HardwareBuilderPage() {
             </>
           )}
         </Button>
+
+        {sourcingWarning && (
+          <p
+            className="text-sm text-amber-400/95 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2"
+            data-testid="text-sourcing-warning"
+          >
+            {sourcingWarning}{" "}
+            <a
+              href="/dashboard/settings/runtime-keys"
+              className="underline underline-offset-2 hover:opacity-80"
+            >
+              Add Gemini (free)
+            </a>
+          </p>
+        )}
 
         {sourcingError && (
           <p className="text-sm text-red-400" data-testid="text-sourcing-error">
@@ -1363,6 +1392,20 @@ export default function HardwareBuilderPage() {
                   className="min-h-[60px] text-sm"
                   data-testid="textarea-sketch-notes"
                 />
+                {sketchAnalysisWarning && (
+                  <p
+                    className="text-sm text-amber-400/95 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2"
+                    data-testid="text-sketch-analyze-warning"
+                  >
+                    {sketchAnalysisWarning}{" "}
+                    <a
+                      href="/dashboard/settings/runtime-keys"
+                      className="underline underline-offset-2 hover:opacity-80"
+                    >
+                      Add Gemini (free)
+                    </a>
+                  </p>
+                )}
                 {sketchAnalyzeError && (
                   <p className="text-sm text-red-400" data-testid="text-sketch-analyze-error">
                     {sketchAnalyzeError}

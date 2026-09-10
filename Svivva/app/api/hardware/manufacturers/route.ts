@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { canUseHardwareBuilder, HARDWARE_ACCESS_DENIED } from "@/lib/hardware/access";
+import { hardwareChatCompletion } from "@/lib/hardware/ai-client";
+import { formatHardwareAiError } from "@/lib/hardware/ai-errors";
+import { buildSourcingFallback } from "@/lib/hardware/sourcing-fallback";
 import { buildSourcingPrompt, parseSourcingResult } from "@/lib/hardware/sourcing";
-import { openai, DEFAULT_MODEL } from "@/lib/llm/openai";
+import { isEasyPeasyWordLimitError } from "@/lib/orbit/orbit-error-messages";
 import { z } from "zod";
 
 const reqSchema = z.object({
@@ -63,27 +66,47 @@ export async function POST(req: NextRequest) {
         ]
       : textPrompt;
 
-    const resp = await openai.chat.completions.create({
-      model: DEFAULT_MODEL,
-      temperature: 0.7,
-      max_tokens: 2500,
-      response_format: { type: "json_object" },
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are a manufacturing sourcing expert. Given a hardware product specification, suggest specific real-world manufacturers, material suppliers, and online platforms where each component or the full product can be manufactured. Be specific with company names, websites, and why they are a good fit. Return JSON only.",
-        },
-        {
-          role: "user",
-          content: userContent,
-        },
-      ],
-    });
+    try {
+      const ai = await hardwareChatCompletion({
+        system:
+          "You are a manufacturing sourcing expert. Given a hardware product specification, suggest specific real-world manufacturers, material suppliers, and online platforms where each component or the full product can be manufactured. Be specific with company names, websites, and why they are a good fit. Return JSON only.",
+        userContent,
+        temperature: 0.7,
+        maxTokens: 2500,
+        jsonMode: true,
+      });
 
-    const raw = resp.choices[0]?.message?.content || "{}";
-    const result = parseSourcingResult(raw);
-    return NextResponse.json(result);
+      const result = parseSourcingResult(ai.text);
+      return NextResponse.json({
+        ...result,
+        ...(ai.usedFallback
+          ? { warning: `Used ${ai.provider} (${ai.model}) after the primary AI route failed.` }
+          : {}),
+      });
+    } catch (aiErr: unknown) {
+      const message = aiErr instanceof Error ? aiErr.message : "Sourcing failed";
+      console.error("[hardware/manufacturers] AI failed:", aiErr);
+
+      if (isEasyPeasyWordLimitError(message) || message.includes("No AI provider")) {
+        const fallback = buildSourcingFallback({
+          productName: data.productName,
+          productDescription: data.productDescription,
+          category: data.category,
+          materials: data.materials,
+          manufacturingMethod: data.manufacturingMethod,
+          budgetRange: data.budgetRange,
+        });
+        const hint = formatHardwareAiError(message);
+        return NextResponse.json({
+          ...fallback,
+          warning: `${hint.title}: ${hint.detail}`,
+          usedHeuristicFallback: true,
+        });
+      }
+
+      const hint = formatHardwareAiError(message);
+      return NextResponse.json({ error: hint.detail, hint }, { status: 502 });
+    }
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Sourcing failed";
     console.error("[hardware/manufacturers]", err);

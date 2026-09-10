@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { canUseHardwareBuilder, HARDWARE_ACCESS_DENIED } from "@/lib/hardware/access";
-import { openai, DEFAULT_MODEL } from "@/lib/llm/openai";
+import { hardwareChatCompletion } from "@/lib/hardware/ai-client";
+import { formatHardwareAiError } from "@/lib/hardware/ai-errors";
+import { buildSketchAnalysisFallback } from "@/lib/hardware/sketch-fallback";
 import {
   SKETCH_ANALYSIS_SYSTEM,
   buildSketchAnalysisPrompt,
   sketchAnalysisSchema,
 } from "@/lib/hardware/sketch-analysis";
+import { isEasyPeasyWordLimitError } from "@/lib/orbit/orbit-error-messages";
 import { z } from "zod";
 
 const reqSchema = z.object({
@@ -16,6 +19,15 @@ const reqSchema = z.object({
     .default("image/jpeg"),
   notes: z.string().max(1000).optional().default(""),
 });
+
+function parseAnalysisJson(raw: string) {
+  const cleaned = raw
+    .replace(/```json\n?/g, "")
+    .replace(/```\n?/g, "")
+    .trim();
+  const json = JSON.parse(cleaned);
+  return sketchAnalysisSchema.safeParse(json);
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,43 +46,63 @@ export async function POST(req: NextRequest) {
       buildSketchAnalysisPrompt() +
       (notes.trim() ? `\n\nUser notes about the sketch: ${notes.trim()}` : "");
 
-    const resp = await openai.chat.completions.create({
-      model: DEFAULT_MODEL,
-      temperature: 0.4,
-      max_tokens: 2000,
-      messages: [
-        { role: "system", content: SKETCH_ANALYSIS_SYSTEM },
-        {
-          role: "user",
-          content: [
-            { type: "text", text: userText },
-            {
-              type: "image_url",
-              image_url: {
-                url: `data:${mimeType};base64,${imageBase64}`,
-                detail: "high",
-              },
+    try {
+      const ai = await hardwareChatCompletion({
+        system: SKETCH_ANALYSIS_SYSTEM,
+        userContent: [
+          { type: "text", text: userText },
+          {
+            type: "image_url",
+            image_url: {
+              url: `data:${mimeType};base64,${imageBase64}`,
+              detail: "high",
             },
-          ],
-        },
-      ],
-    });
+          },
+        ],
+        temperature: 0.4,
+        maxTokens: 2000,
+      });
 
-    const raw = resp.choices[0]?.message?.content || "{}";
-    const cleaned = raw
-      .replace(/```json\n?/g, "")
-      .replace(/```\n?/g, "")
-      .trim();
-    const json = JSON.parse(cleaned);
-    const analysis = sketchAnalysisSchema.safeParse(json);
-    if (!analysis.success) {
+      const analysis = parseAnalysisJson(ai.text);
+      if (!analysis.success) {
+        return NextResponse.json(
+          { error: "Could not parse sketch analysis.", details: analysis.error.flatten() },
+          { status: 502 },
+        );
+      }
+
+      return NextResponse.json({
+        ...analysis.data,
+        ...(ai.usedFallback
+          ? {
+              warning: `Used ${ai.provider} (${ai.model}) after the primary AI route failed.`,
+            }
+          : {}),
+      });
+    } catch (aiErr: unknown) {
+      const message = aiErr instanceof Error ? aiErr.message : "Sketch analysis failed";
+      console.error("[hardware/analyze-sketch] AI failed:", aiErr);
+
+      // When quota is exhausted or all providers fail, pre-fill from notes so BUILD isn't blocked.
+      if (isEasyPeasyWordLimitError(message) || message.includes("No AI provider")) {
+        const fallback = buildSketchAnalysisFallback(notes);
+        const hint = formatHardwareAiError(message);
+        return NextResponse.json({
+          ...fallback,
+          warning: `${hint.title}: ${hint.detail}`,
+          usedHeuristicFallback: true,
+        });
+      }
+
+      const hint = formatHardwareAiError(message);
       return NextResponse.json(
-        { error: "Could not parse sketch analysis.", details: analysis.error.flatten() },
+        {
+          error: hint.detail,
+          hint,
+        },
         { status: 502 },
       );
     }
-
-    return NextResponse.json(analysis.data);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Sketch analysis failed";
     console.error("[hardware/analyze-sketch]", err);
