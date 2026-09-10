@@ -152,6 +152,16 @@ export async function POST(req: NextRequest) {
       throw e;
     }
 
+    // Clear expired OAuth so UI stops showing false "Connected" (invalid_grant)
+    if (action === "clear_oauth") {
+      const { clearGoogleOAuthRefreshToken } = await import("@/lib/google-gsc-oauth");
+      await clearGoogleOAuthRefreshToken(userId);
+      return ok({
+        success: true,
+        message: "Google OAuth cleared — click Connect with Google to sign in again.",
+      });
+    }
+
     // Re-match GSC property + submit sitemap (OAuth — no re-sign-in)
     if (action === "sync_property") {
       const accessToken = await getGoogleOAuthAccessTokenForUser(userId);
