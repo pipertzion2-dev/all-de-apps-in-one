@@ -144,6 +144,32 @@ export function SvivvaArtifact({ mountCanvas = true }: SvivvaArtifactProps) {
           </button>
         ))}
       </nav>
+
+      <div className="mt-6 w-full max-w-xl relative z-20 rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm p-4 sm:p-5 space-y-3">
+        <div className="flex items-start gap-3">
+          <FileArchive className="w-5 h-5 text-[#5B8DA8] shrink-0 mt-0.5" />
+          <div className="space-y-1 min-w-0">
+            <p className="text-sm font-semibold">Download the six-face pack</p>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              ZIP with README, JSON, markdown walkthrough, CSV checklist, route map, and one file
+              per cube face — ship one product through every side offline.
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <a href="/api/cube/walkthrough-pack?format=zip" download>
+            <Button size="sm" className="gap-2 bg-[#5B8DA8]" data-testid="button-cube-download-pack">
+              <Download className="w-3.5 h-3.5" />
+              Download pack
+            </Button>
+          </a>
+          <Link href="/tools/cube-walkthrough-pack">
+            <Button size="sm" variant="outline" className="gap-2">
+              Customize product name
+            </Button>
+          </Link>
+        </div>
+      </div>
     </section>
   );
 }
