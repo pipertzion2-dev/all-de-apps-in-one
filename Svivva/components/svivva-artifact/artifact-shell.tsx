@@ -1,7 +1,8 @@
 "use client";
 
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { platformModeForCubeFace, usePlatform } from "@/lib/platform-context";
 import type { FeatureId } from "./feature-defs";
 import { FEATURES } from "./feature-defs";
 
@@ -28,13 +29,19 @@ type SvivvaArtifactProps = {
 
 export function SvivvaArtifact({ mountCanvas = true }: SvivvaArtifactProps) {
   const router = useRouter();
+  const { setMode } = usePlatform();
 
-  const handleSelect = (id: FeatureId) => {
-    const target = FEATURES.find((f) => f.id === id);
-    if (!target) return;
-    router.push(target.cta.href);
-    window.scrollTo(0, 0);
-  };
+  const handleSelect = useCallback(
+    (id: FeatureId) => {
+      const target = FEATURES.find((f) => f.id === id);
+      if (!target) return;
+      const busMode = platformModeForCubeFace(id);
+      if (busMode) setMode(busMode);
+      router.push(target.cta.href);
+      window.scrollTo(0, 0);
+    },
+    [router, setMode],
+  );
 
   return (
     <section

@@ -1,8 +1,31 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { usePathname } from "next/navigation";
+import type { FeatureId } from "@/components/svivva-artifact/feature-defs";
 
 export type PlatformMode = "digital" | "physical";
+
+const PHYSICAL_PATH_PREFIXES = ["/dashboard/hardware-builder", "/dashboard/hypothesis-hardware"];
+const DIGITAL_PATH_PREFIXES = ["/dashboard/api-builder", "/dashboard/hypothesis"];
+
+function matchesPrefix(pathname: string, prefix: string): boolean {
+  return pathname === prefix || pathname.startsWith(`${prefix}/`);
+}
+
+/** Infer Signal/Crest from the URL — null on shared routes (Play, Seeds, Orbit, …). */
+export function platformModeFromPath(pathname: string): PlatformMode | null {
+  if (PHYSICAL_PATH_PREFIXES.some((p) => matchesPrefix(pathname, p))) return "physical";
+  if (DIGITAL_PATH_PREFIXES.some((p) => matchesPrefix(pathname, p))) return "digital";
+  return null;
+}
+
+/** Cube faces on the Crest or Signal bus flip platform mode; others leave it unchanged. */
+export function platformModeForCubeFace(id: FeatureId): PlatformMode | null {
+  if (id === "hardware") return "physical";
+  if (id === "api") return "digital";
+  return null;
+}
 
 /** UI labels for the ZZAI crest/glitch duality (maps onto digital/physical product modes). */
 export const PLATFORM_MODE_LABELS = {
@@ -55,19 +78,23 @@ interface PlatformContextType {
 const PlatformContext = createContext<PlatformContextType | undefined>(undefined);
 
 export function PlatformProvider({ children }: { children: ReactNode }) {
+  const pathname = usePathname() || "";
   const [mode, setMode] = useState<PlatformMode>("digital");
-  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
+    const busMode = platformModeFromPath(pathname);
+    if (busMode) {
+      setMode(busMode);
+      return;
+    }
     // Only restore saved mode if we're NOT on the home page (home page always starts digital/Signal)
-    if (typeof window !== "undefined" && window.location.pathname !== "/") {
+    if (pathname !== "/") {
       const savedMode = localStorage.getItem("svivva-platform-mode") as PlatformMode | null;
-      if (savedMode && (savedMode === "digital" || savedMode === "physical")) {
+      if (savedMode === "digital" || savedMode === "physical") {
         setMode(savedMode);
       }
     }
-    setIsInitialized(true);
-  }, []);
+  }, [pathname]);
 
   useEffect(() => {
     localStorage.setItem("svivva-platform-mode", mode);
