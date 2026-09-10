@@ -257,10 +257,32 @@ export async function saveGoogleOAuthTokens(
   }
 }
 
+export function isGoogleOAuthInvalidGrant(error: unknown): boolean {
+  const msg = error instanceof Error ? error.message : String(error);
+  return msg.includes("invalid_grant");
+}
+
+/** Drop a revoked/expired refresh token so UI stops showing a false “Connected”. */
+export async function clearGoogleOAuthRefreshToken(userId: string): Promise<void> {
+  await ensureGscOAuthColumns();
+  await db.execute(sql`
+    UPDATE seed_credentials
+    SET google_oauth_refresh_token = NULL, updated_at = NOW()
+    WHERE user_id = ${userId}
+  `);
+}
+
 export async function getGoogleOAuthAccessTokenForUser(userId: string): Promise<string | null> {
   const row = await loadGoogleOAuthRefreshToken(userId);
   if (!row) return null;
-  return refreshGoogleOAuthAccessToken(row.refreshToken);
+  try {
+    return await refreshGoogleOAuthAccessToken(row.refreshToken);
+  } catch (e) {
+    if (isGoogleOAuthInvalidGrant(e)) {
+      await clearGoogleOAuthRefreshToken(userId);
+    }
+    return null;
+  }
 }
 
 export type GscSiteEntry = { siteUrl: string; permissionLevel?: string };

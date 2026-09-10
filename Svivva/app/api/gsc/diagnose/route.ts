@@ -120,16 +120,31 @@ export async function GET() {
 
   // Step 4 — Google account (OAuth — recommended)
   const oauthEmail = creds?.googleOauthEmail || null;
-  const oauthConnected = !!creds?.googleOauthRefreshToken?.trim();
+  let oauthConnected = !!creds?.googleOauthRefreshToken?.trim();
+  let oauthAccessToken: string | null = null;
   if (oauthConnected) {
-    steps.push({
-      id: "google_oauth",
-      label: "Google account connected",
-      status: "ok",
-      detail: oauthEmail
-        ? `Signed in as ${oauthEmail}. Orbit can submit sitemaps and request indexing automatically.`
-        : "Google OAuth connected. Orbit can submit sitemaps and request indexing automatically.",
-    });
+    oauthAccessToken = await getGoogleOAuthAccessTokenForUser(userId);
+    if (!oauthAccessToken) {
+      oauthConnected = false;
+      steps.push({
+        id: "google_oauth",
+        label: "Google account",
+        status: "fail",
+        detail: oauthEmail
+          ? `Signed in as ${oauthEmail} previously, but the refresh token expired (invalid_grant). Click Connect with Google again on /dashboard/gsc-connect.`
+          : "Google refresh token expired — reconnect at /dashboard/gsc-connect.",
+        fix: "/dashboard/gsc-connect",
+      });
+    } else {
+      steps.push({
+        id: "google_oauth",
+        label: "Google account connected",
+        status: "ok",
+        detail: oauthEmail
+          ? `Signed in as ${oauthEmail}. Orbit can submit sitemaps and request indexing automatically.`
+          : "Google OAuth connected. Orbit can submit sitemaps and request indexing automatically.",
+      });
+    }
   } else {
     steps.push({
       id: "google_oauth",
@@ -187,9 +202,9 @@ export async function GET() {
   let gscSitesSample: string[] = [];
   let gscSitemaps: GscSitemapStatus[] = [];
 
-  if (oauthConnected) {
+  if (oauthConnected && oauthAccessToken) {
     try {
-      const accessToken = await getGoogleOAuthAccessTokenForUser(userId);
+      const accessToken = oauthAccessToken;
       if (accessToken) {
         const sites = await listGscSites(accessToken);
         gscSitesSample = sites.slice(0, 8).map((s) => s.siteUrl);
