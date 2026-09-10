@@ -7,12 +7,20 @@ export type HardwareAiErrorHint = {
   actions: { label: string; href: string }[];
 };
 
+/** Short banner when heuristic fallback succeeded — not an error. */
+export function hardwareAiFallbackNotice(context: "sketch" | "suppliers"): string {
+  if (context === "sketch") {
+    return "Starter brief loaded from your notes. Add a free Gemini key below for full sketch vision.";
+  }
+  return "Starter supplier list loaded. Add a free Gemini key below for AI-tailored manufacturer matches.";
+}
+
 /** Turn raw AI failures into actionable Hardware Builder copy. */
 export function formatHardwareAiError(raw: string): HardwareAiErrorHint {
   if (isEasyPeasyWordLimitError(raw)) {
     return {
       title: "AI word limit reached",
-      detail: `EasyPeasy quota is used up. ${describeOrbitAiAlternatives(["easypeasy"])} We can still pre-fill your brief from your notes — try again or switch to a written brief.`,
+      detail: `EasyPeasy quota is used up. ${describeOrbitAiAlternatives(["easypeasy"])} A starter pack is shown below so you can keep building.`,
       actions: [
         { label: "Add Gemini (free)", href: "/dashboard/settings/runtime-keys" },
         { label: "OpenAI direct", href: "https://platform.openai.com/api-keys" },

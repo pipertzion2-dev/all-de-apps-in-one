@@ -6,7 +6,7 @@ import {
   patchPlatformRuntimeSecrets,
   runtimeSecretColdStart,
 } from "@/lib/platform-runtime-secrets";
-import { getOpenAIApiKey, getOpenAIBaseUrl } from "@/lib/env";
+import { getGeminiApiKey, getOpenAIApiKey, getOpenAIBaseUrl } from "@/lib/env";
 import {
   getCashAppTag,
   isCashAppPlansActive,
@@ -35,6 +35,7 @@ const patchSchema = z
   .object({
     openaiApiKey: z.string().optional(),
     openaiBaseUrl: z.string().optional(),
+    geminiApiKey: z.string().optional(),
     easypeasyTier: z.enum(["standard", "balanced", "premium"]).optional(),
     stripeSecretKey: z.string().optional(),
     stripePublishableKey: z.string().optional(),
@@ -111,6 +112,7 @@ export async function GET() {
       stored: {
         openai: !!row?.openaiApiKey?.trim(),
         openaiBaseUrl: !!row?.openaiBaseUrl?.trim(),
+        gemini: !!row?.geminiApiKey?.trim(),
         easypeasyApiKey: !!(row?.openaiApiKey?.trim() && isEasyPeasyBaseUrl(row.openaiBaseUrl)),
         easypeasyBaseUrl: !!isEasyPeasyBaseUrl(row?.openaiBaseUrl),
         easypeasyTier: !!row?.easypeasyTier?.trim(),
@@ -138,6 +140,7 @@ export async function GET() {
       effective: {
         openai: !!getOpenAIApiKey()?.trim(),
         openaiBaseUrl: !!getOpenAIBaseUrl()?.trim(),
+        gemini: !!getGeminiApiKey()?.trim(),
         stripeSecret: !!process.env.STRIPE_SECRET_KEY?.trim(),
         stripePublishable: !!(
           process.env.STRIPE_PUBLISHABLE_KEY?.trim() ||
@@ -201,6 +204,7 @@ export async function POST(request: Request) {
 
     if ("openaiApiKey" in body) patch.openaiApiKey = toPatchValue(body.openaiApiKey);
     if ("openaiBaseUrl" in body) patch.openaiBaseUrl = toPatchValue(body.openaiBaseUrl);
+    if ("geminiApiKey" in body) patch.geminiApiKey = toPatchValue(body.geminiApiKey);
     if ("easypeasyTier" in body) {
       const raw = body.easypeasyTier?.trim();
       const resolved = raw ? resolveEasyPeasyTierId(raw) : null;

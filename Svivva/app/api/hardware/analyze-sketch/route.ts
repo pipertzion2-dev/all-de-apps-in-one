@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { canUseHardwareBuilder, HARDWARE_ACCESS_DENIED } from "@/lib/hardware/access";
 import { hardwareChatCompletion } from "@/lib/hardware/ai-client";
-import { formatHardwareAiError } from "@/lib/hardware/ai-errors";
+import { formatHardwareAiError, hardwareAiFallbackNotice } from "@/lib/hardware/ai-errors";
 import { buildSketchAnalysisFallback } from "@/lib/hardware/sketch-fallback";
 import {
   SKETCH_ANALYSIS_SYSTEM,
@@ -86,10 +86,9 @@ export async function POST(req: NextRequest) {
       // When quota is exhausted or all providers fail, pre-fill from notes so BUILD isn't blocked.
       if (isEasyPeasyWordLimitError(message) || message.includes("No AI provider")) {
         const fallback = buildSketchAnalysisFallback(notes);
-        const hint = formatHardwareAiError(message);
         return NextResponse.json({
           ...fallback,
-          warning: `${hint.title}: ${hint.detail}`,
+          warning: hardwareAiFallbackNotice("sketch"),
           usedHeuristicFallback: true,
         });
       }

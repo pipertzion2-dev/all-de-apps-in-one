@@ -354,7 +354,7 @@ export default function HardwareBuilderPage() {
       if (/429|allowed words|word limit|easypeasy quota/i.test(message)) {
         const fallback = buildSketchAnalysisFallback(sketchUploadNotes);
         setSketchAnalysisWarning(
-          "AI word limit reached — pre-filled your brief from notes. Add a free Gemini key at Platform Secrets for full sketch vision.",
+          "Starter brief loaded from your notes. Add a free Gemini key below for full sketch vision.",
         );
         applySketchAnalysis(fallback);
         setEntryMode("brief");
@@ -472,7 +472,7 @@ export default function HardwareBuilderPage() {
           budgetRange: budgetRange[0],
         });
         setSourcingWarning(
-          "AI word limit reached — showing starter supplier list. Add a free Gemini key for tailored matches.",
+          "Starter supplier list loaded. Add a free Gemini key below for AI-tailored manufacturer matches.",
         );
         setSourcingResults(fallback);
         setChecklist((prev) =>

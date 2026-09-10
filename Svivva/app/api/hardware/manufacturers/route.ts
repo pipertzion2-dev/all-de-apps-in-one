@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { canUseHardwareBuilder, HARDWARE_ACCESS_DENIED } from "@/lib/hardware/access";
 import { hardwareChatCompletion } from "@/lib/hardware/ai-client";
-import { formatHardwareAiError } from "@/lib/hardware/ai-errors";
+import { formatHardwareAiError, hardwareAiFallbackNotice } from "@/lib/hardware/ai-errors";
 import { buildSourcingFallback } from "@/lib/hardware/sourcing-fallback";
 import { buildSourcingPrompt, parseSourcingResult } from "@/lib/hardware/sourcing";
 import { isEasyPeasyWordLimitError } from "@/lib/orbit/orbit-error-messages";
@@ -96,10 +96,9 @@ export async function POST(req: NextRequest) {
           manufacturingMethod: data.manufacturingMethod,
           budgetRange: data.budgetRange,
         });
-        const hint = formatHardwareAiError(message);
         return NextResponse.json({
           ...fallback,
-          warning: `${hint.title}: ${hint.detail}`,
+          warning: hardwareAiFallbackNotice("suppliers"),
           usedHeuristicFallback: true,
         });
       }

@@ -1641,6 +1641,7 @@ export const platformRuntimeSecrets = pgTable("platform_runtime_secrets", {
   id: text("id").primaryKey(),
   openaiApiKey: text("openai_api_key"),
   openaiBaseUrl: text("openai_base_url"),
+  geminiApiKey: text("gemini_api_key"),
   stripeSecretKey: text("stripe_secret_key"),
   stripePublishableKey: text("stripe_publishable_key"),
   stripeWebhookSecret: text("stripe_webhook_secret"),

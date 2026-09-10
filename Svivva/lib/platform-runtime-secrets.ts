@@ -15,6 +15,20 @@ let googleGscColumnsEnsured = false;
 let interimPaymentColumnsEnsured = false;
 let lemonSqueezyColumnsEnsured = false;
 let easypeasyColumnsEnsured = false;
+let geminiColumnsEnsured = false;
+
+async function ensureGeminiColumns(): Promise<void> {
+  if (geminiColumnsEnsured) return;
+  try {
+    await ensureCoreDbTables();
+    await db.execute(
+      sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS gemini_api_key TEXT`,
+    );
+    geminiColumnsEnsured = true;
+  } catch {
+    /* test env */
+  }
+}
 
 async function ensureEasyPeasyColumns(): Promise<void> {
   if (easypeasyColumnsEnsured) return;
@@ -127,6 +141,7 @@ async function ensureGoogleGscPlatformColumns(): Promise<void> {
  * overwritten or cleared from database values (Vercel/host env wins).
  */
 export const runtimeSecretColdStart = {
+  gemini: !!process.env.GEMINI_API_KEY?.trim(),
   openai: !!(
     process.env.ORBIT_OPENAI_API_KEY?.trim() ||
     process.env.OPENAI_API_KEY?.trim() ||
@@ -150,6 +165,7 @@ export const runtimeSecretColdStart = {
 export type PlatformRuntimeSecretsPatch = Partial<{
   openaiApiKey: string | null;
   openaiBaseUrl: string | null;
+  geminiApiKey: string | null;
   stripeSecretKey: string | null;
   stripePublishableKey: string | null;
   stripeWebhookSecret: string | null;
@@ -182,6 +198,7 @@ export async function getPlatformRuntimeSecretsRow() {
   await ensureInterimPaymentColumns();
   await ensureLemonSqueezyColumns();
   await ensureEasyPeasyColumns();
+  await ensureGeminiColumns();
   const [row] = await db
     .select()
     .from(platformRuntimeSecrets)
@@ -220,6 +237,12 @@ function syncProcessEnvFromRow(
     const v = row.openaiApiKey?.trim();
     if (v) process.env.OPENAI_API_KEY = v;
     else delete process.env.OPENAI_API_KEY;
+  }
+
+  if (!runtimeSecretColdStart.gemini) {
+    const v = row.geminiApiKey?.trim();
+    if (v) process.env.GEMINI_API_KEY = v;
+    else delete process.env.GEMINI_API_KEY;
   }
 
   if (!runtimeSecretColdStart.openaiBaseUrl) {
@@ -323,11 +346,15 @@ export async function patchPlatformRuntimeSecrets(patch: PlatformRuntimeSecretsP
   if ("easypeasyTier" in patch) {
     await ensureEasyPeasyColumns();
   }
+  if ("geminiApiKey" in patch) {
+    await ensureGeminiColumns();
+  }
   const existing = await getPlatformRuntimeSecretsRow();
   const base = {
     id: ROW_ID,
     openaiApiKey: existing?.openaiApiKey ?? null,
     openaiBaseUrl: existing?.openaiBaseUrl ?? null,
+    geminiApiKey: existing?.geminiApiKey ?? null,
     stripeSecretKey: existing?.stripeSecretKey ?? null,
     stripePublishableKey: existing?.stripePublishableKey ?? null,
     stripeWebhookSecret: existing?.stripeWebhookSecret ?? null,
@@ -367,6 +394,7 @@ export async function patchPlatformRuntimeSecrets(patch: PlatformRuntimeSecretsP
       set: {
         openaiApiKey: merged.openaiApiKey,
         openaiBaseUrl: merged.openaiBaseUrl,
+        geminiApiKey: merged.geminiApiKey,
         stripeSecretKey: merged.stripeSecretKey,
         stripePublishableKey: merged.stripePublishableKey,
         stripeWebhookSecret: merged.stripeWebhookSecret,

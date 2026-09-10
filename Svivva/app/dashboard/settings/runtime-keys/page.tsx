@@ -13,6 +13,7 @@ type StatusPayload = {
   stored: {
     openai: boolean;
     openaiBaseUrl: boolean;
+    gemini: boolean;
     stripeSecret: boolean;
     stripePublishable: boolean;
     stripeWebhook: boolean;
@@ -22,6 +23,7 @@ type StatusPayload = {
   effective: {
     openai: boolean;
     openaiBaseUrl: boolean;
+    gemini: boolean;
     stripeSecret: boolean;
     stripePublishable: boolean;
     stripeWebhook: boolean;
@@ -47,6 +49,7 @@ export default function RuntimeKeysPage() {
 
   const [openaiApiKey, setOpenaiApiKey] = useState("");
   const [openaiBaseUrl, setOpenaiBaseUrl] = useState("");
+  const [geminiApiKey, setGeminiApiKey] = useState("");
   const [stripeSecretKey, setStripeSecretKey] = useState("");
   const [stripePublishableKey, setStripePublishableKey] = useState("");
   const [stripeWebhookSecret, setStripeWebhookSecret] = useState("");
@@ -54,6 +57,7 @@ export default function RuntimeKeysPage() {
 
   const [clearOpenai, setClearOpenai] = useState(false);
   const [clearOpenaiBase, setClearOpenaiBase] = useState(false);
+  const [clearGemini, setClearGemini] = useState(false);
   const [clearStripeSecret, setClearStripeSecret] = useState(false);
   const [clearStripePublishable, setClearStripePublishable] = useState(false);
   const [clearStripeWebhook, setClearStripeWebhook] = useState(false);
@@ -88,6 +92,9 @@ export default function RuntimeKeysPage() {
       if (clearOpenaiBase) body.openaiBaseUrl = "";
       else if (openaiBaseUrl.trim()) body.openaiBaseUrl = openaiBaseUrl.trim();
 
+      if (clearGemini) body.geminiApiKey = "";
+      else if (geminiApiKey.trim()) body.geminiApiKey = geminiApiKey.trim();
+
       if (clearStripeSecret) body.stripeSecretKey = "";
       else if (stripeSecretKey.trim()) body.stripeSecretKey = stripeSecretKey.trim();
 
@@ -115,12 +122,14 @@ export default function RuntimeKeysPage() {
 
       setOpenaiApiKey("");
       setOpenaiBaseUrl("");
+      setGeminiApiKey("");
       setStripeSecretKey("");
       setStripePublishableKey("");
       setStripeWebhookSecret("");
       setNextPublicSiteUrl("");
       setClearOpenai(false);
       setClearOpenaiBase(false);
+      setClearGemini(false);
       setClearStripeSecret(false);
       setClearStripePublishable(false);
       setClearStripeWebhook(false);
@@ -149,8 +158,8 @@ export default function RuntimeKeysPage() {
       <div>
         <h1 className="text-3xl font-bold">Runtime credentials</h1>
         <p className="text-muted-foreground">
-          Store OpenAI, Stripe, and site URL in the database when you do not want to paste keys into
-          your host’s environment panel.{" "}
+          Store Gemini, OpenAI, Stripe, and site URL in the database when you do not want to paste
+          keys into your host’s environment panel.{" "}
           <strong className="text-foreground font-medium">Host env vars still win</strong> if they
           are set at deploy time.
         </p>
@@ -200,6 +209,9 @@ export default function RuntimeKeysPage() {
               <span />
               <span className="text-muted-foreground text-xs uppercase tracking-wide">Stored</span>
               <span className="text-muted-foreground text-xs uppercase tracking-wide">Live</span>
+              <span>Gemini key (Hardware + Orbit)</span>
+              <Dot ok={status.stored.gemini} />
+              <Dot ok={status.effective.gemini} />
               <span>OpenAI key</span>
               <Dot ok={status.stored.openai} />
               <Dot ok={status.effective.openai} />
@@ -233,6 +245,49 @@ export default function RuntimeKeysPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            <div className="space-y-3">
+              <Label>Google Gemini API key (recommended — free)</Label>
+              <p className="text-xs text-muted-foreground -mt-1">
+                Powers Hardware Builder sketch vision and supplier matching without EasyPeasy word
+                limits. Get a free key at{" "}
+                <a
+                  href="https://aistudio.google.com/apikey"
+                  className="underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Google AI Studio
+                </a>
+                .
+              </p>
+              <Input
+                type="password"
+                autoComplete="off"
+                placeholder={
+                  status.stored.gemini ? "•••••••• (saved — enter new to replace)" : "AIza…"
+                }
+                value={geminiApiKey}
+                onChange={(e) => setGeminiApiKey(e.target.value)}
+                disabled={clearGemini || !!status.deploymentOverrides.gemini}
+              />
+              {status.deploymentOverrides.gemini && (
+                <p className="text-xs text-muted-foreground">
+                  Overridden by host environment — database value is ignored.
+                </p>
+              )}
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="c-gemini"
+                  checked={clearGemini}
+                  onCheckedChange={(v) => setClearGemini(!!v)}
+                  disabled={!!status.deploymentOverrides.gemini}
+                />
+                <Label htmlFor="c-gemini" className="font-normal text-muted-foreground">
+                  Clear saved Gemini key
+                </Label>
+              </div>
+            </div>
+
             <div className="space-y-3">
               <Label>OpenAI API key</Label>
               <p className="text-xs text-muted-foreground -mt-1">
