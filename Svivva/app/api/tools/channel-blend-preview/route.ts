@@ -10,6 +10,7 @@ import {
   nextHybridOrder,
   resolveParent,
 } from "@/lib/hybridization/feature-lab";
+import { getScientificCatalog } from "@/lib/hybridization/scientific-catalog";
 import { badRequest, ok } from "@/lib/http-response";
 
 export const dynamic = "force-dynamic";
@@ -64,12 +65,22 @@ export async function POST(req: NextRequest) {
   });
   const hybrid = result.hybrids[0];
 
+  const catalog = getScientificCatalog();
+
   return ok({
     order,
     lineage,
     name: hybrid?.name,
     sketch: hybrid?.emergentBehavior || hybrid?.scientificBasis,
     properties: hybrid?.emergentProperties?.slice(0, 3) ?? [],
+    scientific: {
+      topologicalBridge: result.topologicalBridge,
+      domainBridgingPrinciple: result.domainBridgingPrinciple,
+      requiredTests: result.requiredCharacterizationTests,
+      referenceDesigns: result.referenceDesigns,
+      protocolVersion: catalog.protocolVersion,
+      catalogUrl: "/api/hybridization/scientific",
+    },
     nextHref: "/dashboard/hybrid-lab",
     slice: "First-order sketch only. Hybrid² Lab lists blends and hybridizes those blends.",
   });

@@ -5,6 +5,7 @@ import {
   listFeatureHybridPairs,
   listHybridizableFeatures,
 } from "@/lib/hybridization/feature-lab";
+import { getScientificCatalog } from "@/lib/hybridization/scientific-catalog";
 
 export const dynamic = "force-dynamic";
 
@@ -27,11 +28,20 @@ export async function GET() {
     bLabel: `${p.b.channelLabel} ${p.b.shortTitle}`,
   }));
 
+  const catalog = getScientificCatalog();
+
   return ok({
     maxOrder: HYBRID_LAB_MAX_ORDER,
     featureCount: features.length,
     pairCount: featurePairCount(features.length),
     features,
     pairs,
+    scientific: {
+      protocolVersion: catalog.protocolVersion,
+      domainBridgeCount: catalog.domainBridges.length,
+      biomimeticCount: catalog.biomimeticLibrary.length,
+      referenceDesignCount: catalog.referenceDesigns.length,
+      catalogUrl: "/api/hybridization/scientific",
+    },
   });
 }

@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Beaker,
+  BookOpen,
   Combine,
   FlaskConical,
   Loader2,
@@ -18,7 +19,9 @@ import {
   ArrowRight,
   Check,
 } from "lucide-react";
-import type { HybridizationMode, HybridizationResult } from "@/lib/hybridization/types";
+import { HybridResultDetails } from "@/components/hybridization/hybrid-result-details";
+import { ScientificProtocolPanel } from "@/components/hybridization/scientific-protocol-panel";
+import type { HybridizationMode, HybridizationResult, ScientificDepth } from "@/lib/hybridization/types";
 import type { HybridParentRef } from "@/lib/hybridization/feature-lab";
 import { formatLineage } from "@/lib/hybridization/feature-lab";
 
@@ -77,6 +80,7 @@ type StoredArtifact = {
 
 const STORAGE_KEY = "zzai.hybrid-lab.v1";
 const MODES: HybridizationMode[] = ["emergent", "complementary", "antagonistic", "biomimetic"];
+const DEPTHS: ScientificDepth[] = ["prototype", "research", "production"];
 
 function loadArtifacts(): StoredArtifact[] {
   if (typeof window === "undefined") return [];
@@ -126,7 +130,7 @@ function HybridResultCard({
   if (!hybrid) return null;
   return (
     <Card className="border-[#6B2C4E]/30" data-testid="card-hybrid-result">
-      <CardContent className="p-5 space-y-3">
+      <CardContent className="p-5 space-y-4">
         <div className="flex flex-wrap items-center gap-2">
           <Badge className="bg-[#6B2C4E] text-white">H{order === 2 ? "²" : "¹"}</Badge>
           <Badge variant="outline">{usedEngine ? "engine" : "scientific fallback"}</Badge>
@@ -134,17 +138,7 @@ function HybridResultCard({
         </div>
         <h3 className="text-lg font-semibold">{name}</h3>
         <p className="text-sm text-muted-foreground">{hybrid.emergentBehavior}</p>
-        {hybrid.emergentProperties?.length > 0 && (
-          <ul className="text-sm space-y-1 list-disc pl-4">
-            {hybrid.emergentProperties.slice(0, 4).map((p) => (
-              <li key={p}>{p}</li>
-            ))}
-          </ul>
-        )}
-        <p className="text-xs text-muted-foreground">
-          Bridge: {result.domainBridgingPrinciple.slice(0, 220)}
-          {result.domainBridgingPrinciple.length > 220 ? "…" : ""}
-        </p>
+        <HybridResultDetails result={result} usedEngine={usedEngine} />
       </CardContent>
     </Card>
   );
@@ -155,6 +149,7 @@ export default function HybridLabPage() {
   const [selected, setSelected] = useState<string[]>([]);
   const [marketPick, setMarketPick] = useState<string[]>([]);
   const [mode, setMode] = useState<HybridizationMode>("emergent");
+  const [depth, setDepth] = useState<ScientificDepth>("prototype");
   const [target, setTarget] = useState("");
   const [pairQuery, setPairQuery] = useState("");
   const [artifacts, setArtifacts] = useState<StoredArtifact[]>([]);
@@ -182,6 +177,7 @@ export default function HybridLabPage() {
       parentA: HybridParentRef | { kind: "feature"; id: string };
       parentB: HybridParentRef | { kind: "feature"; id: string };
       hybridizationMode: HybridizationMode;
+      scientificDepth?: ScientificDepth;
       targetApplication?: string;
     }) => {
       const res = await authFetch("/api/hybrid-lab/blend", {
@@ -220,6 +216,7 @@ export default function HybridLabPage() {
       parentA: { kind: "feature", id: aId },
       parentB: { kind: "feature", id: bId },
       hybridizationMode: mode,
+      scientificDepth: depth,
       targetApplication: target.trim() || undefined,
     });
   };
@@ -323,6 +320,10 @@ export default function HybridLabPage() {
             <Store className="w-3.5 h-3.5" />
             Marketplace
           </TabsTrigger>
+          <TabsTrigger value="science" className="gap-1.5" data-testid="tab-scientific-protocol">
+            <BookOpen className="w-3.5 h-3.5" />
+            Science
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="lab" className="space-y-4 mt-4">
@@ -385,6 +386,23 @@ export default function HybridLabPage() {
                     </Button>
                   ))}
                 </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs text-muted-foreground">Scientific depth:</span>
+                {DEPTHS.map((d) => (
+                  <Button
+                    key={d}
+                    size="sm"
+                    variant={depth === d ? "default" : "outline"}
+                    className={
+                      depth === d ? "bg-[#6B2C4E] h-7 text-[10px] capitalize" : "h-7 text-[10px] capitalize"
+                    }
+                    onClick={() => setDepth(d)}
+                    data-testid={`button-depth-${d}`}
+                  >
+                    {d}
+                  </Button>
+                ))}
               </div>
               <Input
                 value={target}
@@ -542,6 +560,7 @@ export default function HybridLabPage() {
                     parentA: artifactToParent(a),
                     parentB: artifactToParent(b),
                     hybridizationMode: mode,
+                    scientificDepth: depth,
                     targetApplication: target.trim() || undefined,
                   });
                 }}
@@ -598,6 +617,19 @@ export default function HybridLabPage() {
               </CardContent>
             </Card>
           )}
+        </TabsContent>
+
+        <TabsContent value="science" className="space-y-4 mt-4">
+          <Card>
+            <CardContent className="p-5 space-y-2">
+              <h2 className="font-semibold">Scientific protocol</h2>
+              <p className="text-sm text-muted-foreground">
+                Full domain bridges, biomimetic library, analysis pipeline, and reference designs
+                the hybridization engine uses — not just saved lab inventory or fallback templates.
+              </p>
+            </CardContent>
+          </Card>
+          <ScientificProtocolPanel />
         </TabsContent>
       </Tabs>
     </div>
