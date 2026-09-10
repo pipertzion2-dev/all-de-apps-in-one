@@ -46,6 +46,7 @@ import {
 } from "lucide-react";
 import { HardwareSchematicHybridizer } from "@/components/hardware-schematic-hybridizer";
 import { authFetch } from "@/hooks/use-auth";
+import type { SourcingResult } from "@/lib/hardware/sourcing";
 
 interface BuildStep {
   id: string;
@@ -213,27 +214,9 @@ export default function HardwareBuilderPage() {
     { id: "6", label: "Prototype schedule set", checked: false, category: "Timeline" },
   ]);
 
-  const [sourcingResults, setSourcingResults] = useState<{
-    manufacturers: {
-      name: string;
-      website: string;
-      specialty: string;
-      fit?: string;
-      estimatedCost: string;
-      moq: string;
-      location: string;
-      leadTime: string;
-    }[];
-    materialSuppliers: {
-      material: string;
-      supplier: string;
-      website: string;
-      priceRange: string;
-    }[];
-    platforms: { name: string; website: string; type?: string; description: string }[];
-    recommendation: string;
-  } | null>(null);
+  const [sourcingResults, setSourcingResults] = useState<SourcingResult | null>(null);
   const [sourcingLoading, setSourcingLoading] = useState(false);
+  const [sourcingError, setSourcingError] = useState("");
 
   const [showHybridizer, setShowHybridizer] = useState(false);
   const [systemAName, setSystemAName] = useState("");
@@ -408,6 +391,7 @@ export default function HardwareBuilderPage() {
 
   const handleFindManufacturers = useCallback(async () => {
     setSourcingLoading(true);
+    setSourcingError("");
     try {
       const r = await authFetch("/api/hardware/manufacturers", {
         method: "POST",
@@ -427,9 +411,15 @@ export default function HardwareBuilderPage() {
       });
       const data = await r.json();
       if (!r.ok) throw new Error(data.error || "Sourcing failed");
-      setSourcingResults(data);
+      setSourcingResults(data as SourcingResult);
+      setChecklist((prev) =>
+        prev.map((item) =>
+          item.id === "2" || item.id === "5" ? { ...item, checked: true } : item,
+        ),
+      );
     } catch (err: unknown) {
-      console.error(err);
+      setSourcingResults(null);
+      setSourcingError(err instanceof Error ? err.message : "Sourcing failed");
     } finally {
       setSourcingLoading(false);
     }
@@ -560,6 +550,181 @@ export default function HardwareBuilderPage() {
   };
 
   const progress = ((currentStep + 1) / steps.length) * 100;
+
+  const renderSupplierSourcing = (compact = false) => (
+    <Card className="border-[#5B8DA8]/30">
+      <CardHeader className={compact ? "pb-2" : undefined}>
+        <CardTitle className="flex items-center gap-2">
+          <Factory className="w-5 h-5 text-[#5B8DA8]" />
+          Find Manufacturers & Suppliers
+        </CardTitle>
+        <CardDescription>
+          AI suggests real manufacturers, material suppliers, and sourcing platforms matched to your
+          budget, materials, and build method.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <Button
+          onClick={handleFindManufacturers}
+          disabled={sourcingLoading}
+          className="gap-2 w-full"
+          data-testid="button-find-manufacturers"
+        >
+          {sourcingLoading ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" /> Researching suppliers...
+            </>
+          ) : sourcingResults ? (
+            <>
+              <RotateCcw className="w-4 h-4" /> Refresh Supplier Suggestions
+            </>
+          ) : (
+            <>
+              <Search className="w-4 h-4" /> Suggest Manufacturers & Suppliers
+            </>
+          )}
+        </Button>
+
+        {sourcingError && (
+          <p className="text-sm text-red-400" data-testid="text-sourcing-error">
+            {sourcingError}
+          </p>
+        )}
+
+        {sourcingResults && (
+          <div className="space-y-4 mt-4">
+            {sourcingResults.recommendation && (
+              <div className="p-3 rounded-lg bg-[#5B8DA8]/10 border border-[#5B8DA8]/20">
+                <p className="text-sm flex items-start gap-2">
+                  <Sparkles className="w-4 h-4 text-[#5B8DA8] shrink-0 mt-0.5" />
+                  {sourcingResults.recommendation}
+                </p>
+              </div>
+            )}
+
+            {sourcingResults.manufacturers.length > 0 && (
+              <div>
+                <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+                  <Factory className="w-4 h-4" /> Recommended Manufacturers
+                </h4>
+                <div className="space-y-2">
+                  {sourcingResults.manufacturers.map((m, i) => (
+                    <div key={i} className="border rounded-lg overflow-hidden">
+                      <button
+                        onClick={() =>
+                          setExpandedManufacturer(expandedManufacturer === i ? null : i)
+                        }
+                        className="w-full p-3 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
+                        data-testid={`button-manufacturer-${i}`}
+                      >
+                        <div>
+                          <span className="font-medium text-sm">{m.name}</span>
+                          <span className="text-xs text-muted-foreground ml-2">{m.location}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-xs">
+                            {m.estimatedCost}
+                          </Badge>
+                          {expandedManufacturer === i ? (
+                            <ChevronUp className="w-4 h-4" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4" />
+                          )}
+                        </div>
+                      </button>
+                      {expandedManufacturer === i && (
+                        <div className="px-3 pb-3 space-y-1 text-xs text-muted-foreground border-t pt-2">
+                          <p>
+                            <span className="font-medium text-foreground">Specialty:</span>{" "}
+                            {m.specialty}
+                          </p>
+                          {m.fit && (
+                            <p>
+                              <span className="font-medium text-foreground">Why:</span> {m.fit}
+                            </p>
+                          )}
+                          <p>
+                            <span className="font-medium text-foreground">Min Order:</span> {m.moq}
+                          </p>
+                          <p>
+                            <span className="font-medium text-foreground">Lead Time:</span>{" "}
+                            {m.leadTime}
+                          </p>
+                          {m.website && (
+                            <a
+                              href={m.website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[#5B8DA8] hover:underline flex items-center gap-1"
+                            >
+                              <Globe className="w-3 h-3" /> {m.website}
+                            </a>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {sourcingResults.materialSuppliers.length > 0 && (
+              <div>
+                <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+                  <Package className="w-4 h-4" /> Material Suppliers
+                </h4>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {sourcingResults.materialSuppliers.map((s, i) => (
+                    <div key={i} className="p-2.5 border rounded-lg text-xs space-y-0.5">
+                      <p className="font-medium text-sm">{s.material}</p>
+                      <p className="text-muted-foreground">{s.supplier}</p>
+                      <p className="text-muted-foreground">{s.priceRange}</p>
+                      {s.website && (
+                        <a
+                          href={s.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[#5B8DA8] hover:underline flex items-center gap-1"
+                        >
+                          <Globe className="w-3 h-3" /> Visit
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {sourcingResults.platforms.length > 0 && (
+              <div>
+                <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+                  <Globe className="w-4 h-4" /> Manufacturing Platforms
+                </h4>
+                <div className="grid gap-2 sm:grid-cols-3">
+                  {sourcingResults.platforms.map((p, i) => (
+                    <div key={i} className="p-2.5 border rounded-lg text-xs">
+                      <p className="font-medium text-sm">{p.name}</p>
+                      <p className="text-muted-foreground mt-0.5">{p.description}</p>
+                      {p.website && (
+                        <a
+                          href={p.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[#5B8DA8] hover:underline flex items-center gap-1 mt-1"
+                        >
+                          <ExternalLink className="w-3 h-3" /> Open
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
 
   const renderStepContent = () => {
     switch (currentStep) {
@@ -696,6 +861,7 @@ export default function HardwareBuilderPage() {
                 ))}
               </div>
             </div>
+            {renderSupplierSourcing(true)}
           </div>
         );
 
@@ -868,172 +1034,7 @@ export default function HardwareBuilderPage() {
               </CardContent>
             </Card>
 
-            <Card className="border-[#5B8DA8]/30">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Factory className="w-5 h-5 text-[#5B8DA8]" />
-                  Find Manufacturers & Suppliers
-                </CardTitle>
-                <CardDescription>
-                  AI researches specific manufacturers, material suppliers, and platforms for your
-                  product
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Button
-                  onClick={handleFindManufacturers}
-                  disabled={sourcingLoading}
-                  className="gap-2 w-full"
-                  data-testid="button-find-manufacturers"
-                >
-                  {sourcingLoading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" /> Researching manufacturers...
-                    </>
-                  ) : (
-                    <>
-                      <Search className="w-4 h-4" /> Research Manufacturers & Suppliers
-                    </>
-                  )}
-                </Button>
-
-                {sourcingResults && (
-                  <div className="space-y-4 mt-4">
-                    {sourcingResults.recommendation && (
-                      <div className="p-3 rounded-lg bg-[#5B8DA8]/10 border border-[#5B8DA8]/20">
-                        <p className="text-sm flex items-start gap-2">
-                          <Sparkles className="w-4 h-4 text-[#5B8DA8] shrink-0 mt-0.5" />
-                          {sourcingResults.recommendation}
-                        </p>
-                      </div>
-                    )}
-
-                    {sourcingResults.manufacturers?.length > 0 && (
-                      <div>
-                        <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
-                          <Factory className="w-4 h-4" /> Recommended Manufacturers
-                        </h4>
-                        <div className="space-y-2">
-                          {sourcingResults.manufacturers.map((m, i) => (
-                            <div key={i} className="border rounded-lg overflow-hidden">
-                              <button
-                                onClick={() =>
-                                  setExpandedManufacturer(expandedManufacturer === i ? null : i)
-                                }
-                                className="w-full p-3 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
-                                data-testid={`button-manufacturer-${i}`}
-                              >
-                                <div>
-                                  <span className="font-medium text-sm">{m.name}</span>
-                                  <span className="text-xs text-muted-foreground ml-2">
-                                    {m.location}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Badge variant="outline" className="text-xs">
-                                    {m.estimatedCost}
-                                  </Badge>
-                                  {expandedManufacturer === i ? (
-                                    <ChevronUp className="w-4 h-4" />
-                                  ) : (
-                                    <ChevronDown className="w-4 h-4" />
-                                  )}
-                                </div>
-                              </button>
-                              {expandedManufacturer === i && (
-                                <div className="px-3 pb-3 space-y-1 text-xs text-muted-foreground border-t pt-2">
-                                  <p>
-                                    <span className="font-medium text-foreground">Specialty:</span>{" "}
-                                    {m.specialty}
-                                  </p>
-                                  {m.fit && (
-                                    <p>
-                                      <span className="font-medium text-foreground">Why:</span>{" "}
-                                      {m.fit}
-                                    </p>
-                                  )}
-                                  <p>
-                                    <span className="font-medium text-foreground">Min Order:</span>{" "}
-                                    {m.moq}
-                                  </p>
-                                  <p>
-                                    <span className="font-medium text-foreground">Lead Time:</span>{" "}
-                                    {m.leadTime}
-                                  </p>
-                                  {m.website && (
-                                    <a
-                                      href={m.website}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-[#5B8DA8] hover:underline flex items-center gap-1"
-                                    >
-                                      <Globe className="w-3 h-3" /> {m.website}
-                                    </a>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {sourcingResults.materialSuppliers?.length > 0 && (
-                      <div>
-                        <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
-                          <Package className="w-4 h-4" /> Material Suppliers
-                        </h4>
-                        <div className="grid gap-2 sm:grid-cols-2">
-                          {sourcingResults.materialSuppliers.map((s, i) => (
-                            <div key={i} className="p-2.5 border rounded-lg text-xs space-y-0.5">
-                              <p className="font-medium text-sm">{s.material}</p>
-                              <p className="text-muted-foreground">{s.supplier}</p>
-                              <p className="text-muted-foreground">{s.priceRange}</p>
-                              {s.website && (
-                                <a
-                                  href={s.website}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-[#5B8DA8] hover:underline flex items-center gap-1"
-                                >
-                                  <Globe className="w-3 h-3" /> Visit
-                                </a>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {sourcingResults.platforms?.length > 0 && (
-                      <div>
-                        <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
-                          <Globe className="w-4 h-4" /> Manufacturing Platforms
-                        </h4>
-                        <div className="grid gap-2 sm:grid-cols-3">
-                          {sourcingResults.platforms.map((p, i) => (
-                            <div key={i} className="p-2.5 border rounded-lg text-xs">
-                              <p className="font-medium text-sm">{p.name}</p>
-                              <p className="text-muted-foreground mt-0.5">{p.description}</p>
-                              {p.website && (
-                                <a
-                                  href={p.website}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-[#5B8DA8] hover:underline flex items-center gap-1 mt-1"
-                                >
-                                  <ExternalLink className="w-3 h-3" /> Open
-                                </a>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            {renderSupplierSourcing()}
 
             <Card className="border-[#6B2C4E]/30">
               <CardHeader>
