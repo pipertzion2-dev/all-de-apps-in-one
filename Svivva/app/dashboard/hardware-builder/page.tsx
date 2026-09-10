@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { FeaturePageShell } from "@/components/feature-page-shell";
 import Image from "next/image";
 import {
@@ -158,7 +159,9 @@ const manufacturingMethods = [
 type EntryMode = "sketch" | "brief";
 
 export default function HardwareBuilderPage() {
+  const searchParams = useSearchParams();
   const [entryMode, setEntryMode] = useState<EntryMode>("sketch");
+  const [briefStarted, setBriefStarted] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [steps, setSteps] = useState<BuildStep[]>(buildSteps);
@@ -254,6 +257,21 @@ export default function HardwareBuilderPage() {
 
   const [pdfGenerating, setPdfGenerating] = useState(false);
   const [expandedManufacturer, setExpandedManufacturer] = useState<number | null>(null);
+
+  useEffect(() => {
+    const insight = searchParams.get("insight");
+    if (!insight) return;
+    const decoded = decodeURIComponent(insight);
+    setProductDescription(decoded);
+    setEntryMode("brief");
+    setBriefStarted(true);
+  }, [searchParams]);
+
+  const handleStartBrief = useCallback(() => {
+    if (!productDescription.trim() && !productName.trim()) return;
+    setBriefStarted(true);
+    setCurrentStep(0);
+  }, [productDescription, productName]);
 
   const applySketchAnalysis = useCallback((data: SketchAnalysis) => {
     setProductName(data.productName);
@@ -1215,7 +1233,10 @@ export default function HardwareBuilderPage() {
                 variant={entryMode === "sketch" ? "default" : "outline"}
                 size="sm"
                 className="gap-2"
-                onClick={() => setEntryMode("sketch")}
+                onClick={() => {
+                  setEntryMode("sketch");
+                  setBriefStarted(false);
+                }}
                 data-testid="button-entry-sketch"
               >
                 <Upload className="w-4 h-4" /> I have a sketch
@@ -1224,12 +1245,53 @@ export default function HardwareBuilderPage() {
                 variant={entryMode === "brief" ? "default" : "outline"}
                 size="sm"
                 className="gap-2"
-                onClick={() => setEntryMode("brief")}
+                onClick={() => {
+                  setEntryMode("brief");
+                  setStartedFromSketch(false);
+                }}
                 data-testid="button-entry-brief"
               >
                 <PenLine className="w-4 h-4" /> I have a written brief
               </Button>
             </div>
+
+            {entryMode === "brief" && !briefStarted && !startedFromSketch && (
+              <div className="space-y-4 pt-2">
+                <div className="space-y-2">
+                  <Label htmlFor="briefProductName">Product Name</Label>
+                  <Input
+                    id="briefProductName"
+                    placeholder="Enter your product name..."
+                    value={productName}
+                    onChange={(e) => setProductName(e.target.value)}
+                    data-testid="input-brief-product-name"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="briefProductDescription">Product Description</Label>
+                  <Textarea
+                    id="briefProductDescription"
+                    placeholder="Describe your product vision in detail. What problem does it solve? What makes it unique?"
+                    value={productDescription}
+                    onChange={(e) => setProductDescription(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleStartBrief();
+                    }}
+                    className="min-h-[120px]"
+                    data-testid="input-brief-product-description"
+                  />
+                </div>
+                <Button
+                  onClick={handleStartBrief}
+                  disabled={!productDescription.trim() && !productName.trim()}
+                  className="gap-2 w-full sm:w-auto"
+                  data-testid="button-start-brief"
+                >
+                  <ArrowRight className="w-4 h-4" />
+                  Start BUILD
+                </Button>
+              </div>
+            )}
 
             {entryMode === "sketch" && !startedFromSketch && (
               <div className="space-y-4 pt-2">
@@ -1307,12 +1369,25 @@ export default function HardwareBuilderPage() {
                     </>
                   )}
                 </Button>
+                {!uploadedSketchBase64 && (
+                  <p className="text-xs text-muted-foreground">
+                    No sketch yet? Choose{" "}
+                    <button
+                      type="button"
+                      className="text-primary underline underline-offset-2 hover:opacity-80"
+                      onClick={() => setEntryMode("brief")}
+                    >
+                      I have a written brief
+                    </button>{" "}
+                    to enter your product details and start BUILD.
+                  </p>
+                )}
               </div>
             )}
           </CardContent>
         </Card>
 
-        {(entryMode === "brief" || startedFromSketch) && (
+        {(briefStarted || startedFromSketch) && (
           <Card className="border-primary/30">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -1384,7 +1459,7 @@ export default function HardwareBuilderPage() {
           </Card>
         )}
 
-        {(entryMode === "brief" || startedFromSketch) && (
+        {(briefStarted || startedFromSketch) && (
           <Card className="border-[#5B8DA8]/30">
             <CardHeader className="pb-3">
               <button
@@ -1423,8 +1498,8 @@ export default function HardwareBuilderPage() {
           </Card>
         )}
 
-        {(entryMode === "brief" || startedFromSketch) && (
-          <div className="flex flex-col sm:flex-row gap-3 sm:justify-between">
+        {(briefStarted || startedFromSketch) && (
+          <div className="flex flex-col sm:flex-row gap-3 sm:justify-between sticky bottom-0 z-20 py-3 -mx-4 px-4 sm:mx-0 sm:px-0 bg-background/80 backdrop-blur-md sm:bg-transparent sm:backdrop-blur-none border-t border-border/40 sm:border-0">
             <Button
               variant="outline"
               onClick={handleBack}
