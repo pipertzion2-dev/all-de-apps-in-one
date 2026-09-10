@@ -4,6 +4,14 @@ import { SECURITY_HEADERS } from "./lib/security-headers.mjs";
 const nextConfig = {
   reactStrictMode: true,
   serverExternalPackages: ["drizzle-orm", "pg"],
+  // Mobile sketch uploads send base64 JSON; default 1MB limit caused 413 in production.
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "8mb",
+    },
+    proxyClientMaxBodySize: "8mb",
+    middlewareClientMaxBodySize: "8mb",
+  },
   allowedDevOrigins: ["*.vercel.app", "127.0.0.1", "localhost", "192.168.*", "10.*", "172.*"],
   images: {
     formats: ["image/avif", "image/webp"],

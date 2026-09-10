@@ -47,6 +47,7 @@ import {
 import { HardwareSchematicHybridizer } from "@/components/hardware-schematic-hybridizer";
 import { authFetch } from "@/hooks/use-auth";
 import type { SourcingResult } from "@/lib/hardware/sourcing";
+import { compressSketchImageFile } from "@/lib/hardware/compress-sketch-image";
 
 interface BuildStep {
   id: string;
@@ -174,6 +175,7 @@ export default function HardwareBuilderPage() {
     "image/jpeg" | "image/png" | "image/webp" | "image/gif"
   >("image/jpeg");
   const [sketchUploadNotes, setSketchUploadNotes] = useState("");
+  const [sketchCompressing, setSketchCompressing] = useState(false);
   const [sketchAnalyzing, setSketchAnalyzing] = useState(false);
   const [sketchAnalyzeError, setSketchAnalyzeError] = useState("");
   const [sketchNotes, setSketchNotes] = useState("");
@@ -276,28 +278,29 @@ export default function HardwareBuilderPage() {
     setGeneratedSketch(true);
   }, []);
 
-  const handleSketchFile = useCallback((file: File) => {
+  const handleSketchFile = useCallback(async (file: File) => {
     if (!file.type.startsWith("image/")) {
       setSketchAnalyzeError("Please upload an image (JPEG, PNG, or WebP).");
       return;
     }
-    if (file.size > 6 * 1024 * 1024) {
-      setSketchAnalyzeError("Image must be under 6 MB.");
+    if (file.size > 12 * 1024 * 1024) {
+      setSketchAnalyzeError("Image must be under 12 MB.");
       return;
     }
     setSketchAnalyzeError("");
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result as string;
-      const comma = dataUrl.indexOf(",");
-      const base64 = comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl;
-      const mime = (file.type || "image/jpeg") as typeof uploadedSketchMime;
-      setUploadedSketchBase64(base64);
-      setUploadedSketchMime(mime);
-      setSketchImageSrc(dataUrl);
-    };
-    reader.onerror = () => setSketchAnalyzeError("Could not read that file.");
-    reader.readAsDataURL(file);
+    setSketchCompressing(true);
+    setUploadedSketchBase64("");
+    setSketchImageSrc("");
+    try {
+      const compressed = await compressSketchImageFile(file);
+      setUploadedSketchBase64(compressed.base64);
+      setUploadedSketchMime(compressed.mimeType);
+      setSketchImageSrc(compressed.dataUrl);
+    } catch {
+      setSketchAnalyzeError("Could not read or prepare that image. Try another photo.");
+    } finally {
+      setSketchCompressing(false);
+    }
   }, []);
 
   const handleAnalyzeSketch = useCallback(async () => {
@@ -317,9 +320,22 @@ export default function HardwareBuilderPage() {
           notes: sketchUploadNotes,
         }),
       });
-      const data = await r.json();
-      if (!r.ok) throw new Error(data.error || "Analysis failed");
-      applySketchAnalysis(data as SketchAnalysis);
+      const raw = await r.text();
+      let data: { error?: string } = {};
+      try {
+        data = raw ? (JSON.parse(raw) as { error?: string }) : {};
+      } catch {
+        /* non-JSON body (e.g. platform 413 page) */
+      }
+      if (!r.ok) {
+        if (r.status === 413 || /413|1mb limit|body exceeded/i.test(raw)) {
+          throw new Error(
+            "That photo is too large to upload. We compress images automatically — try re-uploading, or use a smaller photo.",
+          );
+        }
+        throw new Error(data.error || raw || "Analysis failed");
+      }
+      applySketchAnalysis(JSON.parse(raw) as SketchAnalysis);
       setEntryMode("brief");
       setCurrentStep(0);
     } catch (err: unknown) {
@@ -1334,7 +1350,8 @@ export default function HardwareBuilderPage() {
                         Drop your sketch or click to upload
                       </span>
                       <span className="text-xs">
-                        Photo, scan, or drawing — JPEG, PNG, WebP up to 6 MB
+                        Photo, scan, or drawing — JPEG, PNG, WebP (large photos are compressed
+                        automatically)
                       </span>
                     </div>
                   )}
@@ -1353,11 +1370,15 @@ export default function HardwareBuilderPage() {
                 )}
                 <Button
                   onClick={handleAnalyzeSketch}
-                  disabled={sketchAnalyzing || !uploadedSketchBase64}
+                  disabled={sketchCompressing || sketchAnalyzing || !uploadedSketchBase64}
                   className="gap-2 w-full sm:w-auto"
                   data-testid="button-analyze-sketch"
                 >
-                  {sketchAnalyzing ? (
+                  {sketchCompressing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" /> Preparing photo...
+                    </>
+                  ) : sketchAnalyzing ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" /> Reading your sketch...
                     </>
