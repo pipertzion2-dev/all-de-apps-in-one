@@ -2,7 +2,10 @@ import type { SketchAnalysis } from "./sketch-analysis";
 
 /** Keyword → product category for heuristic sketch analysis when AI is unavailable. */
 const CATEGORY_HINTS: { pattern: RegExp; category: string }[] = [
-  { pattern: /watch|wearable|bracelet|smartwatch|wrist/i, category: "Wearable / Consumer Electronics" },
+  {
+    pattern: /watch|wearable|bracelet|smartwatch|wrist/i,
+    category: "Wearable / Consumer Electronics",
+  },
   { pattern: /jewel|ring|necklace|diamond|gold|silver/i, category: "Jewelry / Luxury Goods" },
   { pattern: /tool|drill|wrench|hardware kit/i, category: "Industrial Tool" },
   { pattern: /sensor|iot|device|pcb|circuit/i, category: "Consumer Electronics" },
@@ -60,7 +63,12 @@ export function buildSketchAnalysisFallback(notes: string): SketchAnalysis {
 
   const isLuxury = /jewel|diamond|luxury|watch/i.test(hintText);
   const materials = isLuxury
-    ? ["Sapphire crystal", "Stainless steel", "Precious metal accents", "Premium leather or silicone band"]
+    ? [
+        "Sapphire crystal",
+        "Stainless steel",
+        "Precious metal accents",
+        "Premium leather or silicone band",
+      ]
     : [...DEFAULT_MATERIALS];
 
   const requirements = isLuxury

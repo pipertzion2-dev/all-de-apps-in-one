@@ -80,10 +80,7 @@ export function getHardwareProviderAttempts(): ProviderAttempt[] {
       id: "gemini",
       label: "Google Gemini",
       client: gemini,
-      models: uniqueModels(
-        [getDefaultModelForProvider("gemini")],
-        getModelFallbackChain("gemini"),
-      ),
+      models: uniqueModels([getDefaultModelForProvider("gemini")], getModelFallbackChain("gemini")),
     });
   }
 
@@ -208,5 +205,7 @@ export async function hardwareChatCompletion(opts: {
     }
   }
 
-  throw lastError instanceof Error ? lastError : new Error(String(lastError ?? "AI request failed"));
+  throw lastError instanceof Error
+    ? lastError
+    : new Error(String(lastError ?? "AI request failed"));
 }

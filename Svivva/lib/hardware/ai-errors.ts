@@ -35,7 +35,8 @@ export function formatHardwareAiError(raw: string): HardwareAiErrorHint {
   if (raw.toLowerCase().includes("not configured") || raw.toLowerCase().includes("no ai")) {
     return {
       title: "No AI provider configured",
-      detail: "Add GEMINI_API_KEY (free) or OPENAI_API_KEY in Platform Secrets, or use the written brief path without sketch analysis.",
+      detail:
+        "Add GEMINI_API_KEY (free) or OPENAI_API_KEY in Platform Secrets, or use the written brief path without sketch analysis.",
       actions: [{ label: "Platform Secrets", href: "/dashboard/settings/runtime-keys" }],
     };
   }
