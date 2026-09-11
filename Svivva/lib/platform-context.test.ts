@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  platformModeForCubeFace,
-  platformModeFromPath,
-} from "@/lib/platform-context";
+import { platformModeForCubeFace, platformModeFromPath } from "@/lib/platform-context";
 
 describe("platformModeFromPath", () => {
   it("maps hardware routes to Crest (physical)", () => {

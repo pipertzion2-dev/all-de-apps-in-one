@@ -177,10 +177,7 @@ export function buildFeatureLabFallback(input: {
   lineage: string[];
 }): HybridizationResult {
   const bridge = pickDomainBridge(input.schematicA.domain, input.schematicB.domain);
-  const applicableBridges = matchingDomainBridges(
-    input.schematicA.domain,
-    input.schematicB.domain,
-  );
+  const applicableBridges = matchingDomainBridges(input.schematicA.domain, input.schematicB.domain);
   const bridgeSummary =
     applicableBridges.length > 0
       ? applicableBridges.map((b) => `${b.id}: ${b.principle}`).join(" | ")

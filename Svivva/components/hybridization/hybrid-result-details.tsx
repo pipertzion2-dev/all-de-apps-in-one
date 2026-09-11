@@ -133,7 +133,9 @@ export function HybridResultDetails({ result, usedEngine }: Props) {
           <p className="text-[10px] font-semibold uppercase tracking-wider text-[#5B8DA8]">
             Topological bridge
           </p>
-          <p className="text-sm text-muted-foreground leading-relaxed">{result.topologicalBridge}</p>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            {result.topologicalBridge}
+          </p>
         </div>
         <div className="rounded-xl border border-[#6B2C4E]/30 bg-[#6B2C4E]/5 p-4 space-y-2">
           <p className="text-[10px] font-semibold uppercase tracking-wider text-[#6B2C4E]">

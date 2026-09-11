@@ -31,11 +31,26 @@ const FAQ_ITEMS = [
 ];
 
 const HOW_TO_STEPS = [
-  { name: "Describe your API", text: "Write what you want your API to do in plain English — no code required." },
-  { name: "Define your output schema", text: "Set the JSON structure you expect back. ZZAI will enforce and validate it on every call." },
-  { name: "Auto-generate evaluations", text: "ZZAI writes up to 200 test cases automatically — edge cases, adversarial inputs, and boundary conditions." },
-  { name: "Deploy your endpoint", text: "One click publishes a live, auto-scaling API endpoint with full OpenAPI documentation." },
-  { name: "Monitor and rollback", text: "Watch latency, success rate, and token costs in real time. Enable auto-rollback for hands-free quality control." },
+  {
+    name: "Describe your API",
+    text: "Write what you want your API to do in plain English — no code required.",
+  },
+  {
+    name: "Define your output schema",
+    text: "Set the JSON structure you expect back. ZZAI will enforce and validate it on every call.",
+  },
+  {
+    name: "Auto-generate evaluations",
+    text: "ZZAI writes up to 200 test cases automatically — edge cases, adversarial inputs, and boundary conditions.",
+  },
+  {
+    name: "Deploy your endpoint",
+    text: "One click publishes a live, auto-scaling API endpoint with full OpenAPI documentation.",
+  },
+  {
+    name: "Monitor and rollback",
+    text: "Watch latency, success rate, and token costs in real time. Enable auto-rollback for hands-free quality control.",
+  },
 ];
 
 export function HomeFaqSection() {

@@ -85,8 +85,7 @@ export async function POST(request: NextRequest) {
     const order = nextHybridOrder(resolvedA.ref.order, resolvedB.ref.order);
     const lineage = mergeLineage(resolvedA.ref.lineage, resolvedB.ref.lineage);
     const mode = parsed.data.hybridizationMode as HybridizationMode;
-    const scientificDepth =
-      parsed.data.scientificDepth ?? (order === 2 ? "research" : "prototype");
+    const scientificDepth = parsed.data.scientificDepth ?? (order === 2 ? "research" : "prototype");
     const targetApplication =
       parsed.data.targetApplication?.trim() ||
       defaultTargetApplication(order, resolvedA.ref.label, resolvedB.ref.label);

@@ -83,7 +83,11 @@ export function CubeDownloadPanel() {
       <div className="flex flex-wrap gap-2">
         {isComplete && zipHref ? (
           <a href={zipHref} download>
-            <Button size="sm" className="gap-2 bg-[#5B8DA8]" data-testid="button-cube-download-pack">
+            <Button
+              size="sm"
+              className="gap-2 bg-[#5B8DA8]"
+              data-testid="button-cube-download-pack"
+            >
               <Download className="w-3.5 h-3.5" />
               Download pack
             </Button>

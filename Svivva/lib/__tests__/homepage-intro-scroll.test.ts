@@ -3,7 +3,7 @@ import { readFileSync } from "fs";
 import { resolve } from "path";
 
 describe("homepage intro scroll", () => {
-  const pageSrc = readFileSync(resolve(__dirname, "../../app/page.tsx"), "utf8");
+  const pageSrc = readFileSync(resolve(__dirname, "../../app/home-page-client.tsx"), "utf8");
 
   it("registers wheel/touch only on window (no duplicate capture listeners)", () => {
     expect(pageSrc).toContain('window.addEventListener("wheel", handleWheel');

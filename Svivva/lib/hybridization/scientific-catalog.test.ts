@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  formatAllDomainBridgesForPrompt,
-  getScientificCatalog,
-} from "./scientific-catalog";
+import { formatAllDomainBridgesForPrompt, getScientificCatalog } from "./scientific-catalog";
 import { matchingDomainBridges } from "./principles";
 
 describe("getScientificCatalog", () => {
