@@ -2,25 +2,41 @@
 /**
  * Vercel "Ignored Build Step" — exit 0 = skip deploy, exit 1 = build.
  *
- * Skips when:
- * - branch is not main (no preview deploys from cursor/* or PR branches)
- * - commit message contains [skip vercel]
- * - diff only touches non-production paths (scripts/, tests, docs, workflows)
- * - Svivva/ has no changes vs previous commit (monorepo noise)
+ * On main: build unless [skip vercel] or diff is docs/scripts-only (non-empty).
+ * Empty diffs on main always build (Vercel shallow clones often miss parent SHAs).
+ *
+ * On other branches: skip (no preview deploys from cursor/* or PR branches).
  */
-import { diffRequiresProductionDeploy, resolveDiffRange } from "./vercel-deploy-diff.mjs";
+import { execSync } from "child_process";
+import {
+  diffRequiresProductionDeploy,
+  listChangedFiles,
+  resolveDiffRange,
+} from "./vercel-deploy-diff.mjs";
+
+function resolveCommitMessage() {
+  const fromEnv = process.env.VERCEL_GIT_COMMIT_MESSAGE?.trim() || "";
+  if (fromEnv) return fromEnv;
+  try {
+    return execSync("git log -1 --format=%B", { encoding: "utf8" }).trim();
+  } catch {
+    return "";
+  }
+}
 
 const ref = process.env.VERCEL_GIT_COMMIT_REF || "";
+const msg = resolveCommitMessage();
+
 if (ref && ref !== "main") {
   console.log(`Skip: branch "${ref}" is not main`);
   process.exit(0);
 }
 
-const msg = process.env.VERCEL_GIT_COMMIT_MESSAGE || "";
 if (/\[skip vercel\]/i.test(msg)) {
   console.log("Skip: commit message contains [skip vercel]");
   process.exit(0);
 }
+
 if (/\[(vercel )?deploy\]/i.test(msg)) {
   console.log("Build: commit message requests deploy");
   process.exit(1);
@@ -30,6 +46,12 @@ const { base, head, label } = resolveDiffRange(".");
 
 if (!base) {
   console.log("Build: first commit or shallow clone (no previous SHA)");
+  process.exit(1);
+}
+
+const files = listChangedFiles(base, head, ".");
+if (!files?.length) {
+  console.log(`Build: empty diff on main (${label}) — forcing deploy`);
   process.exit(1);
 }
 
