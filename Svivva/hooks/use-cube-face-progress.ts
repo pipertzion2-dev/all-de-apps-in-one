@@ -1,9 +1,8 @@
 "use client";
 
-import { useCallback, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { FeatureId } from "@/components/svivva-artifact/feature-defs";
 import {
-  CUBE_FACE_PROGRESS_STORAGE_KEY,
   cubeVisitProgress,
   isCubeJourneyComplete,
   readCubeFaceProgress,
@@ -14,41 +13,20 @@ import {
 const PROGRESS_EVENT = "svivva-cube-face-progress";
 const EMPTY_PROGRESS: CubeFaceProgress = { visited: [], updatedAt: "" };
 
-/** React 19 requires getSnapshot to return a stable reference until the store changes. */
-let cachedRaw: string | null | undefined;
-let cachedSnapshot: CubeFaceProgress = EMPTY_PROGRESS;
-
-function subscribe(onStoreChange: () => void): () => void {
-  window.addEventListener("storage", onStoreChange);
-  window.addEventListener(PROGRESS_EVENT, onStoreChange);
-  return () => {
-    window.removeEventListener("storage", onStoreChange);
-    window.removeEventListener(PROGRESS_EVENT, onStoreChange);
-  };
-}
-
-function readRawProgress(): string | null {
-  try {
-    return window.localStorage.getItem(CUBE_FACE_PROGRESS_STORAGE_KEY);
-  } catch {
-    return null;
-  }
-}
-
-function getSnapshot(): CubeFaceProgress {
-  const raw = readRawProgress();
-  if (raw === cachedRaw) return cachedSnapshot;
-  cachedRaw = raw;
-  cachedSnapshot = raw == null ? EMPTY_PROGRESS : readCubeFaceProgress(window.localStorage);
-  return cachedSnapshot;
-}
-
-function getServerSnapshot(): CubeFaceProgress {
-  return EMPTY_PROGRESS;
-}
-
 export function useCubeFaceProgress() {
-  const progress = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const [progress, setProgress] = useState<CubeFaceProgress>(EMPTY_PROGRESS);
+
+  useEffect(() => {
+    setProgress(readCubeFaceProgress(window.localStorage));
+
+    const sync = () => setProgress(readCubeFaceProgress(window.localStorage));
+    window.addEventListener("storage", sync);
+    window.addEventListener(PROGRESS_EVENT, sync);
+    return () => {
+      window.removeEventListener("storage", sync);
+      window.removeEventListener(PROGRESS_EVENT, sync);
+    };
+  }, []);
 
   const recordVisit = useCallback((faceId: FeatureId) => {
     recordCubeFaceVisit(faceId, window.localStorage);

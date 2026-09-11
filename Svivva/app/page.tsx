@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { authFetch } from "@/hooks/use-auth";
 import { CamoThreeOverlay } from "@/components/camo-three-overlay";
+import { ClientErrorBoundary } from "@/components/client-error-boundary";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -732,7 +733,19 @@ export default function LandingPage() {
                 the top of the page was the OaaS block until the cube mounted and
                 shoved everything down. */}
             <div className="relative z-10">
-              <SvivvaArtifact mountCanvas={canMountHeavy3d} />
+              <ClientErrorBoundary
+                fallback={
+                  <p className="text-center text-sm text-muted-foreground py-12 px-4">
+                    Cube navigation is temporarily unavailable. Scroll down to explore ZZAI, or{" "}
+                    <Link href="/dashboard" className="text-[#5B8DA8] underline">
+                      open the dashboard
+                    </Link>
+                    .
+                  </p>
+                }
+              >
+                <SvivvaArtifact mountCanvas={canMountHeavy3d} />
+              </ClientErrorBoundary>
             </div>
 
             <section id="oaas-intro" className="pt-8 sm:pt-10 pb-8 sm:pb-10 relative z-10">
