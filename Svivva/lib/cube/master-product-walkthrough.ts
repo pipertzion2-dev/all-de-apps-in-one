@@ -8,10 +8,7 @@
  *   console.log(exportWalkthroughJson(DEFAULT_MASTER_PRODUCT_JOURNEY));
  */
 
-import {
-  buildMasterProductJourney,
-  type MasterProductJourney,
-} from "./cube-faces";
+import { buildMasterProductJourney, type MasterProductJourney } from "./cube-faces";
 
 /** Example product used in docs, QA, and the cube walkthrough tool. */
 export const DEFAULT_PRODUCT_NAME = "Smart Soil Monitor";
@@ -25,7 +22,9 @@ export const DEFAULT_MASTER_PRODUCT_JOURNEY: MasterProductJourney = buildMasterP
   productBrief: DEFAULT_PRODUCT_BRIEF,
 });
 
-export function exportWalkthroughJson(journey: MasterProductJourney = DEFAULT_MASTER_PRODUCT_JOURNEY): string {
+export function exportWalkthroughJson(
+  journey: MasterProductJourney = DEFAULT_MASTER_PRODUCT_JOURNEY,
+): string {
   return JSON.stringify(journey, null, 2);
 }
 
@@ -50,7 +49,9 @@ export function exportWalkthroughMarkdown(
       `- **Route:** [\`${s.href}\`](${s.href})`,
       `- **Role:** ${s.role}`,
       `- **Action:** ${s.action}`,
-      s.platformMode ? `- **Platform mode:** ${s.platformMode === "physical" ? "Crest" : "Signal"}` : "",
+      s.platformMode
+        ? `- **Platform mode:** ${s.platformMode === "physical" ? "Crest" : "Signal"}`
+        : "",
       "",
     );
   }

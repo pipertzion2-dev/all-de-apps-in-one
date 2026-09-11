@@ -300,8 +300,7 @@ export async function GET() {
   const warnCount = checks.filter((c) => c.status === "warn").length;
   const failCount = checks.filter((c) => c.status === "fail").length;
   const infoCount = checks.filter((c) => c.status === "info").length;
-  const weighted =
-    okCount * 1 + warnCount * 0.5 + failCount * 0 + infoCount * 0.75;
+  const weighted = okCount * 1 + warnCount * 0.5 + failCount * 0 + infoCount * 0.75;
   const scoreable = checks.length - infoCount || checks.length;
   let score = Math.round((weighted / scoreable) * 100);
   if (gscClicks === 0 && gscImpressions < 50) score = Math.min(score, 65);

@@ -353,9 +353,8 @@ async function countComparisons(): Promise<number> {
     .select({ slug: seoLandingPages.slug })
     .from(seoLandingPages)
     .where(eq(seoLandingPages.category, "seo-landing"));
-  return rows.filter(
-    (p) => p.slug.startsWith("svivva-vs-") || p.slug.startsWith("zzai-vs-"),
-  ).length;
+  return rows.filter((p) => p.slug.startsWith("svivva-vs-") || p.slug.startsWith("zzai-vs-"))
+    .length;
 }
 
 async function insertSeoPage(

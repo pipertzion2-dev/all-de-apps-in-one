@@ -21,7 +21,11 @@ import {
 } from "lucide-react";
 import { HybridResultDetails } from "@/components/hybridization/hybrid-result-details";
 import { ScientificProtocolPanel } from "@/components/hybridization/scientific-protocol-panel";
-import type { HybridizationMode, HybridizationResult, ScientificDepth } from "@/lib/hybridization/types";
+import type {
+  HybridizationMode,
+  HybridizationResult,
+  ScientificDepth,
+} from "@/lib/hybridization/types";
 import type { HybridParentRef } from "@/lib/hybridization/feature-lab";
 import { formatLineage } from "@/lib/hybridization/feature-lab";
 
@@ -395,7 +399,9 @@ export default function HybridLabPage() {
                     size="sm"
                     variant={depth === d ? "default" : "outline"}
                     className={
-                      depth === d ? "bg-[#6B2C4E] h-7 text-[10px] capitalize" : "h-7 text-[10px] capitalize"
+                      depth === d
+                        ? "bg-[#6B2C4E] h-7 text-[10px] capitalize"
+                        : "h-7 text-[10px] capitalize"
                     }
                     onClick={() => setDepth(d)}
                     data-testid={`button-depth-${d}`}

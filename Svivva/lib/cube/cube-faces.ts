@@ -1,4 +1,8 @@
-import { FEATURES, type FeatureDef, type FeatureId } from "@/components/svivva-artifact/feature-defs";
+import {
+  FEATURES,
+  type FeatureDef,
+  type FeatureId,
+} from "@/components/svivva-artifact/feature-defs";
 import { FEATURE_PUBLIC_PATHS } from "@/lib/feature-routes";
 import type { PlatformMode } from "@/lib/platform-context";
 import { platformModeForCubeFace } from "@/lib/platform-context";

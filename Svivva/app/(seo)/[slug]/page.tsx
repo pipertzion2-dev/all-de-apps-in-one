@@ -14,10 +14,7 @@ import { SeoBreadcrumbs } from "@/components/seo/breadcrumbs";
 import { ConversionFunnel } from "@/components/seo/conversion-funnel";
 import { pickHubForPage } from "@/lib/seo/internal-links/authority";
 import { isLegacyBrandSlug } from "@/lib/seo/legacy-paths";
-import {
-  isDuplicateSeoVariantSlug,
-  canonicalSlugFromVariant,
-} from "@/lib/seo/duplicate-variants";
+import { isDuplicateSeoVariantSlug, canonicalSlugFromVariant } from "@/lib/seo/duplicate-variants";
 import { getSiteUrl } from "@/lib/site-url";
 import { canonicalPathForFeatureSlug } from "@/lib/tools/catalogs/hub-feature-pages";
 

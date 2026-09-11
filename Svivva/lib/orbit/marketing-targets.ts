@@ -93,7 +93,10 @@ export function computeIndexHealthScore(
       ? Math.min(100, Math.round((opts.sitemapEligible / totalPages) * 100))
       : pagesPct;
 
-  const trafficBonus = Math.min(20, (opts?.gscClicks28d ?? 0) > 0 ? 10 + Math.log10((opts?.gscClicks28d ?? 0) + 1) * 5 : 0);
+  const trafficBonus = Math.min(
+    20,
+    (opts?.gscClicks28d ?? 0) > 0 ? 10 + Math.log10((opts?.gscClicks28d ?? 0) + 1) * 5 : 0,
+  );
 
   const score = Math.round(
     qualityPct * 0.3 +

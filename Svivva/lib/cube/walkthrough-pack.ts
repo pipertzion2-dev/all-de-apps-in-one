@@ -60,7 +60,10 @@ function exportChecklistCsv(
   return [header, ...rows].join("\n");
 }
 
-function stepMarkdown(step: MasterProductJourney["steps"][number], journey: MasterProductJourney): string {
+function stepMarkdown(
+  step: MasterProductJourney["steps"][number],
+  journey: MasterProductJourney,
+): string {
   return `# Step ${step.step}: ${step.shortLabel} — ${step.name}
 
 **Product:** ${journey.productName}
@@ -121,9 +124,7 @@ export function buildWalkthroughPack(
   options: WalkthroughPackOptions = {},
 ): WalkthroughPack {
   const slug = slugify(journey.productName);
-  const visitedSet = options.visitedFaceIds?.length
-    ? new Set(options.visitedFaceIds)
-    : undefined;
+  const visitedSet = options.visitedFaceIds?.length ? new Set(options.visitedFaceIds) : undefined;
   const journeyComplete = visitedSet ? isCubeJourneyComplete(visitedSet) : false;
   const files: WalkthroughPackFile[] = [
     {
@@ -153,9 +154,7 @@ export function buildWalkthroughPack(
             "checklist.csv",
             "routes.json",
             "cube-geometry.json",
-            ...journey.steps.map(
-              (s) => `steps/${padStep(s.step)}-${s.faceId}.md`,
-            ),
+            ...journey.steps.map((s) => `steps/${padStep(s.step)}-${s.faceId}.md`),
           ],
         },
         null,

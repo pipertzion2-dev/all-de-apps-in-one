@@ -81,15 +81,9 @@ export async function unpublishDuplicateBlogPosts(): Promise<number> {
   let count = 0;
   for (const [, group] of byTitle) {
     if (group.length < 2) continue;
-    group.sort(
-      (a, b) =>
-        (a.createdAt?.getTime() ?? 0) - (b.createdAt?.getTime() ?? 0),
-    );
+    group.sort((a, b) => (a.createdAt?.getTime() ?? 0) - (b.createdAt?.getTime() ?? 0));
     for (let i = 1; i < group.length; i++) {
-      await db
-        .update(blogPosts)
-        .set({ published: false })
-        .where(eq(blogPosts.id, group[i].id));
+      await db.update(blogPosts).set({ published: false }).where(eq(blogPosts.id, group[i].id));
       count++;
     }
   }

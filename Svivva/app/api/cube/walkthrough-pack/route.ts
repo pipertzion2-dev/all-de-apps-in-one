@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { buildMasterProductJourney } from "@/lib/cube/cube-faces";
 import { parseVisitedFacesParam } from "@/lib/cube/cube-face-progress";
+import { DEFAULT_MASTER_PRODUCT_JOURNEY } from "@/lib/cube/master-product-walkthrough";
 import {
-  DEFAULT_MASTER_PRODUCT_JOURNEY,
   buildWalkthroughPack,
   buildWalkthroughPackZipBuffer,
   walkthroughPackZipFilename,

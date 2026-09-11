@@ -1,8 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  isDuplicateSeoVariantSlug,
-  canonicalSlugFromVariant,
-} from "@/lib/seo/duplicate-variants";
+import { isDuplicateSeoVariantSlug, canonicalSlugFromVariant } from "@/lib/seo/duplicate-variants";
 
 describe("duplicate-variants", () => {
   it("flags doorway variant slugs", () => {

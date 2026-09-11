@@ -8,12 +8,7 @@ import {
   SCIENTIFIC_PROTOCOL_VERSION,
   matchingDomainBridges,
 } from "./principles";
-import {
-  ENGINEERING_DOMAINS,
-  HYBRIDIZATION_MODES,
-  SCIENTIFIC_DEPTHS,
-  TOPOLOGIES,
-} from "./types";
+import { ENGINEERING_DOMAINS, HYBRIDIZATION_MODES, SCIENTIFIC_DEPTHS, TOPOLOGIES } from "./types";
 
 export type ScientificCatalog = {
   protocolVersion: string;

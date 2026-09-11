@@ -38,9 +38,9 @@ export default function CubeWalkthroughPackPage() {
     <MiniAppShell app={APP} nextLabel="Homepage cube">
       <div className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          Download a ZIP with README, JSON, markdown walkthrough, CSV checklist, route map, and
-          six step files — one per cube face — for your product. Visit all six faces on the
-          homepage cube first ({visitedCount}/{totalFaces} done).
+          Download a ZIP with README, JSON, markdown walkthrough, CSV checklist, route map, and six
+          step files — one per cube face — for your product. Visit all six faces on the homepage
+          cube first ({visitedCount}/{totalFaces} done).
         </p>
 
         <div className="space-y-3">
