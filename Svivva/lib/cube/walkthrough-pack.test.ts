@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   buildWalkthroughPack,
   buildWalkthroughPackFromInput,
-  buildWalkthroughPackZipBuffer,
   walkthroughPackZipFilename,
 } from "./walkthrough-pack";
+import { buildWalkthroughPackZipBuffer } from "./walkthrough-pack-zip";
 
 describe("walkthrough pack", () => {
   it("builds a multi-file pack with one file per cube face", () => {

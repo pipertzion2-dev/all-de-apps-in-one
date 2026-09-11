@@ -2,11 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { buildMasterProductJourney } from "@/lib/cube/cube-faces";
 import { parseVisitedFacesParam } from "@/lib/cube/cube-face-progress";
 import { DEFAULT_MASTER_PRODUCT_JOURNEY } from "@/lib/cube/master-product-walkthrough";
-import {
-  buildWalkthroughPack,
-  buildWalkthroughPackZipBuffer,
-  walkthroughPackZipFilename,
-} from "@/lib/cube/walkthrough-pack";
+import { buildWalkthroughPack, walkthroughPackZipFilename } from "@/lib/cube/walkthrough-pack";
+import { buildWalkthroughPackZipBuffer } from "@/lib/cube/walkthrough-pack-zip";
 
 export const dynamic = "force-dynamic";
 

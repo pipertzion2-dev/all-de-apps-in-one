@@ -33,8 +33,8 @@ jobs:
         working-directory: Svivva
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID || 'team_GuJh1mdYQPgRIhJaagdpM8lw' }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID || 'prj_dFOy1SeDx3JLYTxfsnZ7Fd68bIQr' }}
         run: node scripts/resume-vercel-project.mjs
 
       - name: Clear queue and deploy latest
@@ -45,8 +45,8 @@ jobs:
           GITHUB_SHA: ${{ github.sha }}
           GITHUB_EVENT_NAME: workflow_dispatch
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID || 'team_GuJh1mdYQPgRIhJaagdpM8lw' }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID || 'prj_dFOy1SeDx3JLYTxfsnZ7Fd68bIQr' }}
           VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
           VERCEL_CI_DEPLOY: "true"
         run: node scripts/ci-vercel-deploy.mjs

@@ -11,7 +11,7 @@
 import { spawnSync } from "child_process";
 import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
-import { vercelScopeArgs } from "./vercel-canonical.mjs";
+import { vercelCanonical, vercelScopeArgs } from "./vercel-canonical.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, "..");
@@ -96,8 +96,11 @@ if (!hasCredentials) {
 }
 
 if (token) {
-  if (!process.env.VERCEL_ORG_ID?.trim() || !process.env.VERCEL_PROJECT_ID?.trim()) {
-    fail("VERCEL_TOKEN is set but VERCEL_ORG_ID or VERCEL_PROJECT_ID is missing.");
+  if (!process.env.VERCEL_ORG_ID?.trim()) {
+    process.env.VERCEL_ORG_ID = vercelCanonical.teamId;
+  }
+  if (!process.env.VERCEL_PROJECT_ID?.trim()) {
+    process.env.VERCEL_PROJECT_ID = vercelCanonical.projectId;
   }
   await deployViaCli();
 } else {

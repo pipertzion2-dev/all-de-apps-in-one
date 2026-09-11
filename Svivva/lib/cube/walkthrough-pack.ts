@@ -1,6 +1,3 @@
-import archiver from "archiver";
-import { PassThrough } from "stream";
-import { finished } from "stream/promises";
 import type { FeatureId } from "@/components/svivva-artifact/feature-defs";
 import {
   CUBE_GEOMETRY_FACE_ORDER,
@@ -207,32 +204,6 @@ export function buildWalkthroughPack(
 
 export function walkthroughPackZipFilename(pack: WalkthroughPack): string {
   return `${pack.slug}-cube-walkthrough-pack.zip`;
-}
-
-/** Zip the pack for download (server or scripts). */
-export async function buildWalkthroughPackZipBuffer(
-  journey: MasterProductJourney = DEFAULT_MASTER_PRODUCT_JOURNEY,
-  options: WalkthroughPackOptions = {},
-): Promise<{ buffer: Buffer; filename: string; pack: WalkthroughPack }> {
-  const pack = buildWalkthroughPack(journey, options);
-  const archive = archiver("zip", { zlib: { level: 9 } });
-  const passthrough = new PassThrough();
-  const chunks: Buffer[] = [];
-  passthrough.on("data", (chunk: Buffer) => chunks.push(chunk));
-  archive.pipe(passthrough);
-
-  for (const file of pack.files) {
-    archive.append(file.content, { name: file.path });
-  }
-
-  archive.on("error", (err) => passthrough.destroy(err));
-  await archive.finalize();
-  await finished(passthrough);
-
-  const buffer = Buffer.concat(chunks);
-  if (buffer.length < 22) throw new Error("Walkthrough pack zip is empty");
-
-  return { buffer, filename: walkthroughPackZipFilename(pack), pack };
 }
 
 export function buildWalkthroughPackFromInput(
