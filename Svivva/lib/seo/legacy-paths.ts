@@ -2,6 +2,8 @@
  * Paths and slugs that must not appear in sitemaps or SEO landing resolution.
  * Pyracrypt is a ZZAI feature — canonical hub is /cyber-security-mini-apps.
  */
+import { isDuplicateSeoVariantSlug } from "@/lib/seo/duplicate-variants";
+
 /** Canonical hubs — served via (seo)/[slug] and listed in static sitemap; skip duplicate DB rows only. */
 export const HUB_SLUGS = new Set(["ai-tools-hub", "cyber-security-mini-apps", "seo-pack"]);
 
@@ -35,6 +37,7 @@ export function isNonIndexableSlug(slug: string): boolean {
   const s = slug.trim().toLowerCase();
   if (!s || RESERVED_PATH_SLUGS.has(s)) return true;
   if (HUB_SLUGS.has(s)) return true;
+  if (isDuplicateSeoVariantSlug(s)) return true;
   return isLegacyBrandSlug(s);
 }
 

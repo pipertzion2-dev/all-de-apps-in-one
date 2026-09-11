@@ -25,7 +25,6 @@ import {
   batchPAAPages,
   generateMiniSEOPages,
   generateMiniImportTools,
-  generateAllToolSeoVariants,
   MINI_TOOL_CATALOG_SIZE,
   type SEOPageData,
 } from "@/lib/orbit/content-templates";
@@ -298,13 +297,6 @@ async function ensureAllToolSeoPages(
     }
   }
 
-  for (const tool of tools) {
-    if (seedCount >= TARGET_TOOL_SEO_PAGES) break;
-    for (const p of generateAllToolSeoVariants(tool.name, tool.description, tool.url)) {
-      await tryInsert(p, tool.url);
-    }
-  }
-
   return { added, toolCount: tools.length, finalCount: seedCount };
 }
 
@@ -361,7 +353,9 @@ async function countComparisons(): Promise<number> {
     .select({ slug: seoLandingPages.slug })
     .from(seoLandingPages)
     .where(eq(seoLandingPages.category, "seo-landing"));
-  return rows.filter((p) => p.slug.startsWith("svivva-vs-")).length;
+  return rows.filter(
+    (p) => p.slug.startsWith("svivva-vs-") || p.slug.startsWith("zzai-vs-"),
+  ).length;
 }
 
 async function insertSeoPage(
@@ -553,8 +547,9 @@ export async function fillMarketingGaps(userId: string): Promise<FillMarketingGa
   if (blogRows.length < THRESHOLDS.blogPosts) {
     const need = THRESHOLDS.blogPosts - blogRows.length;
     let added = 0;
-    for (let i = 0; i < need + 3; i++) {
-      const post = batchBlogPosts(1)[0];
+    const candidates = batchBlogPosts(need + 5);
+    for (const post of candidates) {
+      if (added >= need) break;
       try {
         const ex = await db
           .select({ id: blogPosts.id })
@@ -562,8 +557,21 @@ export async function fillMarketingGaps(userId: string): Promise<FillMarketingGa
           .where(eq(blogPosts.slug, post.slug))
           .limit(1);
         if (ex.length) continue;
+        const titleDup = await db
+          .select({ id: blogPosts.id })
+          .from(blogPosts)
+          .where(eq(blogPosts.title, post.title))
+          .limit(1);
+        if (titleDup.length) continue;
+        const { scorePageContent } = await import("@/lib/seo/content-quality/score");
+        const quality = scorePageContent({
+          title: post.title,
+          content: post.content,
+          hasFaq: false,
+        });
+        if (!quality.passed) continue;
         await db.insert(blogPosts).values({
-          slug: `${post.slug}-${added}`,
+          slug: post.slug,
           title: post.title,
           excerpt: post.excerpt,
           content: post.content,
@@ -574,7 +582,7 @@ export async function fillMarketingGaps(userId: string): Promise<FillMarketingGa
           publishedAt: new Date(),
         });
         added++;
-        newUrls.push(`${BASE}/blog/${post.slug}-${added - 1}`);
+        newUrls.push(`${BASE}/blog/${post.slug}`);
       } catch {
         /* skip */
       }

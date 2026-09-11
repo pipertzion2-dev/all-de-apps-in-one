@@ -14,6 +14,10 @@ import { SeoBreadcrumbs } from "@/components/seo/breadcrumbs";
 import { ConversionFunnel } from "@/components/seo/conversion-funnel";
 import { pickHubForPage } from "@/lib/seo/internal-links/authority";
 import { isLegacyBrandSlug } from "@/lib/seo/legacy-paths";
+import {
+  isDuplicateSeoVariantSlug,
+  canonicalSlugFromVariant,
+} from "@/lib/seo/duplicate-variants";
 import { getSiteUrl } from "@/lib/site-url";
 import { canonicalPathForFeatureSlug } from "@/lib/tools/catalogs/hub-feature-pages";
 
@@ -81,6 +85,12 @@ function hubLabel(hubPath: string): string {
   return "Tools";
 }
 
+function variantCanonicalRedirect(slug: string): string | null {
+  if (!isDuplicateSeoVariantSlug(slug)) return null;
+  const canonical = canonicalSlugFromVariant(slug);
+  return canonical && canonical !== slug ? `/${canonical}` : null;
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -90,6 +100,10 @@ export async function generateMetadata({
   const featurePath = canonicalPathForFeatureSlug(slug);
   if (featurePath) {
     permanentRedirect(featurePath);
+  }
+  const variantPath = variantCanonicalRedirect(slug);
+  if (variantPath) {
+    permanentRedirect(variantPath);
   }
   const page = await getPage(slug);
   if (!page) return { title: "Page Not Found | ZZAI" };
@@ -107,6 +121,10 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ slu
   const featurePath = canonicalPathForFeatureSlug(slug);
   if (featurePath) {
     permanentRedirect(featurePath);
+  }
+  const variantPath = variantCanonicalRedirect(slug);
+  if (variantPath) {
+    permanentRedirect(variantPath);
   }
   const page = await getPage(slug);
   if (!page) notFound();

@@ -3,6 +3,9 @@ import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { db } from "@/lib/db";
 import { seedCredentials, blogPosts, seoLandingPages } from "@/lib/schema";
 import { eq, isNotNull } from "drizzle-orm";
+import { isDuplicateSeoVariantSlug } from "@/lib/seo/duplicate-variants";
+import { fetchGscSearchAnalytics } from "@/lib/seo/gsc-search-analytics";
+import { getCanonicalUrlsForIndexing } from "@/lib/seo/sitemap/registry";
 
 export const dynamic = "force-dynamic";
 
@@ -204,7 +207,80 @@ export async function GET() {
     value: blogCount + seoCount,
   });
 
-  // 6. Quick links (informational)
+  // 6. Duplicate doorway variants still published
+  let variantCount = 0;
+  try {
+    const pages = await db
+      .select({ slug: seoLandingPages.slug })
+      .from(seoLandingPages)
+      .where(eq(seoLandingPages.published, true));
+    variantCount = pages.filter((p) => p.slug && isDuplicateSeoVariantSlug(p.slug)).length;
+  } catch {}
+  checks.push({
+    id: "variants",
+    label: "Duplicate SEO variants",
+    status: variantCount === 0 ? "ok" : variantCount <= 5 ? "warn" : "fail",
+    detail:
+      variantCount === 0
+        ? "One canonical URL per tool — no doorway duplicates."
+        : `${variantCount} duplicate variant(s) still published (free-*, *-guide, best-*). Run traffic quality repair.`,
+    value: variantCount,
+    link: variantCount ? { label: "Run repair", href: "/dashboard/launchpad" } : undefined,
+  });
+
+  // 7. GSC traffic (real ranking signal)
+  let gscClicks = 0;
+  let gscImpressions = 0;
+  try {
+    const gsc = await fetchGscSearchAnalytics({ days: 28, rowLimit: 50 });
+    if (gsc.ok) {
+      gscClicks = gsc.queries.reduce((n, q) => n + q.clicks, 0);
+      gscImpressions = gsc.queries.reduce((n, q) => n + q.impressions, 0);
+      checks.push({
+        id: "gsc-traffic",
+        label: "Search traffic (28d)",
+        status: gscClicks >= 10 ? "ok" : gscImpressions >= 50 ? "warn" : "fail",
+        detail:
+          gscClicks > 0
+            ? `${gscClicks} clicks, ${gscImpressions.toLocaleString()} impressions in GSC (last 28 days).`
+            : gscImpressions > 0
+              ? `${gscImpressions.toLocaleString()} impressions but 0 clicks — improve titles and meta descriptions.`
+              : "No GSC impressions yet — focus on unique content, not page count.",
+        value: gscClicks,
+        link: { label: "Search Console", href: "https://search.google.com/search-console" },
+      });
+    } else {
+      checks.push({
+        id: "gsc-traffic",
+        label: "Search traffic (28d)",
+        status: "warn",
+        detail: gsc.error || "GSC not connected — connect to track real traffic.",
+        link: { label: "Connect GSC", href: "/dashboard/gsc-connect" },
+      });
+    }
+  } catch {
+    checks.push({
+      id: "gsc-traffic",
+      label: "Search traffic (28d)",
+      status: "info",
+      detail: "Could not fetch GSC data.",
+    });
+  }
+
+  // 8. Sitemap size vs raw DB (quality-filtered)
+  let sitemapUrlCount = 0;
+  try {
+    sitemapUrlCount = (await getCanonicalUrlsForIndexing()).length;
+  } catch {}
+  checks.push({
+    id: "sitemap-quality",
+    label: "Quality-filtered sitemap",
+    status: sitemapUrlCount >= 30 ? "ok" : sitemapUrlCount > 0 ? "warn" : "fail",
+    detail: `${sitemapUrlCount} URLs pass quality gate (thin/duplicate pages excluded).`,
+    value: sitemapUrlCount,
+  });
+
+  // Quick links (informational)
   const liveLinks = [
     {
       label: "Google: site:zzaizzai.com",
@@ -219,16 +295,28 @@ export async function GET() {
     { label: "IndexNow status", href: "https://www.bing.com/indexnow" },
   ];
 
-  // Overall score
+  // Overall score — warnings and traffic matter, not just uptime
   const okCount = checks.filter((c) => c.status === "ok").length;
   const warnCount = checks.filter((c) => c.status === "warn").length;
   const failCount = checks.filter((c) => c.status === "fail").length;
-  const score = Math.round((okCount / checks.length) * 100);
+  const infoCount = checks.filter((c) => c.status === "info").length;
+  const weighted =
+    okCount * 1 + warnCount * 0.5 + failCount * 0 + infoCount * 0.75;
+  const scoreable = checks.length - infoCount || checks.length;
+  let score = Math.round((weighted / scoreable) * 100);
+  if (gscClicks === 0 && gscImpressions < 50) score = Math.min(score, 65);
+  if (variantCount > 10) score = Math.min(score, 50);
 
   return NextResponse.json({
     site: SITE,
     score,
-    summary: { ok: okCount, warn: warnCount, fail: failCount, total: checks.length },
+    summary: {
+      ok: okCount,
+      warn: warnCount,
+      fail: failCount,
+      info: infoCount,
+      total: checks.length,
+    },
     checks,
     liveLinks,
     checkedAt: new Date().toISOString(),

@@ -1,6 +1,9 @@
-/** Orbit marketing page targets — dashboard + gap fill use the same numbers. */
-export const TARGET_TOTAL_MARKETING_PAGES = 300;
-export const TARGET_TOOL_SEO_PAGES = 300;
+import { MINI_TOOL_CATALOG_SIZE } from "@/lib/orbit/content-templates";
+
+/** Quality over quantity — one canonical page per tool, not 4 doorway variants. */
+export const TARGET_TOOL_SEO_PAGES = MINI_TOOL_CATALOG_SIZE + 15;
+/** Total marketing pages: tools + comparisons + blog + supporting content. */
+export const TARGET_TOTAL_MARKETING_PAGES = TARGET_TOOL_SEO_PAGES + 50;
 
 export type MarketingCountFields = {
   seoPages: number;
@@ -65,11 +68,18 @@ export function computeIndexedPercent(opts: {
 
 export function computeIndexHealthScore(
   counts: MarketingCountFields,
-  opts?: { totalPages?: number; indexedPercent?: number },
+  opts?: {
+    totalPages?: number;
+    indexedPercent?: number;
+    /** Sitemap-eligible pages after quality gate (not raw DB count). */
+    sitemapEligible?: number;
+    /** GSC clicks in last 28 days — real traffic signal. */
+    gscClicks28d?: number;
+  },
 ): number {
   const toolSeoComplete = counts.seedMarketing >= TARGET_TOOL_SEO_PAGES;
   const totalPages = opts?.totalPages ?? sumMarketingPages(counts);
-  const pagesPct = computePagesPercent(totalPages);
+  const pagesPct = computePagesPercent(totalPages, TARGET_TOTAL_MARKETING_PAGES);
   const indexedPct =
     opts?.indexedPercent ??
     computeIndexedPercent({
@@ -78,16 +88,20 @@ export function computeIndexHealthScore(
       toolSeoComplete,
     });
 
-  if (toolSeoComplete && indexedPct >= 100 && counts.indexNowKey && counts.hubExists) {
-    return 100;
-  }
+  const qualityPct =
+    opts?.sitemapEligible != null && totalPages > 0
+      ? Math.min(100, Math.round((opts.sitemapEligible / totalPages) * 100))
+      : pagesPct;
+
+  const trafficBonus = Math.min(20, (opts?.gscClicks28d ?? 0) > 0 ? 10 + Math.log10((opts?.gscClicks28d ?? 0) + 1) * 5 : 0);
 
   const score = Math.round(
-    pagesPct * 0.35 +
-      indexedPct * 0.35 +
+    qualityPct * 0.3 +
+      indexedPct * 0.3 +
       (counts.indexNowKey ? 10 : 0) +
       (counts.hubExists ? 10 : 0) +
-      Math.min((counts.seedMarketing / TARGET_TOOL_SEO_PAGES) * 10, 10),
+      Math.min((counts.seedMarketing / TARGET_TOOL_SEO_PAGES) * 10, 10) +
+      trafficBonus,
   );
   return Math.min(100, score);
 }

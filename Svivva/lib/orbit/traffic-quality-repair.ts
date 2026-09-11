@@ -3,10 +3,12 @@
  * thin doorway pages, duplicate titles, filler slugs.
  */
 import { db } from "@/lib/db";
-import { seoLandingPages } from "@/lib/schema";
+import { blogPosts, seoLandingPages } from "@/lib/schema";
 import { eq, like } from "drizzle-orm";
 import { getSiteUrl } from "@/lib/site-url";
 import { scorePageContent } from "@/lib/seo/content-quality/score";
+import { isDuplicateSeoVariantSlug } from "@/lib/seo/duplicate-variants";
+import { buildExpandedSeoBody } from "@/lib/seo/page-body";
 import { healOrphanInternalLinks } from "@/lib/seo/internal-links/graph";
 
 const BASE = getSiteUrl().replace(/\/$/, "");
@@ -23,55 +25,76 @@ function wordCount(html: string): number {
   return stripHtml(html).split(/\s+/).filter(Boolean).length;
 }
 
-/** Rich, unique HTML for thin tool/seed pages (passes quality gate). */
-export function buildExpandedSeoBody(opts: {
-  title: string;
-  keyword: string;
-  slug: string;
-  category?: string | null;
-}): string {
-  const { title, keyword, slug } = opts;
-  const kw = keyword || title;
-  return `<h1>${title}</h1>
-<p><strong>${title}</strong> is a free, browser-based utility on ZZAI. Use it instantly — no signup required for basic access. Whether you are prototyping an AI feature, validating an idea, or shipping a small automation, this page explains what the tool does, who it helps, and how it connects to ZZAI's prompt-to-API platform at <a href="${BASE}">zzaizzai.com</a>.</p>
-
-<h2>What ${title} does</h2>
-<p>This tool focuses on <em>${kw}</em>. It is designed for developers, founders, and operators who need a fast answer without standing up a backend. Run it in the browser, copy the output, and iterate. When you need a production endpoint with schema validation and monitoring, deploy the same behavior as an API on ZZAI in minutes.</p>
-
-<h2>How to use it</h2>
-<ol>
-<li>Open the tool from <a href="${BASE}/tools">ZZAI Tools</a> or build a custom version with a plain-English prompt.</li>
-<li>Enter your input — text, JSON, or file depending on the tool.</li>
-<li>Review structured output; adjust prompts on ZZAI without redeploying servers.</li>
-<li>Ship: call your live HTTPS endpoint from any app or workflow.</li>
-</ol>
-
-<h2>Who this is for</h2>
-<p>Indie hackers adding AI to a side project, SaaS teams testing a feature before writing a backend, and security or ops teams running one-off checks. If your job is mostly <strong>AI behavior</strong> (generate, classify, extract, summarize), a prompt-backed API beats maintaining idle servers.</p>
-
-<h2>Why ZZAI</h2>
-<p>ZZAI turns descriptions into deployable APIs with automated evals, versioning, and rollback. Free tools like this one are the top of the funnel — they solve a real job and show how fast you can go from idea to production. <a href="${BASE}">Start building on ZZAI →</a></p>
-
-[FAQ_JSON]
-[
-  {"q":"Is ${title} free?","a":"Yes — you can use ZZAI's free tools without creating an account for basic access."},
-  {"q":"Do I need a backend?","a":"No. These utilities run in the browser or call ZZAI-hosted endpoints so you do not maintain servers."},
-  {"q":"How is this different from ChatGPT?","a":"ZZAI gives you a fixed contract (JSON schema), a stable HTTPS URL, and production guardrails — not just a chat window."}
-]
-[/FAQ_JSON]
-
-<p class="text-muted"><small>Page id: ${slug}</small></p>`;
-}
+export { buildExpandedSeoBody } from "@/lib/seo/page-body";
 
 export type TrafficQualityRepairResult = {
   summaryLines: string[];
   unpublishedFiller: number;
+  unpublishedVariants: number;
+  unpublishedDuplicateBlogs: number;
   expandedThin: number;
   duplicateTitlesFixed: number;
   orphansHealed: number;
   sitemapEligible: number;
   stillThin: number;
 };
+
+/** Unpublish doorway variants (free-*, *-guide, best-*, etc.) — keep canonical slug only. */
+export async function unpublishDuplicateSeoVariants(): Promise<number> {
+  const rows = await db
+    .select({ id: seoLandingPages.id, slug: seoLandingPages.slug })
+    .from(seoLandingPages)
+    .where(eq(seoLandingPages.published, true));
+
+  let count = 0;
+  for (const row of rows) {
+    if (!row.slug || !isDuplicateSeoVariantSlug(row.slug)) continue;
+    await db
+      .update(seoLandingPages)
+      .set({ published: false })
+      .where(eq(seoLandingPages.id, row.id));
+    count++;
+  }
+  return count;
+}
+
+/** Unpublish blog posts that duplicate another post's title (keep oldest). */
+export async function unpublishDuplicateBlogPosts(): Promise<number> {
+  const rows = await db
+    .select({
+      id: blogPosts.id,
+      title: blogPosts.title,
+      createdAt: blogPosts.createdAt,
+    })
+    .from(blogPosts)
+    .where(eq(blogPosts.published, true));
+
+  const byTitle = new Map<string, typeof rows>();
+  for (const row of rows) {
+    const key = (row.title || "").trim().toLowerCase();
+    if (!key) continue;
+    const list = byTitle.get(key) ?? [];
+    list.push(row);
+    byTitle.set(key, list);
+  }
+
+  let count = 0;
+  for (const [, group] of byTitle) {
+    if (group.length < 2) continue;
+    group.sort(
+      (a, b) =>
+        (a.createdAt?.getTime() ?? 0) - (b.createdAt?.getTime() ?? 0),
+    );
+    for (let i = 1; i < group.length; i++) {
+      await db
+        .update(blogPosts)
+        .set({ published: false })
+        .where(eq(blogPosts.id, group[i].id));
+      count++;
+    }
+  }
+  return count;
+}
 
 export async function unpublishFillerPages(): Promise<number> {
   const rows = await db
@@ -109,6 +132,7 @@ export async function expandThinPublishedPages(): Promise<{ expanded: number; st
       keyword: row.keyword || row.title,
       slug: row.slug,
       category: row.category,
+      toolUrl: row.toolUrl,
     });
 
     const uniqueMeta =
@@ -216,6 +240,20 @@ export async function runTrafficQualityRepair(): Promise<TrafficQualityRepairRes
       : "✓ No filler doorway pages to unpublish",
   );
 
+  const unpublishedVariants = await unpublishDuplicateSeoVariants();
+  summaryLines.push(
+    unpublishedVariants
+      ? `✓ Unpublished ${unpublishedVariants} duplicate SEO variants (guide/free/best/alternative)`
+      : "✓ No duplicate SEO variants to unpublish",
+  );
+
+  const unpublishedDuplicateBlogs = await unpublishDuplicateBlogPosts();
+  summaryLines.push(
+    unpublishedDuplicateBlogs
+      ? `✓ Unpublished ${unpublishedDuplicateBlogs} duplicate blog posts`
+      : "✓ No duplicate blog posts",
+  );
+
   const { expanded: expandedThin, stillThin } = await expandThinPublishedPages();
   summaryLines.push(
     `✓ Expanded ${expandedThin} thin pages to 280+ words with FAQ`,
@@ -244,6 +282,8 @@ export async function runTrafficQualityRepair(): Promise<TrafficQualityRepairRes
   return {
     summaryLines,
     unpublishedFiller,
+    unpublishedVariants,
+    unpublishedDuplicateBlogs,
     expandedThin,
     duplicateTitlesFixed,
     orphansHealed,

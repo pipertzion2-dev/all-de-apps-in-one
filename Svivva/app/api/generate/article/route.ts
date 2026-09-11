@@ -3,6 +3,7 @@ import { db } from "@/server/db";
 import { blogPosts, seoKeywords } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { openai, DEFAULT_MODEL } from "@/lib/llm/openai";
+import { assertContentQuality } from "@/lib/seo/content-quality/score";
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,6 +36,11 @@ export async function POST(request: NextRequest) {
     });
 
     const generated = JSON.parse(completion.choices[0].message.content || "{}");
+
+    assertContentQuality({
+      title: generated.title || keyword,
+      content: generated.content || "",
+    });
 
     const [post] = await db
       .insert(blogPosts)

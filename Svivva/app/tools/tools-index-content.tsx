@@ -45,8 +45,8 @@ function toolPageHref(tool: { slug: string; published: boolean; toolUrl: string 
   if (tool.toolUrl?.startsWith("/") && !tool.toolUrl.startsWith("//")) {
     return tool.toolUrl.split("?")[0];
   }
-  if (NATIVE_TOOL_SLUGS.has(tool.slug)) return `/tools/${tool.slug}`;
   if (tool.published) return `/${tool.slug}`;
+  if (NATIVE_TOOL_SLUGS.has(tool.slug)) return `/tools/${tool.slug}`;
   return `/tools/${tool.slug}`;
 }
 

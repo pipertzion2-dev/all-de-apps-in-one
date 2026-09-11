@@ -3,6 +3,7 @@ import { db } from "@/server/db";
 import { seoLandingPages, seoKeywords } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { openai, DEFAULT_MODEL } from "@/lib/llm/openai";
+import { assertContentQuality } from "@/lib/seo/content-quality/score";
 
 export async function POST(request: NextRequest) {
   try {
@@ -51,6 +52,14 @@ export async function POST(request: NextRequest) {
     if (generated.faq && Array.isArray(generated.faq) && generated.faq.length > 0) {
       contentWithFaq += `\n\n[FAQ_JSON]${JSON.stringify(generated.faq)}[/FAQ_JSON]`;
     }
+
+    assertContentQuality({
+      title: generated.title || keyword,
+      content: contentWithFaq,
+      howItWorks: generated.howItWorks,
+      whoItsFor: generated.whoItsFor,
+      hasFaq: Array.isArray(generated.faq) && generated.faq.length > 0,
+    });
 
     const [page] = await db
       .insert(seoLandingPages)

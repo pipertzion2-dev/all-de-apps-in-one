@@ -2,6 +2,7 @@
  * Zero-API-Key Content Generation
  * Clean template exports for run-step route fallback.
  */
+import { buildExpandedSeoBody } from "@/lib/seo/page-body";
 
 export interface SEOPageData {
   title: string;
@@ -77,7 +78,7 @@ export function generateSEOPage(keyword: string, idx: number): SEOPageData {
 }
 
 export function generateComparisonPage(comp: string): SEOPageData {
-  const slug = `svivva-vs-${comp.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+  const slug = `zzai-vs-${comp.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
   return {
     title: `ZZAI vs ${comp}`,
     metaTitle: `ZZAI vs ${comp} | Compare AI API Builders`.slice(0, 60),
@@ -505,54 +506,39 @@ export function generateMiniSocial(toolNames: string[], hubUrl: string): SocialP
   };
 }
 
+/** One canonical SEO page per tool — rich content that passes the quality gate. */
+export function generateCanonicalToolSeoPage(
+  appName: string,
+  appDesc: string,
+  appUrl: string,
+): SEOPageData {
+  const base = appName
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .slice(0, 48);
+  return {
+    title: `${appName} — Free Online Tool | ZZAI`,
+    metaTitle: `${appName} — Free Online Tool`.slice(0, 60),
+    metaDescription: `Free ${appName}. ${appDesc}. No signup — try on ZZAI.`.slice(0, 155),
+    headline: `${appName} — Free Online`,
+    subheadline: appDesc,
+    content: buildExpandedSeoBody({
+      title: appName,
+      keyword: appName,
+      slug: base,
+      toolUrl: appUrl,
+    }),
+    slug: base,
+    keyword: appName,
+  };
+}
+
 export function generateMiniSEOPages(
   appName: string,
   appDesc: string,
   appUrl: string,
 ): SEOPageData[] {
-  const base = appName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-  return [
-    {
-      title: `${appName} — Free Online Tool | ZZAI`,
-      metaTitle: `${appName} — Free Online`.slice(0, 60),
-      metaDescription: `Free ${appName}. ${appDesc}. No signup.`.slice(0, 155),
-      headline: `${appName} — Free Online`,
-      subheadline: appDesc,
-      content: `<h1>${appName}</h1><p>${appDesc}</p><p><a href="${appUrl}">Use now &rarr;</a></p>`,
-      slug: `${base}-online`,
-      keyword: `${appName} online`,
-    },
-    {
-      title: `Free ${appName} — No Signup | ZZAI`,
-      metaTitle: `Free ${appName} — No Signup`.slice(0, 60),
-      metaDescription: `Free ${appName} with no signup. ${appDesc}.`.slice(0, 155),
-      headline: `Free ${appName}`,
-      subheadline: "No signup required.",
-      content: `<h1>Free ${appName}</h1><p>${appDesc}</p><p><a href="${appUrl}">Use free &rarr;</a></p>`,
-      slug: `free-${base}`,
-      keyword: `free ${appName}`,
-    },
-    {
-      title: `How to Use ${appName} — Guide | ZZAI`,
-      metaTitle: `How to Use ${appName} | Guide`.slice(0, 60),
-      metaDescription: `How to use ${appName}. ${appDesc}.`.slice(0, 155),
-      headline: `How to Use ${appName}`,
-      subheadline: "Step-by-step guide.",
-      content: `<h1>How to Use ${appName}</h1><p>${appDesc}</p><ol><li>Enter input</li><li>Click process</li><li>Get results</li></ol><p><a href="${appUrl}">Try now &rarr;</a></p>`,
-      slug: `${base}-guide`,
-      keyword: `how to use ${appName}`,
-    },
-    {
-      title: `Best ${appName} — Free AI Tool | ZZAI`,
-      metaTitle: `Best ${appName} — Free AI`.slice(0, 60),
-      metaDescription: `Best free ${appName} tool. ${appDesc}. AI-powered.`.slice(0, 155),
-      headline: `Best ${appName}`,
-      subheadline: "AI-powered and free.",
-      content: `<h1>Best ${appName}</h1><p>${appDesc}</p><ul><li>AI-powered</li><li>Free forever</li><li>Fast and accurate</li></ul><p><a href="${appUrl}">Try best ${appName} &rarr;</a></p>`,
-      slug: `best-${base}`,
-      keyword: `best ${appName}`,
-    },
-  ];
+  return [generateCanonicalToolSeoPage(appName, appDesc, appUrl)];
 }
 
 export function generateMiniIndexNowUrls(siteUrl: string, toolNames: string[]): string[] {
@@ -873,7 +859,8 @@ const EXPANDED_MINI_TOOL_SLUGS = [
 ];
 
 export const MINI_TOOL_CATALOG_SIZE = 75;
-export const PAGES_PER_MINI_TOOL = 4;
+/** One canonical page per tool — duplicate variants hurt Google rankings. */
+export const PAGES_PER_MINI_TOOL = 1;
 export const TARGET_MINI_TOOL_SEO_PAGES = MINI_TOOL_CATALOG_SIZE * PAGES_PER_MINI_TOOL;
 
 export function generateMiniImportTools(): { name: string; slug: string; description: string }[] {
@@ -891,64 +878,13 @@ function slugToDisplayName(slug: string): string {
     .trim();
 }
 
-/** All SEO page variants per tool (standard + import-style slugs). */
+/** @deprecated Use generateCanonicalToolSeoPage — one page per tool avoids doorway penalties. */
 export function generateAllToolSeoVariants(
   appName: string,
   appDesc: string,
   appUrl: string,
 ): SEOPageData[] {
-  const base = appName
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .slice(0, 48);
-  const importStyle: SEOPageData[] = [
-    {
-      title: `${appName} — ZZAI Tool`,
-      metaTitle: `${appName} | Free Tool`.slice(0, 60),
-      metaDescription: `${appDesc}. Try free on ZZAI — traffic to zzaizzai.com.`.slice(0, 155),
-      headline: appName,
-      subheadline: appDesc,
-      content: `<h1>${appName}</h1><p>${appDesc}</p><p><a href="${appUrl}">Open tool</a> · <a href="${SITE}">Build on ZZAI</a></p>`,
-      slug: base,
-      keyword: appName,
-    },
-    {
-      title: `How to Use ${appName}`,
-      metaTitle: `How to Use ${appName}`.slice(0, 60),
-      metaDescription: `Guide for ${appName}. ${appDesc}.`.slice(0, 155),
-      headline: `How to Use ${appName}`,
-      subheadline: "Step-by-step",
-      content: `<h1>How to Use ${appName}</h1><p>${appDesc}</p><p><a href="${appUrl}">Try now</a></p>`,
-      slug: `${base}-guide`,
-      keyword: `how to use ${appName}`,
-    },
-    {
-      title: `Best ${appName} Alternative`,
-      metaTitle: `Best ${appName} Alternative`.slice(0, 60),
-      metaDescription: `Best free ${appName}. ${appDesc}.`.slice(0, 155),
-      headline: `Best ${appName}`,
-      subheadline: "Free alternative",
-      content: `<h1>Best ${appName}</h1><p>${appDesc}</p><p><a href="${appUrl}">Use free</a></p>`,
-      slug: `${base}-alternative`,
-      keyword: `best ${appName}`,
-    },
-    {
-      title: `Free ${appName}`,
-      metaTitle: `Free ${appName}`.slice(0, 60),
-      metaDescription: `Free ${appName} — no signup. ${appDesc}.`.slice(0, 155),
-      headline: `Free ${appName}`,
-      subheadline: "No signup",
-      content: `<h1>Free ${appName}</h1><p>${appDesc}</p><p><a href="${appUrl}">Start free</a></p>`,
-      slug: `free-${base}`,
-      keyword: `free ${appName}`,
-    },
-  ];
-
-  const bySlug = new Map<string, SEOPageData>();
-  for (const p of [...generateMiniSEOPages(appName, appDesc, appUrl), ...importStyle]) {
-    if (!bySlug.has(p.slug)) bySlug.set(p.slug, p);
-  }
-  return [...bySlug.values()];
+  return generateMiniSEOPages(appName, appDesc, appUrl);
 }
 
 // ── Batch generators used by run-step route ───────────────────────────────

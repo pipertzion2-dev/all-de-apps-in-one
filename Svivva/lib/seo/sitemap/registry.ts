@@ -110,7 +110,19 @@ export async function getSitemapEntries(): Promise<SitemapEntry[]> {
 
   try {
     const posts = await db.select().from(blogPosts).where(eq(blogPosts.published, true));
+    const seenTitles = new Set<string>();
     for (const post of posts) {
+      const titleKey = (post.title || "").trim().toLowerCase();
+      if (titleKey && seenTitles.has(titleKey)) continue;
+      if (titleKey) seenTitles.add(titleKey);
+
+      const quality = scorePageContent({
+        title: post.title,
+        content: post.content || "",
+        hasFaq: /\[FAQ_JSON\]/i.test(post.content || ""),
+      });
+      if (!quality.passed) continue;
+
       entries.push({
         url: `${b}/blog/${post.slug}`,
         lastModified: post.updatedAt || post.publishedAt || post.createdAt || new Date(),
