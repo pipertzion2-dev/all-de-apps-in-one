@@ -24,7 +24,9 @@ if (!repo || !sha || !token) {
 
 const timeoutMs = Number(process.env.VERCEL_STATUS_TIMEOUT_MS || 20 * 60 * 1000);
 const intervalMs = Number(process.env.VERCEL_STATUS_POLL_MS || 20_000);
+const blockedFailFastMs = Number(process.env.VERCEL_BLOCKED_FAIL_FAST_MS || 90_000);
 const started = Date.now();
+let blockedSince = null;
 
 async function fetchStatus() {
   const res = await fetch(`https://api.github.com/repos/${repo}/commits/${sha}/status`, {
@@ -82,7 +84,23 @@ while (Date.now() - started < timeoutMs) {
       process.exit(1);
     }
     if (blocked) {
+      if (blockedSince === null) blockedSince = Date.now();
+      const blockedFor = Date.now() - blockedSince;
+      if (blockedFor >= blockedFailFastMs) {
+        console.error("");
+        console.error(
+          `Vercel project is paused/blocked for ${Math.round(blockedFor / 1000)}s — cannot deploy without dashboard resume or VERCEL_TOKEN.`,
+        );
+        console.error(`  1. Open ${canonical.dashboardUrl}`);
+        console.error(`  2. Resume Service (or raise Spend Management limit)`);
+        console.error(
+          "  3. Add GitHub secret VERCEL_TOKEN (or VERCEL_DEPLOY_HOOK) and run Actions → Fix Vercel block (resume + deploy)",
+        );
+        process.exit(1);
+      }
       console.log("  (Vercel label often means queued/paused — keep waiting…)");
+    } else {
+      blockedSince = null;
     }
   } else {
     console.log(`  ${required}: pending (not reported yet)`);
