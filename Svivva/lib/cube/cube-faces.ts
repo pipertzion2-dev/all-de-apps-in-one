@@ -114,6 +114,63 @@ function actionForFace(id: FeatureId, productName: string): string {
   }
 }
 
+function buildStepsForFaceOrder(
+  productName: string,
+  order: readonly FeatureId[],
+): CubeFaceStep[] {
+  const faces = listCubeFaces();
+  const byId = new Map(faces.map((f) => [f.id, f]));
+
+  return order.map((faceId, i) => {
+    const face = byId.get(faceId);
+    if (!face) throw new Error(`Unknown face in journey: ${faceId}`);
+    return {
+      step: i + 1,
+      faceId,
+      geometryIndex: face.geometryIndex,
+      shortLabel: face.shortLabel,
+      name: face.name,
+      href: face.href,
+      platformMode: face.platformMode,
+      role: FACE_ROLES[faceId],
+      action: actionForFace(faceId, productName),
+    };
+  });
+}
+
+/**
+ * Build a cube-face combo for one product (1–6 unique faces).
+ * Used by product-type pickers that route through a subset of the cube.
+ */
+export function buildCubeFaceCombo(input: {
+  productName: string;
+  productBrief?: string;
+  faceOrder: readonly FeatureId[];
+  masterBusOut?: string;
+}): MasterProductJourney {
+  const productName = input.productName.trim();
+  if (!productName) throw new Error("productName is required");
+
+  const order = input.faceOrder;
+  if (order.length < 1 || order.length > 6 || new Set(order).size !== order.length) {
+    throw new Error("faceOrder must contain 1–6 unique cube faces");
+  }
+
+  const steps = buildStepsForFaceOrder(productName, order);
+  const faceLabels = steps.map((s) => s.shortLabel).join(" → ");
+
+  return {
+    productName,
+    productBrief:
+      input.productBrief?.trim() ||
+      `“${productName}” routed through ${faceLabels} on the ZZAI cube.`,
+    steps,
+    masterBusOut:
+      input.masterBusOut?.trim() ||
+      `Ship “${productName}” via ${faceLabels} — open each cube face in order.`,
+  };
+}
+
 /**
  * Build a six-step walkthrough that takes **one product** through every cube face.
  * Use for guided tours, QA checklists, onboarding, and deep-link scripts.
@@ -132,24 +189,7 @@ export function buildMasterProductJourney(input: {
     throw new Error("faceOrder must contain exactly six unique cube faces");
   }
 
-  const faces = listCubeFaces();
-  const byId = new Map(faces.map((f) => [f.id, f]));
-
-  const steps: CubeFaceStep[] = order.map((faceId, i) => {
-    const face = byId.get(faceId);
-    if (!face) throw new Error(`Unknown face in journey: ${faceId}`);
-    return {
-      step: i + 1,
-      faceId,
-      geometryIndex: face.geometryIndex,
-      shortLabel: face.shortLabel,
-      name: face.name,
-      href: face.href,
-      platformMode: face.platformMode,
-      role: FACE_ROLES[faceId],
-      action: actionForFace(faceId, productName),
-    };
-  });
+  const steps = buildStepsForFaceOrder(productName, order);
 
   return {
     productName,
