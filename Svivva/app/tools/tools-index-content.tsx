@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Search, Wrench } from "lucide-react";
 import { BrandMark } from "@/components/brand-mark";
@@ -57,8 +58,15 @@ export default function ToolsIndexContent({
   tools: SeoPage[];
   categories: PageCategory[];
 }) {
-  const [searchQuery, setSearchQuery] = useState("");
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get("q")?.trim() || "";
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [activeCategory, setActiveCategory] = useState("all");
+
+  useEffect(() => {
+    const q = searchParams.get("q")?.trim() || "";
+    setSearchQuery(q);
+  }, [searchParams]);
 
   const filteredTools = useMemo(() => {
     return tools.filter((tool) => {

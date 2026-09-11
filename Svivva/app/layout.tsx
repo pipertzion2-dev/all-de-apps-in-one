@@ -13,6 +13,7 @@ import { getPrimaryAdminUserId } from "@/lib/auth/admin";
 import { getSiteUrl } from "@/lib/site-url";
 import { BRAND } from "@/lib/brand";
 import { MEDIA } from "@/lib/media-assets";
+import { rootJsonLdSchemas } from "@/lib/seo/root-json-ld";
 
 const zcFont = localFont({
   src: "../media/fonts/Zc-Regular.ttf",
@@ -55,9 +56,9 @@ export async function generateMetadata(): Promise<Metadata> {
     } catch {}
   }
 
-  const title = "zzai zzai — From seed to symphony";
+  const title = "ZZAI — AI API Builder | Prompt to Production Endpoint";
   const description =
-    "zzai zzai — From seed to symphony. One workspace to describe what you want, ship it with guardrails, and grow it without babysitting infrastructure.";
+    "Build production AI APIs from plain English. JSON schema validation, auto-generated evals, versioning, and rollback — free tier on zzaizzai.com.";
 
   return {
     title: {
@@ -66,7 +67,15 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description,
     metadataBase: new URL(siteUrl),
-    keywords: ["zzai zzai", "zzai", "zzaizzai", "From seed to symphony"],
+    keywords: [
+      "AI API builder",
+      "prompt to API",
+      "JSON schema validation",
+      "LLM API",
+      "zzai",
+      "zzaizzai",
+      "AI app generator",
+    ],
     openGraph: {
       type: "website",
       siteName: "zzai zzai",
@@ -125,136 +134,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify([
-              {
-                "@context": "https://schema.org",
-                "@type": "Organization",
-                name: "zzai zzai",
-                url: siteUrl,
-                logo: new URL(MEDIA.logo, siteUrl).toString(),
-                description:
-                  "From seed to symphony — zzai zzai is one workspace to describe, ship, and grow products across software, hardware, audio, and go-to-market.",
-                sameAs: [],
-              },
-              {
-                "@context": "https://schema.org",
-                "@type": "WebSite",
-                name: "zzai zzai",
-                url: siteUrl,
-                potentialAction: {
-                  "@type": "SearchAction",
-                  target: {
-                    "@type": "EntryPoint",
-                    urlTemplate: `${siteUrl}/blog?q={search_term_string}`,
-                  },
-                  "query-input": "required name=search_term_string",
-                },
-              },
-              {
-                "@context": "https://schema.org",
-                "@type": "SoftwareApplication",
-                name: "zzai zzai",
-                operatingSystem: "Web",
-                applicationCategory: "DeveloperApplication",
-                offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-                description:
-                  "From seed to symphony — ship with schema validation, automated checks, versioning, and rollback from one workspace.",
-                url: siteUrl,
-              },
-              {
-                "@context": "https://schema.org",
-                "@type": "FAQPage",
-                mainEntity: [
-                  {
-                    "@type": "Question",
-                    name: "What is ZZAI?",
-                    acceptedAnswer: {
-                      "@type": "Answer",
-                      text: "From seed to symphony: ZZAI turns plain-language intent into shipped product — with validation, evaluations, versioning, and rollback so quality does not drift.",
-                    },
-                  },
-                  {
-                    "@type": "Question",
-                    name: "How long does it take to ship with ZZAI?",
-                    acceptedAnswer: {
-                      "@type": "Answer",
-                      text: "Most teams get a working, tested endpoint live quickly. Describe what you need, define the output schema, deploy — ZZAI handles validation, rollback, and ops.",
-                    },
-                  },
-                  {
-                    "@type": "Question",
-                    name: "Does ZZAI work with OpenAI and other AI models?",
-                    acceptedAnswer: {
-                      "@type": "Answer",
-                      text: "Yes. ZZAI supports OpenAI (GPT-4o, GPT-4, GPT-3.5), Anthropic Claude, Google Gemini, and other LLMs. You can route between models automatically based on cost or quality thresholds.",
-                    },
-                  },
-                  {
-                    "@type": "Question",
-                    name: "Do I need to write code to use ZZAI?",
-                    acceptedAnswer: {
-                      "@type": "Answer",
-                      text: "No. ZZAI's core workflow is entirely no-code — describe your API in plain English, set your output schema, and deploy. A TypeScript SDK is available for developers who want programmatic access.",
-                    },
-                  },
-                  {
-                    "@type": "Question",
-                    name: "Is ZZAI free to start?",
-                    acceptedAnswer: {
-                      "@type": "Answer",
-                      text: "Yes. ZZAI has a free tier with no credit card required. Paid plans start at $49/month and unlock unlimited endpoints, higher request volumes, and team features.",
-                    },
-                  },
-                  {
-                    "@type": "Question",
-                    name: "What happens if my endpoint returns bad data?",
-                    acceptedAnswer: {
-                      "@type": "Answer",
-                      text: "ZZAI validates every response against your JSON schema and automatically retries or repairs malformed outputs. If quality drops below your threshold, auto-rollback reverts to the last good version.",
-                    },
-                  },
-                ],
-              },
-              {
-                "@context": "https://schema.org",
-                "@type": "HowTo",
-                name: "How to ship with ZZAI",
-                description:
-                  "Build a production-ready endpoint from a plain-language prompt with ZZAI — schema validation, evaluations, and rollback included.",
-                step: [
-                  {
-                    "@type": "HowToStep",
-                    position: 1,
-                    name: "Describe your API",
-                    text: "Write what you want your API to do in plain English — no code required.",
-                  },
-                  {
-                    "@type": "HowToStep",
-                    position: 2,
-                    name: "Define your output schema",
-                    text: "Set the JSON structure you expect back. ZZAI will enforce and validate it on every call.",
-                  },
-                  {
-                    "@type": "HowToStep",
-                    position: 3,
-                    name: "Auto-generate evaluations",
-                    text: "ZZAI writes up to 200 test cases automatically — edge cases, adversarial inputs, and boundary conditions.",
-                  },
-                  {
-                    "@type": "HowToStep",
-                    position: 4,
-                    name: "Deploy your endpoint",
-                    text: "One click publishes a live, auto-scaling API endpoint with full OpenAPI documentation.",
-                  },
-                  {
-                    "@type": "HowToStep",
-                    position: 5,
-                    name: "Monitor and rollback",
-                    text: "Watch latency, success rate, and token costs in real time. Enable auto-rollback for hands-free quality control.",
-                  },
-                ],
-              },
-            ]),
+            __html: JSON.stringify(rootJsonLdSchemas()),
           }}
         />
         {(gaId || gadsId) && (

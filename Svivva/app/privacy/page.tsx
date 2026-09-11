@@ -1,5 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
+import { buildSeoMetadata } from "@/lib/seo/metadata";
+
+export const metadata: Metadata = buildSeoMetadata({
+  title: "Privacy Policy",
+  description:
+    "How ZZAI collects, uses, and protects your data — account information, API configurations, and usage analytics on zzaizzai.com.",
+  path: "/privacy",
+});
 
 export default function PrivacyPage() {
   return (

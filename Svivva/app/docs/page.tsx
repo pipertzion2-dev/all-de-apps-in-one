@@ -1,19 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
+import { buildSeoMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildSeoMetadata({
   title: "Documentation",
   description:
     "Guides and reference for ZZAI — from first project to production: prompts, schemas, evaluations, versioning, rollback, and ZZAI Play.",
-  alternates: { canonical: "https://zzaizzai.com/docs" },
-  openGraph: {
-    title: "ZZAI documentation",
-    description:
-      "Guides and reference for shipping with ZZAI — prompts, schemas, evaluations, versioning, rollback, and more.",
-    url: "https://zzaizzai.com/docs",
-  },
-};
+  path: "/docs",
+});
 
 export default function DocsPage() {
   return (

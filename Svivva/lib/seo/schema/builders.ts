@@ -1,3 +1,4 @@
+import { getBrandSameAs } from "@/lib/brand";
 import { absoluteUrl } from "@/lib/seo/metadata";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -11,7 +12,7 @@ export function organizationSchema() {
     name: "zzai zzai",
     url: getSiteUrl(),
     logo: absoluteUrl("/zzai-logo.png"),
-    sameAs: [] as string[],
+    sameAs: getBrandSameAs(),
   };
 }
 
