@@ -1,19 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
+import { buildSeoMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
-  title: "Contact",
+export const metadata: Metadata = buildSeoMetadata({
+  title: "Contact ZZAI",
   description:
     "Contact the ZZAI team for platform questions, enterprise plans, or partnerships. Email hello@zzaizzai.com.",
-  alternates: { canonical: "https://zzaizzai.com/contact" },
-  openGraph: {
-    title: "Contact ZZAI",
-    description:
-      "Get in touch with the ZZAI team for platform questions, enterprise plans, or partnership inquiries.",
-    url: "https://zzaizzai.com/contact",
-  },
-};
+  path: "/contact",
+});
 
 export default function ContactPage() {
   return (

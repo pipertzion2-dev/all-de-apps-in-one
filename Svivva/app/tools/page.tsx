@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { db } from "@/server/db";
 import { seoLandingPages, pageCategories } from "@/lib/schema";
 import { eq } from "drizzle-orm";
@@ -9,9 +10,9 @@ import ToolsIndexContent from "./tools-index-content";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = buildSeoMetadata({
-  title: "Tools | ZZAI",
+  title: "Free AI & Developer Tools",
   description:
-    "Free tools for developers and creators — calculators, validators, and playgrounds. Most need no signup.",
+    "Browse free AI tools, calculators, validators, and security mini-apps on zzaizzai.com — JSON schema validator, API cost calculator, and more. No signup.",
   path: "/tools",
 });
 
@@ -52,9 +53,11 @@ export default async function ToolsIndexPage() {
   ];
 
   return (
-    <ToolsIndexContent
-      tools={JSON.parse(JSON.stringify(mergedTools))}
-      categories={JSON.parse(JSON.stringify(categories))}
-    />
+    <Suspense fallback={<div className="min-h-screen bg-[#0a0f14]" />}>
+      <ToolsIndexContent
+        tools={JSON.parse(JSON.stringify(mergedTools))}
+        categories={JSON.parse(JSON.stringify(categories))}
+      />
+    </Suspense>
   );
 }

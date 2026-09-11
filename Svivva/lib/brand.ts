@@ -12,6 +12,16 @@ export const BRAND = {
   ogImagePath: "/zzai-logo.png",
 } as const;
 
+/** Social/profile URLs for Organization sameAs — comma-separated in NEXT_PUBLIC_BRAND_SOCIAL_URLS. */
+export function getBrandSameAs(): string[] {
+  const raw = process.env.NEXT_PUBLIC_BRAND_SOCIAL_URLS?.trim();
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map((url) => url.trim())
+    .filter(Boolean);
+}
+
 export function brandTitle(page?: string): string {
   return page ? `${page} · ${BRAND.name}` : `${BRAND.name} — ${BRAND.tagline}`;
 }

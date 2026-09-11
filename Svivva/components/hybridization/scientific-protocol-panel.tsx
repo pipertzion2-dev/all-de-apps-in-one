@@ -23,9 +23,7 @@ export function ScientificProtocolPanel() {
   }
 
   if (isError || !data) {
-    return (
-      <p className="text-sm text-destructive py-4">Could not load the scientific protocol.</p>
-    );
+    return <p className="text-sm text-destructive py-4">Could not load the scientific protocol.</p>;
   }
 
   return (

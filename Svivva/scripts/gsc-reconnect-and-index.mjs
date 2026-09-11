@@ -39,14 +39,10 @@ async function main() {
   console.log("STEP 1 — Open this URL and sign in with Google:\n");
   console.log(start.json.googleUrl);
   console.log("\n═".repeat(60));
-  console.log(
-    "\nSTEP 2 — After Google redirects, copy the FULL callback URL from your browser",
-  );
+  console.log("\nSTEP 2 — After Google redirects, copy the FULL callback URL from your browser");
   console.log("(should contain ?code=…&state=…)\n");
   console.log("STEP 3 — Run:\n");
-  console.log(
-    `  node scripts/gsc-reconnect-and-index.mjs finish "<paste callback url here>"\n`,
-  );
+  console.log(`  node scripts/gsc-reconnect-and-index.mjs finish "<paste callback url here>"\n`);
   console.log(`OAuth state expires: ${start.json.expiresAt}\n`);
 
   const callbackUrl = process.argv[2];

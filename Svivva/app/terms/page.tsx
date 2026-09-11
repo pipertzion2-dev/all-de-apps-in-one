@@ -1,5 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
+import { buildSeoMetadata } from "@/lib/seo/metadata";
+
+export const metadata: Metadata = buildSeoMetadata({
+  title: "Terms of Service",
+  description:
+    "Terms of Service for ZZAI — acceptable use, subscriptions, API usage limits, and platform policies on zzaizzai.com.",
+  path: "/terms",
+});
 
 export default function TermsPage() {
   return (
