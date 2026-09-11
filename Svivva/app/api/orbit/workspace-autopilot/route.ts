@@ -8,6 +8,7 @@ import { hasStripeConfigured, hasStripeWebhookConfigured } from "@/lib/env";
 import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
 import { ensureOrbitHubPages } from "@/lib/orbit/ensure-hub-pages";
 import { unpublishLegacySeoSlugs } from "@/lib/seo/unpublish-legacy-slugs";
+import { isDuplicateSeoVariantSlug } from "@/lib/seo/duplicate-variants";
 import { eq } from "drizzle-orm";
 
 export const maxDuration = 60;
@@ -127,6 +128,19 @@ export async function POST() {
       .limit(400);
 
     const unpublished = await unpublishLegacySeoSlugs(400);
+
+    for (const page of publishedPages) {
+      if (!page.slug || !isDuplicateSeoVariantSlug(page.slug)) continue;
+      if (unpublished.some((u) => u.slug === page.slug)) continue;
+      await db
+        .update(seoLandingPages)
+        .set({ published: false })
+        .where(eq(seoLandingPages.id, page.id));
+      unpublished.push({
+        slug: page.slug,
+        reason: "Duplicate SEO variant (guide/free/best/alternative) — canonical URL only",
+      });
+    }
 
     const toolPages = publishedPages.filter((p) => p.toolUrl);
     for (const page of toolPages) {
