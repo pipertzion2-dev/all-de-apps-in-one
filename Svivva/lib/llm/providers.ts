@@ -83,6 +83,7 @@ export function getOrbitActiveAiProvider(): AiProvider {
   const customBase = getOpenAIBaseUrl()?.trim();
   const easyPeasyRoute = isEasyPeasyConfiguredFromEnv();
 
+  if (forced === "templates") return "none";
   if (forced === "openai" && (isDirectOpenAiConfigured() || (openaiKey && !easyPeasyRoute)))
     return "openai";
   if (forced === "gemini" && geminiKey) return "gemini";

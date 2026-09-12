@@ -892,7 +892,15 @@ export function OrbitOneClickLaunch({
                     Switched from Premium → Standard. Paid word limits no longer apply.
                   </p>
                 )}
-                {aiFallbackWarning && (
+                {templateMode && aiFallbackWarning && (
+                  <p className="text-xs text-emerald-700 dark:text-emerald-300 mt-1.5 font-medium">
+                    {aiFallbackWarning.includes("429") ||
+                    aiFallbackWarning.includes("allowed words")
+                      ? "Using built-in templates — no quota limits. Add a free Gemini key or use Cursor Cloud Agent ingest for AI copy."
+                      : aiFallbackWarning}
+                  </p>
+                )}
+                {!templateMode && aiFallbackWarning && (
                   <p className="text-xs text-amber-800 dark:text-amber-200 mt-1.5 font-medium">
                     {aiFallbackWarning}
                   </p>

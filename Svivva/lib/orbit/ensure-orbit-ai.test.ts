@@ -30,13 +30,24 @@ describe("ensureOrbitAiForRun template fallback", () => {
     expect(result.providerLabel).toContain("no API key");
   });
 
-  it("falls back to templates when EasyPeasy fails", async () => {
+  it("uses templates immediately when EasyPeasy is the only configured provider", async () => {
     process.env.EASYPEASY_API_KEY = "ep-broken-key";
     const { ensureOrbitAiForRun } = await import("./ensure-orbit-ai");
     const result = await ensureOrbitAiForRun({ testConnection: true });
     expect(result.ok).toBe(true);
     expect(result.templateMode).toBe(true);
-    expect(result.usedFallback).toBe(true);
-    expect(result.warning).toBeTruthy();
+    expect(result.provider).toBe("templates");
+    expect(result.warning).toMatch(/built-in templates/i);
+  });
+
+  it("honors ORBIT_AI_PROVIDER=templates without probing external APIs", async () => {
+    process.env.EASYPEASY_API_KEY = "ep-key";
+    process.env.ORBIT_AI_PROVIDER = "templates";
+    const { ensureOrbitAiForRun } = await import("./ensure-orbit-ai");
+    const result = await ensureOrbitAiForRun({ testConnection: true });
+    expect(result.ok).toBe(true);
+    expect(result.templateMode).toBe(true);
+    expect(result.provider).toBe("templates");
+    expect(result.warning).toBeUndefined();
   });
 });

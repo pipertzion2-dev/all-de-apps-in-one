@@ -37,6 +37,9 @@ async function ensureEasyPeasyColumns(): Promise<void> {
     await db.execute(
       sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS easypeasy_tier TEXT`,
     );
+    await db.execute(
+      sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS easypeasy_skip_reason TEXT`,
+    );
     easypeasyColumnsEnsured = true;
   } catch {
     /* test env */
@@ -192,6 +195,7 @@ export type PlatformRuntimeSecretsPatch = Partial<{
   lemonSqueezyCheckoutUrlPro: string | null;
   lemonSqueezyCheckoutUrlEnterprise: string | null;
   easypeasyTier: string | null;
+  easypeasySkipReason: string | null;
 }>;
 
 export async function getPlatformRuntimeSecretsRow() {
@@ -343,7 +347,7 @@ export async function patchPlatformRuntimeSecrets(patch: PlatformRuntimeSecretsP
   ) {
     await ensureLemonSqueezyColumns();
   }
-  if ("easypeasyTier" in patch) {
+  if ("easypeasyTier" in patch || "easypeasySkipReason" in patch) {
     await ensureEasyPeasyColumns();
   }
   if ("geminiApiKey" in patch) {
@@ -381,6 +385,7 @@ export async function patchPlatformRuntimeSecrets(patch: PlatformRuntimeSecretsP
     lemonSqueezyCheckoutUrlPro: existing?.lemonSqueezyCheckoutUrlPro ?? null,
     lemonSqueezyCheckoutUrlEnterprise: existing?.lemonSqueezyCheckoutUrlEnterprise ?? null,
     easypeasyTier: existing?.easypeasyTier ?? null,
+    easypeasySkipReason: existing?.easypeasySkipReason ?? null,
     updatedAt: new Date(),
   };
 
@@ -421,6 +426,7 @@ export async function patchPlatformRuntimeSecrets(patch: PlatformRuntimeSecretsP
         lemonSqueezyCheckoutUrlPro: merged.lemonSqueezyCheckoutUrlPro,
         lemonSqueezyCheckoutUrlEnterprise: merged.lemonSqueezyCheckoutUrlEnterprise,
         easypeasyTier: merged.easypeasyTier,
+        easypeasySkipReason: merged.easypeasySkipReason,
         updatedAt: merged.updatedAt,
       },
     });
