@@ -1,7 +1,10 @@
+import type { Metadata } from "next";
 import type { FeatureId } from "@/components/svivva-artifact/feature-defs";
 import { FEATURES } from "@/components/svivva-artifact/feature-defs";
 import type { SEOPageData } from "@/lib/orbit/content-templates";
 import { scorePageContent } from "@/lib/seo/content-quality/score";
+import { getSiteUrl } from "@/lib/site-url";
+import { nativeToolMetadata } from "@/lib/tools/native-tool-meta";
 import {
   BLEND_PREVIEW_CHANNELS,
   FEATURE_MINI_APPS,
@@ -18,15 +21,29 @@ export function featureMiniAppLayoutMeta(slug: string): {
   description: string;
   canonical: string;
   keywords: string[];
+  path: `/tools/${string}`;
 } {
   const app = getFeatureMiniApp(slug);
   if (!app) throw new Error(`Unknown feature mini-app: ${slug}`);
+  const base = getSiteUrl().replace(/\/$/, "");
   return {
     title: `${app.name} — Free | ZZAI`,
-    description: `${app.description} ${app.sliceNote} Free on zzaizzai.com. No signup.`,
-    canonical: `https://zzaizzai.com${app.path}`,
+    description: `${app.description} ${app.sliceNote} Free on ${new URL(base).hostname}. No signup.`,
+    canonical: `${base}${app.path}`,
+    path: app.path as `/tools/${string}`,
     keywords: [app.keyword, "free tool", "no signup", "zzaizzai", app.parentLabel],
   };
+}
+
+/** Indexable /tools/* mini-app metadata with self-referencing canonical. */
+export function featureMiniAppMetadata(slug: string): Metadata {
+  const meta = featureMiniAppLayoutMeta(slug);
+  return nativeToolMetadata({
+    path: meta.path,
+    title: meta.title,
+    description: meta.description,
+    keywords: meta.keywords,
+  });
 }
 
 export const FACE_CHOOSER_JOBS: {

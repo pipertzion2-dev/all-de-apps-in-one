@@ -18,7 +18,13 @@ const outDir = path.join(root, "seo-reports");
 
 async function main() {
   const audit = await runSiteAudit();
-  const linkMap = await buildInternalLinkMap();
+  let linkMap: Awaited<ReturnType<typeof buildInternalLinkMap>>;
+  try {
+    linkMap = await buildInternalLinkMap();
+  } catch (err) {
+    console.warn("[seo-audit] DB unavailable — skipping internal link map:", err);
+    linkMap = { generatedAt: new Date().toISOString(), links: [], orphanSlugs: [] };
+  }
 
   await mkdir(outDir, { recursive: true });
 

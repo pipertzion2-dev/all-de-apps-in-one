@@ -96,14 +96,29 @@ export async function generateMetadata({
   const { slug } = await params;
   const featurePath = canonicalPathForFeatureSlug(slug);
   if (featurePath) {
-    permanentRedirect(featurePath);
+    return buildSeoMetadata({
+      title: "Redirecting…",
+      description: "This page has moved to its canonical feature URL.",
+      path: featurePath,
+    });
   }
   const variantPath = variantCanonicalRedirect(slug);
   if (variantPath) {
-    permanentRedirect(variantPath);
+    return buildSeoMetadata({
+      title: "Redirecting…",
+      description: "This page has moved to its canonical URL.",
+      path: variantPath,
+    });
   }
   const page = await getPage(slug);
-  if (!page) return { title: "Page Not Found | ZZAI" };
+  if (!page) {
+    return buildSeoMetadata({
+      title: "Page Not Found",
+      description: "This page could not be found on ZZAI.",
+      path: `/${slug}`,
+      noindex: true,
+    });
+  }
 
   const description = page.metaDescription || getContentWithoutFaq(page.content).slice(0, 160);
   return buildSeoMetadata({

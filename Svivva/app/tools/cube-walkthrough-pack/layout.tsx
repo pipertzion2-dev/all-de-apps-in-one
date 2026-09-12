@@ -1,21 +1,7 @@
 import type { Metadata } from "next";
-import { featureMiniAppLayoutMeta } from "@/lib/tools/feature-mini-apps";
+import { featureMiniAppMetadata } from "@/lib/tools/feature-mini-apps";
 
-const meta = featureMiniAppLayoutMeta("cube-walkthrough-pack");
-
-export const metadata: Metadata = {
-  title: meta.title,
-  description: meta.description,
-  keywords: meta.keywords,
-  alternates: { canonical: meta.canonical },
-  robots: { index: true, follow: true },
-  openGraph: {
-    title: meta.title,
-    description: meta.description,
-    url: meta.canonical,
-    type: "website",
-  },
-};
+export const metadata: Metadata = featureMiniAppMetadata("cube-walkthrough-pack");
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return children;

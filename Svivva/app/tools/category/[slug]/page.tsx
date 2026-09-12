@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { buildSeoMetadata } from "@/lib/seo/metadata";
 import { FolderOpen } from "lucide-react";
 import { BrandMark } from "@/components/brand-mark";
 import { Badge } from "@/components/ui/badge";
@@ -52,19 +53,19 @@ export async function generateMetadata({
   const { slug } = await params;
   const category = await fetchCategory(slug);
   if (!category) {
-    return { title: "Category Not Found | ZZAI" };
+    return buildSeoMetadata({
+      title: "Category Not Found",
+      description: "Tool category not found on ZZAI.",
+      path: `/tools/category/${slug}`,
+      noindex: true,
+    });
   }
-  return {
+  return buildSeoMetadata({
     title: category.metaTitle || `${category.name} Tools | ZZAI`,
     description:
       category.metaDescription || category.description || `Browse ${category.name} tools on ZZAI`,
-    openGraph: {
-      title: category.metaTitle || `${category.name} Tools | ZZAI`,
-      description:
-        category.metaDescription || category.description || `Browse ${category.name} tools on ZZAI`,
-      type: "website",
-    },
-  };
+    path: `/tools/category/${slug}`,
+  });
 }
 
 export default async function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {

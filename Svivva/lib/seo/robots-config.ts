@@ -52,6 +52,10 @@ export const NOINDEX_PATH_PREFIXES = [
   "/protect",
   "/login",
   "/signup",
+  "/clutety",
+  "/pyracrypt",
+  "/clutter",
+  "/clutety-shell",
 ] as const;
 
 export function isNoindexPath(pathname: string): boolean {
