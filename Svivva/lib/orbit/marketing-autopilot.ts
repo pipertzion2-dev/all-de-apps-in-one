@@ -205,9 +205,7 @@ export async function runMarketingAutopilot(opts?: {
 
     if (traffic) {
       const idx = traffic.indexing;
-      const gscConnected =
-        (credStatus.google.serviceAccount || credStatus.google.siteUrl) &&
-        credStatus.google.siteUrl;
+      const gscConnected = !!credStatus.google.canUseGoogleApis;
 
       // Verify the URLs we just pushed are actually live + indexable, and persist
       // per-URL progress so a week-long crawl is tracked across runs.

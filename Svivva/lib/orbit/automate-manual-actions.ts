@@ -8,7 +8,7 @@ import {
   noteGoogleIndexingErrors,
 } from "@/lib/orbit/google-indexing-quota";
 import { seedCredentials } from "@/lib/schema";
-import { getPrimaryAdminUserId } from "@/lib/auth/admin";
+import { resolveGscCredentialsUserId } from "@/lib/orbit/gsc-credentials-user";
 import {
   submitSitemapToGSC,
   submitUrlsToGoogleIndexingApi,
@@ -60,34 +60,46 @@ async function getGscCreds(): Promise<{
   sa?: string;
 } | null> {
   await ensureGscOAuthColumns();
-  const adminUserId = getPrimaryAdminUserId() || "";
-  const [row] = adminUserId
-    ? await db
-        .select({
-          sa: seedCredentials.googleServiceAccountJson,
-          site: seedCredentials.googleSiteUrl,
-          userId: seedCredentials.userId,
-          oauthRefresh: seedCredentials.googleOauthRefreshToken,
-        })
-        .from(seedCredentials)
-        .where(eq(seedCredentials.userId, adminUserId))
-        .limit(1)
-    : await db
-        .select({
-          sa: seedCredentials.googleServiceAccountJson,
-          site: seedCredentials.googleSiteUrl,
-          userId: seedCredentials.userId,
-          oauthRefresh: seedCredentials.googleOauthRefreshToken,
-        })
-        .from(seedCredentials)
-        .where(
-          and(
-            eq(seedCredentials.googleIndexingEnabled, true),
-            isNotNull(seedCredentials.googleSiteUrl),
-          ),
-        )
-        .orderBy(desc(seedCredentials.updatedAt))
-        .limit(1);
+  const credUserId = await resolveGscCredentialsUserId();
+  type CredRow = {
+    sa: string | null;
+    site: string | null;
+    userId: string;
+    oauthRefresh: string | null;
+  };
+
+  let row: CredRow | undefined;
+  const [primary] = await db
+    .select({
+      sa: seedCredentials.googleServiceAccountJson,
+      site: seedCredentials.googleSiteUrl,
+      userId: seedCredentials.userId,
+      oauthRefresh: seedCredentials.googleOauthRefreshToken,
+    })
+    .from(seedCredentials)
+    .where(eq(seedCredentials.userId, credUserId))
+    .limit(1);
+  row = primary;
+
+  if (!row?.site) {
+    const [fallback] = await db
+      .select({
+        sa: seedCredentials.googleServiceAccountJson,
+        site: seedCredentials.googleSiteUrl,
+        userId: seedCredentials.userId,
+        oauthRefresh: seedCredentials.googleOauthRefreshToken,
+      })
+      .from(seedCredentials)
+      .where(
+        and(
+          eq(seedCredentials.googleIndexingEnabled, true),
+          isNotNull(seedCredentials.googleSiteUrl),
+        ),
+      )
+      .orderBy(desc(seedCredentials.updatedAt))
+      .limit(1);
+    row = fallback;
+  }
 
   if (!row?.site) return null;
 
