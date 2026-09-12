@@ -1,4 +1,7 @@
-import { getPlatformRuntimeSecretsRow, patchPlatformRuntimeSecrets } from "@/lib/platform-runtime-secrets";
+import {
+  getPlatformRuntimeSecretsRow,
+  patchPlatformRuntimeSecrets,
+} from "@/lib/platform-runtime-secrets";
 import { isEasyPeasyWordLimitError } from "@/lib/orbit/orbit-error-messages";
 
 export const EASYPEASY_SKIP_REASON_WORD_LIMIT = "word_limit";

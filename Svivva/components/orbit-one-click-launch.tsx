@@ -894,7 +894,8 @@ export function OrbitOneClickLaunch({
                 )}
                 {templateMode && aiFallbackWarning && (
                   <p className="text-xs text-emerald-700 dark:text-emerald-300 mt-1.5 font-medium">
-                    {aiFallbackWarning.includes("429") || aiFallbackWarning.includes("allowed words")
+                    {aiFallbackWarning.includes("429") ||
+                    aiFallbackWarning.includes("allowed words")
                       ? "Using built-in templates — no quota limits. Add a free Gemini key or use Cursor Cloud Agent ingest for AI copy."
                       : aiFallbackWarning}
                   </p>

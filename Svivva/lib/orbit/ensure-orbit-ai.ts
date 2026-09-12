@@ -205,9 +205,7 @@ export async function ensureOrbitAiForRun(opts?: {
   if (probes.length === 0) {
     if (allowTemplateFallback) {
       const notice = formatTemplateModeNotice(easyPeasyOnlySkipped);
-      return succeedWithTemplates(
-        notice ?? "No working AI keys — using built-in Orbit templates.",
-      );
+      return succeedWithTemplates(notice ?? "No working AI keys — using built-in Orbit templates.");
     }
     const alts = getOrbitAiAlternatives();
     return {
