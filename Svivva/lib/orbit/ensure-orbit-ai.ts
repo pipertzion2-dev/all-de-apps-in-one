@@ -11,6 +11,11 @@ import {
 import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
 import { isEasyPeasyWordLimitError } from "@/lib/orbit/orbit-error-messages";
 import {
+  formatTemplateModeNotice,
+  isEasyPeasySkippedForOrbit,
+  markEasyPeasyWordLimitSkip,
+} from "@/lib/orbit/easypeasy-skip";
+import {
   describeOrbitAiAlternatives,
   getOrbitAiAlternatives,
   type OrbitAiAlternative,
@@ -89,7 +94,8 @@ function buildDirectOpenAiClient(): OpenAI | null {
   return new OpenAI({ apiKey: key });
 }
 
-function orderedProbes(): ProviderProbe[] {
+async function orderedProbes(): Promise<ProviderProbe[]> {
+  const skipEasyPeasy = await isEasyPeasySkippedForOrbit();
   const probes: ProviderProbe[] = [
     {
       id: "gemini",
@@ -107,10 +113,19 @@ function orderedProbes(): ProviderProbe[] {
       id: "easypeasy",
       label: "EasyPeasy.AI",
       model: getOrbitDefaultModelForProvider("openai"),
-      canTry: isEasyPeasyConfiguredFromEnv(),
+      canTry: isEasyPeasyConfiguredFromEnv() && !skipEasyPeasy,
     },
   ];
-  return probes.filter((p) => p.canTry);
+  const available = probes.filter((p) => p.canTry);
+  // EasyPeasy-only setups hit word limits often — use templates immediately unless forced.
+  if (
+    available.length === 1 &&
+    available[0].id === "easypeasy" &&
+    process.env.ORBIT_FORCE_EASYPEASY !== "1"
+  ) {
+    return [];
+  }
+  return available;
 }
 
 async function probeProvider(
@@ -174,11 +189,25 @@ export async function ensureOrbitAiForRun(opts?: {
   await hydratePlatformSecrets();
   const testConnection = opts?.testConnection ?? true;
   const allowTemplateFallback = opts?.allowTemplateFallback !== false;
-  const probes = orderedProbes();
+  const forced = process.env.ORBIT_AI_PROVIDER?.trim().toLowerCase();
+
+  if (forced === "templates") {
+    return succeedWithTemplates();
+  }
+
+  const probes = await orderedProbes();
+  const easyPeasyOnlySkipped =
+    isEasyPeasyConfiguredFromEnv() &&
+    !buildGeminiClient() &&
+    !buildDirectOpenAiClient() &&
+    probes.length === 0;
 
   if (probes.length === 0) {
     if (allowTemplateFallback) {
-      return succeedWithTemplates("No AI keys configured — using built-in Orbit templates.");
+      const notice = formatTemplateModeNotice(easyPeasyOnlySkipped);
+      return succeedWithTemplates(
+        notice ?? "No working AI keys — using built-in Orbit templates.",
+      );
     }
     const alts = getOrbitAiAlternatives();
     return {
@@ -228,8 +257,9 @@ export async function ensureOrbitAiForRun(opts?: {
     failedProvider = probe.id;
     lastError = result.error;
 
-    // Word-limit on EasyPeasy — don't keep trying EasyPeasy variants; move on (already last)
+    // Word-limit on EasyPeasy — persist skip and stop retrying this gateway.
     if (probe.id === "easypeasy" && isEasyPeasyWordLimitError(lastError)) {
+      await markEasyPeasyWordLimitSkip(lastError);
       break;
     }
   }
@@ -237,9 +267,12 @@ export async function ensureOrbitAiForRun(opts?: {
   const alts = getOrbitAiAlternatives(failedProvider ? [failedProvider] : undefined);
 
   if (allowTemplateFallback) {
-    const warn = lastError
-      ? `AI unavailable (${lastError.slice(0, 120)}) — using built-in templates instead.`
-      : "AI unavailable — using built-in Orbit templates (no API key).";
+    const easyPeasyLimit = failedProvider === "easypeasy" && isEasyPeasyWordLimitError(lastError);
+    const warn = easyPeasyLimit
+      ? formatTemplateModeNotice(true)
+      : lastError
+        ? `AI unavailable (${lastError.slice(0, 120)}) — using built-in templates instead.`
+        : "AI unavailable — using built-in Orbit templates (no API key).";
     return succeedWithTemplates(warn);
   }
 

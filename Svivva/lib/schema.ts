@@ -1668,6 +1668,8 @@ export const platformRuntimeSecrets = pgTable("platform_runtime_secrets", {
   lemonSqueezyCheckoutUrlPro: text("lemon_squeezy_checkout_url_pro"),
   lemonSqueezyCheckoutUrlEnterprise: text("lemon_squeezy_checkout_url_enterprise"),
   easypeasyTier: text("easypeasy_tier"),
+  /** When set (e.g. word_limit), Orbit skips EasyPeasy and uses templates / other providers. */
+  easypeasySkipReason: text("easypeasy_skip_reason"),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
