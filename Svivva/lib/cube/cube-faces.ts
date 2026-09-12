@@ -114,10 +114,7 @@ function actionForFace(id: FeatureId, productName: string): string {
   }
 }
 
-function buildStepsForFaceOrder(
-  productName: string,
-  order: readonly FeatureId[],
-): CubeFaceStep[] {
+function buildStepsForFaceOrder(productName: string, order: readonly FeatureId[]): CubeFaceStep[] {
   const faces = listCubeFaces();
   const byId = new Map(faces.map((f) => [f.id, f]));
 
