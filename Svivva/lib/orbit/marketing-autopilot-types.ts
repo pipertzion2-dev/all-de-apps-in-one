@@ -257,6 +257,10 @@ export type MarketingCredentialStatus = {
   google: {
     serviceAccount: boolean;
     siteUrl: boolean;
+    /** Valid OAuth session — can submit sitemaps and call Search Analytics. */
+    oauthConnected?: boolean;
+    /** OAuth or service account — GSC API calls will work. */
+    canUseGoogleApis?: boolean;
     indexNow: boolean;
   };
 };

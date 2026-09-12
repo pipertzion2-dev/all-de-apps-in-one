@@ -21,6 +21,8 @@ import {
   computeIndexedPercent,
   computeIndexHealthScore,
 } from "@/lib/orbit/marketing-targets";
+import { getGscConnectionStatus } from "@/lib/orbit/gsc-connection-status";
+import { fetchGscSearchAnalytics } from "@/lib/seo/gsc-search-analytics";
 
 export async function GET() {
   try {
@@ -134,9 +136,23 @@ export async function GET() {
       totalUrls: indexableUrlCount || totalPages,
       toolSeoComplete,
     });
+    const gscStatus = await getGscConnectionStatus();
+    let gscClicks28d = 0;
+    if (gscStatus.oauthConnected || gscStatus.serviceAccount) {
+      try {
+        const gscReport = await fetchGscSearchAnalytics({ days: 28, rowLimit: 500 });
+        if (gscReport.ok) {
+          gscClicks28d = gscReport.queries.reduce((sum, q) => sum + q.clicks, 0);
+        }
+      } catch {
+        /* GSC analytics optional */
+      }
+    }
+
     const indexHealthScore = computeIndexHealthScore(counts, {
       totalPages,
       indexedPercent,
+      gscClicks28d,
     });
 
     const warnings: string[] = [];
@@ -150,6 +166,15 @@ export async function GET() {
       );
     if (toolSeoComplete && !cred?.lastIndexnowSubmit)
       warnings.push("Run Complete Now to submit all 300 tool pages to IndexNow.");
+    if (!gscStatus.canUseGoogleApis && gscStatus.siteConfigured) {
+      warnings.push(
+        "Google Search Console OAuth expired — reconnect at /dashboard/gsc-connect to submit sitemaps and use Search Analytics. IndexNow still works.",
+      );
+    } else if (!gscStatus.siteConfigured) {
+      warnings.push(
+        "Google Search Console not connected — open /dashboard/gsc-connect and sign in with Google once.",
+      );
+    }
     if (!orbitAiConfigured)
       warnings.push(
         "Orbit AI prose is in template mode. Add OPENAI_API_KEY (paid, recommended for marketing) in Vercel or Platform Secrets, or GEMINI_API_KEY as a free fallback.",
@@ -225,6 +250,9 @@ export async function GET() {
         stripeConnected,
         stripeWebhookConfigured,
         indexHealthScore,
+        gscConnected: gscStatus.canUseGoogleApis,
+        gscSiteConfigured: gscStatus.siteConfigured,
+        gscClicks28d,
         warnings,
       },
     });

@@ -1,3 +1,5 @@
+import { getSiteUrl } from "@/lib/site-url";
+
 /** Human-readable copy for GSC OAuth error codes (URL params + API responses). */
 export function gscOAuthErrorMessage(err: string | null | undefined): string {
   if (!err?.trim()) return "Google sign-in failed.";
@@ -21,7 +23,8 @@ export function gscOAuthErrorMessage(err: string | null | undefined): string {
     return "Google sign-in was cancelled or blocked. Approve all permissions when Google asks for Search Console access, or add your Google account as a test user if the OAuth app is still in Testing mode.";
   }
   if (code.includes("redirect_uri_mismatch") || code === "redirect_uri_mismatch") {
-    return "Redirect URI mismatch — in Google Cloud Console → Credentials → your OAuth client, add exactly: https://zzaizzai.com/api/gsc/oauth/callback (no trailing slash). Save, wait 1–2 minutes, then try again.";
+    const callback = `${getSiteUrl().replace(/\/$/, "")}/api/gsc/oauth/callback`;
+    return `Redirect URI mismatch — in Google Cloud Console → Credentials → your OAuth client, add exactly: ${callback} (no trailing slash). Save, wait 1–2 minutes, then try again.`;
   }
   if (code === "oauth_start_failed") {
     return "Could not start Google sign-in. Wait a moment and try again.";

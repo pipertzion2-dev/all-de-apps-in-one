@@ -21,6 +21,7 @@ import {
 import { forbidden, ok } from "@/lib/http-response";
 import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
 import { getActiveIndexNowKey, verifyIndexNowKeyFile } from "@/lib/indexing/indexnow-key";
+import { getGscConnectionStatus } from "@/lib/orbit/gsc-connection-status";
 
 export const dynamic = "force-dynamic";
 
@@ -50,6 +51,36 @@ export async function GET() {
   const steps: DiagStep[] = [];
   const canonicalSite = getSiteUrl();
   const canonicalSitemap = getSitemapUrl();
+  const gscStatus = await getGscConnectionStatus();
+
+  // Step 0 — HTML site verification tag (required before GSC property verification)
+  try {
+    const homeRes = await fetch(canonicalSite, {
+      signal: AbortSignal.timeout(8000),
+      cache: "no-store",
+    });
+    const homeHtml = homeRes.ok ? await homeRes.text() : "";
+    const envToken = process.env.GOOGLE_SITE_VERIFICATION?.trim();
+    const hasMeta = /google-site-verification/i.test(homeHtml);
+    steps.push({
+      id: "site_verification_meta",
+      label: "Google site verification meta tag",
+      status: hasMeta || envToken ? "ok" : "warn",
+      detail: hasMeta
+        ? "Homepage includes google-site-verification meta tag."
+        : envToken
+          ? "GOOGLE_SITE_VERIFICATION is set in env (meta may render at runtime)."
+          : "No verification meta on homepage — add GOOGLE_SITE_VERIFICATION in Vercel or save token in dashboard before verifying in Search Console.",
+      fix: hasMeta ? undefined : "https://search.google.com/search-console/welcome",
+    });
+  } catch {
+    steps.push({
+      id: "site_verification_meta",
+      label: "Google site verification meta tag",
+      status: "skip",
+      detail: "Could not fetch homepage to check verification meta.",
+    });
+  }
 
   // Step 1 — site URL format
   const rawUrl = creds?.googleSiteUrl || "";
@@ -119,40 +150,38 @@ export async function GET() {
   }
 
   // Step 4 — Google account (OAuth — recommended)
-  const oauthEmail = creds?.googleOauthEmail || null;
-  let oauthConnected = !!creds?.googleOauthRefreshToken?.trim();
-  let oauthAccessToken: string | null = null;
-  if (oauthConnected) {
-    oauthAccessToken = await getGoogleOAuthAccessTokenForUser(userId);
-    if (!oauthAccessToken) {
-      oauthConnected = false;
-      steps.push({
-        id: "google_oauth",
-        label: "Google account",
-        status: "fail",
-        detail: oauthEmail
-          ? `Signed in as ${oauthEmail} previously, but the refresh token expired (invalid_grant). Click Connect with Google again on /dashboard/gsc-connect.`
-          : "Google refresh token expired — reconnect at /dashboard/gsc-connect.",
-        fix: "/dashboard/gsc-connect",
-      });
-    } else {
-      steps.push({
-        id: "google_oauth",
-        label: "Google account connected",
-        status: "ok",
-        detail: oauthEmail
-          ? `Signed in as ${oauthEmail}. Orbit can submit sitemaps and request indexing automatically.`
-          : "Google OAuth connected. Orbit can submit sitemaps and request indexing automatically.",
-      });
-    }
+  const oauthEmail = gscStatus.oauthEmail || creds?.googleOauthEmail || null;
+  const oauthConnected = gscStatus.oauthConnected;
+  let oauthAccessToken: string | null = oauthConnected
+    ? await getGoogleOAuthAccessTokenForUser(userId)
+    : null;
+
+  if (oauthConnected && oauthAccessToken) {
+    steps.push({
+      id: "google_oauth",
+      label: "Google account connected",
+      status: "ok",
+      detail: oauthEmail
+        ? `Signed in as ${oauthEmail}. Orbit can submit sitemaps and request indexing automatically.`
+        : "Google OAuth connected. Orbit can submit sitemaps and request indexing automatically.",
+    });
+  } else if (oauthEmail) {
+    steps.push({
+      id: "google_oauth",
+      label: "Google account",
+      status: "fail",
+      detail: `Previously signed in as ${oauthEmail}, but the session expired. Click Connect with Google again on /dashboard/gsc-connect — IndexNow still works without this.`,
+      fix: "/dashboard/gsc-connect",
+    });
   } else {
     steps.push({
       id: "google_oauth",
       label: "Google account",
       status: isGoogleGscOAuthConfigured() ? "fail" : "warn",
       detail: isGoogleGscOAuthConfigured()
-        ? "Not connected — click Connect with Google (one sign-in, AI configures the rest)."
+        ? "Not connected — click Connect with Google (one sign-in, Orbit submits sitemaps and indexing automatically)."
         : "OAuth not configured — paste client ID + secret on this page, or set GOOGLE_GSC_CLIENT_ID + SECRET in Vercel.",
+      fix: isGoogleGscOAuthConfigured() ? "/dashboard/gsc-connect" : undefined,
     });
   }
 

@@ -62,7 +62,13 @@ async function cmdStatus() {
   );
   const configured = Object.entries(s.credentials || {}).map(([k]) => k);
   console.log(`Credentials set: ${configured.length ? configured.join(", ") : "(none)"}`);
-  console.log(`GSC connected:   ${s.status?.google?.siteUrl ? "yes" : "no"}`);
+  const g = s.status?.google || {};
+  const gscLine = g.canUseGoogleApis
+    ? "yes (OAuth/service account)"
+    : g.siteUrl
+      ? "site saved — reconnect Google OAuth at /dashboard/gsc-connect"
+      : "no";
+  console.log(`GSC connected:   ${gscLine}`);
 
   const cov = await api("/api/orbit/index-health");
   const c = cov.snapshot || {};
