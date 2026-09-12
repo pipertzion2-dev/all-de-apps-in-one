@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { buildSeoMetadata } from "@/lib/seo/metadata";
 import {
   Zap,
   Shield,
@@ -190,17 +191,18 @@ export async function generateMetadata({
   const { slug } = await params;
   const page = pages[slug];
   if (!page) {
-    return { title: "Not Found" };
+    return buildSeoMetadata({
+      title: "Not Found",
+      description: "Landing page not found.",
+      path: `/lp/${slug}`,
+      noindex: true,
+    });
   }
-  return {
+  return buildSeoMetadata({
     title: page.metaTitle,
     description: page.metaDescription,
-    openGraph: {
-      title: page.metaTitle,
-      description: page.metaDescription,
-      type: "website",
-    },
-  };
+    path: `/lp/${slug}`,
+  });
 }
 
 export default async function LandingPage({ params }: { params: Promise<{ slug: string }> }) {

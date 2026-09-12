@@ -147,7 +147,9 @@ export function ProductTypePicker() {
                   className="mt-0.5"
                 />
                 <span className="text-xs leading-relaxed">
-                  <span className="font-medium text-foreground">{face?.shortLabel ?? opt.faceId}</span>
+                  <span className="font-medium text-foreground">
+                    {face?.shortLabel ?? opt.faceId}
+                  </span>
                   {" — "}
                   {opt.when}
                 </span>
@@ -190,7 +192,12 @@ export function ProductTypePicker() {
       </div>
 
       <div className="flex flex-wrap gap-2 pt-1">
-        <Button size="sm" className="gap-2 bg-[#5B8DA8]" onClick={startPath} data-testid="product-type-start">
+        <Button
+          size="sm"
+          className="gap-2 bg-[#5B8DA8]"
+          onClick={startPath}
+          data-testid="product-type-start"
+        >
           Start step 1
           <ArrowRight className="w-3.5 h-3.5" />
         </Button>

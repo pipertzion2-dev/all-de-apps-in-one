@@ -1,7 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Gift, Users, TrendingUp, Share2, Copy, ArrowRight, CheckCircle, Zap } from "lucide-react";
+import { buildSeoMetadata } from "@/lib/seo/metadata";
 import { ReferralWidget } from "@/components/referral-widget";
 import { Button } from "@/components/ui/button";
+
+export const metadata: Metadata = buildSeoMetadata({
+  title: "Referral Program",
+  description:
+    "Earn commission by referring teams to ZZAI — multi-level rewards, instant signup bonuses, and full referral tracking.",
+  path: "/referrals",
+});
 
 const TEAL = "#5B8DA8";
 const BURG = "#6B2C4E";
