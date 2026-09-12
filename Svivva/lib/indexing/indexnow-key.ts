@@ -3,8 +3,11 @@ import { seedCredentials } from "@/lib/schema";
 import { desc, isNotNull } from "drizzle-orm";
 import { getSiteUrl } from "@/lib/site-url";
 
-/** Latest IndexNow key from any `seed_credentials` row (canonical for submissions). */
+/** Latest IndexNow key from env, then any `seed_credentials` row (canonical for submissions). */
 export async function getActiveIndexNowKey(): Promise<string | null> {
+  const fromEnv = process.env.INDEXNOW_KEY?.trim().toLowerCase();
+  if (fromEnv && /^[0-9a-f]{32}$/.test(fromEnv)) return fromEnv;
+
   const [row] = await db
     .select({ indexnowKey: seedCredentials.indexnowKey })
     .from(seedCredentials)

@@ -22,6 +22,7 @@ import { forbidden, ok } from "@/lib/http-response";
 import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
 import { getActiveIndexNowKey, verifyIndexNowKeyFile } from "@/lib/indexing/indexnow-key";
 import { getGscConnectionStatus } from "@/lib/orbit/gsc-connection-status";
+import { fetchGscSearchAnalytics } from "@/lib/seo/gsc-search-analytics";
 
 export const dynamic = "force-dynamic";
 
@@ -316,6 +317,64 @@ export async function GET() {
     }
   }
 
+  // Step — live search performance (proxy for “is Google showing any pages?”)
+  let searchPerformance: {
+    ok: boolean;
+    impressions: number;
+    clicks: number;
+    pagesWithImpressions: number;
+    queries: number;
+    topPages: string[];
+  } | null = null;
+  if (oauthConnected) {
+    try {
+      const gsc = await fetchGscSearchAnalytics({ days: 90, rowLimit: 250 });
+      if (gsc.ok) {
+        const impressions = gsc.queries.reduce((n, q) => n + q.impressions, 0);
+        const clicks = gsc.queries.reduce((n, q) => n + q.clicks, 0);
+        searchPerformance = {
+          ok: true,
+          impressions,
+          clicks,
+          pagesWithImpressions: gsc.pages.length,
+          queries: gsc.queries.length,
+          topPages: gsc.pages.slice(0, 5).map((p) => p.keys[0] ?? ""),
+        };
+        steps.push({
+          id: "gsc_search_performance",
+          label: "Google search visibility (90d)",
+          status:
+            clicks >= 10 ? "ok" : impressions >= 20 || gsc.pages.length >= 3 ? "warn" : "fail",
+          detail:
+            impressions > 0
+              ? `${gsc.pages.length} page(s) with impressions, ${impressions.toLocaleString()} total impressions, ${clicks} clicks (last 90 days). Submission ≠ instant indexing — Google can take days to weeks for new URLs.`
+              : "No impressions in the last 90 days on this property. Confirm you are viewing sc-domain:zzaizzai.com (not svivva.com). Sitemap + IndexNow are working; focus on unique content and wait for crawl cycles.",
+          fix:
+            impressions === 0
+              ? `https://search.google.com/search-console?resource_id=${encodeURIComponent(gscMatchedSite || `sc-domain:${getSiteHostname()}`)}`
+              : undefined,
+        });
+      } else {
+        steps.push({
+          id: "gsc_search_performance",
+          label: "Google search visibility (90d)",
+          status: "skip",
+          detail: gsc.error || "Could not load Search Analytics.",
+        });
+      }
+    } catch (e: unknown) {
+      steps.push({
+        id: "gsc_search_performance",
+        label: "Google search visibility (90d)",
+        status: "skip",
+        detail: `Search Analytics error: ${e instanceof Error ? e.message : String(e)}`.slice(
+          0,
+          160,
+        ),
+      });
+    }
+  }
+
   return ok({
     steps,
     score: total > 0 ? Math.round((passing / total) * 100) : 0,
@@ -328,5 +387,8 @@ export async function GET() {
     gscMatchedSite,
     gscSitesSample,
     gscSitemaps,
+    searchPerformance,
+    canonicalSite,
+    canonicalSitemap,
   });
 }
