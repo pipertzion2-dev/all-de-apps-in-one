@@ -4,11 +4,24 @@ import { db } from "@/lib/db";
 import { seedCredentials } from "@/lib/schema";
 import { eq, isNotNull, desc } from "drizzle-orm";
 
+function envIndexNowKey(): string | null {
+  const key = process.env.INDEXNOW_KEY?.trim().toLowerCase();
+  return key && /^[0-9a-f]{32}$/.test(key) ? key : null;
+}
+
 export async function GET(req: NextRequest) {
   try {
     const requested = req.nextUrl.searchParams.get("key")?.trim().toLowerCase() ?? "";
 
     if (requested && /^[0-9a-f]{32}$/.test(requested)) {
+      const envKey = envIndexNowKey();
+      if (envKey === requested) {
+        return new NextResponse(envKey, {
+          status: 200,
+          headers: { "Content-Type": "text/plain; charset=utf-8" },
+        });
+      }
+
       const [row] = await db
         .select({ indexnowKey: seedCredentials.indexnowKey })
         .from(seedCredentials)
@@ -31,7 +44,7 @@ export async function GET(req: NextRequest) {
       .orderBy(desc(seedCredentials.updatedAt))
       .limit(1);
 
-    const key = row?.indexnowKey;
+    const key = row?.indexnowKey || envIndexNowKey();
     if (!key) {
       return new NextResponse("no key configured", { status: 404 });
     }
