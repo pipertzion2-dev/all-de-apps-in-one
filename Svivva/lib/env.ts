@@ -68,7 +68,11 @@ export function getOllamaModel(): string {
 }
 
 export function getGeminiApiKey(): string | undefined {
-  return process.env.GEMINI_API_KEY?.trim() || undefined;
+  return (
+    process.env.GEMINI_API_KEY?.trim() ||
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY?.trim() ||
+    undefined
+  );
 }
 
 export function hasStripeConfigured(): boolean {
