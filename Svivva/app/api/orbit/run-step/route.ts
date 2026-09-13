@@ -53,8 +53,38 @@ import { isSeoIndexStepId } from "@/lib/orbit/seo-index-phases";
 import { runSeoIndexStep } from "@/lib/orbit/seo-index-actions";
 import { ensureOrbitDbReady } from "@/lib/ensure-core-db-tables";
 import { formatOrbitDbSetupError } from "@/lib/db-connection-error";
+import { buildExpandedSeoBody } from "@/lib/seo/page-body";
 
 const BASE_URL = getSiteUrl();
+
+function templateSeoPageForKeyword(keyword: string, slug: string, idx: number) {
+  const base = batchSEOPages(1)[0];
+  const title = `${keyword.charAt(0).toUpperCase() + keyword.slice(1)} — ZZAI`;
+  return {
+    title,
+    metaTitle: base.metaTitle || title.slice(0, 60),
+    metaDescription: base.metaDescription || `Build ${keyword} with ZZAI.`.slice(0, 155),
+    headline: title,
+    content: buildExpandedSeoBody({ title, keyword, slug, category: "seo-landing" }),
+  };
+}
+
+function templateComparisonPage(comp: string, slug: string) {
+  const base = batchComparisonPages(1)[0];
+  const title = `ZZAI vs ${comp}`;
+  return {
+    title,
+    metaTitle: `ZZAI vs ${comp} | Compare AI API Builders`.slice(0, 60),
+    metaDescription: `Compare ZZAI vs ${comp} for AI API workflows.`.slice(0, 155),
+    headline: title,
+    content: buildExpandedSeoBody({
+      title,
+      keyword: `${comp} alternative`,
+      slug,
+      category: "seo-landing",
+    }),
+  };
+}
 
 function orbitAiSummarySuffix(useAI: boolean): string {
   if (!useAI) {
@@ -330,37 +360,35 @@ export async function POST(req: NextRequest) {
             continue;
           }
 
-          let pageData;
-          if (useAI) {
-            const gen = await orbitOpenai.chat.completions.create({
-              model: getMarketingModel(),
-              response_format: { type: "json_object" },
-              messages: [
-                {
-                  role: "system",
-                  content:
-                    "SEO copywriter for ZZAI — an AI API builder SaaS. Write conversion-focused content.",
-                },
-                {
-                  role: "user",
-                  content: `Landing page for: "${keyword}". Return JSON: { title, metaTitle (≤60 chars), metaDescription (≤155 chars), content (3 paragraphs HTML), headline, subheadline }`,
-                },
-              ],
-            });
-            const d = JSON.parse(gen.choices[0].message.content || "{}");
-            pageData = {
-              title: d.title || keyword,
-              metaTitle: d.metaTitle || d.title || keyword,
-              metaDescription: d.metaDescription || "",
-              headline: d.headline || d.title || keyword,
-              content: d.content || `<p>${keyword}</p>`,
-            };
-          } else {
-            pageData = batchSEOPages(1)[0];
-            pageData.title = `${keyword.charAt(0).toUpperCase() + keyword.slice(1)} — ZZAI`;
-            pageData.slug = `${slug}-${i}`;
-            pageData.keyword = keyword;
-          }
+          const pageData = await generateWithAIOrFallback(
+            async () => {
+              const gen = await orbitOpenai.chat.completions.create({
+                model: getMarketingModel(),
+                response_format: { type: "json_object" },
+                messages: [
+                  {
+                    role: "system",
+                    content:
+                      "SEO copywriter for ZZAI — an AI API builder SaaS. Write conversion-focused content.",
+                  },
+                  {
+                    role: "user",
+                    content: `Landing page for: "${keyword}". Return JSON: { title, metaTitle (≤60 chars), metaDescription (≤155 chars), content (3 paragraphs HTML), headline, subheadline }`,
+                  },
+                ],
+              });
+              const d = JSON.parse(gen.choices[0].message.content || "{}");
+              return {
+                title: d.title || keyword,
+                metaTitle: d.metaTitle || d.title || keyword,
+                metaDescription: d.metaDescription || "",
+                headline: d.headline || d.title || keyword,
+                content: d.content || `<p>${keyword}</p>`,
+              };
+            },
+            () => templateSeoPageForKeyword(keyword, slug, i),
+            keyword,
+          );
 
           await db.insert(seoLandingPages).values({
             slug,
@@ -445,40 +473,44 @@ export async function POST(req: NextRequest) {
             continue;
           }
 
-          let pageData;
-          if (useAI) {
-            const gen = await orbitOpenai.chat.completions.create({
-              model: getMarketingModel(),
-              response_format: { type: "json_object" },
-              messages: [
-                {
-                  role: "system",
-                  content:
-                    "Conversion copywriter for ZZAI AI API Builder. Write compelling comparison pages.",
-                },
-                {
-                  role: "user",
-                  content: `Comparison page: "ZZAI vs ${comp}". Target: people searching "${comp} alternative". Position ZZAI as better for AI/API use cases. Return JSON: { title, metaTitle, metaDescription, content (4 sections HTML: overview, feature comparison table as HTML, who should use svivva, CTA), headline, subheadline }`,
-                },
-              ],
-            });
-            const d = JSON.parse(gen.choices[0].message.content || "{}");
-            pageData = {
-              title: d.title || `ZZAI vs ${comp}`,
-              metaTitle: d.metaTitle || `ZZAI vs ${comp}`,
-              metaDescription: d.metaDescription || "",
-              headline: d.headline || `ZZAI vs ${comp}: Which is Better?`,
-              howItWorks: d.howItWorks || "Compare features, pricing and use-cases side by side",
-              whoItsFor:
-                d.whoItsFor || `${comp} users looking for a more powerful AI-native alternative`,
-              content: d.content || "",
-            };
-          } else {
-            pageData = batchComparisonPages(1)[0];
-            pageData.title = `ZZAI vs ${comp}`;
-            pageData.slug = slug;
-            pageData.keyword = `svivva vs ${comp.toLowerCase()}`;
-          }
+          const pageData = await generateWithAIOrFallback(
+            async () => {
+              const gen = await orbitOpenai.chat.completions.create({
+                model: getMarketingModel(),
+                response_format: { type: "json_object" },
+                messages: [
+                  {
+                    role: "system",
+                    content:
+                      "Conversion copywriter for ZZAI AI API Builder. Write compelling comparison pages.",
+                  },
+                  {
+                    role: "user",
+                    content: `Comparison page: "ZZAI vs ${comp}". Target: people searching "${comp} alternative". Position ZZAI as better for AI/API use cases. Return JSON: { title, metaTitle, metaDescription, content (4 sections HTML: overview, feature comparison table as HTML, who should use svivva, CTA), headline, subheadline }`,
+                  },
+                ],
+              });
+              const d = JSON.parse(gen.choices[0].message.content || "{}");
+              return {
+                title: d.title || `ZZAI vs ${comp}`,
+                metaTitle: d.metaTitle || `ZZAI vs ${comp}`,
+                metaDescription: d.metaDescription || "",
+                headline: d.headline || `ZZAI vs ${comp}: Which is Better?`,
+                howItWorks: d.howItWorks || "Compare features, pricing and use-cases side by side",
+                whoItsFor:
+                  d.whoItsFor || `${comp} users looking for a more powerful AI-native alternative`,
+                content: d.content || "",
+                keyword: `svivva vs ${comp.toLowerCase()}`,
+              };
+            },
+            () => ({
+              ...templateComparisonPage(comp, slug),
+              howItWorks: "Compare features, pricing and use-cases side by side",
+              whoItsFor: `${comp} users looking for a more powerful AI-native alternative`,
+              keyword: `svivva vs ${comp.toLowerCase()}`,
+            }),
+            `comparison-${comp}`,
+          );
 
           await db.insert(seoLandingPages).values({
             slug,
@@ -551,37 +583,39 @@ export async function POST(req: NextRequest) {
             continue;
           }
 
-          let blogData;
-          if (useAI) {
-            const gen = await orbitOpenai.chat.completions.create({
-              model: getMarketingModel(),
-              response_format: { type: "json_object" },
-              messages: [
-                {
-                  role: "system",
-                  content:
-                    "Technical SEO blogger for ZZAI. Write detailed, actionable articles that rank well and convert readers.",
-                },
-                {
-                  role: "user",
-                  content: `Blog post: "${topic}". Return JSON: { title, excerpt (2 sentences), content (markdown 700-1000 words with H2 headings, code examples where relevant, CTA for ZZAI at end), metaTitle, metaDescription, tags (3-5 strings) }`,
-                },
-              ],
-            });
-            const d = JSON.parse(gen.choices[0].message.content || "{}");
-            blogData = {
-              title: d.title || topic,
-              excerpt: d.excerpt || "",
-              content: d.content || `## ${topic}\n\nDetailed guide coming soon.`,
-              metaTitle: d.metaTitle || topic,
-              metaDescription: d.metaDescription || "",
-              tags: d.tags || ["AI API"],
-            };
-          } else {
-            blogData = batchBlogPosts(1)[0];
-            blogData.title = topic;
-            blogData.excerpt = topic;
-          }
+          const blogData = await generateWithAIOrFallback(
+            async () => {
+              const gen = await orbitOpenai.chat.completions.create({
+                model: getMarketingModel(),
+                response_format: { type: "json_object" },
+                messages: [
+                  {
+                    role: "system",
+                    content:
+                      "Technical SEO blogger for ZZAI. Write detailed, actionable articles that rank well and convert readers.",
+                  },
+                  {
+                    role: "user",
+                    content: `Blog post: "${topic}". Return JSON: { title, excerpt (2 sentences), content (markdown 700-1000 words with H2 headings, code examples where relevant, CTA for ZZAI at end), metaTitle, metaDescription, tags (3-5 strings) }`,
+                  },
+                ],
+              });
+              const d = JSON.parse(gen.choices[0].message.content || "{}");
+              return {
+                title: d.title || topic,
+                excerpt: d.excerpt || "",
+                content: d.content || `## ${topic}\n\nDetailed guide coming soon.`,
+                metaTitle: d.metaTitle || topic,
+                metaDescription: d.metaDescription || "",
+                tags: d.tags || ["AI API"],
+              };
+            },
+            () => {
+              const t = batchBlogPosts(1)[0];
+              return { ...t, title: topic, excerpt: t.excerpt || topic };
+            },
+            topic,
+          );
 
           const id = randomBytes(12).toString("hex");
           await db.insert(blogPosts).values({
@@ -3816,17 +3850,15 @@ Return JSON:
         }
       } catch (e) {
         aeoGenError = String(e).slice(0, 300);
-        if (!useAI) {
-          const templateAEO = generateMiniAEO();
-          aeoPages = templateAEO.map((t) => ({
-            query: t.query,
-            slug: t.slug,
-            title: t.query.charAt(0).toUpperCase() + t.query.slice(1),
-            metaTitle: t.query.slice(0, 60),
-            metaDescription: t.content.slice(0, 155),
-            content: t.content,
-          }));
-        }
+        const templateAEO = generateMiniAEO();
+        aeoPages = templateAEO.map((t) => ({
+          query: t.query,
+          slug: t.slug,
+          title: t.query.charAt(0).toUpperCase() + t.query.slice(1),
+          metaTitle: t.query.slice(0, 60),
+          metaDescription: t.content.slice(0, 155),
+          content: t.content,
+        }));
       }
       const pages = aeoPages;
       const created: string[] = [];
@@ -4506,41 +4538,47 @@ Return JSON:
       const toCreate = INTEGRATIONS.filter((i) => !existingSlugs.has(i.slug));
       const skipped = INTEGRATIONS.filter((i) => existingSlugs.has(i.slug));
 
-      const useAI = isOrbitAiConfigured();
       const results = await Promise.allSettled(
         toCreate.map(async (integ) => {
-          let d;
-          if (useAI) {
-            const gen = await orbitOpenai.chat.completions.create({
-              model: getMarketingModel(),
-              response_format: { type: "json_object" },
-              messages: [
-                {
-                  role: "system",
-                  content:
-                    "You are a technical content writer for ZZAI — an AI API builder SaaS that lets developers create production AI APIs in minutes. Write integration pages that genuinely help developers.",
-                },
-                {
-                  role: "user",
-                  content: `Write an integration guide page for "ZZAI + ${integ.tool}". Target keyword: "${integ.kw}". Return JSON: { title, metaTitle (60 chars max), metaDescription (155 chars), content (600-800 words markdown: intro paragraph, H2 "Why ZZAI + ${integ.tool}?", H2 "Step-by-Step Integration", H2 "Use Cases", H2 "Getting Started", end with CTA for ZZAI free trial) }`,
-                },
-              ],
-            });
-            d = JSON.parse(gen.choices[0].message.content || "{}");
-          } else {
-            const templatePages = batchIntegrationPages();
-            const template = templatePages[0];
-            d = {
-              title: `ZZAI + ${integ.tool} Integration`,
-              metaTitle: `ZZAI + ${integ.tool} - AI API Builder`.slice(0, 60),
-              metaDescription:
-                `Build AI-powered ${integ.tool} integrations with ZZAI in minutes. No coding required.`.slice(
-                  0,
-                  155,
-                ),
-              content: `# ZZAI + ${integ.tool} Integration\n\nBuild AI-powered ${integ.tool} integrations with ZZAI in minutes. No coding required.\n\n## Why ZZAI + ${integ.tool}?\n\nZZAI's AI API builder seamlessly integrates with ${integ.tool}, enabling you to:\n- Automate workflows\n- Process data in real-time\n- Scale without infrastructure worries\n\n## Step-by-Step Integration\n\n1. Sign up for ZZAI\n2. Connect your ${integ.tool} account\n3. Describe your API in plain English\n4. Deploy instantly\n\n## Use Cases\n\n- Data automation\n- Real-time processing\n- Custom workflows\n\n## Getting Started\n\nTry ZZAI free today and build your first ${integ.tool} integration in minutes.\n\n[Start Free →](https://zzaizzai.com)`,
-            };
-          }
+          const d = await generateWithAIOrFallback(
+            async () => {
+              const gen = await orbitOpenai.chat.completions.create({
+                model: getMarketingModel(),
+                response_format: { type: "json_object" },
+                messages: [
+                  {
+                    role: "system",
+                    content:
+                      "You are a technical content writer for ZZAI — an AI API builder SaaS that lets developers create production AI APIs in minutes. Write integration pages that genuinely help developers.",
+                  },
+                  {
+                    role: "user",
+                    content: `Write an integration guide page for "ZZAI + ${integ.tool}". Target keyword: "${integ.kw}". Return JSON: { title, metaTitle (60 chars max), metaDescription (155 chars), content (600-800 words markdown: intro paragraph, H2 "Why ZZAI + ${integ.tool}?", H2 "Step-by-Step Integration", H2 "Use Cases", H2 "Getting Started", end with CTA for ZZAI free trial) }`,
+                  },
+                ],
+              });
+              return JSON.parse(gen.choices[0].message.content || "{}");
+            },
+            () => {
+              const title = `ZZAI + ${integ.tool} Integration`;
+              return {
+                title,
+                metaTitle: `ZZAI + ${integ.tool} - AI API Builder`.slice(0, 60),
+                metaDescription:
+                  `Build AI-powered ${integ.tool} integrations with ZZAI in minutes.`.slice(
+                    0,
+                    155,
+                  ),
+                content: buildExpandedSeoBody({
+                  title,
+                  keyword: integ.kw,
+                  slug: integ.slug,
+                  category: "integration",
+                }),
+              };
+            },
+            integ.tool,
+          );
           await db.insert(seoLandingPages).values({
             id: randomBytes(12).toString("hex"),
             slug: integ.slug,
@@ -4632,41 +4670,44 @@ Return JSON:
       const indToCreate = INDUSTRIES.filter((i) => !indExistingSlugs.has(i.slug));
       const indSkipped = INDUSTRIES.filter((i) => indExistingSlugs.has(i.slug));
 
-      const useAI = isOrbitAiConfigured();
       const indResults = await Promise.allSettled(
         indToCreate.map(async (ind) => {
-          let d;
-          if (useAI) {
-            const gen = await orbitOpenai.chat.completions.create({
-              model: getMarketingModel(),
-              response_format: { type: "json_object" },
-              messages: [
-                {
-                  role: "system",
-                  content:
-                    "You write industry-specific AI use case pages for ZZAI — an AI API builder SaaS. Write for decision-makers in each industry, not just developers.",
-                },
-                {
-                  role: "user",
-                  content: `Write a use case page for "AI API for ${ind.name}". Target keyword: "${ind.kw}". Return JSON: { title, metaTitle (60 chars), metaDescription (155 chars), content (700 words markdown: problem in the industry, H2 "How AI APIs Transform ${ind.name}", H2 "5 Specific Use Cases", H2 "Real Results", H2 "Build Your ${ind.name} AI API with ZZAI", CTA) }`,
-                },
-              ],
-            });
-            d = JSON.parse(gen.choices[0].message.content || "{}");
-          } else {
-            const templatePages = batchIndustryPages();
-            const template = templatePages[0];
-            d = {
-              title: `AI API for ${ind.name} - Transform Your Business`,
-              metaTitle: `AI API for ${ind.name} | ZZAI`.slice(0, 60),
-              metaDescription:
-                `Build AI-powered ${ind.name} applications with ZZAI. Automate workflows and scale without coding.`.slice(
-                  0,
-                  155,
-                ),
-              content: `# AI API for ${ind.name}\n\nTransform your ${ind.name} operations with AI-powered APIs from ZZAI.\n\n## How AI APIs Transform ${ind.name}\n\nAI APIs are revolutionizing the ${ind.name} industry by:\n- Automating repetitive tasks\n- Providing real-time insights\n- Reducing operational costs\n- Improving customer experiences\n\n## 5 Specific Use Cases\n\n1. **Automated Workflows** - Streamline operations\n2. **Data Analysis** - Get insights in real-time\n3. **Customer Support** - 24/7 intelligent assistance\n4. **Risk Assessment** - Predictive analytics\n5. **Compliance** - Automated regulatory checks\n\n## Real Results\n\nCompanies using AI APIs in ${ind.name} report:\n- 40% faster operations\n- 35% cost reduction\n- 50% better customer satisfaction\n\n## Build Your ${ind.name} AI API with ZZAI\n\nSvivva lets you build production AI APIs in minutes without coding. Simply describe what you need, and our platform handles the rest.\n\n[Start Free →](https://zzaizzai.com)`,
-            };
-          }
+          const d = await generateWithAIOrFallback(
+            async () => {
+              const gen = await orbitOpenai.chat.completions.create({
+                model: getMarketingModel(),
+                response_format: { type: "json_object" },
+                messages: [
+                  {
+                    role: "system",
+                    content:
+                      "You write industry-specific AI use case pages for ZZAI — an AI API builder SaaS. Write for decision-makers in each industry, not just developers.",
+                  },
+                  {
+                    role: "user",
+                    content: `Write a use case page for "AI API for ${ind.name}". Target keyword: "${ind.kw}". Return JSON: { title, metaTitle (60 chars), metaDescription (155 chars), content (700 words markdown: problem in the industry, H2 "How AI APIs Transform ${ind.name}", H2 "5 Specific Use Cases", H2 "Real Results", H2 "Build Your ${ind.name} AI API with ZZAI", CTA) }`,
+                  },
+                ],
+              });
+              return JSON.parse(gen.choices[0].message.content || "{}");
+            },
+            () => {
+              const title = `AI API for ${ind.name}`;
+              return {
+                title,
+                metaTitle: `AI API for ${ind.name} | ZZAI`.slice(0, 60),
+                metaDescription:
+                  `Build AI-powered ${ind.name} applications with ZZAI.`.slice(0, 155),
+                content: buildExpandedSeoBody({
+                  title,
+                  keyword: ind.kw,
+                  slug: ind.slug,
+                  category: "usecase",
+                }),
+              };
+            },
+            ind.name,
+          );
           await db.insert(seoLandingPages).values({
             id: randomBytes(12).toString("hex"),
             slug: ind.slug,
@@ -4837,38 +4878,43 @@ Return JSON:
       const tmplToCreate = TEMPLATES.filter((t) => !tmplExistingSlugs.has(t.slug));
       const tmplSkipped = TEMPLATES.filter((t) => tmplExistingSlugs.has(t.slug));
 
-      const useAI = isOrbitAiConfigured();
       const tmplResults = await Promise.allSettled(
-        TEMPLATES.map(async (tmpl) => {
-          let d;
-          if (useAI) {
-            const gen = await orbitOpenai.chat.completions.create({
-              model: getMarketingModel(),
-              response_format: { type: "json_object" },
-              messages: [
-                {
-                  role: "system",
-                  content:
-                    "You write developer-focused API template guide pages for ZZAI — an AI API builder. Include working code examples. Target developers who want to build this specific API type quickly.",
-                },
-                {
-                  role: "user",
-                  content: `Write an API template page for "${tmpl.name}". Keyword: "${tmpl.kw}". Return JSON: { title, metaTitle (60 chars), metaDescription (155 chars), content (750 words markdown: what this API does, H2 "Sample API Schema", H2 "Example Request/Response" with JSON code blocks, H2 "Build This in 11 Minutes with ZZAI", H2 "Common Customizations", CTA to try ZZAI free) }`,
-                },
-              ],
-            });
-            d = JSON.parse(gen.choices[0].message.content || "{}");
-          } else {
-            const templatePages = batchAPITemplatePages();
-            const template = templatePages[0];
-            d = {
-              title: `${tmpl.name} - Build in Minutes`,
-              metaTitle: `${tmpl.name} | ZZAI Templates`.slice(0, 60),
-              metaDescription:
-                `Build a ${tmpl.name} with ZZAI in minutes. No coding required.`.slice(0, 155),
-              content: `# ${tmpl.name}\n\nBuild a production-ready ${tmpl.name} with ZZAI in minutes.\n\n## Sample API Schema\n\n\`\`\`json\n{\n  "input": "string",\n  "output": "string"\n}\n\`\`\`\n\n## Example Request/Response\n\n**Request:**\n\`\`\`json\n{\n  "input": "Your input data here"\n}\n\`\`\`\n\n**Response:**\n\`\`\`json\n{\n  "output": "Processed result"\n}\n\`\`\`\n\n## Build This in 11 Minutes with ZZAI\n\n1. Sign up for ZZAI\n2. Describe your API in plain English\n3. ZZAI generates the schema and code\n4. Deploy instantly\n\n## Common Customizations\n\n- Add authentication\n- Rate limiting\n- Custom endpoints\n\n[Start Free →](https://zzaizzai.com)`,
-            };
-          }
+        tmplToCreate.map(async (tmpl) => {
+          const d = await generateWithAIOrFallback(
+            async () => {
+              const gen = await orbitOpenai.chat.completions.create({
+                model: getMarketingModel(),
+                response_format: { type: "json_object" },
+                messages: [
+                  {
+                    role: "system",
+                    content:
+                      "You write developer-focused API template guide pages for ZZAI — an AI API builder. Include working code examples. Target developers who want to build this specific API type quickly.",
+                  },
+                  {
+                    role: "user",
+                    content: `Write an API template page for "${tmpl.name}". Keyword: "${tmpl.kw}". Return JSON: { title, metaTitle (60 chars), metaDescription (155 chars), content (750 words markdown: what this API does, H2 "Sample API Schema", H2 "Example Request/Response" with JSON code blocks, H2 "Build This in 11 Minutes with ZZAI", H2 "Common Customizations", CTA to try ZZAI free) }`,
+                  },
+                ],
+              });
+              return JSON.parse(gen.choices[0].message.content || "{}");
+            },
+            () => {
+              const title = `${tmpl.name} — Build in Minutes`;
+              return {
+                title,
+                metaTitle: `${tmpl.name} | ZZAI Templates`.slice(0, 60),
+                metaDescription: `Build a ${tmpl.name} with ZZAI in minutes.`.slice(0, 155),
+                content: buildExpandedSeoBody({
+                  title,
+                  keyword: tmpl.kw,
+                  slug: tmpl.slug,
+                  category: "template",
+                }),
+              };
+            },
+            tmpl.name,
+          );
           await db.insert(seoLandingPages).values({
             id: randomBytes(12).toString("hex"),
             slug: tmpl.slug,

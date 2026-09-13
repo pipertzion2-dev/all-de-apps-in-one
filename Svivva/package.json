@@ -35,6 +35,7 @@
     "orbit:ingest": "node scripts/orbit.mjs ingest",
     "orbit:research": "node scripts/orbit.mjs research",
     "marketing:execute": "node scripts/marketing-execute.mjs",
+    "orbit:finish-pipeline": "node scripts/finish-pipeline.mjs",
     "domain:cutover": "node scripts/domain-cutover.mjs",
     "domain:legacy-alias": "node scripts/attach-legacy-domain.mjs"
   },

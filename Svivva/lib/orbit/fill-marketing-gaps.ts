@@ -33,6 +33,7 @@ import { TARGET_TOTAL_MARKETING_PAGES, TARGET_TOOL_SEO_PAGES } from "@/lib/orbit
 import { ensureOrbitHubPages } from "@/lib/orbit/ensure-hub-pages";
 import { nativeToolsAsDiscoverable } from "@/lib/orbit/mini-app-curation";
 import { FEATURE_MINI_APPS, generateFeatureMiniAppSeoPages } from "@/lib/tools/feature-mini-apps";
+import { buildExpandedSeoBody } from "@/lib/seo/page-body";
 
 const BASE = getSiteUrl();
 
@@ -364,14 +365,31 @@ async function insertSeoPage(
 ): Promise<boolean> {
   try {
     const { scorePageContent } = await import("@/lib/seo/content-quality/score");
-    const quality = scorePageContent({
+    let content = page.content;
+    let quality = scorePageContent({
       title: page.title,
-      content: page.content,
+      content,
       howItWorks: page.subheadline || page.headline,
       whoItsFor: "Developers and teams building with AI on ZZAI",
-      hasFaq: /\[FAQ_JSON\]/i.test(page.content),
+      hasFaq: /\[FAQ_JSON\]/i.test(content),
     });
-    if (!quality.passed) return false;
+    if (!quality.passed) {
+      content = buildExpandedSeoBody({
+        title: page.title,
+        keyword: page.keyword,
+        slug: page.slug,
+        category,
+        toolUrl,
+      });
+      quality = scorePageContent({
+        title: page.title,
+        content,
+        howItWorks: page.subheadline || page.headline,
+        whoItsFor: "Developers and teams building with AI on ZZAI",
+        hasFaq: true,
+      });
+      if (!quality.passed) return false;
+    }
 
     const ex = await db
       .select({ id: seoLandingPages.id })
@@ -386,7 +404,7 @@ async function insertSeoPage(
       headline: page.headline,
       howItWorks: page.subheadline || page.headline,
       whoItsFor: "Developers and teams building with AI on ZZAI",
-      content: page.content,
+      content,
       metaTitle: page.metaTitle,
       metaDescription: page.metaDescription,
       category,
