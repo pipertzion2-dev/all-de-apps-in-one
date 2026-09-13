@@ -4565,10 +4565,7 @@ Return JSON:
                 title,
                 metaTitle: `ZZAI + ${integ.tool} - AI API Builder`.slice(0, 60),
                 metaDescription:
-                  `Build AI-powered ${integ.tool} integrations with ZZAI in minutes.`.slice(
-                    0,
-                    155,
-                  ),
+                  `Build AI-powered ${integ.tool} integrations with ZZAI in minutes.`.slice(0, 155),
                 content: buildExpandedSeoBody({
                   title,
                   keyword: integ.kw,
@@ -4696,8 +4693,10 @@ Return JSON:
               return {
                 title,
                 metaTitle: `AI API for ${ind.name} | ZZAI`.slice(0, 60),
-                metaDescription:
-                  `Build AI-powered ${ind.name} applications with ZZAI.`.slice(0, 155),
+                metaDescription: `Build AI-powered ${ind.name} applications with ZZAI.`.slice(
+                  0,
+                  155,
+                ),
                 content: buildExpandedSeoBody({
                   title,
                   keyword: ind.kw,

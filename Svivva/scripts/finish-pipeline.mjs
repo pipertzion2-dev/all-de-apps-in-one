@@ -46,16 +46,7 @@ const SEO_KEYWORDS = [
   "reduce openai api costs",
 ];
 
-const COMPETITORS = [
-  "Bubble",
-  "Zapier",
-  "n8n",
-  "LangChain",
-  "Retool",
-  "Make",
-  "Dify",
-  "Firebase",
-];
+const COMPETITORS = ["Bubble", "Zapier", "n8n", "LangChain", "Retool", "Make", "Dify", "Firebase"];
 
 const BLOG_TOPICS = [
   "How to Build an API Without Writing Code",
@@ -491,7 +482,11 @@ async function main() {
   }
 
   console.log("\n── auto-complete ──");
-  await orbitFetch(auth, "/api/orbit/auto-complete", { method: "POST", body: {}, timeoutMs: 300_000 });
+  await orbitFetch(auth, "/api/orbit/auto-complete", {
+    method: "POST",
+    body: {},
+    timeoutMs: 300_000,
+  });
 
   ({ json: status } = await orbitFetch(auth, "/api/orbit/status"));
   const completion = status.stepCompletion || {};
@@ -503,11 +498,7 @@ async function main() {
     if (merged[id]) merged[id] = true;
   }
   // Force done for steps we executed or that are copy-only
-  for (const id of [
-    ...SVIVVA_STEPS,
-    ...MINI_STEPS,
-    ...INDEX22_STEPS,
-  ]) {
+  for (const id of [...SVIVVA_STEPS, ...MINI_STEPS, ...INDEX22_STEPS]) {
     merged[id] = true;
   }
 
@@ -529,7 +520,9 @@ async function main() {
     pipelineMarked: allPipelineIds.length,
   });
 
-  console.log(`\n✓ Pipeline finish run complete. Open ${SITE}/dashboard/launchpad to verify 32/32.\n`);
+  console.log(
+    `\n✓ Pipeline finish run complete. Open ${SITE}/dashboard/launchpad to verify 32/32.\n`,
+  );
 }
 
 main().catch((e) => {
