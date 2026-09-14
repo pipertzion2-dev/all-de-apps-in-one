@@ -39,14 +39,15 @@ export type PreparedBlueprint = Record<Baloon8BlueprintQuadrant, PreparedQuadran
 
 function isBackgroundPixel(r: number, g: number, b: number): boolean {
   const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-  return lum > 232 && r > 225 && g > 225 && b > 225;
+  return lum > 220 && r > 215 && g > 215 && b > 215;
 }
 
-function cropQuadrantCanvas(img: CanvasImageSource, quadrant: Baloon8BlueprintQuadrant): HTMLCanvasElement {
+function cropQuadrantCanvas(
+  img: CanvasImageSource,
+  quadrant: Baloon8BlueprintQuadrant,
+): HTMLCanvasElement {
   const iw =
-    "naturalWidth" in img && img.naturalWidth
-      ? img.naturalWidth
-      : (img as HTMLCanvasElement).width;
+    "naturalWidth" in img && img.naturalWidth ? img.naturalWidth : (img as HTMLCanvasElement).width;
   const ih =
     "naturalHeight" in img && img.naturalHeight
       ? img.naturalHeight
@@ -64,7 +65,12 @@ function cropQuadrantCanvas(img: CanvasImageSource, quadrant: Baloon8BlueprintQu
   return canvas;
 }
 
-function trimBounds(canvas: HTMLCanvasElement): { minX: number; minY: number; maxX: number; maxY: number } {
+function trimBounds(canvas: HTMLCanvasElement): {
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+} {
   const ctx = canvas.getContext("2d")!;
   const { width, height, data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
   let minX = width;
@@ -105,7 +111,10 @@ function buildAlphaMap(source: HTMLCanvasElement): HTMLCanvasElement {
   return alpha;
 }
 
-function trimCanvas(source: HTMLCanvasElement, bounds: ReturnType<typeof trimBounds>): HTMLCanvasElement {
+function trimCanvas(
+  source: HTMLCanvasElement,
+  bounds: ReturnType<typeof trimBounds>,
+): HTMLCanvasElement {
   const w = bounds.maxX - bounds.minX + 1;
   const h = bounds.maxY - bounds.minY + 1;
   const trimmed = document.createElement("canvas");

@@ -61,9 +61,7 @@ function describeVerifyTarget(target) {
 async function tryProductionVerify(label, exitOnSuccess = true, skipRevision = false) {
   if (!verifyTargets.length) await loadVerifyTargets();
   let allOk = true;
-  const targets = skipRevision
-    ? verifyTargets.filter((t) => !t.expectedSha)
-    : verifyTargets;
+  const targets = skipRevision ? verifyTargets.filter((t) => !t.expectedSha) : verifyTargets;
   for (const target of targets) {
     const result = await verifyProductionLive({
       url: target.url,
@@ -156,7 +154,9 @@ while (Date.now() - started < timeoutMs) {
       if (blockedFor >= 30_000) {
         console.log("  GitHub reports blocked/queued — checking live production…");
         if (await tryProductionVerify("✓", false, true)) {
-          console.log("  Production pages live (GitHub blocked label is often stale — still waiting for deploy)…");
+          console.log(
+            "  Production pages live (GitHub blocked label is often stale — still waiting for deploy)…",
+          );
         }
       }
       if (blockedFor >= blockedFailFastMs) {

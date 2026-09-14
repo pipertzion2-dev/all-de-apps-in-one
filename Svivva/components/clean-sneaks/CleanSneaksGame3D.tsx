@@ -11,6 +11,7 @@ import {
 } from "@/lib/clean-sneaks/run-engine";
 import { readBestScore, shareScore, writeBestScore } from "@/lib/clean-sneaks/storage";
 import type { GameOverPayload, RunStats, SneakerAssetRef } from "@/lib/clean-sneaks/types";
+import { isPortraitViewport } from "@/lib/clean-sneaks/run-quality";
 import { CleanSneaksRunScene } from "./CleanSneaksRunScene";
 
 export type CleanSneaksGame3DProps = {
@@ -57,6 +58,7 @@ export function CleanSneaksGame3D({
   const [flashStreak, setFlashStreak] = useState(false);
   const [sceneKey, setSceneKey] = useState(0);
   const [popups, setPopups] = useState<{ text: string; life: number; color: string }[]>([]);
+  const [portrait, setPortrait] = useState(false);
 
   const emitStats = useCallback(() => {
     const s = stateRef.current;
@@ -106,6 +108,17 @@ export function CleanSneaksGame3D({
   const handleStreakFlash = useCallback(() => {
     setFlashStreak(true);
     window.setTimeout(() => setFlashStreak(false), 450);
+  }, []);
+
+  useEffect(() => {
+    const syncViewport = () => setPortrait(isPortraitViewport());
+    syncViewport();
+    window.addEventListener("resize", syncViewport);
+    window.addEventListener("orientationchange", syncViewport);
+    return () => {
+      window.removeEventListener("resize", syncViewport);
+      window.removeEventListener("orientationchange", syncViewport);
+    };
   }, []);
 
   useEffect(() => {
@@ -254,29 +267,46 @@ export function CleanSneaksGame3D({
           fullscreen ? "rounded-lg border border-white/10" : "rounded-xl border border-white/10"
         }`}
       >
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex flex-wrap items-start justify-between gap-2 p-3 sm:p-4">
-          <div className="space-y-1">
-            <p className="text-[10px] uppercase tracking-[0.25em] text-[#5B8DA8]/80">
-              {sneaker.label ?? "Walkers"} · 3D Run
-            </p>
-            <p className="text-lg font-bold tabular-nums text-foreground sm:text-xl">
+        <div
+          className={`pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-2 ${
+            portrait ? "px-2 py-1.5" : "p-3 sm:p-4"
+          }`}
+        >
+          <div className={portrait ? "space-y-0" : "space-y-1"}>
+            {!portrait && (
+              <p className="text-[10px] uppercase tracking-[0.25em] text-[#5B8DA8]/80">
+                {sneaker.label ?? "Walkers"} · 3D Run
+              </p>
+            )}
+            <p
+              className={`font-bold tabular-nums text-foreground ${portrait ? "text-base" : "text-lg sm:text-xl"}`}
+            >
               {hud.score.toLocaleString()}
             </p>
-            <p className="text-xs text-muted-foreground">
-              {hud.distance}m · Best {hud.bestScore.toLocaleString()}
-            </p>
+            {!portrait && (
+              <p className="text-xs text-muted-foreground">
+                {hud.distance}m · Best {hud.bestScore.toLocaleString()}
+              </p>
+            )}
           </div>
-          <div className="min-w-[140px] max-w-[200px] flex-1 space-y-1 text-right">
-            <div className="flex items-center justify-end gap-2">
-              <span className={`text-xs font-semibold uppercase tracking-wider ${cleanTone}`}>
+          <div
+            className={`space-y-1 text-right ${portrait ? "min-w-[110px] max-w-[150px]" : "min-w-[140px] max-w-[200px] flex-1"}`}
+          >
+            <div className="flex items-center justify-end gap-1.5">
+              <span
+                className={`font-semibold uppercase tracking-wider ${cleanTone} ${portrait ? "text-[10px]" : "text-xs"}`}
+              >
                 {hud.cleanLabel}
               </span>
-              <span className={`text-sm font-bold tabular-nums ${cleanTone}`} aria-live="polite">
+              <span
+                className={`font-bold tabular-nums ${cleanTone} ${portrait ? "text-xs" : "text-sm"}`}
+                aria-live="polite"
+              >
                 {cleanPct}%
               </span>
             </div>
             <div
-              className="h-2 overflow-hidden rounded-full bg-white/10"
+              className={`overflow-hidden rounded-full bg-white/10 ${portrait ? "h-1.5" : "h-2"}`}
               role="meter"
               aria-valuenow={cleanPct}
               aria-valuemin={0}
@@ -296,17 +326,19 @@ export function CleanSneaksGame3D({
                 }}
               />
             </div>
-            <p
-              className={`text-[11px] font-medium tracking-wide text-[#7EC8D9] transition-transform ${flashStreak ? "scale-110" : ""}`}
-            >
-              {hud.streakLabel}
-            </p>
+            {!portrait && (
+              <p
+                className={`text-[11px] font-medium tracking-wide text-[#7EC8D9] transition-transform ${flashStreak ? "scale-110" : ""}`}
+              >
+                {hud.streakLabel}
+              </p>
+            )}
           </div>
         </div>
 
         <div
-          className={`relative w-full ${fullscreen ? "min-h-[50vh] flex-1" : "h-[420px] sm:h-[480px]"}`}
-          style={fullscreen ? { minHeight: "min(60vh, 640px)" } : undefined}
+          className={`relative w-full ${fullscreen ? "min-h-0 flex-1" : "h-[420px] sm:h-[480px]"}`}
+          style={fullscreen && !portrait ? { minHeight: "min(60vh, 640px)" } : undefined}
         >
           <CleanSneaksRunScene
             key={sceneKey}
