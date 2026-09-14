@@ -20,7 +20,7 @@ export const BALOON8_WALKER_SCALE_MOBILE = 0.36;
 /** Smaller per-foot scale so a left/right pair fits the lane. */
 export const BALOON8_PAIR_SCALE = 0.26;
 export const BALOON8_PAIR_SCALE_MOBILE = 0.34;
-export const BALOON8_PAIR_SCALE_PORTRAIT = 0.38;
+export const BALOON8_PAIR_SCALE_PORTRAIT = 0.27;
 
 const IRIDESCENCE = [0x2a9d8f, 0x5b8da8, 0x7b4397, 0x3d9970, 0x4cc9c0];
 

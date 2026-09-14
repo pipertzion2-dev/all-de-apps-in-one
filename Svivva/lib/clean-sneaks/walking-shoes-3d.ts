@@ -53,10 +53,10 @@ function createShoeBillboard(
     toneMapped: false,
   });
   const sprite = new THREE.Sprite(mat);
-  const baseW = portrait ? 0.92 : mobile ? 1.05 : 0.92;
+  const baseW = portrait ? 0.68 : mobile ? 1.05 : 0.92;
   const h = baseW / aspect;
   sprite.scale.set(baseW, h, 1);
-  sprite.position.y = portrait ? 0.22 : mobile ? 0.26 : 0.22;
+  sprite.position.y = portrait ? 0.18 : mobile ? 0.26 : 0.22;
   sprite.renderOrder = 8;
   sprite.frustumCulled = false;
 
@@ -265,7 +265,7 @@ export function updateWalkingShoes3D(
   const dt = 0.016;
   const t = performance.now() / 1000;
   const stride = args.airborne ? 0 : Math.sin(phase);
-  const lateral = args.portrait ? 0.28 : 0.34;
+  const lateral = args.portrait ? 0.2 : 0.34;
 
   const bob = args.airborne ? 0.14 : Math.max(0, Math.sin(phase * 2)) * 0.05;
   shoes.shoePivot.rotation.x = Math.sin(phase) * (args.airborne ? 0.04 : 0.06);

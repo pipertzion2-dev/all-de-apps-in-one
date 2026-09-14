@@ -18,6 +18,7 @@ import {
 import {
   detectRunQuality,
   isPortraitViewport,
+  portraitFramingBoost,
   runQualityFlags,
   type RunQuality,
 } from "@/lib/clean-sneaks/run-quality";
@@ -48,7 +49,16 @@ type CameraRig = { ox: number; oy: number; oz: number; lookY: number; lookZ: num
 
 function cameraRigFor(mobile: boolean, portrait: boolean): CameraRig {
   if (mobile && portrait) {
-    return { ox: 1.55, oy: 0.62, oz: 1.35, lookY: 0.14, lookZ: -2.4, fov: 62 };
+    // Centered, pulled back, wide FOV — keeps both shoes in a tall narrow frame.
+    const boost = portraitFramingBoost();
+    return {
+      ox: 0.55 * boost,
+      oy: 0.88 * boost,
+      oz: 2.35 * boost,
+      lookY: 0.2,
+      lookZ: -2.85,
+      fov: 68 + (boost - 1) * 10,
+    };
   }
   if (mobile) {
     return { ox: 2.35, oy: 1.05, oz: 2.05, lookY: 0.32, lookZ: -3.8, fov: 48 };
@@ -106,7 +116,9 @@ function FollowCamera({
     camera.lookAt(lookAt.current);
 
     if (camera instanceof THREE.PerspectiveCamera) {
-      camera.fov = THREE.MathUtils.lerp(camera.fov, rig.fov + speedT * 6, dt * 3);
+      const speedFov = portrait ? speedT * 3 : speedT * 6;
+      const maxFov = portrait ? rig.fov + 4 : rig.fov + 8;
+      camera.fov = THREE.MathUtils.lerp(camera.fov, Math.min(rig.fov + speedFov, maxFov), dt * 3);
       camera.updateProjectionMatrix();
     }
   });
@@ -419,7 +431,7 @@ function PlayerShoes({
 
     host.position.x = laneWorldX(s.laneX);
     host.position.y = s.y < 0 ? -s.y / 120 : 0;
-    host.rotation.y = portrait ? 0.08 : mobile ? 0.22 : 0;
+    host.rotation.y = portrait ? 0 : mobile ? 0.22 : 0;
 
     updateWalkingShoes3D(shoes, {
       walkPhase: s.walkPhase,
@@ -600,11 +612,19 @@ export function CleanSneaksRunScene({
 }: CleanSneaksRunSceneProps) {
   const [qualityTier, setQualityTier] = useState<RunQuality>("mobile");
   const [portrait, setPortrait] = useState(false);
+  const [viewport, setViewport] = useState({ w: 0, h: 0 });
   const quality = useMemo(() => runQualityFlags(qualityTier, portrait), [qualityTier, portrait]);
+  const portraitRig = useMemo(
+    () => (portrait ? cameraRigFor(true, true) : null),
+    [portrait, viewport.w, viewport.h],
+  );
 
   useEffect(() => {
     setQualityTier(detectRunQuality());
-    const syncViewport = () => setPortrait(isPortraitViewport());
+    const syncViewport = () => {
+      setPortrait(isPortraitViewport());
+      setViewport({ w: window.innerWidth, h: window.innerHeight });
+    };
     syncViewport();
     window.addEventListener("resize", syncViewport);
     window.addEventListener("orientationchange", syncViewport);
@@ -621,10 +641,12 @@ export function CleanSneaksRunScene({
         shadows={quality.castShadows}
         dpr={quality.dpr}
         camera={{
-          fov: portrait ? 62 : 48,
+          fov: portraitRig?.fov ?? 48,
           near: 0.08,
           far: 140,
-          position: portrait ? [1.55, 0.62, 1.35] : [2.35, 1.05, 2.05],
+          position: portraitRig
+            ? [portraitRig.ox, portraitRig.oy, portraitRig.oz]
+            : [2.35, 1.05, 2.05],
         }}
         gl={{
           antialias: quality.antialias,
