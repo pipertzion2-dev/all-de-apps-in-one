@@ -67,7 +67,7 @@ export function createWalkingShoes3D(blueprint: THREE.Texture, mobile = false): 
     }),
   );
   shieldRing.rotation.x = Math.PI / 2;
-  shieldRing.position.y = 0.28;
+  shieldRing.position.y = 0.42;
   shieldRing.visible = false;
 
   const shieldGlow = new THREE.PointLight(0x5b8da8, 0, 4);
