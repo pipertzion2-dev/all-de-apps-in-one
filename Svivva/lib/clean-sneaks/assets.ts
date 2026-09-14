@@ -3,9 +3,12 @@ import type { CleanLabel, SneakerAssetRef } from "./types";
 /** Default replaceable custom sneaker — see public/assets/clean-sneaks/README.md */
 export const DEFAULT_PLAYER_SHOE_URL = "/assets/clean-sneaks/player-shoe.png";
 
+/** Baloon8 car-shoe blueprint reference (four orthographic views). */
+export const BALOON8_BLUEPRINT_URL = "/assets/clean-sneaks/baloon8-blueprint.jpg";
+
 export const DEFAULT_SNEAKER: SneakerAssetRef = {
   spriteUrl: DEFAULT_PLAYER_SHOE_URL,
-  label: "ZZAI Custom",
+  label: "Baloon8",
   source: "default",
 };
 
