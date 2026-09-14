@@ -5,7 +5,8 @@ describe("run-quality", () => {
   it("mobile tier disables heavy GPU features", () => {
     const flags = runQualityFlags("mobile");
     expect(flags.postFx).toBe(false);
-    expect(flags.pmremEnvironment).toBe(false);
+    expect(flags.pmremEnvironment).toBe(true);
+    expect(flags.pmremLite).toBe(true);
     expect(flags.castShadows).toBe(false);
     expect(flags.contactShadows).toBe(false);
     expect(flags.sky).toBe(false);

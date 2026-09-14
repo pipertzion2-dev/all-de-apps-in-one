@@ -19,22 +19,27 @@ function runnerBubbleCount(): number {
   return flags.bubbleCount;
 }
 
-function buildRunnerShoeSafe(preferredCount: number): Baloon8WalkerShoe {
-  const reduced = Math.max(180, Math.floor(preferredCount * 0.45));
-  try {
-    return buildBaloon8RunnerShoe(preferredCount);
-  } catch {
-    return buildBaloon8RunnerShoe(reduced);
+function buildRunnerShoeSafe(preferredCount: number, mobile: boolean): Baloon8WalkerShoe {
+  const counts = [preferredCount, Math.max(180, Math.floor(preferredCount * 0.45)), 120];
+  let lastErr: unknown;
+  for (const count of counts) {
+    try {
+      return buildBaloon8RunnerShoe(count, { mobile });
+    } catch (err) {
+      lastErr = err;
+      console.warn("[createWalkingShoes3D] shoe build retry", count, err);
+    }
   }
+  throw lastErr instanceof Error ? lastErr : new Error("Baloon8 runner shoe build failed");
 }
 
 /** Single Baloon8 blueprint mockup — same orientation as homepage preview. */
-export function createWalkingShoes3D(): WalkingShoes3D {
+export function createWalkingShoes3D(mobile = false): WalkingShoes3D {
   const root = new THREE.Group();
   const count = runnerBubbleCount();
 
   const shoePivot = new THREE.Group();
-  const shoe = buildRunnerShoeSafe(count);
+  const shoe = buildRunnerShoeSafe(count, mobile);
   shoePivot.add(shoe.root);
 
   const shieldRing = new THREE.Mesh(

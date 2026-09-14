@@ -356,35 +356,27 @@ function DynamicEntities({ stateRef }: { stateRef: React.MutableRefObject<RunEng
   return <group ref={groupRef} />;
 }
 
-function PlayerShoes({ stateRef }: { stateRef: React.MutableRefObject<RunEngineState> }) {
-  const shoesRef = useRef<WalkingShoes3D | null>(null);
+function PlayerShoes({
+  stateRef,
+  mobile,
+}: {
+  stateRef: React.MutableRefObject<RunEngineState>;
+  mobile: boolean;
+}) {
+  const shoes = useMemo(() => createWalkingShoes3D(mobile), [mobile]);
   const hostRef = useRef<THREE.Group>(null);
-
-  useEffect(() => {
-    try {
-      shoesRef.current = createWalkingShoes3D();
-      hostRef.current?.add(shoesRef.current.root);
-    } catch (err) {
-      console.error("[CleanSneaksRunScene] Baloon8 shoe build failed", err);
-    }
-    return () => {
-      if (shoesRef.current && hostRef.current) {
-        hostRef.current.remove(shoesRef.current.root);
-      }
-    };
-  }, []);
 
   useFrame(() => {
     const s = stateRef.current;
     const host = hostRef.current;
-    if (!host || !shoesRef.current) return;
+    if (!host) return;
     const now = performance.now();
 
     host.position.x = laneWorldX(s.laneX);
     host.position.y = s.y < 0 ? -s.y / 120 : 0;
     host.rotation.y = 0;
 
-    updateWalkingShoes3D(shoesRef.current, {
+    updateWalkingShoes3D(shoes, {
       walkPhase: s.walkPhase,
       airborne: !s.grounded,
       dirt: 1 - s.cleanliness / 100,
@@ -394,7 +386,11 @@ function PlayerShoes({ stateRef }: { stateRef: React.MutableRefObject<RunEngineS
     });
   });
 
-  return <group ref={hostRef} />;
+  return (
+    <group ref={hostRef}>
+      <primitive object={shoes.root} />
+    </group>
+  );
 }
 
 function World({ stateRef, running, onGameOver, onStreakFlash, onStatsTick, quality }: SceneProps) {
@@ -466,7 +462,7 @@ function World({ stateRef, running, onGameOver, onStreakFlash, onStatsTick, qual
       <directionalLight position={[-4, 3, -6]} intensity={0.55} color="#7ec8d9" />
       <pointLight position={[-2, 2, 3]} intensity={0.45} color="#d94f9c" distance={18} />
 
-      <Baloon8RunEnvironment enabled={quality.pmremEnvironment} />
+      <Baloon8RunEnvironment lite={quality.pmremLite} />
 
       <FollowCamera stateRef={stateRef} />
       <Road stateRef={stateRef} castShadows={quality.castShadows} />
@@ -485,7 +481,7 @@ function World({ stateRef, running, onGameOver, onStreakFlash, onStatsTick, qual
         />
       ) : null}
 
-      <PlayerShoes stateRef={stateRef} />
+      <PlayerShoes stateRef={stateRef} mobile={quality.mobile} />
       <DynamicEntities stateRef={stateRef} />
 
       {quality.contactShadows ? (
