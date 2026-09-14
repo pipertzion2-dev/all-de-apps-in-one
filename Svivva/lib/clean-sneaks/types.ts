@@ -22,6 +22,8 @@ export type GamePhase = "idle" | "countdown" | "running" | "over";
 export interface SneakerAssetRef {
   /** Public URL or data URL for the 2D side sprite */
   spriteUrl: string;
+  /** Draw animated walking sneaker pair instead of a flat sprite (default gameplay). */
+  useWalkingSprite?: boolean;
   /** Optional future Three.js / GLB path */
   modelUrl?: string;
   /** Display name for HUD / share */

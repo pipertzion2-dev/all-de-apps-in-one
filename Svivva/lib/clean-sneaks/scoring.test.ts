@@ -45,6 +45,7 @@ describe("clean-sneaks scoring", () => {
   it("resolves default sneaker asset path for replacement", () => {
     const s = resolvePlayerSneaker();
     expect(s.spriteUrl).toBe("/assets/clean-sneaks/player-shoe.png");
+    expect(s.useWalkingSprite).toBe(true);
     const custom = resolvePlayerSneaker({
       spriteUrl: "/assets/clean-sneaks/user-design.png",
       source: "user",
@@ -52,5 +53,6 @@ describe("clean-sneaks scoring", () => {
     });
     expect(custom.source).toBe("user");
     expect(custom.spriteUrl).toContain("user-design");
+    expect(custom.useWalkingSprite).toBe(false);
   });
 });

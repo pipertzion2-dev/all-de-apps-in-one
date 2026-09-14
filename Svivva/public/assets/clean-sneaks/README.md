@@ -2,21 +2,15 @@
 
 ## Replace the custom sneaker here
 
-**Primary player sprite (required):**
+**Gameplay (default):** the runner draws an animated **pair of walking sneakers** on canvas (`lib/clean-sneaks/walking-shoes-renderer.ts`) — not the car-shoe blueprint.
+
+**Optional custom flat sprite** (user/AI designs via `resolvePlayerSneaker({ spriteUrl, useWalkingSprite: false })`):
 
 ```
 public/assets/clean-sneaks/player-shoe.png
 ```
 
-Optional JPG fallback:
-
-```
-public/assets/clean-sneaks/player-shoe.jpg
-```
-
-Recommended: **side-profile PNG with transparent background**, facing right, ~900×300 or similar aspect.
-
-The current file is cropped from the official ZZAI Three.js shoe blueprint (`blueprint-source.jpg`).
+The bundled PNG is the Baloon8 car-shoe side view (wheels) — used for marketing/3D reference only, not in-game by default.
 
 ## Baloon8 3D car-shoe
 
