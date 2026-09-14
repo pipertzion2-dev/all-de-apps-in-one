@@ -7,11 +7,20 @@ export const DEFAULT_PLAYER_SHOE_URL = "/assets/clean-sneaks/player-shoe.png";
 export const BALOON8_BLUEPRINT_URL = "/assets/clean-sneaks/baloon8-blueprint.jpg";
 
 export const DEFAULT_SNEAKER: SneakerAssetRef = {
-  spriteUrl: DEFAULT_PLAYER_SHOE_URL,
+  spriteUrl: "",
   useWalkingSprite: true,
-  label: "Baloon8 Walkers",
+  label: "Walkers",
   source: "default",
 };
+
+/** True when the game should fetch a custom flat PNG (never the legacy car-shoe). */
+export function shouldLoadSneakerSprite(sneaker: SneakerAssetRef): boolean {
+  if (sneaker.useWalkingSprite !== false) return false;
+  const url = sneaker.spriteUrl?.trim() ?? "";
+  if (!url) return false;
+  if (url.includes("player-shoe")) return false;
+  return true;
+}
 
 /**
  * Resolve which sneaker the player wears.

@@ -10,7 +10,12 @@ import {
   OBSTACLE_META,
   POWERUP_META,
 } from "@/lib/clean-sneaks/constants";
-import { cleanLabelFrom, resolvePlayerSneaker, streakLabelFrom } from "@/lib/clean-sneaks/assets";
+import {
+  cleanLabelFrom,
+  resolvePlayerSneaker,
+  shouldLoadSneakerSprite,
+  streakLabelFrom,
+} from "@/lib/clean-sneaks/assets";
 import {
   computeFrameScore,
   readBestScore,
@@ -270,7 +275,7 @@ export function CleanSneaksGame({
   }, []);
 
   useEffect(() => {
-    if (sneaker.useWalkingSprite !== false) {
+    if (!shouldLoadSneakerSprite(sneaker)) {
       stateRef.current.shoeImg = null;
       return;
     }
@@ -280,7 +285,7 @@ export function CleanSneaksGame({
     img.onload = () => {
       stateRef.current.shoeImg = img;
     };
-  }, [sneaker.spriteUrl, sneaker.useWalkingSprite]);
+  }, [sneaker]);
 
   useEffect(() => {
     if (!active) return;
@@ -622,15 +627,15 @@ export function CleanSneaksGame({
 
       const shoe = s.shoeImg;
       const dirt = 1 - s.cleanliness / 100;
-      const useWalkingSprite = sneaker.useWalkingSprite !== false;
+      const useWalkingSprite = !shouldLoadSneakerSprite(sneaker);
 
       if (useWalkingSprite) {
-        drawWalkingSneakerPair(ctx, playerX, smoothY + 18, {
+        drawWalkingSneakerPair(ctx, playerX, smoothY + 16, {
           walkPhase: s.walkPhase,
           airborne: !s.grounded,
           dirt,
           freshGlow: s.cleanliness >= 80,
-          scale: 1,
+          scale: 1.35,
         });
       } else if (shoe && shoe.complete) {
         const sw = 100;
@@ -666,12 +671,12 @@ export function CleanSneaksGame({
         }
         ctx.restore();
       } else {
-        drawWalkingSneakerPair(ctx, playerX, smoothY + 18, {
+        drawWalkingSneakerPair(ctx, playerX, smoothY + 16, {
           walkPhase: s.walkPhase,
           airborne: !s.grounded,
           dirt,
           freshGlow: s.cleanliness >= 80,
-          scale: 1,
+          scale: 1.35,
         });
       }
 
@@ -842,7 +847,7 @@ export function CleanSneaksGame({
         <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex flex-wrap items-start justify-between gap-2 p-3 sm:p-4">
           <div className="space-y-1">
             <p className="text-[10px] uppercase tracking-[0.25em] text-[#5B8DA8]/80">
-              Clean Sneaks
+              Walkers · Clean Sneaks
             </p>
             <p className="text-lg font-bold tabular-nums text-foreground sm:text-xl">
               {hud.score.toLocaleString()}
