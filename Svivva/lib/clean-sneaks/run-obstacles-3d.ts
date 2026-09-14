@@ -44,7 +44,12 @@ export function buildObstacle3D(kind: ObstacleKind): THREE.Object3D {
     pool.position.y = 0.05;
     root.add(rim, pool);
   } else if (kind === "pedestrian") {
-    const cloth = new THREE.MeshPhysicalMaterial({ color: meta.color, roughness: 0.75, sheen: 0.3, sheenColor: new THREE.Color(0xffffff) });
+    const cloth = new THREE.MeshPhysicalMaterial({
+      color: meta.color,
+      roughness: 0.75,
+      sheen: 0.3,
+      sheenColor: new THREE.Color(0xffffff),
+    });
     const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.16, 0.75, 8, 12), cloth);
     body.position.y = 1.05;
     const head = new THREE.Mesh(
@@ -54,7 +59,11 @@ export function buildObstacle3D(kind: ObstacleKind): THREE.Object3D {
     head.position.y = 1.62;
     root.add(body, head);
   } else if (kind === "bike") {
-    const frameMat = new THREE.MeshPhysicalMaterial({ color: meta.color, roughness: 0.35, metalness: 0.4 });
+    const frameMat = new THREE.MeshPhysicalMaterial({
+      color: meta.color,
+      roughness: 0.35,
+      metalness: 0.4,
+    });
     const tireMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.95 });
     const w1 = new THREE.Mesh(new THREE.TorusGeometry(0.34, 0.05, 12, 32), tireMat);
     w1.rotation.x = Math.PI / 2;

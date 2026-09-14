@@ -1950,7 +1950,10 @@ export default function LandingPage() {
                       </Link>
                     </li>
                     <li>
-                      <Link href="/clean-sneaks" className="hover:text-foreground transition-colors">
+                      <Link
+                        href="/clean-sneaks"
+                        className="hover:text-foreground transition-colors"
+                      >
                         Clean Sneaks
                       </Link>
                     </li>

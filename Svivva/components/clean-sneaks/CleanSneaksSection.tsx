@@ -86,8 +86,8 @@ export function CleanSneaksSection() {
               KEEP &apos;EM FRESH.
             </p>
             <p className="mt-5 max-w-md text-sm leading-relaxed text-white/70 sm:text-base lg:max-w-none">
-              The Baloon8 car-shoe — iridescent bubble coat, glowing grille, transparent wheels,
-              and a footwell lined with the crest mandala. Built in advanced Three.js from your
+              The Baloon8 car-shoe — iridescent bubble coat, glowing grille, transparent wheels, and
+              a footwell lined with the crest mandala. Built in advanced Three.js from your
               four-side mockup. Now run the streets and keep them clean.
             </p>
 

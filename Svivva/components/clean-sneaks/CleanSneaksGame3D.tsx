@@ -145,7 +145,8 @@ export function CleanSneaksGame3D({
       }
       if (k === "arrowleft" || k === "a") shiftLane(stateRef.current, -1);
       else if (k === "arrowright" || k === "d") shiftLane(stateRef.current, 1);
-      else if (k === " " || k === "arrowup" || k === "w" || e.code === "Space") jumpRun(stateRef.current);
+      else if (k === " " || k === "arrowup" || k === "w" || e.code === "Space")
+        jumpRun(stateRef.current);
     };
     window.addEventListener("keydown", onKey, { passive: false });
     return () => window.removeEventListener("keydown", onKey);
@@ -303,7 +304,9 @@ export function CleanSneaksGame3D({
           </div>
         </div>
 
-        <div className={`relative min-h-0 w-full ${fullscreen ? "flex-1" : "h-[420px] sm:h-[480px]"}`}>
+        <div
+          className={`relative min-h-0 w-full ${fullscreen ? "flex-1" : "h-[420px] sm:h-[480px]"}`}
+        >
           <CleanSneaksRunScene
             key={sceneKey}
             stateRef={stateRef}

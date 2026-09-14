@@ -48,7 +48,13 @@ function getSoleMaterial(): THREE.MeshPhysicalMaterial {
   return soleMat;
 }
 
-function roundedBox(w: number, h: number, d: number, radius: number, mat: THREE.Material): THREE.Mesh {
+function roundedBox(
+  w: number,
+  h: number,
+  d: number,
+  radius: number,
+  mat: THREE.Material,
+): THREE.Mesh {
   const shape = new THREE.Shape();
   const r = Math.min(radius, w / 2, h / 2);
   shape.moveTo(-w / 2 + r, -h / 2);
@@ -60,7 +66,13 @@ function roundedBox(w: number, h: number, d: number, radius: number, mat: THREE.
   shape.quadraticCurveTo(-w / 2, h / 2, -w / 2, h / 2 - r);
   shape.lineTo(-w / 2, -h / 2 + r);
   shape.quadraticCurveTo(-w / 2, -h / 2, -w / 2 + r, -h / 2);
-  const geo = new THREE.ExtrudeGeometry(shape, { depth: d, bevelEnabled: true, bevelSize: 0.04, bevelThickness: 0.04, bevelSegments: 3 });
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    depth: d,
+    bevelEnabled: true,
+    bevelSize: 0.04,
+    bevelThickness: 0.04,
+    bevelSegments: 3,
+  });
   geo.center();
   const mesh = new THREE.Mesh(geo, mat);
   mesh.castShadow = true;
@@ -118,10 +130,7 @@ function buildShoe(side: -1 | 1): THREE.Group {
   swoosh.rotation.y = side * 0.35;
   swoosh.rotation.z = -0.25;
 
-  const tongue = new THREE.Mesh(
-    new THREE.BoxGeometry(0.22, 0.06, 0.38),
-    leather,
-  );
+  const tongue = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.06, 0.38), leather);
   tongue.position.set(0, 0.32, 0.28);
   tongue.rotation.x = -0.35;
 

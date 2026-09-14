@@ -6,11 +6,7 @@ import { ContactShadows, Environment, Sky, Sparkles } from "@react-three/drei";
 import * as THREE from "three";
 import { POWERUP_META } from "@/lib/clean-sneaks/constants";
 import { buildObstacle3D, buildPowerUp3D } from "@/lib/clean-sneaks/run-obstacles-3d";
-import {
-  laneWorldX,
-  stepRunEngine,
-  type RunEngineState,
-} from "@/lib/clean-sneaks/run-engine";
+import { laneWorldX, stepRunEngine, type RunEngineState } from "@/lib/clean-sneaks/run-engine";
 import {
   asphaltMaterial,
   buildingFacadeTexture,
@@ -51,7 +47,11 @@ function FollowCamera({ stateRef }: { stateRef: React.MutableRefObject<RunEngine
 
     pos.current.x = THREE.MathUtils.lerp(pos.current.x, px * 0.32, Math.min(1, dt * 4.5));
     lookAt.current.x = THREE.MathUtils.lerp(lookAt.current.x, px * 0.5, Math.min(1, dt * 5.5));
-    lookAt.current.y = THREE.MathUtils.lerp(lookAt.current.y, 0.85 + (s.y < 0 ? -s.y / 100 : 0), dt * 6);
+    lookAt.current.y = THREE.MathUtils.lerp(
+      lookAt.current.y,
+      0.85 + (s.y < 0 ? -s.y / 100 : 0),
+      dt * 6,
+    );
     pos.current.z = THREE.MathUtils.lerp(pos.current.z, 10.2 - speedT * 0.8, dt * 2);
 
     const shake = s.shake * 0.012;
@@ -132,10 +132,20 @@ function Road({ stateRef }: { stateRef: React.MutableRefObject<RunEngineState> }
               </mesh>
             </group>
           ))}
-          <mesh position={[-4.8, 0.08, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow material={sidewalk}>
+          <mesh
+            position={[-4.8, 0.08, 0]}
+            rotation={[-Math.PI / 2, 0, 0]}
+            receiveShadow
+            material={sidewalk}
+          >
             <planeGeometry args={[1.6, SEG_LEN]} />
           </mesh>
-          <mesh position={[4.8, 0.08, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow material={sidewalk}>
+          <mesh
+            position={[4.8, 0.08, 0]}
+            rotation={[-Math.PI / 2, 0, 0]}
+            receiveShadow
+            material={sidewalk}
+          >
             <planeGeometry args={[1.6, SEG_LEN]} />
           </mesh>
           <mesh position={[-3.85, 0.12, 0]} castShadow receiveShadow>
@@ -365,14 +375,7 @@ function PlayerShoes({ stateRef }: { stateRef: React.MutableRefObject<RunEngineS
   return <group ref={hostRef} />;
 }
 
-function World({
-  stateRef,
-  running,
-  onGameOver,
-  onStreakFlash,
-  onStatsTick,
-  mobile,
-}: SceneProps) {
+function World({ stateRef, running, onGameOver, onStreakFlash, onStatsTick, mobile }: SceneProps) {
   const tickRef = useRef(0);
   const sunRef = useRef<THREE.DirectionalLight>(null);
   const { scene } = useThree();
@@ -441,7 +444,14 @@ function World({
       <StreetLights />
       <SpeedStreaks stateRef={stateRef} />
 
-      <Sparkles count={mobile ? 40 : 80} scale={[14, 6, 50]} size={1.2} speed={0.35} opacity={0.25} color="#7ec8d9" />
+      <Sparkles
+        count={mobile ? 40 : 80}
+        scale={[14, 6, 50]}
+        size={1.2}
+        speed={0.35}
+        opacity={0.25}
+        color="#7ec8d9"
+      />
 
       <PlayerShoes stateRef={stateRef} />
       <DynamicEntities stateRef={stateRef} />

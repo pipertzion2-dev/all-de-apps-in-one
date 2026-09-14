@@ -84,11 +84,7 @@ export default function CleanSneaksPage() {
               </div>
             }
           >
-            <CleanSneaksGame3D
-              active
-              fullscreen
-              onExit={() => router.push("/#clean-sneaks")}
-            />
+            <CleanSneaksGame3D active fullscreen onExit={() => router.push("/#clean-sneaks")} />
           </SceneErrorBoundary>
         </div>
       </div>
