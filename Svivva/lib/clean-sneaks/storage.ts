@@ -57,7 +57,7 @@ export async function shareScore(payload: {
       await navigator.share({
         title: "CLEAN SNEAKS",
         text,
-        url: "https://zzaizzai.com/#clean-sneaks",
+        url: "https://zzaizzai.com/clean-sneaks",
       });
       return "shared";
     }

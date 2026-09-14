@@ -18,6 +18,7 @@ import {
   shareScore,
   writeBestScore,
 } from "@/lib/clean-sneaks/storage";
+import { drawWalkingSneakerPair } from "@/lib/clean-sneaks/walking-shoes-renderer";
 import type {
   GameOverPayload,
   ObstacleKind,
@@ -141,6 +142,7 @@ export function CleanSneaksGame({
     best: 0,
     cleanAcc: 0,
     lastDirtAt: 0,
+    walkPhase: 0,
   });
 
   const emitStats = useCallback(() => {
@@ -185,6 +187,7 @@ export function CleanSneaksGame({
     s.shake = 0;
     s.cleanAcc = 0;
     s.lastDirtAt = 0;
+    s.walkPhase = 0;
     s.best = readBestScore();
     setGameOver(null);
     setShareMsg(null);
@@ -288,7 +291,7 @@ export function CleanSneaksGame({
     return () => {
       alive = false;
     };
-  }, [sneaker.spriteUrl]);
+  }, [sneaker]);
 
   useEffect(() => {
     if (!active) return;
@@ -508,6 +511,10 @@ export function CleanSneaksGame({
       s.popups = s.popups.filter((p) => p.life > 0);
       s.shake *= Math.max(0, 1 - dt * 8);
 
+      if (s.running && s.grounded) {
+        s.walkPhase = (s.walkPhase + dt * Math.max(1.1, s.speed / 220)) % 1;
+      }
+
       const shx = (Math.random() - 0.5) * s.shake;
       const shy = (Math.random() - 0.5) * s.shake;
       ctx.save();
@@ -664,10 +671,13 @@ export function CleanSneaksGame({
         }
         ctx.restore();
       } else {
-        ctx.fillStyle = "#5B8DA8";
-        ctx.fillRect(playerX, smoothY - 24, 70, 28);
-        ctx.fillStyle = "#D94F9C";
-        ctx.fillRect(playerX + 50, smoothY - 18, 24, 16);
+        drawWalkingSneakerPair(ctx, playerX, smoothY + 16, {
+          walkPhase: s.walkPhase,
+          airborne: !s.grounded,
+          dirt,
+          freshGlow: s.cleanliness >= 80,
+          scale: 1.35,
+        });
       }
 
       for (const p of s.particles) {

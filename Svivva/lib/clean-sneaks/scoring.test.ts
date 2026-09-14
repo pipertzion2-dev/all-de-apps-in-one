@@ -3,6 +3,7 @@ import {
   cleanLabelFrom,
   cleanlinessMultiplier,
   resolvePlayerSneaker,
+  shouldLoadSneakerSprite,
   streakLabelFrom,
   streakMultiplier,
 } from "@/lib/clean-sneaks/assets";
@@ -53,5 +54,23 @@ describe("clean-sneaks scoring", () => {
     });
     expect(custom.source).toBe("user");
     expect(custom.spriteUrl).toContain("user-design");
+    expect(custom.useWalkingSprite).toBe(false);
+  });
+
+  it("never loads the legacy car-shoe PNG in gameplay", () => {
+    expect(shouldLoadSneakerSprite(resolvePlayerSneaker())).toBe(false);
+    expect(
+      shouldLoadSneakerSprite(
+        resolvePlayerSneaker({ spriteUrl: "/assets/clean-sneaks/player-shoe.png" }),
+      ),
+    ).toBe(false);
+    expect(
+      shouldLoadSneakerSprite(
+        resolvePlayerSneaker({
+          spriteUrl: "/assets/clean-sneaks/user-design.png",
+          useWalkingSprite: false,
+        }),
+      ),
+    ).toBe(true);
   });
 });

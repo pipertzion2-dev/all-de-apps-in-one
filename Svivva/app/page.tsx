@@ -8,6 +8,7 @@ import { ClientErrorBoundary } from "@/components/client-error-boundary";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { runBodyLayerHygiene } from "@/lib/body-layer-cleanup";
 import { usePlatform } from "@/lib/platform-context";
 import { ZzaiModeToggle } from "@/components/zzai-mode-toggle";
 import Link from "next/link";
@@ -45,6 +46,11 @@ const PlatformFeatureHub = dynamic(
 );
 const CleanSneaksSection = dynamic(
   () => import("@/components/clean-sneaks/CleanSneaksSection").then((m) => m.CleanSneaksSection),
+  { ssr: false },
+);
+const CleanSneaksLazyMount = dynamic(
+  () =>
+    import("@/components/clean-sneaks/CleanSneaksLazyMount").then((m) => m.CleanSneaksLazyMount),
   { ssr: false },
 );
 const features = [
@@ -193,20 +199,12 @@ export default function LandingPage() {
   }, []);
 
   useEffect(() => {
-    document
-      .querySelectorAll(
-        "body > canvas, body > div[aria-hidden].fixed, body > div.fixed.inset-0, body > [data-svivva-feature-bg]",
-      )
-      .forEach((el) => el.remove());
+    runBodyLayerHygiene();
   }, []);
 
   useEffect(() => {
     if (!flipComplete) return;
-    document
-      .querySelectorAll(
-        "body > canvas, body > div[aria-hidden].fixed, body > div.fixed.inset-0, body > [data-svivva-feature-bg]",
-      )
-      .forEach((el) => el.remove());
+    runBodyLayerHygiene();
   }, [flipComplete]);
 
   useEffect(() => {
@@ -1886,7 +1884,35 @@ export default function LandingPage() {
             </div>
           </section>
 
-          <CleanSneaksSection />
+          {flipComplete ? (
+            <ClientErrorBoundary
+              fallback={
+                <section
+                  id="clean-sneaks"
+                  className="border-t border-white/10 py-16 text-center text-sm text-muted-foreground"
+                >
+                  Clean Sneaks is temporarily unavailable.{" "}
+                  <Link href="/clean-sneaks" className="text-[#5B8DA8] underline">
+                    Open the game
+                  </Link>
+                  .
+                </section>
+              }
+            >
+              <CleanSneaksLazyMount
+                placeholder={
+                  <section
+                    id="clean-sneaks"
+                    className="border-t border-white/10 py-20 text-center text-sm text-muted-foreground"
+                  >
+                    Loading Clean Sneaks…
+                  </section>
+                }
+              >
+                <CleanSneaksSection />
+              </CleanSneaksLazyMount>
+            </ClientErrorBoundary>
+          ) : null}
 
           <footer className="border-t border-white/10 py-8 sm:py-12">
             <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -1924,9 +1950,12 @@ export default function LandingPage() {
                       </Link>
                     </li>
                     <li>
-                      <a href="#clean-sneaks" className="hover:text-foreground transition-colors">
+                      <Link
+                        href="/clean-sneaks"
+                        className="hover:text-foreground transition-colors"
+                      >
                         Clean Sneaks
-                      </a>
+                      </Link>
                     </li>
                     <li>
                       <a href="#oaas" className="hover:text-foreground transition-colors">

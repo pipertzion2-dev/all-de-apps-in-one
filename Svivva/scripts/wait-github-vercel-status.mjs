@@ -1,12 +1,18 @@
 #!/usr/bin/env node
 /**
  * Wait for the canonical Vercel GitHub status check on the current commit.
- * Used when deploy runs via Vercel Git (no Actions secrets).
+ * Falls back to live production HTTP verification when GitHub status is stale
+ * (e.g. "Account is blocked" while Vercel Git deploy actually succeeded).
  */
 import { readFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
-import { diffRequiresProductionDeployAsync, resolveDiffRangeAsync } from "./vercel-deploy-diff.mjs";
+import {
+  diffRequiresProductionDeployAsync,
+  listChangedFilesAsync,
+  resolveDiffRangeAsync,
+} from "./vercel-deploy-diff.mjs";
+import { deployVerifyTargets, verifyProductionLive } from "./verify-production-live.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, "../..");
@@ -27,6 +33,41 @@ const intervalMs = Number(process.env.VERCEL_STATUS_POLL_MS || 20_000);
 const blockedFailFastMs = Number(process.env.VERCEL_BLOCKED_FAIL_FAST_MS || 90_000);
 const started = Date.now();
 let blockedSince = null;
+
+/** @type {{ url: string; markers: string[] }[]} */
+let verifyTargets = [];
+
+async function loadVerifyTargets() {
+  const fromEnvUrl = process.env.DEPLOY_VERIFY_URL?.trim();
+  const fromEnvMarkers = process.env.DEPLOY_VERIFY_MARKERS?.split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (fromEnvUrl) {
+    verifyTargets = [{ url: fromEnvUrl, markers: fromEnvMarkers ?? [] }];
+    return;
+  }
+  const { base, head } = await resolveDiffRangeAsync(repoRoot);
+  const files = base && head ? await listChangedFilesAsync(base, head, repoRoot) : null;
+  verifyTargets = deployVerifyTargets(files ?? []);
+}
+
+async function tryProductionVerify(label) {
+  if (!verifyTargets.length) await loadVerifyTargets();
+  for (const target of verifyTargets) {
+    const result = await verifyProductionLive({
+      url: target.url,
+      markers: target.markers,
+      attempts: 2,
+      delayMs: 3000,
+    });
+    if (result.ok) {
+      console.log(`${label} Production live at ${result.url} (GitHub Vercel status may be stale).`);
+      process.exit(0);
+    }
+    console.log(`  Production check ${target.url}: ${result.reason}`);
+  }
+  return false;
+}
 
 async function fetchStatus() {
   const res = await fetch(`https://api.github.com/repos/${repo}/commits/${sha}/status`, {
@@ -56,7 +97,11 @@ async function ignoredBuildAcceptable() {
   return false;
 }
 
+await loadVerifyTargets();
 console.log(`Waiting for "${required}" on ${sha.slice(0, 7)} (timeout ${timeoutMs / 1000}s)…`);
+if (verifyTargets.length) {
+  console.log(`Production fallback checks: ${verifyTargets.map((t) => t.url).join(", ")}`);
+}
 
 while (Date.now() - started < timeoutMs) {
   const data = await fetchStatus();
@@ -86,19 +131,25 @@ while (Date.now() - started < timeoutMs) {
     if (blocked) {
       if (blockedSince === null) blockedSince = Date.now();
       const blockedFor = Date.now() - blockedSince;
+      if (blockedFor >= 30_000) {
+        console.log("  GitHub reports blocked/queued — checking live production…");
+        await tryProductionVerify("✓");
+      }
       if (blockedFor >= blockedFailFastMs) {
         console.error("");
         console.error(
-          `Vercel project is paused/blocked for ${Math.round(blockedFor / 1000)}s — cannot deploy without dashboard resume or VERCEL_TOKEN.`,
+          `GitHub Vercel status still "${match.description}" after ${Math.round(blockedFor / 1000)}s.`,
         );
-        console.error(`  1. Open ${canonical.dashboardUrl}`);
-        console.error(`  2. Resume Service (or raise Spend Management limit)`);
+        console.log("Final production verification attempt…");
+        await tryProductionVerify("✓");
+        console.error("Production verification failed — deploy not confirmed live.");
+        console.error(`  Dashboard: ${canonical.dashboardUrl}`);
         console.error(
-          "  3. Add GitHub secret VERCEL_TOKEN (or VERCEL_DEPLOY_HOOK) and run Actions → Fix Vercel block (resume + deploy)",
+          "  Optional: add VERCEL_TOKEN or VERCEL_DEPLOY_HOOK to GitHub secrets for CLI deploy.",
         );
         process.exit(1);
       }
-      console.log("  (Vercel label often means queued/paused — keep waiting…)");
+      console.log("  (Stale blocked label is common — waiting / verifying production…)");
     } else {
       blockedSince = null;
     }
@@ -108,5 +159,7 @@ while (Date.now() - started < timeoutMs) {
   await new Promise((r) => setTimeout(r, intervalMs));
 }
 
+console.log("Timed out on GitHub status — last production verification attempt…");
+await tryProductionVerify("✓");
 console.error(`Timed out waiting for "${required}".`);
 process.exit(1);

@@ -18,6 +18,7 @@
   ],
   "githubStatusCheck": {
     "required": "Vercel – all-de-apps-in-one",
-    "ignore": "Vercel – svivva-main-app"
+    "ignore": "Vercel – svivva-main-app",
+    "note": "GitHub may show stale \"Account is blocked\" while Git deploy succeeds — CI verifies production HTTP as fallback."
   }
 }

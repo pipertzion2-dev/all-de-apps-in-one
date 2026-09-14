@@ -283,10 +283,70 @@ export function buildBaloon8Shoe(blueprint: THREE.Texture, bubbleCount = 1800): 
     }
   });
 
+  return { root, bubbles, hullMat, glowMeshes, wheels, disposables };
+}
+
+/** Boost contrast when mobile skips full studio PMREM or GPU limits iridescence. */
+export function tuneBaloon8RunnerVisibility(shoe: Baloon8WalkerShoe, mobile: boolean): void {
+  if (!mobile) return;
+
+  shoe.hullMat.iridescence = Math.min(shoe.hullMat.iridescence, 0.5);
+  shoe.hullMat.envMapIntensity = 0.95;
+  shoe.hullMat.emissive = new THREE.Color(0x1a4860);
+  shoe.hullMat.emissiveIntensity = 0.35;
+
+  const bubbleMat = shoe.bubbles.material as THREE.MeshPhysicalMaterial;
+  bubbleMat.iridescence = 0.5;
+  bubbleMat.envMapIntensity = 1.0;
+  bubbleMat.metalness = 0.72;
+  bubbleMat.roughness = 0.22;
+}
+
+/**
+ * Temple Run player — identical mesh + yaw as homepage `buildBaloon8Shoe` so the sideline
+ * camera sees the blueprint side profile (bubbles, wheels, green B grille).
+ */
+export function buildBaloon8RunnerShoe(
+  bubbleCount = 1100,
+  opts?: { mobile?: boolean },
+): Baloon8WalkerShoe {
+  const mobile = opts?.mobile ?? false;
+  const scale = mobile ? BALOON8_WALKER_SCALE_MOBILE : BALOON8_WALKER_SCALE;
+  const core = assembleBaloon8ShoeCore(bubbleCount);
+  core.root.position.y = -0.02;
+  core.root.rotation.y = -Math.PI / 2;
+
+  const mount = new THREE.Group();
+  mount.add(core.root);
+  mount.scale.setScalar(scale);
+  mount.position.y = 0.34 * scale;
+
+  const shoe: Baloon8WalkerShoe = {
+    root: mount,
+    bubbles: core.bubbles,
+    hullMat: core.hullMat,
+    glowMeshes: core.glowMeshes,
+    wheels: core.wheels,
+  };
+  tuneBaloon8RunnerVisibility(shoe, mobile);
+  return shoe;
+}
+
+/** @deprecated Use buildBaloon8RunnerShoe — kept for tests importing the old name. */
+export function buildBaloon8WalkerShoe(_side: -1 | 1, bubbleCount = 1100): Baloon8WalkerShoe {
+  return buildBaloon8RunnerShoe(bubbleCount);
+}
+
+/** Build the full Baloon8 car-shoe from the four-view mockup (homepage showcase). */
+export function buildBaloon8Shoe(bubbleCount = 2200): Baloon8ShoeModel {
+  const core = assembleBaloon8ShoeCore(bubbleCount);
+  core.root.position.y = -0.02;
+  core.root.rotation.y = -Math.PI / 2;
+
   return {
-    root,
-    bubbles,
-    glowMeshes,
+    root: core.root,
+    bubbles: core.bubbles,
+    glowMeshes: core.glowMeshes,
     dispose: () => {
       root.traverse((obj) => {
         if (obj instanceof THREE.Mesh) {

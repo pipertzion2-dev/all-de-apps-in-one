@@ -12,6 +12,15 @@ export const DEFAULT_SNEAKER: SneakerAssetRef = {
   source: "default",
 };
 
+/** True when the game should fetch a custom flat PNG (never the legacy car-shoe). */
+export function shouldLoadSneakerSprite(sneaker: SneakerAssetRef): boolean {
+  if (sneaker.useWalkingSprite !== false) return false;
+  const url = sneaker.spriteUrl?.trim() ?? "";
+  if (!url) return false;
+  if (url.includes("player-shoe")) return false;
+  return true;
+}
+
 /**
  * Resolve which sneaker the player wears.
  * Future: wire ZZAI design lab / profile sneakers here.
@@ -22,6 +31,7 @@ export function resolvePlayerSneaker(override?: Partial<SneakerAssetRef> | null)
     ...DEFAULT_SNEAKER,
     ...override,
     spriteUrl: override.spriteUrl,
+    useWalkingSprite: override.useWalkingSprite ?? false,
   };
 }
 
