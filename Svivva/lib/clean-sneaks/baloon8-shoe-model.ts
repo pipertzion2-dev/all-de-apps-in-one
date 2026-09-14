@@ -17,6 +17,9 @@ export const BALOON8_DIMS = {
 export const BALOON8_SCENE_SCALE = 0.42;
 export const BALOON8_WALKER_SCALE = 0.42;
 export const BALOON8_WALKER_SCALE_MOBILE = 0.36;
+/** Smaller per-foot scale so a left/right pair fits the lane. */
+export const BALOON8_PAIR_SCALE = 0.26;
+export const BALOON8_PAIR_SCALE_MOBILE = 0.3;
 
 const IRIDESCENCE = [0x2a9d8f, 0x5b8da8, 0x7b4397, 0x3d9970, 0x4cc9c0];
 
@@ -212,19 +215,22 @@ function assembleFromBlueprint(
   blueprint: THREE.Texture,
   bubbleCount: number,
   scale = BALOON8_SCENE_SCALE,
+  opts?: { legacyPanels?: boolean },
 ): Baloon8ShoeCore {
   const root = new THREE.Group();
   const disposables: Array<{ dispose: () => void }> = [];
   const glowMeshes: THREE.Mesh[] = [];
 
   let prepared: ReturnType<typeof prepareBlueprint> | null = null;
-  try {
-    const img = blueprint.image as CanvasImageSource & { width?: number };
-    if (img && ("naturalWidth" in img ? img.naturalWidth : img.width)) {
-      prepared = prepareBlueprint(blueprint);
+  if (!opts?.legacyPanels) {
+    try {
+      const img = blueprint.image as CanvasImageSource & { width?: number };
+      if (img && ("naturalWidth" in img ? img.naturalWidth : img.width)) {
+        prepared = prepareBlueprint(blueprint);
+      }
+    } catch (err) {
+      console.warn("[Baloon8] prepareBlueprint failed, using UV crops", err);
     }
-  } catch (err) {
-    console.warn("[Baloon8] prepareBlueprint failed, using UV crops", err);
   }
 
   const L = scaledDim(BALOON8_DIMS.length, scale);
@@ -320,44 +326,60 @@ export function ensureBaloon8RunnerVisible(shoe: Baloon8WalkerShoe, mobile: bool
   if (shoe.bubbles) {
     shoe.bubbles.frustumCulled = false;
     const bubbleMat = shoe.bubbles.material as THREE.MeshPhysicalMaterial;
-    bubbleMat.opacity = mobile ? 0.22 : 0.3;
+    bubbleMat.opacity = mobile ? 0.28 : 0.3;
   }
 
   shoe.hullMat.emissive = new THREE.Color(0x1a3040);
-  shoe.hullMat.emissiveIntensity = mobile ? 0.45 : 0.3;
+  shoe.hullMat.emissiveIntensity = mobile ? 0.65 : 0.3;
 
   shoe.root.traverse((obj) => {
     if (!(obj instanceof THREE.Mesh)) return;
     obj.frustumCulled = false;
     const mat = obj.material as THREE.MeshPhysicalMaterial;
     if (!mat.map) return;
-    mat.envMapIntensity = mobile ? 1.2 : 1.45;
+    mat.envMapIntensity = mobile ? 1.55 : 1.45;
     mat.emissive = mat.emissive ?? new THREE.Color(0x0a1820);
-    mat.emissiveIntensity = Math.max(mat.emissiveIntensity ?? 0, mobile ? 0.35 : 0.22);
+    mat.emissiveIntensity = Math.max(mat.emissiveIntensity ?? 0, mobile ? 0.55 : 0.22);
+    if (mobile) {
+      mat.alphaTest = 0.02;
+    }
   });
 
   for (const mesh of shoe.glowMeshes) {
     mesh.frustumCulled = false;
     const mat = mesh.material as THREE.MeshStandardMaterial;
-    mat.emissiveIntensity = Math.max(mat.emissiveIntensity ?? 0, 1);
+    mat.emissiveIntensity = Math.max(mat.emissiveIntensity ?? 0, mobile ? 1.35 : 1);
   }
 }
 
 export function buildBaloon8RunnerShoe(
   blueprint: THREE.Texture,
   bubbleCount = 160,
-  opts?: { mobile?: boolean },
+  opts?: { mobile?: boolean; pair?: boolean; mirror?: boolean },
 ): Baloon8WalkerShoe {
   const mobile = opts?.mobile ?? false;
-  const scale = mobile ? BALOON8_WALKER_SCALE_MOBILE : BALOON8_WALKER_SCALE;
-  const count = mobile ? Math.min(bubbleCount, 100) : bubbleCount;
-  const core = assembleFromBlueprint(blueprint, count, scale);
+  const pair = opts?.pair ?? false;
+  const scale = pair
+    ? mobile
+      ? BALOON8_PAIR_SCALE_MOBILE
+      : BALOON8_PAIR_SCALE
+    : mobile
+      ? BALOON8_WALKER_SCALE_MOBILE
+      : BALOON8_WALKER_SCALE;
+  const perShoeCap = mobile ? (pair ? 70 : 100) : bubbleCount;
+  const count = Math.min(bubbleCount, perShoeCap);
+  const core = assembleFromBlueprint(blueprint, count, scale, {
+    legacyPanels: mobile,
+  });
   core.root.rotation.y = -Math.PI / 2;
 
   const mount = new THREE.Group();
   mount.add(core.root);
   mount.position.y = scaledDim(0.04, scale);
   mount.frustumCulled = false;
+  if (opts?.mirror) {
+    mount.scale.x = -1;
+  }
 
   const shoe: Baloon8WalkerShoe = {
     root: mount,

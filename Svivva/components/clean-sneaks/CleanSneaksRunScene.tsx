@@ -48,7 +48,7 @@ function FollowCamera({
 }) {
   const { camera } = useThree();
   const rig = mobile
-    ? { ox: 2.85, oy: 1.35, oz: 2.35, lookY: 0.42, lookZ: -4.5, fov: 44 }
+    ? { ox: 2.35, oy: 1.05, oz: 2.05, lookY: 0.32, lookZ: -3.8, fov: 48 }
     : { ox: 3.6, oy: 1.65, oz: 3.0, lookY: 0.48, lookZ: -5.5, fov: 42 };
   const lookAt = useRef(new THREE.Vector3(0, rig.lookY, rig.lookZ));
   const pos = useRef(new THREE.Vector3(rig.ox, rig.oy, rig.oz));
@@ -375,24 +375,14 @@ function PlayerShoes({
   mobile: boolean;
   blueprint: THREE.Texture;
 }) {
-  const [shoes, setShoes] = useState<WalkingShoes3D | null>(null);
   const hostRef = useRef<THREE.Group>(null);
-
-  useEffect(() => {
-    let alive = true;
-    // Yield so the canvas paints before the heavy instanced bubble build.
-    const id = window.setTimeout(() => {
-      try {
-        const built = createWalkingShoes3D(blueprint, mobile);
-        if (alive) setShoes(built);
-      } catch (err) {
-        console.error("[PlayerShoes] Baloon8 build failed", err);
-      }
-    }, 0);
-    return () => {
-      alive = false;
-      window.clearTimeout(id);
-    };
+  const shoes = useMemo(() => {
+    try {
+      return createWalkingShoes3D(blueprint, mobile);
+    } catch (err) {
+      console.error("[PlayerShoes] Baloon8 build failed", err);
+      return null;
+    }
   }, [blueprint, mobile]);
 
   useFrame(() => {
@@ -403,7 +393,7 @@ function PlayerShoes({
 
     host.position.x = laneWorldX(s.laneX);
     host.position.y = s.y < 0 ? -s.y / 120 : 0;
-    host.rotation.y = 0;
+    host.rotation.y = mobile ? 0.22 : 0;
 
     updateWalkingShoes3D(shoes, {
       walkPhase: s.walkPhase,
@@ -421,12 +411,23 @@ function PlayerShoes({
     <group ref={hostRef}>
       <primitive object={shoes.root} />
       <pointLight
-        position={[0, 0.55, 0.8]}
-        intensity={mobile ? 1.4 : 0.9}
-        distance={8}
+        position={[0, 0.55, 0.65]}
+        intensity={mobile ? 2.2 : 0.9}
+        distance={10}
         color="#7ec8d9"
       />
-      <pointLight position={[1.2, 0.35, 0.4]} intensity={0.55} distance={6} color="#ffffff" />
+      <pointLight
+        position={[1.4, 0.4, 0.55]}
+        intensity={mobile ? 1.35 : 0.55}
+        distance={8}
+        color="#ffffff"
+      />
+      <pointLight
+        position={[-1.1, 0.25, 0.35]}
+        intensity={mobile ? 0.85 : 0.35}
+        distance={6}
+        color="#d94f9c"
+      />
     </group>
   );
 }
@@ -578,7 +579,7 @@ export function CleanSneaksRunScene({
         className="!h-full !w-full"
         shadows={quality.castShadows}
         dpr={quality.dpr}
-        camera={{ fov: 44, near: 0.1, far: 140, position: [2.85, 1.35, 2.35] }}
+        camera={{ fov: 48, near: 0.08, far: 140, position: [2.35, 1.05, 2.05] }}
         gl={{
           antialias: quality.antialias,
           powerPreference: quality.mobile ? "default" : "high-performance",

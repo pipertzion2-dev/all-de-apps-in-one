@@ -6,7 +6,10 @@ import { detectRunQuality, runQualityFlags } from "./run-quality";
 export type WalkingShoes3D = {
   root: THREE.Group;
   shoePivot: THREE.Group;
-  shoe: Baloon8WalkerShoe;
+  leftPivot: THREE.Group;
+  rightPivot: THREE.Group;
+  leftShoe: Baloon8WalkerShoe;
+  rightShoe: Baloon8WalkerShoe;
   shieldRing: THREE.Mesh;
   shieldGlow: THREE.PointLight;
   dustEmitter: THREE.Group;
@@ -24,12 +27,13 @@ function buildRunnerShoeSafe(
   blueprint: THREE.Texture,
   preferredCount: number,
   mobile: boolean,
+  mirror: boolean,
 ): Baloon8WalkerShoe {
-  const counts = [preferredCount, Math.max(180, Math.floor(preferredCount * 0.45)), 120];
+  const counts = [preferredCount, Math.max(90, Math.floor(preferredCount * 0.45)), 60];
   let lastErr: unknown;
   for (const count of counts) {
     try {
-      return buildBaloon8RunnerShoe(blueprint, count, { mobile });
+      return buildBaloon8RunnerShoe(blueprint, count, { mobile, pair: true, mirror });
     } catch (err) {
       lastErr = err;
       console.warn("[createWalkingShoes3D] shoe build retry", count, err);
@@ -43,14 +47,21 @@ export function preloadBaloon8RunnerShoe(): Promise<THREE.Texture> {
   return loadBaloon8BlueprintTexture();
 }
 
-/** Single Baloon8 blueprint mockup — same orientation as homepage preview. */
+/** Baloon8 blueprint pair — left + right foot with walking stride. */
 export function createWalkingShoes3D(blueprint: THREE.Texture, mobile = false): WalkingShoes3D {
   const root = new THREE.Group();
-  const count = runnerBubbleCount();
+  const perShoeBubbles = Math.max(60, Math.floor(runnerBubbleCount() / 2));
 
   const shoePivot = new THREE.Group();
-  const shoe = buildRunnerShoeSafe(blueprint, count, mobile);
-  shoePivot.add(shoe.root);
+  const leftPivot = new THREE.Group();
+  const rightPivot = new THREE.Group();
+
+  const leftShoe = buildRunnerShoeSafe(blueprint, perShoeBubbles, mobile, false);
+  const rightShoe = buildRunnerShoeSafe(blueprint, perShoeBubbles, mobile, true);
+
+  leftPivot.add(leftShoe.root);
+  rightPivot.add(rightShoe.root);
+  shoePivot.add(leftPivot, rightPivot);
 
   const shieldRing = new THREE.Mesh(
     new THREE.TorusGeometry(0.72, 0.022, 16, 64),
@@ -81,7 +92,10 @@ export function createWalkingShoes3D(blueprint: THREE.Texture, mobile = false): 
   return {
     root,
     shoePivot,
-    shoe,
+    leftPivot,
+    rightPivot,
+    leftShoe,
+    rightShoe,
     shieldRing,
     shieldGlow,
     dustEmitter,
@@ -90,8 +104,8 @@ export function createWalkingShoes3D(blueprint: THREE.Texture, mobile = false): 
 
 const dustPool: THREE.Mesh[] = [];
 
-function spawnDust(shoes: WalkingShoes3D): void {
-  if (dustPool.length > 20) return;
+function spawnDust(shoes: WalkingShoes3D, xOffset: number): void {
+  if (dustPool.length > 24) return;
   const p = new THREE.Mesh(
     new THREE.SphereGeometry(0.012 + Math.random() * 0.016, 6, 6),
     new THREE.MeshBasicMaterial({
@@ -100,7 +114,7 @@ function spawnDust(shoes: WalkingShoes3D): void {
       opacity: 0.35,
     }),
   );
-  p.position.set((Math.random() - 0.5) * 0.12, 0.02, 0.04);
+  p.position.set(xOffset + (Math.random() - 0.5) * 0.08, 0.02, 0.04);
   p.userData.life = 0.35 + Math.random() * 0.25;
   p.userData.vy = 0.25 + Math.random() * 0.35;
   p.userData.vz = -0.12 - Math.random() * 0.2;
@@ -143,9 +157,11 @@ function spinWheels(shoe: Baloon8WalkerShoe, speed: number, dt: number): void {
 
 function pulseGlow(shoes: WalkingShoes3D, t: number, freshGlow: boolean): void {
   const pulse = 0.85 + Math.sin(t * 2.2) * 0.15;
-  for (const mesh of shoes.shoe.glowMeshes) {
-    const mat = mesh.material as THREE.MeshStandardMaterial;
-    mat.emissiveIntensity = (freshGlow ? 1.35 : 1.0) * pulse * 1.2;
+  for (const shoe of [shoes.leftShoe, shoes.rightShoe]) {
+    for (const mesh of shoe.glowMeshes) {
+      const mat = mesh.material as THREE.MeshStandardMaterial;
+      mat.emissiveIntensity = (freshGlow ? 1.35 : 1.0) * pulse * 1.2;
+    }
   }
 }
 
@@ -163,21 +179,49 @@ export function updateWalkingShoes3D(
   const phase = args.walkPhase * Math.PI * 2;
   const dt = 0.016;
   const t = performance.now() / 1000;
+  const stride = args.airborne ? 0 : Math.sin(phase);
+  const lateral = 0.38;
 
-  // Gentle roll/bob — keep blueprint side profile readable (not a leg-swing).
-  const bob = args.airborne ? 0.12 : Math.max(0, Math.sin(phase * 2)) * 0.06;
-  shoes.shoePivot.rotation.x = Math.sin(phase) * (args.airborne ? 0.05 : 0.08);
-  shoes.shoePivot.rotation.z = Math.sin(phase * 0.5) * 0.04;
+  const bob = args.airborne ? 0.14 : Math.max(0, Math.sin(phase * 2)) * 0.05;
+  shoes.shoePivot.rotation.x = Math.sin(phase) * (args.airborne ? 0.04 : 0.06);
+  shoes.shoePivot.rotation.z = Math.sin(phase * 0.5) * 0.03;
   shoes.shoePivot.position.y = bob;
 
-  if (!args.airborne && Math.sin(phase * 2) > 0.92) spawnDust(shoes);
+  if (args.airborne) {
+    shoes.leftPivot.position.set(-lateral * 0.85, 0.1, 0.06);
+    shoes.rightPivot.position.set(lateral * 0.85, 0.08, 0.1);
+    shoes.leftPivot.rotation.x = -0.18;
+    shoes.rightPivot.rotation.x = -0.14;
+  } else {
+    const leadLift = Math.max(0, stride) * 0.1;
+    const trailLift = Math.max(0, -stride) * 0.1;
+    const leadZ = stride > 0 ? -0.1 : 0.08;
+    const trailZ = stride > 0 ? 0.08 : -0.1;
+    const leftLead = stride > 0;
 
-  applyDirtToShoe(shoes.shoe, args.dirt, args.freshGlow);
-  pulseGlow(shoes, t, args.freshGlow);
-
-  if (!args.airborne && args.speed) {
-    spinWheels(shoes.shoe, args.speed, dt);
+    shoes.leftPivot.position.set(
+      -lateral,
+      leftLead ? leadLift : trailLift,
+      leftLead ? leadZ : trailZ,
+    );
+    shoes.rightPivot.position.set(
+      lateral,
+      leftLead ? trailLift : leadLift,
+      leftLead ? trailZ : leadZ,
+    );
+    shoes.leftPivot.rotation.x = leftLead ? -0.08 : 0.04;
+    shoes.rightPivot.rotation.x = leftLead ? 0.04 : -0.08;
   }
+
+  if (!args.airborne && Math.sin(phase * 2) > 0.92) {
+    spawnDust(shoes, stride > 0 ? -lateral : lateral);
+  }
+
+  for (const shoe of [shoes.leftShoe, shoes.rightShoe]) {
+    applyDirtToShoe(shoe, args.dirt, args.freshGlow);
+    if (!args.airborne && args.speed) spinWheels(shoe, args.speed, dt);
+  }
+  pulseGlow(shoes, t, args.freshGlow);
 
   shoes.shieldRing.visible = args.shieldActive;
   shoes.shieldGlow.intensity = args.shieldActive ? 1.2 : 0;
