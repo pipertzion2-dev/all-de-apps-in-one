@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { buildBaloon8RunnerShoe, type Baloon8WalkerShoe } from "./baloon8-shoe-model";
+import { detectRunQuality, runQualityFlags } from "./run-quality";
 
 export type WalkingShoes3D = {
   root: THREE.Group;
@@ -12,10 +13,19 @@ export type WalkingShoes3D = {
 
 function runnerBubbleCount(): number {
   if (typeof window === "undefined") return 1200;
-  const mobile = window.innerWidth < 768;
+  const flags = runQualityFlags(detectRunQuality());
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (reduced) return 800;
-  return mobile ? 950 : 1500;
+  if (reduced) return flags.bubbleCountReduced;
+  return flags.bubbleCount;
+}
+
+function buildRunnerShoeSafe(preferredCount: number): Baloon8WalkerShoe {
+  const reduced = Math.max(180, Math.floor(preferredCount * 0.45));
+  try {
+    return buildBaloon8RunnerShoe(preferredCount);
+  } catch {
+    return buildBaloon8RunnerShoe(reduced);
+  }
 }
 
 /** Single Baloon8 blueprint mockup — same orientation as homepage preview. */
@@ -24,7 +34,7 @@ export function createWalkingShoes3D(): WalkingShoes3D {
   const count = runnerBubbleCount();
 
   const shoePivot = new THREE.Group();
-  const shoe = buildBaloon8RunnerShoe(count);
+  const shoe = buildRunnerShoeSafe(count);
   shoePivot.add(shoe.root);
 
   const shieldRing = new THREE.Mesh(

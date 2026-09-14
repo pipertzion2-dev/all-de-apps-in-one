@@ -7,10 +7,12 @@ import * as THREE from "three";
 
 type Props = {
   mobile?: boolean;
+  /** Post-processing often crashes iOS WebGL — disable on mobile tier. */
+  enabled?: boolean;
 };
 
 /** Bloom + vignette with ACES tone mapping for cinematic runner look. */
-export function CleanSneaksPostFX({ mobile = false }: Props) {
+export function CleanSneaksPostFX({ mobile = false, enabled = true }: Props) {
   const { gl } = useThree();
 
   useEffect(() => {
@@ -18,6 +20,8 @@ export function CleanSneaksPostFX({ mobile = false }: Props) {
     gl.toneMappingExposure = mobile ? 1.05 : 1.18;
     gl.outputColorSpace = THREE.SRGBColorSpace;
   }, [gl, mobile]);
+
+  if (!enabled) return null;
 
   return (
     <EffectComposer multisampling={mobile ? 0 : 4}>

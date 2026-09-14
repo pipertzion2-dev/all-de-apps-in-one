@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -21,6 +21,7 @@ const CleanSneaksGame3D = dynamic(
 
 export default function CleanSneaksPage() {
   const router = useRouter();
+  const [sceneAttempt, setSceneAttempt] = useState(0);
 
   useEffect(() => {
     const prev = document.body.style.overflow;
@@ -73,18 +74,29 @@ export default function CleanSneaksPage() {
           style={{ minHeight: "min(70vh, 720px)" }}
         >
           <SceneErrorBoundary
+            key={sceneAttempt}
             fallback={
               <div className="flex flex-1 flex-col items-center justify-center gap-4 rounded-lg border border-white/10 bg-[#0a0c10]/90 p-6 text-center">
                 <p className="text-sm text-muted-foreground">
-                  Clean Sneaks couldn&apos;t start on this device.
+                  Clean Sneaks 3D couldn&apos;t start. Tap retry — the game stays fully 3D.
                 </p>
-                <Button asChild variant="outline">
-                  <Link href="/#clean-sneaks">Back to homepage</Link>
-                </Button>
+                <div className="flex flex-wrap justify-center gap-3">
+                  <Button variant="outline" onClick={() => setSceneAttempt((n) => n + 1)}>
+                    Retry 3D
+                  </Button>
+                  <Button asChild variant="ghost">
+                    <Link href="/#clean-sneaks">Back to homepage</Link>
+                  </Button>
+                </div>
               </div>
             }
           >
-            <CleanSneaksGame3D active fullscreen onExit={() => router.push("/#clean-sneaks")} />
+            <CleanSneaksGame3D
+              key={sceneAttempt}
+              active
+              fullscreen
+              onExit={() => router.push("/#clean-sneaks")}
+            />
           </SceneErrorBoundary>
         </div>
       </div>
