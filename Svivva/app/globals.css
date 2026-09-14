@@ -113,13 +113,26 @@
 
   [data-landing-page],
   [data-feature-page],
-  [data-page-shell] {
+  [data-page-shell]:not([data-clean-sneaks-fullscreen]) {
     position: relative;
     isolation: isolate;
     min-height: 0;
     height: auto;
     padding-bottom: 0;
     overflow-x: hidden;
+  }
+
+  /* Full-screen game route — must stay fixed viewport (data-page-shell alone collapses height). */
+  [data-clean-sneaks-fullscreen] {
+    position: fixed !important;
+    inset: 0;
+    width: 100%;
+    min-height: 100dvh;
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
+    isolation: isolate;
+    z-index: 200;
   }
 
   [data-landing-page] > *:last-child {

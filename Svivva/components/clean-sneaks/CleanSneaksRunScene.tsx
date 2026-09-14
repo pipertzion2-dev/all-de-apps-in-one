@@ -573,8 +573,9 @@ export function CleanSneaksRunScene({
   }, []);
 
   return (
-    <div className={`h-full w-full ${className}`} aria-hidden>
+    <div className={`h-full min-h-[240px] w-full ${className}`} aria-hidden>
       <Canvas
+        className="!h-full !w-full"
         shadows={quality.castShadows}
         dpr={quality.dpr}
         camera={{ fov: 44, near: 0.1, far: 140, position: [2.85, 1.35, 2.35] }}

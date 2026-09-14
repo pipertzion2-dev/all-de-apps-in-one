@@ -305,7 +305,8 @@ export function CleanSneaksGame3D({
         </div>
 
         <div
-          className={`relative min-h-0 w-full ${fullscreen ? "flex-1" : "h-[420px] sm:h-[480px]"}`}
+          className={`relative w-full ${fullscreen ? "min-h-[50vh] flex-1" : "h-[420px] sm:h-[480px]"}`}
+          style={fullscreen ? { minHeight: "min(60vh, 640px)" } : undefined}
         >
           <CleanSneaksRunScene
             key={sceneKey}

@@ -1,48 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { CleanSneaksGame3D } from "@/components/clean-sneaks/CleanSneaksGame3D";
 import { SceneErrorBoundary } from "@/components/clean-sneaks/SceneErrorBoundary";
-
-function CleanSneaksLoading() {
-  const [slow, setSlow] = useState(false);
-  useEffect(() => {
-    const id = window.setTimeout(() => setSlow(true), 12_000);
-    return () => window.clearTimeout(id);
-  }, []);
-  return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4 text-center text-sm text-muted-foreground">
-      <p>Loading Clean Sneaks 3D…</p>
-      {slow ? (
-        <>
-          <p className="max-w-xs text-xs text-muted-foreground/80">
-            Still loading — try a hard refresh or check your connection.
-          </p>
-          <Button type="button" variant="outline" size="sm" onClick={() => window.location.reload()}>
-            Reload game
-          </Button>
-        </>
-      ) : null}
-    </div>
-  );
-}
-
-const CleanSneaksGame3D = dynamic(
-  () => import("@/components/clean-sneaks/CleanSneaksGame3D").then((m) => m.CleanSneaksGame3D),
-  {
-    ssr: false,
-    loading: () => <CleanSneaksLoading />,
-  },
-);
 
 export default function CleanSneaksPage() {
   const router = useRouter();
   const [sceneAttempt, setSceneAttempt] = useState(0);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    setReady(true);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
@@ -54,8 +25,7 @@ export default function CleanSneaksPage() {
     <div
       data-svivva-app-shell=""
       data-clean-sneaks-fullscreen=""
-      data-page-shell
-      className="fixed inset-0 z-[200] flex flex-col bg-[#0a0c10]"
+      className="fixed inset-0 z-[200] flex h-[100dvh] min-h-[100dvh] w-full flex-col bg-[#0a0c10]"
       style={{
         paddingTop: "env(safe-area-inset-top)",
         paddingRight: "env(safe-area-inset-right)",
@@ -88,35 +58,38 @@ export default function CleanSneaksPage() {
           </Button>
         </div>
 
-        <div
-          className="flex min-h-0 flex-1 flex-col px-3 pb-3 sm:px-6 sm:pb-6"
-          style={{ minHeight: "min(70vh, 720px)" }}
-        >
-          <SceneErrorBoundary
-            key={sceneAttempt}
-            fallback={
-              <div className="flex flex-1 flex-col items-center justify-center gap-4 rounded-lg border border-white/10 bg-[#0a0c10]/90 p-6 text-center">
-                <p className="text-sm text-muted-foreground">
-                  Clean Sneaks 3D couldn&apos;t start. Tap retry — the game stays fully 3D.
-                </p>
-                <div className="flex flex-wrap justify-center gap-3">
-                  <Button variant="outline" onClick={() => setSceneAttempt((n) => n + 1)}>
-                    Retry 3D
-                  </Button>
-                  <Button asChild variant="ghost">
-                    <Link href="/#clean-sneaks">Back to homepage</Link>
-                  </Button>
-                </div>
-              </div>
-            }
-          >
-            <CleanSneaksGame3D
+        <div className="flex min-h-0 flex-1 flex-col px-3 pb-3 sm:px-6 sm:pb-6">
+          {!ready ? (
+            <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
+              Loading Clean Sneaks…
+            </div>
+          ) : (
+            <SceneErrorBoundary
               key={sceneAttempt}
-              active
-              fullscreen
-              onExit={() => router.push("/#clean-sneaks")}
-            />
-          </SceneErrorBoundary>
+              fallback={
+                <div className="flex flex-1 flex-col items-center justify-center gap-4 rounded-lg border border-white/10 bg-[#0a0c10]/90 p-6 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    Clean Sneaks 3D couldn&apos;t start. Tap retry — the game stays fully 3D.
+                  </p>
+                  <div className="flex flex-wrap justify-center gap-3">
+                    <Button variant="outline" onClick={() => setSceneAttempt((n) => n + 1)}>
+                      Retry 3D
+                    </Button>
+                    <Button asChild variant="ghost">
+                      <Link href="/#clean-sneaks">Back to homepage</Link>
+                    </Button>
+                  </div>
+                </div>
+              }
+            >
+              <CleanSneaksGame3D
+                key={sceneAttempt}
+                active
+                fullscreen
+                onExit={() => router.push("/#clean-sneaks")}
+              />
+            </SceneErrorBoundary>
+          )}
         </div>
       </div>
     </div>
