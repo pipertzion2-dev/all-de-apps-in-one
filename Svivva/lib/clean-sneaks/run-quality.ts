@@ -41,7 +41,9 @@ export function runQualityFlags(quality: RunQuality) {
     quality,
     mobile,
     postFx: !mobile,
-    pmremEnvironment: !mobile,
+    /** Physical Baloon8 materials need an env map — lite PMREM on mobile. */
+    pmremEnvironment: true,
+    pmremLite: mobile,
     castShadows: !mobile,
     contactShadows: !mobile,
     sky: !mobile,

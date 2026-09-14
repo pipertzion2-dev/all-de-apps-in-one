@@ -6,26 +6,29 @@ import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 
 type Props = {
-  /** PMREM is heavy on mobile GPUs — skip on phones/tablets. */
-  enabled?: boolean;
+  /** Lower-resolution PMREM on phones — still required for visible iridescent materials. */
+  lite?: boolean;
 };
 
-/** Same studio PMREM as homepage Baloon8ShoeScene — required for iridescent bubbles. */
-export function Baloon8RunEnvironment({ enabled = true }: Props) {
+/** Studio PMREM — Baloon8 physical/iridescent materials are invisible without scene.environment. */
+export function Baloon8RunEnvironment({ lite = false }: Props) {
   const { scene, gl } = useThree();
 
   useEffect(() => {
-    if (!enabled) return;
     const pmrem = new THREE.PMREMGenerator(gl);
     pmrem.compileEquirectangularShader();
-    const env = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-    scene.environment = env;
+
+    const target = pmrem.fromScene(new RoomEnvironment(), 0.04, 0.1, 100, {
+      size: lite ? 128 : 256,
+    });
+    scene.environment = target.texture;
+
     return () => {
       scene.environment = null;
-      env.dispose();
+      target.dispose();
       pmrem.dispose();
     };
-  }, [scene, gl, enabled]);
+  }, [scene, gl, lite]);
 
   return null;
 }
