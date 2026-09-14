@@ -12,13 +12,14 @@ export const BALOON8_DIMS = {
   height: 1.32,
 } as const;
 
-/** Scene scale — keeps the car-shoe framed in the viewer. */
 export const BALOON8_SCENE_SCALE = 0.42;
+export const BALOON8_WALKER_SCALE = 0.118;
+export const BALOON8_WALKER_SCALE_MOBILE = 0.142;
 
 const IRIDESCENCE = [0x2a9d8f, 0x5b8da8, 0x7b4397, 0x3d9970, 0x4cc9c0];
 
-function scaledDim(value: number): number {
-  return value * BALOON8_SCENE_SCALE;
+function scaledDim(value: number, scale = BALOON8_SCENE_SCALE): number {
+  return value * scale;
 }
 
 function canvasTexture(
@@ -90,8 +91,9 @@ function createBubbleInstances(
   height: number,
   depth: number,
   count: number,
+  scaleMul = 1,
 ): THREE.InstancedMesh {
-  const bubbleGeo = new THREE.SphereGeometry(0.022 * BALOON8_SCENE_SCALE, 8, 8);
+  const bubbleGeo = new THREE.SphereGeometry(0.022 * scaleMul, 8, 8);
   const bubbleMat = new THREE.MeshPhysicalMaterial({
     color: 0xffffff,
     metalness: 0.95,
@@ -162,10 +164,10 @@ function createBubbleInstances(
         break;
     }
 
-    const scale = 0.55 + Math.random() * 0.75;
-    const push = 0.035 * BALOON8_SCENE_SCALE * scale;
+    const s = 0.55 + Math.random() * 0.75;
+    const push = 0.035 * scaleMul * s;
     dummy.position.set(x + nx * push, y + ny * push + hh * 0.5, z + nz * push);
-    dummy.scale.setScalar(scale);
+    dummy.scale.setScalar(s);
     dummy.updateMatrix();
     mesh.setMatrixAt(i, dummy.matrix);
     color.setHex(IRIDESCENCE[i % IRIDESCENCE.length]!);
@@ -177,14 +179,14 @@ function createBubbleInstances(
   return mesh;
 }
 
-function createWheel(z: number): THREE.Group {
+function createWheel(xSign: number, zSign: number, scale = BALOON8_SCENE_SCALE): THREE.Group {
   const wheel = new THREE.Group();
-  const radius = scaledDim(0.34);
-  const y = scaledDim(0.34);
-  const x = scaledDim(BALOON8_DIMS.length * 0.22);
+  const radius = scaledDim(0.34, scale);
+  const y = scaledDim(0.34, scale);
+  const x = xSign * scaledDim(BALOON8_DIMS.length * 0.22, scale);
 
   const tire = new THREE.Mesh(
-    new THREE.TorusGeometry(radius, scaledDim(0.07), 12, 36),
+    new THREE.TorusGeometry(radius, scaledDim(0.07, scale), 12, 36),
     new THREE.MeshPhysicalMaterial({
       color: 0x1a2530,
       metalness: 0.4,
@@ -197,7 +199,7 @@ function createWheel(z: number): THREE.Group {
   wheel.add(tire);
 
   const rim = new THREE.Mesh(
-    new THREE.CylinderGeometry(radius * 0.82, radius * 0.82, scaledDim(0.06), 24),
+    new THREE.CylinderGeometry(radius * 0.82, radius * 0.82, scaledDim(0.06, scale), 24),
     new THREE.MeshPhysicalMaterial({
       color: 0xd8e8f8,
       metalness: 0.85,
@@ -215,12 +217,29 @@ function createWheel(z: number): THREE.Group {
     new THREE.MeshStandardMaterial({ map: hubcapTexture(), metalness: 0.6, roughness: 0.25 }),
   );
   hub.rotation.y = Math.PI / 2;
-  hub.position.x = scaledDim(0.04);
+  hub.position.x = scaledDim(0.04, scale);
   wheel.add(hub);
 
-  wheel.position.set(x, y, z);
+  wheel.position.set(x, y, zSign * scaledDim(BALOON8_DIMS.width * 0.38, scale));
   return wheel;
 }
+
+export type Baloon8ShoeCore = {
+  root: THREE.Group;
+  bubbles: THREE.InstancedMesh;
+  hullMat: THREE.MeshPhysicalMaterial;
+  glowMeshes: THREE.Mesh[];
+  wheels: THREE.Group[];
+  disposables: Array<{ dispose: () => void }>;
+};
+
+export type Baloon8WalkerShoe = {
+  root: THREE.Group;
+  bubbles: THREE.InstancedMesh;
+  hullMat: THREE.MeshPhysicalMaterial;
+  glowMeshes: THREE.Mesh[];
+  wheels: THREE.Group[];
+};
 
 export type Baloon8ShoeModel = {
   root: THREE.Group;
@@ -229,15 +248,16 @@ export type Baloon8ShoeModel = {
   dispose: () => void;
 };
 
-/**
- * Build the Baloon8 car-shoe from the user's four-view blueprint texture.
- * Side / front / top / rear panels are cropped from the mockup sheet.
- */
-export function buildBaloon8Shoe(blueprint: THREE.Texture, bubbleCount = 1800): Baloon8ShoeModel {
+function assembleFromBlueprint(
+  blueprint: THREE.Texture,
+  bubbleCount: number,
+  scale = BALOON8_SCENE_SCALE,
+): Baloon8ShoeCore {
   const root = new THREE.Group();
-  const L = scaledDim(BALOON8_DIMS.length);
-  const W = scaledDim(BALOON8_DIMS.width);
-  const H = scaledDim(BALOON8_DIMS.height);
+  const disposables: Array<{ dispose: () => void }> = [];
+  const L = scaledDim(BALOON8_DIMS.length, scale);
+  const W = scaledDim(BALOON8_DIMS.width, scale);
+  const H = scaledDim(BALOON8_DIMS.height, scale);
 
   const body = new THREE.Group();
 
@@ -267,13 +287,30 @@ export function buildBaloon8Shoe(blueprint: THREE.Texture, bubbleCount = 1800): 
 
   root.add(body);
 
-  const bubbles = createBubbleInstances(L, H, W, bubbleCount);
+  const hullMat = new THREE.MeshPhysicalMaterial({
+    color: 0x2a6080,
+    metalness: 0.85,
+    roughness: 0.18,
+    clearcoat: 1,
+    clearcoatRoughness: 0.06,
+    iridescence: 0.85,
+    iridescenceIOR: 1.3,
+    iridescenceThicknessRange: [200, 900],
+    envMapIntensity: 1.4,
+  });
+  disposables.push(hullMat);
+
+  const bubbles = createBubbleInstances(L, H, W, bubbleCount, scale);
   root.add(bubbles);
+  disposables.push(bubbles.geometry, bubbles.material as THREE.Material);
 
-  root.add(createWheel(W * 0.38));
-  root.add(createWheel(-W * 0.38));
-
-  root.position.y = scaledDim(0.02);
+  const wheels = [
+    createWheel(1, 1, scale),
+    createWheel(1, -1, scale),
+    createWheel(-1, 1, scale),
+    createWheel(-1, -1, scale),
+  ];
+  for (const w of wheels) root.add(w);
 
   const glowMeshes: THREE.Mesh[] = [];
   root.traverse((obj) => {
@@ -286,39 +323,56 @@ export function buildBaloon8Shoe(blueprint: THREE.Texture, bubbleCount = 1800): 
   return { root, bubbles, hullMat, glowMeshes, wheels, disposables };
 }
 
-/** Boost contrast when mobile skips full studio PMREM or GPU limits iridescence. */
+/** Homepage / orbit viewer — user's four-view mockup as textured panels. */
+export function buildBaloon8Shoe(blueprint: THREE.Texture, bubbleCount = 1600): Baloon8ShoeModel {
+  const core = assembleFromBlueprint(blueprint, bubbleCount);
+  core.root.position.y = scaledDim(0.02);
+
+  return {
+    root: core.root,
+    bubbles: core.bubbles,
+    glowMeshes: core.glowMeshes,
+    dispose: () => {
+      core.disposables.forEach((d) => d.dispose());
+      core.root.traverse((obj) => {
+        if (obj instanceof THREE.Mesh) {
+          const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+          mats.forEach((m) => {
+            const std = m as THREE.MeshStandardMaterial;
+            if (std.map && std.map !== blueprint) std.map.dispose();
+            m.dispose();
+          });
+          obj.geometry.dispose();
+        }
+      });
+    },
+  };
+}
+
 export function tuneBaloon8RunnerVisibility(shoe: Baloon8WalkerShoe, mobile: boolean): void {
   if (!mobile) return;
-
   shoe.hullMat.iridescence = Math.min(shoe.hullMat.iridescence, 0.5);
   shoe.hullMat.envMapIntensity = 0.95;
   shoe.hullMat.emissive = new THREE.Color(0x1a4860);
   shoe.hullMat.emissiveIntensity = 0.35;
-
   const bubbleMat = shoe.bubbles.material as THREE.MeshPhysicalMaterial;
   bubbleMat.iridescence = 0.5;
   bubbleMat.envMapIntensity = 1.0;
-  bubbleMat.metalness = 0.72;
-  bubbleMat.roughness = 0.22;
 }
 
-/**
- * Temple Run player — identical mesh + yaw as homepage `buildBaloon8Shoe` so the sideline
- * camera sees the blueprint side profile (bubbles, wheels, green B grille).
- */
+/** In-game Temple Run player — same Baloon8 blueprint, scaled for sideline camera. */
 export function buildBaloon8RunnerShoe(
-  bubbleCount = 1100,
+  blueprint: THREE.Texture,
+  bubbleCount = 900,
   opts?: { mobile?: boolean },
 ): Baloon8WalkerShoe {
   const mobile = opts?.mobile ?? false;
   const scale = mobile ? BALOON8_WALKER_SCALE_MOBILE : BALOON8_WALKER_SCALE;
-  const core = assembleBaloon8ShoeCore(bubbleCount);
-  core.root.position.y = -0.02;
+  const core = assembleFromBlueprint(blueprint, bubbleCount, scale);
   core.root.rotation.y = -Math.PI / 2;
 
   const mount = new THREE.Group();
   mount.add(core.root);
-  mount.scale.setScalar(scale);
   mount.position.y = 0.34 * scale;
 
   const shoe: Baloon8WalkerShoe = {
@@ -332,37 +386,13 @@ export function buildBaloon8RunnerShoe(
   return shoe;
 }
 
-/** @deprecated Use buildBaloon8RunnerShoe — kept for tests importing the old name. */
-export function buildBaloon8WalkerShoe(_side: -1 | 1, bubbleCount = 1100): Baloon8WalkerShoe {
-  return buildBaloon8RunnerShoe(bubbleCount);
-}
-
-/** Build the full Baloon8 car-shoe from the four-view mockup (homepage showcase). */
-export function buildBaloon8Shoe(bubbleCount = 2200): Baloon8ShoeModel {
-  const core = assembleBaloon8ShoeCore(bubbleCount);
-  core.root.position.y = -0.02;
-  core.root.rotation.y = -Math.PI / 2;
-
-  return {
-    root: core.root,
-    bubbles: core.bubbles,
-    glowMeshes: core.glowMeshes,
-    dispose: () => {
-      root.traverse((obj) => {
-        if (obj instanceof THREE.Mesh) {
-          const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
-          mats.forEach((m) => {
-            const std = m as THREE.MeshStandardMaterial;
-            if (std.map && std.map.image && std.map !== blueprint) std.map.dispose();
-            m.dispose();
-          });
-          obj.geometry.dispose();
-        }
-      });
-      if (bubbles.geometry) bubbles.geometry.dispose();
-      (bubbles.material as THREE.Material).dispose();
-    },
-  };
+/** @deprecated */
+export function buildBaloon8WalkerShoe(
+  blueprint: THREE.Texture,
+  _side: -1 | 1,
+  bubbleCount = 900,
+): Baloon8WalkerShoe {
+  return buildBaloon8RunnerShoe(blueprint, bubbleCount);
 }
 
 export { BALOON8_BLUEPRINT_URL };

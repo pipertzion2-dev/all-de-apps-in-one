@@ -52,40 +52,28 @@ export function CleanSneaksSection() {
         }}
       />
 
-        <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="grid items-stretch gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-10">
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#06080c] shadow-[0_0_60px_rgba(91,141,168,0.12)]">
-              <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-4 py-3">
-                <p className="text-[10px] uppercase tracking-[0.35em] text-[#5B8DA8]/90">
-                  Baloon8 · 3D Rebuild
-                </p>
-                <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">
-                  Drag to orbit
-                </p>
-              </div>
-              <div className="relative h-[360px] sm:h-[440px] lg:h-[520px]">
-                <SceneErrorBoundary
-                  fallback={
-                    <div
-                      className="h-full w-full bg-cover bg-center"
-                      style={{
-                        backgroundImage: "url(/assets/clean-sneaks/baloon8-blueprint.jpg)",
-                      }}
-                      role="img"
-                      aria-label="Baloon8 car-shoe blueprint"
-                    />
-                  }
-                >
-                  <Baloon8ShoeScene className="h-full" />
-                </SceneErrorBoundary>
-              </div>
-              <div
-                className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#06080c] to-transparent"
-                aria-hidden
-              />
+      <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="grid items-stretch gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-10">
+          <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#06080c] shadow-[0_0_60px_rgba(91,141,168,0.12)]">
+            <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-4 py-3">
+              <p className="text-[10px] uppercase tracking-[0.35em] text-[#5B8DA8]/90">
+                Your Baloon8 · 3D
+              </p>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Drag to orbit</p>
             </div>
-            <div className="h-[360px] sm:h-[440px] lg:h-[520px]">
-              <SceneErrorBoundary>
+            <div className="relative h-[360px] sm:h-[440px] lg:h-[520px]">
+              <SceneErrorBoundary
+                fallback={
+                  <div
+                    className="h-full w-full bg-cover bg-center"
+                    style={{
+                      backgroundImage: "url(/assets/clean-sneaks/baloon8-blueprint.jpg)",
+                    }}
+                    role="img"
+                    aria-label="Baloon8 car-shoe blueprint"
+                  />
+                }
+              >
                 <Baloon8ShoeScene className="h-full" />
               </SceneErrorBoundary>
             </div>
@@ -109,9 +97,8 @@ export function CleanSneaksSection() {
               KEEP &apos;EM FRESH.
             </p>
             <p className="mt-5 max-w-md text-sm leading-relaxed text-white/70 sm:text-base lg:max-w-none">
-              The Baloon8 car-shoe — iridescent bubble coat, glowing grille, transparent wheels, and
-              a footwell lined with the crest mandala. Built in advanced Three.js from your
-              four-side mockup. Now run the streets and keep them clean.
+              Run in your Baloon8 car-shoe — the same iridescent bubble coat, glowing grille, and
+              BALOON8 plate from your four-view mockup, rebuilt in Three.js for the game.
             </p>
 
             <div className="mt-8 flex flex-col items-center gap-3 lg:items-start">
@@ -124,7 +111,7 @@ export function CleanSneaksSection() {
                 <Link href="/clean-sneaks">Play Clean Sneaks</Link>
               </Button>
               <p className="text-[11px] uppercase tracking-[0.25em] text-white/45">
-                Opens in game mode · Mobile &amp; desktop
+                Your Baloon8 · Full screen · Mobile &amp; desktop
               </p>
               {best > 0 && (
                 <p className="text-xs text-[#7EC8D9]/90" data-testid="text-clean-sneaks-best">

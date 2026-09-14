@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { buildBaloon8RunnerShoe, type Baloon8WalkerShoe } from "./baloon8-shoe-model";
+import { loadBaloon8BlueprintTexture } from "./baloon8-textures";
 import { detectRunQuality, runQualityFlags } from "./run-quality";
 
 export type WalkingShoes3D = {
@@ -19,12 +20,16 @@ function runnerBubbleCount(): number {
   return flags.bubbleCount;
 }
 
-function buildRunnerShoeSafe(preferredCount: number, mobile: boolean): Baloon8WalkerShoe {
+function buildRunnerShoeSafe(
+  blueprint: THREE.Texture,
+  preferredCount: number,
+  mobile: boolean,
+): Baloon8WalkerShoe {
   const counts = [preferredCount, Math.max(180, Math.floor(preferredCount * 0.45)), 120];
   let lastErr: unknown;
   for (const count of counts) {
     try {
-      return buildBaloon8RunnerShoe(count, { mobile });
+      return buildBaloon8RunnerShoe(blueprint, count, { mobile });
     } catch (err) {
       lastErr = err;
       console.warn("[createWalkingShoes3D] shoe build retry", count, err);
@@ -33,13 +38,18 @@ function buildRunnerShoeSafe(preferredCount: number, mobile: boolean): Baloon8Wa
   throw lastErr instanceof Error ? lastErr : new Error("Baloon8 runner shoe build failed");
 }
 
+/** Preload blueprint so the runner shoe is ready before the scene mounts. */
+export function preloadBaloon8RunnerShoe(): Promise<THREE.Texture> {
+  return loadBaloon8BlueprintTexture();
+}
+
 /** Single Baloon8 blueprint mockup — same orientation as homepage preview. */
-export function createWalkingShoes3D(mobile = false): WalkingShoes3D {
+export function createWalkingShoes3D(blueprint: THREE.Texture, mobile = false): WalkingShoes3D {
   const root = new THREE.Group();
   const count = runnerBubbleCount();
 
   const shoePivot = new THREE.Group();
-  const shoe = buildRunnerShoeSafe(count, mobile);
+  const shoe = buildRunnerShoeSafe(blueprint, count, mobile);
   shoePivot.add(shoe.root);
 
   const shieldRing = new THREE.Mesh(

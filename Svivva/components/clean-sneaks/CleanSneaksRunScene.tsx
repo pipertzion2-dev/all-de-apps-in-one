@@ -18,6 +18,7 @@ import {
 import { detectRunQuality, runQualityFlags, type RunQuality } from "@/lib/clean-sneaks/run-quality";
 import {
   createWalkingShoes3D,
+  preloadBaloon8RunnerShoe,
   updateWalkingShoes3D,
   type WalkingShoes3D,
 } from "@/lib/clean-sneaks/walking-shoes-3d";
@@ -363,13 +364,26 @@ function PlayerShoes({
   stateRef: React.MutableRefObject<RunEngineState>;
   mobile: boolean;
 }) {
-  const shoes = useMemo(() => createWalkingShoes3D(mobile), [mobile]);
+  const [shoes, setShoes] = useState<WalkingShoes3D | null>(null);
   const hostRef = useRef<THREE.Group>(null);
+
+  useEffect(() => {
+    let alive = true;
+    preloadBaloon8RunnerShoe()
+      .then((blueprint) => {
+        if (!alive) return;
+        setShoes(createWalkingShoes3D(blueprint, mobile));
+      })
+      .catch((err) => console.error("[PlayerShoes] Baloon8 load failed", err));
+    return () => {
+      alive = false;
+    };
+  }, [mobile]);
 
   useFrame(() => {
     const s = stateRef.current;
     const host = hostRef.current;
-    if (!host) return;
+    if (!host || !shoes) return;
     const now = performance.now();
 
     host.position.x = laneWorldX(s.laneX);
@@ -385,6 +399,8 @@ function PlayerShoes({
       speed: s.speed,
     });
   });
+
+  if (!shoes) return null;
 
   return (
     <group ref={hostRef}>
