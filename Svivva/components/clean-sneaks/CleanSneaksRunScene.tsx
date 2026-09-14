@@ -376,14 +376,7 @@ function PlayerShoes({
   blueprint: THREE.Texture;
 }) {
   const hostRef = useRef<THREE.Group>(null);
-  const shoes = useMemo(() => {
-    try {
-      return createWalkingShoes3D(blueprint, mobile);
-    } catch (err) {
-      console.error("[PlayerShoes] Baloon8 build failed", err);
-      return null;
-    }
-  }, [blueprint, mobile]);
+  const shoes = useMemo(() => createWalkingShoes3D(blueprint, mobile), [blueprint, mobile]);
 
   useFrame(() => {
     const s = stateRef.current;
