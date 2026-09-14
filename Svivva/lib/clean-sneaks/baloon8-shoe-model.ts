@@ -20,7 +20,7 @@ export const BALOON8_WALKER_SCALE_MOBILE = 0.36;
 /** Smaller per-foot scale so a left/right pair fits the lane. */
 export const BALOON8_PAIR_SCALE = 0.26;
 export const BALOON8_PAIR_SCALE_MOBILE = 0.34;
-export const BALOON8_PAIR_SCALE_PORTRAIT = 0.27;
+export const BALOON8_PAIR_SCALE_PORTRAIT = 0.31;
 
 const IRIDESCENCE = [0x2a9d8f, 0x5b8da8, 0x7b4397, 0x3d9970, 0x4cc9c0];
 
@@ -37,16 +37,15 @@ function legacyPanel(
   const tex = cropBlueprintTexture(blueprint, quadrant);
   const mat = new THREE.MeshPhysicalMaterial({
     map: tex,
-    color: new THREE.Color(0x3a7898),
     transparent: true,
-    alphaTest: 0.08,
-    metalness: 0.3,
-    roughness: 0.42,
-    clearcoat: 0.5,
-    envMapIntensity: 1.35,
+    alphaTest: 0.04,
+    metalness: 0.35,
+    roughness: 0.38,
+    clearcoat: 0.65,
+    envMapIntensity: 1.5,
     side: THREE.DoubleSide,
     emissive: new THREE.Color(0x0a2030),
-    emissiveIntensity: 0.18,
+    emissiveIntensity: 0.15,
   });
   const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
   mesh.renderOrder = 2;
@@ -62,17 +61,16 @@ function preparedPanel(
   const mat = new THREE.MeshPhysicalMaterial({
     map: prep.map,
     alphaMap: prep.alphaMap,
-    color: new THREE.Color(0x3a7898),
     transparent: true,
-    alphaTest: 0.14,
-    metalness: 0.28,
-    roughness: 0.4,
-    clearcoat: 0.55,
-    envMapIntensity: 1.35,
+    alphaTest: 0.12,
+    metalness: 0.32,
+    roughness: 0.36,
+    clearcoat: 0.65,
+    envMapIntensity: 1.5,
     side: THREE.DoubleSide,
     depthWrite: true,
     emissive: new THREE.Color(glow?.emissive ?? 0x0a2030),
-    emissiveIntensity: glow?.intensity ?? 0.22,
+    emissiveIntensity: glow?.intensity ?? 0.18,
   });
   const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
   mesh.renderOrder = 2;
@@ -106,15 +104,19 @@ function createBubbleInstances(
   scaleMul = 1,
 ): THREE.InstancedMesh | null {
   if (count <= 0) return null;
-  const bubbleGeo = new THREE.SphereGeometry(0.02 * scaleMul, 6, 6);
+  const bubbleGeo = new THREE.SphereGeometry(0.022 * scaleMul, 8, 8);
   const bubbleMat = new THREE.MeshPhysicalMaterial({
-    color: 0x4cc9c0,
-    metalness: 0.85,
-    roughness: 0.18,
+    color: 0xffffff,
+    metalness: 0.95,
+    roughness: 0.12,
+    clearcoat: 1,
+    clearcoatRoughness: 0.08,
     iridescence: 1,
-    iridescenceIOR: 1.32,
+    iridescenceIOR: 1.35,
+    iridescenceThicknessRange: [100, 800],
+    envMapIntensity: 1.6,
     transparent: true,
-    opacity: 0.22,
+    opacity: 0.85,
     depthWrite: false,
   });
   const mesh = new THREE.InstancedMesh(bubbleGeo, bubbleMat, count);
@@ -174,8 +176,8 @@ function createBubbleInstances(
         break;
     }
 
-    const s = 0.5 + Math.random() * 0.65;
-    const push = 0.028 * scaleMul * s;
+    const s = 0.55 + Math.random() * 0.75;
+    const push = 0.035 * scaleMul * s;
     dummy.position.set(x + nx * push, y + ny * push + hh * 0.5, z + nz * push);
     dummy.scale.setScalar(s);
     dummy.updateMatrix();
@@ -329,20 +331,20 @@ export function ensureBaloon8RunnerVisible(shoe: Baloon8WalkerShoe, mobile: bool
   if (shoe.bubbles) {
     shoe.bubbles.frustumCulled = false;
     const bubbleMat = shoe.bubbles.material as THREE.MeshPhysicalMaterial;
-    bubbleMat.opacity = mobile ? 0.2 : 0.22;
+    bubbleMat.opacity = mobile ? 0.62 : 0.85;
   }
 
   shoe.hullMat.emissive = new THREE.Color(0x1a3040);
-  shoe.hullMat.emissiveIntensity = mobile ? 0.65 : 0.3;
+  shoe.hullMat.emissiveIntensity = mobile ? 0.35 : 0.3;
 
   shoe.root.traverse((obj) => {
     if (!(obj instanceof THREE.Mesh)) return;
     obj.frustumCulled = false;
     const mat = obj.material as THREE.MeshPhysicalMaterial;
     if (!mat.map) return;
-    mat.envMapIntensity = mobile ? 1.55 : 1.45;
+    mat.envMapIntensity = mobile ? 1.5 : 1.45;
     mat.emissive = mat.emissive ?? new THREE.Color(0x0a1820);
-    mat.emissiveIntensity = Math.max(mat.emissiveIntensity ?? 0, mobile ? 0.55 : 0.22);
+    mat.emissiveIntensity = Math.max(mat.emissiveIntensity ?? 0, mobile ? 0.22 : 0.18);
     if (mobile) {
       mat.alphaTest = 0.02;
     }

@@ -45,18 +45,17 @@ function createShoeBillboard(
   const mat = new THREE.SpriteMaterial({
     map: sideTex,
     alphaMap,
-    color: new THREE.Color(0x3a7898),
     transparent: true,
-    alphaTest: 0.12,
+    alphaTest: 0.08,
     depthTest: true,
     depthWrite: false,
     toneMapped: false,
   });
   const sprite = new THREE.Sprite(mat);
-  const baseW = portrait ? 0.68 : mobile ? 1.05 : 0.92;
+  const baseW = portrait ? 0.78 : mobile ? 1.05 : 0.92;
   const h = baseW / aspect;
   sprite.scale.set(baseW, h, 1);
-  sprite.position.y = portrait ? 0.18 : mobile ? 0.26 : 0.22;
+  sprite.position.y = portrait ? 0.2 : mobile ? 0.26 : 0.22;
   sprite.renderOrder = 8;
   sprite.frustumCulled = false;
 
@@ -127,7 +126,9 @@ export function createWalkingShoes3D(
   portrait = false,
 ): WalkingShoes3D {
   const root = new THREE.Group();
-  const perShoeBubbles = mobile ? 0 : Math.max(60, Math.floor(runnerBubbleCount() / 2));
+  const perShoeBubbles = mobile
+    ? Math.max(portrait ? 36 : 45, Math.floor(runnerBubbleCount() / (portrait ? 3 : 2)))
+    : Math.max(60, Math.floor(runnerBubbleCount() / 2));
 
   const shoePivot = new THREE.Group();
   const leftPivot = new THREE.Group();
@@ -211,8 +212,8 @@ function applyDirtToShoe(shoe: Baloon8WalkerShoe | null, dirt: number, freshGlow
   if ("iridescence" in shoe.hullMat) {
     shoe.hullMat.iridescence = Math.max(0.35, 0.85 - dirt * 0.45);
   }
-  shoe.hullMat.metalness = Math.max(0.25, 0.5 - dirt * 0.2);
-  shoe.hullMat.envMapIntensity = freshGlow ? 1.4 : 1.05 - dirt * 0.25;
+  shoe.hullMat.metalness = Math.max(0.45, 0.85 - dirt * 0.3);
+  shoe.hullMat.envMapIntensity = freshGlow ? 2.0 : 1.55 - dirt * 0.35;
 
   if (shoe.bubbles?.instanceColor) {
     const c = new THREE.Color();
@@ -265,7 +266,7 @@ export function updateWalkingShoes3D(
   const dt = 0.016;
   const t = performance.now() / 1000;
   const stride = args.airborne ? 0 : Math.sin(phase);
-  const lateral = args.portrait ? 0.2 : 0.34;
+  const lateral = args.portrait ? 0.22 : 0.34;
 
   const bob = args.airborne ? 0.14 : Math.max(0, Math.sin(phase * 2)) * 0.05;
   shoes.shoePivot.rotation.x = Math.sin(phase) * (args.airborne ? 0.04 : 0.06);

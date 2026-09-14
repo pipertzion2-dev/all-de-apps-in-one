@@ -52,12 +52,12 @@ function cameraRigFor(mobile: boolean, portrait: boolean): CameraRig {
     // Centered, pulled back, wide FOV — keeps both shoes in a tall narrow frame.
     const boost = portraitFramingBoost();
     return {
-      ox: 0.55 * boost,
-      oy: 0.88 * boost,
-      oz: 2.35 * boost,
-      lookY: 0.2,
-      lookZ: -2.85,
-      fov: 68 + (boost - 1) * 10,
+      ox: 0.45 * boost,
+      oy: 0.92 * boost,
+      oz: 2.65 * boost,
+      lookY: 0.18,
+      lookZ: -3.0,
+      fov: 70 + (boost - 1) * 10,
     };
   }
   if (mobile) {
