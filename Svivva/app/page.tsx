@@ -43,6 +43,11 @@ const PlatformFeatureHub = dynamic(
   () => import("@/components/platform-feature-hub").then((m) => m.PlatformFeatureHub),
   { ssr: false },
 );
+const CleanSneaksSection = dynamic(
+  () =>
+    import("@/components/clean-sneaks/CleanSneaksSection").then((m) => m.CleanSneaksSection),
+  { ssr: false },
+);
 const features = [
   {
     icon: Shield,
@@ -1882,6 +1887,8 @@ export default function LandingPage() {
             </div>
           </section>
 
+          <CleanSneaksSection />
+
           <footer className="border-t border-white/10 py-8 sm:py-12">
             <div className="max-w-7xl mx-auto px-4 sm:px-6">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
@@ -1916,6 +1923,11 @@ export default function LandingPage() {
                       <Link href="/play" className="hover:text-foreground transition-colors">
                         ZZAI Play
                       </Link>
+                    </li>
+                    <li>
+                      <a href="#clean-sneaks" className="hover:text-foreground transition-colors">
+                        Clean Sneaks
+                      </a>
                     </li>
                     <li>
                       <a href="#oaas" className="hover:text-foreground transition-colors">
