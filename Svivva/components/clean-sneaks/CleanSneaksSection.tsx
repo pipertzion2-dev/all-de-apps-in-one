@@ -1,19 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
-import { useFullscreen } from "@/hooks/use-fullscreen";
 import { readBestScore } from "@/lib/clean-sneaks/storage";
 import { CleanSneaksCubeBackdrop } from "./CleanSneaksCubeBackdrop";
+import { SceneErrorBoundary } from "./SceneErrorBoundary";
 
 const CleanSneaksGame = dynamic(
   () => import("@/components/clean-sneaks/CleanSneaksGame").then((m) => m.CleanSneaksGame),
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-[360px] items-center justify-center rounded-xl border border-white/10 bg-[#0a0c10] text-sm text-muted-foreground">
+      <div className="flex min-h-[280px] flex-1 items-center justify-center rounded-xl border border-white/10 bg-[#0a0c10] text-sm text-muted-foreground">
         Loading Clean Sneaks…
       </div>
     ),
@@ -36,16 +36,6 @@ export function CleanSneaksSection() {
   const [playing, setPlaying] = useState(false);
   const [best, setBest] = useState(0);
   const [mounted, setMounted] = useState(false);
-  const shellRef = useRef<HTMLDivElement>(null);
-
-  const exit = useCallback(() => {
-    setPlaying(false);
-    setBest(readBestScore());
-  }, []);
-
-  const { enter: enterFullscreen, exit: exitFullscreen } = useFullscreen(shellRef, {
-    onExit: exit,
-  });
 
   useEffect(() => {
     setMounted(true);
@@ -55,28 +45,28 @@ export function CleanSneaksSection() {
     setBest(readBestScore());
   }, [playing]);
 
+  useEffect(() => {
+    if (!playing) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [playing]);
+
   const start = useCallback(() => {
     setPlaying(true);
   }, []);
 
-  useEffect(() => {
-    if (!playing) return;
-    void enterFullscreen();
-    return () => {
-      void exitFullscreen();
-    };
-  }, [playing, enterFullscreen, exitFullscreen]);
-
-  const handleExit = useCallback(() => {
-    void exitFullscreen();
-    exit();
-  }, [exitFullscreen, exit]);
+  const exit = useCallback(() => {
+    setPlaying(false);
+    setBest(readBestScore());
+  }, []);
 
   const fullscreenPlay =
     playing && mounted
       ? createPortal(
           <div
-            ref={shellRef}
             className="fixed inset-0 z-[200] flex flex-col bg-[#0a0c10]"
             style={{
               paddingTop: "env(safe-area-inset-top)",
@@ -86,7 +76,9 @@ export function CleanSneaksSection() {
             }}
             data-testid="clean-sneaks-fullscreen"
           >
-            <CleanSneaksCubeBackdrop className="absolute inset-0 opacity-70" />
+            <SceneErrorBoundary fallback={null}>
+              <CleanSneaksCubeBackdrop className="absolute inset-0 opacity-70" />
+            </SceneErrorBoundary>
 
             <div className="relative z-10 flex min-h-0 flex-1 flex-col">
               <div className="flex shrink-0 items-center justify-between gap-3 px-4 py-3 sm:px-6">
@@ -99,15 +91,18 @@ export function CleanSneaksSection() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={handleExit}
+                  onClick={exit}
                   data-testid="button-clean-sneaks-back"
                 >
                   Exit game
                 </Button>
               </div>
 
-              <div className="flex min-h-0 flex-1 flex-col px-3 pb-3 sm:px-6 sm:pb-6">
-                <CleanSneaksGame active={playing} onExit={handleExit} fullscreen />
+              <div
+                className="flex min-h-0 flex-1 flex-col px-3 pb-3 sm:px-6 sm:pb-6"
+                style={{ minHeight: "min(70vh, 720px)" }}
+              >
+                <CleanSneaksGame active={playing} onExit={exit} fullscreen />
               </div>
             </div>
           </div>,
@@ -146,7 +141,6 @@ export function CleanSneaksSection() {
 
         <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
           <div className="grid items-stretch gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-10">
-            {/* Advanced Three.js Baloon8 car-shoe — four-view mockup in 3D */}
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#06080c] shadow-[0_0_60px_rgba(91,141,168,0.12)]">
               <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-4 py-3">
                 <p className="text-[10px] uppercase tracking-[0.35em] text-[#5B8DA8]/90">
@@ -157,7 +151,9 @@ export function CleanSneaksSection() {
                 </p>
               </div>
               <div className="h-[360px] sm:h-[440px] lg:h-[520px]">
-                <Baloon8ShoeScene className="h-full" />
+                <SceneErrorBoundary>
+                  <Baloon8ShoeScene className="h-full" />
+                </SceneErrorBoundary>
               </div>
               <div
                 className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#06080c] to-transparent"

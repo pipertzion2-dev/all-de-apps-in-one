@@ -48,49 +48,63 @@ async function exitNativeFullscreen(): Promise<void> {
 export type UseFullscreenOptions = {
   /** When false, only toggles the immersive CSS overlay (no Fullscreen API). */
   native?: boolean;
-  onExit?: () => void;
+  /** Fired when the user exits native fullscreen (Esc / back), not on CSS-only mode. */
+  onNativeExit?: () => void;
 };
 
 export function useFullscreen(
   containerRef: RefObject<HTMLElement | null>,
   options: UseFullscreenOptions = {},
 ) {
-  const { native = true, onExit } = options;
+  const { native = false, onNativeExit } = options;
   const [active, setActive] = useState(false);
-  const onExitRef = useRef(onExit);
+  const onNativeExitRef = useRef(onNativeExit);
   const exitingRef = useRef(false);
-  onExitRef.current = onExit;
+  const enteredNativeRef = useRef(false);
+  onNativeExitRef.current = onNativeExit;
 
   const enter = useCallback(async () => {
     setActive(true);
-    if (native) {
-      const el = containerRef.current;
-      if (el) await requestElementFullscreen(el);
-    }
+    if (!native) return;
+
+    const el = containerRef.current;
+    if (!el) return;
+    enteredNativeRef.current = await requestElementFullscreen(el);
   }, [containerRef, native]);
 
   const exit = useCallback(async () => {
     exitingRef.current = true;
-    if (native) await exitNativeFullscreen();
+    if (native && enteredNativeRef.current) {
+      await exitNativeFullscreen();
+      enteredNativeRef.current = false;
+    }
     setActive(false);
     exitingRef.current = false;
   }, [native]);
 
   useEffect(() => {
+    if (!native) return;
+
     const onChange = () => {
       const nativeActive = !!getFullscreenElement();
-      if (!nativeActive && active && !exitingRef.current) {
+      if (nativeActive) {
+        enteredNativeRef.current = true;
+        return;
+      }
+      if (enteredNativeRef.current && !exitingRef.current) {
+        enteredNativeRef.current = false;
         setActive(false);
-        onExitRef.current?.();
+        onNativeExitRef.current?.();
       }
     };
+
     document.addEventListener("fullscreenchange", onChange);
     document.addEventListener("webkitfullscreenchange", onChange);
     return () => {
       document.removeEventListener("fullscreenchange", onChange);
       document.removeEventListener("webkitfullscreenchange", onChange);
     };
-  }, [active]);
+  }, [native]);
 
   useEffect(() => {
     if (!active) return;

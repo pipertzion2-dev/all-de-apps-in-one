@@ -73,8 +73,19 @@ export function Baloon8ShoeScene({ className = "", autoRotate = true, bubbleCoun
     fill.position.set(-2, 2, 3);
     scene.add(fill);
 
-    const shoe = buildBaloon8Shoe(count);
-    scene.add(shoe.root);
+    let shoe: ReturnType<typeof buildBaloon8Shoe>;
+    try {
+      shoe = buildBaloon8Shoe(count);
+      scene.add(shoe.root);
+    } catch (err) {
+      console.error("[Baloon8ShoeScene] model build failed", err);
+      pmrem.dispose();
+      renderer.dispose();
+      if (renderer.domElement.parentElement === host) {
+        host.removeChild(renderer.domElement);
+      }
+      return;
+    }
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;

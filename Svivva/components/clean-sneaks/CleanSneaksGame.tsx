@@ -314,9 +314,9 @@ export function CleanSneaksGame({
       const wrap = wrapRef.current;
       if (!wrap) return;
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const w = wrap.clientWidth;
+      const w = Math.max(280, wrap.clientWidth);
       const h = fullscreen
-        ? Math.max(240, wrap.clientHeight)
+        ? Math.max(280, wrap.clientHeight || Math.round(window.innerHeight * 0.52))
         : Math.max(320, Math.min(520, Math.round(wrap.clientWidth * 0.56)));
       canvas.width = Math.floor(w * dpr);
       canvas.height = Math.floor(h * dpr);
@@ -327,6 +327,8 @@ export function CleanSneaksGame({
     resize();
     const ro = new ResizeObserver(resize);
     if (wrapRef.current) ro.observe(wrapRef.current);
+    window.addEventListener("resize", resize);
+    window.visualViewport?.addEventListener("resize", resize);
 
     const laneYs = (h: number) => {
       const base = h * 0.62;
@@ -674,6 +676,8 @@ export function CleanSneaksGame({
       alive = false;
       cancelAnimationFrame(raf);
       ro.disconnect();
+      window.removeEventListener("resize", resize);
+      window.visualViewport?.removeEventListener("resize", resize);
     };
   }, [active, phase, fullscreen, applyDirt, bumpStreak, emitStats]);
 
