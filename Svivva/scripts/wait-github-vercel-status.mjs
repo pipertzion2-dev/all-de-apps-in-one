@@ -100,9 +100,7 @@ async function ignoredBuildAcceptable() {
 await loadVerifyTargets();
 console.log(`Waiting for "${required}" on ${sha.slice(0, 7)} (timeout ${timeoutMs / 1000}s)…`);
 if (verifyTargets.length) {
-  console.log(
-    `Production fallback checks: ${verifyTargets.map((t) => t.url).join(", ")}`,
-  );
+  console.log(`Production fallback checks: ${verifyTargets.map((t) => t.url).join(", ")}`);
 }
 
 while (Date.now() - started < timeoutMs) {
