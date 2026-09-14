@@ -15,11 +15,7 @@ import {
   sidewalkTexture,
   wetAsphaltMaterial,
 } from "@/lib/clean-sneaks/run-textures";
-import {
-  detectRunQuality,
-  runQualityFlags,
-  type RunQuality,
-} from "@/lib/clean-sneaks/run-quality";
+import { detectRunQuality, runQualityFlags, type RunQuality } from "@/lib/clean-sneaks/run-quality";
 import {
   createWalkingShoes3D,
   updateWalkingShoes3D,
