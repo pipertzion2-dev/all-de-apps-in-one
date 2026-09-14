@@ -11,6 +11,7 @@ import {
   POWERUP_META,
 } from "@/lib/clean-sneaks/constants";
 import { cleanLabelFrom, resolvePlayerSneaker, streakLabelFrom } from "@/lib/clean-sneaks/assets";
+import { loadBaloon8SideSprite } from "@/lib/clean-sneaks/baloon8-textures";
 import {
   computeFrameScore,
   readBestScore,
@@ -133,7 +134,7 @@ export function CleanSneaksGame({
     freshUntil: 0,
     perfectUntil: 0,
     shake: 0,
-    shoeImg: null as HTMLImageElement | null,
+    shoeImg: null as CanvasImageSource | null,
     lastTs: 0,
     reduced: false,
     touchStart: null as { x: number; y: number; t: number } | null,
@@ -267,11 +268,25 @@ export function CleanSneaksGame({
   }, []);
 
   useEffect(() => {
-    const img = new Image();
-    img.decoding = "async";
-    img.src = sneaker.spriteUrl;
-    img.onload = () => {
-      stateRef.current.shoeImg = img;
+    let alive = true;
+    stateRef.current.shoeImg = null;
+
+    const apply = (img: CanvasImageSource) => {
+      if (!alive) return;
+      stateRef.current.shoeImg = img as HTMLImageElement;
+    };
+
+    loadBaloon8SideSprite()
+      .then(apply)
+      .catch(() => {
+        const img = new Image();
+        img.decoding = "async";
+        img.onload = () => apply(img);
+        img.src = sneaker.spriteUrl;
+      });
+
+    return () => {
+      alive = false;
     };
   }, [sneaker.spriteUrl]);
 
@@ -611,9 +626,13 @@ export function CleanSneaksGame({
 
       const shoe = s.shoeImg;
       const dirt = 1 - s.cleanliness / 100;
-      if (shoe && shoe.complete) {
-        const sw = 100;
-        const sh = Math.round(sw * (shoe.height / Math.max(1, shoe.width)));
+      const shoeReady = shoe && ("complete" in shoe ? (shoe as HTMLImageElement).complete : true);
+      if (shoe && shoeReady) {
+        const sw = fullscreen ? 168 : 132;
+        const shoeW = "width" in shoe ? (shoe as HTMLImageElement | HTMLCanvasElement).width : sw;
+        const shoeH =
+          "height" in shoe ? (shoe as HTMLImageElement | HTMLCanvasElement).height : sw * 0.4;
+        const sh = Math.round(sw * (shoeH / Math.max(1, shoeW)));
         ctx.save();
         ctx.translate(playerX, smoothY - sh + 18);
         const bob = s.grounded && !s.reduced ? Math.sin(ts / 90) * 2 : 0;
@@ -818,7 +837,7 @@ export function CleanSneaksGame({
         <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex flex-wrap items-start justify-between gap-2 p-3 sm:p-4">
           <div className="space-y-1">
             <p className="text-[10px] uppercase tracking-[0.25em] text-[#5B8DA8]/80">
-              Clean Sneaks
+              {sneaker.label ?? "Baloon8"} · Clean Sneaks
             </p>
             <p className="text-lg font-bold tabular-nums text-foreground sm:text-xl">
               {hud.score.toLocaleString()}

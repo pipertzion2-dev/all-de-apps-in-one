@@ -8,19 +8,21 @@ import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
-import { buildBaloon8Shoe } from "@/lib/clean-sneaks/baloon8-shoe-model";
+import {
+  BALOON8_DIMS,
+  BALOON8_SCENE_SCALE,
+  buildBaloon8Shoe,
+} from "@/lib/clean-sneaks/baloon8-shoe-model";
+import { loadBaloon8BlueprintTexture } from "@/lib/clean-sneaks/baloon8-textures";
 
 type Props = {
   className?: string;
-  /** Auto-rotate showcase (default true). */
   autoRotate?: boolean;
-  /** Bubble instance count — lower on mobile for perf. */
   bubbleCount?: number;
 };
 
 /**
- * Advanced Three.js viewer for the Baloon8 car-shoe mockup.
- * Iridescent bubble coat, glowing grille, transparent wheels, bloom post-FX.
+ * Interactive Baloon8 car-shoe — textured from the user's four-view mockup.
  */
 export function Baloon8ShoeScene({ className = "", autoRotate = true, bubbleCount }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -29,16 +31,23 @@ export function Baloon8ShoeScene({ className = "", autoRotate = true, bubbleCoun
     const host = hostRef.current;
     if (!host) return;
 
+    let disposed = false;
+    let raf = 0;
+    let ro: ResizeObserver | null = null;
+    let controls: OrbitControls | null = null;
+    let composer: EffectComposer | null = null;
+    let shoe: ReturnType<typeof buildBaloon8Shoe> | null = null;
+
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const isMobile = window.innerWidth < 768;
-    const count = bubbleCount ?? (isMobile ? 1200 : 2400);
+    const count = bubbleCount ?? (isMobile ? 900 : 1600);
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x06080c);
-    scene.fog = new THREE.FogExp2(0x06080c, 0.045);
+    scene.fog = new THREE.FogExp2(0x06080c, 0.06);
 
-    const camera = new THREE.PerspectiveCamera(38, 1, 0.05, 80);
-    camera.position.set(5.5, 2.4, 4.8);
+    const camera = new THREE.PerspectiveCamera(36, 1, 0.05, 40);
+    camera.position.set(2.8, 1.5, 2.6);
 
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -62,62 +71,17 @@ export function Baloon8ShoeScene({ className = "", autoRotate = true, bubbleCoun
     const pmrem = new THREE.PMREMGenerator(renderer);
     scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.35));
-    const key = new THREE.DirectionalLight(0xffffff, 1.2);
-    key.position.set(6, 8, 4);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+    const key = new THREE.DirectionalLight(0xffffff, 1.3);
+    key.position.set(4, 6, 3);
     scene.add(key);
-    const rim = new THREE.DirectionalLight(0x7ec8d9, 0.55);
-    rim.position.set(-4, 3, -6);
+    const rim = new THREE.DirectionalLight(0x7ec8d9, 0.65);
+    rim.position.set(-3, 2, -4);
     scene.add(rim);
-    const fill = new THREE.PointLight(0xd94f9c, 0.45, 20);
-    fill.position.set(-2, 2, 3);
-    scene.add(fill);
 
-    let shoe: ReturnType<typeof buildBaloon8Shoe>;
-    try {
-      shoe = buildBaloon8Shoe(count);
-      scene.add(shoe.root);
-    } catch (err) {
-      console.error("[Baloon8ShoeScene] model build failed", err);
-      pmrem.dispose();
-      renderer.dispose();
-      if (renderer.domElement.parentElement === host) {
-        host.removeChild(renderer.domElement);
-      }
-      return;
-    }
-
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.06;
-    controls.minDistance = 3.2;
-    controls.maxDistance = 12;
-    controls.maxPolarAngle = Math.PI * 0.48;
-    controls.target.set(0, 0.55, 0);
-    controls.update();
-
-    const composer = new EffectComposer(renderer);
-    composer.setPixelRatio(dpr);
-    composer.addPass(new RenderPass(scene, camera));
-    const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.55, 0.35, 0.72);
-    composer.addPass(bloom);
-    composer.addPass(new OutputPass());
-
-    const grid = new THREE.GridHelper(14, 28, 0x1a3040, 0x0e1820);
-    grid.position.y = -0.02;
-    scene.add(grid);
-
-    let disposed = false;
-    let raf = 0;
-    let userOrbiting = false;
     const clock = new THREE.Clock();
-
-    controls.addEventListener("start", () => {
-      userOrbiting = true;
-    });
-    controls.addEventListener("end", () => {
-      userOrbiting = false;
-    });
+    let userOrbiting = false;
+    const lookAtY = (BALOON8_DIMS.height * BALOON8_SCENE_SCALE) / 2;
 
     const resize = () => {
       const w = host.clientWidth;
@@ -126,44 +90,75 @@ export function Baloon8ShoeScene({ className = "", autoRotate = true, bubbleCoun
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h, false);
-      composer.setSize(w, h);
-      bloom.resolution.set(w, h);
+      composer?.setSize(w, h);
     };
-    resize();
-    const ro = new ResizeObserver(resize);
-    ro.observe(host);
 
-    const tick = () => {
-      if (disposed) return;
-      const t = clock.getElapsedTime();
+    loadBaloon8BlueprintTexture()
+      .then((blueprint) => {
+        if (disposed) return;
 
-      if (autoRotate && !reduced && !userOrbiting) {
-        shoe.root.rotation.y = -Math.PI / 2 + t * 0.18;
-      }
+        shoe = buildBaloon8Shoe(blueprint, count);
+        scene.add(shoe.root);
 
-      const pulse = 0.85 + Math.sin(t * 2.2) * 0.15;
-      shoe.glowMeshes.forEach((mesh) => {
-        const mat = mesh.material as THREE.MeshStandardMaterial;
-        mat.emissiveIntensity = pulse * 1.2;
+        controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.06;
+        controls.minDistance = 1.6;
+        controls.maxDistance = 6;
+        controls.maxPolarAngle = Math.PI * 0.48;
+        controls.target.set(0, lookAtY, 0);
+        controls.update();
+
+        controls.addEventListener("start", () => {
+          userOrbiting = true;
+        });
+        controls.addEventListener("end", () => {
+          userOrbiting = false;
+        });
+
+        composer = new EffectComposer(renderer);
+        composer.setPixelRatio(dpr);
+        composer.addPass(new RenderPass(scene, camera));
+        const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.35, 0.3, 0.82);
+        composer.addPass(bloom);
+        composer.addPass(new OutputPass());
+
+        const grid = new THREE.GridHelper(6, 24, 0x1a3040, 0x0e1820);
+        scene.add(grid);
+
+        resize();
+        ro = new ResizeObserver(resize);
+        ro.observe(host);
+
+        const tick = () => {
+          if (disposed || !shoe || !composer || !controls) return;
+          const t = clock.getElapsedTime();
+          if (autoRotate && !reduced && !userOrbiting) {
+            shoe.root.rotation.y = t * 0.35;
+          }
+          controls.update();
+          composer.render();
+          raf = requestAnimationFrame(tick);
+        };
+        raf = requestAnimationFrame(tick);
+      })
+      .catch((err) => {
+        console.error("[Baloon8ShoeScene] failed to load blueprint", err);
       });
-
-      controls.update();
-      composer.render();
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
 
     return () => {
       disposed = true;
       cancelAnimationFrame(raf);
-      ro.disconnect();
-      controls.dispose();
-      composer.dispose();
-      shoe.dispose();
+      ro?.disconnect();
+      controls?.dispose();
+      composer?.dispose();
+      shoe?.dispose();
       pmrem.dispose();
       scene.environment?.dispose();
       renderer.dispose();
-      host.removeChild(renderer.domElement);
+      if (renderer.domElement.parentElement === host) {
+        host.removeChild(renderer.domElement);
+      }
     };
   }, [autoRotate, bubbleCount]);
 

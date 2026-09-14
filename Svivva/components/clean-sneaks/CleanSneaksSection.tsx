@@ -150,8 +150,19 @@ export function CleanSneaksSection() {
                   Drag to orbit
                 </p>
               </div>
-              <div className="h-[360px] sm:h-[440px] lg:h-[520px]">
-                <SceneErrorBoundary>
+              <div className="relative h-[360px] sm:h-[440px] lg:h-[520px]">
+                <SceneErrorBoundary
+                  fallback={
+                    <div
+                      className="h-full w-full bg-cover bg-center"
+                      style={{
+                        backgroundImage: "url(/assets/clean-sneaks/baloon8-blueprint.jpg)",
+                      }}
+                      role="img"
+                      aria-label="Baloon8 car-shoe blueprint"
+                    />
+                  }
+                >
                   <Baloon8ShoeScene className="h-full" />
                 </SceneErrorBoundary>
               </div>

@@ -1,13 +1,13 @@
 import type { CleanLabel, SneakerAssetRef } from "./types";
+import { BALOON8_BLUEPRINT_URL } from "./baloon8-textures";
 
-/** Default replaceable custom sneaker — see public/assets/clean-sneaks/README.md */
+/** Legacy fallback sprite — Baloon8 side profile is preferred. */
 export const DEFAULT_PLAYER_SHOE_URL = "/assets/clean-sneaks/player-shoe.png";
 
-/** Baloon8 car-shoe blueprint reference (four orthographic views). */
-export const BALOON8_BLUEPRINT_URL = "/assets/clean-sneaks/baloon8-blueprint.jpg";
+export { BALOON8_BLUEPRINT_URL };
 
 export const DEFAULT_SNEAKER: SneakerAssetRef = {
-  spriteUrl: DEFAULT_PLAYER_SHOE_URL,
+  spriteUrl: BALOON8_BLUEPRINT_URL,
   label: "Baloon8",
   source: "default",
 };
