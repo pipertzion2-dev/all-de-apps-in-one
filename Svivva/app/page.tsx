@@ -8,6 +8,7 @@ import { ClientErrorBoundary } from "@/components/client-error-boundary";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { runBodyLayerHygiene } from "@/lib/body-layer-cleanup";
 import { usePlatform } from "@/lib/platform-context";
 import { ZzaiModeToggle } from "@/components/zzai-mode-toggle";
 import Link from "next/link";
@@ -193,20 +194,12 @@ export default function LandingPage() {
   }, []);
 
   useEffect(() => {
-    document
-      .querySelectorAll(
-        "body > canvas, body > div[aria-hidden].fixed, body > div.fixed.inset-0, body > [data-svivva-feature-bg]",
-      )
-      .forEach((el) => el.remove());
+    runBodyLayerHygiene();
   }, []);
 
   useEffect(() => {
     if (!flipComplete) return;
-    document
-      .querySelectorAll(
-        "body > canvas, body > div[aria-hidden].fixed, body > div.fixed.inset-0, body > [data-svivva-feature-bg]",
-      )
-      .forEach((el) => el.remove());
+    runBodyLayerHygiene();
   }, [flipComplete]);
 
   useEffect(() => {

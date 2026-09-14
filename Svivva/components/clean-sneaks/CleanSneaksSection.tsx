@@ -67,6 +67,7 @@ export function CleanSneaksSection() {
     playing && mounted
       ? createPortal(
           <div
+            data-svivva-app-shell=""
             className="fixed inset-0 z-[200] flex flex-col bg-[#0a0c10]"
             style={{
               paddingTop: "env(safe-area-inset-top)",
