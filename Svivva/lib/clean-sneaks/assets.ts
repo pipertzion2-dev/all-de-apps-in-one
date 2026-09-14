@@ -1,6 +1,6 @@
 import type { CleanLabel, SneakerAssetRef } from "./types";
 
-/** Default replaceable custom sneaker — see public/assets/clean-sneaks/README.md */
+/** Legacy flat sprite (Baloon8 car-shoe side view) — homepage 3D only; gameplay uses walking pair. */
 export const DEFAULT_PLAYER_SHOE_URL = "/assets/clean-sneaks/player-shoe.png";
 
 /** Baloon8 car-shoe blueprint reference (four orthographic views). */
@@ -8,7 +8,8 @@ export const BALOON8_BLUEPRINT_URL = "/assets/clean-sneaks/baloon8-blueprint.jpg
 
 export const DEFAULT_SNEAKER: SneakerAssetRef = {
   spriteUrl: DEFAULT_PLAYER_SHOE_URL,
-  label: "Baloon8",
+  useWalkingSprite: true,
+  label: "Baloon8 Walkers",
   source: "default",
 };
 
@@ -22,6 +23,7 @@ export function resolvePlayerSneaker(override?: Partial<SneakerAssetRef> | null)
     ...DEFAULT_SNEAKER,
     ...override,
     spriteUrl: override.spriteUrl,
+    useWalkingSprite: override.useWalkingSprite ?? false,
   };
 }
 
