@@ -267,7 +267,11 @@ function createMirror(side: 1 | -1): THREE.Mesh {
       iridescenceIOR: 1.2,
     }),
   );
-  mirror.position.set(BALOON8_DIMS.length * 0.08, BALOON8_DIMS.height * 0.72, side * (BALOON8_DIMS.width / 2 + 0.06));
+  mirror.position.set(
+    BALOON8_DIMS.length * 0.08,
+    BALOON8_DIMS.height * 0.72,
+    side * (BALOON8_DIMS.width / 2 + 0.06),
+  );
   return mirror;
 }
 
@@ -373,11 +377,7 @@ function createRear(): THREE.Group {
       }),
     );
     pipe.rotation.z = Math.PI / 2;
-    pipe.position.set(
-      -BALOON8_DIMS.length / 2 + 0.08,
-      0.12,
-      -0.22 + i * 0.088,
-    );
+    pipe.position.set(-BALOON8_DIMS.length / 2 + 0.08, 0.12, -0.22 + i * 0.088);
     rear.add(pipe);
   }
 

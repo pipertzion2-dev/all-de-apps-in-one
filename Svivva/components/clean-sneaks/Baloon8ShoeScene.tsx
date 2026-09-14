@@ -22,11 +22,7 @@ type Props = {
  * Advanced Three.js viewer for the Baloon8 car-shoe mockup.
  * Iridescent bubble coat, glowing grille, transparent wheels, bloom post-FX.
  */
-export function Baloon8ShoeScene({
-  className = "",
-  autoRotate = true,
-  bubbleCount,
-}: Props) {
+export function Baloon8ShoeScene({ className = "", autoRotate = true, bubbleCount }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
