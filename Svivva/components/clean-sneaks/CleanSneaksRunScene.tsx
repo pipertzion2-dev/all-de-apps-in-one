@@ -39,26 +39,35 @@ const ROAD_LENGTH = 140;
 const ROAD_SEGMENTS = 10;
 const SEG_LEN = ROAD_LENGTH / ROAD_SEGMENTS;
 
-function FollowCamera({ stateRef }: { stateRef: React.MutableRefObject<RunEngineState> }) {
+function FollowCamera({
+  stateRef,
+  mobile,
+}: {
+  stateRef: React.MutableRefObject<RunEngineState>;
+  mobile: boolean;
+}) {
   const { camera } = useThree();
-  const lookAt = useRef(new THREE.Vector3(0, 0.55, -6));
-  const pos = useRef(new THREE.Vector3(5.5, 2.4, 4.8));
-  const fovBase = 38;
+  const rig = mobile
+    ? { ox: 2.85, oy: 1.35, oz: 2.35, lookY: 0.42, lookZ: -4.5, fov: 44 }
+    : { ox: 3.6, oy: 1.65, oz: 3.0, lookY: 0.48, lookZ: -5.5, fov: 42 };
+  const lookAt = useRef(new THREE.Vector3(0, rig.lookY, rig.lookZ));
+  const pos = useRef(new THREE.Vector3(rig.ox, rig.oy, rig.oz));
+  const fovBase = rig.fov;
 
   useFrame((_, dt) => {
     const s = stateRef.current;
     const px = laneWorldX(s.laneX);
     const speedT = THREE.MathUtils.clamp(s.speed / 620, 0, 1);
 
-    pos.current.x = THREE.MathUtils.lerp(pos.current.x, px + 5.5, Math.min(1, dt * 4.5));
+    pos.current.x = THREE.MathUtils.lerp(pos.current.x, px + rig.ox, Math.min(1, dt * 4.5));
     lookAt.current.x = THREE.MathUtils.lerp(lookAt.current.x, px, Math.min(1, dt * 5.5));
     lookAt.current.y = THREE.MathUtils.lerp(
       lookAt.current.y,
-      0.55 + (s.y < 0 ? -s.y / 120 : 0),
+      rig.lookY + (s.y < 0 ? -s.y / 120 : 0),
       dt * 6,
     );
-    lookAt.current.z = THREE.MathUtils.lerp(lookAt.current.z, -6 - speedT * 2, dt * 3);
-    pos.current.z = THREE.MathUtils.lerp(pos.current.z, 4.8 - speedT * 0.25, dt * 2);
+    lookAt.current.z = THREE.MathUtils.lerp(lookAt.current.z, rig.lookZ - speedT * 2, dt * 3);
+    pos.current.z = THREE.MathUtils.lerp(pos.current.z, rig.oz - speedT * 0.25, dt * 2);
 
     const shake = s.shake * 0.012;
     camera.position.set(
@@ -360,25 +369,14 @@ function DynamicEntities({ stateRef }: { stateRef: React.MutableRefObject<RunEng
 function PlayerShoes({
   stateRef,
   mobile,
+  blueprint,
 }: {
   stateRef: React.MutableRefObject<RunEngineState>;
   mobile: boolean;
+  blueprint: THREE.Texture;
 }) {
-  const [shoes, setShoes] = useState<WalkingShoes3D | null>(null);
+  const shoes = useMemo(() => createWalkingShoes3D(blueprint, mobile), [blueprint, mobile]);
   const hostRef = useRef<THREE.Group>(null);
-
-  useEffect(() => {
-    let alive = true;
-    preloadBaloon8RunnerShoe()
-      .then((blueprint) => {
-        if (!alive) return;
-        setShoes(createWalkingShoes3D(blueprint, mobile));
-      })
-      .catch((err) => console.error("[PlayerShoes] Baloon8 load failed", err));
-    return () => {
-      alive = false;
-    };
-  }, [mobile]);
 
   useFrame(() => {
     const s = stateRef.current;
@@ -400,11 +398,16 @@ function PlayerShoes({
     });
   });
 
-  if (!shoes) return null;
-
   return (
     <group ref={hostRef}>
       <primitive object={shoes.root} />
+      <pointLight
+        position={[0, 0.55, 0.8]}
+        intensity={mobile ? 1.4 : 0.9}
+        distance={8}
+        color="#7ec8d9"
+      />
+      <pointLight position={[1.2, 0.35, 0.4]} intensity={0.55} distance={6} color="#ffffff" />
     </group>
   );
 }
@@ -413,10 +416,21 @@ function World({ stateRef, running, onGameOver, onStreakFlash, onStatsTick, qual
   const tickRef = useRef(0);
   const sunRef = useRef<THREE.DirectionalLight>(null);
   const { scene } = useThree();
+  const [blueprint, setBlueprint] = useState<THREE.Texture | null>(null);
 
   useEffect(() => {
     scene.background = new THREE.Color(0x0a0e14);
   }, [scene]);
+
+  useEffect(() => {
+    let alive = true;
+    preloadBaloon8RunnerShoe().then((tex) => {
+      if (alive) setBlueprint(tex);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   useFrame((_, rawDt) => {
     const s = stateRef.current;
@@ -480,7 +494,7 @@ function World({ stateRef, running, onGameOver, onStreakFlash, onStatsTick, qual
 
       <Baloon8RunEnvironment lite={quality.pmremLite} />
 
-      <FollowCamera stateRef={stateRef} />
+      <FollowCamera stateRef={stateRef} mobile={quality.mobile} />
       <Road stateRef={stateRef} castShadows={quality.castShadows} />
       <CityBlock count={quality.cityBuildings} castShadows={quality.castShadows} />
       <StreetLights count={quality.streetLights} />
@@ -497,7 +511,9 @@ function World({ stateRef, running, onGameOver, onStreakFlash, onStatsTick, qual
         />
       ) : null}
 
-      <PlayerShoes stateRef={stateRef} mobile={quality.mobile} />
+      {blueprint ? (
+        <PlayerShoes stateRef={stateRef} mobile={quality.mobile} blueprint={blueprint} />
+      ) : null}
       <DynamicEntities stateRef={stateRef} />
 
       {quality.contactShadows ? (
@@ -542,7 +558,7 @@ export function CleanSneaksRunScene({
       <Canvas
         shadows={quality.castShadows}
         dpr={quality.dpr}
-        camera={{ fov: 38, near: 0.1, far: 140, position: [5.5, 2.4, 4.8] }}
+        camera={{ fov: 44, near: 0.1, far: 140, position: [2.85, 1.35, 2.35] }}
         gl={{
           antialias: quality.antialias,
           powerPreference: quality.mobile ? "default" : "high-performance",

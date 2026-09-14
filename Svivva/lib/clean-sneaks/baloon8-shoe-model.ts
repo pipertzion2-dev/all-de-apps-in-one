@@ -13,8 +13,9 @@ export const BALOON8_DIMS = {
 } as const;
 
 export const BALOON8_SCENE_SCALE = 0.42;
-export const BALOON8_WALKER_SCALE = 0.118;
-export const BALOON8_WALKER_SCALE_MOBILE = 0.142;
+/** Runner fill-frame scale (~1.6 m long). Homepage viewer uses BALOON8_SCENE_SCALE (0.42). */
+export const BALOON8_WALKER_SCALE = 0.36;
+export const BALOON8_WALKER_SCALE_MOBILE = 0.32;
 
 const IRIDESCENCE = [0x2a9d8f, 0x5b8da8, 0x7b4397, 0x3d9970, 0x4cc9c0];
 
@@ -349,15 +350,28 @@ export function buildBaloon8Shoe(blueprint: THREE.Texture, bubbleCount = 1600): 
   };
 }
 
-export function tuneBaloon8RunnerVisibility(shoe: Baloon8WalkerShoe, mobile: boolean): void {
-  if (!mobile) return;
-  shoe.hullMat.iridescence = Math.min(shoe.hullMat.iridescence, 0.5);
-  shoe.hullMat.envMapIntensity = 0.95;
-  shoe.hullMat.emissive = new THREE.Color(0x1a4860);
-  shoe.hullMat.emissiveIntensity = 0.35;
+/** Keep blueprint panels + bubbles readable on dark asphalt (especially mobile). */
+export function ensureBaloon8RunnerVisible(shoe: Baloon8WalkerShoe, mobile: boolean): void {
+  shoe.root.frustumCulled = false;
+  shoe.bubbles.frustumCulled = false;
+
+  shoe.hullMat.color.setHex(0x3a7898);
+  shoe.hullMat.iridescence = mobile ? 0.35 : 0.65;
+  shoe.hullMat.envMapIntensity = mobile ? 0.9 : 1.35;
+  shoe.hullMat.emissive = new THREE.Color(0x286080);
+  shoe.hullMat.emissiveIntensity = mobile ? 0.65 : 0.45;
+
   const bubbleMat = shoe.bubbles.material as THREE.MeshPhysicalMaterial;
-  bubbleMat.iridescence = 0.5;
-  bubbleMat.envMapIntensity = 1.0;
+  bubbleMat.iridescence = mobile ? 0.4 : 0.85;
+  bubbleMat.envMapIntensity = mobile ? 0.95 : 1.5;
+  bubbleMat.emissive = new THREE.Color(0x1a3040);
+  bubbleMat.emissiveIntensity = mobile ? 0.35 : 0.2;
+
+  for (const mesh of shoe.glowMeshes) {
+    mesh.frustumCulled = false;
+    const mat = mesh.material as THREE.MeshStandardMaterial;
+    mat.emissiveIntensity = Math.max(mat.emissiveIntensity ?? 0, 1.1);
+  }
 }
 
 /** In-game Temple Run player — same Baloon8 blueprint, scaled for sideline camera. */
@@ -373,7 +387,8 @@ export function buildBaloon8RunnerShoe(
 
   const mount = new THREE.Group();
   mount.add(core.root);
-  mount.position.y = 0.34 * scale;
+  mount.position.y = scaledDim(0.02, scale);
+  mount.frustumCulled = false;
 
   const shoe: Baloon8WalkerShoe = {
     root: mount,
@@ -382,7 +397,7 @@ export function buildBaloon8RunnerShoe(
     glowMeshes: core.glowMeshes,
     wheels: core.wheels,
   };
-  tuneBaloon8RunnerVisibility(shoe, mobile);
+  ensureBaloon8RunnerVisible(shoe, mobile);
   return shoe;
 }
 

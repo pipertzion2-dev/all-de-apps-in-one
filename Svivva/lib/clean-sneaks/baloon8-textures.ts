@@ -33,9 +33,40 @@ export function cropBlueprintTexture(
 
 let blueprintLoad: Promise<THREE.Texture> | null = null;
 
+function proceduralBlueprintTexture(): THREE.Texture {
+  const canvas = document.createElement("canvas");
+  canvas.width = 1024;
+  canvas.height = 1024;
+  const ctx = canvas.getContext("2d")!;
+  const quadrants: Array<{ x: number; y: number; label: string; fill: string }> = [
+    { x: 0, y: 0, label: "TOP", fill: "#2a6080" },
+    { x: 512, y: 0, label: "REAR", fill: "#1a4030" },
+    { x: 0, y: 512, label: "SIDE", fill: "#3a7898" },
+    { x: 512, y: 512, label: "FRONT", fill: "#0a4028" },
+  ];
+  for (const q of quadrants) {
+    ctx.fillStyle = q.fill;
+    ctx.fillRect(q.x, q.y, 512, 512);
+    ctx.fillStyle = "#7ec8d9";
+    ctx.font = "bold 48px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(q.label, q.x + 256, q.y + 256);
+    ctx.strokeStyle = "rgba(126,200,217,0.35)";
+    for (let i = 0; i < 12; i++) {
+      ctx.beginPath();
+      ctx.arc(q.x + 80 + (i % 4) * 100, q.y + 80 + Math.floor(i / 4) * 100, 18, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  }
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.needsUpdate = true;
+  return tex;
+}
+
 export function loadBaloon8BlueprintTexture(): Promise<THREE.Texture> {
   if (!blueprintLoad) {
-    blueprintLoad = new Promise((resolve, reject) => {
+    blueprintLoad = new Promise((resolve) => {
       new THREE.TextureLoader().load(
         BALOON8_BLUEPRINT_URL,
         (tex) => {
@@ -44,7 +75,10 @@ export function loadBaloon8BlueprintTexture(): Promise<THREE.Texture> {
           resolve(tex);
         },
         undefined,
-        reject,
+        (err) => {
+          console.warn("[Baloon8] blueprint JPG failed, using procedural panels", err);
+          resolve(proceduralBlueprintTexture());
+        },
       );
     });
   }
