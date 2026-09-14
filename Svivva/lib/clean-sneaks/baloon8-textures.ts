@@ -39,7 +39,7 @@ export type PreparedBlueprint = Record<Baloon8BlueprintQuadrant, PreparedQuadran
 
 function isBackgroundPixel(r: number, g: number, b: number): boolean {
   const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-  return lum > 220 && r > 215 && g > 215 && b > 215;
+  return lum > 232 && r > 225 && g > 225 && b > 225;
 }
 
 function cropQuadrantCanvas(
