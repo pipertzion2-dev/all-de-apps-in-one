@@ -7,13 +7,13 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { SceneErrorBoundary } from "@/components/clean-sneaks/SceneErrorBoundary";
 
-const CleanSneaksGame = dynamic(
-  () => import("@/components/clean-sneaks/CleanSneaksGame").then((m) => m.CleanSneaksGame),
+const CleanSneaksGame3D = dynamic(
+  () => import("@/components/clean-sneaks/CleanSneaksGame3D").then((m) => m.CleanSneaksGame3D),
   {
     ssr: false,
     loading: () => (
       <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
-        Loading Clean Sneaks…
+        Loading Clean Sneaks 3D…
       </div>
     ),
   },
@@ -84,7 +84,7 @@ export default function CleanSneaksPage() {
               </div>
             }
           >
-            <CleanSneaksGame
+            <CleanSneaksGame3D
               active
               fullscreen
               onExit={() => router.push("/#clean-sneaks")}
