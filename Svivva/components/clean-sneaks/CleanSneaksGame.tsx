@@ -65,6 +65,8 @@ export type CleanSneaksGameProps = {
   onExit?: () => void;
   onStats?: (stats: RunStats) => void;
   sneakerOverride?: Partial<SneakerAssetRef> | null;
+  /** When true, canvas fills the immersive fullscreen shell. */
+  fullscreen?: boolean;
   className?: string;
   style?: CSSProperties;
 };
@@ -83,6 +85,7 @@ export function CleanSneaksGame({
   onExit,
   onStats,
   sneakerOverride,
+  fullscreen = false,
   className,
   style,
 }: CleanSneaksGameProps) {
@@ -312,7 +315,9 @@ export function CleanSneaksGame({
       if (!wrap) return;
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const w = wrap.clientWidth;
-      const h = Math.max(320, Math.min(520, Math.round(wrap.clientWidth * 0.56)));
+      const h = fullscreen
+        ? Math.max(240, wrap.clientHeight)
+        : Math.max(320, Math.min(520, Math.round(wrap.clientWidth * 0.56)));
       canvas.width = Math.floor(w * dpr);
       canvas.height = Math.floor(h * dpr);
       canvas.style.width = `${w}px`;
@@ -670,7 +675,7 @@ export function CleanSneaksGame({
       cancelAnimationFrame(raf);
       ro.disconnect();
     };
-  }, [active, phase, applyDirt, bumpStreak, emitStats]);
+  }, [active, phase, fullscreen, applyDirt, bumpStreak, emitStats]);
 
   useEffect(() => {
     if (!active) return;
@@ -796,12 +801,16 @@ export function CleanSneaksGame({
   return (
     <div
       ref={wrapRef}
-      className={className}
+      className={`flex min-h-0 flex-col ${fullscreen ? "h-full flex-1" : ""} ${className ?? ""}`}
       style={style}
       role="application"
       aria-label="Clean Sneaks game"
     >
-      <div className="relative overflow-hidden rounded-xl border border-white/10 bg-[#0a0c10]">
+      <div
+        className={`relative flex min-h-0 flex-1 flex-col overflow-hidden bg-[#0a0c10]/85 ${
+          fullscreen ? "rounded-lg border border-white/10" : "rounded-xl border border-white/10"
+        }`}
+      >
         <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex flex-wrap items-start justify-between gap-2 p-3 sm:p-4">
           <div className="space-y-1">
             <p className="text-[10px] uppercase tracking-[0.25em] text-[#5B8DA8]/80">
@@ -852,7 +861,10 @@ export function CleanSneaksGame({
           </div>
         </div>
 
-        <canvas ref={canvasRef} className="block w-full touch-none" />
+        <canvas
+          ref={canvasRef}
+          className={`block w-full touch-none ${fullscreen ? "min-h-0 flex-1" : ""}`}
+        />
 
         {phase === "countdown" && (
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm">
@@ -929,9 +941,11 @@ export function CleanSneaksGame({
         )}
       </div>
 
-      <p className="mt-3 text-center text-[11px] text-muted-foreground sm:text-xs">
-        Desktop: A/D or ←/→ dodge · Space/↑ jump · Mobile: swipe left/right/up
-      </p>
+      {!fullscreen && (
+        <p className="mt-3 text-center text-[11px] text-muted-foreground sm:text-xs">
+          Desktop: A/D or ←/→ dodge · Space/↑ jump · Mobile: swipe left/right/up
+        </p>
+      )}
     </div>
   );
 }

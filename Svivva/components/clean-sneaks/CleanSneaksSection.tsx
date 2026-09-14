@@ -1,9 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
+import { useFullscreen } from "@/hooks/use-fullscreen";
 import { readBestScore } from "@/lib/clean-sneaks/storage";
+import { CleanSneaksCubeBackdrop } from "./CleanSneaksCubeBackdrop";
 
 const CleanSneaksGame = dynamic(
   () => import("@/components/clean-sneaks/CleanSneaksGame").then((m) => m.CleanSneaksGame),
@@ -20,6 +23,21 @@ const CleanSneaksGame = dynamic(
 export function CleanSneaksSection() {
   const [playing, setPlaying] = useState(false);
   const [best, setBest] = useState(0);
+  const [mounted, setMounted] = useState(false);
+  const shellRef = useRef<HTMLDivElement>(null);
+
+  const exit = useCallback(() => {
+    setPlaying(false);
+    setBest(readBestScore());
+  }, []);
+
+  const { enter: enterFullscreen, exit: exitFullscreen } = useFullscreen(shellRef, {
+    onExit: exit,
+  });
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     setBest(readBestScore());
@@ -29,40 +47,93 @@ export function CleanSneaksSection() {
     setPlaying(true);
   }, []);
 
-  const exit = useCallback(() => {
-    setPlaying(false);
-    setBest(readBestScore());
-  }, []);
+  useEffect(() => {
+    if (!playing) return;
+    void enterFullscreen();
+    return () => {
+      void exitFullscreen();
+    };
+  }, [playing, enterFullscreen, exitFullscreen]);
+
+  const handleExit = useCallback(() => {
+    void exitFullscreen();
+    exit();
+  }, [exitFullscreen, exit]);
+
+  const fullscreenPlay =
+    playing && mounted
+      ? createPortal(
+          <div
+            ref={shellRef}
+            className="fixed inset-0 z-[200] flex flex-col bg-[#0a0c10]"
+            style={{
+              paddingTop: "env(safe-area-inset-top)",
+              paddingRight: "env(safe-area-inset-right)",
+              paddingBottom: "env(safe-area-inset-bottom)",
+              paddingLeft: "env(safe-area-inset-left)",
+            }}
+            data-testid="clean-sneaks-fullscreen"
+          >
+            <CleanSneaksCubeBackdrop className="absolute inset-0 opacity-70" />
+
+            <div className="relative z-10 flex min-h-0 flex-1 flex-col">
+              <div className="flex shrink-0 items-center justify-between gap-3 px-4 py-3 sm:px-6">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.35em] text-[#5B8DA8]">
+                    ZZAI Play Presents
+                  </p>
+                  <h2 className="seeds-holo-text text-xl font-bold sm:text-2xl">CLEAN SNEAKS</h2>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleExit}
+                  data-testid="button-clean-sneaks-back"
+                >
+                  Exit game
+                </Button>
+              </div>
+
+              <div className="flex min-h-0 flex-1 flex-col px-3 pb-3 sm:px-6 sm:pb-6">
+                <CleanSneaksGame active={playing} onExit={handleExit} fullscreen />
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )
+      : null;
 
   return (
-    <section
-      id="clean-sneaks"
-      className="relative overflow-hidden border-t border-white/10 py-20 sm:py-28"
-      aria-labelledby="clean-sneaks-heading"
-    >
-      {/* Atmosphere — ZZAI cyan/magenta signal field */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        aria-hidden
-        style={{
-          background: `
+    <>
+      {fullscreenPlay}
+
+      <section
+        id="clean-sneaks"
+        className="relative overflow-hidden border-t border-white/10 py-20 sm:py-28"
+        aria-labelledby="clean-sneaks-heading"
+      >
+        {/* Atmosphere — ZZAI cyan/magenta signal field */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          aria-hidden
+          style={{
+            background: `
             radial-gradient(ellipse 80% 50% at 20% 30%, rgba(91,141,168,0.14), transparent 55%),
             radial-gradient(ellipse 70% 45% at 85% 70%, rgba(217,79,156,0.10), transparent 50%),
             linear-gradient(180deg, transparent, rgba(10,12,16,0.85))
           `,
-        }}
-      />
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-px zzai-glitch-bars opacity-40"
-        aria-hidden
-        style={{
-          backgroundImage:
-            "repeating-linear-gradient(90deg, transparent, transparent 12px, rgba(91,141,168,0.35) 12px, rgba(91,141,168,0.35) 14px, transparent 14px, transparent 28px, rgba(217,79,156,0.25) 28px, rgba(217,79,156,0.25) 30px)",
-        }}
-      />
+          }}
+        />
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-px zzai-glitch-bars opacity-40"
+          aria-hidden
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(90deg, transparent, transparent 12px, rgba(91,141,168,0.35) 12px, rgba(91,141,168,0.35) 14px, transparent 14px, transparent 28px, rgba(217,79,156,0.25) 28px, rgba(217,79,156,0.25) 30px)",
+          }}
+        />
 
-      <div className="relative mx-auto max-w-5xl px-4 sm:px-6">
-        {!playing ? (
+        <div className="relative mx-auto max-w-5xl px-4 sm:px-6">
           <div className="relative">
             {/* Full-bleed teaser visual plane */}
             <div className="relative min-h-[420px] overflow-hidden rounded-2xl border border-white/10 sm:min-h-[480px]">
@@ -111,7 +182,7 @@ export function CleanSneaksSection() {
                     Play Clean Sneaks
                   </Button>
                   <p className="text-[11px] uppercase tracking-[0.25em] text-white/45">
-                    100% Clean. For now.
+                    Full screen · Mobile &amp; desktop
                   </p>
                   {best > 0 && (
                     <p className="text-xs text-[#7EC8D9]/90" data-testid="text-clean-sneaks-best">
@@ -122,33 +193,8 @@ export function CleanSneaksSection() {
               </div>
             </div>
           </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.35em] text-[#5B8DA8]">
-                  ZZAI Play Presents
-                </p>
-                <h2
-                  id="clean-sneaks-heading"
-                  className="seeds-holo-text text-3xl font-bold sm:text-4xl"
-                >
-                  CLEAN SNEAKS
-                </h2>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={exit}
-                data-testid="button-clean-sneaks-back"
-              >
-                Exit game
-              </Button>
-            </div>
-            <CleanSneaksGame active={playing} onExit={exit} />
-          </div>
-        )}
-      </div>
-    </section>
+        </div>
+      </section>
+    </>
   );
 }
