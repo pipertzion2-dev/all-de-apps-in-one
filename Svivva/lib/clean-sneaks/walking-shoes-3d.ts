@@ -20,11 +20,7 @@ function runnerBubbleCount(): number {
 }
 
 function buildRunnerShoeSafe(preferredCount: number, mobile: boolean): Baloon8WalkerShoe {
-  const counts = [
-    preferredCount,
-    Math.max(180, Math.floor(preferredCount * 0.45)),
-    120,
-  ];
+  const counts = [preferredCount, Math.max(180, Math.floor(preferredCount * 0.45)), 120];
   let lastErr: unknown;
   for (const count of counts) {
     try {
