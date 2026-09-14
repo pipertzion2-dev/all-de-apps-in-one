@@ -2,7 +2,9 @@
 export const SVIVVA_APP_SHELL_ATTR = "data-svivva-app-shell";
 
 export function isProtectedBodyLayer(el: Element): boolean {
-  return el.hasAttribute(SVIVVA_APP_SHELL_ATTR);
+  return (
+    el.hasAttribute(SVIVVA_APP_SHELL_ATTR) || el.hasAttribute("data-clean-sneaks-fullscreen")
+  );
 }
 
 /** Remove leaked full-screen layers from older builds (body-portaled Three.js backgrounds). */
