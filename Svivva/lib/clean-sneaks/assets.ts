@@ -9,7 +9,7 @@ export const BALOON8_BLUEPRINT_URL = "/assets/clean-sneaks/baloon8-blueprint.jpg
 export const DEFAULT_SNEAKER: SneakerAssetRef = {
   spriteUrl: "",
   useWalkingSprite: true,
-  label: "Baloon8",
+  label: "Baloon8 Blueprint",
   source: "default",
 };
 

@@ -13,22 +13,22 @@ export type WalkingShoes3D = {
 };
 
 function walkerBubbleCount(): number {
-  if (typeof window === "undefined") return 420;
+  if (typeof window === "undefined") return 1100;
   const mobile = window.innerWidth < 768;
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (reduced) return 280;
-  return mobile ? 320 : 480;
+  if (reduced) return 700;
+  return mobile ? 850 : 1300;
 }
 
-/** Baloon8 blueprint sneaker pair — iridescent bubbles, green B grille, mandala insole. */
+/** Exact Baloon8 blueprint pair — full mockup scaled for Temple Run. */
 export function createWalkingShoes3D(): WalkingShoes3D {
   const root = new THREE.Group();
   const count = walkerBubbleCount();
 
   const leftPivot = new THREE.Group();
-  leftPivot.position.set(-0.12, 0, 0);
+  leftPivot.position.set(-0.22, 0, 0);
   const rightPivot = new THREE.Group();
-  rightPivot.position.set(0.12, 0, 0);
+  rightPivot.position.set(0.22, 0, 0);
 
   const leftShoe = buildBaloon8WalkerShoe(-1, count);
   const rightShoe = buildBaloon8WalkerShoe(1, count);
@@ -37,7 +37,7 @@ export function createWalkingShoes3D(): WalkingShoes3D {
   rightPivot.add(rightShoe.root);
 
   const shieldRing = new THREE.Mesh(
-    new THREE.TorusGeometry(0.42, 0.014, 16, 64),
+    new THREE.TorusGeometry(0.55, 0.018, 16, 64),
     new THREE.MeshPhysicalMaterial({
       color: 0x5b8da8,
       emissive: 0x5b8da8,
@@ -51,11 +51,11 @@ export function createWalkingShoes3D(): WalkingShoes3D {
     }),
   );
   shieldRing.rotation.x = Math.PI / 2;
-  shieldRing.position.y = 0.14;
+  shieldRing.position.y = 0.18;
   shieldRing.visible = false;
 
-  const shieldGlow = new THREE.PointLight(0x5b8da8, 0, 2.5);
-  shieldGlow.position.y = 0.14;
+  const shieldGlow = new THREE.PointLight(0x5b8da8, 0, 3);
+  shieldGlow.position.y = 0.18;
 
   const dustEmitter = new THREE.Group();
   dustEmitter.position.y = 0.02;
@@ -86,7 +86,7 @@ function spawnDust(shoes: WalkingShoes3D, side: number): void {
       opacity: 0.35,
     }),
   );
-  p.position.set(side * 0.12, 0.02, 0.04);
+  p.position.set(side * 0.22, 0.02, 0.04);
   p.userData.life = 0.35 + Math.random() * 0.25;
   p.userData.vy = 0.25 + Math.random() * 0.35;
   p.userData.vz = -0.12 - Math.random() * 0.2;
@@ -98,9 +98,9 @@ function applyDirtToShoe(shoe: Baloon8WalkerShoe, dirt: number, freshGlow: boole
   const base = new THREE.Color(0x2a6080);
   if (dirt > 0.02) base.lerp(new THREE.Color(0x4a3828), 0.2 + dirt * 0.65);
   shoe.hullMat.color.copy(base);
-  shoe.hullMat.iridescence = Math.max(0.25, 0.9 - dirt * 0.55);
-  shoe.hullMat.metalness = Math.max(0.35, 0.88 - dirt * 0.35);
-  shoe.hullMat.envMapIntensity = freshGlow ? 1.8 : 1.55 - dirt * 0.4;
+  shoe.hullMat.iridescence = Math.max(0.25, 0.85 - dirt * 0.55);
+  shoe.hullMat.metalness = Math.max(0.35, 0.85 - dirt * 0.35);
+  shoe.hullMat.envMapIntensity = freshGlow ? 1.85 : 1.4 - dirt * 0.4;
 
   if (shoe.bubbles.instanceColor) {
     const c = new THREE.Color();
@@ -118,6 +118,13 @@ function applyDirtToShoe(shoe: Baloon8WalkerShoe, dirt: number, freshGlow: boole
   }
 }
 
+function spinWheels(shoe: Baloon8WalkerShoe, speed: number, dt: number): void {
+  const spin = speed * 0.0004 * dt;
+  for (const wheel of shoe.wheels) {
+    wheel.rotation.x += spin;
+  }
+}
+
 export function updateWalkingShoes3D(
   shoes: WalkingShoes3D,
   args: {
@@ -130,19 +137,25 @@ export function updateWalkingShoes3D(
   },
 ): void {
   const phase = args.walkPhase * Math.PI * 2;
-  const stride = args.airborne ? 0.22 : 0.38;
-  const lift = args.airborne ? 0.22 : Math.max(0, Math.sin(phase)) * stride;
+  const stride = args.airborne ? 0.2 : 0.36;
+  const lift = args.airborne ? 0.2 : Math.max(0, Math.sin(phase)) * stride;
+  const dt = 0.016;
 
   shoes.leftPivot.rotation.x = Math.sin(phase) * stride;
   shoes.rightPivot.rotation.x = Math.sin(phase + Math.PI) * stride;
-  shoes.leftPivot.position.y = lift * 0.22;
-  shoes.rightPivot.position.y = Math.max(0, Math.sin(phase + Math.PI)) * stride * 0.22;
+  shoes.leftPivot.position.y = lift * 0.2;
+  shoes.rightPivot.position.y = Math.max(0, Math.sin(phase + Math.PI)) * stride * 0.2;
 
   if (!args.airborne && Math.sin(phase) > 0.92) spawnDust(shoes, -1);
   if (!args.airborne && Math.sin(phase + Math.PI) > 0.92) spawnDust(shoes, 1);
 
   applyDirtToShoe(shoes.leftShoe, args.dirt, args.freshGlow);
   applyDirtToShoe(shoes.rightShoe, args.dirt, args.freshGlow);
+
+  if (!args.airborne && args.speed) {
+    spinWheels(shoes.leftShoe, args.speed, dt);
+    spinWheels(shoes.rightShoe, args.speed, dt);
+  }
 
   shoes.shieldRing.visible = args.shieldActive;
   shoes.shieldGlow.intensity = args.shieldActive ? 1.2 : 0;
@@ -159,7 +172,6 @@ export function updateWalkingShoes3D(
     }
   }
 
-  const dt = 0.016;
   for (let i = dustPool.length - 1; i >= 0; i--) {
     const p = dustPool[i]!;
     p.userData.life -= dt;

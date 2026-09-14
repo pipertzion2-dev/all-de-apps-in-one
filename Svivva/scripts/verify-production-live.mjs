@@ -68,7 +68,7 @@ export function deployVerifyTargets(changedFiles) {
   if (files.some((f) => /clean-sneaks/i.test(f))) {
     targets.push({
       url: `https://${domain}/clean-sneaks`,
-      markers: ["Loading Clean Sneaks 3D", "Baloon8"],
+      markers: ["Loading Clean Sneaks 3D", "Baloon8 Blueprint"],
     });
   }
 
