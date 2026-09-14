@@ -14,6 +14,12 @@ function isMobileViewport(): boolean {
   return window.innerWidth < 768 || isIOS();
 }
 
+/** True when the viewport is taller than wide (iPhone vertical). */
+export function isPortraitViewport(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.innerHeight > window.innerWidth;
+}
+
 /** True when WebGL can be created at all (used before mounting R3F). */
 export function canCreateWebGL(): boolean {
   if (typeof document === "undefined") return false;
@@ -35,11 +41,12 @@ export function detectRunQuality(): RunQuality {
   return "full";
 }
 
-export function runQualityFlags(quality: RunQuality) {
+export function runQualityFlags(quality: RunQuality, portrait = isPortraitViewport()) {
   const mobile = quality === "mobile";
   return {
     quality,
     mobile,
+    portrait,
     postFx: !mobile,
     /** Physical Baloon8 materials need an env map — lite PMREM on mobile. */
     pmremEnvironment: true,

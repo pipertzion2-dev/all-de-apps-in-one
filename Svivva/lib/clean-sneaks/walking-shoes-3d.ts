@@ -1,6 +1,10 @@
 import * as THREE from "three";
 import { buildBaloon8RunnerShoe, type Baloon8WalkerShoe } from "./baloon8-shoe-model";
-import { cropBlueprintTexture, loadBaloon8BlueprintTexture } from "./baloon8-textures";
+import {
+  cropBlueprintTexture,
+  loadBaloon8BlueprintTexture,
+  prepareBlueprintQuadrant,
+} from "./baloon8-textures";
 import { detectRunQuality, runQualityFlags } from "./run-quality";
 
 export type WalkingShoes3D = {
@@ -18,21 +22,41 @@ export type WalkingShoes3D = {
 function createShoeBillboard(
   blueprint: THREE.Texture,
   mobile: boolean,
+  portrait: boolean,
   mirror: boolean,
 ): THREE.Group {
-  const sideTex = cropBlueprintTexture(blueprint, "side");
+  let sideTex: THREE.Texture;
+  let alphaMap: THREE.Texture | undefined;
+  let aspect = 2.15;
+  try {
+    const img = blueprint.image as CanvasImageSource & { width?: number };
+    if (img && ("naturalWidth" in img ? img.naturalWidth : img.width)) {
+      const prep = prepareBlueprintQuadrant(img, "side");
+      sideTex = prep.map;
+      alphaMap = prep.alphaMap;
+      aspect = prep.aspect;
+    } else {
+      throw new Error("blueprint not loaded");
+    }
+  } catch {
+    sideTex = cropBlueprintTexture(blueprint, "side");
+  }
+
   const mat = new THREE.SpriteMaterial({
     map: sideTex,
+    alphaMap,
+    color: new THREE.Color(0x3a7898),
     transparent: true,
+    alphaTest: 0.12,
     depthTest: true,
     depthWrite: false,
     toneMapped: false,
   });
   const sprite = new THREE.Sprite(mat);
-  const w = mobile ? 1.05 : 0.92;
-  const h = mobile ? 0.48 : 0.42;
-  sprite.scale.set(w, h, 1);
-  sprite.position.y = mobile ? 0.26 : 0.22;
+  const baseW = portrait ? 0.92 : mobile ? 1.05 : 0.92;
+  const h = baseW / aspect;
+  sprite.scale.set(baseW, h, 1);
+  sprite.position.y = portrait ? 0.22 : mobile ? 0.26 : 0.22;
   sprite.renderOrder = 8;
   sprite.frustumCulled = false;
 
@@ -55,13 +79,19 @@ function buildRunnerShoeSafe(
   blueprint: THREE.Texture,
   preferredCount: number,
   mobile: boolean,
+  portrait: boolean,
   mirror: boolean,
 ): Baloon8WalkerShoe {
   const counts = [preferredCount, Math.max(90, Math.floor(preferredCount * 0.45)), 60];
   let lastErr: unknown;
   for (const count of counts) {
     try {
-      return buildBaloon8RunnerShoe(blueprint, count, { mobile, pair: true, mirror });
+      return buildBaloon8RunnerShoe(blueprint, count, {
+        mobile,
+        portrait,
+        pair: true,
+        mirror,
+      });
     } catch (err) {
       lastErr = err;
       console.warn("[createWalkingShoes3D] shoe build retry", count, err);
@@ -79,10 +109,11 @@ function tryBuildRunnerShoe(
   blueprint: THREE.Texture,
   preferredCount: number,
   mobile: boolean,
+  portrait: boolean,
   mirror: boolean,
 ): Baloon8WalkerShoe | null {
   try {
-    return buildRunnerShoeSafe(blueprint, preferredCount, mobile, mirror);
+    return buildRunnerShoeSafe(blueprint, preferredCount, mobile, portrait, mirror);
   } catch (err) {
     console.warn("[createWalkingShoes3D] 3D shoe build failed, using billboard", err);
     return null;
@@ -90,7 +121,11 @@ function tryBuildRunnerShoe(
 }
 
 /** Baloon8 blueprint pair — left + right foot with walking stride. */
-export function createWalkingShoes3D(blueprint: THREE.Texture, mobile = false): WalkingShoes3D {
+export function createWalkingShoes3D(
+  blueprint: THREE.Texture,
+  mobile = false,
+  portrait = false,
+): WalkingShoes3D {
   const root = new THREE.Group();
   const perShoeBubbles = mobile ? 0 : Math.max(60, Math.floor(runnerBubbleCount() / 2));
 
@@ -98,14 +133,14 @@ export function createWalkingShoes3D(blueprint: THREE.Texture, mobile = false): 
   const leftPivot = new THREE.Group();
   const rightPivot = new THREE.Group();
 
-  // Billboards always render on mobile — reliable side-profile pair even when 3D panels fail.
-  leftPivot.add(createShoeBillboard(blueprint, mobile, false));
-  rightPivot.add(createShoeBillboard(blueprint, mobile, true));
+  const leftShoe = tryBuildRunnerShoe(blueprint, perShoeBubbles, mobile, portrait, false);
+  const rightShoe = tryBuildRunnerShoe(blueprint, perShoeBubbles, mobile, portrait, true);
 
-  const leftShoe = tryBuildRunnerShoe(blueprint, perShoeBubbles, mobile, false);
-  const rightShoe = tryBuildRunnerShoe(blueprint, perShoeBubbles, mobile, true);
   if (leftShoe) leftPivot.add(leftShoe.root);
+  else leftPivot.add(createShoeBillboard(blueprint, mobile, portrait, false));
+
   if (rightShoe) rightPivot.add(rightShoe.root);
+  else rightPivot.add(createShoeBillboard(blueprint, mobile, portrait, true));
 
   shoePivot.add(leftPivot, rightPivot);
 
@@ -223,13 +258,14 @@ export function updateWalkingShoes3D(
     freshGlow: boolean;
     shieldActive: boolean;
     speed?: number;
+    portrait?: boolean;
   },
 ): void {
   const phase = args.walkPhase * Math.PI * 2;
   const dt = 0.016;
   const t = performance.now() / 1000;
   const stride = args.airborne ? 0 : Math.sin(phase);
-  const lateral = 0.38;
+  const lateral = args.portrait ? 0.28 : 0.34;
 
   const bob = args.airborne ? 0.14 : Math.max(0, Math.sin(phase * 2)) * 0.05;
   shoes.shoePivot.rotation.x = Math.sin(phase) * (args.airborne ? 0.04 : 0.06);

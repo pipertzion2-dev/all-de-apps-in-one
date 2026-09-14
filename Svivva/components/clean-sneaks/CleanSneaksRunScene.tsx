@@ -15,7 +15,12 @@ import {
   sidewalkTexture,
   wetAsphaltMaterial,
 } from "@/lib/clean-sneaks/run-textures";
-import { detectRunQuality, runQualityFlags, type RunQuality } from "@/lib/clean-sneaks/run-quality";
+import {
+  detectRunQuality,
+  isPortraitViewport,
+  runQualityFlags,
+  type RunQuality,
+} from "@/lib/clean-sneaks/run-quality";
 import {
   createWalkingShoes3D,
   preloadBaloon8RunnerShoe,
@@ -39,23 +44,46 @@ const ROAD_LENGTH = 140;
 const ROAD_SEGMENTS = 10;
 const SEG_LEN = ROAD_LENGTH / ROAD_SEGMENTS;
 
+type CameraRig = { ox: number; oy: number; oz: number; lookY: number; lookZ: number; fov: number };
+
+function cameraRigFor(mobile: boolean, portrait: boolean): CameraRig {
+  if (mobile && portrait) {
+    return { ox: 1.55, oy: 0.62, oz: 1.35, lookY: 0.14, lookZ: -2.4, fov: 62 };
+  }
+  if (mobile) {
+    return { ox: 2.35, oy: 1.05, oz: 2.05, lookY: 0.32, lookZ: -3.8, fov: 48 };
+  }
+  return { ox: 3.6, oy: 1.65, oz: 3.0, lookY: 0.48, lookZ: -5.5, fov: 42 };
+}
+
 function FollowCamera({
   stateRef,
   mobile,
+  portrait,
 }: {
   stateRef: React.MutableRefObject<RunEngineState>;
   mobile: boolean;
+  portrait: boolean;
 }) {
   const { camera } = useThree();
-  const rig = mobile
-    ? { ox: 2.35, oy: 1.05, oz: 2.05, lookY: 0.32, lookZ: -3.8, fov: 48 }
-    : { ox: 3.6, oy: 1.65, oz: 3.0, lookY: 0.48, lookZ: -5.5, fov: 42 };
-  const lookAt = useRef(new THREE.Vector3(0, rig.lookY, rig.lookZ));
-  const pos = useRef(new THREE.Vector3(rig.ox, rig.oy, rig.oz));
-  const fovBase = rig.fov;
+  const rigRef = useRef(cameraRigFor(mobile, portrait));
+  const lookAt = useRef(new THREE.Vector3(0, rigRef.current.lookY, rigRef.current.lookZ));
+  const pos = useRef(new THREE.Vector3(rigRef.current.ox, rigRef.current.oy, rigRef.current.oz));
+
+  useEffect(() => {
+    const rig = cameraRigFor(mobile, portrait);
+    rigRef.current = rig;
+    pos.current.set(rig.ox, rig.oy, rig.oz);
+    lookAt.current.set(0, rig.lookY, rig.lookZ);
+    if (camera instanceof THREE.PerspectiveCamera) {
+      camera.fov = rig.fov;
+      camera.updateProjectionMatrix();
+    }
+  }, [camera, mobile, portrait]);
 
   useFrame((_, dt) => {
     const s = stateRef.current;
+    const rig = rigRef.current;
     const px = laneWorldX(s.laneX);
     const speedT = THREE.MathUtils.clamp(s.speed / 620, 0, 1);
 
@@ -78,7 +106,7 @@ function FollowCamera({
     camera.lookAt(lookAt.current);
 
     if (camera instanceof THREE.PerspectiveCamera) {
-      camera.fov = THREE.MathUtils.lerp(camera.fov, fovBase + speedT * 6, dt * 3);
+      camera.fov = THREE.MathUtils.lerp(camera.fov, rig.fov + speedT * 6, dt * 3);
       camera.updateProjectionMatrix();
     }
   });
@@ -369,14 +397,19 @@ function DynamicEntities({ stateRef }: { stateRef: React.MutableRefObject<RunEng
 function PlayerShoes({
   stateRef,
   mobile,
+  portrait,
   blueprint,
 }: {
   stateRef: React.MutableRefObject<RunEngineState>;
   mobile: boolean;
+  portrait: boolean;
   blueprint: THREE.Texture;
 }) {
   const hostRef = useRef<THREE.Group>(null);
-  const shoes = useMemo(() => createWalkingShoes3D(blueprint, mobile), [blueprint, mobile]);
+  const shoes = useMemo(
+    () => createWalkingShoes3D(blueprint, mobile, portrait),
+    [blueprint, mobile, portrait],
+  );
 
   useFrame(() => {
     const s = stateRef.current;
@@ -386,7 +419,7 @@ function PlayerShoes({
 
     host.position.x = laneWorldX(s.laneX);
     host.position.y = s.y < 0 ? -s.y / 120 : 0;
-    host.rotation.y = mobile ? 0.22 : 0;
+    host.rotation.y = portrait ? 0.08 : mobile ? 0.22 : 0;
 
     updateWalkingShoes3D(shoes, {
       walkPhase: s.walkPhase,
@@ -395,6 +428,7 @@ function PlayerShoes({
       freshGlow: s.cleanliness >= 80,
       shieldActive: now < s.shieldUntil,
       speed: s.speed,
+      portrait,
     });
   });
 
@@ -413,7 +447,7 @@ function PlayerShoes({
         position={[1.4, 0.4, 0.55]}
         intensity={mobile ? 1.35 : 0.55}
         distance={8}
-        color="#ffffff"
+        color="#7ec8d9"
       />
       <pointLight
         position={[-1.1, 0.25, 0.35]}
@@ -507,7 +541,7 @@ function World({ stateRef, running, onGameOver, onStreakFlash, onStatsTick, qual
 
       <Baloon8RunEnvironment lite={quality.pmremLite} />
 
-      <FollowCamera stateRef={stateRef} mobile={quality.mobile} />
+      <FollowCamera stateRef={stateRef} mobile={quality.mobile} portrait={quality.portrait} />
       <Road stateRef={stateRef} castShadows={quality.castShadows} />
       <CityBlock count={quality.cityBuildings} castShadows={quality.castShadows} />
       <StreetLights count={quality.streetLights} />
@@ -525,7 +559,12 @@ function World({ stateRef, running, onGameOver, onStreakFlash, onStatsTick, qual
       ) : null}
 
       {blueprint ? (
-        <PlayerShoes stateRef={stateRef} mobile={quality.mobile} blueprint={blueprint} />
+        <PlayerShoes
+          stateRef={stateRef}
+          mobile={quality.mobile}
+          portrait={quality.portrait}
+          blueprint={blueprint}
+        />
       ) : null}
       <DynamicEntities stateRef={stateRef} />
 
@@ -560,10 +599,19 @@ export function CleanSneaksRunScene({
   className = "",
 }: CleanSneaksRunSceneProps) {
   const [qualityTier, setQualityTier] = useState<RunQuality>("mobile");
-  const quality = useMemo(() => runQualityFlags(qualityTier), [qualityTier]);
+  const [portrait, setPortrait] = useState(false);
+  const quality = useMemo(() => runQualityFlags(qualityTier, portrait), [qualityTier, portrait]);
 
   useEffect(() => {
     setQualityTier(detectRunQuality());
+    const syncViewport = () => setPortrait(isPortraitViewport());
+    syncViewport();
+    window.addEventListener("resize", syncViewport);
+    window.addEventListener("orientationchange", syncViewport);
+    return () => {
+      window.removeEventListener("resize", syncViewport);
+      window.removeEventListener("orientationchange", syncViewport);
+    };
   }, []);
 
   return (
@@ -572,7 +620,12 @@ export function CleanSneaksRunScene({
         className="!h-full !w-full"
         shadows={quality.castShadows}
         dpr={quality.dpr}
-        camera={{ fov: 48, near: 0.08, far: 140, position: [2.35, 1.05, 2.05] }}
+        camera={{
+          fov: portrait ? 62 : 48,
+          near: 0.08,
+          far: 140,
+          position: portrait ? [1.55, 0.62, 1.35] : [2.35, 1.05, 2.05],
+        }}
         gl={{
           antialias: quality.antialias,
           powerPreference: quality.mobile ? "default" : "high-performance",
