@@ -40,7 +40,7 @@ export function Baloon8ShoeScene({ className = "", autoRotate = true, bubbleCoun
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const isMobile = window.innerWidth < 768;
-    const count = bubbleCount ?? (isMobile ? 200 : 320);
+    const count = bubbleCount ?? (isMobile ? 480 : 1200);
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x06080c);
@@ -58,7 +58,7 @@ export function Baloon8ShoeScene({ className = "", autoRotate = true, bubbleCoun
     renderer.setPixelRatio(dpr);
     renderer.setClearColor(0x06080c, 1);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.05;
+    renderer.toneMappingExposure = 1.12;
     host.appendChild(renderer.domElement);
     Object.assign(renderer.domElement.style, {
       width: "100%",

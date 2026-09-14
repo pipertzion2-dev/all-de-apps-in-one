@@ -127,8 +127,8 @@ export function createWalkingShoes3D(
 ): WalkingShoes3D {
   const root = new THREE.Group();
   const perShoeBubbles = mobile
-    ? Math.max(portrait ? 36 : 45, Math.floor(runnerBubbleCount() / (portrait ? 3 : 2)))
-    : Math.max(60, Math.floor(runnerBubbleCount() / 2));
+    ? Math.max(portrait ? 48 : 60, Math.floor(runnerBubbleCount() / (portrait ? 2.5 : 2)))
+    : Math.max(80, Math.floor(runnerBubbleCount() / 2));
 
   const shoePivot = new THREE.Group();
   const leftPivot = new THREE.Group();
