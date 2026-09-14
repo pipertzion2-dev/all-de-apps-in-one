@@ -20,6 +20,23 @@ export function isPortraitViewport(): boolean {
   return window.innerHeight > window.innerWidth;
 }
 
+/** Width / height — lower on tall phones (~0.46 on iPhone). */
+export function viewportAspect(): number {
+  if (typeof window === "undefined") return 1;
+  return window.innerWidth / Math.max(window.innerHeight, 1);
+}
+
+/**
+ * Multiplier for portrait camera distance / FOV — narrow screens need a wider,
+ * farther rig so the left/right shoe pair stays in frame.
+ */
+export function portraitFramingBoost(): number {
+  if (!isPortraitViewport()) return 1;
+  const aspect = viewportAspect();
+  // iPhone 14 portrait ≈ 0.46; iPad portrait ≈ 0.75
+  return Math.min(1.55, Math.max(1, 0.52 / Math.max(aspect, 0.38)));
+}
+
 /** True when WebGL can be created at all (used before mounting R3F). */
 export function canCreateWebGL(): boolean {
   if (typeof document === "undefined") return false;
