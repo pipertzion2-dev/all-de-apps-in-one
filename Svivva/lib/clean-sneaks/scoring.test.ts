@@ -47,7 +47,7 @@ describe("clean-sneaks scoring", () => {
     const s = resolvePlayerSneaker();
     expect(s.spriteUrl).toBe("");
     expect(s.useWalkingSprite).toBe(true);
-    expect(s.label).toBe("Walkers");
+    expect(s.label).toBe("Baloon8 Blueprint");
     const custom = resolvePlayerSneaker({
       spriteUrl: "/assets/clean-sneaks/user-design.png",
       source: "user",
