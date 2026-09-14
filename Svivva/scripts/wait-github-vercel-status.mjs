@@ -48,25 +48,62 @@ async function loadVerifyTargets() {
   }
   const { base, head } = await resolveDiffRangeAsync(repoRoot);
   const files = base && head ? await listChangedFilesAsync(base, head, repoRoot) : null;
-  verifyTargets = deployVerifyTargets(files ?? []);
+  verifyTargets = deployVerifyTargets(files ?? [], sha);
 }
 
-async function tryProductionVerify(label) {
+async function isVercelProjectPaused() {
+  try {
+    const res = await fetch("https://all-de-apps-in-one.vercel.app/", {
+      method: "HEAD",
+      redirect: "manual",
+    });
+    return res.status === 402;
+  } catch {
+    return false;
+  }
+}
+
+function describeVerifyTarget(target) {
+  if (target.expectedSha) {
+    return `/api/deploy-revision (${target.expectedSha.slice(0, 7)})`;
+  }
+  return target.url || "unknown";
+}
+
+async function tryProductionVerify(label, exitOnSuccess = true) {
   if (!verifyTargets.length) await loadVerifyTargets();
+  let allOk = true;
   for (const target of verifyTargets) {
     const result = await verifyProductionLive({
       url: target.url,
       markers: target.markers,
+      expectedSha: target.expectedSha,
       attempts: 2,
       delayMs: 3000,
     });
     if (result.ok) {
-      console.log(`${label} Production live at ${result.url} (GitHub Vercel status may be stale).`);
-      process.exit(0);
+      const where = result.url || `revision ${result.sha}`;
+      console.log(`${label} Production live at ${where}`);
+      continue;
     }
-    console.log(`  Production check ${target.url}: ${result.reason}`);
+    allOk = false;
+    console.log(`  Production check ${describeVerifyTarget(target)}: ${result.reason}`);
   }
-  return false;
+  if (allOk && exitOnSuccess) {
+    console.log("(GitHub Vercel status may be stale — production revision confirmed.)");
+    process.exit(0);
+  }
+  return allOk;
+}
+
+async function reportPausedProject() {
+  if (!(await isVercelProjectPaused())) return false;
+  console.error("");
+  console.error("Vercel project is PAUSED (DEPLOYMENT_DISABLED / spend cap).");
+  console.error(`  Resume: ${canonical.dashboardUrl} → Settings → Resume Service`);
+  console.error("  Or add VERCEL_TOKEN to GitHub secrets and run Fix Vercel block workflow.");
+  console.error(`  ${canonical.productionDomain} keeps serving the last build before the pause.`);
+  return true;
 }
 
 async function fetchStatus() {
@@ -100,7 +137,10 @@ async function ignoredBuildAcceptable() {
 await loadVerifyTargets();
 console.log(`Waiting for "${required}" on ${sha.slice(0, 7)} (timeout ${timeoutMs / 1000}s)…`);
 if (verifyTargets.length) {
-  console.log(`Production fallback checks: ${verifyTargets.map((t) => t.url).join(", ")}`);
+  console.log(`Production fallback checks: ${verifyTargets.map(describeVerifyTarget).join(", ")}`);
+}
+if (await isVercelProjectPaused()) {
+  await reportPausedProject();
 }
 
 while (Date.now() - started < timeoutMs) {
@@ -120,8 +160,14 @@ while (Date.now() - started < timeoutMs) {
       process.exit(1);
     }
     if (match.state === "success") {
-      console.log("Vercel production deploy confirmed via Git integration.");
-      process.exit(0);
+      console.log("Vercel Git reported success — confirming production revision…");
+      if (await tryProductionVerify("✓", true)) {
+        process.exit(0);
+      }
+      await reportPausedProject();
+      console.error(
+        "GitHub shows deploy success but production is still on an older revision — waiting…",
+      );
     }
     const blocked = /blocked|paused|queued/i.test(match.description || "");
     if ((match.state === "failure" || match.state === "error") && !blocked) {
@@ -142,6 +188,7 @@ while (Date.now() - started < timeoutMs) {
         );
         console.log("Final production verification attempt…");
         await tryProductionVerify("✓");
+        await reportPausedProject();
         console.error("Production verification failed — deploy not confirmed live.");
         console.error(`  Dashboard: ${canonical.dashboardUrl}`);
         console.error(
