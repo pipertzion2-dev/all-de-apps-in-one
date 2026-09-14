@@ -1,0 +1,33 @@
+"use client";
+
+import { useEffect } from "react";
+import { useThree } from "@react-three/fiber";
+import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
+import * as THREE from "three";
+
+type Props = {
+  mobile?: boolean;
+};
+
+/** Bloom + vignette with ACES tone mapping for cinematic runner look. */
+export function CleanSneaksPostFX({ mobile = false }: Props) {
+  const { gl } = useThree();
+
+  useEffect(() => {
+    gl.toneMapping = THREE.ACESFilmicToneMapping;
+    gl.toneMappingExposure = mobile ? 1.05 : 1.18;
+    gl.outputColorSpace = THREE.SRGBColorSpace;
+  }, [gl, mobile]);
+
+  return (
+    <EffectComposer multisampling={mobile ? 0 : 4}>
+      <Bloom
+        intensity={mobile ? 0.45 : 0.65}
+        luminanceThreshold={0.72}
+        luminanceSmoothing={0.35}
+        mipmapBlur
+      />
+      <Vignette eskil={false} offset={0.22} darkness={mobile ? 0.55 : 0.68} />
+    </EffectComposer>
+  );
+}

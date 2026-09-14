@@ -332,7 +332,7 @@ export function CleanSneaksGame3D({
         {phase === "countdown" && (
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm">
             <p className="seeds-holo-text mb-2 text-xs uppercase tracking-[0.35em]">Clean Sneaks</p>
-            <p className="mb-2 text-sm text-[#7EC8D9]">Temple Run · 3D</p>
+            <p className="mb-2 text-sm text-[#7EC8D9]">Temple Run · 3D · Ultra</p>
             <p className="mb-6 text-sm text-[#7EC8D9]/80">100% CLEAN</p>
             <p className="text-6xl font-bold tabular-nums text-foreground sm:text-7xl">
               {countdown > 0 ? countdown : "RUN."}
