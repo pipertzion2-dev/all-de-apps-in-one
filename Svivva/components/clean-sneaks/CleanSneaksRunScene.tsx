@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { ContactShadows, Sky, Sparkles } from "@react-three/drei";
 import { Baloon8RunEnvironment } from "./Baloon8RunEnvironment";
@@ -15,6 +15,7 @@ import {
   sidewalkTexture,
   wetAsphaltMaterial,
 } from "@/lib/clean-sneaks/run-textures";
+import { detectRunQuality, runQualityFlags, type RunQuality } from "@/lib/clean-sneaks/run-quality";
 import {
   createWalkingShoes3D,
   updateWalkingShoes3D,
@@ -22,13 +23,15 @@ import {
 } from "@/lib/clean-sneaks/walking-shoes-3d";
 import { CleanSneaksPostFX } from "./CleanSneaksPostFX";
 
+type QualityFlags = ReturnType<typeof runQualityFlags>;
+
 type SceneProps = {
   stateRef: React.MutableRefObject<RunEngineState>;
   running: boolean;
   onGameOver: () => void;
   onStreakFlash: () => void;
   onStatsTick: () => void;
-  mobile?: boolean;
+  quality: QualityFlags;
 };
 
 const ROAD_LENGTH = 140;
@@ -37,7 +40,6 @@ const SEG_LEN = ROAD_LENGTH / ROAD_SEGMENTS;
 
 function FollowCamera({ stateRef }: { stateRef: React.MutableRefObject<RunEngineState> }) {
   const { camera } = useThree();
-  // Same sideline 3/4 rig as homepage Baloon8ShoeScene (camera 5.5, 2.4, 4.8 → target y 0.55).
   const lookAt = useRef(new THREE.Vector3(0, 0.55, -6));
   const pos = useRef(new THREE.Vector3(5.5, 2.4, 4.8));
   const fovBase = 38;
@@ -74,7 +76,13 @@ function FollowCamera({ stateRef }: { stateRef: React.MutableRefObject<RunEngine
   return null;
 }
 
-function Road({ stateRef }: { stateRef: React.MutableRefObject<RunEngineState> }) {
+function Road({
+  stateRef,
+  castShadows,
+}: {
+  stateRef: React.MutableRefObject<RunEngineState>;
+  castShadows: boolean;
+}) {
   const groupRef = useRef<THREE.Group>(null);
   const asphalt = useMemo(() => asphaltMaterial(), []);
   const wet = useMemo(() => wetAsphaltMaterial(), []);
@@ -117,7 +125,7 @@ function Road({ stateRef }: { stateRef: React.MutableRefObject<RunEngineState> }
     <group ref={groupRef}>
       {segments.map((seg) => (
         <group key={seg.key} position={[0, 0, seg.z]}>
-          <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow material={asphalt}>
+          <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow={castShadows} material={asphalt}>
             <planeGeometry args={[9.2, SEG_LEN]} />
           </mesh>
           {[-2.4, 0, 2.4].map((lx, li) => (
@@ -125,7 +133,7 @@ function Road({ stateRef }: { stateRef: React.MutableRefObject<RunEngineState> }
               <mesh
                 position={[lx, 0.015, 0]}
                 rotation={[-Math.PI / 2, 0, 0]}
-                receiveShadow
+                receiveShadow={castShadows}
                 material={li === 1 ? wet : asphalt}
               >
                 <planeGeometry args={[1.75, SEG_LEN - 0.15]} />
@@ -138,7 +146,7 @@ function Road({ stateRef }: { stateRef: React.MutableRefObject<RunEngineState> }
           <mesh
             position={[-4.8, 0.08, 0]}
             rotation={[-Math.PI / 2, 0, 0]}
-            receiveShadow
+            receiveShadow={castShadows}
             material={sidewalk}
           >
             <planeGeometry args={[1.6, SEG_LEN]} />
@@ -146,16 +154,16 @@ function Road({ stateRef }: { stateRef: React.MutableRefObject<RunEngineState> }
           <mesh
             position={[4.8, 0.08, 0]}
             rotation={[-Math.PI / 2, 0, 0]}
-            receiveShadow
+            receiveShadow={castShadows}
             material={sidewalk}
           >
             <planeGeometry args={[1.6, SEG_LEN]} />
           </mesh>
-          <mesh position={[-3.85, 0.12, 0]} castShadow receiveShadow>
+          <mesh position={[-3.85, 0.12, 0]} castShadow={castShadows} receiveShadow={castShadows}>
             <boxGeometry args={[0.18, 0.24, SEG_LEN - 0.1]} />
             <meshStandardMaterial color="#3a424c" roughness={0.75} />
           </mesh>
-          <mesh position={[3.85, 0.12, 0]} castShadow receiveShadow>
+          <mesh position={[3.85, 0.12, 0]} castShadow={castShadows} receiveShadow={castShadows}>
             <boxGeometry args={[0.18, 0.24, SEG_LEN - 0.1]} />
             <meshStandardMaterial color="#3a424c" roughness={0.75} />
           </mesh>
@@ -165,21 +173,21 @@ function Road({ stateRef }: { stateRef: React.MutableRefObject<RunEngineState> }
   );
 }
 
-function StreetLights() {
+function StreetLights({ count }: { count: number }) {
   const positions = useMemo(
     () =>
-      Array.from({ length: 12 }, (_, i) => ({
+      Array.from({ length: count }, (_, i) => ({
         x: i % 2 === 0 ? -5.2 : 5.2,
         z: -12 - i * 11,
       })),
-    [],
+    [count],
   );
 
   return (
     <group>
       {positions.map((p, i) => (
         <group key={i} position={[p.x, 0, p.z]}>
-          <mesh castShadow position={[0, 2.2, 0]}>
+          <mesh position={[0, 2.2, 0]}>
             <cylinderGeometry args={[0.05, 0.07, 4.4, 8]} />
             <meshStandardMaterial color="#2a3038" metalness={0.6} roughness={0.35} />
           </mesh>
@@ -192,22 +200,24 @@ function StreetLights() {
               roughness={0.2}
             />
           </mesh>
-          <pointLight
-            position={[0, 4, 0.3]}
-            color="#ffcc88"
-            intensity={0.35}
-            distance={14}
-            decay={2}
-          />
+          {count >= 12 ? (
+            <pointLight
+              position={[0, 4, 0.3]}
+              color="#ffcc88"
+              intensity={0.35}
+              distance={14}
+              decay={2}
+            />
+          ) : null}
         </group>
       ))}
     </group>
   );
 }
 
-function CityBlock() {
+function CityBlock({ count, castShadows }: { count: number; castShadows: boolean }) {
   const buildings = useMemo(() => {
-    return Array.from({ length: 20 }, (_, i) => {
+    return Array.from({ length: count }, (_, i) => {
       const seed = i + 1;
       return {
         x: (i % 2 === 0 ? -1 : 1) * (7.5 + (i % 3) * 0.8),
@@ -218,14 +228,19 @@ function CityBlock() {
         seed,
       };
     });
-  }, []);
+  }, [count]);
 
   return (
     <group>
       {buildings.map((b) => {
         const facade = buildingFacadeTexture(b.seed);
         return (
-          <mesh key={`${b.x}-${b.z}`} position={[b.x, b.h / 2, b.z]} castShadow receiveShadow>
+          <mesh
+            key={`${b.x}-${b.z}`}
+            position={[b.x, b.h / 2, b.z]}
+            castShadow={castShadows}
+            receiveShadow={castShadows}
+          >
             <boxGeometry args={[b.w, b.h, b.d]} />
             <meshStandardMaterial
               map={facade}
@@ -346,8 +361,12 @@ function PlayerShoes({ stateRef }: { stateRef: React.MutableRefObject<RunEngineS
   const hostRef = useRef<THREE.Group>(null);
 
   useEffect(() => {
-    shoesRef.current = createWalkingShoes3D();
-    hostRef.current?.add(shoesRef.current.root);
+    try {
+      shoesRef.current = createWalkingShoes3D();
+      hostRef.current?.add(shoesRef.current.root);
+    } catch (err) {
+      console.error("[CleanSneaksRunScene] Baloon8 shoe build failed", err);
+    }
     return () => {
       if (shoesRef.current && hostRef.current) {
         hostRef.current.remove(shoesRef.current.root);
@@ -378,7 +397,7 @@ function PlayerShoes({ stateRef }: { stateRef: React.MutableRefObject<RunEngineS
   return <group ref={hostRef} />;
 }
 
-function World({ stateRef, running, onGameOver, onStreakFlash, onStatsTick, mobile }: SceneProps) {
+function World({ stateRef, running, onGameOver, onStreakFlash, onStatsTick, quality }: SceneProps) {
   const tickRef = useRef(0);
   const sunRef = useRef<THREE.DirectionalLight>(null);
   const { scene } = useThree();
@@ -409,26 +428,32 @@ function World({ stateRef, running, onGameOver, onStreakFlash, onStatsTick, mobi
     <>
       <fog attach="fog" args={["#0a0e18", 22, 68]} />
 
-      <Sky
-        distance={450000}
-        sunPosition={[8, 3, -20]}
-        inclination={0.52}
-        azimuth={0.28}
-        mieCoefficient={0.012}
-        mieDirectionalG={0.85}
-        rayleigh={0.4}
-        turbidity={8}
-      />
+      {quality.sky ? (
+        <Sky
+          distance={450000}
+          sunPosition={[8, 3, -20]}
+          inclination={0.52}
+          azimuth={0.28}
+          mieCoefficient={0.012}
+          mieDirectionalG={0.85}
+          rayleigh={0.4}
+          turbidity={8}
+        />
+      ) : null}
 
       <hemisphereLight args={["#7ec8d9", "#1a1420", 0.45]} />
       <ambientLight intensity={0.32} color="#ffffff" />
       <directionalLight
         ref={sunRef}
-        castShadow
+        castShadow={quality.castShadows}
         position={[6, 8, 4]}
         intensity={1.25}
         color="#ffffff"
-        shadow-mapSize={[mobile ? 1024 : 2048, mobile ? 1024 : 2048]}
+        shadow-mapSize={
+          quality.castShadows
+            ? [quality.mobile ? 512 : 2048, quality.mobile ? 512 : 2048]
+            : undefined
+        }
         shadow-camera-near={0.5}
         shadow-camera-far={60}
         shadow-camera-left={-12}
@@ -441,43 +466,47 @@ function World({ stateRef, running, onGameOver, onStreakFlash, onStatsTick, mobi
       <directionalLight position={[-4, 3, -6]} intensity={0.55} color="#7ec8d9" />
       <pointLight position={[-2, 2, 3]} intensity={0.45} color="#d94f9c" distance={18} />
 
-      <Baloon8RunEnvironment />
+      <Baloon8RunEnvironment enabled={quality.pmremEnvironment} />
 
       <FollowCamera stateRef={stateRef} />
-      <Road stateRef={stateRef} />
-      <CityBlock />
-      <StreetLights />
-      <SpeedStreaks stateRef={stateRef} />
+      <Road stateRef={stateRef} castShadows={quality.castShadows} />
+      <CityBlock count={quality.cityBuildings} castShadows={quality.castShadows} />
+      <StreetLights count={quality.streetLights} />
+      {quality.speedStreaks ? <SpeedStreaks stateRef={stateRef} /> : null}
 
-      <Sparkles
-        count={mobile ? 40 : 80}
-        scale={[14, 6, 50]}
-        size={1.2}
-        speed={0.35}
-        opacity={0.25}
-        color="#7ec8d9"
-      />
+      {quality.sparkles ? (
+        <Sparkles
+          count={quality.mobile ? 24 : 80}
+          scale={[14, 6, 50]}
+          size={1.2}
+          speed={0.35}
+          opacity={0.25}
+          color="#7ec8d9"
+        />
+      ) : null}
 
       <PlayerShoes stateRef={stateRef} />
       <DynamicEntities stateRef={stateRef} />
 
-      <ContactShadows
-        position={[0, 0.01, 0]}
-        opacity={0.55}
-        scale={12}
-        blur={2.2}
-        far={4}
-        color="#000000"
-        frames={Infinity}
-        resolution={mobile ? 256 : 512}
-      />
+      {quality.contactShadows ? (
+        <ContactShadows
+          position={[0, 0.01, 0]}
+          opacity={0.55}
+          scale={12}
+          blur={2.2}
+          far={4}
+          color="#000000"
+          frames={Infinity}
+          resolution={quality.mobile ? 128 : 512}
+        />
+      ) : null}
 
-      <CleanSneaksPostFX mobile={mobile} />
+      <CleanSneaksPostFX mobile={quality.mobile} enabled={quality.postFx} />
     </>
   );
 }
 
-export type CleanSneaksRunSceneProps = SceneProps & {
+export type CleanSneaksRunSceneProps = Omit<SceneProps, "quality"> & {
   className?: string;
 };
 
@@ -489,19 +518,25 @@ export function CleanSneaksRunScene({
   onStatsTick,
   className = "",
 }: CleanSneaksRunSceneProps) {
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  const [qualityTier, setQualityTier] = useState<RunQuality>("mobile");
+  const quality = useMemo(() => runQualityFlags(qualityTier), [qualityTier]);
+
+  useEffect(() => {
+    setQualityTier(detectRunQuality());
+  }, []);
 
   return (
     <div className={`h-full w-full ${className}`} aria-hidden>
       <Canvas
-        shadows="soft"
-        dpr={[1, isMobile ? 1.5 : 2]}
+        shadows={quality.castShadows}
+        dpr={quality.dpr}
         camera={{ fov: 38, near: 0.1, far: 140, position: [5.5, 2.4, 4.8] }}
         gl={{
-          antialias: true,
-          powerPreference: "high-performance",
+          antialias: quality.antialias,
+          powerPreference: quality.mobile ? "default" : "high-performance",
           alpha: false,
           stencil: false,
+          failIfMajorPerformanceCaveat: false,
         }}
         style={{ touchAction: "none" }}
       >
@@ -511,7 +546,7 @@ export function CleanSneaksRunScene({
           onGameOver={onGameOver}
           onStreakFlash={onStreakFlash}
           onStatsTick={onStatsTick}
-          mobile={isMobile}
+          quality={quality}
         />
       </Canvas>
     </div>
