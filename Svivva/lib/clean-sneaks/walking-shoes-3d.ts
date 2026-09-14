@@ -112,11 +112,13 @@ function applyDirtToShoe(shoe: Baloon8WalkerShoe, dirt: number, freshGlow: boole
   const base = new THREE.Color(0x2a6080);
   if (dirt > 0.02) base.lerp(new THREE.Color(0x4a3828), 0.2 + dirt * 0.65);
   shoe.hullMat.color.copy(base);
-  shoe.hullMat.iridescence = Math.max(0.35, 0.85 - dirt * 0.45);
-  shoe.hullMat.metalness = Math.max(0.45, 0.85 - dirt * 0.3);
-  shoe.hullMat.envMapIntensity = freshGlow ? 2.0 : 1.55 - dirt * 0.35;
+  if ("iridescence" in shoe.hullMat) {
+    shoe.hullMat.iridescence = Math.max(0.35, 0.85 - dirt * 0.45);
+  }
+  shoe.hullMat.metalness = Math.max(0.25, 0.5 - dirt * 0.2);
+  shoe.hullMat.envMapIntensity = freshGlow ? 1.4 : 1.05 - dirt * 0.25;
 
-  if (shoe.bubbles.instanceColor) {
+  if (shoe.bubbles?.instanceColor) {
     const c = new THREE.Color();
     for (let i = 0; i < shoe.bubbles.count; i++) {
       shoe.bubbles.getColorAt(i, c);
@@ -165,6 +167,7 @@ export function updateWalkingShoes3D(
   // Gentle roll/bob — keep blueprint side profile readable (not a leg-swing).
   const bob = args.airborne ? 0.12 : Math.max(0, Math.sin(phase * 2)) * 0.06;
   shoes.shoePivot.rotation.x = Math.sin(phase) * (args.airborne ? 0.05 : 0.08);
+  shoes.shoePivot.rotation.z = Math.sin(phase * 0.5) * 0.04;
   shoes.shoePivot.position.y = bob;
 
   if (!args.airborne && Math.sin(phase * 2) > 0.92) spawnDust(shoes);

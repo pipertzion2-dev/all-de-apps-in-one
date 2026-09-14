@@ -51,8 +51,8 @@ export function runQualityFlags(quality: RunQuality) {
     speedStreaks: !mobile,
     antialias: !mobile,
     dpr: mobile || typeof window === "undefined" ? 1 : Math.min(window.devicePixelRatio || 1, 2),
-    bubbleCount: mobile ? 380 : 1500,
-    bubbleCountReduced: mobile ? 220 : 800,
+    bubbleCount: 0,
+    bubbleCountReduced: 0,
     cityBuildings: mobile ? 10 : 20,
     streetLights: mobile ? 6 : 12,
   };

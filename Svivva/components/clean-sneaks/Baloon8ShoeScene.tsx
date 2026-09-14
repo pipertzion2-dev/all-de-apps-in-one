@@ -40,7 +40,7 @@ export function Baloon8ShoeScene({ className = "", autoRotate = true, bubbleCoun
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const isMobile = window.innerWidth < 768;
-    const count = bubbleCount ?? (isMobile ? 900 : 1600);
+    const count = bubbleCount ?? 0;
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x06080c);
