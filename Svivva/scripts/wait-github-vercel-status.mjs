@@ -51,18 +51,6 @@ async function loadVerifyTargets() {
   verifyTargets = deployVerifyTargets(files ?? [], sha);
 }
 
-async function isVercelProjectPaused() {
-  try {
-    const res = await fetch("https://all-de-apps-in-one.vercel.app/", {
-      method: "HEAD",
-      redirect: "manual",
-    });
-    return res.status === 402;
-  } catch {
-    return false;
-  }
-}
-
 function describeVerifyTarget(target) {
   if (target.expectedSha) {
     return `/api/deploy-revision (${target.expectedSha.slice(0, 7)})`;
@@ -94,16 +82,6 @@ async function tryProductionVerify(label, exitOnSuccess = true) {
     process.exit(0);
   }
   return allOk;
-}
-
-async function reportPausedProject() {
-  if (!(await isVercelProjectPaused())) return false;
-  console.error("");
-  console.error("Vercel project is PAUSED (DEPLOYMENT_DISABLED / spend cap).");
-  console.error(`  Resume: ${canonical.dashboardUrl} → Settings → Resume Service`);
-  console.error("  Or add VERCEL_TOKEN to GitHub secrets and run Fix Vercel block workflow.");
-  console.error(`  ${canonical.productionDomain} keeps serving the last build before the pause.`);
-  return true;
 }
 
 async function fetchStatus() {
@@ -139,12 +117,6 @@ console.log(`Waiting for "${required}" on ${sha.slice(0, 7)} (timeout ${timeoutM
 if (verifyTargets.length) {
   console.log(`Production fallback checks: ${verifyTargets.map(describeVerifyTarget).join(", ")}`);
 }
-if (await isVercelProjectPaused()) {
-  await reportPausedProject();
-  console.error("Aborting — new deploys cannot go live while the project is paused.");
-  process.exit(1);
-}
-
 while (Date.now() - started < timeoutMs) {
   const data = await fetchStatus();
   const match = (data.statuses || []).find((s) => s.context === required);
@@ -166,7 +138,6 @@ while (Date.now() - started < timeoutMs) {
       if (await tryProductionVerify("✓", true)) {
         process.exit(0);
       }
-      await reportPausedProject();
       console.error(
         "GitHub shows deploy success but production is still on an older revision — waiting…",
       );
@@ -190,7 +161,6 @@ while (Date.now() - started < timeoutMs) {
         );
         console.log("Final production verification attempt…");
         await tryProductionVerify("✓");
-        await reportPausedProject();
         console.error("Production verification failed — deploy not confirmed live.");
         console.error(`  Dashboard: ${canonical.dashboardUrl}`);
         console.error(

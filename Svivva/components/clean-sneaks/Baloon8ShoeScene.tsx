@@ -40,7 +40,7 @@ export function Baloon8ShoeScene({ className = "", autoRotate = true, bubbleCoun
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const isMobile = window.innerWidth < 768;
-    const count = bubbleCount ?? 0;
+    const count = bubbleCount ?? (isMobile ? 200 : 320);
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x06080c);
@@ -144,6 +144,9 @@ export function Baloon8ShoeScene({ className = "", autoRotate = true, bubbleCoun
       })
       .catch((err) => {
         console.error("[Baloon8ShoeScene] failed to load blueprint", err);
+        if (!disposed && host) {
+          host.innerHTML = `<img src="/assets/clean-sneaks/baloon8-blueprint.jpg" alt="Baloon8 blueprint" style="width:100%;height:100%;object-fit:contain;background:#06080c" />`;
+        }
       });
 
     return () => {

@@ -1,8 +1,9 @@
 import * as THREE from "three";
 import {
   BALOON8_BLUEPRINT_URL,
+  cropBlueprintTexture,
   prepareBlueprint,
-  type PreparedBlueprint,
+  type Baloon8BlueprintQuadrant,
   type PreparedQuadrant,
 } from "./baloon8-textures";
 
@@ -14,9 +15,8 @@ export const BALOON8_DIMS = {
 } as const;
 
 export const BALOON8_SCENE_SCALE = 0.42;
-/** Runner fill-frame scale (~1.6 m long). Homepage viewer uses BALOON8_SCENE_SCALE (0.42). */
-export const BALOON8_WALKER_SCALE = 0.36;
-export const BALOON8_WALKER_SCALE_MOBILE = 0.32;
+export const BALOON8_WALKER_SCALE = 0.42;
+export const BALOON8_WALKER_SCALE_MOBILE = 0.36;
 
 const IRIDESCENCE = [0x2a9d8f, 0x5b8da8, 0x7b4397, 0x3d9970, 0x4cc9c0];
 
@@ -24,132 +24,163 @@ function scaledDim(value: number, scale = BALOON8_SCENE_SCALE): number {
   return value * scale;
 }
 
-/** Side-profile outline traced from the orthographic mockup (length × height). */
-function buildSideProfileShape(L: number, H: number): THREE.Shape {
-  const x = (t: number) => t * L;
-  const y = (t: number) => t * H;
-  const shape = new THREE.Shape();
-  shape.moveTo(x(0), y(0.07));
-  shape.lineTo(x(0.04), y(0.1));
-  shape.lineTo(x(0.14), y(0.11));
-  shape.quadraticCurveTo(x(0.22), y(0.14), x(0.3), y(0.38));
-  shape.lineTo(x(0.42), y(0.36));
-  shape.quadraticCurveTo(x(0.55), y(0.34), x(0.68), y(0.72));
-  shape.quadraticCurveTo(x(0.78), y(0.92), x(0.9), y(1));
-  shape.lineTo(x(0.98), y(0.94));
-  shape.lineTo(x(1), y(0.12));
-  shape.lineTo(x(0.96), y(0.08));
-  shape.lineTo(x(0), y(0.07));
-  return shape;
+function legacyPanel(
+  blueprint: THREE.Texture,
+  quadrant: Baloon8BlueprintQuadrant,
+  w: number,
+  h: number,
+): THREE.Mesh {
+  const tex = cropBlueprintTexture(blueprint, quadrant);
+  const mat = new THREE.MeshPhysicalMaterial({
+    map: tex,
+    transparent: true,
+    alphaTest: 0.04,
+    metalness: 0.3,
+    roughness: 0.42,
+    clearcoat: 0.5,
+    envMapIntensity: 1.35,
+    side: THREE.DoubleSide,
+    emissive: new THREE.Color(0x0a2030),
+    emissiveIntensity: 0.18,
+  });
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
+  mesh.renderOrder = 2;
+  return mesh;
 }
 
-function alphaPanel(
+function preparedPanel(
   prep: PreparedQuadrant,
-  width: number,
-  height: number,
-  opts?: { emissive?: number; emissiveIntensity?: number },
+  w: number,
+  h: number,
+  glow?: { emissive: number; intensity: number },
 ): THREE.Mesh {
   const mat = new THREE.MeshPhysicalMaterial({
     map: prep.map,
     alphaMap: prep.alphaMap,
     transparent: true,
-    alphaTest: 0.45,
-    metalness: 0.25,
-    roughness: 0.38,
+    alphaTest: 0.12,
+    metalness: 0.28,
+    roughness: 0.4,
     clearcoat: 0.55,
-    clearcoatRoughness: 0.18,
-    envMapIntensity: 1.15,
+    envMapIntensity: 1.35,
     side: THREE.DoubleSide,
     depthWrite: true,
-    ...(opts?.emissive != null
-      ? { emissive: new THREE.Color(opts.emissive), emissiveIntensity: opts.emissiveIntensity ?? 0.35 }
-      : {}),
+    emissive: new THREE.Color(glow?.emissive ?? 0x0a2030),
+    emissiveIntensity: glow?.intensity ?? 0.22,
   });
-  return new THREE.Mesh(new THREE.PlaneGeometry(width, height), mat);
-}
-
-function buildInteriorVolume(L: number, H: number, W: number): THREE.Mesh {
-  const shape = buildSideProfileShape(L, H);
-  const geo = new THREE.ExtrudeGeometry(shape, {
-    depth: W * 0.92,
-    bevelEnabled: false,
-    steps: 1,
-    curveSegments: 24,
-  });
-  geo.translate(0, 0, (-W * 0.92) / 2);
-  const mat = new THREE.MeshStandardMaterial({
-    color: 0x0a0c10,
-    metalness: 0.15,
-    roughness: 0.85,
-    side: THREE.DoubleSide,
-  });
-  const mesh = new THREE.Mesh(geo, mat);
-  mesh.position.set(-L / 2, 0, 0);
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
+  mesh.renderOrder = 2;
   return mesh;
 }
 
-function buildFootwellCollar(L: number, W: number, H: number): THREE.Mesh {
-  const geo = new THREE.TorusGeometry(W * 0.22, W * 0.04, 8, 32, Math.PI * 1.15);
-  const mat = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 0.9, metalness: 0.05 });
-  const mesh = new THREE.Mesh(geo, mat);
-  mesh.rotation.x = Math.PI / 2;
-  mesh.rotation.z = Math.PI / 2;
-  mesh.position.set(L * 0.02, H * 0.88, 0);
-  return mesh;
+function panelForQuadrant(
+  blueprint: THREE.Texture,
+  prepared: PreparedQuadrant | null,
+  quadrant: Baloon8BlueprintQuadrant,
+  w: number,
+  h: number,
+  glow?: { emissive: number; intensity: number },
+): THREE.Mesh {
+  if (prepared) {
+    try {
+      return preparedPanel(prepared, w, h, glow);
+    } catch {
+      /* fall through */
+    }
+  }
+  return legacyPanel(blueprint, quadrant, w, h);
 }
 
-function buildSole(L: number, W: number): THREE.Mesh {
-  const geo = new THREE.BoxGeometry(L * 0.98, 0.04, W * 0.95);
-  const mat = new THREE.MeshStandardMaterial({ color: 0x141820, roughness: 0.95, metalness: 0.05 });
-  const mesh = new THREE.Mesh(geo, mat);
-  mesh.position.y = 0.02;
-  return mesh;
-}
-
-/** Optional rim shimmer — blueprint already includes bubble texture; keep count low. */
-function createBubbleRim(L: number, H: number, W: number, count: number, scale: number): THREE.InstancedMesh | null {
+/** Soft iridescent rim — low opacity so blueprint art stays visible. */
+function createBubbleInstances(
+  width: number,
+  height: number,
+  depth: number,
+  count: number,
+  scaleMul = 1,
+): THREE.InstancedMesh | null {
   if (count <= 0) return null;
-  const bubbleGeo = new THREE.SphereGeometry(0.018 * scale, 6, 6);
+  const bubbleGeo = new THREE.SphereGeometry(0.02 * scaleMul, 6, 6);
   const bubbleMat = new THREE.MeshPhysicalMaterial({
     color: 0xffffff,
     metalness: 0.9,
     roughness: 0.15,
     iridescence: 1,
-    iridescenceIOR: 1.3,
+    iridescenceIOR: 1.32,
     transparent: true,
-    opacity: 0.35,
+    opacity: 0.28,
+    depthWrite: false,
   });
   const mesh = new THREE.InstancedMesh(bubbleGeo, bubbleMat, count);
   const dummy = new THREE.Object3D();
   const color = new THREE.Color();
+  const hw = width / 2;
+  const hh = height / 2;
+  const hd = depth / 2;
+
   for (let i = 0; i < count; i++) {
-    const edge = i % 4;
-    const t = Math.random();
-    let px = 0;
-    let py = H * (0.15 + Math.random() * 0.75);
-    let pz = 0;
-    if (edge === 0) {
-      px = (t - 0.5) * L;
-      pz = W / 2;
-    } else if (edge === 1) {
-      px = (t - 0.5) * L;
-      pz = -W / 2;
-    } else if (edge === 2) {
-      px = L / 2;
-      pz = (t - 0.5) * W;
-    } else {
-      px = -L / 2;
-      pz = (t - 0.5) * W;
+    const face = i % 6;
+    let x = 0;
+    let y = 0;
+    let z = 0;
+    let nx = 0;
+    let ny = 0;
+    let nz = 0;
+    const u = Math.random();
+    const v = Math.random();
+
+    switch (face) {
+      case 0:
+        x = -hw + u * width;
+        y = v * height;
+        z = hd;
+        nz = 1;
+        break;
+      case 1:
+        x = hw - u * width;
+        y = v * height;
+        z = -hd;
+        nz = -1;
+        break;
+      case 2:
+        x = -hw + u * width;
+        y = hh;
+        z = -hd + v * depth;
+        ny = 1;
+        break;
+      case 3:
+        x = -hw + u * width;
+        y = 0;
+        z = -hd + v * depth;
+        ny = -1;
+        break;
+      case 4:
+        x = -hw;
+        y = v * height;
+        z = -hd + u * depth;
+        nx = -1;
+        break;
+      default:
+        x = hw;
+        y = v * height;
+        z = -hd + u * depth;
+        nx = 1;
+        break;
     }
-    dummy.position.set(px, py, pz);
-    dummy.scale.setScalar(0.4 + Math.random() * 0.5);
+
+    const s = 0.5 + Math.random() * 0.65;
+    const push = 0.028 * scaleMul * s;
+    dummy.position.set(x + nx * push, y + ny * push + hh * 0.5, z + nz * push);
+    dummy.scale.setScalar(s);
     dummy.updateMatrix();
     mesh.setMatrixAt(i, dummy.matrix);
     color.setHex(IRIDESCENCE[i % IRIDESCENCE.length]!);
     mesh.setColorAt(i, color);
   }
+
   mesh.instanceMatrix.needsUpdate = true;
   if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+  mesh.renderOrder = 3;
   return mesh;
 }
 
@@ -177,72 +208,71 @@ export type Baloon8ShoeModel = {
   dispose: () => void;
 };
 
-/**
- * Assemble a volumetric sneaker from the four orthographic blueprint views.
- * Strategy: alpha-cut trimmed panels on each face + extruded side profile for depth.
- * Wheels/bubbles come from the artwork — no duplicate 3D wheels on top.
- */
 function assembleFromBlueprint(
   blueprint: THREE.Texture,
   bubbleCount: number,
   scale = BALOON8_SCENE_SCALE,
 ): Baloon8ShoeCore {
-  const prepared = prepareBlueprint(blueprint);
   const root = new THREE.Group();
   const disposables: Array<{ dispose: () => void }> = [];
   const glowMeshes: THREE.Mesh[] = [];
+
+  let prepared: ReturnType<typeof prepareBlueprint> | null = null;
+  try {
+    const img = blueprint.image as CanvasImageSource & { width?: number };
+    if (img && ("naturalWidth" in img ? img.naturalWidth : img.width)) {
+      prepared = prepareBlueprint(blueprint);
+    }
+  } catch (err) {
+    console.warn("[Baloon8] prepareBlueprint failed, using UV crops", err);
+  }
 
   const L = scaledDim(BALOON8_DIMS.length, scale);
   const W = scaledDim(BALOON8_DIMS.width, scale);
   const H = scaledDim(BALOON8_DIMS.height, scale);
 
   const body = new THREE.Group();
-  body.position.set(0, 0, 0);
 
-  const sideH = H;
-  const sideW = L;
-  const sidePanel = alphaPanel(prepared.side, sideW, sideH);
-  sidePanel.position.set(0, sideH / 2, W / 2 + 0.004);
-  body.add(sidePanel);
+  const side = panelForQuadrant(blueprint, prepared?.side ?? null, "side", L, H);
+  side.position.set(0, H / 2, W / 2 + 0.003);
+  body.add(side);
 
-  const sidePanelBack = alphaPanel(prepared.side, sideW, sideH);
-  sidePanelBack.position.set(0, sideH / 2, -W / 2 - 0.004);
-  sidePanelBack.rotation.y = Math.PI;
-  body.add(sidePanelBack);
+  const sideBack = panelForQuadrant(blueprint, prepared?.side ?? null, "side", L, H);
+  sideBack.position.set(0, H / 2, -W / 2 - 0.003);
+  sideBack.rotation.y = Math.PI;
+  body.add(sideBack);
 
-  const frontPanel = alphaPanel(prepared.front, W, H, {
+  const front = panelForQuadrant(blueprint, prepared?.front ?? null, "front", W, H, {
     emissive: 0x1a5030,
-    emissiveIntensity: 0.25,
+    intensity: 0.35,
   });
-  frontPanel.position.set(L / 2 + 0.004, H / 2, 0);
-  frontPanel.rotation.y = Math.PI / 2;
-  body.add(frontPanel);
+  front.position.set(L / 2 + 0.003, H / 2, 0);
+  front.rotation.y = Math.PI / 2;
+  body.add(front);
 
-  const rearPanel = alphaPanel(prepared.rear, W, H);
-  rearPanel.position.set(-L / 2 - 0.004, H / 2, 0);
-  rearPanel.rotation.y = -Math.PI / 2;
-  body.add(rearPanel);
+  const rear = panelForQuadrant(blueprint, prepared?.rear ?? null, "rear", W, H);
+  rear.position.set(-L / 2 - 0.003, H / 2, 0);
+  rear.rotation.y = -Math.PI / 2;
+  body.add(rear);
 
-  const topPanel = alphaPanel(prepared.top, L, W);
-  topPanel.position.set(0, H + 0.004, 0);
-  topPanel.rotation.x = -Math.PI / 2;
-  body.add(topPanel);
-
-  body.add(buildInteriorVolume(L, H, W));
-  body.add(buildFootwellCollar(L, W, H));
-  body.add(buildSole(L, W));
+  const top = panelForQuadrant(blueprint, prepared?.top ?? null, "top", L, W);
+  top.position.set(0, H + 0.003, 0);
+  top.rotation.x = -Math.PI / 2;
+  body.add(top);
 
   root.add(body);
 
   const hullMat = new THREE.MeshPhysicalMaterial({
     color: 0x2a6080,
-    metalness: 0.5,
-    roughness: 0.35,
-    envMapIntensity: 1,
+    metalness: 0.55,
+    roughness: 0.32,
+    iridescence: 0.75,
+    iridescenceIOR: 1.28,
+    envMapIntensity: 1.2,
   });
   disposables.push(hullMat);
 
-  const bubbles = createBubbleRim(L, H, W, bubbleCount, scale);
+  const bubbles = createBubbleInstances(L, H, W, bubbleCount, scale);
   if (bubbles) {
     root.add(bubbles);
     disposables.push(bubbles.geometry, bubbles.material as THREE.Material);
@@ -250,16 +280,16 @@ function assembleFromBlueprint(
 
   root.traverse((obj) => {
     if (obj instanceof THREE.Mesh) {
+      obj.frustumCulled = false;
       const mat = obj.material as THREE.MeshStandardMaterial;
-      if (mat.emissiveIntensity && mat.emissiveIntensity > 0.2) glowMeshes.push(obj);
+      if ((mat.emissiveIntensity ?? 0) > 0.25) glowMeshes.push(obj);
     }
   });
 
   return { root, bubbles, hullMat, glowMeshes, wheels: [], disposables };
 }
 
-/** Homepage / orbit viewer — user's four-view mockup as a 3D sneaker. */
-export function buildBaloon8Shoe(blueprint: THREE.Texture, bubbleCount = 0): Baloon8ShoeModel {
+export function buildBaloon8Shoe(blueprint: THREE.Texture, bubbleCount = 280): Baloon8ShoeModel {
   const core = assembleFromBlueprint(blueprint, bubbleCount);
   core.root.position.y = scaledDim(0.02);
 
@@ -285,45 +315,48 @@ export function buildBaloon8Shoe(blueprint: THREE.Texture, bubbleCount = 0): Bal
   };
 }
 
-/** Keep blueprint panels readable on dark asphalt (especially mobile). */
 export function ensureBaloon8RunnerVisible(shoe: Baloon8WalkerShoe, mobile: boolean): void {
   shoe.root.frustumCulled = false;
-  if (shoe.bubbles) shoe.bubbles.frustumCulled = false;
+  if (shoe.bubbles) {
+    shoe.bubbles.frustumCulled = false;
+    const bubbleMat = shoe.bubbles.material as THREE.MeshPhysicalMaterial;
+    bubbleMat.opacity = mobile ? 0.22 : 0.3;
+  }
 
   shoe.hullMat.emissive = new THREE.Color(0x1a3040);
-  shoe.hullMat.emissiveIntensity = mobile ? 0.35 : 0.2;
+  shoe.hullMat.emissiveIntensity = mobile ? 0.45 : 0.3;
 
   shoe.root.traverse((obj) => {
     if (!(obj instanceof THREE.Mesh)) return;
     obj.frustumCulled = false;
     const mat = obj.material as THREE.MeshPhysicalMaterial;
     if (!mat.map) return;
-    mat.envMapIntensity = mobile ? 1.05 : 1.25;
+    mat.envMapIntensity = mobile ? 1.2 : 1.45;
     mat.emissive = mat.emissive ?? new THREE.Color(0x0a1820);
-    mat.emissiveIntensity = Math.max(mat.emissiveIntensity ?? 0, mobile ? 0.2 : 0.12);
+    mat.emissiveIntensity = Math.max(mat.emissiveIntensity ?? 0, mobile ? 0.35 : 0.22);
   });
 
   for (const mesh of shoe.glowMeshes) {
     mesh.frustumCulled = false;
     const mat = mesh.material as THREE.MeshStandardMaterial;
-    mat.emissiveIntensity = Math.max(mat.emissiveIntensity ?? 0, 0.85);
+    mat.emissiveIntensity = Math.max(mat.emissiveIntensity ?? 0, 1);
   }
 }
 
-/** In-game Temple Run player — same Baloon8 blueprint, scaled for sideline camera. */
 export function buildBaloon8RunnerShoe(
   blueprint: THREE.Texture,
-  bubbleCount = 0,
+  bubbleCount = 160,
   opts?: { mobile?: boolean },
 ): Baloon8WalkerShoe {
   const mobile = opts?.mobile ?? false;
   const scale = mobile ? BALOON8_WALKER_SCALE_MOBILE : BALOON8_WALKER_SCALE;
-  const core = assembleFromBlueprint(blueprint, mobile ? Math.min(bubbleCount, 40) : bubbleCount, scale);
+  const count = mobile ? Math.min(bubbleCount, 100) : bubbleCount;
+  const core = assembleFromBlueprint(blueprint, count, scale);
   core.root.rotation.y = -Math.PI / 2;
 
   const mount = new THREE.Group();
   mount.add(core.root);
-  mount.position.y = scaledDim(0.02, scale);
+  mount.position.y = scaledDim(0.04, scale);
   mount.frustumCulled = false;
 
   const shoe: Baloon8WalkerShoe = {
@@ -341,9 +374,9 @@ export function buildBaloon8RunnerShoe(
 export function buildBaloon8WalkerShoe(
   blueprint: THREE.Texture,
   _side: -1 | 1,
-  bubbleCount = 0,
+  bubbleCount = 160,
 ): Baloon8WalkerShoe {
   return buildBaloon8RunnerShoe(blueprint, bubbleCount);
 }
 
-export { BALOON8_BLUEPRINT_URL, type PreparedBlueprint };
+export { BALOON8_BLUEPRINT_URL };
