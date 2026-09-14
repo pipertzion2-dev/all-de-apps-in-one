@@ -44,8 +44,7 @@ const PlatformFeatureHub = dynamic(
   { ssr: false },
 );
 const CleanSneaksSection = dynamic(
-  () =>
-    import("@/components/clean-sneaks/CleanSneaksSection").then((m) => m.CleanSneaksSection),
+  () => import("@/components/clean-sneaks/CleanSneaksSection").then((m) => m.CleanSneaksSection),
   { ssr: false },
 );
 const features = [

@@ -129,7 +129,10 @@ export function CleanSneaksSection() {
                 <p className="text-[11px] uppercase tracking-[0.35em] text-[#5B8DA8]">
                   ZZAI Play Presents
                 </p>
-                <h2 id="clean-sneaks-heading" className="seeds-holo-text text-3xl font-bold sm:text-4xl">
+                <h2
+                  id="clean-sneaks-heading"
+                  className="seeds-holo-text text-3xl font-bold sm:text-4xl"
+                >
                   CLEAN SNEAKS
                 </h2>
               </div>

@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-} from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { Button } from "@/components/ui/button";
 import {
   ALL_OBSTACLES,
@@ -16,11 +10,7 @@ import {
   OBSTACLE_META,
   POWERUP_META,
 } from "@/lib/clean-sneaks/constants";
-import {
-  cleanLabelFrom,
-  resolvePlayerSneaker,
-  streakLabelFrom,
-} from "@/lib/clean-sneaks/assets";
+import { cleanLabelFrom, resolvePlayerSneaker, streakLabelFrom } from "@/lib/clean-sneaks/assets";
 import {
   computeFrameScore,
   readBestScore,
@@ -289,17 +279,20 @@ export function CleanSneaksGame({
     setPhase("countdown");
     setCountdown(3);
     let n = 3;
-    const id = window.setInterval(() => {
-      n -= 1;
-      if (n > 0) setCountdown(n);
-      else if (n === 0) setCountdown(0);
-      else {
-        window.clearInterval(id);
-        setPhase("running");
-        stateRef.current.running = true;
-        stateRef.current.lastTs = performance.now();
-      }
-    }, stateRef.current.reduced ? 280 : 520);
+    const id = window.setInterval(
+      () => {
+        n -= 1;
+        if (n > 0) setCountdown(n);
+        else if (n === 0) setCountdown(0);
+        else {
+          window.clearInterval(id);
+          setPhase("running");
+          stateRef.current.running = true;
+          stateRef.current.lastTs = performance.now();
+        }
+      },
+      stateRef.current.reduced ? 280 : 520,
+    );
     return () => window.clearInterval(id);
   }, [active, resetRun]);
 
@@ -507,7 +500,7 @@ export function CleanSneaksGame({
 
       ctx.fillStyle = "rgba(91,141,168,0.08)";
       for (let i = 0; i < 8; i++) {
-        const bx = ((i * 97 - ((s.distance * 8) % 97)) + w) % (w + 40) - 20;
+        const bx = ((i * 97 - ((s.distance * 8) % 97) + w) % (w + 40)) - 20;
         const bh = 40 + ((i * 37) % 80);
         ctx.fillRect(bx, h * 0.28 - bh, 28 + (i % 3) * 10, bh);
       }
@@ -811,7 +804,9 @@ export function CleanSneaksGame({
       <div className="relative overflow-hidden rounded-xl border border-white/10 bg-[#0a0c10]">
         <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex flex-wrap items-start justify-between gap-2 p-3 sm:p-4">
           <div className="space-y-1">
-            <p className="text-[10px] uppercase tracking-[0.25em] text-[#5B8DA8]/80">Clean Sneaks</p>
+            <p className="text-[10px] uppercase tracking-[0.25em] text-[#5B8DA8]/80">
+              Clean Sneaks
+            </p>
             <p className="text-lg font-bold tabular-nums text-foreground sm:text-xl">
               {hud.score.toLocaleString()}
             </p>

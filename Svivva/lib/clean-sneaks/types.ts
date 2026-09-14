@@ -1,10 +1,4 @@
-export type CleanLabel =
-  | "FRESH"
-  | "CLEAN"
-  | "GETTING DIRTY"
-  | "DIRTY"
-  | "FILTHY"
-  | "COOKED";
+export type CleanLabel = "FRESH" | "CLEAN" | "GETTING DIRTY" | "DIRTY" | "FILTHY" | "COOKED";
 
 export type ObstacleKind =
   | "mud"
