@@ -375,8 +375,25 @@ function PlayerShoes({
   mobile: boolean;
   blueprint: THREE.Texture;
 }) {
-  const shoes = useMemo(() => createWalkingShoes3D(blueprint, mobile), [blueprint, mobile]);
+  const [shoes, setShoes] = useState<WalkingShoes3D | null>(null);
   const hostRef = useRef<THREE.Group>(null);
+
+  useEffect(() => {
+    let alive = true;
+    // Yield so the canvas paints before the heavy instanced bubble build.
+    const id = window.setTimeout(() => {
+      try {
+        const built = createWalkingShoes3D(blueprint, mobile);
+        if (alive) setShoes(built);
+      } catch (err) {
+        console.error("[PlayerShoes] Baloon8 build failed", err);
+      }
+    }, 0);
+    return () => {
+      alive = false;
+      window.clearTimeout(id);
+    };
+  }, [blueprint, mobile]);
 
   useFrame(() => {
     const s = stateRef.current;
@@ -397,6 +414,8 @@ function PlayerShoes({
       speed: s.speed,
     });
   });
+
+  if (!shoes) return null;
 
   return (
     <group ref={hostRef}>

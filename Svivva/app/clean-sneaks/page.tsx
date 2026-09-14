@@ -7,15 +7,34 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { SceneErrorBoundary } from "@/components/clean-sneaks/SceneErrorBoundary";
 
+function CleanSneaksLoading() {
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    const id = window.setTimeout(() => setSlow(true), 12_000);
+    return () => window.clearTimeout(id);
+  }, []);
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4 text-center text-sm text-muted-foreground">
+      <p>Loading Clean Sneaks 3D…</p>
+      {slow ? (
+        <>
+          <p className="max-w-xs text-xs text-muted-foreground/80">
+            Still loading — try a hard refresh or check your connection.
+          </p>
+          <Button type="button" variant="outline" size="sm" onClick={() => window.location.reload()}>
+            Reload game
+          </Button>
+        </>
+      ) : null}
+    </div>
+  );
+}
+
 const CleanSneaksGame3D = dynamic(
   () => import("@/components/clean-sneaks/CleanSneaksGame3D").then((m) => m.CleanSneaksGame3D),
   {
     ssr: false,
-    loading: () => (
-      <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
-        Loading Clean Sneaks 3D…
-      </div>
-    ),
+    loading: () => <CleanSneaksLoading />,
   },
 );
 

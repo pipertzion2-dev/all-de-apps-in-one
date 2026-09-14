@@ -30,7 +30,7 @@ if (!repo || !sha || !token) {
 
 const timeoutMs = Number(process.env.VERCEL_STATUS_TIMEOUT_MS || 20 * 60 * 1000);
 const intervalMs = Number(process.env.VERCEL_STATUS_POLL_MS || 20_000);
-const blockedFailFastMs = Number(process.env.VERCEL_BLOCKED_FAIL_FAST_MS || 90_000);
+const blockedFailFastMs = Number(process.env.VERCEL_BLOCKED_FAIL_FAST_MS || 45_000);
 const started = Date.now();
 let blockedSince = null;
 
@@ -141,6 +141,8 @@ if (verifyTargets.length) {
 }
 if (await isVercelProjectPaused()) {
   await reportPausedProject();
+  console.error("Aborting — new deploys cannot go live while the project is paused.");
+  process.exit(1);
 }
 
 while (Date.now() - started < timeoutMs) {

@@ -80,7 +80,27 @@ async function deployViaCli() {
   console.log("Production deploy complete (CLI).");
 }
 
+async function checkProjectPaused() {
+  try {
+    const res = await fetch("https://all-de-apps-in-one.vercel.app/", {
+      method: "HEAD",
+      redirect: "manual",
+    });
+    return res.status === 402;
+  } catch {
+    return false;
+  }
+}
+
 async function waitForGitDeploy() {
+  if (await checkProjectPaused()) {
+    console.error("");
+    console.error("Vercel project is PAUSED (DEPLOYMENT_DISABLED).");
+    console.error(`  Resume: ${vercelCanonical.dashboardUrl} → Settings → Resume Service`);
+    console.error(`  ${vercelCanonical.productionDomain} keeps serving the last build before pause.`);
+    console.error("  Add VERCEL_TOKEN to GitHub secrets to auto-resume via Fix Vercel block workflow.");
+    process.exit(1);
+  }
   console.log("No Actions Vercel secrets — waiting for Vercel Git integration on this commit…");
   const status = run("node", ["scripts/wait-github-vercel-status.mjs"]);
   process.exit(status);

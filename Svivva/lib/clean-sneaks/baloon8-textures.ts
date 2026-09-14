@@ -64,23 +64,39 @@ function proceduralBlueprintTexture(): THREE.Texture {
   return tex;
 }
 
+const BLUEPRINT_LOAD_TIMEOUT_MS = 8000;
+
+function blueprintLoadTimeout(): Promise<THREE.Texture> {
+  return new Promise((resolve) => {
+    window.setTimeout(() => {
+      console.warn("[Baloon8] blueprint JPG timed out, using procedural panels");
+      resolve(proceduralBlueprintTexture());
+    }, BLUEPRINT_LOAD_TIMEOUT_MS);
+  });
+}
+
 export function loadBaloon8BlueprintTexture(): Promise<THREE.Texture> {
   if (!blueprintLoad) {
-    blueprintLoad = new Promise((resolve) => {
-      new THREE.TextureLoader().load(
-        BALOON8_BLUEPRINT_URL,
-        (tex) => {
-          tex.colorSpace = THREE.SRGBColorSpace;
-          tex.anisotropy = 8;
-          resolve(tex);
-        },
-        undefined,
-        (err) => {
-          console.warn("[Baloon8] blueprint JPG failed, using procedural panels", err);
-          resolve(proceduralBlueprintTexture());
-        },
-      );
-    });
+    blueprintLoad = Promise.race([
+      new Promise<THREE.Texture>((resolve) => {
+        new THREE.TextureLoader().load(
+          BALOON8_BLUEPRINT_URL,
+          (tex) => {
+            tex.colorSpace = THREE.SRGBColorSpace;
+            tex.anisotropy = 8;
+            resolve(tex);
+          },
+          undefined,
+          (err) => {
+            console.warn("[Baloon8] blueprint JPG failed, using procedural panels", err);
+            resolve(proceduralBlueprintTexture());
+          },
+        );
+      }),
+      typeof window !== "undefined"
+        ? blueprintLoadTimeout()
+        : new Promise<THREE.Texture>((resolve) => resolve(proceduralBlueprintTexture())),
+    ]);
   }
   return blueprintLoad;
 }
