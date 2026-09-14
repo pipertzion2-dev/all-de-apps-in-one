@@ -171,7 +171,7 @@ function createBubbleInstances(
     iridescence: 1,
     iridescenceIOR: 1.35,
     iridescenceThicknessRange: [100, 800],
-    envMapIntensity: 1.6,
+    envMapIntensity: 1.75,
   });
   const mesh = new THREE.InstancedMesh(bubbleGeo, bubbleMat, count);
   const dummy = new THREE.Object3D();
@@ -431,8 +431,8 @@ export type Baloon8ShoeCore = {
   disposables: Array<{ dispose: () => void }>;
 };
 
-/** Uniform scale from blueprint car-shoe (4.61 m) to runner foot size (~0.35 m). */
-export const BALOON8_WALKER_SCALE = 0.076;
+/** Scale from 4.61 m blueprint to runner size (~0.55 m long — side profile readable). */
+export const BALOON8_WALKER_SCALE = 0.118;
 
 export type Baloon8WalkerShoe = {
   root: THREE.Group;
@@ -459,7 +459,7 @@ function assembleBaloon8ShoeCore(bubbleCount: number): Baloon8ShoeCore {
     iridescence: 0.85,
     iridescenceIOR: 1.3,
     iridescenceThicknessRange: [200, 900],
-    envMapIntensity: 1.4,
+    envMapIntensity: 1.6,
   });
   root.add(new THREE.Mesh(hullGeo, hullMat));
   disposables.push(hullMat);
@@ -488,20 +488,18 @@ function assembleBaloon8ShoeCore(bubbleCount: number): Baloon8ShoeCore {
 }
 
 /**
- * Exact blueprint Baloon8 sneaker for Temple Run — same mesh as homepage preview,
- * scaled and oriented for running (toe forward, BALOON8 plate toward camera).
+ * Temple Run player — identical mesh + yaw as homepage `buildBaloon8Shoe` so the sideline
+ * camera sees the blueprint side profile (bubbles, wheels, green B grille).
  */
-export function buildBaloon8WalkerShoe(side: -1 | 1, bubbleCount = 1100): Baloon8WalkerShoe {
+export function buildBaloon8RunnerShoe(bubbleCount = 1100): Baloon8WalkerShoe {
   const core = assembleBaloon8ShoeCore(bubbleCount);
-  const oriented = new THREE.Group();
-  oriented.add(core.root);
-  oriented.rotation.y = Math.PI / 2;
-  oriented.scale.setScalar(BALOON8_WALKER_SCALE);
+  core.root.position.y = -0.02;
+  core.root.rotation.y = -Math.PI / 2;
 
   const mount = new THREE.Group();
-  mount.add(oriented);
+  mount.add(core.root);
+  mount.scale.setScalar(BALOON8_WALKER_SCALE);
   mount.position.y = 0.34 * BALOON8_WALKER_SCALE;
-  if (side < 0) mount.scale.x = -1;
 
   return {
     root: mount,
@@ -510,6 +508,11 @@ export function buildBaloon8WalkerShoe(side: -1 | 1, bubbleCount = 1100): Baloon
     glowMeshes: core.glowMeshes,
     wheels: core.wheels,
   };
+}
+
+/** @deprecated Use buildBaloon8RunnerShoe — kept for tests importing the old name. */
+export function buildBaloon8WalkerShoe(_side: -1 | 1, bubbleCount = 1100): Baloon8WalkerShoe {
+  return buildBaloon8RunnerShoe(bubbleCount);
 }
 
 /** Build the full Baloon8 car-shoe from the four-view mockup (homepage showcase). */

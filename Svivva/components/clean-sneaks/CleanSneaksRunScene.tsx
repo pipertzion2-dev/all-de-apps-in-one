@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { ContactShadows, Environment, Sky, Sparkles } from "@react-three/drei";
+import { ContactShadows, Sky, Sparkles } from "@react-three/drei";
+import { Baloon8RunEnvironment } from "./Baloon8RunEnvironment";
 import * as THREE from "three";
 import { POWERUP_META } from "@/lib/clean-sneaks/constants";
 import { buildObstacle3D, buildPowerUp3D } from "@/lib/clean-sneaks/run-obstacles-3d";
@@ -36,23 +37,25 @@ const SEG_LEN = ROAD_LENGTH / ROAD_SEGMENTS;
 
 function FollowCamera({ stateRef }: { stateRef: React.MutableRefObject<RunEngineState> }) {
   const { camera } = useThree();
-  const lookAt = useRef(new THREE.Vector3(0, 0.85, -22));
-  const pos = useRef(new THREE.Vector3(0, 4.6, 10.2));
-  const fovBase = 50;
+  // Same sideline 3/4 rig as homepage Baloon8ShoeScene (camera 5.5, 2.4, 4.8 → target y 0.55).
+  const lookAt = useRef(new THREE.Vector3(0, 0.55, -6));
+  const pos = useRef(new THREE.Vector3(5.5, 2.4, 4.8));
+  const fovBase = 38;
 
   useFrame((_, dt) => {
     const s = stateRef.current;
     const px = laneWorldX(s.laneX);
     const speedT = THREE.MathUtils.clamp(s.speed / 620, 0, 1);
 
-    pos.current.x = THREE.MathUtils.lerp(pos.current.x, px * 0.32, Math.min(1, dt * 4.5));
-    lookAt.current.x = THREE.MathUtils.lerp(lookAt.current.x, px * 0.5, Math.min(1, dt * 5.5));
+    pos.current.x = THREE.MathUtils.lerp(pos.current.x, px + 5.5, Math.min(1, dt * 4.5));
+    lookAt.current.x = THREE.MathUtils.lerp(lookAt.current.x, px, Math.min(1, dt * 5.5));
     lookAt.current.y = THREE.MathUtils.lerp(
       lookAt.current.y,
-      0.85 + (s.y < 0 ? -s.y / 100 : 0),
+      0.55 + (s.y < 0 ? -s.y / 120 : 0),
       dt * 6,
     );
-    pos.current.z = THREE.MathUtils.lerp(pos.current.z, 10.2 - speedT * 0.8, dt * 2);
+    lookAt.current.z = THREE.MathUtils.lerp(lookAt.current.z, -6 - speedT * 2, dt * 3);
+    pos.current.z = THREE.MathUtils.lerp(pos.current.z, 4.8 - speedT * 0.25, dt * 2);
 
     const shake = s.shake * 0.012;
     camera.position.set(
@@ -360,7 +363,7 @@ function PlayerShoes({ stateRef }: { stateRef: React.MutableRefObject<RunEngineS
 
     host.position.x = laneWorldX(s.laneX);
     host.position.y = s.y < 0 ? -s.y / 120 : 0;
-    host.rotation.y = Math.sin(now / 140) * 0.025;
+    host.rotation.y = 0;
 
     updateWalkingShoes3D(shoesRef.current, {
       walkPhase: s.walkPhase,
@@ -417,14 +420,14 @@ function World({ stateRef, running, onGameOver, onStreakFlash, onStatsTick, mobi
         turbidity={8}
       />
 
-      <hemisphereLight args={["#7ec8d9", "#1a1420", 0.55]} />
-      <ambientLight intensity={0.18} color="#8899aa" />
+      <hemisphereLight args={["#7ec8d9", "#1a1420", 0.45]} />
+      <ambientLight intensity={0.32} color="#ffffff" />
       <directionalLight
         ref={sunRef}
         castShadow
-        position={[8, 14, 6]}
-        intensity={1.65}
-        color="#ffe8d0"
+        position={[6, 8, 4]}
+        intensity={1.25}
+        color="#ffffff"
         shadow-mapSize={[mobile ? 1024 : 2048, mobile ? 1024 : 2048]}
         shadow-camera-near={0.5}
         shadow-camera-far={60}
@@ -435,8 +438,10 @@ function World({ stateRef, running, onGameOver, onStreakFlash, onStatsTick, mobi
         shadow-bias={-0.0002}
         shadow-normalBias={0.02}
       />
-      <directionalLight position={[-6, 8, -10]} intensity={0.45} color="#5b8da8" />
-      <pointLight position={[0, 2, 3]} intensity={0.25} color="#d94f9c" distance={12} />
+      <directionalLight position={[-4, 3, -6]} intensity={0.55} color="#7ec8d9" />
+      <pointLight position={[-2, 2, 3]} intensity={0.45} color="#d94f9c" distance={18} />
+
+      <Baloon8RunEnvironment />
 
       <FollowCamera stateRef={stateRef} />
       <Road stateRef={stateRef} />
@@ -467,8 +472,6 @@ function World({ stateRef, running, onGameOver, onStreakFlash, onStatsTick, mobi
         resolution={mobile ? 256 : 512}
       />
 
-      <Environment preset="city" environmentIntensity={0.45} background={false} />
-
       <CleanSneaksPostFX mobile={mobile} />
     </>
   );
@@ -493,7 +496,7 @@ export function CleanSneaksRunScene({
       <Canvas
         shadows="soft"
         dpr={[1, isMobile ? 1.5 : 2]}
-        camera={{ fov: 50, near: 0.1, far: 140, position: [0, 4.6, 10.2] }}
+        camera={{ fov: 38, near: 0.1, far: 140, position: [5.5, 2.4, 4.8] }}
         gl={{
           antialias: true,
           powerPreference: "high-performance",
