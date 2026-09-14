@@ -2,7 +2,7 @@
 
 ## Replace the custom sneaker here
 
-**Gameplay (default):** the runner draws an animated **pair of walking sneakers** on canvas (`lib/clean-sneaks/walking-shoes-renderer.ts`) — not the car-shoe blueprint.
+**Gameplay (default):** the 3D runner at `/clean-sneaks` loads **Baloon8 blueprint panels** from `baloon8-blueprint.jpg` (`lib/clean-sneaks/baloon8-shoe-model.ts`). The 2D fallback draws the side-profile crop when WebGL is unavailable.
 
 **Optional custom flat sprite** (user/AI designs via `resolvePlayerSneaker({ spriteUrl, useWalkingSprite: false })`):
 
@@ -16,7 +16,7 @@ The bundled PNG is the Baloon8 car-shoe side view (wheels) — used for marketin
 
 The four-view Baloon8 mockup is rebuilt in advanced Three.js:
 
-- `lib/clean-sneaks/baloon8-shoe-model.ts` — procedural geometry (lathe hull, instanced iridescent bubbles, transparent wheels, glowing grille, footwell mandala, BALOON8 plate)
+- `lib/clean-sneaks/baloon8-shoe-model.ts` — blueprint-textured panels + instanced iridescent bubbles, wheels, grille, BALOON8 plate
 - `components/clean-sneaks/Baloon8ShoeScene.tsx` — viewer with RoomEnvironment, bloom, orbit controls
 - Reference blueprint: `baloon8-blueprint.jpg`
 
