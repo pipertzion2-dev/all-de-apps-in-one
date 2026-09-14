@@ -30,7 +30,7 @@ if (!repo || !sha || !token) {
 
 const timeoutMs = Number(process.env.VERCEL_STATUS_TIMEOUT_MS || 20 * 60 * 1000);
 const intervalMs = Number(process.env.VERCEL_STATUS_POLL_MS || 20_000);
-const blockedFailFastMs = Number(process.env.VERCEL_BLOCKED_FAIL_FAST_MS || 45_000);
+const blockedRevisionCheckMs = Number(process.env.VERCEL_BLOCKED_REVISION_CHECK_MS || 30_000);
 const started = Date.now();
 let blockedSince = null;
 
@@ -61,9 +61,7 @@ function describeVerifyTarget(target) {
 async function tryProductionVerify(label, exitOnSuccess = true, skipRevision = false) {
   if (!verifyTargets.length) await loadVerifyTargets();
   let allOk = true;
-  const targets = skipRevision
-    ? verifyTargets.filter((t) => !t.expectedSha)
-    : verifyTargets;
+  const targets = skipRevision ? verifyTargets.filter((t) => !t.expectedSha) : verifyTargets;
   for (const target of targets) {
     const result = await verifyProductionLive({
       url: target.url,
@@ -153,29 +151,15 @@ while (Date.now() - started < timeoutMs) {
     if (blocked) {
       if (blockedSince === null) blockedSince = Date.now();
       const blockedFor = Date.now() - blockedSince;
-      if (blockedFor >= 30_000) {
-        console.log("  GitHub reports blocked/queued — checking live production…");
-        if (await tryProductionVerify("✓", false, true)) {
-          console.log("  Production pages live (GitHub blocked label is often stale — still waiting for deploy)…");
-        }
-      }
-      if (blockedFor >= blockedFailFastMs) {
-        console.error("");
-        console.error(
-          `GitHub Vercel status still "${match.description}" after ${Math.round(blockedFor / 1000)}s.`,
-        );
-        console.log("Final production verification attempt…");
-        if (await tryProductionVerify("✓", false, true)) {
-          console.log(
-            "Production site is up — treating as OK (revision may lag; GitHub blocked label is often stale).",
-          );
+      if (blockedFor >= blockedRevisionCheckMs) {
+        console.log("  GitHub reports blocked/queued — checking production revision…");
+        if (await tryProductionVerify("✓", true, false)) {
           process.exit(0);
         }
-        console.error("Production verification failed — deploy not confirmed live.");
-        console.error(`  Dashboard: ${canonical.dashboardUrl}`);
-        process.exit(1);
+        console.log("  Production revision not updated yet — still waiting for deploy…");
+      } else {
+        console.log("  (Blocked label may be stale — waiting before revision check…)");
       }
-      console.log("  (Stale blocked label is common — waiting / verifying production…)");
     } else {
       blockedSince = null;
     }

@@ -19,7 +19,8 @@ export const BALOON8_WALKER_SCALE = 0.42;
 export const BALOON8_WALKER_SCALE_MOBILE = 0.36;
 /** Smaller per-foot scale so a left/right pair fits the lane. */
 export const BALOON8_PAIR_SCALE = 0.26;
-export const BALOON8_PAIR_SCALE_MOBILE = 0.3;
+export const BALOON8_PAIR_SCALE_MOBILE = 0.34;
+export const BALOON8_PAIR_SCALE_PORTRAIT = 0.38;
 
 const IRIDESCENCE = [0x2a9d8f, 0x5b8da8, 0x7b4397, 0x3d9970, 0x4cc9c0];
 
@@ -36,8 +37,9 @@ function legacyPanel(
   const tex = cropBlueprintTexture(blueprint, quadrant);
   const mat = new THREE.MeshPhysicalMaterial({
     map: tex,
+    color: new THREE.Color(0x3a7898),
     transparent: true,
-    alphaTest: 0.04,
+    alphaTest: 0.08,
     metalness: 0.3,
     roughness: 0.42,
     clearcoat: 0.5,
@@ -60,8 +62,9 @@ function preparedPanel(
   const mat = new THREE.MeshPhysicalMaterial({
     map: prep.map,
     alphaMap: prep.alphaMap,
+    color: new THREE.Color(0x3a7898),
     transparent: true,
-    alphaTest: 0.12,
+    alphaTest: 0.14,
     metalness: 0.28,
     roughness: 0.4,
     clearcoat: 0.55,
@@ -105,13 +108,13 @@ function createBubbleInstances(
   if (count <= 0) return null;
   const bubbleGeo = new THREE.SphereGeometry(0.02 * scaleMul, 6, 6);
   const bubbleMat = new THREE.MeshPhysicalMaterial({
-    color: 0xffffff,
-    metalness: 0.9,
-    roughness: 0.15,
+    color: 0x4cc9c0,
+    metalness: 0.85,
+    roughness: 0.18,
     iridescence: 1,
     iridescenceIOR: 1.32,
     transparent: true,
-    opacity: 0.28,
+    opacity: 0.22,
     depthWrite: false,
   });
   const mesh = new THREE.InstancedMesh(bubbleGeo, bubbleMat, count);
@@ -326,7 +329,7 @@ export function ensureBaloon8RunnerVisible(shoe: Baloon8WalkerShoe, mobile: bool
   if (shoe.bubbles) {
     shoe.bubbles.frustumCulled = false;
     const bubbleMat = shoe.bubbles.material as THREE.MeshPhysicalMaterial;
-    bubbleMat.opacity = mobile ? 0.28 : 0.3;
+    bubbleMat.opacity = mobile ? 0.2 : 0.22;
   }
 
   shoe.hullMat.emissive = new THREE.Color(0x1a3040);
@@ -355,22 +358,23 @@ export function ensureBaloon8RunnerVisible(shoe: Baloon8WalkerShoe, mobile: bool
 export function buildBaloon8RunnerShoe(
   blueprint: THREE.Texture,
   bubbleCount = 160,
-  opts?: { mobile?: boolean; pair?: boolean; mirror?: boolean },
+  opts?: { mobile?: boolean; portrait?: boolean; pair?: boolean; mirror?: boolean },
 ): Baloon8WalkerShoe {
   const mobile = opts?.mobile ?? false;
+  const portrait = opts?.portrait ?? false;
   const pair = opts?.pair ?? false;
   const scale = pair
-    ? mobile
-      ? BALOON8_PAIR_SCALE_MOBILE
-      : BALOON8_PAIR_SCALE
+    ? portrait
+      ? BALOON8_PAIR_SCALE_PORTRAIT
+      : mobile
+        ? BALOON8_PAIR_SCALE_MOBILE
+        : BALOON8_PAIR_SCALE
     : mobile
       ? BALOON8_WALKER_SCALE_MOBILE
       : BALOON8_WALKER_SCALE;
   const perShoeCap = mobile ? (pair ? 70 : 100) : bubbleCount;
   const count = Math.min(bubbleCount, perShoeCap);
-  const core = assembleFromBlueprint(blueprint, count, scale, {
-    legacyPanels: mobile,
-  });
+  const core = assembleFromBlueprint(blueprint, count, scale);
   core.root.rotation.y = -Math.PI / 2;
 
   const mount = new THREE.Group();
