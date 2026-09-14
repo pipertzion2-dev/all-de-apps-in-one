@@ -1879,7 +1879,22 @@ export default function LandingPage() {
             </div>
           </section>
 
-          <CleanSneaksSection />
+          <ClientErrorBoundary
+            fallback={
+              <section
+                id="clean-sneaks"
+                className="border-t border-white/10 py-16 text-center text-sm text-muted-foreground"
+              >
+                Clean Sneaks is temporarily unavailable.{" "}
+                <Link href="/play" className="text-[#5B8DA8] underline">
+                  Try ZZAI Play
+                </Link>
+                .
+              </section>
+            }
+          >
+            <CleanSneaksSection />
+          </ClientErrorBoundary>
 
           <footer className="border-t border-white/10 py-8 sm:py-12">
             <div className="max-w-7xl mx-auto px-4 sm:px-6">

@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { createPortal } from "react-dom";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { readBestScore } from "@/lib/clean-sneaks/storage";
@@ -64,52 +63,58 @@ export function CleanSneaksSection() {
   }, []);
 
   const fullscreenPlay =
-    playing && mounted
-      ? createPortal(
-          <div
-            data-svivva-app-shell=""
-            className="fixed inset-0 z-[200] flex flex-col bg-[#0a0c10]"
-            style={{
-              paddingTop: "env(safe-area-inset-top)",
-              paddingRight: "env(safe-area-inset-right)",
-              paddingBottom: "env(safe-area-inset-bottom)",
-              paddingLeft: "env(safe-area-inset-left)",
-            }}
-            data-testid="clean-sneaks-fullscreen"
-          >
-            <SceneErrorBoundary fallback={null}>
-              <CleanSneaksCubeBackdrop className="absolute inset-0 opacity-70" />
-            </SceneErrorBoundary>
+    playing && mounted ? (
+      <div
+        data-svivva-app-shell=""
+        data-clean-sneaks-fullscreen=""
+        className="fixed inset-0 z-[200] flex flex-col bg-[#0a0c10]"
+        style={{
+          paddingTop: "env(safe-area-inset-top)",
+          paddingRight: "env(safe-area-inset-right)",
+          paddingBottom: "env(safe-area-inset-bottom)",
+          paddingLeft: "env(safe-area-inset-left)",
+        }}
+        data-testid="clean-sneaks-fullscreen"
+      >
+        <SceneErrorBoundary fallback={null}>
+          <CleanSneaksCubeBackdrop className="absolute inset-0 opacity-70" />
+        </SceneErrorBoundary>
 
-            <div className="relative z-10 flex min-h-0 flex-1 flex-col">
-              <div className="flex shrink-0 items-center justify-between gap-3 px-4 py-3 sm:px-6">
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.35em] text-[#5B8DA8]">
-                    ZZAI Play Presents
-                  </p>
-                  <h2 className="seeds-holo-text text-xl font-bold sm:text-2xl">CLEAN SNEAKS</h2>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={exit}
-                  data-testid="button-clean-sneaks-back"
-                >
-                  Exit game
-                </Button>
-              </div>
-
-              <div
-                className="flex min-h-0 flex-1 flex-col px-3 pb-3 sm:px-6 sm:pb-6"
-                style={{ minHeight: "min(70vh, 720px)" }}
-              >
-                <CleanSneaksGame active={playing} onExit={exit} fullscreen />
-              </div>
+        <div className="relative z-10 flex min-h-0 flex-1 flex-col">
+          <div className="flex shrink-0 items-center justify-between gap-3 px-4 py-3 sm:px-6">
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.35em] text-[#5B8DA8]">
+                ZZAI Play Presents
+              </p>
+              <h2 className="seeds-holo-text text-xl font-bold sm:text-2xl">CLEAN SNEAKS</h2>
             </div>
-          </div>,
-          document.body,
-        )
-      : null;
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={exit}
+              data-testid="button-clean-sneaks-back"
+            >
+              Exit game
+            </Button>
+          </div>
+
+          <div
+            className="flex min-h-0 flex-1 flex-col px-3 pb-3 sm:px-6 sm:pb-6"
+            style={{ minHeight: "min(70vh, 720px)" }}
+          >
+            <SceneErrorBoundary
+              fallback={
+                <div className="flex flex-1 items-center justify-center rounded-lg border border-white/10 bg-[#0a0c10] p-6 text-center text-sm text-muted-foreground">
+                  Game failed to load. Close and try again.
+                </div>
+              }
+            >
+              <CleanSneaksGame active={playing} onExit={exit} fullscreen />
+            </SceneErrorBoundary>
+          </div>
+        </div>
+      </div>
+    ) : null;
 
   return (
     <>
