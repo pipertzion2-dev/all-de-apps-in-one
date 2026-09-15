@@ -142,10 +142,10 @@ export function Baloon8ShoeScene({ className = "", autoRotate = true, bubbleCoun
         raf = requestAnimationFrame(tick);
       })
       .catch((err) => {
-        console.error("[Baloon8ShoeScene] failed to build stone coupe", err);
+        console.error("[Baloon8ShoeScene] failed to build puffer coupe", err);
         if (!disposed && host) {
           host.innerHTML =
-            `<div style="display:grid;place-items:center;width:100%;height:100%;background:#0a0c10;color:#9aa4ae;font:500 14px/1.4 system-ui,sans-serif;padding:1.5rem;text-align:center">3D stone coupe unavailable in this browser</div>`;
+            `<div style="display:grid;place-items:center;width:100%;height:100%;background:#0a0c10;color:#9aa4ae;font:500 14px/1.4 system-ui,sans-serif;padding:1.5rem;text-align:center">3D puffer coupe unavailable in this browser</div>`;
         }
       });
 

@@ -22,7 +22,7 @@ function runnerBubbleCount(): number {
   return flags.bubbleCount;
 }
 
-/** Preload is a no-op resolve — the stone coupe is fully procedural (no image texture). */
+/** Preload is a no-op resolve — the puffer coupe is fully procedural (no image texture). */
 export function preloadBaloon8RunnerShoe(): Promise<THREE.Texture | null> {
   return Promise.resolve(null);
 }
@@ -39,7 +39,7 @@ function buildRunnerShoe(mobile: boolean, portrait: boolean, mirror: boolean): B
   });
 }
 
-/** Baloon8 procedural stone coupe pair — left + right with walking stride. */
+/** Baloon8 procedural puffer coupe pair — left + right with walking stride. */
 export function createWalkingShoes3D(
   _blueprint?: THREE.Texture | null,
   mobile = false,
@@ -117,12 +117,14 @@ function spawnDust(shoes: WalkingShoes3D, xOffset: number): void {
 
 function applyDirtToShoe(shoe: Baloon8WalkerShoe | null, dirt: number, freshGlow: boolean): void {
   if (!shoe) return;
-  const base = new THREE.Color(0x7a8088);
+  const base = new THREE.Color(0x2a6080);
   if (dirt > 0.02) base.lerp(new THREE.Color(0x4a3828), 0.2 + dirt * 0.65);
   shoe.hullMat.color.copy(base);
-  shoe.hullMat.roughness = Math.min(0.95, 0.72 + dirt * 0.2);
-  shoe.hullMat.metalness = Math.max(0.04, 0.08 - dirt * 0.04);
-  shoe.hullMat.envMapIntensity = freshGlow ? 0.75 : 0.5 - dirt * 0.15;
+  if ("iridescence" in shoe.hullMat) {
+    shoe.hullMat.iridescence = Math.max(0.35, 0.95 - dirt * 0.5);
+  }
+  shoe.hullMat.metalness = Math.max(0.45, 0.92 - dirt * 0.3);
+  shoe.hullMat.envMapIntensity = freshGlow ? 2.0 : 1.55 - dirt * 0.35;
 
   if (shoe.bubbles?.instanceColor) {
     const c = new THREE.Color();
@@ -136,7 +138,7 @@ function applyDirtToShoe(shoe: Baloon8WalkerShoe | null, dirt: number, freshGlow
 
   for (const mesh of shoe.glowMeshes) {
     const mat = mesh.material as THREE.MeshStandardMaterial;
-    mat.emissiveIntensity = freshGlow ? 1.35 : Math.max(0.55, 1.05 - dirt * 0.4);
+    mat.emissiveIntensity = freshGlow ? 1.6 : Math.max(0.65, 1.25 - dirt * 0.45);
   }
 }
 

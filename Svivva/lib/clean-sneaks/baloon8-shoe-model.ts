@@ -1,7 +1,7 @@
 /**
- * Baloon8 stone coupe — thin API over the procedural 3D car model.
- * One volumetric car asset, mirrored for left/right runner pair.
- * No presence-image / blueprint panel thumbnails.
+ * Baloon8 puffer coupe — thin API over the procedural 3D car model.
+ * Dark iridescent quilted pods (Tripo / hero refs), mirrored for the runner.
+ * Real volumetric mesh — no presence-image / blueprint thumbnails.
  */
 import * as THREE from "three";
 import {
@@ -74,26 +74,26 @@ export function ensureBaloon8RunnerVisible(shoe: Baloon8WalkerShoe, mobile: bool
   if (shoe.bubbles) {
     shoe.bubbles.frustumCulled = false;
   }
-  shoe.hullMat.emissive = new THREE.Color(0x1a1c20);
-  shoe.hullMat.emissiveIntensity = mobile ? 0.08 : 0.12;
+  shoe.hullMat.emissive = new THREE.Color(0x142830);
+  shoe.hullMat.emissiveIntensity = mobile ? 0.16 : 0.22;
 
   shoe.root.traverse((obj) => {
     if (!(obj instanceof THREE.Mesh)) return;
     obj.frustumCulled = false;
     const mat = obj.material as THREE.MeshPhysicalMaterial;
     if (mat.metalness !== undefined) {
-      mat.envMapIntensity = mobile ? 0.5 : 0.65;
+      mat.envMapIntensity = mobile ? 1.55 : 1.8;
     }
   });
 
   for (const mesh of shoe.glowMeshes) {
     mesh.frustumCulled = false;
     const mat = mesh.material as THREE.MeshStandardMaterial;
-    mat.emissiveIntensity = Math.max(mat.emissiveIntensity ?? 0, mobile ? 0.9 : 1.15);
+    mat.emissiveIntensity = Math.max(mat.emissiveIntensity ?? 0, mobile ? 1.15 : 1.4);
   }
 }
 
-/** Homepage / orbit viewer — full-scale procedural stone coupe. */
+/** Homepage / orbit viewer — full-scale procedural puffer coupe. */
 export function buildBaloon8Shoe(
   _blueprint?: THREE.Texture,
   _bubbleCount = 1400,

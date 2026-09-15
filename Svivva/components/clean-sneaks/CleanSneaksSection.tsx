@@ -68,7 +68,7 @@ export function CleanSneaksSection() {
                     className="grid h-full w-full place-items-center bg-[#0a0c10] px-6 text-center text-sm text-white/50"
                     role="status"
                   >
-                    3D stone coupe unavailable — try another browser
+                    3D puffer coupe unavailable — try another browser
                   </div>
                 }
               >
