@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { CleanSneaksGame3D } from "@/components/clean-sneaks/CleanSneaksGame3D";
-import { GameLogoSplash } from "@/components/clean-sneaks/GameLogoSplash";
+import { GameLoadingWheels } from "@/components/clean-sneaks/GameLoadingWheels";
 import { SceneErrorBoundary } from "@/components/clean-sneaks/SceneErrorBoundary";
 
 export default function CleanSneaksPage() {
@@ -32,7 +32,7 @@ export default function CleanSneaksPage() {
 
   if (!ready) {
     return (
-      <GameLogoSplash
+      <GameLoadingWheels
         className="fixed inset-0 z-[300]"
         style={{
           paddingTop: "env(safe-area-inset-top)",

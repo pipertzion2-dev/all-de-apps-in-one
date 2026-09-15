@@ -1,12 +1,22 @@
 # Clean Sneaks — BALOON8 Car-Sneaker
 
-## Main logo (game splash)
+## Main logo
 
 ```
 public/assets/clean-sneaks/karen-the-muscle-logo.jpg
 ```
 
-Shown fullscreen as the first screen when a player opens `/clean-sneaks`, before the countdown.
+Brand logo asset for Karen the Muscle.
+
+## Loading wheels (pre-run splash)
+
+```
+public/assets/clean-sneaks/loading-wheel-yin.jpg
+public/assets/clean-sneaks/loading-wheel-radial.jpg
+public/assets/clean-sneaks/loading-wheel-d-logo.jpg
+```
+
+Three iPbw hubcap wheels spin on the loading screen before each run (and on retry).
 
 ## Thumbnail (homepage / OG / runner)
 
