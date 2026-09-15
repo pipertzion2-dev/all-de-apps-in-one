@@ -13,6 +13,7 @@ import { readBestScore, shareScore, writeBestScore } from "@/lib/clean-sneaks/st
 import type { GameOverPayload, RunStats, SneakerAssetRef } from "@/lib/clean-sneaks/types";
 import { isPortraitViewport } from "@/lib/clean-sneaks/run-quality";
 import { GameLoadingWheels } from "./GameLoadingWheels";
+import { GameStartScreen } from "./GameStartScreen";
 import { CleanSneaksRunScene } from "./CleanSneaksRunScene";
 
 export type CleanSneaksGame3DProps = {
@@ -44,7 +45,9 @@ export function CleanSneaksGame3D({
   const stateRef = useRef<RunEngineState>(createRunEngineState());
   const loadingDoneRef = useRef(false);
 
-  const [phase, setPhase] = useState<"loading" | "countdown" | "running" | "over">("loading");
+  const [phase, setPhase] = useState<"loading" | "start" | "countdown" | "running" | "over">(
+    "loading",
+  );
   const [countdown, setCountdown] = useState(3);
   const [hud, setHud] = useState<RunStats>({
     score: 0,
@@ -148,6 +151,10 @@ export function CleanSneaksGame3D({
   const finishLoading = useCallback(() => {
     if (loadingDoneRef.current) return;
     loadingDoneRef.current = true;
+    setPhase("start");
+  }, []);
+
+  const beginGame = useCallback(() => {
     startCountdown();
   }, [startCountdown]);
 
@@ -169,8 +176,15 @@ export function CleanSneaksGame3D({
   useEffect(() => {
     if (!active) return;
     const onKey = (e: KeyboardEvent) => {
-      if (phase === "over") return;
+      if (phase === "over" || phase === "loading") return;
       const k = e.key.toLowerCase();
+      if (phase === "start") {
+        if (k === " " || k === "enter" || e.code === "Space") {
+          e.preventDefault();
+          beginGame();
+        }
+        return;
+      }
       if (
         ["arrowleft", "a", "arrowright", "d", " ", "arrowup", "w"].includes(k) ||
         e.code === "Space"
@@ -184,10 +198,10 @@ export function CleanSneaksGame3D({
     };
     window.addEventListener("keydown", onKey, { passive: false });
     return () => window.removeEventListener("keydown", onKey);
-  }, [active, phase]);
+  }, [active, phase, beginGame]);
 
   useEffect(() => {
-    if (!active || phase === "over") return;
+    if (!active || phase !== "running") return;
     const el = wrapRef.current;
     if (!el) return;
     const onStart = (e: TouchEvent) => {
@@ -375,6 +389,10 @@ export function CleanSneaksGame3D({
         </div>
 
         {phase === "loading" && <GameLoadingWheels className="fixed inset-0 z-[300]" />}
+
+        {phase === "start" && (
+          <GameStartScreen className="fixed inset-0 z-[300] cursor-pointer" onStart={beginGame} />
+        )}
 
         {phase === "countdown" && (
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm">

@@ -18,6 +18,14 @@ public/assets/clean-sneaks/loading-wheel-d-logo.jpg
 
 Three iPbw hubcap wheels spin on the loading screen before each run (and on retry).
 
+## Main cover (start screen)
+
+```
+public/assets/clean-sneaks/ipbw-main-cover.jpg
+```
+
+Shown fullscreen after loading with a **Start** prompt in ZZAI holo type — tap to begin the countdown.
+
 ## Thumbnail (homepage / OG / runner)
 
 Official sneaker side render:
