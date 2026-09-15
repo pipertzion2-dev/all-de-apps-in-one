@@ -1,14 +1,13 @@
 "use client";
 
-import { useEffect, useState, type ComponentType, type CSSProperties } from "react";
+import { useCallback, useEffect, useState, type ComponentType } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import type { GamePhase } from "@/lib/clean-sneaks/types";
 import { GameLoadingWheels } from "./GameLoadingWheels";
 import type { CleanSneaksGame3DProps } from "./CleanSneaksGame3D";
 
-type LoaderProps = CleanSneaksGame3DProps & {
-  shellStyle?: CSSProperties;
-};
+type LoaderProps = CleanSneaksGame3DProps;
 
 function GameLoadError({ onRetry }: { onRetry: () => void }) {
   return (
@@ -36,16 +35,27 @@ function GameLoadError({ onRetry }: { onRetry: () => void }) {
   );
 }
 
-/** Loads the 3D game chunk after the loading wheels — keeps WebGL off the critical path. */
-export function CleanSneaksGameLoader({ shellStyle, ...gameProps }: LoaderProps) {
+/** Single owner of the loading wheels UI; defers the Three.js chunk until after it shows. */
+export function CleanSneaksGameLoader(props: LoaderProps) {
+  const { onPhaseChange, ...gameProps } = props;
   const [Game, setGame] = useState<ComponentType<CleanSneaksGame3DProps> | null>(null);
+  const [phase, setPhase] = useState<GamePhase>("loading");
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
+
+  const handlePhaseChange = useCallback(
+    (next: GamePhase) => {
+      setPhase(next);
+      onPhaseChange?.(next);
+    },
+    [onPhaseChange],
+  );
 
   useEffect(() => {
     let cancelled = false;
     setFailed(false);
     setGame(null);
+    setPhase("loading");
 
     import("./CleanSneaksGame3D")
       .then((mod) => {
@@ -65,9 +75,14 @@ export function CleanSneaksGameLoader({ shellStyle, ...gameProps }: LoaderProps)
     return <GameLoadError onRetry={() => setAttempt((n) => n + 1)} />;
   }
 
-  if (!Game) {
-    return <GameLoadingWheels className="fixed inset-0 z-[300]" style={shellStyle} />;
-  }
+  const showLoadingWheels = !Game || phase === "loading";
 
-  return <Game {...gameProps} style={shellStyle} />;
+  return (
+    <>
+      {showLoadingWheels && <GameLoadingWheels fullscreen />}
+      {Game ? (
+        <Game {...gameProps} onPhaseChange={handlePhaseChange} hiddenDuringLoading={showLoadingWheels} />
+      ) : null}
+    </>
+  );
 }
