@@ -39,6 +39,7 @@ type SceneProps = {
   onStreakFlash: () => void;
   onStatsTick: () => void;
   quality: QualityFlags;
+  colorwayId?: string | null;
 };
 
 const ROAD_LENGTH = 140;
@@ -494,15 +495,17 @@ function PlayerShoes({
   stateRef,
   mobile,
   portrait,
+  colorwayId,
 }: {
   stateRef: React.MutableRefObject<RunEngineState>;
   mobile: boolean;
   portrait: boolean;
+  colorwayId?: string | null;
 }) {
   const hostRef = useRef<THREE.Group>(null);
   const shoes = useMemo(
-    () => createWalkingShoes3D(undefined, mobile, portrait),
-    [mobile, portrait],
+    () => createWalkingShoes3D(undefined, mobile, portrait, colorwayId),
+    [mobile, portrait, colorwayId],
   );
 
   useFrame(() => {
@@ -554,7 +557,15 @@ function PlayerShoes({
   );
 }
 
-function World({ stateRef, running, onGameOver, onStreakFlash, onStatsTick, quality }: SceneProps) {
+function World({
+  stateRef,
+  running,
+  onGameOver,
+  onStreakFlash,
+  onStatsTick,
+  quality,
+  colorwayId,
+}: SceneProps) {
   const tickRef = useRef(0);
   const sunRef = useRef<THREE.DirectionalLight>(null);
   const { scene } = useThree();
@@ -658,7 +669,12 @@ function World({ stateRef, running, onGameOver, onStreakFlash, onStatsTick, qual
       ) : null}
 
       {ready ? (
-        <PlayerShoes stateRef={stateRef} mobile={quality.mobile} portrait={quality.portrait} />
+        <PlayerShoes
+          stateRef={stateRef}
+          mobile={quality.mobile}
+          portrait={quality.portrait}
+          colorwayId={colorwayId}
+        />
       ) : null}
       <DynamicEntities stateRef={stateRef} />
 
@@ -690,6 +706,7 @@ export function CleanSneaksRunScene({
   onGameOver,
   onStreakFlash,
   onStatsTick,
+  colorwayId,
   className = "",
 }: CleanSneaksRunSceneProps) {
   const [qualityTier, setQualityTier] = useState<RunQuality>("mobile");
@@ -746,6 +763,7 @@ export function CleanSneaksRunScene({
           onStreakFlash={onStreakFlash}
           onStatsTick={onStatsTick}
           quality={quality}
+          colorwayId={colorwayId}
         />
       </Canvas>
     </div>

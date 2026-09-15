@@ -65,11 +65,11 @@ export function CleanSneaksSection() {
               CLEAN SNEAKS
             </h2>
             <p className="mt-3 text-lg font-semibold tracking-[0.2em] text-[#D94F9C] sm:text-xl">
-              HOW CLEAN CAN YOU KEEP THE FIT?
+              HOW CLEAN CAN YOU KEEP THE BALOON8?
             </p>
             <p className="mt-5 max-w-md text-sm leading-relaxed text-white/70 sm:text-base lg:max-w-none">
-              The world is trying to ruin your sneakers. Mud, puddles, crowds, weather — every step
-              lands dirt on exact zones. Use Sneak Vision, protect each shoe, chase clean chains.
+              One chassis. Eight colorways. Mud, puddles, crowds, weather — every step lands dirt on
+              exact balloon zones. Pick your finish, then protect the fit.
             </p>
 
             <div className="mt-8 flex flex-col items-center gap-3 lg:items-start">

@@ -8,7 +8,7 @@ import {
 } from "@/lib/clean-sneaks/dirt-system";
 import { suggestCleanPaths, visionForObstacle } from "@/lib/clean-sneaks/sneak-vision";
 import { contactForObstacle } from "@/lib/clean-sneaks/contact-map";
-import { getArchetype } from "@/lib/clean-sneaks/sneaker-catalog";
+import { getColorway, BALOON8_COLORWAYS } from "@/lib/clean-sneaks/sneaker-catalog";
 import {
   activateSneakVision,
   createRunEngineState,
@@ -132,11 +132,13 @@ describe("contact + archetypes", () => {
     expect(c.canScuff).toBe(true);
   });
 
-  it("luxury sneakers punish damage harder", () => {
-    expect(getArchetype("luxury").damagePenalty).toBeGreaterThan(
-      getArchetype("beatUp").damagePenalty,
-    );
-    expect(getArchetype("meshRunner").agility).toBeGreaterThan(getArchetype("highTop").agility);
+  it("maps legacy silhouettes onto BALOON8 colorways only", () => {
+    expect(getColorway("luxury").id).toBe("solar");
+    expect(getColorway("beatUp").id).toBe("midnight");
+    expect(getColorway("meshRunner").id).toBe("emerald");
+    expect(getColorway("highTop").id).toBe("amethyst");
+    expect(getColorway("oilSlick").label).toContain("BALOON8");
+    expect(Object.keys(BALOON8_COLORWAYS).every((id) => id.length > 0)).toBe(true);
   });
 });
 

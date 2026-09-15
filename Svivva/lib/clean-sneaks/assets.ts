@@ -1,5 +1,11 @@
 import type { CleanLabel, SneakerAssetRef } from "./types";
 import { BALOON8_BLUEPRINT_URL, BALOON8_SNEAKER_THUMBNAIL_URL } from "./baloon8-textures";
+import {
+  DEFAULT_COLORWAY,
+  getColorway,
+  resolveColorwayId,
+  type Baloon8ColorwayId,
+} from "./sneaker-catalog";
 
 /** Baloon8 side-profile sneaker — the official thumbnail / marketing sprite. */
 export const DEFAULT_PLAYER_SHOE_URL = BALOON8_SNEAKER_THUMBNAIL_URL;
@@ -8,8 +14,9 @@ export { BALOON8_BLUEPRINT_URL, BALOON8_SNEAKER_THUMBNAIL_URL };
 
 export const DEFAULT_SNEAKER: SneakerAssetRef = {
   spriteUrl: BALOON8_SNEAKER_THUMBNAIL_URL,
-  label: "Baloon8",
+  label: "BALOON8 Oil Slick",
   source: "default",
+  archetype: DEFAULT_COLORWAY,
 };
 
 /** True when the game should fetch a custom flat PNG (never the legacy car-shoe). */
@@ -22,17 +29,27 @@ export function shouldLoadSneakerSprite(sneaker: SneakerAssetRef): boolean {
 }
 
 /**
- * Resolve which sneaker the player wears.
- * Future: wire ZZAI design lab / profile sneakers here.
+ * Resolve which BALOON8 colorway the player wears.
+ * Only colorways of the same car-sneaker chassis are allowed.
  */
 export function resolvePlayerSneaker(override?: Partial<SneakerAssetRef> | null): SneakerAssetRef {
-  if (!override?.spriteUrl) return DEFAULT_SNEAKER;
+  const colorwayId = resolveColorwayId(override?.archetype ?? DEFAULT_COLORWAY);
+  const cw = getColorway(colorwayId);
+  const hasCustomSprite = Boolean(override?.spriteUrl);
   return {
     ...DEFAULT_SNEAKER,
     ...override,
-    spriteUrl: override.spriteUrl,
-    useWalkingSprite: override.useWalkingSprite ?? false,
+    // Keep Baloon8 thumbnail as the share / HUD sprite; colorway is chassis tint only.
+    spriteUrl: override?.spriteUrl ?? BALOON8_SNEAKER_THUMBNAIL_URL,
+    label: override?.label ?? cw.label,
+    archetype: colorwayId,
+    useWalkingSprite:
+      override?.useWalkingSprite ?? (hasCustomSprite ? false : DEFAULT_SNEAKER.useWalkingSprite),
   };
+}
+
+export function resolveColorway(id?: Baloon8ColorwayId | string | null) {
+  return getColorway(id);
 }
 
 export function cleanLabelFrom(cleanliness: number): CleanLabel {

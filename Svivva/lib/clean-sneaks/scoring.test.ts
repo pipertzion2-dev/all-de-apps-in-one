@@ -46,7 +46,8 @@ describe("clean-sneaks scoring", () => {
   it("resolves default sneaker asset path for replacement", () => {
     const s = resolvePlayerSneaker();
     expect(s.spriteUrl).toBe("/assets/clean-sneaks/baloon8-sneaker-thumbnail.png");
-    expect(s.label).toBe("Baloon8");
+    expect(s.label).toBe("BALOON8 Oil Slick");
+    expect(s.archetype).toBe("oilSlick");
     const custom = resolvePlayerSneaker({
       spriteUrl: "/assets/clean-sneaks/user-design.png",
       source: "user",

@@ -5,6 +5,7 @@ import {
   type PreparedBlueprint,
   type PreparedQuadrant,
 } from "./baloon8-textures";
+import { getColorway } from "./sneaker-catalog";
 
 /**
  * YOUR Baloon8 shoes from the orthographic blueprint, rear-view toward the
@@ -101,6 +102,7 @@ export function createWalkingShoes3D(
   _blueprint?: THREE.Texture | null,
   mobile = false,
   portrait = false,
+  colorwayId?: string | null,
 ): WalkingShoes3D {
   const root = new THREE.Group();
   const shoePivot = new THREE.Group();
@@ -127,6 +129,17 @@ export function createWalkingShoes3D(
     rightPivot.add(rightShoe.root);
     leftPivot.rotation.y = 0.06;
     rightPivot.rotation.y = -0.06;
+  }
+
+  // BALOON8 colorway tint on orthographic panels
+  const tintHex = getColorway(colorwayId).tint;
+  const tint = new THREE.Color(tintHex);
+  for (const shoe of [leftShoe, rightShoe]) {
+    if (!shoe) continue;
+    for (const m of shoe.mats) {
+      m.color.copy(tint);
+      m.userData.baseTint = tint.clone();
+    }
   }
 
   shoePivot.add(leftPivot, rightPivot);
@@ -188,10 +201,11 @@ function spawnDust(shoes: WalkingShoes3D, xOffset: number): void {
 
 function tintShoe(shoe: Baloon8OrthoShoe | null, dirt: number, freshGlow: boolean): void {
   if (!shoe) return;
-  const base = new THREE.Color(0xffffff);
-  if (dirt > 0.02) base.lerp(new THREE.Color(0x6b5340), 0.15 + dirt * 0.55);
-  if (freshGlow) base.lerp(new THREE.Color(0xe8f6fa), 0.08);
   for (const m of shoe.mats) {
+    const base =
+      (m.userData.baseTint as THREE.Color | undefined)?.clone() ?? new THREE.Color(0xffffff);
+    if (dirt > 0.02) base.lerp(new THREE.Color(0x6b5340), 0.15 + dirt * 0.55);
+    if (freshGlow) base.lerp(new THREE.Color(0xe8f6fa), 0.08);
     m.color.copy(base);
     m.opacity = freshGlow ? 1 : Math.max(0.85, 1 - dirt * 0.12);
   }

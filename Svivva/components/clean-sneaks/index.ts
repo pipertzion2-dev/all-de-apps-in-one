@@ -6,3 +6,4 @@ export { CleanSneaksCubeBackdrop } from "./CleanSneaksCubeBackdrop";
 export { ShoeCamHud } from "./ShoeCamHud";
 export { PostMissionReveal } from "./PostMissionReveal";
 export { OhNoOverlay, CleanPathHud } from "./OhNoOverlay";
+export { Baloon8ColorwayPicker } from "./Baloon8ColorwayPicker";

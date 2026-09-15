@@ -138,7 +138,7 @@ export function laneWorldX(laneBlend: number): number {
 
 export function createRunEngineState(
   best = 0,
-  archetypeId: SneakerArchetypeId = "baloon8",
+  archetypeId: SneakerArchetypeId = "oilSlick",
 ): RunEngineState {
   return {
     running: false,

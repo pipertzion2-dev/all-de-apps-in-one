@@ -24,10 +24,16 @@ import type {
 } from "@/lib/clean-sneaks/types";
 import { isPortraitViewport } from "@/lib/clean-sneaks/run-quality";
 import { WEATHER, type OhNoAction } from "@/lib/clean-sneaks/contact-map";
+import {
+  readSavedColorway,
+  writeSavedColorway,
+  type Baloon8ColorwayId,
+} from "@/lib/clean-sneaks/sneaker-catalog";
 import { CleanSneaksRunScene } from "./CleanSneaksRunScene";
 import { ShoeCamHud } from "./ShoeCamHud";
 import { PostMissionReveal } from "./PostMissionReveal";
 import { CleanPathHud, OhNoOverlay } from "./OhNoOverlay";
+import { Baloon8ColorwayPicker } from "./Baloon8ColorwayPicker";
 
 export type CleanSneaksGame3DProps = {
   active: boolean;
@@ -90,9 +96,15 @@ export function CleanSneaksGame3D({
   className,
   style,
 }: CleanSneaksGame3DProps) {
-  const sneaker = resolvePlayerSneaker(sneakerOverride);
+  const [colorwayId, setColorwayId] = useState<Baloon8ColorwayId>(() =>
+    typeof window === "undefined" ? "oilSlick" : readSavedColorway(),
+  );
+  const sneaker = resolvePlayerSneaker({
+    ...sneakerOverride,
+    archetype: sneakerOverride?.archetype ?? colorwayId,
+  });
   const wrapRef = useRef<HTMLDivElement | null>(null);
-  const stateRef = useRef<RunEngineState>(createRunEngineState(0, sneaker.archetype ?? "baloon8"));
+  const stateRef = useRef<RunEngineState>(createRunEngineState(0, sneaker.archetype ?? colorwayId));
 
   const [phase, setPhase] = useState<"countdown" | "running" | "over">("countdown");
   const [countdown, setCountdown] = useState(3);
@@ -127,12 +139,21 @@ export function CleanSneaksGame3D({
   }, [onStats]);
 
   const resetRun = useCallback(() => {
-    stateRef.current = createRunEngineState(readBestScore(), sneaker.archetype ?? "baloon8");
+    stateRef.current = createRunEngineState(readBestScore(), sneaker.archetype ?? colorwayId);
     setGameOver(null);
     setShareMsg(null);
     setSceneKey((k) => k + 1);
     emitStats();
-  }, [emitStats, sneaker.archetype]);
+  }, [emitStats, sneaker.archetype, colorwayId]);
+
+  const selectColorway = useCallback(
+    (id: Baloon8ColorwayId) => {
+      if (phase === "running") return;
+      setColorwayId(id);
+      writeSavedColorway(id);
+    },
+    [phase],
+  );
 
   const endRun = useCallback(() => {
     const s = stateRef.current;
@@ -424,12 +445,13 @@ export function CleanSneaksGame3D({
           style={fullscreen && !portrait ? { minHeight: "min(60vh, 640px)" } : undefined}
         >
           <CleanSneaksRunScene
-            key={sceneKey}
+            key={`${sceneKey}-${colorwayId}`}
             stateRef={stateRef}
             running={phase === "running"}
             onGameOver={endRun}
             onStreakFlash={handleStreakFlash}
             onStatsTick={emitStats}
+            colorwayId={colorwayId}
             className="absolute inset-0"
           />
 
@@ -482,11 +504,14 @@ export function CleanSneaksGame3D({
         )}
 
         {phase === "countdown" && (
-          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
             <p className="seeds-holo-text mb-2 text-xs uppercase tracking-[0.35em]">Clean Sneaks</p>
             <p className="mb-1 text-sm text-[#7EC8D9]">
-              {sneaker.label ?? "Baloon8"} · Keep the fit clean
+              {sneaker.label ?? "BALOON8"} · Keep the fit clean
             </p>
+            <div className="mb-4 w-full max-w-md rounded-lg border border-white/10 bg-black/50 p-3">
+              <Baloon8ColorwayPicker value={colorwayId} onChange={selectColorway} compact />
+            </div>
             <p className="mb-2 max-w-xs text-center text-[11px] text-white/50">
               Look at the ground. V = Sneak Vision · C = walk style · 1–6 = Oh No saves
             </p>
