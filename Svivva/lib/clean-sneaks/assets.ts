@@ -1,13 +1,13 @@
 import type { CleanLabel, SneakerAssetRef } from "./types";
-import { BALOON8_BLUEPRINT_URL } from "./baloon8-textures";
+import { BALOON8_BLUEPRINT_URL, BALOON8_SNEAKER_THUMBNAIL_URL } from "./baloon8-textures";
 
-/** Legacy fallback sprite — Baloon8 side profile is preferred. */
-export const DEFAULT_PLAYER_SHOE_URL = "/assets/clean-sneaks/player-shoe.png";
+/** Baloon8 side-profile sneaker — the official thumbnail / marketing sprite. */
+export const DEFAULT_PLAYER_SHOE_URL = BALOON8_SNEAKER_THUMBNAIL_URL;
 
-export { BALOON8_BLUEPRINT_URL };
+export { BALOON8_BLUEPRINT_URL, BALOON8_SNEAKER_THUMBNAIL_URL };
 
 export const DEFAULT_SNEAKER: SneakerAssetRef = {
-  spriteUrl: BALOON8_BLUEPRINT_URL,
+  spriteUrl: BALOON8_SNEAKER_THUMBNAIL_URL,
   label: "Baloon8",
   source: "default",
 };
