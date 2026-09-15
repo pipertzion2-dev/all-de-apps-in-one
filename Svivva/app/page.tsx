@@ -221,12 +221,19 @@ export default function LandingPage() {
 
     document.body.style.overflow = "hidden";
     document.body.style.touchAction = "none";
+    document.documentElement.style.background = "#ffffff";
+    document.body.style.background = "#ffffff";
 
     const stopFlipAnim = () => {
       if (flipAnimRef.current) {
         cancelAnimationFrame(flipAnimRef.current);
         flipAnimRef.current = 0;
       }
+    };
+
+    const restorePageBackground = () => {
+      document.documentElement.style.background = "";
+      document.body.style.background = "";
     };
 
     const finishIntro = () => {
@@ -238,6 +245,7 @@ export default function LandingPage() {
         pageFaceRef.current.style.transformOrigin = "";
         pageFaceRef.current.style.willChange = "";
       }
+      restorePageBackground();
       setFlipComplete(true);
       document.body.style.overflow = "";
       document.body.style.touchAction = "";
@@ -476,6 +484,7 @@ export default function LandingPage() {
       window.removeEventListener("resize", handleResize);
       document.body.style.overflow = "";
       document.body.style.touchAction = "";
+      restorePageBackground();
       window.removeEventListener("wheel", handleWheel);
       window.removeEventListener("wheel", handleWheelEnd);
       window.removeEventListener("touchstart", handleTouchStart);
@@ -488,7 +497,7 @@ export default function LandingPage() {
     <div
       ref={containerRef}
       data-landing-page
-      className="min-h-screen w-full bg-background overflow-x-hidden"
+      className={`min-h-screen w-full overflow-x-hidden ${flipComplete ? "bg-background" : "bg-white"}`}
     >
       {!flipComplete && (
         <div
@@ -498,10 +507,7 @@ export default function LandingPage() {
             zIndex: 70,
             touchAction: "none",
             overflow: "visible",
-            // Transparent on purpose: the receding corners now expose the page
-            // face rotating in behind, which is what reads as a solid box. An
-            // opaque backdrop here would hide the second face entirely.
-            backgroundColor: "transparent",
+            backgroundColor: "#ffffff",
             opacity: 1,
             willChange: "opacity",
           }}
@@ -542,11 +548,9 @@ export default function LandingPage() {
                   transform: "translate3d(0, 0, 50vh)",
                 }}
               >
-                {/* Overscan bleed. Under perspective the panel's top corners
-                    pull inward as they recede, and neither face covers the gap
-                    mid-rotation, which showed as black wedges. Extending the
-                    white past the top and sides keeps it covered; the bottom
-                    stays flush so it never hides the page face rising in. */}
+                {/* Overscan bleed. Under perspective the panel's corners pull
+                    inward as they recede, leaving gaps mid-rotation. Extend
+                    white past all edges so nothing dark peeks through. */}
                 <div
                   aria-hidden
                   style={{
@@ -554,7 +558,7 @@ export default function LandingPage() {
                     top: "-45%",
                     left: "-45%",
                     right: "-45%",
-                    bottom: 0,
+                    bottom: "-45%",
                     backgroundColor: "#ffffff",
                   }}
                 />
@@ -649,7 +653,7 @@ export default function LandingPage() {
       >
         <div
           ref={pageFaceRef}
-          className="bg-background"
+          className={flipComplete ? "bg-background" : "bg-white"}
           style={
             flipComplete
               ? { pointerEvents: "auto" }
