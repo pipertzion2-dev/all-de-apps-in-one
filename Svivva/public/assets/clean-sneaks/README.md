@@ -4,16 +4,16 @@
 
 Colorways live in `baloon8-variants/` — same orthographic model, different finishes:
 
-| File | Colorway |
-|------|----------|
+| File          | Colorway            |
+| ------------- | ------------------- |
 | oil-slick.jpg | Oil Slick (default) |
-| emerald.jpg | Emerald |
-| amethyst.jpg | Amethyst |
-| abalone.jpg | Abalone |
-| graphite.jpg | Graphite |
-| midnight.jpg | Midnight |
-| void.jpg | Void |
-| solar.jpg | Solar |
+| emerald.jpg   | Emerald             |
+| amethyst.jpg  | Amethyst            |
+| abalone.jpg   | Abalone             |
+| graphite.jpg  | Graphite            |
+| midnight.jpg  | Midnight            |
+| void.jpg      | Void                |
+| solar.jpg     | Solar               |
 
 Official sheets:
 
