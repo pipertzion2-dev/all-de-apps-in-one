@@ -579,7 +579,11 @@ function World({ stateRef, running, onGameOver, onStreakFlash, onStatsTick, qual
     if (running && s.running) {
       const ts = performance.now();
       const dt = Math.min(0.05, rawDt);
-      stepRunEngine(s, dt, ts, { onGameOver, onStreakFlash });
+      stepRunEngine(s, dt, ts, {
+        onGameOver,
+        onStreakFlash,
+        onFinish: onGameOver,
+      });
       tickRef.current += dt;
       if (tickRef.current >= 0.1) {
         tickRef.current = 0;

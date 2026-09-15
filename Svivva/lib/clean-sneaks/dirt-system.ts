@@ -117,16 +117,16 @@ export const SUBSTANCE_ZONES: Record<SubstanceKind, DirtZone[]> = {
 export const SPLASH_EXTRA_ZONES: DirtZone[] = ["midsole", "toeBox", "leftSide", "rightSide"];
 
 export const SUBSTANCE_BASE_DIRT: Record<SubstanceKind, number> = {
-  mud: 14,
-  water: 4,
-  grass: 8,
-  dust: 3,
-  paint: 18,
-  gum: 6,
-  oil: 10,
-  snow: 5,
-  food: 12,
-  drink: 10,
+  mud: 22,
+  water: 7,
+  grass: 12,
+  dust: 5,
+  paint: 26,
+  gum: 9,
+  oil: 14,
+  snow: 8,
+  food: 16,
+  drink: 15,
 };
 
 export const SUBSTANCE_LABELS: Record<SubstanceKind, string> = {
@@ -165,9 +165,28 @@ export function zoneCleanliness(zone: ZoneDirt): number {
 }
 
 export function shoeCleanliness(shoe: ShoeCondition): number {
+  // Weighted — visible zones hurt the score more than buried outsole alone.
+  const weights: Record<DirtZone, number> = {
+    toeBox: 1.4,
+    leftSide: 1.1,
+    rightSide: 1.1,
+    heel: 1.0,
+    tongue: 1.0,
+    laces: 1.15,
+    midsole: 1.25,
+    outsole: 0.85,
+  };
   let sum = 0;
-  for (const z of DIRT_ZONES) sum += zoneCleanliness(shoe.dirt[z]);
-  return sum / DIRT_ZONES.length;
+  let wSum = 0;
+  for (const z of DIRT_ZONES) {
+    const w = weights[z];
+    sum += zoneCleanliness(shoe.dirt[z]) * w;
+    wSum += w;
+  }
+  const avg = sum / wSum;
+  // A single severe stain should pull the shoe down harder than a pure average.
+  const worst = Math.min(...DIRT_ZONES.map((z) => zoneCleanliness(shoe.dirt[z])));
+  return avg * 0.65 + worst * 0.35;
 }
 
 export function pairCleanliness(left: ShoeCondition, right: ShoeCondition): number {

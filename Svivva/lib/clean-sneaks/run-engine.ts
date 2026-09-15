@@ -46,6 +46,8 @@ export const COLLISION_Z_MIN = -1.2;
 export const COLLISION_Z_MAX = 1.4;
 export const OH_NO_Z_ENTER = -2.4;
 export const OH_NO_Z_EXIT = -1.35;
+/** Reach the destination for a post-mission shoe reveal (not only when cooked). */
+export const FINISH_DISTANCE = 90;
 
 export type RunObstacle = {
   id: number;
@@ -193,6 +195,8 @@ export function createRunEngineState(
 export type RunEngineCallbacks = {
   onGameOver: () => void;
   onStreakFlash?: () => void;
+  /** Clean finish at destination — still post-mission reveal */
+  onFinish?: () => void;
 };
 
 function wetObstacles(): ObstacleKind[] {
@@ -469,6 +473,15 @@ export function stepRunEngine(
   s.speed = baseSpeed;
   const scroll = s.speed * step;
   s.distance += scroll * 0.05;
+
+  if (s.distance >= FINISH_DISTANCE) {
+    s.distance = FINISH_DISTANCE;
+    s.running = false;
+    s.popups.push({ text: "DESTINATION", life: 1.2, color: "#7EC8D9" });
+    (callbacks.onFinish ?? callbacks.onGameOver)();
+    return;
+  }
+
   s.score +=
     computeFrameScore({
       distanceDelta: scroll * 0.05,

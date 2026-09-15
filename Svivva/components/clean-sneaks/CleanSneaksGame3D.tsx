@@ -8,6 +8,7 @@ import {
   buildGameOverPayload,
   createRunEngineState,
   cycleWalkStyle,
+  FINISH_DISTANCE,
   jumpRun,
   shiftLane,
   snapshotShoes,
@@ -135,6 +136,7 @@ export function CleanSneaksGame3D({
 
   const endRun = useCallback(() => {
     const s = stateRef.current;
+    if (!s.running && phase === "over") return;
     s.running = false;
     const best = writeBestScore(s.score);
     s.best = best;
@@ -142,7 +144,7 @@ export function CleanSneaksGame3D({
     setGameOver(payload);
     setPhase("over");
     emitStats();
-  }, [emitStats]);
+  }, [emitStats, phase]);
 
   const handleStreakFlash = useCallback(() => {
     setFlashStreak(true);
@@ -488,7 +490,9 @@ export function CleanSneaksGame3D({
             <p className="mb-2 max-w-xs text-center text-[11px] text-white/50">
               Look at the ground. V = Sneak Vision · C = walk style · 1–6 = Oh No saves
             </p>
-            <p className="mb-6 text-sm text-[#7EC8D9]/80">100% CLEAN · TWO SHOES</p>
+            <p className="mb-6 text-sm text-[#7EC8D9]/80">
+              100% CLEAN · TWO SHOES · {FINISH_DISTANCE}m destination
+            </p>
             <p className="text-6xl font-bold tabular-nums text-foreground sm:text-7xl">
               {countdown > 0 ? countdown : "RUN."}
             </p>
