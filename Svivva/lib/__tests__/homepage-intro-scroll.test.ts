@@ -40,8 +40,8 @@ describe("homepage intro scroll", () => {
     expect(pageSrc.match(/paintPageFace\(angle\)/g)?.length).toBeGreaterThanOrEqual(2);
   });
 
-  it("keeps the intro layer transparent so the second face is visible behind it", () => {
-    expect(pageSrc).toContain('backgroundColor: "transparent"');
+  it("keeps the intro layer white so no dark page face shows through on mobile", () => {
+    expect(pageSrc).toContain('backgroundColor: "#ffffff"');
   });
 
   it("releases the page from 3D when the intro finishes", () => {

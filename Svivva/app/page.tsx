@@ -579,12 +579,11 @@ export default function LandingPage() {
                     height={1024}
                     sizes="100vw"
                     style={{
-                      // Fill the panel in both axes: `height: auto` left the square
-                      // image only as tall as the viewport was wide, stranding the
-                      // slack as blank space on portrait/mobile viewports.
+                      // Cover the full viewport on mobile — contain left the graphic
+                      // small with empty space above and below on portrait screens.
                       width: "100%",
                       height: "100%",
-                      objectFit: "contain",
+                      objectFit: "cover",
                       objectPosition: "center",
                       display: "block",
                     }}
