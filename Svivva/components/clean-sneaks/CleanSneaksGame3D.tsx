@@ -31,17 +31,16 @@ import {
   writeSavedColorway,
   type Baloon8ColorwayId,
 } from "@/lib/clean-sneaks/sneaker-catalog";
-import { GameLoadingWheels } from "./GameLoadingWheels";
 import { GameStartScreen } from "./GameStartScreen";
 import { ShoeCamHud } from "./ShoeCamHud";
+import { PostMissionReveal } from "./PostMissionReveal";
+import { CleanPathHud, OhNoOverlay } from "./OhNoOverlay";
+import { Baloon8ColorwayPicker } from "./Baloon8ColorwayPicker";
 
 const CleanSneaksRunScene = dynamic(
   () => import("./CleanSneaksRunScene").then((m) => ({ default: m.CleanSneaksRunScene })),
   { ssr: false, loading: () => null },
 );
-import { PostMissionReveal } from "./PostMissionReveal";
-import { CleanPathHud, OhNoOverlay } from "./OhNoOverlay";
-import { Baloon8ColorwayPicker } from "./Baloon8ColorwayPicker";
 
 export type CleanSneaksGame3DProps = {
   active: boolean;
@@ -52,8 +51,6 @@ export type CleanSneaksGame3DProps = {
   fullscreen?: boolean;
   className?: string;
   style?: CSSProperties;
-  /** When true, parent renders the loading wheels — skip the duplicate overlay. */
-  hiddenDuringLoading?: boolean;
 };
 
 function prefersReducedMotion(): boolean {
@@ -107,7 +104,6 @@ export function CleanSneaksGame3D({
   fullscreen = false,
   className,
   style,
-  hiddenDuringLoading = false,
 }: CleanSneaksGame3DProps) {
   const [colorwayId, setColorwayId] = useState<Baloon8ColorwayId>(() =>
     typeof window === "undefined" ? "oilSlick" : readSavedColorway(),
@@ -406,7 +402,7 @@ export function CleanSneaksGame3D({
 
   if (preGame) {
     if (phase === "loading") {
-      return hiddenDuringLoading ? null : <GameLoadingWheels fullscreen />;
+      return null;
     }
     return (
       <GameStartScreen

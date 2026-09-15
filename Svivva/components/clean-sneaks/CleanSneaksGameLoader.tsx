@@ -9,6 +9,22 @@ import type { CleanSneaksGame3DProps } from "./CleanSneaksGame3D";
 
 type LoaderProps = CleanSneaksGame3DProps;
 
+async function importGameChunk(retries = 3): Promise<ComponentType<CleanSneaksGame3DProps>> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < retries; attempt++) {
+    try {
+      const mod = await import("./CleanSneaksGame3D");
+      return mod.CleanSneaksGame3D;
+    } catch (err) {
+      lastError = err;
+      if (attempt < retries - 1) {
+        await new Promise((resolve) => window.setTimeout(resolve, 600 * (attempt + 1)));
+      }
+    }
+  }
+  throw lastError;
+}
+
 function GameLoadError({ onRetry }: { onRetry: () => void }) {
   return (
     <div className="fixed inset-0 z-[300] flex min-h-[100dvh] flex-col items-center justify-center bg-white px-6 text-center">
@@ -35,7 +51,7 @@ function GameLoadError({ onRetry }: { onRetry: () => void }) {
   );
 }
 
-/** Single owner of the loading wheels UI; defers the Three.js chunk until after it shows. */
+/** Owns the loading wheels UI and defers the Three.js chunk until after first paint. */
 export function CleanSneaksGameLoader(props: LoaderProps) {
   const { onPhaseChange, ...gameProps } = props;
   const [Game, setGame] = useState<ComponentType<CleanSneaksGame3DProps> | null>(null);
@@ -57,17 +73,21 @@ export function CleanSneaksGameLoader(props: LoaderProps) {
     setGame(null);
     setPhase("loading");
 
-    import("./CleanSneaksGame3D")
-      .then((mod) => {
-        if (!cancelled) setGame(() => mod.CleanSneaksGame3D);
-      })
-      .catch((err) => {
-        console.error("[CleanSneaks] game chunk failed to load:", err);
-        if (!cancelled) setFailed(true);
-      });
+    // Paint the loading screen first, then fetch the heavy game chunk.
+    const startTimer = window.setTimeout(() => {
+      importGameChunk()
+        .then((Component) => {
+          if (!cancelled) setGame(() => Component);
+        })
+        .catch((err) => {
+          console.error("[CleanSneaks] game chunk failed to load:", err);
+          if (!cancelled) setFailed(true);
+        });
+    }, 80);
 
     return () => {
       cancelled = true;
+      window.clearTimeout(startTimer);
     };
   }, [attempt]);
 
@@ -77,12 +97,14 @@ export function CleanSneaksGameLoader(props: LoaderProps) {
 
   const showLoadingWheels = !Game || phase === "loading";
 
-  return (
-    <>
-      {showLoadingWheels && <GameLoadingWheels fullscreen />}
-      {Game ? (
-        <Game {...gameProps} onPhaseChange={handlePhaseChange} hiddenDuringLoading={showLoadingWheels} />
-      ) : null}
-    </>
-  );
+  if (showLoadingWheels) {
+    return (
+      <>
+        <GameLoadingWheels fullscreen />
+        {Game ? <Game {...gameProps} onPhaseChange={handlePhaseChange} /> : null}
+      </>
+    );
+  }
+
+  return <Game {...gameProps} onPhaseChange={handlePhaseChange} />;
 }

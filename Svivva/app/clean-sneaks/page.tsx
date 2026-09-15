@@ -42,8 +42,8 @@ export default function CleanSneaksPage() {
     <div
       data-svivva-app-shell=""
       data-clean-sneaks-fullscreen=""
-      className={`fixed inset-0 z-[200] flex h-[100dvh] min-h-[100dvh] w-full flex-col ${preGame ? "bg-white" : "bg-[#0a0c10]"}`}
-      style={preGame ? undefined : shellStyle}
+      className={`fixed inset-0 z-[200] flex h-[100dvh] min-h-[100dvh] w-full flex-col ${preGame ? "bg-transparent" : "bg-[#0a0c10]"}`}
+      style={preGame ? { overflow: "hidden" } : shellStyle}
     >
       {!preGame && (
         <div
