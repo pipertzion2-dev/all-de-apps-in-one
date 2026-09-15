@@ -11,7 +11,6 @@ const WHEEL_SPINS = [
 ] as const;
 
 export type GameLoadingWheelsProps = {
-  /** When true, cover the viewport as the only loading layer (no extra padding wrappers). */
   fullscreen?: boolean;
 };
 
@@ -30,8 +29,8 @@ export function GameLoadingWheels({ fullscreen = false }: GameLoadingWheelsProps
     <div
       className={
         fullscreen
-          ? "fixed inset-0 z-[300] flex flex-col overflow-hidden bg-white"
-          : "relative flex h-full w-full flex-col overflow-hidden bg-white"
+          ? "fixed inset-0 z-[300] flex flex-col items-center justify-center overflow-hidden bg-white"
+          : "relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-white"
       }
       style={{
         paddingTop: "env(safe-area-inset-top)",
@@ -41,38 +40,40 @@ export function GameLoadingWheels({ fullscreen = false }: GameLoadingWheelsProps
       aria-label="Loading game"
       aria-live="polite"
     >
-      <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-6">
-        <div className="relative h-[min(34vh,200px)] w-full max-w-lg shrink-0">
-          <Image
-            src={KAREN_THE_MUSCLE_LOGO_URL}
-            alt="Karen the Muscle"
-            fill
-            priority
-            className="object-contain object-center"
-            sizes="(max-width: 768px) 85vw, 480px"
-            data-testid="img-karen-the-muscle-logo"
-          />
-        </div>
+      <div className="relative mb-8 h-[min(28vh,160px)] w-[min(85vw,360px)] shrink-0">
+        <Image
+          src={KAREN_THE_MUSCLE_LOGO_URL}
+          alt="Karen the Muscle"
+          fill
+          priority
+          className="object-contain object-center"
+          sizes="(max-width: 768px) 85vw, 360px"
+          data-testid="img-karen-the-muscle-logo"
+        />
+      </div>
 
-        <div className="mt-8 grid w-full max-w-md grid-cols-3 gap-3 sm:max-w-lg sm:gap-5">
-          {LOADING_WHEEL_URLS.map((src, index) => (
+      {/* Hubcaps spin inside circular clips so square JPEG bounds never overlap. */}
+      <div className="flex items-center justify-center gap-[min(3.5vw,14px)] px-4">
+        {LOADING_WHEEL_URLS.map((src, index) => (
+          <div
+            key={src}
+            className="size-[min(24vw,96px)] shrink-0 overflow-hidden rounded-full sm:size-[min(22vw,112px)]"
+            data-testid={`loading-wheel-${index}`}
+          >
             <div
-              key={src}
-              className="relative aspect-square w-full"
-              data-testid={`loading-wheel-${index}`}
+              className={`h-full w-full ${reducedMotion ? "" : WHEEL_SPINS[index]}`}
+              aria-hidden
             >
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={src}
                 alt=""
-                aria-hidden
-                fill
-                priority
-                className={`object-contain ${reducedMotion ? "" : WHEEL_SPINS[index]}`}
-                sizes="(max-width: 640px) 28vw, 180px"
+                draggable={false}
+                className="block h-full w-full object-cover"
               />
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
 
       <p className="sr-only">Loading</p>
