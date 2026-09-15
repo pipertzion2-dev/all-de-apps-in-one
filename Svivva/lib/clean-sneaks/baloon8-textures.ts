@@ -1,7 +1,10 @@
 import * as THREE from "three";
 
-/** Four-quadrant layout of baloon8-blueprint.jpg (2×2 orthographic sheet). */
-export const BALOON8_BLUEPRINT_URL = "/assets/clean-sneaks/baloon8-blueprint.jpg";
+/** Four-quadrant orthographic brand sheet (side / front / top / rear). */
+export const BALOON8_BLUEPRINT_URL = "/assets/clean-sneaks/baloon8-orthographic-blueprint.jpg";
+
+/** Alias — same orthographic sheet the runner and orbit viewer use. */
+export const BALOON8_ORTHOGRAPHIC_BLUEPRINT_URL = BALOON8_BLUEPRINT_URL;
 
 /** Official side-profile sneaker thumbnail (homepage / OG / fallbacks). */
 export const BALOON8_SNEAKER_THUMBNAIL_URL = "/assets/clean-sneaks/baloon8-sneaker-thumbnail.png";
@@ -11,15 +14,16 @@ export const BALOON8_HERO_REFERENCE_URL = "/assets/clean-sneaks/baloon8-sneaker-
 
 export type Baloon8BlueprintQuadrant = "side" | "front" | "top" | "rear";
 
-/** Image-space crop for each orthographic view on the 2×2 sheet (1536×1024 typical). */
+/** Image-space crop for each orthographic view — inset to drop labels / rulers. */
 const QUADRANT_IMAGE_RECT: Record<
   Baloon8BlueprintQuadrant,
   { x: number; y: number; w: number; h: number }
 > = {
-  side: { x: 0, y: 0, w: 0.5, h: 0.5 },
-  front: { x: 0.5, y: 0, w: 0.5, h: 0.5 },
-  top: { x: 0, y: 0.5, w: 0.5, h: 0.5 },
-  rear: { x: 0.5, y: 0.5, w: 0.5, h: 0.5 },
+  // Tighter insets: drop “SIDE/FRONT/TOP/REAR VIEW” captions under each panel
+  side: { x: 0.03, y: 0.015, w: 0.44, h: 0.38 },
+  front: { x: 0.53, y: 0.015, w: 0.42, h: 0.38 },
+  top: { x: 0.03, y: 0.515, w: 0.44, h: 0.38 },
+  rear: { x: 0.53, y: 0.515, w: 0.42, h: 0.38 },
 };
 
 /** UV crop for each panel (Three.js bottom-left origin, flipY textures). */
