@@ -54,12 +54,14 @@ export function CleanSneaksSection() {
 
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
         <div className="grid items-stretch gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-10">
-          <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#06080c] shadow-[0_0_60px_rgba(91,141,168,0.12)]">
+          <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#ededed] shadow-[0_0_60px_rgba(91,141,168,0.12)]">
             <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-4 py-3">
-              <p className="text-[10px] uppercase tracking-[0.35em] text-[#5B8DA8]/90">
-                Your Baloon8 · 3D
+              <p className="text-[10px] uppercase tracking-[0.35em] text-[#3a6878]">
+                Your Baloon8 · Reference
               </p>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Drag to orbit</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-black/40">
+                Drag to explore 3D
+              </p>
             </div>
             <div className="relative h-[360px] sm:h-[440px] lg:h-[520px]">
               <SceneErrorBoundary
@@ -67,10 +69,10 @@ export function CleanSneaksSection() {
                   <div
                     className="h-full w-full bg-cover bg-center"
                     style={{
-                      backgroundImage: "url(/assets/clean-sneaks/baloon8-blueprint.jpg)",
+                      backgroundImage: "url(/assets/clean-sneaks/baloon8-hero-reference.jpg)",
                     }}
                     role="img"
-                    aria-label="Baloon8 car-shoe blueprint"
+                    aria-label="Baloon8 car-shoe reference"
                   />
                 }
               >
@@ -78,7 +80,7 @@ export function CleanSneaksSection() {
               </SceneErrorBoundary>
             </div>
             <div
-              className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#06080c] to-transparent"
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#ededed] to-transparent"
               aria-hidden
             />
           </div>
