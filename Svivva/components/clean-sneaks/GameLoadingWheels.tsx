@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState, type CSSProperties } from "react";
-import { LOADING_WHEEL_URLS } from "@/lib/clean-sneaks/assets";
+import { KAREN_THE_MUSCLE_LOGO_URL, LOADING_WHEEL_URLS } from "@/lib/clean-sneaks/assets";
 
 const WHEEL_SPINS = [
   "animate-[spin_1.8s_linear_infinite]",
@@ -38,6 +38,18 @@ export function GameLoadingWheels({ className, style }: GameLoadingWheelsProps) 
       aria-label="Loading game"
       aria-live="polite"
     >
+      <div className="relative mb-6 h-24 w-full max-w-md px-6 sm:mb-8 sm:h-32 sm:max-w-lg">
+        <Image
+          src={KAREN_THE_MUSCLE_LOGO_URL}
+          alt="Karen the Muscle"
+          fill
+          priority
+          className="object-contain"
+          sizes="(max-width: 768px) 80vw, 480px"
+          data-testid="img-karen-the-muscle-logo"
+        />
+      </div>
+
       <div className="flex w-full max-w-3xl items-center justify-center gap-3 px-4 sm:gap-6 sm:px-8">
         {LOADING_WHEEL_URLS.map((src, index) => (
           <div
