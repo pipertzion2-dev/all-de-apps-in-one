@@ -49,21 +49,21 @@ type CameraRig = { ox: number; oy: number; oz: number; lookY: number; lookZ: num
 
 function cameraRigFor(mobile: boolean, portrait: boolean): CameraRig {
   if (mobile && portrait) {
-    // Centered, pulled back, wide FOV — keeps both shoes in a tall narrow frame.
+    // Strong side offset — rear-dead chase hid the coupe; show wheels + profile
     const boost = portraitFramingBoost();
     return {
-      ox: 0.45 * boost,
-      oy: 0.92 * boost,
-      oz: 2.65 * boost,
-      lookY: 0.18,
-      lookZ: -3.0,
-      fov: 70 + (boost - 1) * 10,
+      ox: 1.55 * boost,
+      oy: 1.45 * boost,
+      oz: 3.55 * boost,
+      lookY: 0.35,
+      lookZ: -2.4,
+      fov: 58 + (boost - 1) * 5,
     };
   }
   if (mobile) {
-    return { ox: 2.35, oy: 1.05, oz: 2.05, lookY: 0.32, lookZ: -3.8, fov: 48 };
+    return { ox: 2.65, oy: 1.35, oz: 2.55, lookY: 0.42, lookZ: -3.6, fov: 46 };
   }
-  return { ox: 3.6, oy: 1.65, oz: 3.0, lookY: 0.48, lookZ: -5.5, fov: 42 };
+  return { ox: 3.8, oy: 1.75, oz: 3.2, lookY: 0.5, lookZ: -5.2, fov: 40 };
 }
 
 function FollowCamera({
@@ -429,7 +429,7 @@ function PlayerShoes({
 
     host.position.x = laneWorldX(s.laneX);
     host.position.y = s.y < 0 ? -s.y / 120 : 0;
-    host.rotation.y = portrait ? 0 : mobile ? 0.22 : 0;
+    host.rotation.y = portrait ? 0.18 : mobile ? 0.28 : 0.12;
 
     updateWalkingShoes3D(shoes, {
       walkPhase: s.walkPhase,
@@ -448,22 +448,28 @@ function PlayerShoes({
     <group ref={hostRef}>
       <primitive object={shoes.root} />
       <pointLight
-        position={[0, 0.55, 0.65]}
-        intensity={mobile ? 2.2 : 0.9}
-        distance={10}
+        position={[0, 0.75, 0.85]}
+        intensity={mobile ? 3.2 : 1.4}
+        distance={12}
+        color="#9ed8e8"
+      />
+      <pointLight
+        position={[1.6, 0.55, 0.7]}
+        intensity={mobile ? 1.8 : 0.75}
+        distance={9}
         color="#7ec8d9"
       />
       <pointLight
-        position={[1.4, 0.4, 0.55]}
-        intensity={mobile ? 1.35 : 0.55}
-        distance={8}
-        color="#7ec8d9"
-      />
-      <pointLight
-        position={[-1.1, 0.25, 0.35]}
-        intensity={mobile ? 0.85 : 0.35}
-        distance={6}
+        position={[-1.2, 0.4, 0.45]}
+        intensity={mobile ? 1.1 : 0.45}
+        distance={7}
         color="#d94f9c"
+      />
+      <pointLight
+        position={[0.2, 0.45, -0.9]}
+        intensity={mobile ? 1.6 : 0.7}
+        distance={8}
+        color="#36f078"
       />
     </group>
   );

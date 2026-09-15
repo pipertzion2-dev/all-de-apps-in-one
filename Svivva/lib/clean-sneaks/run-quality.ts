@@ -75,8 +75,9 @@ export function runQualityFlags(quality: RunQuality, portrait = isPortraitViewpo
     speedStreaks: !mobile,
     antialias: !mobile,
     dpr: mobile || typeof window === "undefined" ? 1 : Math.min(window.devicePixelRatio || 1, 2),
-    bubbleCount: mobile ? 100 : 180,
-    bubbleCountReduced: mobile ? 60 : 120,
+    /** Quilted balloon pod preference for the Tripo coupe (per pair before caps). */
+    bubbleCount: mobile ? 2200 : 4000,
+    bubbleCountReduced: mobile ? 1400 : 2400,
     cityBuildings: mobile ? 10 : 20,
     streetLights: mobile ? 6 : 12,
   };

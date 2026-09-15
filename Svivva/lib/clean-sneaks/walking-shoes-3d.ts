@@ -22,24 +22,25 @@ function runnerBubbleCount(): number {
   return flags.bubbleCount;
 }
 
-/** Preload is a no-op resolve — the puffer coupe is fully procedural (no image texture). */
+/** Preload is a no-op resolve — the Tripo coupe is fully procedural (no GLB yet). */
 export function preloadBaloon8RunnerShoe(): Promise<THREE.Texture | null> {
   return Promise.resolve(null);
 }
 
 function buildRunnerShoe(mobile: boolean, portrait: boolean, mirror: boolean): Baloon8WalkerShoe {
+  // Single hero coupe gets a denser quilt budget than the old pair-per-shoe caps
   const preferred = mobile
-    ? Math.max(portrait ? 480 : 640, Math.floor(runnerBubbleCount() / (portrait ? 2.2 : 1.8)))
-    : Math.max(900, Math.floor(runnerBubbleCount() / 1.5));
+    ? Math.max(portrait ? 2200 : 2600, Math.floor(runnerBubbleCount() * 0.9))
+    : Math.max(3600, Math.floor(runnerBubbleCount()));
   return buildBaloon8RunnerShoe(undefined, preferred, {
     mobile,
     portrait,
-    pair: true,
+    pair: false,
     mirror,
   });
 }
 
-/** Baloon8 procedural puffer coupe pair — left + right with walking stride. */
+/** Baloon8 Tripo coupe — single hero car (matches the Tripo reference, not a dual blob). */
 export function createWalkingShoes3D(
   _blueprint?: THREE.Texture | null,
   mobile = false,
@@ -50,14 +51,14 @@ export function createWalkingShoes3D(
   const leftPivot = new THREE.Group();
   const rightPivot = new THREE.Group();
 
+  // One coupe centered — dual mirrored cars looked like an abstract sphere pile from chase cam
   const leftShoe = buildRunnerShoe(mobile, portrait, false);
-  const rightShoe = buildRunnerShoe(mobile, portrait, true);
+  const rightShoe = null;
   leftPivot.add(leftShoe.root);
-  rightPivot.add(rightShoe.root);
-  shoePivot.add(leftPivot, rightPivot);
+  shoePivot.add(leftPivot);
 
   const shieldRing = new THREE.Mesh(
-    new THREE.TorusGeometry(0.72, 0.022, 16, 64),
+    new THREE.TorusGeometry(0.85, 0.022, 16, 64),
     new THREE.MeshPhysicalMaterial({
       color: 0x5b8da8,
       emissive: 0x5b8da8,
@@ -177,41 +178,20 @@ export function updateWalkingShoes3D(
   const dt = 0.016;
   const t = performance.now() / 1000;
   const stride = args.airborne ? 0 : Math.sin(phase);
-  const lateral = args.portrait ? 0.22 : 0.34;
 
-  const bob = args.airborne ? 0.14 : Math.max(0, Math.sin(phase * 2)) * 0.05;
-  shoes.shoePivot.rotation.x = Math.sin(phase) * (args.airborne ? 0.04 : 0.06);
-  shoes.shoePivot.rotation.z = Math.sin(phase * 0.5) * 0.03;
+  const bob = args.airborne ? 0.1 : Math.max(0, Math.sin(phase * 2)) * 0.025;
+  shoes.shoePivot.rotation.x = Math.sin(phase) * (args.airborne ? 0.025 : 0.03);
+  shoes.shoePivot.rotation.z = Math.sin(phase * 0.5) * 0.012;
   shoes.shoePivot.position.y = bob;
 
-  if (args.airborne) {
-    shoes.leftPivot.position.set(-lateral * 0.85, 0.1, 0.06);
-    shoes.rightPivot.position.set(lateral * 0.85, 0.08, 0.1);
-    shoes.leftPivot.rotation.x = -0.18;
-    shoes.rightPivot.rotation.x = -0.14;
-  } else {
-    const leadLift = Math.max(0, stride) * 0.1;
-    const trailLift = Math.max(0, -stride) * 0.1;
-    const leadZ = stride > 0 ? -0.1 : 0.08;
-    const trailZ = stride > 0 ? 0.08 : -0.1;
-    const leftLead = stride > 0;
-
-    shoes.leftPivot.position.set(
-      -lateral,
-      leftLead ? leadLift : trailLift,
-      leftLead ? leadZ : trailZ,
-    );
-    shoes.rightPivot.position.set(
-      lateral,
-      leftLead ? trailLift : leadLift,
-      leftLead ? trailZ : leadZ,
-    );
-    shoes.leftPivot.rotation.x = leftLead ? -0.08 : 0.04;
-    shoes.rightPivot.rotation.x = leftLead ? 0.04 : -0.08;
-  }
+  // Single centered coupe — gentle nose bob, no lateral shoe-pair stride
+  shoes.leftPivot.position.set(0, args.airborne ? 0.08 : Math.max(0, stride) * 0.03, 0);
+  shoes.leftPivot.rotation.x = args.airborne ? -0.08 : stride * 0.03;
+  shoes.rightPivot.position.set(0, 0, 0);
+  shoes.rightPivot.rotation.x = 0;
 
   if (!args.airborne && Math.sin(phase * 2) > 0.92) {
-    spawnDust(shoes, stride > 0 ? -lateral : lateral);
+    spawnDust(shoes, 0);
   }
 
   applyDirtToShoe(shoes.leftShoe, args.dirt, args.freshGlow);

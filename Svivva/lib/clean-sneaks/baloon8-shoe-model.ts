@@ -1,8 +1,7 @@
 /**
- * BALOON8 car-sneaker — thin API over the advanced procedural 3D model.
- * Slip-on sneaker silhouette + packed iridescent balloons (orthographic
- * blueprint + Tripo / Meshy refs). Mirrored for the runner. Real volumetric
- * mesh — never a presence-image thumbnail.
+ * BALOON8 Tripo coupe — thin API over the procedural 3D model.
+ * Sports-coupe silhouette + quilted iridescent balloon pods matching the
+ * Tripo futuristic-car reference. Mirrored for the runner pair.
  */
 import * as THREE from "three";
 import {
@@ -16,11 +15,11 @@ import { BALOON8_BLUEPRINT_URL } from "./baloon8-textures";
 export { BALOON8_DIMS, BALOON8_BLUEPRINT_URL };
 
 export const BALOON8_SCENE_SCALE = 0.42;
-export const BALOON8_WALKER_SCALE = 0.42;
-export const BALOON8_WALKER_SCALE_MOBILE = 0.36;
-export const BALOON8_PAIR_SCALE = 0.26;
-export const BALOON8_PAIR_SCALE_MOBILE = 0.34;
-export const BALOON8_PAIR_SCALE_PORTRAIT = 0.31;
+export const BALOON8_WALKER_SCALE = 0.48;
+export const BALOON8_WALKER_SCALE_MOBILE = 0.44;
+export const BALOON8_PAIR_SCALE = 0.3;
+export const BALOON8_PAIR_SCALE_MOBILE = 0.38;
+export const BALOON8_PAIR_SCALE_PORTRAIT = 0.36;
 
 export type Baloon8WalkerShoe = {
   root: THREE.Group;
@@ -55,7 +54,7 @@ function runnerScale(opts: { mobile?: boolean; portrait?: boolean; pair?: boolea
 }
 
 function podBudgetFor(mobile: boolean, portrait: boolean, pair: boolean, cap: number): number {
-  const base = mobile ? (portrait ? 1000 : 1400) : pair ? 2200 : 3200;
+  const base = mobile ? (portrait ? 1800 : 2200) : pair ? 3200 : 4000;
   return Math.min(cap, base);
 }
 
@@ -75,26 +74,30 @@ export function ensureBaloon8RunnerVisible(shoe: Baloon8WalkerShoe, mobile: bool
   if (shoe.bubbles) {
     shoe.bubbles.frustumCulled = false;
   }
-  shoe.hullMat.emissive = new THREE.Color(0x142830);
-  shoe.hullMat.emissiveIntensity = mobile ? 0.16 : 0.22;
+  shoe.hullMat.emissive = new THREE.Color(0x1a3848);
+  shoe.hullMat.emissiveIntensity = mobile ? 0.28 : 0.22;
 
   shoe.root.traverse((obj) => {
     if (!(obj instanceof THREE.Mesh)) return;
     obj.frustumCulled = false;
     const mat = obj.material as THREE.MeshPhysicalMaterial;
     if (mat.metalness !== undefined) {
-      mat.envMapIntensity = mobile ? 1.55 : 1.8;
+      mat.envMapIntensity = mobile ? 2.0 : 2.15;
+    }
+    if (mat.emissiveIntensity !== undefined && mat.emissiveIntensity < 0.2) {
+      mat.emissive = mat.emissive ?? new THREE.Color(0x0a1820);
+      mat.emissiveIntensity = Math.max(mat.emissiveIntensity, mobile ? 0.2 : 0.12);
     }
   });
 
   for (const mesh of shoe.glowMeshes) {
     mesh.frustumCulled = false;
     const mat = mesh.material as THREE.MeshStandardMaterial;
-    mat.emissiveIntensity = Math.max(mat.emissiveIntensity ?? 0, mobile ? 1.15 : 1.4);
+    mat.emissiveIntensity = Math.max(mat.emissiveIntensity ?? 0, mobile ? 1.6 : 1.8);
   }
 }
 
-/** Homepage / orbit viewer — full-scale procedural BALOON8 car-sneaker. */
+/** Homepage / orbit viewer — full-scale procedural BALOON8 Tripo coupe. */
 export function buildBaloon8Shoe(
   _blueprint?: THREE.Texture,
   _bubbleCount = 2800,
@@ -102,7 +105,7 @@ export function buildBaloon8Shoe(
   const build = buildBaloon8Car({
     scale: BALOON8_SCENE_SCALE,
     mobile: false,
-    podBudget: 3200,
+    podBudget: 4000,
   });
   build.root.position.y = scaledDim(0.02, BALOON8_SCENE_SCALE);
 
@@ -114,17 +117,17 @@ export function buildBaloon8Shoe(
   };
 }
 
-/** Runner shoe — one procedural car, optionally mirrored for right foot. */
+/** Runner coupe — one procedural Tripo car, optionally mirrored for the pair. */
 export function buildBaloon8RunnerShoe(
   _blueprint?: THREE.Texture,
-  bubbleCount = 640,
+  bubbleCount = 1800,
   opts?: { mobile?: boolean; portrait?: boolean; pair?: boolean; mirror?: boolean },
 ): Baloon8WalkerShoe {
   const mobile = opts?.mobile ?? false;
   const portrait = opts?.portrait ?? false;
   const pair = opts?.pair ?? false;
   const scale = runnerScale({ mobile, portrait, pair });
-  const perShoeCap = mobile ? (pair ? 1400 : 1600) : Math.max(bubbleCount, 2200);
+  const perShoeCap = mobile ? (pair ? 2200 : 2600) : Math.max(bubbleCount, 3600);
   const budget = podBudgetFor(mobile, portrait, pair, perShoeCap);
 
   const build = buildBaloon8Car({ scale, mobile, portrait, podBudget: budget });
