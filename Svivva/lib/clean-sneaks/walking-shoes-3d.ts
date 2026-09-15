@@ -192,7 +192,7 @@ export function updateWalkingShoes3D(
   const phase = args.walkPhase * Math.PI * 2;
   const dt = 0.016;
   const stride = args.airborne ? 0 : Math.sin(phase);
-  const lateral = args.portrait ? 0.22 : 0.34;
+  const lateral = args.portrait ? 0.38 : 0.48;
 
   const bob = args.airborne ? 0.14 : Math.max(0, Math.sin(phase * 2)) * 0.05;
   shoes.shoePivot.rotation.x = Math.sin(phase) * (args.airborne ? 0.04 : 0.06);
