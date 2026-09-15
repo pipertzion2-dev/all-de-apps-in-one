@@ -273,6 +273,72 @@ export function loadBaloon8BlueprintTexture(): Promise<THREE.Texture> {
   return blueprintLoad;
 }
 
+/**
+ * Drop sparse right-side dimension callouts (mm / in rulers) that hang off the
+ * studio sneaker render — keep only the dense shoe body for in-game billboards.
+ */
+function cropAnnotationStrip(canvas: HTMLCanvasElement): HTMLCanvasElement {
+  const ctx = canvas.getContext("2d")!;
+  const { width, height, data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const density = new Float32Array(width);
+  for (let x = 0; x < width; x++) {
+    let n = 0;
+    for (let y = 0; y < height; y++) {
+      const i = (y * width + x) * 4;
+      if (!isBackgroundPixel(data[i]!, data[i + 1]!, data[i + 2]!)) n++;
+    }
+    density[x] = n / height;
+  }
+
+  let shoeEnd = width - 1;
+  const start = Math.floor(width * 0.55);
+  for (let x = start; x < width - 4; x++) {
+    let sum = 0;
+    for (let k = 0; k < 8; k++) sum += density[Math.min(width - 1, x + k)]!;
+    if (sum / 8 < 0.08) {
+      shoeEnd = x;
+      break;
+    }
+  }
+
+  if (shoeEnd >= width - 2) return canvas;
+  const cropped = document.createElement("canvas");
+  cropped.width = shoeEnd;
+  cropped.height = height;
+  cropped.getContext("2d")!.drawImage(canvas, 0, 0, shoeEnd, height, 0, 0, shoeEnd, height);
+  return cropped;
+}
+
+/** Cut white studio backdrop (+ dimension rulers) from the official sneaker thumbnail. */
+export function prepareSneakerThumbnail(img: CanvasImageSource): PreparedQuadrant {
+  const iw =
+    "naturalWidth" in img && img.naturalWidth ? img.naturalWidth : (img as HTMLCanvasElement).width;
+  const ih =
+    "naturalHeight" in img && img.naturalHeight
+      ? img.naturalHeight
+      : (img as HTMLCanvasElement).height;
+  const canvas = document.createElement("canvas");
+  canvas.width = iw;
+  canvas.height = ih;
+  canvas.getContext("2d")!.drawImage(img, 0, 0);
+  const withoutRulers = cropAnnotationStrip(canvas);
+  const bounds = trimBounds(withoutRulers);
+  const trimmed = trimCanvas(withoutRulers, bounds);
+  const map = canvasTexture(trimmed);
+  const alphaMap = canvasTexture(buildAlphaMap(trimmed));
+  return {
+    map,
+    alphaMap,
+    aspect: trimmed.width / trimmed.height,
+    trim: {
+      u0: bounds.minX / iw,
+      v0: bounds.minY / ih,
+      u1: (bounds.maxX + 1) / iw,
+      v1: (bounds.maxY + 1) / ih,
+    },
+  };
+}
+
 /** Canvas sprite — official Baloon8 sneaker side thumbnail (fallback: blueprint crop). */
 let sideSpriteLoad: Promise<HTMLCanvasElement> | null = null;
 
