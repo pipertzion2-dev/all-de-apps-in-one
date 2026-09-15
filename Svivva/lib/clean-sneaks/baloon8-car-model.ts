@@ -15,7 +15,8 @@ export const BALOON8_DIMS = {
 
 /** Dark iridescent abalone / hematite palette from Tripo + hero refs. */
 const ABALONE = [
-  0x1a1e28, 0x2a3040, 0x1a4858, 0x2a6878, 0x3a4080, 0x4a2888, 0x1a8068, 0x5a48a0, 0x2a9878, 0x4cc9c0,
+  0x1a1e28, 0x2a3040, 0x1a4858, 0x2a6878, 0x3a4080, 0x4a2888, 0x1a8068, 0x5a48a0, 0x2a9878,
+  0x4cc9c0,
 ];
 
 export type Baloon8CarBuild = {
@@ -255,11 +256,7 @@ function createPufferShell(scale: number, budget: number, mobile: boolean): THRE
     if (idx >= budget) return false;
     dummy.position.set(x, y, z);
     dummy.scale.set(sx, sy, sz);
-    dummy.rotation.set(
-      ((idx * 17) % 7) * 0.03,
-      ((idx * 11) % 5) * 0.04,
-      ((idx * 7) % 6) * 0.03,
-    );
+    dummy.rotation.set(((idx * 17) % 7) * 0.03, ((idx * 11) % 5) * 0.04, ((idx * 7) % 6) * 0.03);
     dummy.updateMatrix();
     mesh.setMatrixAt(idx, dummy.matrix);
     color.setHex(colorHex);
@@ -293,7 +290,8 @@ function createPufferShell(scale: number, budget: number, mobile: boolean): THRE
           if (idx >= budget) break;
           if (windowCut && depth < 0.9) continue;
           const z = side * halfW * depth * (0.96 + ((row + col) % 5) * 0.01);
-          const hex = ABALONE[(row + col + (side > 0 ? 0 : 3) + Math.round(depth * 5)) % ABALONE.length]!;
+          const hex =
+            ABALONE[(row + col + (side > 0 ? 0 : 3) + Math.round(depth * 5)) % ABALONE.length]!;
           place(x, y, z, sx, sy, sz, hex);
         }
       }
@@ -482,10 +480,7 @@ function createCabinVoid(scale: number): THREE.Group {
     metalness: 0,
   });
 
-  const cabinBox = new THREE.Mesh(
-    new THREE.BoxGeometry(L * 0.34, H * 0.28, W * 0.48),
-    voidMat,
-  );
+  const cabinBox = new THREE.Mesh(new THREE.BoxGeometry(L * 0.34, H * 0.28, W * 0.48), voidMat);
   cabinBox.position.set(-L * 0.02, H * 0.72, 0);
   cabin.add(cabinBox);
 
