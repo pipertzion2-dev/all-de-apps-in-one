@@ -41,17 +41,18 @@ export function CleanSneaksSection() {
               </p>
             </div>
 
-            <div className="px-2 pb-3 sm:px-5 sm:pb-5">
-              <Image
-                src={BALOON8_SNEAKER_THUMBNAIL_URL}
-                alt="Baloon8 iridescent car-sneaker — packed balloon body, crystal wheels, e8 hubcaps"
-                width={883}
-                height={300}
-                priority
-                className="h-auto w-full"
-                sizes="(max-width: 1024px) 100vw, 55vw"
-                data-testid="img-baloon8-sneaker-thumbnail"
-              />
+            <div className="flex justify-center px-3 pb-3 sm:px-5 sm:pb-5">
+              <div className="relative aspect-[883/300] w-full max-w-[320px] sm:max-w-[420px]">
+                <Image
+                  src={BALOON8_SNEAKER_THUMBNAIL_URL}
+                  alt="Baloon8 iridescent car-sneaker — packed balloon body, crystal wheels, e8 hubcaps"
+                  fill
+                  priority
+                  className="object-contain object-center"
+                  sizes="(max-width: 640px) 320px, 420px"
+                  data-testid="img-baloon8-sneaker-thumbnail"
+                />
+              </div>
             </div>
           </div>
 

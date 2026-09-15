@@ -60,10 +60,7 @@ export function GameLoadingWheels({ fullscreen = false }: GameLoadingWheelsProps
             className="size-[min(24vw,96px)] shrink-0 overflow-hidden rounded-full sm:size-[min(22vw,112px)]"
             data-testid={`loading-wheel-${index}`}
           >
-            <div
-              className={`h-full w-full ${reducedMotion ? "" : WHEEL_SPINS[index]}`}
-              aria-hidden
-            >
+            <div className={`h-full w-full ${reducedMotion ? "" : WHEEL_SPINS[index]}`} aria-hidden>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={src}
