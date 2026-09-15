@@ -1,33 +1,37 @@
-# Clean Sneaks — Player Sneaker Asset
+# Clean Sneaks — Baloon8 Puffer Coupe
 
-## Replace the custom sneaker here
+## 3D asset (default)
 
-**Gameplay (default):** the 3D runner at `/clean-sneaks` loads **Baloon8 blueprint panels** from `baloon8-blueprint.jpg` (`lib/clean-sneaks/baloon8-shoe-model.ts`). The 2D fallback draws the side-profile crop when WebGL is unavailable.
+Gameplay at `/clean-sneaks` and the homepage orbit viewer build a **real procedural 3D puffer coupe** matching the Tripo / hero references:
 
-**Optional custom flat sprite** (user/AI designs via `resolvePlayerSneaker({ spriteUrl, useWalkingSprite: false })`):
+- dark iridescent abalone quilted pods
+- neon-green ornate grille with eB emblem
+- chrome disc wheels with logo
+- claw feet + rear crest
+
+Source:
+
+- `lib/clean-sneaks/baloon8-car-model.ts` — volumetric instanced puffer body
+- `lib/clean-sneaks/baloon8-shoe-model.ts` — viewer / runner scale wrappers
+- `components/clean-sneaks/Baloon8ShoeScene.tsx` — homepage orbit viewer
+
+References (not used as in-game textures):
+
+- `baloon8-tripo-puffer-reference.jpg` — Tripo dark puffer coupe
+- `baloon8-hero-reference.jpg` — studio abalone hero still
+- `baloon8-meshy-stone-reference.jpg` — earlier stone look (superseded)
+- `baloon8-blueprint.jpg` / `player-shoe.png` — legacy mockups only
+
+## Optional custom flat sprite
+
+User/AI designs via `resolvePlayerSneaker({ spriteUrl, useWalkingSprite: false })` can still point at:
 
 ```
 public/assets/clean-sneaks/player-shoe.png
 ```
 
-The bundled PNG is the Baloon8 car-shoe side view (wheels) — used for marketing/3D reference only, not in-game by default.
+That PNG is marketing/reference only — **not** the default in-game 3D body.
 
-## Baloon8 3D car-shoe
+## Future: GLB import
 
-The four-view Baloon8 mockup is rebuilt in advanced Three.js:
-
-- `lib/clean-sneaks/baloon8-shoe-model.ts` — blueprint-textured panels + instanced iridescent bubbles, wheels, grille, BALOON8 plate
-- `components/clean-sneaks/Baloon8ShoeScene.tsx` — viewer with RoomEnvironment, bloom, orbit controls
-- Reference blueprint: `baloon8-blueprint.jpg`
-
-## Future: user / AI sneakers
-
-`lib/clean-sneaks/assets.ts` → `resolvePlayerSneaker()` resolves the player sneaker.
-
-Later you can pass:
-
-- a user-selected design URL
-- an AI-generated sneaker texture
-- a Three.js texture / GLB path (`modelUrl`)
-
-without rewriting the game loop. Gameplay currently draws the 2D sprite on Canvas for homepage performance; Three.js is already in the repo for richer sneaker presentation later.
+`lib/clean-sneaks/types.ts` → `modelUrl?: string` can later load a Tripo/Meshy-exported `.glb` without rewriting the runner.

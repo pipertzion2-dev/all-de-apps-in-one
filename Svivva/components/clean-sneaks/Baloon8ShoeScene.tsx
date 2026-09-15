@@ -4,15 +4,15 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import {
-  BALOON8_HERO_REFERENCE_URL,
-  buildBaloon8ReferenceHero,
+  BALOON8_DIMS,
+  BALOON8_SCENE_SCALE,
   buildBaloon8Shoe,
 } from "@/lib/clean-sneaks/baloon8-shoe-model";
-import {
-  loadBaloon8BlueprintTexture,
-  loadBaloon8HeroReferenceTexture,
-} from "@/lib/clean-sneaks/baloon8-textures";
 
 type Props = {
   className?: string;
@@ -20,12 +20,10 @@ type Props = {
   bubbleCount?: number;
 };
 
-const STUDIO_BG = 0xededed;
-
 /**
- * Baloon8 viewer — opens on the exact hero reference; drag to orbit the blueprint 3D.
+ * Interactive Baloon8 car-shoe — textured from the user's four-view mockup.
  */
-export function Baloon8ShoeScene({ className = "", autoRotate = true }: Props) {
+export function Baloon8ShoeScene({ className = "", autoRotate = true, bubbleCount }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -36,18 +34,19 @@ export function Baloon8ShoeScene({ className = "", autoRotate = true }: Props) {
     let raf = 0;
     let ro: ResizeObserver | null = null;
     let controls: OrbitControls | null = null;
-    let hero: ReturnType<typeof buildBaloon8ReferenceHero> | null = null;
+    let composer: EffectComposer | null = null;
     let shoe: ReturnType<typeof buildBaloon8Shoe> | null = null;
-    let showModel = false;
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const isMobile = window.innerWidth < 768;
+    const count = bubbleCount ?? (isMobile ? 480 : 1200);
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(STUDIO_BG);
+    scene.background = new THREE.Color(0x06080c);
+    scene.fog = new THREE.FogExp2(0x06080c, 0.06);
 
-    const camera = new THREE.PerspectiveCamera(isMobile ? 32 : 28, 1, 0.05, 40);
-    camera.position.set(0.05, 1.05, 4.35);
+    const camera = new THREE.PerspectiveCamera(36, 1, 0.05, 40);
+    camera.position.set(2.8, 1.5, 2.6);
 
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -56,8 +55,9 @@ export function Baloon8ShoeScene({ className = "", autoRotate = true }: Props) {
     });
     const dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2);
     renderer.setPixelRatio(dpr);
-    renderer.setClearColor(STUDIO_BG, 1);
-    renderer.toneMapping = THREE.NoToneMapping;
+    renderer.setClearColor(0x06080c, 1);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.12;
     host.appendChild(renderer.domElement);
     Object.assign(renderer.domElement.style, {
       width: "100%",
@@ -65,23 +65,22 @@ export function Baloon8ShoeScene({ className = "", autoRotate = true }: Props) {
       display: "block",
       touchAction: "none",
     });
-    renderer.domElement.setAttribute("aria-label", "Baloon8 car-shoe — hero reference");
+    renderer.domElement.setAttribute("aria-label", "Baloon8 3D car-shoe model");
 
     const pmrem = new THREE.PMREMGenerator(renderer);
-    const studioEnv = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.92));
-    const key = new THREE.DirectionalLight(0xffffff, 0.35);
-    key.position.set(2, 4, 3);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+    const key = new THREE.DirectionalLight(0xffffff, 1.3);
+    key.position.set(4, 6, 3);
     scene.add(key);
-
-    const heroGroup = new THREE.Group();
-    const modelGroup = new THREE.Group();
-    modelGroup.visible = false;
-    scene.add(heroGroup, modelGroup);
+    const rim = new THREE.DirectionalLight(0x7ec8d9, 0.65);
+    rim.position.set(-3, 2, -4);
+    scene.add(rim);
 
     const clock = new THREE.Clock();
     let userOrbiting = false;
+    const lookAtY = (BALOON8_DIMS.height * BALOON8_SCENE_SCALE) / 2;
 
     const resize = () => {
       const w = host.clientWidth;
@@ -90,70 +89,62 @@ export function Baloon8ShoeScene({ className = "", autoRotate = true }: Props) {
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h, false);
+      composer?.setSize(w, h);
     };
 
-    const switchToModel = () => {
-      if (showModel) return;
-      showModel = true;
-      heroGroup.visible = false;
-      modelGroup.visible = true;
-      scene.background = new THREE.Color(0x06080c);
-      scene.environment = studioEnv;
-      renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.08;
-      if (controls) {
-        controls.target.set(0, 0.28, 0);
-        controls.minDistance = 1.4;
-        controls.maxDistance = 5.5;
-        controls.update();
-      }
-      camera.position.set(2.4, 1.35, 2.5);
-    };
-
-    Promise.all([loadBaloon8HeroReferenceTexture(), loadBaloon8BlueprintTexture()])
-      .then(([heroTex, blueprint]) => {
+    Promise.resolve()
+      .then(() => {
         if (disposed) return;
 
-        hero = buildBaloon8ReferenceHero(heroTex);
-        heroGroup.add(hero.root);
-
-        shoe = buildBaloon8Shoe(blueprint, 0);
-        modelGroup.add(shoe.root);
+        shoe = buildBaloon8Shoe(undefined, count);
+        scene.add(shoe.root);
 
         controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
-        controls.dampingFactor = 0.07;
-        controls.minDistance = 2.8;
+        controls.dampingFactor = 0.06;
+        controls.minDistance = 1.6;
         controls.maxDistance = 6;
         controls.maxPolarAngle = Math.PI * 0.48;
-        controls.target.set(0, 0.72, 0);
+        controls.target.set(0, lookAtY, 0);
         controls.update();
 
         controls.addEventListener("start", () => {
           userOrbiting = true;
-          switchToModel();
         });
+        controls.addEventListener("end", () => {
+          userOrbiting = false;
+        });
+
+        composer = new EffectComposer(renderer);
+        composer.setPixelRatio(dpr);
+        composer.addPass(new RenderPass(scene, camera));
+        const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.35, 0.3, 0.82);
+        composer.addPass(bloom);
+        composer.addPass(new OutputPass());
+
+        const grid = new THREE.GridHelper(6, 24, 0x1a3040, 0x0e1820);
+        scene.add(grid);
 
         resize();
         ro = new ResizeObserver(resize);
         ro.observe(host);
 
         const tick = () => {
-          if (disposed || !controls) return;
+          if (disposed || !shoe || !composer || !controls) return;
           const t = clock.getElapsedTime();
-          if (showModel && autoRotate && !reduced && !userOrbiting && shoe) {
-            shoe.root.rotation.y = t * 0.32;
+          if (autoRotate && !reduced && !userOrbiting) {
+            shoe.root.rotation.y = t * 0.35;
           }
           controls.update();
-          renderer.render(scene, camera);
+          composer.render();
           raf = requestAnimationFrame(tick);
         };
         raf = requestAnimationFrame(tick);
       })
       .catch((err) => {
-        console.error("[Baloon8ShoeScene] failed to load Baloon8 assets", err);
+        console.error("[Baloon8ShoeScene] failed to build puffer coupe", err);
         if (!disposed && host) {
-          host.innerHTML = `<img src="${BALOON8_HERO_REFERENCE_URL}" alt="Baloon8 reference" style="width:100%;height:100%;object-fit:contain;background:#ededed" />`;
+          host.innerHTML = `<div style="display:grid;place-items:center;width:100%;height:100%;background:#0a0c10;color:#9aa4ae;font:500 14px/1.4 system-ui,sans-serif;padding:1.5rem;text-align:center">3D puffer coupe unavailable in this browser</div>`;
         }
       });
 
@@ -162,21 +153,21 @@ export function Baloon8ShoeScene({ className = "", autoRotate = true }: Props) {
       cancelAnimationFrame(raf);
       ro?.disconnect();
       controls?.dispose();
-      hero?.dispose();
+      composer?.dispose();
       shoe?.dispose();
       pmrem.dispose();
-      studioEnv.dispose();
+      scene.environment?.dispose();
       renderer.dispose();
       if (renderer.domElement.parentElement === host) {
         host.removeChild(renderer.domElement);
       }
     };
-  }, [autoRotate]);
+  }, [autoRotate, bubbleCount]);
 
   return (
     <div
       ref={hostRef}
-      className={`relative h-full min-h-[280px] w-full bg-[#ededed] ${className}`}
+      className={`relative h-full min-h-[280px] w-full ${className}`}
       data-testid="baloon8-shoe-scene"
     />
   );
