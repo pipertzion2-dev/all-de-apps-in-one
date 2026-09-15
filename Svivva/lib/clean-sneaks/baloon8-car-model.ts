@@ -426,7 +426,10 @@ export function buildBaloon8Car(opts: Baloon8CarOptions): Baloon8CarBuild {
 
   const puffer = createPufferShell(scale, podBudget, mobile);
   root.add(puffer);
-  disposables.push(puffer.geometry, puffer.material);
+  disposables.push(puffer.geometry);
+  const pufferMat = puffer.material;
+  if (Array.isArray(pufferMat)) pufferMat.forEach((m) => disposables.push(m));
+  else disposables.push(pufferMat);
 
   root.add(createGrille(scale, mobile));
   root.add(createClawFoot(scale, 1, mobile));
