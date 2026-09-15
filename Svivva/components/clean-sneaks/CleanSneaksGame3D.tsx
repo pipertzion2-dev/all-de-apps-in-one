@@ -18,6 +18,7 @@ import {
 import { readBestScore, shareScore, writeBestScore } from "@/lib/clean-sneaks/storage";
 import type {
   GameOverPayload,
+  GamePhase,
   HudShoeSnapshot,
   RunStats,
   SneakerAssetRef,
@@ -41,6 +42,7 @@ export type CleanSneaksGame3DProps = {
   active: boolean;
   onExit?: () => void;
   onStats?: (stats: RunStats) => void;
+  onPhaseChange?: (phase: GamePhase) => void;
   sneakerOverride?: Partial<SneakerAssetRef> | null;
   fullscreen?: boolean;
   className?: string;
@@ -93,6 +95,7 @@ export function CleanSneaksGame3D({
   active,
   onExit,
   onStats,
+  onPhaseChange,
   sneakerOverride,
   fullscreen = false,
   className,
@@ -109,9 +112,7 @@ export function CleanSneaksGame3D({
   const stateRef = useRef<RunEngineState>(createRunEngineState(0, sneaker.archetype ?? colorwayId));
   const loadingDoneRef = useRef(false);
 
-  const [phase, setPhase] = useState<"loading" | "start" | "countdown" | "running" | "over">(
-    "loading",
-  );
+  const [phase, setPhase] = useState<GamePhase>("loading");
   const [countdown, setCountdown] = useState(3);
   const [hud, setHud] = useState<RunStats>(() => statsFromState(stateRef.current));
   const [shoes, setShoes] = useState(() => ({
@@ -176,6 +177,10 @@ export function CleanSneaksGame3D({
     setFlashStreak(true);
     window.setTimeout(() => setFlashStreak(false), 450);
   }, []);
+
+  useEffect(() => {
+    onPhaseChange?.(phase);
+  }, [phase, onPhaseChange]);
 
   useEffect(() => {
     const syncViewport = () => setPortrait(isPortraitViewport());
@@ -389,6 +394,20 @@ export function CleanSneaksGame3D({
   const visionOn = hud.sneakVisionActive;
   void ohNoTick;
 
+  const preGame = phase === "loading" || phase === "start";
+
+  if (preGame) {
+    return phase === "loading" ? (
+      <GameLoadingWheels className={`fixed inset-0 z-[300] ${className ?? ""}`} style={style} />
+    ) : (
+      <GameStartScreen
+        className={`fixed inset-0 z-[300] cursor-pointer ${className ?? ""}`}
+        style={style}
+        onStart={beginGame}
+      />
+    );
+  }
+
   return (
     <div
       ref={wrapRef}
@@ -502,12 +521,6 @@ export function CleanSneaksGame3D({
 
           {ohNo && phase === "running" && <OhNoOverlay window={ohNo} onAction={onOhNo} />}
         </div>
-
-        {phase === "loading" && <GameLoadingWheels className="fixed inset-0 z-[300]" />}
-
-        {phase === "start" && (
-          <GameStartScreen className="fixed inset-0 z-[300] cursor-pointer" onStart={beginGame} />
-        )}
 
         {phase === "running" && (
           <div className="pointer-events-auto absolute bottom-3 right-3 z-20 flex gap-2">
