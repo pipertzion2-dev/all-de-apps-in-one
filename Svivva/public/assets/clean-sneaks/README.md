@@ -1,32 +1,25 @@
 # Clean Sneaks — BALOON8 Car-Sneaker
 
-## 3D asset (default)
+## Thumbnail (homepage / OG)
 
-Gameplay at `/clean-sneaks` and the homepage orbit viewer build a **real procedural 3D car-sneaker** matching the brand orthographic blueprint + Tripo / Meshy refs:
+Official sneaker side render:
 
-- slip-on sneaker silhouette (4610 × 1880 × 1320 mm)
-- densely packed iridescent balloon pods (instanced Three.js mesh)
-- neon-green e8 circular grille with bloom
-- crystalline tread wheels + chrome e8 hubcaps
-- BALOON8 rear plate, 6 exhausts, claw toes, mirror pods
+```
+public/assets/clean-sneaks/baloon8-sneaker-thumbnail.png
+```
 
-Source:
+(Same art as `player-shoe.png`.) Used by:
 
-- `lib/clean-sneaks/baloon8-car-model.ts` — advanced procedural geometry
-- `lib/clean-sneaks/baloon8-shoe-model.ts` — viewer / runner wrappers
-- `components/clean-sneaks/Baloon8ShoeScene.tsx` — orbit viewer + bloom
+- Homepage Clean Sneaks section (default preview)
+- Open Graph / Twitter cards for `/clean-sneaks`
+- 2D side sprite preload
 
-References (not used as in-game textures):
+## 3D asset
 
-- `baloon8-orthographic-blueprint.jpg` — official 4-view brand sheet
-- `baloon8-tripo-futuristic-reference.jpg` / `baloon8-tripo-puffer-reference.jpg`
-- `baloon8-meshy-puffer-reference.jpg` / `baloon8-meshy-stone-reference.jpg`
-- `baloon8-hero-reference.jpg`
+Optional orbit viewer (toggle “Orbit 3D”) and `/clean-sneaks` runner build a procedural packed-balloon sneaker mesh in Three.js (`baloon8-car-model.ts`).
 
-## Optional custom flat sprite
+## References
 
-User/AI designs via `resolvePlayerSneaker({ spriteUrl, useWalkingSprite: false })` can still point at `player-shoe.png` (marketing only — not the default 3D body).
-
-## Future: GLB import
-
-`types.ts` → `modelUrl?: string` can later load a Tripo/Meshy-exported `.glb`.
+- `baloon8-orthographic-blueprint.jpg` — 4-view brand sheet
+- `baloon8-tripo-futuristic-reference.jpg` / `baloon8-meshy-puffer-reference.jpg`
+- `baloon8-blueprint.jpg` — legacy 2×2 mockup sheet
