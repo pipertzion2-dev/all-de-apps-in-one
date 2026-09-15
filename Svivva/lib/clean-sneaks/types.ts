@@ -17,7 +17,7 @@ export type ObstacleKind =
 
 export type PowerUpKind = "shield" | "quickClean" | "freshKicks" | "perfectStep";
 
-export type GamePhase = "idle" | "countdown" | "running" | "over";
+export type GamePhase = "idle" | "logo" | "countdown" | "running" | "over";
 
 export interface SneakerAssetRef {
   /** Public URL or data URL for the 2D side sprite */

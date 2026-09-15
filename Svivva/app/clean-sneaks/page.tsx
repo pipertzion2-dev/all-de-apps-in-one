@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { CleanSneaksGame3D } from "@/components/clean-sneaks/CleanSneaksGame3D";
+import { GameLogoSplash } from "@/components/clean-sneaks/GameLogoSplash";
 import { SceneErrorBoundary } from "@/components/clean-sneaks/SceneErrorBoundary";
 
 export default function CleanSneaksPage() {
@@ -28,6 +29,18 @@ export default function CleanSneaksPage() {
       window.removeEventListener("orientationchange", syncViewport);
     };
   }, []);
+
+  if (!ready) {
+    return (
+      <GameLogoSplash
+        className="fixed inset-0 z-[300]"
+        style={{
+          paddingTop: "env(safe-area-inset-top)",
+          paddingBottom: "env(safe-area-inset-bottom)",
+        }}
+      />
+    );
+  }
 
   return (
     <div
@@ -85,37 +98,31 @@ export default function CleanSneaksPage() {
         <div
           className={`flex min-h-0 flex-1 flex-col ${portrait ? "px-1.5 pb-1.5" : "px-3 pb-3 sm:px-6 sm:pb-6"}`}
         >
-          {!ready ? (
-            <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
-              Loading Clean Sneaks…
-            </div>
-          ) : (
-            <SceneErrorBoundary
-              key={sceneAttempt}
-              fallback={
-                <div className="flex flex-1 flex-col items-center justify-center gap-4 rounded-lg border border-white/10 bg-[#0a0c10]/90 p-6 text-center">
-                  <p className="text-sm text-muted-foreground">
-                    Clean Sneaks 3D couldn&apos;t start. Tap retry — the game stays fully 3D.
-                  </p>
-                  <div className="flex flex-wrap justify-center gap-3">
-                    <Button variant="outline" onClick={() => setSceneAttempt((n) => n + 1)}>
-                      Retry 3D
-                    </Button>
-                    <Button asChild variant="ghost">
-                      <Link href="/#clean-sneaks">Back to homepage</Link>
-                    </Button>
-                  </div>
+          <SceneErrorBoundary
+            key={sceneAttempt}
+            fallback={
+              <div className="flex flex-1 flex-col items-center justify-center gap-4 rounded-lg border border-white/10 bg-[#0a0c10]/90 p-6 text-center">
+                <p className="text-sm text-muted-foreground">
+                  Clean Sneaks 3D couldn&apos;t start. Tap retry — the game stays fully 3D.
+                </p>
+                <div className="flex flex-wrap justify-center gap-3">
+                  <Button variant="outline" onClick={() => setSceneAttempt((n) => n + 1)}>
+                    Retry 3D
+                  </Button>
+                  <Button asChild variant="ghost">
+                    <Link href="/#clean-sneaks">Back to homepage</Link>
+                  </Button>
                 </div>
-              }
-            >
-              <CleanSneaksGame3D
-                key={sceneAttempt}
-                active
-                fullscreen
-                onExit={() => router.push("/#clean-sneaks")}
-              />
-            </SceneErrorBoundary>
-          )}
+              </div>
+            }
+          >
+            <CleanSneaksGame3D
+              key={sceneAttempt}
+              active
+              fullscreen
+              onExit={() => router.push("/#clean-sneaks")}
+            />
+          </SceneErrorBoundary>
         </div>
       </div>
     </div>

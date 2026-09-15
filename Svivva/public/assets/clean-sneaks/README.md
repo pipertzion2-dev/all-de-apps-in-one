@@ -1,5 +1,13 @@
 # Clean Sneaks — BALOON8 Car-Sneaker
 
+## Main logo (game splash)
+
+```
+public/assets/clean-sneaks/karen-the-muscle-logo.jpg
+```
+
+Shown fullscreen as the first screen when a player opens `/clean-sneaks`, before the countdown.
+
 ## Thumbnail (homepage / OG / runner)
 
 Official sneaker side render:

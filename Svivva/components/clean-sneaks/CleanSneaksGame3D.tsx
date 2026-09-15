@@ -12,6 +12,7 @@ import {
 import { readBestScore, shareScore, writeBestScore } from "@/lib/clean-sneaks/storage";
 import type { GameOverPayload, RunStats, SneakerAssetRef } from "@/lib/clean-sneaks/types";
 import { isPortraitViewport } from "@/lib/clean-sneaks/run-quality";
+import { GameLogoSplash } from "./GameLogoSplash";
 import { CleanSneaksRunScene } from "./CleanSneaksRunScene";
 
 export type CleanSneaksGame3DProps = {
@@ -41,8 +42,9 @@ export function CleanSneaksGame3D({
   const sneaker = resolvePlayerSneaker(sneakerOverride);
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const stateRef = useRef<RunEngineState>(createRunEngineState());
+  const logoSkipRef = useRef(false);
 
-  const [phase, setPhase] = useState<"countdown" | "running" | "over">("countdown");
+  const [phase, setPhase] = useState<"logo" | "countdown" | "running" | "over">("logo");
   const [countdown, setCountdown] = useState(3);
   const [hud, setHud] = useState<RunStats>({
     score: 0,
@@ -121,9 +123,7 @@ export function CleanSneaksGame3D({
     };
   }, []);
 
-  useEffect(() => {
-    if (!active) return;
-    resetRun();
+  const startCountdown = useCallback(() => {
     setPhase("countdown");
     setCountdown(3);
     let n = 3;
@@ -142,8 +142,41 @@ export function CleanSneaksGame3D({
       },
       reduced ? 280 : 520,
     );
-    return () => window.clearInterval(id);
+    return id;
+  }, []);
+
+  const dismissLogo = useCallback(() => {
+    if (logoSkipRef.current) return;
+    logoSkipRef.current = true;
+    startCountdown();
+  }, [startCountdown]);
+
+  useEffect(() => {
+    if (!active) return;
+    resetRun();
+    logoSkipRef.current = false;
+    setPhase("logo");
+    setCountdown(3);
   }, [active, resetRun]);
+
+  useEffect(() => {
+    if (!active || phase !== "logo") return;
+    const reduced = prefersReducedMotion();
+    const autoId = window.setTimeout(dismissLogo, reduced ? 1200 : 2400);
+    return () => window.clearTimeout(autoId);
+  }, [active, phase, dismissLogo]);
+
+  useEffect(() => {
+    if (!active || phase !== "logo") return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " " || e.code === "Space") {
+        e.preventDefault();
+        dismissLogo();
+      }
+    };
+    window.addEventListener("keydown", onKey, { passive: false });
+    return () => window.removeEventListener("keydown", onKey);
+  }, [active, phase, dismissLogo]);
 
   useEffect(() => {
     if (!active) return;
@@ -210,20 +243,8 @@ export function CleanSneaksGame3D({
 
   const runItBack = () => {
     resetRun();
-    setPhase("countdown");
-    setCountdown(3);
-    let n = 3;
-    const id = window.setInterval(() => {
-      n -= 1;
-      if (n > 0) setCountdown(n);
-      else if (n === 0) setCountdown(0);
-      else {
-        window.clearInterval(id);
-        setPhase("running");
-        stateRef.current.running = true;
-        stateRef.current.lastTs = performance.now();
-      }
-    }, 480);
+    logoSkipRef.current = true;
+    startCountdown();
   };
 
   const onShare = async () => {
@@ -364,6 +385,14 @@ export function CleanSneaksGame3D({
             </div>
           )}
         </div>
+
+        {phase === "logo" && (
+          <GameLogoSplash
+            className="fixed inset-0 z-[300] cursor-pointer"
+            showHint
+            onContinue={dismissLogo}
+          />
+        )}
 
         {phase === "countdown" && (
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm">
