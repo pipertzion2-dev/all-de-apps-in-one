@@ -29,6 +29,30 @@ export function preloadBaloon8RunnerShoe(): Promise<THREE.Texture | null> {
     });
 }
 
+/** Rotate canvas −90° so a rightward toe becomes an upward (down-the-road) toe. */
+function rotateCanvasToeForward(src: HTMLCanvasElement): HTMLCanvasElement {
+  const dst = document.createElement("canvas");
+  dst.width = src.height;
+  dst.height = src.width;
+  const ctx = dst.getContext("2d")!;
+  ctx.translate(0, dst.height);
+  ctx.rotate(-Math.PI / 2);
+  ctx.drawImage(src, 0, 0);
+  return dst;
+}
+
+function canvasToTexture(canvas: HTMLCanvasElement): THREE.CanvasTexture {
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 8;
+  tex.needsUpdate = true;
+  return tex;
+}
+
+/**
+ * Camera-facing sprite with the side-profile art rotated so the toe points
+ * toward the horizon (down the road), not across the lanes.
+ */
 function createShoeBillboard(
   source: THREE.Texture,
   mobile: boolean,
@@ -37,14 +61,17 @@ function createShoeBillboard(
 ): { mount: THREE.Group; mat: THREE.SpriteMaterial } {
   let map: THREE.Texture = source;
   let alphaMap: THREE.Texture | undefined;
-  let aspect = 2.2;
+  // After −90° rotation the shoe is taller than wide.
+  let aspect = 0.55;
   try {
     const img = source.image as CanvasImageSource & { width?: number };
     if (img && ("naturalWidth" in img ? img.naturalWidth : img.width)) {
       const prep = prepareSneakerThumbnail(img);
-      map = prep.map;
-      alphaMap = prep.alphaMap;
-      aspect = prep.aspect;
+      const mapCanvas = rotateCanvasToeForward(prep.map.image as HTMLCanvasElement);
+      const alphaCanvas = rotateCanvasToeForward(prep.alphaMap.image as HTMLCanvasElement);
+      map = canvasToTexture(mapCanvas);
+      alphaMap = canvasToTexture(alphaCanvas);
+      aspect = mapCanvas.width / mapCanvas.height;
     }
   } catch (err) {
     console.warn("[walking-shoes-3d] thumbnail prep failed, using raw texture", err);
@@ -60,9 +87,10 @@ function createShoeBillboard(
     toneMapped: false,
   });
   const sprite = new THREE.Sprite(mat);
-  const baseW = portrait ? 1.05 : mobile ? 1.15 : 1.0;
-  sprite.scale.set(baseW, baseW / aspect, 1);
-  sprite.position.y = portrait ? 0.24 : mobile ? 0.28 : 0.24;
+  // Height is the long axis (toe → horizon); width is the shoe thickness on screen.
+  const baseH = portrait ? 1.15 : mobile ? 1.25 : 1.1;
+  sprite.scale.set(baseH * aspect, baseH, 1);
+  sprite.position.y = portrait ? 0.52 : mobile ? 0.58 : 0.55;
   sprite.renderOrder = 8;
   sprite.frustumCulled = false;
 
@@ -74,8 +102,7 @@ function createShoeBillboard(
 }
 
 /**
- * Runner pair — official Baloon8 sneaker thumbnail billboards (not the
- * procedural balloon-car mesh, which never read as a shoe).
+ * Runner pair — official Baloon8 sneaker art, toe pointing down the road.
  */
 export function createWalkingShoes3D(
   _blueprint?: THREE.Texture | null,
@@ -189,7 +216,7 @@ export function updateWalkingShoes3D(
   const phase = args.walkPhase * Math.PI * 2;
   const dt = 0.016;
   const stride = args.airborne ? 0 : Math.sin(phase);
-  const lateral = args.portrait ? 0.38 : 0.48;
+  const lateral = args.portrait ? 0.32 : 0.4;
 
   const bob = args.airborne ? 0.14 : Math.max(0, Math.sin(phase * 2)) * 0.05;
   shoes.shoePivot.rotation.x = Math.sin(phase) * (args.airborne ? 0.04 : 0.06);
@@ -204,8 +231,8 @@ export function updateWalkingShoes3D(
   } else {
     const leadLift = Math.max(0, stride) * 0.1;
     const trailLift = Math.max(0, -stride) * 0.1;
-    const leadZ = stride > 0 ? -0.1 : 0.08;
-    const trailZ = stride > 0 ? 0.08 : -0.1;
+    const leadZ = stride > 0 ? -0.12 : 0.09;
+    const trailZ = stride > 0 ? 0.09 : -0.12;
     const leftLead = stride > 0;
 
     shoes.leftPivot.position.set(
