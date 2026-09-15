@@ -865,7 +865,8 @@ export default function LandingPage() {
                         className="flex items-center gap-1.5 text-sm font-bold flex-shrink-0"
                         style={{ color: "#5B8DA8" }}
                       >
-                        <Users className="w-4 h-4" /> Open tracker <ArrowRight className="w-4 h-4" />
+                        <Users className="w-4 h-4" /> Open tracker{" "}
+                        <ArrowRight className="w-4 h-4" />
                       </div>
                     </div>
                   </div>
