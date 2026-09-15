@@ -1,24 +1,21 @@
 # Clean Sneaks — BALOON8 Car-Sneaker
 
-## Thumbnail (homepage / OG / runner)
+**Only sneaker in the game:** BALOON8 (car × slip-on balloon chassis).
 
-Official sneaker side render:
+Colorways live in `baloon8-variants/` — same orthographic model, different finishes:
 
-```
-public/assets/clean-sneaks/baloon8-sneaker-thumbnail.png
-```
+| File          | Colorway            |
+| ------------- | ------------------- |
+| oil-slick.jpg | Oil Slick (default) |
+| emerald.jpg   | Emerald             |
+| amethyst.jpg  | Amethyst            |
+| abalone.jpg   | Abalone             |
+| graphite.jpg  | Graphite            |
+| midnight.jpg  | Midnight            |
+| void.jpg      | Void                |
+| solar.jpg     | Solar               |
 
-(Same art as `player-shoe.png`.) Used by:
+Official sheets:
 
-- Homepage Clean Sneaks section preview
-- Open Graph / Twitter cards for `/clean-sneaks`
-- In-game runner pair (billboard sprites — not the procedural mesh)
-
-## References
-
-- `baloon8-orthographic-blueprint.jpg` — 4-view brand sheet
-- `baloon8-tripo-futuristic-reference.jpg` / `baloon8-meshy-puffer-reference.jpg`
-- `baloon8-blueprint.jpg` — legacy 2×2 mockup sheet
-
-The procedural packed-balloon mesh (`baloon8-car-model.ts`) is unused in the live runner;
-gameplay shows the official thumbnail so the kicks actually read as sneakers.
+- `baloon8-orthographic-blueprint.jpg` — side / front / top / rear
+- `baloon8-sneaker-thumbnail.png` — homepage / OG / share sprite
