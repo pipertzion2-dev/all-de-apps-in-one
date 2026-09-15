@@ -13,7 +13,6 @@ import {
   BALOON8_SCENE_SCALE,
   buildBaloon8Shoe,
 } from "@/lib/clean-sneaks/baloon8-shoe-model";
-import { loadBaloon8BlueprintTexture } from "@/lib/clean-sneaks/baloon8-textures";
 
 type Props = {
   className?: string;
@@ -93,11 +92,11 @@ export function Baloon8ShoeScene({ className = "", autoRotate = true, bubbleCoun
       composer?.setSize(w, h);
     };
 
-    loadBaloon8BlueprintTexture()
-      .then((blueprint) => {
+    Promise.resolve()
+      .then(() => {
         if (disposed) return;
 
-        shoe = buildBaloon8Shoe(blueprint, count);
+        shoe = buildBaloon8Shoe(undefined, count);
         scene.add(shoe.root);
 
         controls = new OrbitControls(camera, renderer.domElement);
@@ -143,9 +142,10 @@ export function Baloon8ShoeScene({ className = "", autoRotate = true, bubbleCoun
         raf = requestAnimationFrame(tick);
       })
       .catch((err) => {
-        console.error("[Baloon8ShoeScene] failed to load blueprint", err);
+        console.error("[Baloon8ShoeScene] failed to build stone coupe", err);
         if (!disposed && host) {
-          host.innerHTML = `<img src="/assets/clean-sneaks/baloon8-blueprint.jpg" alt="Baloon8 blueprint" style="width:100%;height:100%;object-fit:contain;background:#06080c" />`;
+          host.innerHTML =
+            `<div style="display:grid;place-items:center;width:100%;height:100%;background:#0a0c10;color:#9aa4ae;font:500 14px/1.4 system-ui,sans-serif;padding:1.5rem;text-align:center">3D stone coupe unavailable in this browser</div>`;
         }
       });
 

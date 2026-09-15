@@ -65,13 +65,11 @@ export function CleanSneaksSection() {
               <SceneErrorBoundary
                 fallback={
                   <div
-                    className="h-full w-full bg-cover bg-center"
-                    style={{
-                      backgroundImage: "url(/assets/clean-sneaks/baloon8-blueprint.jpg)",
-                    }}
-                    role="img"
-                    aria-label="Baloon8 car-shoe blueprint"
-                  />
+                    className="grid h-full w-full place-items-center bg-[#0a0c10] px-6 text-center text-sm text-white/50"
+                    role="status"
+                  >
+                    3D stone coupe unavailable — try another browser
+                  </div>
                 }
               >
                 <Baloon8ShoeScene className="h-full" />

@@ -1,10 +1,5 @@
 import * as THREE from "three";
 import { buildBaloon8RunnerShoe, type Baloon8WalkerShoe } from "./baloon8-shoe-model";
-import {
-  cropBlueprintTexture,
-  loadBaloon8BlueprintTexture,
-  prepareBlueprintQuadrant,
-} from "./baloon8-textures";
 import { detectRunQuality, runQualityFlags } from "./run-quality";
 
 export type WalkingShoes3D = {
@@ -19,130 +14,46 @@ export type WalkingShoes3D = {
   dustEmitter: THREE.Group;
 };
 
-function createShoeBillboard(
-  blueprint: THREE.Texture,
-  mobile: boolean,
-  portrait: boolean,
-  mirror: boolean,
-): THREE.Group {
-  let sideTex: THREE.Texture;
-  let alphaMap: THREE.Texture | undefined;
-  let aspect = 2.15;
-  try {
-    const img = blueprint.image as CanvasImageSource & { width?: number };
-    if (img && ("naturalWidth" in img ? img.naturalWidth : img.width)) {
-      const prep = prepareBlueprintQuadrant(img, "side");
-      sideTex = prep.map;
-      alphaMap = prep.alphaMap;
-      aspect = prep.aspect;
-    } else {
-      throw new Error("blueprint not loaded");
-    }
-  } catch {
-    sideTex = cropBlueprintTexture(blueprint, "side");
-  }
-
-  const mat = new THREE.SpriteMaterial({
-    map: sideTex,
-    alphaMap,
-    transparent: true,
-    alphaTest: 0.08,
-    depthTest: true,
-    depthWrite: false,
-    toneMapped: false,
-  });
-  const sprite = new THREE.Sprite(mat);
-  const baseW = portrait ? 0.78 : mobile ? 1.05 : 0.92;
-  const h = baseW / aspect;
-  sprite.scale.set(baseW, h, 1);
-  sprite.position.y = portrait ? 0.2 : mobile ? 0.26 : 0.22;
-  sprite.renderOrder = 8;
-  sprite.frustumCulled = false;
-
-  const mount = new THREE.Group();
-  mount.add(sprite);
-  if (mirror) mount.scale.x = -1;
-  mount.frustumCulled = false;
-  return mount;
-}
-
 function runnerBubbleCount(): number {
-  if (typeof window === "undefined") return 1200;
+  if (typeof window === "undefined") return 1400;
   const flags = runQualityFlags(detectRunQuality());
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (reduced) return flags.bubbleCountReduced;
   return flags.bubbleCount;
 }
 
-function buildRunnerShoeSafe(
-  blueprint: THREE.Texture,
-  preferredCount: number,
-  mobile: boolean,
-  portrait: boolean,
-  mirror: boolean,
-): Baloon8WalkerShoe {
-  const counts = [preferredCount, Math.max(90, Math.floor(preferredCount * 0.45)), 60];
-  let lastErr: unknown;
-  for (const count of counts) {
-    try {
-      return buildBaloon8RunnerShoe(blueprint, count, {
-        mobile,
-        portrait,
-        pair: true,
-        mirror,
-      });
-    } catch (err) {
-      lastErr = err;
-      console.warn("[createWalkingShoes3D] shoe build retry", count, err);
-    }
-  }
-  throw lastErr instanceof Error ? lastErr : new Error("Baloon8 runner shoe build failed");
+/** Preload is a no-op resolve — the stone coupe is fully procedural (no image texture). */
+export function preloadBaloon8RunnerShoe(): Promise<THREE.Texture | null> {
+  return Promise.resolve(null);
 }
 
-/** Preload blueprint so the runner shoe is ready before the scene mounts. */
-export function preloadBaloon8RunnerShoe(): Promise<THREE.Texture> {
-  return loadBaloon8BlueprintTexture();
+function buildRunnerShoe(mobile: boolean, portrait: boolean, mirror: boolean): Baloon8WalkerShoe {
+  const preferred = mobile
+    ? Math.max(portrait ? 480 : 640, Math.floor(runnerBubbleCount() / (portrait ? 2.2 : 1.8)))
+    : Math.max(900, Math.floor(runnerBubbleCount() / 1.5));
+  return buildBaloon8RunnerShoe(undefined, preferred, {
+    mobile,
+    portrait,
+    pair: true,
+    mirror,
+  });
 }
 
-function tryBuildRunnerShoe(
-  blueprint: THREE.Texture,
-  preferredCount: number,
-  mobile: boolean,
-  portrait: boolean,
-  mirror: boolean,
-): Baloon8WalkerShoe | null {
-  try {
-    return buildRunnerShoeSafe(blueprint, preferredCount, mobile, portrait, mirror);
-  } catch (err) {
-    console.warn("[createWalkingShoes3D] 3D shoe build failed, using billboard", err);
-    return null;
-  }
-}
-
-/** Baloon8 blueprint pair — left + right foot with walking stride. */
+/** Baloon8 procedural stone coupe pair — left + right with walking stride. */
 export function createWalkingShoes3D(
-  blueprint: THREE.Texture,
+  _blueprint?: THREE.Texture | null,
   mobile = false,
   portrait = false,
 ): WalkingShoes3D {
   const root = new THREE.Group();
-  const perShoeBubbles = mobile
-    ? Math.max(portrait ? 48 : 60, Math.floor(runnerBubbleCount() / (portrait ? 2.5 : 2)))
-    : Math.max(80, Math.floor(runnerBubbleCount() / 2));
-
   const shoePivot = new THREE.Group();
   const leftPivot = new THREE.Group();
   const rightPivot = new THREE.Group();
 
-  const leftShoe = tryBuildRunnerShoe(blueprint, perShoeBubbles, mobile, portrait, false);
-  const rightShoe = tryBuildRunnerShoe(blueprint, perShoeBubbles, mobile, portrait, true);
-
-  if (leftShoe) leftPivot.add(leftShoe.root);
-  else leftPivot.add(createShoeBillboard(blueprint, mobile, portrait, false));
-
-  if (rightShoe) rightPivot.add(rightShoe.root);
-  else rightPivot.add(createShoeBillboard(blueprint, mobile, portrait, true));
-
+  const leftShoe = buildRunnerShoe(mobile, portrait, false);
+  const rightShoe = buildRunnerShoe(mobile, portrait, true);
+  leftPivot.add(leftShoe.root);
+  rightPivot.add(rightShoe.root);
   shoePivot.add(leftPivot, rightPivot);
 
   const shieldRing = new THREE.Mesh(
@@ -206,20 +117,18 @@ function spawnDust(shoes: WalkingShoes3D, xOffset: number): void {
 
 function applyDirtToShoe(shoe: Baloon8WalkerShoe | null, dirt: number, freshGlow: boolean): void {
   if (!shoe) return;
-  const base = new THREE.Color(0x2a6080);
+  const base = new THREE.Color(0x7a8088);
   if (dirt > 0.02) base.lerp(new THREE.Color(0x4a3828), 0.2 + dirt * 0.65);
   shoe.hullMat.color.copy(base);
-  if ("iridescence" in shoe.hullMat) {
-    shoe.hullMat.iridescence = Math.max(0.35, 0.85 - dirt * 0.45);
-  }
-  shoe.hullMat.metalness = Math.max(0.45, 0.85 - dirt * 0.3);
-  shoe.hullMat.envMapIntensity = freshGlow ? 2.0 : 1.55 - dirt * 0.35;
+  shoe.hullMat.roughness = Math.min(0.95, 0.72 + dirt * 0.2);
+  shoe.hullMat.metalness = Math.max(0.04, 0.08 - dirt * 0.04);
+  shoe.hullMat.envMapIntensity = freshGlow ? 0.75 : 0.5 - dirt * 0.15;
 
   if (shoe.bubbles?.instanceColor) {
     const c = new THREE.Color();
     for (let i = 0; i < shoe.bubbles.count; i++) {
       shoe.bubbles.getColorAt(i, c);
-      if (dirt > 0.02) c.lerp(new THREE.Color(0x5c4033), dirt * 0.4);
+      if (dirt > 0.02) c.lerp(new THREE.Color(0x5c4033), dirt * 0.35);
       shoe.bubbles.setColorAt(i, c);
     }
     shoe.bubbles.instanceColor.needsUpdate = true;
@@ -227,7 +136,7 @@ function applyDirtToShoe(shoe: Baloon8WalkerShoe | null, dirt: number, freshGlow
 
   for (const mesh of shoe.glowMeshes) {
     const mat = mesh.material as THREE.MeshStandardMaterial;
-    mat.emissiveIntensity = freshGlow ? 1.6 : Math.max(0.65, 1.25 - dirt * 0.45);
+    mat.emissiveIntensity = freshGlow ? 1.35 : Math.max(0.55, 1.05 - dirt * 0.4);
   }
 }
 
@@ -245,7 +154,7 @@ function pulseGlow(shoes: WalkingShoes3D, t: number, freshGlow: boolean): void {
     if (!shoe) continue;
     for (const mesh of shoe.glowMeshes) {
       const mat = mesh.material as THREE.MeshStandardMaterial;
-      mat.emissiveIntensity = (freshGlow ? 1.35 : 1.0) * pulse * 1.2;
+      mat.emissiveIntensity = (freshGlow ? 1.2 : 0.95) * pulse;
     }
   }
 }

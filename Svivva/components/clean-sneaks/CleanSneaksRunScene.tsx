@@ -410,17 +410,15 @@ function PlayerShoes({
   stateRef,
   mobile,
   portrait,
-  blueprint,
 }: {
   stateRef: React.MutableRefObject<RunEngineState>;
   mobile: boolean;
   portrait: boolean;
-  blueprint: THREE.Texture;
 }) {
   const hostRef = useRef<THREE.Group>(null);
   const shoes = useMemo(
-    () => createWalkingShoes3D(blueprint, mobile, portrait),
-    [blueprint, mobile, portrait],
+    () => createWalkingShoes3D(undefined, mobile, portrait),
+    [mobile, portrait],
   );
 
   useFrame(() => {
@@ -475,7 +473,7 @@ function World({ stateRef, running, onGameOver, onStreakFlash, onStatsTick, qual
   const tickRef = useRef(0);
   const sunRef = useRef<THREE.DirectionalLight>(null);
   const { scene } = useThree();
-  const [blueprint, setBlueprint] = useState<THREE.Texture | null>(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     scene.background = new THREE.Color(0x0a0e14);
@@ -483,8 +481,8 @@ function World({ stateRef, running, onGameOver, onStreakFlash, onStatsTick, qual
 
   useEffect(() => {
     let alive = true;
-    preloadBaloon8RunnerShoe().then((tex) => {
-      if (alive) setBlueprint(tex);
+    preloadBaloon8RunnerShoe().finally(() => {
+      if (alive) setReady(true);
     });
     return () => {
       alive = false;
@@ -570,13 +568,8 @@ function World({ stateRef, running, onGameOver, onStreakFlash, onStatsTick, qual
         />
       ) : null}
 
-      {blueprint ? (
-        <PlayerShoes
-          stateRef={stateRef}
-          mobile={quality.mobile}
-          portrait={quality.portrait}
-          blueprint={blueprint}
-        />
+      {ready ? (
+        <PlayerShoes stateRef={stateRef} mobile={quality.mobile} portrait={quality.portrait} />
       ) : null}
       <DynamicEntities stateRef={stateRef} />
 
