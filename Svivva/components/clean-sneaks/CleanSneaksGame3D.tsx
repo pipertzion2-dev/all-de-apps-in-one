@@ -29,6 +29,8 @@ import {
   writeSavedColorway,
   type Baloon8ColorwayId,
 } from "@/lib/clean-sneaks/sneaker-catalog";
+import { GameLoadingWheels } from "./GameLoadingWheels";
+import { GameStartScreen } from "./GameStartScreen";
 import { CleanSneaksRunScene } from "./CleanSneaksRunScene";
 import { ShoeCamHud } from "./ShoeCamHud";
 import { PostMissionReveal } from "./PostMissionReveal";
@@ -105,8 +107,11 @@ export function CleanSneaksGame3D({
   });
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const stateRef = useRef<RunEngineState>(createRunEngineState(0, sneaker.archetype ?? colorwayId));
+  const loadingDoneRef = useRef(false);
 
-  const [phase, setPhase] = useState<"countdown" | "running" | "over">("countdown");
+  const [phase, setPhase] = useState<"loading" | "start" | "countdown" | "running" | "over">(
+    "loading",
+  );
   const [countdown, setCountdown] = useState(3);
   const [hud, setHud] = useState<RunStats>(() => statsFromState(stateRef.current));
   const [shoes, setShoes] = useState(() => ({
@@ -183,9 +188,7 @@ export function CleanSneaksGame3D({
     };
   }, []);
 
-  useEffect(() => {
-    if (!active) return;
-    resetRun();
+  const startCountdown = useCallback(() => {
     setPhase("countdown");
     setCountdown(3);
     let n = 3;
@@ -204,7 +207,25 @@ export function CleanSneaksGame3D({
       },
       reduced ? 280 : 520,
     );
-    return () => window.clearInterval(id);
+    return id;
+  }, []);
+
+  const finishLoading = useCallback(() => {
+    if (loadingDoneRef.current) return;
+    loadingDoneRef.current = true;
+    setPhase("start");
+  }, []);
+
+  const beginGame = useCallback(() => {
+    startCountdown();
+  }, [startCountdown]);
+
+  useEffect(() => {
+    if (!active) return;
+    resetRun();
+    loadingDoneRef.current = false;
+    setPhase("loading");
+    setCountdown(3);
   }, [active, resetRun]);
 
   const onOhNo = useCallback(
@@ -216,10 +237,24 @@ export function CleanSneaksGame3D({
   );
 
   useEffect(() => {
+    if (!active || phase !== "loading") return;
+    const reduced = prefersReducedMotion();
+    const autoId = window.setTimeout(finishLoading, reduced ? 1400 : 2800);
+    return () => window.clearTimeout(autoId);
+  }, [active, phase, finishLoading]);
+
+  useEffect(() => {
     if (!active) return;
     const onKey = (e: KeyboardEvent) => {
-      if (phase === "over") return;
+      if (phase === "over" || phase === "loading") return;
       const k = e.key.toLowerCase();
+      if (phase === "start") {
+        if (k === " " || k === "enter" || e.code === "Space") {
+          e.preventDefault();
+          beginGame();
+        }
+        return;
+      }
       const s = stateRef.current;
       const now = performance.now();
 
@@ -258,10 +293,10 @@ export function CleanSneaksGame3D({
     };
     window.addEventListener("keydown", onKey, { passive: false });
     return () => window.removeEventListener("keydown", onKey);
-  }, [active, phase, onOhNo]);
+  }, [active, phase, beginGame, onOhNo]);
 
   useEffect(() => {
-    if (!active || phase === "over") return;
+    if (!active || phase !== "running") return;
     const el = wrapRef.current;
     if (!el) return;
     const onStart = (e: TouchEvent) => {
@@ -318,20 +353,8 @@ export function CleanSneaksGame3D({
 
   const runItBack = () => {
     resetRun();
-    setPhase("countdown");
-    setCountdown(3);
-    let n = 3;
-    const id = window.setInterval(() => {
-      n -= 1;
-      if (n > 0) setCountdown(n);
-      else if (n === 0) setCountdown(0);
-      else {
-        window.clearInterval(id);
-        setPhase("running");
-        stateRef.current.running = true;
-        stateRef.current.lastTs = performance.now();
-      }
-    }, 480);
+    loadingDoneRef.current = false;
+    setPhase("loading");
   };
 
   const onShare = async () => {
@@ -479,6 +502,12 @@ export function CleanSneaksGame3D({
 
           {ohNo && phase === "running" && <OhNoOverlay window={ohNo} onAction={onOhNo} />}
         </div>
+
+        {phase === "loading" && <GameLoadingWheels className="fixed inset-0 z-[300]" />}
+
+        {phase === "start" && (
+          <GameStartScreen className="fixed inset-0 z-[300] cursor-pointer" onStart={beginGame} />
+        )}
 
         {phase === "running" && (
           <div className="pointer-events-auto absolute bottom-3 right-3 z-20 flex gap-2">

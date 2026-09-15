@@ -2,6 +2,32 @@
 
 **Only sneaker in the game:** BALOON8 (car × slip-on balloon chassis).
 
+## Main logo
+
+```
+public/assets/clean-sneaks/karen-the-muscle-logo.jpg
+```
+
+Brand logo asset for Karen the Muscle.
+
+## Loading wheels (pre-run splash)
+
+```
+public/assets/clean-sneaks/loading-wheel-yin.jpg
+public/assets/clean-sneaks/loading-wheel-radial.jpg
+public/assets/clean-sneaks/loading-wheel-d-logo.jpg
+```
+
+Three iPbw hubcap wheels spin on the loading screen before each run (and on retry).
+
+## Main cover (start screen)
+
+```
+public/assets/clean-sneaks/ipbw-main-cover.jpg
+```
+
+Shown fullscreen after loading with a **Start** prompt in ZZAI holo type — tap to begin the countdown.
+
 Colorways live in `baloon8-variants/` — same orthographic model, different finishes:
 
 | File          | Colorway            |
