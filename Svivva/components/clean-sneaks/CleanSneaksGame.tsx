@@ -101,10 +101,19 @@ export function CleanSneaksGame({
     score: 0,
     distance: 0,
     cleanliness: 100,
+    leftClean: 100,
+    rightClean: 100,
     cleanLabel: "FRESH",
     streak: 0,
     streakLabel: "CLEAN x1",
     bestScore: 0,
+    closeCalls: 0,
+    styleScore: 0,
+    creases: 0,
+    weather: "clear",
+    walkStyle: "normal",
+    sneakVisionActive: false,
+    cleanChain: 0,
   });
   const [gameOver, setGameOver] = useState<GameOverPayload | null>(null);
   const [shareMsg, setShareMsg] = useState<string | null>(null);
@@ -151,10 +160,19 @@ export function CleanSneaksGame({
       score: Math.floor(s.score),
       distance: Math.floor(s.distance),
       cleanliness: Math.max(0, Math.floor(s.cleanliness)),
+      leftClean: Math.max(0, Math.floor(s.cleanliness)),
+      rightClean: Math.max(0, Math.floor(s.cleanliness)),
       cleanLabel: cleanLabelFrom(s.cleanliness),
       streak: s.streak,
       streakLabel: streakLabelFrom(s.streak),
       bestScore: s.best,
+      closeCalls: 0,
+      styleScore: 0,
+      creases: 0,
+      weather: "clear",
+      walkStyle: "normal",
+      sneakVisionActive: false,
+      cleanChain: s.streak,
     };
     setHud(stats);
     onStats?.(stats);
@@ -199,16 +217,65 @@ export function CleanSneaksGame({
     s.running = false;
     const best = writeBestScore(s.score);
     s.best = best;
+    const clean = Math.max(0, Math.floor(s.cleanliness));
     const payload: GameOverPayload = {
       score: Math.floor(s.score),
       distance: Math.floor(s.distance),
       cleanliness: 0,
-      finalCleanliness: Math.max(0, Math.floor(s.cleanliness)),
+      leftClean: clean,
+      rightClean: clean,
+      finalCleanliness: clean,
       cleanLabel: "COOKED",
       streak: s.streak,
       streakLabel: streakLabelFrom(s.maxStreak),
       maxStreak: s.maxStreak,
       bestScore: best,
+      closeCalls: 0,
+      styleScore: 0,
+      creases: 0,
+      weather: "clear",
+      walkStyle: "normal",
+      sneakVisionActive: false,
+      cleanChain: s.streak,
+      maxCleanChain: s.maxStreak,
+      left: {
+        dirt: {
+          toeBox: { amount: 100 - clean, wetness: 0, substances: {} },
+          leftSide: { amount: 0, wetness: 0, substances: {} },
+          rightSide: { amount: 0, wetness: 0, substances: {} },
+          heel: { amount: 0, wetness: 0, substances: {} },
+          tongue: { amount: 0, wetness: 0, substances: {} },
+          laces: { amount: 0, wetness: 0, substances: {} },
+          midsole: { amount: 0, wetness: 0, substances: {} },
+          outsole: { amount: Math.max(0, 100 - clean), wetness: 0, substances: {} },
+        },
+        creases: 0,
+        scuffs: 0,
+        soleWear: 0,
+        laceCondition: 100,
+        odor: 0,
+      },
+      right: {
+        dirt: {
+          toeBox: { amount: 100 - clean, wetness: 0, substances: {} },
+          leftSide: { amount: 0, wetness: 0, substances: {} },
+          rightSide: { amount: 0, wetness: 0, substances: {} },
+          heel: { amount: 0, wetness: 0, substances: {} },
+          tongue: { amount: 0, wetness: 0, substances: {} },
+          laces: { amount: 0, wetness: 0, substances: {} },
+          midsole: { amount: 0, wetness: 0, substances: {} },
+          outsole: { amount: Math.max(0, 100 - clean), wetness: 0, substances: {} },
+        },
+        creases: 0,
+        scuffs: 0,
+        soleWear: 0,
+        laceCondition: 100,
+        odor: 0,
+      },
+      contaminations: [],
+      worstHit: null,
+      perfectClean: clean >= 100,
+      conditionScore: clean,
     };
     setGameOver(payload);
     setPhase("over");

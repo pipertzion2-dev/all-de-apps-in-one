@@ -16,10 +16,13 @@ export const BALOON8_DIMS = {
 } as const;
 
 /** Iridescent abalone / oil-slick balloon palette (teal → violet → emerald). */
-const BALLOON = [
+const DEFAULT_BALLOON_PODS = [
   0x0e2a32, 0x164848, 0x1a6068, 0x0e3850, 0x2a4878, 0x1a7058, 0x3a3888, 0x228878, 0x4a58a0,
   0x2ab898, 0x185868, 0x245070,
 ];
+
+/** Active pod palette for the current build (set by buildBaloon8Car). */
+let BALLOON = DEFAULT_BALLOON_PODS;
 
 export type Baloon8CarBuild = {
   root: THREE.Group;
@@ -35,6 +38,12 @@ export type Baloon8CarOptions = {
   mobile?: boolean;
   portrait?: boolean;
   podBudget?: number;
+  /** Balloon pod hex colors — BALOON8 colorway only */
+  podPalette?: number[];
+  /** Hull base hex */
+  hullColor?: number;
+  /** Grille / plate accent hex */
+  accentColor?: number;
 };
 
 function s(v: number, scale: number): number {
@@ -469,18 +478,19 @@ function createInnerHull(scale: number): THREE.Group {
   return g;
 }
 
-function createGrille(scale: number, mobile: boolean): THREE.Group {
+function createGrille(scale: number, mobile: boolean, accentHex = 0x28e868): THREE.Group {
   const g = new THREE.Group();
   const L = s(BALOON8_DIMS.length, scale);
   const W = s(BALOON8_DIMS.width, scale);
   const H = s(BALOON8_DIMS.height, scale);
+  const accent = new THREE.Color(accentHex);
 
   // Circular neon face (blueprint) on a shallow disc
   const disc = new THREE.Mesh(
     new THREE.CircleGeometry(W * 0.22, 48),
     new THREE.MeshPhysicalMaterial({
       map: grilleTexture(),
-      emissive: new THREE.Color(0x28e868),
+      emissive: accent.clone(),
       emissiveIntensity: mobile ? 1.6 : 2.2,
       metalness: 0.2,
       roughness: 0.25,
@@ -496,7 +506,7 @@ function createGrille(scale: number, mobile: boolean): THREE.Group {
     new THREE.BoxGeometry(s(0.03, scale), H * 0.42, W * 0.38),
     new THREE.MeshPhysicalMaterial({
       color: 0x0a2014,
-      emissive: new THREE.Color(0x14c858),
+      emissive: accent.clone().multiplyScalar(0.55),
       emissiveIntensity: 0.55,
       metalness: 0.4,
       roughness: 0.35,
@@ -505,7 +515,7 @@ function createGrille(scale: number, mobile: boolean): THREE.Group {
   frame.position.set(L * 0.47, H * 0.42, 0);
   g.add(frame);
 
-  const glow = new THREE.PointLight(0x36f078, mobile ? 1.1 : 1.8, s(2.8, scale), 2);
+  const glow = new THREE.PointLight(accentHex, mobile ? 1.1 : 1.8, s(2.8, scale), 2);
   glow.position.set(L * 0.55, H * 0.42, 0);
   g.add(glow);
 
@@ -670,6 +680,8 @@ function createMirrorPods(scale: number, zSign: number): THREE.Group {
 /** Build one full BALOON8 car-sneaker (+X toe/front, +Y up, +Z left). */
 export function buildBaloon8Car(opts: Baloon8CarOptions): Baloon8CarBuild {
   const { scale, mobile = false, portrait = false } = opts;
+  BALLOON = opts.podPalette && opts.podPalette.length > 0 ? opts.podPalette : DEFAULT_BALLOON_PODS;
+  const accent = opts.accentColor ?? 0x28e868;
   const root = new THREE.Group();
   const disposables: Array<{ dispose: () => void }> = [];
   const glowMeshes: THREE.Mesh[] = [];
@@ -686,7 +698,7 @@ export function buildBaloon8Car(opts: Baloon8CarOptions): Baloon8CarBuild {
   if (Array.isArray(pufferMat)) pufferMat.forEach((m) => disposables.push(m));
   else disposables.push(pufferMat);
 
-  root.add(createGrille(scale, mobile));
+  root.add(createGrille(scale, mobile, accent));
   root.add(createClawFeet(scale, 1, mobile));
   root.add(createClawFeet(scale, -1, mobile));
 
@@ -703,6 +715,7 @@ export function buildBaloon8Car(opts: Baloon8CarOptions): Baloon8CarBuild {
   root.add(createMirrorPods(scale, -1));
 
   const hullMat = balloonMat();
+  if (opts.hullColor != null) hullMat.color.setHex(opts.hullColor);
   disposables.push(hullMat);
 
   root.traverse((obj) => {

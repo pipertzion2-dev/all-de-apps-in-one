@@ -12,6 +12,7 @@ import {
   type Baloon8CarBuild,
 } from "./baloon8-car-model";
 import { BALOON8_BLUEPRINT_URL } from "./baloon8-textures";
+import { getColorway, type Baloon8ColorwayId } from "./sneaker-catalog";
 
 export { BALOON8_DIMS, BALOON8_BLUEPRINT_URL };
 
@@ -98,11 +99,16 @@ export function ensureBaloon8RunnerVisible(shoe: Baloon8WalkerShoe, mobile: bool
 export function buildBaloon8Shoe(
   _blueprint?: THREE.Texture,
   _bubbleCount = 2800,
+  colorwayId?: Baloon8ColorwayId | string | null,
 ): Baloon8ShoeModel {
+  const cw = getColorway(colorwayId);
   const build = buildBaloon8Car({
     scale: BALOON8_SCENE_SCALE,
     mobile: false,
     podBudget: 3200,
+    podPalette: cw.pods,
+    hullColor: cw.hull,
+    accentColor: cw.accent,
   });
   build.root.position.y = scaledDim(0.02, BALOON8_SCENE_SCALE);
 
@@ -118,7 +124,13 @@ export function buildBaloon8Shoe(
 export function buildBaloon8RunnerShoe(
   _blueprint?: THREE.Texture,
   bubbleCount = 640,
-  opts?: { mobile?: boolean; portrait?: boolean; pair?: boolean; mirror?: boolean },
+  opts?: {
+    mobile?: boolean;
+    portrait?: boolean;
+    pair?: boolean;
+    mirror?: boolean;
+    colorwayId?: Baloon8ColorwayId | string | null;
+  },
 ): Baloon8WalkerShoe {
   const mobile = opts?.mobile ?? false;
   const portrait = opts?.portrait ?? false;
@@ -126,8 +138,17 @@ export function buildBaloon8RunnerShoe(
   const scale = runnerScale({ mobile, portrait, pair });
   const perShoeCap = mobile ? (pair ? 1400 : 1600) : Math.max(bubbleCount, 2200);
   const budget = podBudgetFor(mobile, portrait, pair, perShoeCap);
+  const cw = getColorway(opts?.colorwayId);
 
-  const build = buildBaloon8Car({ scale, mobile, portrait, podBudget: budget });
+  const build = buildBaloon8Car({
+    scale,
+    mobile,
+    portrait,
+    podBudget: budget,
+    podPalette: cw.pods,
+    hullColor: cw.hull,
+    accentColor: cw.accent,
+  });
   build.root.rotation.y = -Math.PI / 2;
 
   const mount = new THREE.Group();
