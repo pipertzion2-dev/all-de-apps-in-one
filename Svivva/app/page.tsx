@@ -34,6 +34,8 @@ import {
   Ruler,
   Palette,
   Settings2,
+  Mic2,
+  Users,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 const SvivvaArtifact = dynamic(
@@ -681,6 +683,14 @@ export default function LandingPage() {
                   <span className="seeds-holo-text text-base leading-none">&#9835;</span>
                   <span className="seeds-holo-text text-xs font-bold tracking-wide">Play</span>
                 </Link>
+                <Link
+                  href="/dashboard/zzai-show"
+                  className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-md hover:bg-muted/50 transition-colors"
+                  data-testid="link-nav-events"
+                >
+                  <Mic2 className="w-3.5 h-3.5 text-[#5B8DA8]" />
+                  <span className="text-xs font-bold tracking-wide text-foreground/90">Events</span>
+                </Link>
                 <Link href="/dashboard">
                   <Button
                     variant="outline"
@@ -810,6 +820,55 @@ export default function LandingPage() {
                     </div>
                   </div>
                 </div>
+              </div>
+            </section>
+
+            <section id="event-tracker" className="pb-6 sm:pb-8 relative z-10">
+              <div className="max-w-5xl mx-auto px-4 sm:px-6">
+                <Link href="/dashboard/zzai-show">
+                  <div
+                    className="rounded-2xl border-2 p-5 sm:p-6 cursor-pointer hover:opacity-90 active:scale-[0.99] transition-all shadow-lg shadow-[#5B8DA8]/10"
+                    style={{
+                      background: "linear-gradient(135deg, #5b8da818, #6b2c4e12)",
+                      borderColor: "#5b8da850",
+                    }}
+                    data-testid="homepage-zzai-show-cta"
+                  >
+                    <div className="flex items-center justify-between gap-4 flex-wrap">
+                      <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                        <div
+                          className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                          style={{ background: "linear-gradient(135deg, #5B8DA8, #6B2C4E)" }}
+                        >
+                          <Mic2 className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="text-base sm:text-lg font-black text-foreground">
+                              ZZAI ZZAI Show
+                            </p>
+                            <Badge className="text-[10px] bg-[#6B2C4E] hover:bg-[#6B2C4E]">
+                              Event tracker
+                            </Badge>
+                            <span className="text-[10px] px-2 py-0.5 rounded-full text-white/90 font-semibold bg-[#5B8DA8]/80">
+                              CH 25 · OaaS
+                            </span>
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-1 max-w-xl">
+                            Track event attendance, check-ins, and payment divvy — who gives, who
+                            receives. Live desk for shows, pop-ups, and community nights.
+                          </p>
+                        </div>
+                      </div>
+                      <div
+                        className="flex items-center gap-1.5 text-sm font-bold flex-shrink-0"
+                        style={{ color: "#5B8DA8" }}
+                      >
+                        <Users className="w-4 h-4" /> Open tracker <ArrowRight className="w-4 h-4" />
+                      </div>
+                    </div>
+                  </div>
+                </Link>
               </div>
             </section>
 
@@ -1963,6 +2022,14 @@ export default function LandingPage() {
                     <li>
                       <Link href="/seeds" className="hover:text-foreground transition-colors">
                         ZZAI Seeds
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/dashboard/zzai-show"
+                        className="hover:text-foreground transition-colors"
+                      >
+                        Event tracker (ZZAI Show)
                       </Link>
                     </li>
                     <li>
