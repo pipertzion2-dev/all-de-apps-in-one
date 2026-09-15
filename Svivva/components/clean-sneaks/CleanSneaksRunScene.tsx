@@ -49,19 +49,19 @@ type CameraRig = { ox: number; oy: number; oz: number; lookY: number; lookZ: num
 
 function cameraRigFor(mobile: boolean, portrait: boolean): CameraRig {
   if (mobile && portrait) {
-    // Centered, pulled back, wide FOV — keeps both shoes in a tall narrow frame.
+    // Centered, pulled back — keeps the Tripo coupe pair readable in a tall frame.
     const boost = portraitFramingBoost();
     return {
-      ox: 0.45 * boost,
-      oy: 0.92 * boost,
-      oz: 2.65 * boost,
-      lookY: 0.18,
-      lookZ: -3.0,
-      fov: 70 + (boost - 1) * 10,
+      ox: 0.35 * boost,
+      oy: 1.15 * boost,
+      oz: 3.15 * boost,
+      lookY: 0.28,
+      lookZ: -3.2,
+      fov: 68 + (boost - 1) * 8,
     };
   }
   if (mobile) {
-    return { ox: 2.35, oy: 1.05, oz: 2.05, lookY: 0.32, lookZ: -3.8, fov: 48 };
+    return { ox: 2.5, oy: 1.25, oz: 2.35, lookY: 0.4, lookZ: -3.8, fov: 48 };
   }
   return { ox: 3.6, oy: 1.65, oz: 3.0, lookY: 0.48, lookZ: -5.5, fov: 42 };
 }
@@ -448,22 +448,28 @@ function PlayerShoes({
     <group ref={hostRef}>
       <primitive object={shoes.root} />
       <pointLight
-        position={[0, 0.55, 0.65]}
-        intensity={mobile ? 2.2 : 0.9}
-        distance={10}
+        position={[0, 0.75, 0.85]}
+        intensity={mobile ? 3.2 : 1.4}
+        distance={12}
+        color="#9ed8e8"
+      />
+      <pointLight
+        position={[1.6, 0.55, 0.7]}
+        intensity={mobile ? 1.8 : 0.75}
+        distance={9}
         color="#7ec8d9"
       />
       <pointLight
-        position={[1.4, 0.4, 0.55]}
-        intensity={mobile ? 1.35 : 0.55}
-        distance={8}
-        color="#7ec8d9"
-      />
-      <pointLight
-        position={[-1.1, 0.25, 0.35]}
-        intensity={mobile ? 0.85 : 0.35}
-        distance={6}
+        position={[-1.2, 0.4, 0.45]}
+        intensity={mobile ? 1.1 : 0.45}
+        distance={7}
         color="#d94f9c"
+      />
+      <pointLight
+        position={[0.2, 0.45, -0.9]}
+        intensity={mobile ? 1.6 : 0.7}
+        distance={8}
+        color="#36f078"
       />
     </group>
   );

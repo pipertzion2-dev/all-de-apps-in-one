@@ -10,7 +10,8 @@ describe("run-quality", () => {
     expect(flags.castShadows).toBe(false);
     expect(flags.contactShadows).toBe(false);
     expect(flags.sky).toBe(false);
-    expect(flags.bubbleCount).toBeLessThan(500);
+    expect(flags.bubbleCount).toBeGreaterThanOrEqual(1400);
+    expect(flags.bubbleCount).toBeLessThanOrEqual(4000);
   });
 
   it("full tier enables desktop features", () => {

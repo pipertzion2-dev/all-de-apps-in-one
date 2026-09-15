@@ -21,9 +21,9 @@ type Props = {
 };
 
 /**
- * Interactive BALOON8 car-sneaker — advanced procedural Three.js mesh matching
- * the orthographic brand blueprint (packed iridescent balloons, neon e8 grille,
- * crystal wheels). Orbit to inspect; bloom accents the green grille.
+ * Interactive BALOON8 Tripo coupe — procedural Three.js mesh matching the
+ * studio.tripo3d.ai futuristic-car reference (quilted iridescent pods, neon
+ * rectangular grille, chrome disc wheels). Orbit to inspect; bloom accents the grille.
  */
 export function Baloon8ShoeScene({ className = "", autoRotate = true, bubbleCount }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);

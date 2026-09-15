@@ -22,15 +22,15 @@ function runnerBubbleCount(): number {
   return flags.bubbleCount;
 }
 
-/** Preload is a no-op resolve — the puffer coupe is fully procedural (no image texture). */
+/** Preload is a no-op resolve — the Tripo coupe is fully procedural (no GLB yet). */
 export function preloadBaloon8RunnerShoe(): Promise<THREE.Texture | null> {
   return Promise.resolve(null);
 }
 
 function buildRunnerShoe(mobile: boolean, portrait: boolean, mirror: boolean): Baloon8WalkerShoe {
   const preferred = mobile
-    ? Math.max(portrait ? 480 : 640, Math.floor(runnerBubbleCount() / (portrait ? 2.2 : 1.8)))
-    : Math.max(900, Math.floor(runnerBubbleCount() / 1.5));
+    ? Math.max(portrait ? 1600 : 2000, Math.floor(runnerBubbleCount() / (portrait ? 1.4 : 1.2)))
+    : Math.max(2800, Math.floor(runnerBubbleCount() / 1.2));
   return buildBaloon8RunnerShoe(undefined, preferred, {
     mobile,
     portrait,
@@ -39,7 +39,7 @@ function buildRunnerShoe(mobile: boolean, portrait: boolean, mirror: boolean): B
   });
 }
 
-/** Baloon8 procedural puffer coupe pair — left + right with walking stride. */
+/** Baloon8 Tripo coupe pair — left + right with light stride. */
 export function createWalkingShoes3D(
   _blueprint?: THREE.Texture | null,
   mobile = false,
@@ -177,23 +177,24 @@ export function updateWalkingShoes3D(
   const dt = 0.016;
   const t = performance.now() / 1000;
   const stride = args.airborne ? 0 : Math.sin(phase);
-  const lateral = args.portrait ? 0.22 : 0.34;
+  // Keep the coupe pair close so it reads as one vehicle formation, not floating blobs
+  const lateral = args.portrait ? 0.38 : 0.48;
 
-  const bob = args.airborne ? 0.14 : Math.max(0, Math.sin(phase * 2)) * 0.05;
-  shoes.shoePivot.rotation.x = Math.sin(phase) * (args.airborne ? 0.04 : 0.06);
-  shoes.shoePivot.rotation.z = Math.sin(phase * 0.5) * 0.03;
+  const bob = args.airborne ? 0.1 : Math.max(0, Math.sin(phase * 2)) * 0.03;
+  shoes.shoePivot.rotation.x = Math.sin(phase) * (args.airborne ? 0.03 : 0.035);
+  shoes.shoePivot.rotation.z = Math.sin(phase * 0.5) * 0.015;
   shoes.shoePivot.position.y = bob;
 
   if (args.airborne) {
-    shoes.leftPivot.position.set(-lateral * 0.85, 0.1, 0.06);
-    shoes.rightPivot.position.set(lateral * 0.85, 0.08, 0.1);
-    shoes.leftPivot.rotation.x = -0.18;
-    shoes.rightPivot.rotation.x = -0.14;
+    shoes.leftPivot.position.set(-lateral * 0.92, 0.08, 0.04);
+    shoes.rightPivot.position.set(lateral * 0.92, 0.06, 0.06);
+    shoes.leftPivot.rotation.x = -0.1;
+    shoes.rightPivot.rotation.x = -0.08;
   } else {
-    const leadLift = Math.max(0, stride) * 0.1;
-    const trailLift = Math.max(0, -stride) * 0.1;
-    const leadZ = stride > 0 ? -0.1 : 0.08;
-    const trailZ = stride > 0 ? 0.08 : -0.1;
+    const leadLift = Math.max(0, stride) * 0.04;
+    const trailLift = Math.max(0, -stride) * 0.04;
+    const leadZ = stride > 0 ? -0.04 : 0.03;
+    const trailZ = stride > 0 ? 0.03 : -0.04;
     const leftLead = stride > 0;
 
     shoes.leftPivot.position.set(
@@ -206,8 +207,8 @@ export function updateWalkingShoes3D(
       leftLead ? trailLift : leadLift,
       leftLead ? trailZ : leadZ,
     );
-    shoes.leftPivot.rotation.x = leftLead ? -0.08 : 0.04;
-    shoes.rightPivot.rotation.x = leftLead ? 0.04 : -0.08;
+    shoes.leftPivot.rotation.x = leftLead ? -0.04 : 0.02;
+    shoes.rightPivot.rotation.x = leftLead ? 0.02 : -0.04;
   }
 
   if (!args.airborne && Math.sin(phase * 2) > 0.92) {
