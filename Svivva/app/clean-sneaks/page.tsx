@@ -5,7 +5,7 @@ import { isPortraitViewport } from "@/lib/clean-sneaks/run-quality";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { CleanSneaksGame3D } from "@/components/clean-sneaks/CleanSneaksGame3D";
+import { CleanSneaksGameLoader } from "@/components/clean-sneaks/CleanSneaksGameLoader";
 import { GameLoadingWheels } from "@/components/clean-sneaks/GameLoadingWheels";
 import { SceneErrorBoundary } from "@/components/clean-sneaks/SceneErrorBoundary";
 import type { GamePhase } from "@/lib/clean-sneaks/types";
@@ -118,11 +118,11 @@ export default function CleanSneaksPage() {
               </div>
             }
           >
-            <CleanSneaksGame3D
+            <CleanSneaksGameLoader
               key={sceneAttempt}
               active
               fullscreen
-              style={shellStyle}
+              shellStyle={shellStyle}
               onPhaseChange={setGamePhase}
               onExit={() => router.push("/#clean-sneaks")}
             />

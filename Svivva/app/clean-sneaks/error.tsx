@@ -16,11 +16,11 @@ export default function CleanSneaksError({
   }, [error]);
 
   return (
-    <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-[#0a0c10] px-6 text-center text-foreground">
+    <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-white px-6 text-center">
       <div className="max-w-md space-y-4">
         <p className="text-[10px] uppercase tracking-[0.35em] text-[#5B8DA8]">Clean Sneaks</p>
-        <h1 className="text-xl font-bold">Game couldn&apos;t load</h1>
-        <p className="text-sm leading-relaxed text-muted-foreground">
+        <h1 className="text-xl font-bold text-[#1a3040]">Game couldn&apos;t load</h1>
+        <p className="text-sm leading-relaxed text-[#1a3040]/70">
           Try again, or head back to the ZZAI homepage. If you&apos;re on mobile, closing other tabs
           can help free memory for the game.
         </p>
@@ -28,10 +28,10 @@ export default function CleanSneaksError({
           <Button type="button" className="bg-[#5B8DA8] text-white" onClick={() => reset()}>
             Try again
           </Button>
-          <Button type="button" variant="outline" asChild>
+          <Button type="button" variant="outline" className="border-[#1a3040]/20 text-[#1a3040]" asChild>
             <Link href="/clean-sneaks">Reload game</Link>
           </Button>
-          <Button type="button" variant="ghost" asChild>
+          <Button type="button" variant="ghost" className="text-[#1a3040]/80" asChild>
             <Link href="/#clean-sneaks">Back to homepage</Link>
           </Button>
         </div>
