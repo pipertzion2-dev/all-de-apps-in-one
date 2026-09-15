@@ -685,8 +685,9 @@ export default function LandingPage() {
                 </Link>
                 <Link
                   href="/dashboard/zzai-show"
-                  className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-md hover:bg-muted/50 transition-colors"
+                  className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-muted/50 transition-colors"
                   data-testid="link-nav-events"
+                  title="ZZAI Show event tracker"
                 >
                   <Mic2 className="w-3.5 h-3.5 text-[#5B8DA8]" />
                   <span className="text-xs font-bold tracking-wide text-foreground/90">Events</span>
