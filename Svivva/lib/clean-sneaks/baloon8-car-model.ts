@@ -255,36 +255,36 @@ function createCoupeHull(scale: number, mobile: boolean): {
     emissiveIntensity: 0.22,
   });
 
-  // Main body — elongated capsule reading as coupe volume
-  const body = new THREE.Mesh(new THREE.CapsuleGeometry(W * 0.38, L * 0.55, segs, segs * 2), hullMat);
+  // Main body — slightly flattened coupe volume (not a fat capsule blob)
+  const body = new THREE.Mesh(new THREE.CapsuleGeometry(W * 0.34, L * 0.58, segs, segs * 2), hullMat);
   body.rotation.z = Math.PI / 2;
-  body.position.set(0, H * 0.38, 0);
-  body.scale.set(1, 0.72, 0.92);
+  body.position.set(0, H * 0.36, 0);
+  body.scale.set(1, 0.62, 0.98);
   g.add(body);
 
-  // Cabin greenhouse
+  // Cabin greenhouse — distinct roof hump like Tripo
   const cabin = new THREE.Mesh(
-    new THREE.SphereGeometry(W * 0.36, segs, segs),
+    new THREE.SphereGeometry(W * 0.34, segs, segs),
     hullMat.clone(),
   );
-  cabin.position.set(-L * 0.06, H * 0.62, 0);
-  cabin.scale.set(1.35, 0.55, 0.85);
+  cabin.position.set(-L * 0.08, H * 0.68, 0);
+  cabin.scale.set(1.2, 0.62, 0.88);
   g.add(cabin);
 
-  // Hood slab
+  // Hood slab — long nose
   const hood = new THREE.Mesh(
-    new THREE.BoxGeometry(L * 0.32, H * 0.16, W * 0.72),
+    new THREE.BoxGeometry(L * 0.36, H * 0.14, W * 0.7),
     hullMat.clone(),
   );
-  hood.position.set(L * 0.28, H * 0.32, 0);
+  hood.position.set(L * 0.28, H * 0.3, 0);
   g.add(hood);
 
-  // Rear deck
+  // Rear haunches — wider rear like Tripo coupe
   const deck = new THREE.Mesh(
-    new THREE.BoxGeometry(L * 0.22, H * 0.2, W * 0.7),
+    new THREE.BoxGeometry(L * 0.24, H * 0.22, W * 0.78),
     hullMat.clone(),
   );
-  deck.position.set(-L * 0.32, H * 0.4, 0);
+  deck.position.set(-L * 0.34, H * 0.38, 0);
   g.add(deck);
 
   // Dark rocker / chassis
@@ -463,29 +463,29 @@ function createChromeWheel(
   const wheel = new THREE.Group();
   const L = s(BALOON8_DIMS.length, scale);
   const W = s(BALOON8_DIMS.width, scale);
-  const r = s(0.32, scale);
+  const r = s(0.36, scale);
   const segs = mobile ? 20 : 36;
 
   // Dark tire sidewall
   const tire = new THREE.Mesh(
-    new THREE.CylinderGeometry(r, r, s(0.1, scale), segs),
+    new THREE.CylinderGeometry(r, r, s(0.12, scale), segs),
     new THREE.MeshStandardMaterial({ color: 0x0c0e12, roughness: 0.78, metalness: 0.15 }),
   );
   tire.rotation.z = Math.PI / 2;
   wheel.add(tire);
 
-  // Chrome face disc with e8 hub
+  // Chrome face disc with e8 hub — bright so it reads at night
   const disc = new THREE.Mesh(
-    new THREE.CylinderGeometry(r * 0.78, r * 0.78, s(0.04, scale), segs),
+    new THREE.CylinderGeometry(r * 0.78, r * 0.78, s(0.045, scale), segs),
     new THREE.MeshPhysicalMaterial({
       map: hubcapTexture(),
       metalness: 0.95,
       roughness: 0.08,
       clearcoat: 1,
       clearcoatRoughness: 0.04,
-      envMapIntensity: 2.0,
-      emissive: new THREE.Color(0x405060),
-      emissiveIntensity: 0.15,
+      envMapIntensity: 2.2,
+      emissive: new THREE.Color(0x607080),
+      emissiveIntensity: 0.28,
     }),
   );
   disc.rotation.z = Math.PI / 2;
@@ -537,13 +537,13 @@ function createRearPlate(scale: number): THREE.Group {
   const W = s(BALOON8_DIMS.width, scale);
 
   const plate = new THREE.Mesh(
-    new THREE.PlaneGeometry(W * 0.42, H * 0.12),
+    new THREE.PlaneGeometry(W * 0.36, H * 0.1),
     new THREE.MeshPhysicalMaterial({
       map: plateTexture(),
       emissive: new THREE.Color(0x22c860),
-      emissiveIntensity: 0.95,
+      emissiveIntensity: 0.45,
       metalness: 0.2,
-      roughness: 0.35,
+      roughness: 0.4,
       side: THREE.DoubleSide,
     }),
   );
@@ -574,32 +574,34 @@ function createExhaustRow(scale: number, mobile: boolean): THREE.Group {
   return row;
 }
 
-/** Small ornate roof spoiler from Tripo reference. */
+/** Small ornate roof spoiler from Tripo reference — readable from chase cam. */
 function createSpoiler(scale: number): THREE.Group {
   const g = new THREE.Group();
   const L = s(BALOON8_DIMS.length, scale);
   const W = s(BALOON8_DIMS.width, scale);
   const H = s(BALOON8_DIMS.height, scale);
   const mat = new THREE.MeshPhysicalMaterial({
-    color: 0x1a2830,
-    metalness: 0.7,
-    roughness: 0.3,
-    iridescence: 0.6,
+    color: 0x243038,
+    metalness: 0.75,
+    roughness: 0.28,
+    iridescence: 0.7,
     iridescenceThicknessRange: [200, 600],
-    envMapIntensity: 1.4,
+    envMapIntensity: 1.6,
+    emissive: new THREE.Color(0x102028),
+    emissiveIntensity: 0.2,
   });
 
-  const wing = new THREE.Mesh(new THREE.BoxGeometry(s(0.08, scale), s(0.035, scale), W * 0.42), mat);
-  wing.position.set(-L * 0.28, H * 0.92, 0);
-  wing.rotation.z = -0.15;
+  const wing = new THREE.Mesh(new THREE.BoxGeometry(s(0.1, scale), s(0.045, scale), W * 0.5), mat);
+  wing.position.set(-L * 0.3, H * 0.98, 0);
+  wing.rotation.z = -0.18;
   g.add(wing);
 
   for (const side of [-1, 1] as const) {
     const stalk = new THREE.Mesh(
-      new THREE.BoxGeometry(s(0.03, scale), s(0.08, scale), s(0.025, scale)),
+      new THREE.BoxGeometry(s(0.035, scale), s(0.1, scale), s(0.03, scale)),
       mat,
     );
-    stalk.position.set(-L * 0.26, H * 0.86, side * W * 0.14);
+    stalk.position.set(-L * 0.28, H * 0.9, side * W * 0.16);
     g.add(stalk);
   }
   return g;

@@ -49,21 +49,21 @@ type CameraRig = { ox: number; oy: number; oz: number; lookY: number; lookZ: num
 
 function cameraRigFor(mobile: boolean, portrait: boolean): CameraRig {
   if (mobile && portrait) {
-    // Centered, pulled back — keeps the Tripo coupe pair readable in a tall frame.
+    // Offset chase cam for a rear-quarter view so the coupe silhouette + wheels read
     const boost = portraitFramingBoost();
     return {
-      ox: 0.35 * boost,
-      oy: 1.15 * boost,
-      oz: 3.15 * boost,
-      lookY: 0.28,
-      lookZ: -3.2,
-      fov: 68 + (boost - 1) * 8,
+      ox: 1.15 * boost,
+      oy: 1.35 * boost,
+      oz: 3.4 * boost,
+      lookY: 0.32,
+      lookZ: -2.8,
+      fov: 62 + (boost - 1) * 6,
     };
   }
   if (mobile) {
-    return { ox: 2.5, oy: 1.25, oz: 2.35, lookY: 0.4, lookZ: -3.8, fov: 48 };
+    return { ox: 2.65, oy: 1.35, oz: 2.55, lookY: 0.42, lookZ: -3.6, fov: 46 };
   }
-  return { ox: 3.6, oy: 1.65, oz: 3.0, lookY: 0.48, lookZ: -5.5, fov: 42 };
+  return { ox: 3.8, oy: 1.75, oz: 3.2, lookY: 0.5, lookZ: -5.2, fov: 40 };
 }
 
 function FollowCamera({
@@ -429,7 +429,7 @@ function PlayerShoes({
 
     host.position.x = laneWorldX(s.laneX);
     host.position.y = s.y < 0 ? -s.y / 120 : 0;
-    host.rotation.y = portrait ? 0 : mobile ? 0.22 : 0;
+    host.rotation.y = portrait ? 0.18 : mobile ? 0.28 : 0.12;
 
     updateWalkingShoes3D(shoes, {
       walkPhase: s.walkPhase,
