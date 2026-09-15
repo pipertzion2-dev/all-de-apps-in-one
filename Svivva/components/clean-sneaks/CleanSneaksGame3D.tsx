@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { Button } from "@/components/ui/button";
 import { cleanLabelFrom, resolvePlayerSneaker, streakLabelFrom } from "@/lib/clean-sneaks/assets";
@@ -32,8 +33,12 @@ import {
 } from "@/lib/clean-sneaks/sneaker-catalog";
 import { GameLoadingWheels } from "./GameLoadingWheels";
 import { GameStartScreen } from "./GameStartScreen";
-import { CleanSneaksRunScene } from "./CleanSneaksRunScene";
 import { ShoeCamHud } from "./ShoeCamHud";
+
+const CleanSneaksRunScene = dynamic(
+  () => import("./CleanSneaksRunScene").then((m) => ({ default: m.CleanSneaksRunScene })),
+  { ssr: false, loading: () => null },
+);
 import { PostMissionReveal } from "./PostMissionReveal";
 import { CleanPathHud, OhNoOverlay } from "./OhNoOverlay";
 import { Baloon8ColorwayPicker } from "./Baloon8ColorwayPicker";
