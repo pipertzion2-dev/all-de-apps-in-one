@@ -8,6 +8,7 @@ import * as THREE from "three";
 import { POWERUP_META } from "@/lib/clean-sneaks/constants";
 import { buildObstacle3D, buildPowerUp3D } from "@/lib/clean-sneaks/run-obstacles-3d";
 import { laneWorldX, stepRunEngine, type RunEngineState } from "@/lib/clean-sneaks/run-engine";
+import { VISION_HEX_THREE, visionForObstacle } from "@/lib/clean-sneaks/sneak-vision";
 import {
   asphaltMaterial,
   buildingFacadeTexture,
@@ -95,16 +96,34 @@ function FollowCamera({
     const rig = rigRef.current;
     const px = laneWorldX(s.laneX);
     const speedT = THREE.MathUtils.clamp(s.speed / 620, 0, 1);
+    const ohNo = s.ohNo?.active && !s.ohNo.resolved;
 
-    pos.current.x = THREE.MathUtils.lerp(pos.current.x, px + rig.ox, Math.min(1, dt * 4.5));
-    lookAt.current.x = THREE.MathUtils.lerp(lookAt.current.x, px, Math.min(1, dt * 5.5));
+    // Oh No — snap camera toward the threatened shoe
+    const shoeBias = ohNo ? (s.ohNo!.shoe === "left" ? -0.55 : 0.55) : 0;
+    const footZoom = ohNo ? 1.35 : 0;
+
+    pos.current.x = THREE.MathUtils.lerp(
+      pos.current.x,
+      px + rig.ox * (ohNo ? 0.45 : 1) + shoeBias,
+      Math.min(1, dt * (ohNo ? 8 : 4.5)),
+    );
+    lookAt.current.x = THREE.MathUtils.lerp(lookAt.current.x, px + shoeBias, Math.min(1, dt * 5.5));
     lookAt.current.y = THREE.MathUtils.lerp(
       lookAt.current.y,
-      rig.lookY + (s.y < 0 ? -s.y / 120 : 0),
-      dt * 6,
+      (ohNo ? 0.12 : rig.lookY) + (s.y < 0 ? -s.y / 120 : 0),
+      dt * (ohNo ? 10 : 6),
     );
-    lookAt.current.z = THREE.MathUtils.lerp(lookAt.current.z, rig.lookZ - speedT * 2, dt * 3);
-    pos.current.z = THREE.MathUtils.lerp(pos.current.z, rig.oz - speedT * 0.25, dt * 2);
+    lookAt.current.z = THREE.MathUtils.lerp(
+      lookAt.current.z,
+      (ohNo ? -0.4 : rig.lookZ) - speedT * 2,
+      dt * 3,
+    );
+    pos.current.y = THREE.MathUtils.lerp(pos.current.y, ohNo ? 0.55 : rig.oy, dt * (ohNo ? 9 : 3));
+    pos.current.z = THREE.MathUtils.lerp(
+      pos.current.z,
+      (ohNo ? 1.35 : rig.oz) - speedT * 0.25 - footZoom,
+      dt * (ohNo ? 8 : 2),
+    );
 
     const shake = s.shake * 0.012;
     camera.position.set(
@@ -117,7 +136,8 @@ function FollowCamera({
     if (camera instanceof THREE.PerspectiveCamera) {
       const speedFov = portrait ? speedT * 3 : speedT * 6;
       const maxFov = portrait ? rig.fov + 4 : rig.fov + 8;
-      camera.fov = THREE.MathUtils.lerp(camera.fov, Math.min(rig.fov + speedFov, maxFov), dt * 3);
+      const targetFov = ohNo ? Math.min(rig.fov + 12, 68) : Math.min(rig.fov + speedFov, maxFov);
+      camera.fov = THREE.MathUtils.lerp(camera.fov, targetFov, dt * 3);
       camera.updateProjectionMatrix();
     }
   });
@@ -347,17 +367,27 @@ function DynamicEntities({ stateRef }: { stateRef: React.MutableRefObject<RunEng
   const groupRef = useRef<THREE.Group>(null);
   const poolRef = useRef<Map<number, THREE.Object3D>>(new Map());
   const powerPoolRef = useRef<Map<number, THREE.Group>>(new Map());
+  const heatPoolRef = useRef<Map<number, THREE.Mesh>>(new Map());
+  const pathGroupRef = useRef<THREE.Group>(null);
 
   useFrame(() => {
     const group = groupRef.current;
     if (!group) return;
     const s = stateRef.current;
+    const now = performance.now();
+    const visionOn = now < s.sneakVisionUntil;
 
     const activeObs = new Set(s.obstacles.map((o) => o.id));
     for (const [id, obj] of poolRef.current) {
       if (!activeObs.has(id)) {
         group.remove(obj);
         poolRef.current.delete(id);
+      }
+    }
+    for (const [id, heat] of heatPoolRef.current) {
+      if (!activeObs.has(id)) {
+        group.remove(heat);
+        heatPoolRef.current.delete(id);
       }
     }
     for (const o of s.obstacles) {
@@ -378,6 +408,57 @@ function DynamicEntities({ stateRef }: { stateRef: React.MutableRefObject<RunEng
           }
         }
       });
+
+      // Sneak Vision heat projected onto pavement
+      let heat = heatPoolRef.current.get(o.id);
+      if (!heat) {
+        heat = new THREE.Mesh(
+          new THREE.CircleGeometry(0.95, 24),
+          new THREE.MeshBasicMaterial({
+            color: 0x3d9b5f,
+            transparent: true,
+            opacity: 0.35,
+            depthWrite: false,
+          }),
+        );
+        heat.rotation.x = -Math.PI / 2;
+        heatPoolRef.current.set(o.id, heat);
+        group.add(heat);
+      }
+      const level = visionForObstacle(o.kind);
+      (heat.material as THREE.MeshBasicMaterial).color.setHex(VISION_HEX_THREE[level]);
+      heat.position.set(laneWorldX(o.lane), 0.04, o.z);
+      heat.visible = visionOn && !o.hit;
+      (heat.material as THREE.MeshBasicMaterial).opacity = visionOn ? 0.42 : 0;
+    }
+
+    // Clean Path footprint suggestions
+    const pathG = pathGroupRef.current;
+    if (pathG) {
+      pathG.clear();
+      if (s.paths && now < s.pathsUntil) {
+        for (const p of s.paths) {
+          const color = p.kind === "safe" ? 0x3d9b5f : p.kind === "fast" ? 0xd4782a : 0x7ec8d9;
+          for (let i = 0; i < 5; i++) {
+            const print = new THREE.Mesh(
+              new THREE.PlaneGeometry(0.22, 0.38),
+              new THREE.MeshBasicMaterial({
+                color,
+                transparent: true,
+                opacity: 0.35 - i * 0.05,
+                depthWrite: false,
+              }),
+            );
+            print.rotation.x = -Math.PI / 2;
+            print.position.set(
+              laneWorldX(p.lane) + (i % 2 === 0 ? -0.12 : 0.12),
+              0.05,
+              -4 - i * 2.2,
+            );
+            pathG.add(print);
+          }
+        }
+      }
     }
 
     const activePow = new Set(s.powerups.filter((p) => !p.taken).map((p) => p.id));
@@ -402,7 +483,11 @@ function DynamicEntities({ stateRef }: { stateRef: React.MutableRefObject<RunEng
     }
   });
 
-  return <group ref={groupRef} />;
+  return (
+    <group ref={groupRef}>
+      <group ref={pathGroupRef} />
+    </group>
+  );
 }
 
 function PlayerShoes({
