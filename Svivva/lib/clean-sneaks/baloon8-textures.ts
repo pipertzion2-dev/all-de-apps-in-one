@@ -102,6 +102,128 @@ function trimBounds(canvas: HTMLCanvasElement): {
   return { minX, minY, maxX, maxY };
 }
 
+/**
+ * Keep only the widest contiguous column-run of opaque pixels so neighbor-panel
+ * bleed (the “slit of a shoe” on each side) is discarded. For rear views, also
+ * prefer the solid mid-body so hanging wheel lobes don’t read as side slits.
+ */
+function largestContentSpan(
+  canvas: HTMLCanvasElement,
+  opts?: { preferMidBody?: boolean },
+): {
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+} {
+  const ctx = canvas.getContext("2d")!;
+  const { width, height, data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const dens = new Float32Array(width);
+  for (let x = 0; x < width; x++) {
+    let n = 0;
+    for (let y = 0; y < height; y++) {
+      const i = (y * width + x) * 4;
+      if (!isBackgroundPixel(data[i]!, data[i + 1]!, data[i + 2]!)) n++;
+    }
+    dens[x] = n / height;
+  }
+
+  const thresh = 0.04;
+  let bestStart = 0;
+  let bestEnd = width - 1;
+  let bestLen = 0;
+  let runStart = -1;
+  for (let x = 0; x <= width; x++) {
+    const on = x < width && dens[x]! >= thresh;
+    if (on && runStart < 0) runStart = x;
+    if (!on && runStart >= 0) {
+      const len = x - runStart;
+      if (len > bestLen) {
+        bestLen = len;
+        bestStart = runStart;
+        bestEnd = x - 1;
+      }
+      runStart = -1;
+    }
+  }
+
+  // Tighten to the solid mid-body run (drop sparse wheel/mirror flanks).
+  if (opts?.preferMidBody) {
+    const midDens = new Float32Array(width);
+    const y0 = Math.floor(height * 0.18);
+    const y1 = Math.floor(height * 0.58);
+    const midThresh = 0.45;
+    for (let x = bestStart; x <= bestEnd; x++) {
+      let n = 0;
+      for (let y = y0; y < y1; y++) {
+        const i = (y * width + x) * 4;
+        if (!isBackgroundPixel(data[i]!, data[i + 1]!, data[i + 2]!)) n++;
+      }
+      midDens[x] = n / Math.max(1, y1 - y0);
+    }
+    let coreS = bestStart;
+    let coreE = bestEnd;
+    let coreLen = 0;
+    let coreRun = -1;
+    for (let x = bestStart; x <= bestEnd + 1; x++) {
+      const on = x <= bestEnd && midDens[x]! >= midThresh;
+      if (on && coreRun < 0) coreRun = x;
+      if (!on && coreRun >= 0) {
+        const len = x - coreRun;
+        if (len > coreLen) {
+          coreLen = len;
+          coreS = coreRun;
+          coreE = x - 1;
+        }
+        coreRun = -1;
+      }
+    }
+    if (coreLen > (bestEnd - bestStart) * 0.35) {
+      bestStart = coreS;
+      bestEnd = coreE;
+    }
+  }
+
+  // Largest contiguous vertical run inside the X span (drops caption fragments).
+  const rowDens = new Float32Array(height);
+  for (let y = 0; y < height; y++) {
+    let n = 0;
+    for (let x = bestStart; x <= bestEnd; x++) {
+      const i = (y * width + x) * 4;
+      if (!isBackgroundPixel(data[i]!, data[i + 1]!, data[i + 2]!)) n++;
+    }
+    rowDens[y] = n / Math.max(1, bestEnd - bestStart + 1);
+  }
+  const rowThresh = 0.02;
+  let minY = 0;
+  let maxY = height - 1;
+  let rowLen = 0;
+  let rowRun = -1;
+  for (let y = 0; y <= height; y++) {
+    const on = y < height && rowDens[y]! >= rowThresh;
+    if (on && rowRun < 0) rowRun = y;
+    if (!on && rowRun >= 0) {
+      const len = y - rowRun;
+      if (len > rowLen) {
+        rowLen = len;
+        minY = rowRun;
+        maxY = y - 1;
+      }
+      rowRun = -1;
+    }
+  }
+  if (rowLen === 0) return trimBounds(canvas);
+
+  // Pad only into empty margins — never back into a discarded neighbor fragment.
+  const pad = Math.max(2, Math.floor(width * 0.006));
+  return {
+    minX: Math.max(0, bestStart),
+    maxX: Math.min(width - 1, bestEnd),
+    minY: Math.max(0, minY - pad),
+    maxY: Math.min(height - 1, maxY + pad),
+  };
+}
+
 function buildAlphaMap(source: HTMLCanvasElement): HTMLCanvasElement {
   const alpha = document.createElement("canvas");
   alpha.width = source.width;
@@ -148,7 +270,7 @@ export function prepareBlueprintQuadrant(
   quadrant: Baloon8BlueprintQuadrant,
 ): PreparedQuadrant {
   const raw = cropQuadrantCanvas(img, quadrant);
-  const bounds = trimBounds(raw);
+  const bounds = largestContentSpan(raw, { preferMidBody: quadrant === "rear" });
   const trimmed = trimCanvas(raw, bounds);
   const map = canvasTexture(trimmed);
   const alphaMap = canvasTexture(buildAlphaMap(trimmed));
