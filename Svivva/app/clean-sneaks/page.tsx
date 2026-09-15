@@ -5,7 +5,8 @@ import { isPortraitViewport } from "@/lib/clean-sneaks/run-quality";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { CleanSneaksGameLoader } from "@/components/clean-sneaks/CleanSneaksGameLoader";
+import { CleanSneaksGame3D } from "@/components/clean-sneaks/CleanSneaksGame3D";
+import { GameLoadingWheels } from "@/components/clean-sneaks/GameLoadingWheels";
 import { SceneErrorBoundary } from "@/components/clean-sneaks/SceneErrorBoundary";
 import type { GamePhase } from "@/lib/clean-sneaks/types";
 
@@ -45,6 +46,8 @@ export default function CleanSneaksPage() {
       className={`fixed inset-0 z-[200] flex h-[100dvh] min-h-[100dvh] w-full flex-col ${preGame ? "bg-transparent" : "bg-[#0a0c10]"}`}
       style={preGame ? { overflow: "hidden" } : shellStyle}
     >
+      {gamePhase === "loading" && <GameLoadingWheels fullscreen />}
+
       {!preGame && (
         <div
           className="pointer-events-none absolute inset-0 opacity-40"
@@ -96,22 +99,32 @@ export default function CleanSneaksPage() {
           <SceneErrorBoundary
             key={sceneAttempt}
             fallback={
-              <div className="flex flex-1 flex-col items-center justify-center gap-4 rounded-lg border border-white/10 bg-[#0a0c10]/90 p-6 text-center">
-                <p className="text-sm text-muted-foreground">
-                  Clean Sneaks 3D couldn&apos;t start. Tap retry — the game stays fully 3D.
-                </p>
-                <div className="flex flex-wrap justify-center gap-3">
-                  <Button variant="outline" onClick={() => setSceneAttempt((n) => n + 1)}>
-                    Retry 3D
-                  </Button>
-                  <Button asChild variant="ghost">
-                    <Link href="/#clean-sneaks">Back to homepage</Link>
-                  </Button>
+              <div className="fixed inset-0 z-[300] flex flex-col items-center justify-center bg-white px-6 text-center">
+                <div className="max-w-md space-y-4">
+                  <p className="text-[10px] uppercase tracking-[0.35em] text-[#5B8DA8]">
+                    Clean Sneaks
+                  </p>
+                  <h1 className="text-xl font-bold text-[#1a3040]">Game couldn&apos;t load</h1>
+                  <p className="text-sm leading-relaxed text-[#1a3040]/70">
+                    Tap retry to reload the game engine.
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      type="button"
+                      className="bg-[#5B8DA8] text-white"
+                      onClick={() => setSceneAttempt((n) => n + 1)}
+                    >
+                      Try again
+                    </Button>
+                    <Button type="button" variant="ghost" className="text-[#1a3040]/80" asChild>
+                      <Link href="/#clean-sneaks">Back to homepage</Link>
+                    </Button>
+                  </div>
                 </div>
               </div>
             }
           >
-            <CleanSneaksGameLoader
+            <CleanSneaksGame3D
               key={sceneAttempt}
               active
               fullscreen
