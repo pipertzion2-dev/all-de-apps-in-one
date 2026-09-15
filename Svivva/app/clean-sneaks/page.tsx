@@ -6,7 +6,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { CleanSneaksGameLoader } from "@/components/clean-sneaks/CleanSneaksGameLoader";
-import { GameLoadingWheels } from "@/components/clean-sneaks/GameLoadingWheels";
 import { SceneErrorBoundary } from "@/components/clean-sneaks/SceneErrorBoundary";
 import type { GamePhase } from "@/lib/clean-sneaks/types";
 
@@ -20,14 +19,12 @@ const shellStyle = {
 export default function CleanSneaksPage() {
   const router = useRouter();
   const [sceneAttempt, setSceneAttempt] = useState(0);
-  const [ready, setReady] = useState(false);
   const [gamePhase, setGamePhase] = useState<GamePhase>("loading");
   const [portrait, setPortrait] = useState(false);
 
   const preGame = gamePhase === "loading" || gamePhase === "start";
 
   useEffect(() => {
-    setReady(true);
     const syncViewport = () => setPortrait(isPortraitViewport());
     syncViewport();
     window.addEventListener("resize", syncViewport);
@@ -41,16 +38,12 @@ export default function CleanSneaksPage() {
     };
   }, []);
 
-  if (!ready) {
-    return <GameLoadingWheels className="fixed inset-0 z-[300]" style={shellStyle} />;
-  }
-
   return (
     <div
       data-svivva-app-shell=""
       data-clean-sneaks-fullscreen=""
       className={`fixed inset-0 z-[200] flex h-[100dvh] min-h-[100dvh] w-full flex-col ${preGame ? "bg-white" : "bg-[#0a0c10]"}`}
-      style={shellStyle}
+      style={preGame ? undefined : shellStyle}
     >
       {!preGame && (
         <div
@@ -122,7 +115,7 @@ export default function CleanSneaksPage() {
               key={sceneAttempt}
               active
               fullscreen
-              shellStyle={shellStyle}
+              style={shellStyle}
               onPhaseChange={setGamePhase}
               onExit={() => router.push("/#clean-sneaks")}
             />
