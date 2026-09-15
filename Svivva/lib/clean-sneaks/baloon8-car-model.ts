@@ -239,60 +239,60 @@ function createCoupeHull(scale: number, mobile: boolean): {
   const L = s(BALOON8_DIMS.length, scale);
   const W = s(BALOON8_DIMS.width, scale);
   const H = s(BALOON8_DIMS.height, scale);
-  const segs = mobile ? 10 : 16;
+  const segs = mobile ? 12 : 20;
 
   const hullMat = new THREE.MeshPhysicalMaterial({
-    color: 0x1a3848,
-    metalness: 0.75,
-    roughness: 0.28,
-    clearcoat: 0.9,
-    clearcoatRoughness: 0.12,
-    iridescence: 0.85,
+    color: 0x1c3a48,
+    metalness: 0.78,
+    roughness: 0.26,
+    clearcoat: 0.95,
+    clearcoatRoughness: 0.1,
+    iridescence: 0.95,
     iridescenceIOR: 1.4,
-    iridescenceThicknessRange: [160, 700],
-    envMapIntensity: 1.6,
+    iridescenceThicknessRange: [140, 780],
+    envMapIntensity: 1.85,
     emissive: new THREE.Color(0x0c2030),
-    emissiveIntensity: 0.22,
+    emissiveIntensity: 0.25,
   });
 
-  // Main body — slightly flattened coupe volume (not a fat capsule blob)
-  const body = new THREE.Mesh(new THREE.CapsuleGeometry(W * 0.34, L * 0.58, segs, segs * 2), hullMat);
-  body.rotation.z = Math.PI / 2;
-  body.position.set(0, H * 0.36, 0);
-  body.scale.set(1, 0.62, 0.98);
-  g.add(body);
+  // Continuous side-profile extrusion via stacked tapered boxes (no separate sphere domes)
+  const sections: Array<{ x: number; y: number; len: number; h: number; w: number }> = [
+    { x: 0.42, y: 0.26, len: 0.18, h: 0.22, w: 0.62 }, // nose
+    { x: 0.28, y: 0.3, len: 0.2, h: 0.28, w: 0.72 }, // hood
+    { x: 0.1, y: 0.38, len: 0.18, h: 0.42, w: 0.78 }, // cowl
+    { x: -0.06, y: 0.52, len: 0.2, h: 0.58, w: 0.76 }, // cabin
+    { x: -0.22, y: 0.48, len: 0.16, h: 0.5, w: 0.8 }, // C-pillar
+    { x: -0.36, y: 0.36, len: 0.18, h: 0.34, w: 0.82 }, // rear deck
+    { x: -0.46, y: 0.3, len: 0.1, h: 0.26, w: 0.7 }, // tail
+  ];
 
-  // Cabin greenhouse — distinct roof hump like Tripo
-  const cabin = new THREE.Mesh(
-    new THREE.SphereGeometry(W * 0.34, segs, segs),
+  for (const sec of sections) {
+    const mesh = new THREE.Mesh(
+      new THREE.BoxGeometry(L * sec.len, H * sec.h, W * sec.w, 1, 1, 1),
+      hullMat.clone(),
+    );
+    mesh.position.set(L * sec.x, H * sec.y, 0);
+    // Soften box edges with slight bevel via scale jitter on Y for roof rake
+    mesh.scale.set(1, 1, 1);
+    g.add(mesh);
+  }
+
+  // Rounded volume fill so boxes don't look faceted under the quilt
+  const core = new THREE.Mesh(
+    new THREE.CapsuleGeometry(W * 0.3, L * 0.55, segs, segs * 2),
     hullMat.clone(),
   );
-  cabin.position.set(-L * 0.08, H * 0.68, 0);
-  cabin.scale.set(1.2, 0.62, 0.88);
-  g.add(cabin);
-
-  // Hood slab — long nose
-  const hood = new THREE.Mesh(
-    new THREE.BoxGeometry(L * 0.36, H * 0.14, W * 0.7),
-    hullMat.clone(),
-  );
-  hood.position.set(L * 0.28, H * 0.3, 0);
-  g.add(hood);
-
-  // Rear haunches — wider rear like Tripo coupe
-  const deck = new THREE.Mesh(
-    new THREE.BoxGeometry(L * 0.24, H * 0.22, W * 0.78),
-    hullMat.clone(),
-  );
-  deck.position.set(-L * 0.34, H * 0.38, 0);
-  g.add(deck);
+  core.rotation.z = Math.PI / 2;
+  core.position.set(0, H * 0.34, 0);
+  core.scale.set(1, 0.55, 0.95);
+  g.add(core);
 
   // Dark rocker / chassis
   const rocker = new THREE.Mesh(
-    new THREE.BoxGeometry(L * 0.78, H * 0.12, W * 0.78),
+    new THREE.BoxGeometry(L * 0.82, H * 0.1, W * 0.76),
     new THREE.MeshStandardMaterial({ color: 0x06080c, roughness: 0.9, metalness: 0.2 }),
   );
-  rocker.position.set(0, H * 0.12, 0);
+  rocker.position.set(0, H * 0.1, 0);
   g.add(rocker);
 
   return { group: g, hullMat };
