@@ -54,7 +54,7 @@ function runnerScale(opts: { mobile?: boolean; portrait?: boolean; pair?: boolea
 }
 
 function podBudgetFor(mobile: boolean, portrait: boolean, pair: boolean, cap: number): number {
-  const base = mobile ? (portrait ? 480 : 640) : pair ? 900 : 1400;
+  const base = mobile ? (portrait ? 700 : 950) : pair ? 1400 : 2200;
   return Math.min(cap, base);
 }
 
@@ -101,7 +101,7 @@ export function buildBaloon8Shoe(
   const build = buildBaloon8Car({
     scale: BALOON8_SCENE_SCALE,
     mobile: false,
-    podBudget: 1400,
+    podBudget: 2200,
   });
   build.root.position.y = scaledDim(0.02, BALOON8_SCENE_SCALE);
 
@@ -123,7 +123,7 @@ export function buildBaloon8RunnerShoe(
   const portrait = opts?.portrait ?? false;
   const pair = opts?.pair ?? false;
   const scale = runnerScale({ mobile, portrait, pair });
-  const perShoeCap = mobile ? (pair ? 640 : 800) : Math.max(bubbleCount, 900);
+  const perShoeCap = mobile ? (pair ? 950 : 1100) : Math.max(bubbleCount, 1400);
   const budget = podBudgetFor(mobile, portrait, pair, perShoeCap);
 
   const build = buildBaloon8Car({ scale, mobile, portrait, podBudget: budget });

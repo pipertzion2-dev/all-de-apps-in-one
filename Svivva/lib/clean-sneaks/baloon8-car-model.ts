@@ -228,14 +228,14 @@ function bodyRadiusAt(xNorm: number, yNorm: number): { rad: number; windowCut: b
   return { rad, windowCut };
 }
 
-/** Quilted puffer shell — horizontal pill-like pods in dense rows. */
+/** Quilted puffer shell — dense horizontal pill pods (Tripo quilt look). */
 function createPufferShell(scale: number, budget: number, mobile: boolean): THREE.InstancedMesh {
   const L = s(BALOON8_DIMS.length, scale);
   const W = s(BALOON8_DIMS.width, scale);
   const H = s(BALOON8_DIMS.height, scale);
-  const rows = mobile ? 16 : 28;
-  const maxCols = mobile ? 26 : 42;
-  const geo = new THREE.SphereGeometry(s(0.03, scale), mobile ? 6 : 8, mobile ? 5 : 7);
+  const rows = mobile ? 18 : 32;
+  const maxCols = mobile ? 30 : 48;
+  const geo = new THREE.SphereGeometry(s(0.034, scale), mobile ? 6 : 8, mobile ? 5 : 7);
   const mat = abaloneMat();
   const mesh = new THREE.InstancedMesh(geo, mat, budget);
   mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -256,9 +256,9 @@ function createPufferShell(scale: number, budget: number, mobile: boolean): THRE
     dummy.position.set(x, y, z);
     dummy.scale.set(sx, sy, sz);
     dummy.rotation.set(
-      ((idx * 17) % 7) * 0.04,
-      ((idx * 11) % 5) * 0.05,
-      ((idx * 7) % 6) * 0.04,
+      ((idx * 17) % 7) * 0.03,
+      ((idx * 11) % 5) * 0.04,
+      ((idx * 7) % 6) * 0.03,
     );
     dummy.updateMatrix();
     mesh.setMatrixAt(idx, dummy.matrix);
@@ -268,10 +268,11 @@ function createPufferShell(scale: number, budget: number, mobile: boolean): THRE
     return true;
   };
 
+  // Side shell + mid rings so the body reads as a solid quilted coupe
   for (let row = 0; row < rows && idx < budget; row++) {
     const yNorm = row / Math.max(1, rows - 1);
-    const y = s(0.05, scale) + yNorm * H * 0.96;
-    const cols = Math.floor(maxCols * (0.52 + 0.48 * Math.sin(yNorm * Math.PI)));
+    const y = s(0.04, scale) + yNorm * H * 0.97;
+    const cols = Math.floor(maxCols * (0.6 + 0.4 * Math.sin(yNorm * Math.PI)));
     for (let col = 0; col < cols && idx < budget; col++) {
       const u = col / Math.max(1, cols - 1);
       const xNorm = u * 2 - 1;
@@ -279,59 +280,63 @@ function createPufferShell(scale: number, budget: number, mobile: boolean): THRE
       if (rad < 0.1) continue;
 
       const x = xNorm * L * 0.48;
-      const halfW = rad * W * 0.5;
-      const base = (0.75 + ((row * 7 + col * 3) % 11) / 20) * (windowCut ? 0.5 : 1);
-      const sx = base * 1.35;
-      const sy = base * 0.72;
-      const sz = base * 0.95;
+      const halfW = rad * W * 0.52;
+      const base = (0.95 + ((row * 7 + col * 3) % 11) / 18) * (windowCut ? 0.55 : 1);
+      const sx = base * 1.55;
+      const sy = base * 0.78;
+      const sz = base * 1.05;
 
+      // Outer sides + staggered mid-depth pods (fills silhouette like Tripo)
+      const depths = windowCut ? [0.96] : [0.98, 0.72, 0.42];
       for (const side of [-1, 1] as const) {
-        if (idx >= budget) break;
-        if (windowCut && rad < 0.28) continue;
-        const z = side * halfW * (0.9 + ((row + col) % 5) * 0.016);
-        const hex = ABALONE[(row + col + (side > 0 ? 0 : 4)) % ABALONE.length]!;
-        place(x, y, z, sx, sy, sz, hex);
+        for (const depth of depths) {
+          if (idx >= budget) break;
+          if (windowCut && depth < 0.9) continue;
+          const z = side * halfW * depth * (0.96 + ((row + col) % 5) * 0.01);
+          const hex = ABALONE[(row + col + (side > 0 ? 0 : 3) + Math.round(depth * 5)) % ABALONE.length]!;
+          place(x, y, z, sx, sy, sz, hex);
+        }
       }
     }
   }
 
-  const topRows = mobile ? 6 : 10;
-  const topCols = mobile ? 18 : 30;
+  const topRows = mobile ? 8 : 14;
+  const topCols = mobile ? 22 : 36;
   for (let r = 0; r < topRows && idx < budget; r++) {
     for (let c = 0; c < topCols && idx < budget; c++) {
       const u = c / Math.max(1, topCols - 1);
       const v = r / Math.max(1, topRows - 1);
       const xNorm = u * 2 - 1;
       const zNorm = (v - 0.5) * 2;
-      const { rad, windowCut } = bodyRadiusAt(xNorm, 0.78 + v * 0.12);
-      if (windowCut || rad < 0.2) continue;
-      const x = xNorm * L * 0.46;
-      const z = zNorm * rad * W * 0.42;
-      const y = s(0.05, scale) + H * (0.78 + Math.sin(u * Math.PI) * 0.16);
-      const base = 0.9 + (c % 4) * 0.05;
-      place(x, y, z, base * 1.3, base * 0.7, base, ABALONE[(r * 3 + c) % ABALONE.length]!);
+      const { rad, windowCut } = bodyRadiusAt(xNorm, 0.76 + v * 0.14);
+      if (windowCut || rad < 0.18) continue;
+      const x = xNorm * L * 0.47;
+      const z = zNorm * rad * W * 0.46;
+      const y = s(0.04, scale) + H * (0.76 + Math.sin(u * Math.PI) * 0.18);
+      const base = 1.05 + (c % 4) * 0.06;
+      place(x, y, z, base * 1.45, base * 0.75, base, ABALONE[(r * 3 + c) % ABALONE.length]!);
     }
   }
 
-  const noseCount = mobile ? 48 : 80;
+  const noseCount = mobile ? 60 : 110;
   for (let i = 0; i < noseCount && idx < budget; i++) {
     const a = (i / noseCount) * Math.PI * 2;
-    const ring = 0.55 + (i % 3) * 0.12;
-    const y = H * (0.28 + (i % 5) * 0.08);
-    const z = Math.sin(a) * W * 0.28 * ring;
-    const x = L * 0.46 + Math.cos(a) * s(0.04, scale);
-    const base = 0.8 + (i % 4) * 0.05;
-    place(x, y, z, base * 1.2, base * 0.7, base, ABALONE[i % ABALONE.length]!);
+    const ring = 0.5 + (i % 4) * 0.14;
+    const y = H * (0.22 + (i % 6) * 0.09);
+    const z = Math.sin(a) * W * 0.3 * ring;
+    const x = L * 0.47 + Math.cos(a) * s(0.05, scale);
+    const base = 0.95 + (i % 4) * 0.06;
+    place(x, y, z, base * 1.35, base * 0.75, base, ABALONE[i % ABALONE.length]!);
   }
 
-  const rearCount = mobile ? 40 : 70;
+  const rearCount = mobile ? 50 : 90;
   for (let i = 0; i < rearCount && idx < budget; i++) {
     const a = (i / rearCount) * Math.PI * 2;
-    const y = H * (0.22 + (i % 6) * 0.09);
-    const z = Math.sin(a) * W * 0.32;
-    const x = -L * 0.46 + Math.cos(a) * s(0.03, scale);
-    const base = 0.75 + (i % 5) * 0.05;
-    place(x, y, z, base * 1.25, base * 0.7, base, ABALONE[(i + 3) % ABALONE.length]!);
+    const y = H * (0.2 + (i % 7) * 0.09);
+    const z = Math.sin(a) * W * 0.34;
+    const x = -L * 0.47 + Math.cos(a) * s(0.04, scale);
+    const base = 0.9 + (i % 5) * 0.06;
+    place(x, y, z, base * 1.4, base * 0.75, base, ABALONE[(i + 3) % ABALONE.length]!);
   }
 
   mesh.count = idx;
@@ -373,7 +378,7 @@ function createGrille(scale: number, mobile: boolean): THREE.Group {
     new THREE.MeshPhysicalMaterial({
       map: grilleTexture(),
       emissive: new THREE.Color(0x28e868),
-      emissiveIntensity: mobile ? 1.2 : 1.65,
+      emissiveIntensity: mobile ? 1.55 : 2.1,
       metalness: 0.25,
       roughness: 0.22,
       envMapIntensity: 1.1,
@@ -597,7 +602,7 @@ export function buildBaloon8Car(opts: Baloon8CarOptions): Baloon8CarBuild {
   const glowMeshes: THREE.Mesh[] = [];
   const wheels: THREE.Group[] = [];
 
-  const podBudget = opts.podBudget ?? (mobile ? (portrait ? 480 : 640) : portrait ? 900 : 1400);
+  const podBudget = opts.podBudget ?? (mobile ? (portrait ? 700 : 950) : portrait ? 1400 : 2200);
 
   root.add(createInnerHull(scale));
 
