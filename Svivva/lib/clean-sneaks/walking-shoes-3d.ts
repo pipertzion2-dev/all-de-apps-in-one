@@ -1,109 +1,210 @@
 import * as THREE from "three";
-import { loadBaloon8HeroReferenceTexture, prepareSneakerThumbnail } from "./baloon8-textures";
+
+/**
+ * Classic white runner sneakers in real 3D.
+ * Toe → −Z (down the road), heel → +Z (toward the camera) — normal third-person
+ * runner rear view. Not billboards, not the balloon-car mesh.
+ */
+
+export type RunnerShoe3D = {
+  root: THREE.Group;
+  bodyMats: THREE.MeshStandardMaterial[];
+  accentMats: THREE.MeshStandardMaterial[];
+  soleMats: THREE.MeshStandardMaterial[];
+};
 
 export type WalkingShoes3D = {
   root: THREE.Group;
   shoePivot: THREE.Group;
   leftPivot: THREE.Group;
   rightPivot: THREE.Group;
-  leftMat: THREE.SpriteMaterial | null;
-  rightMat: THREE.SpriteMaterial | null;
+  leftShoe: RunnerShoe3D | null;
+  rightShoe: RunnerShoe3D | null;
   shieldRing: THREE.Mesh;
   shieldGlow: THREE.PointLight;
   dustEmitter: THREE.Group;
 };
 
-let runnerTexture: THREE.Texture | null = null;
+const COL = {
+  upper: 0xf4f5f7,
+  sole: 0xe8e8ec,
+  soleEdge: 0xb0b0ba,
+  teal: 0x5b8da8,
+  magenta: 0xd94f9c,
+  lace: 0x8a8a94,
+  tongue: 0xffffff,
+  collar: 0x2a2a32,
+};
 
-/** Preload the official sneaker thumbnail used as the runner billboards. */
+/** No texture preload — shoes are fully procedural meshes. */
 export function preloadBaloon8RunnerShoe(): Promise<THREE.Texture | null> {
-  return loadBaloon8HeroReferenceTexture()
-    .then((tex) => {
-      runnerTexture = tex;
-      return tex;
-    })
-    .catch((err) => {
-      console.warn("[walking-shoes-3d] thumbnail preload failed", err);
-      runnerTexture = null;
-      return null;
-    });
+  return Promise.resolve(null);
 }
 
-/** Rotate canvas −90° so a rightward toe becomes an upward (down-the-road) toe. */
-function rotateCanvasToeForward(src: HTMLCanvasElement): HTMLCanvasElement {
-  const dst = document.createElement("canvas");
-  dst.width = src.height;
-  dst.height = src.width;
-  const ctx = dst.getContext("2d")!;
-  ctx.translate(0, dst.height);
-  ctx.rotate(-Math.PI / 2);
-  ctx.drawImage(src, 0, 0);
-  return dst;
-}
-
-function canvasToTexture(canvas: HTMLCanvasElement): THREE.CanvasTexture {
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = 8;
-  tex.needsUpdate = true;
-  return tex;
+function mat(
+  color: number,
+  opts: Partial<THREE.MeshStandardMaterialParameters> = {},
+): THREE.MeshStandardMaterial {
+  return new THREE.MeshStandardMaterial({
+    color,
+    roughness: 0.55,
+    metalness: 0.08,
+    ...opts,
+  });
 }
 
 /**
- * Camera-facing sprite with the side-profile art rotated so the toe points
- * toward the horizon (down the road), not across the lanes.
+ * One low-poly sneaker. Local space: toe −Z, heel +Z, sole on Y≈0.
+ * Camera sits at +Z looking toward −Z, so the heel faces the player.
  */
-function createShoeBillboard(
-  source: THREE.Texture,
-  mobile: boolean,
-  portrait: boolean,
-  mirror: boolean,
-): { mount: THREE.Group; mat: THREE.SpriteMaterial } {
-  let map: THREE.Texture = source;
-  let alphaMap: THREE.Texture | undefined;
-  // After −90° rotation the shoe is taller than wide.
-  let aspect = 0.55;
-  try {
-    const img = source.image as CanvasImageSource & { width?: number };
-    if (img && ("naturalWidth" in img ? img.naturalWidth : img.width)) {
-      const prep = prepareSneakerThumbnail(img);
-      const mapCanvas = rotateCanvasToeForward(prep.map.image as HTMLCanvasElement);
-      const alphaCanvas = rotateCanvasToeForward(prep.alphaMap.image as HTMLCanvasElement);
-      map = canvasToTexture(mapCanvas);
-      alphaMap = canvasToTexture(alphaCanvas);
-      aspect = mapCanvas.width / mapCanvas.height;
-    }
-  } catch (err) {
-    console.warn("[walking-shoes-3d] thumbnail prep failed, using raw texture", err);
+function buildRunnerSneaker(scale: number, mirror: boolean): RunnerShoe3D {
+  const root = new THREE.Group();
+  const bodyMats: THREE.MeshStandardMaterial[] = [];
+  const accentMats: THREE.MeshStandardMaterial[] = [];
+  const soleMats: THREE.MeshStandardMaterial[] = [];
+
+  const upperMat = mat(COL.upper, { roughness: 0.45 });
+  const soleMat = mat(COL.sole, { roughness: 0.7 });
+  const soleEdgeMat = mat(COL.soleEdge, { roughness: 0.75 });
+  const tealMat = mat(COL.teal, { roughness: 0.4, metalness: 0.15 });
+  const magentaMat = mat(COL.magenta, {
+    roughness: 0.35,
+    metalness: 0.2,
+    emissive: COL.magenta,
+    emissiveIntensity: 0.18,
+  });
+  const laceMat = mat(COL.lace, { roughness: 0.65 });
+  const tongueMat = mat(COL.tongue, { roughness: 0.5 });
+  const collarMat = mat(COL.collar, { roughness: 0.8 });
+
+  bodyMats.push(upperMat, tongueMat);
+  accentMats.push(tealMat, magentaMat, laceMat);
+  soleMats.push(soleMat, soleEdgeMat);
+
+  const L = 0.68 * scale;
+  const W = 0.26 * scale;
+  const H = 0.24 * scale;
+
+  // Outsole
+  const outsole = new THREE.Mesh(
+    new THREE.BoxGeometry(W * 1.06, 0.036 * scale, L * 1.02),
+    soleEdgeMat,
+  );
+  outsole.position.set(0, 0.018 * scale, 0);
+  outsole.castShadow = true;
+  root.add(outsole);
+
+  // Heel lift
+  const heelStack = new THREE.Mesh(
+    new THREE.BoxGeometry(W * 1.02, 0.042 * scale, L * 0.3),
+    soleEdgeMat,
+  );
+  heelStack.position.set(0, 0.042 * scale, L * 0.34);
+  root.add(heelStack);
+
+  // Midsole
+  const midsole = new THREE.Mesh(new THREE.BoxGeometry(W, 0.048 * scale, L * 0.98), soleMat);
+  midsole.position.set(0, 0.056 * scale, 0);
+  midsole.castShadow = true;
+  root.add(midsole);
+
+  // Upper
+  const upper = new THREE.Mesh(new THREE.BoxGeometry(W * 0.92, H, L * 0.7), upperMat);
+  upper.position.set(0, 0.08 * scale + H * 0.5, L * 0.04);
+  upper.castShadow = true;
+  root.add(upper);
+
+  // Toe box
+  const toe = new THREE.Mesh(new THREE.SphereGeometry(W * 0.48, 12, 10), upperMat);
+  toe.scale.set(1, 0.72, 1.2);
+  toe.position.set(0, 0.09 * scale + H * 0.28, -L * 0.34);
+  toe.castShadow = true;
+  root.add(toe);
+
+  // Teal toe bumper
+  const bumper = new THREE.Mesh(new THREE.SphereGeometry(W * 0.42, 10, 8), tealMat);
+  bumper.scale.set(1.05, 0.55, 0.72);
+  bumper.position.set(0, 0.07 * scale + H * 0.15, -L * 0.4);
+  root.add(bumper);
+
+  // Magenta heel counter — faces camera (+Z) but keep it shoe-proportioned
+  const heelCounter = new THREE.Mesh(
+    new THREE.BoxGeometry(W * 0.95, H * 0.9, L * 0.12),
+    magentaMat,
+  );
+  heelCounter.position.set(0, 0.08 * scale + H * 0.48, L * 0.38);
+  heelCounter.castShadow = true;
+  root.add(heelCounter);
+
+  // Heel logo disc facing +Z
+  const heelPlate = new THREE.Mesh(new THREE.CircleGeometry(W * 0.18, 16), tealMat);
+  heelPlate.position.set(0, 0.08 * scale + H * 0.5, L * 0.45);
+  root.add(heelPlate);
+
+  // Rear sole lip sticking toward camera (classic runner “heel” read)
+  const soleLip = new THREE.Mesh(
+    new THREE.BoxGeometry(W * 1.02, 0.05 * scale, 0.06 * scale),
+    soleMat,
+  );
+  soleLip.position.set(0, 0.04 * scale, L * 0.5);
+  root.add(soleLip);
+
+  // Heel tab
+  const heelTab = new THREE.Mesh(
+    new THREE.BoxGeometry(W * 0.34, H * 0.3, 0.04 * scale),
+    magentaMat,
+  );
+  heelTab.position.set(0, 0.08 * scale + H * 1.02, L * 0.45);
+  root.add(heelTab);
+
+  // Collar opening
+  const collar = new THREE.Mesh(
+    new THREE.CylinderGeometry(W * 0.28, W * 0.32, H * 0.35, 12),
+    collarMat,
+  );
+  collar.position.set(0, 0.08 * scale + H * 0.88, L * 0.2);
+  root.add(collar);
+
+  // Tongue
+  const tongue = new THREE.Mesh(new THREE.BoxGeometry(W * 0.4, 0.025 * scale, L * 0.35), tongueMat);
+  tongue.position.set(0, 0.08 * scale + H * 0.95, L * 0.0);
+  tongue.rotation.x = -0.35;
+  root.add(tongue);
+
+  // Laces
+  for (let i = 0; i < 3; i++) {
+    const lace = new THREE.Mesh(
+      new THREE.BoxGeometry(W * 0.38, 0.012 * scale, 0.018 * scale),
+      laceMat,
+    );
+    lace.position.set(0, 0.08 * scale + H * 0.8, -L * 0.04 - i * 0.075 * scale);
+    root.add(lace);
   }
 
-  const mat = new THREE.SpriteMaterial({
-    map,
-    alphaMap,
-    transparent: true,
-    alphaTest: 0.08,
-    depthTest: true,
-    depthWrite: false,
-    toneMapped: false,
-  });
-  const sprite = new THREE.Sprite(mat);
-  // Height is the long axis (toe → horizon); width is the shoe thickness on screen.
-  const baseH = portrait ? 1.15 : mobile ? 1.25 : 1.1;
-  sprite.scale.set(baseH * aspect, baseH, 1);
-  sprite.position.y = portrait ? 0.52 : mobile ? 0.58 : 0.55;
-  sprite.renderOrder = 8;
-  sprite.frustumCulled = false;
+  // Outer teal stripe
+  const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.02 * scale, H * 0.35, L * 0.45), tealMat);
+  stripe.position.set(W * 0.47, 0.08 * scale + H * 0.4, -L * 0.05);
+  root.add(stripe);
 
-  const mount = new THREE.Group();
-  mount.add(sprite);
-  if (mirror) mount.scale.x = -1;
-  mount.frustumCulled = false;
-  return { mount, mat };
+  const stripeIn = new THREE.Mesh(new THREE.BoxGeometry(0.015 * scale, H * 0.28, L * 0.4), tealMat);
+  stripeIn.position.set(-W * 0.46, 0.08 * scale + H * 0.38, -L * 0.05);
+  root.add(stripeIn);
+
+  root.traverse((obj) => {
+    if (obj instanceof THREE.Mesh) obj.frustumCulled = false;
+  });
+
+  if (mirror) root.scale.x = -1;
+
+  return { root, bodyMats, accentMats, soleMats };
 }
 
-/**
- * Runner pair — official Baloon8 sneaker art, toe pointing down the road.
- */
+function runnerScale(mobile: boolean, portrait: boolean): number {
+  if (portrait) return 1.0;
+  if (mobile) return 1.1;
+  return 1.05;
+}
+
 export function createWalkingShoes3D(
   _blueprint?: THREE.Texture | null,
   mobile = false,
@@ -114,19 +215,14 @@ export function createWalkingShoes3D(
   const leftPivot = new THREE.Group();
   const rightPivot = new THREE.Group();
 
-  let leftMat: THREE.SpriteMaterial | null = null;
-  let rightMat: THREE.SpriteMaterial | null = null;
-
-  const tex = runnerTexture ?? _blueprint ?? null;
-  if (tex) {
-    const left = createShoeBillboard(tex, mobile, portrait, false);
-    const right = createShoeBillboard(tex, mobile, portrait, true);
-    leftPivot.add(left.mount);
-    rightPivot.add(right.mount);
-    leftMat = left.mat;
-    rightMat = right.mat;
-  }
-
+  const s = runnerScale(mobile, portrait);
+  const leftShoe = buildRunnerSneaker(s, true);
+  const rightShoe = buildRunnerSneaker(s, false);
+  leftPivot.add(leftShoe.root);
+  rightPivot.add(rightShoe.root);
+  // Mild toe-in — heels toward camera, outer sides readable
+  leftPivot.rotation.y = 0.1;
+  rightPivot.rotation.y = -0.1;
   shoePivot.add(leftPivot, rightPivot);
 
   const shieldRing = new THREE.Mesh(
@@ -144,11 +240,11 @@ export function createWalkingShoes3D(
     }),
   );
   shieldRing.rotation.x = Math.PI / 2;
-  shieldRing.position.y = 0.42;
+  shieldRing.position.y = 0.28;
   shieldRing.visible = false;
 
   const shieldGlow = new THREE.PointLight(0x5b8da8, 0, 4);
-  shieldGlow.position.y = 0.28;
+  shieldGlow.position.y = 0.22;
 
   const dustEmitter = new THREE.Group();
   dustEmitter.position.y = 0.02;
@@ -160,8 +256,8 @@ export function createWalkingShoes3D(
     shoePivot,
     leftPivot,
     rightPivot,
-    leftMat,
-    rightMat,
+    leftShoe,
+    rightShoe,
     shieldRing,
     shieldGlow,
     dustEmitter,
@@ -174,11 +270,7 @@ function spawnDust(shoes: WalkingShoes3D, xOffset: number): void {
   if (dustPool.length > 24) return;
   const p = new THREE.Mesh(
     new THREE.SphereGeometry(0.012 + Math.random() * 0.016, 6, 6),
-    new THREE.MeshBasicMaterial({
-      color: 0x8a8070,
-      transparent: true,
-      opacity: 0.35,
-    }),
+    new THREE.MeshBasicMaterial({ color: 0x8a8070, transparent: true, opacity: 0.35 }),
   );
   p.position.set(xOffset + (Math.random() - 0.5) * 0.08, 0.02, 0.04);
   p.userData.life = 0.35 + Math.random() * 0.25;
@@ -188,17 +280,25 @@ function spawnDust(shoes: WalkingShoes3D, xOffset: number): void {
   dustPool.push(p);
 }
 
-function applyDirtToBillboard(
-  mat: THREE.SpriteMaterial | null,
-  dirt: number,
-  freshGlow: boolean,
-): void {
-  if (!mat) return;
-  const base = new THREE.Color(0xffffff);
-  if (dirt > 0.02) base.lerp(new THREE.Color(0x6b5340), 0.15 + dirt * 0.55);
-  if (freshGlow) base.lerp(new THREE.Color(0xe8f6fa), 0.12);
-  mat.color.copy(base);
-  mat.opacity = freshGlow ? 1 : Math.max(0.85, 1 - dirt * 0.12);
+function tintShoe(shoe: RunnerShoe3D | null, dirt: number, freshGlow: boolean): void {
+  if (!shoe) return;
+  const dirtAmt = dirt > 0.02 ? 0.12 + dirt * 0.55 : 0;
+  for (const m of shoe.bodyMats) {
+    const c = new THREE.Color(COL.upper);
+    if (dirtAmt) c.lerp(new THREE.Color(0x6b5340), dirtAmt);
+    if (freshGlow) c.lerp(new THREE.Color(0xe8f6fa), 0.1);
+    m.color.copy(c);
+  }
+  for (const m of shoe.soleMats) {
+    const c = new THREE.Color(COL.sole);
+    if (dirtAmt) c.lerp(new THREE.Color(0x5c4033), dirtAmt * 0.8);
+    m.color.copy(c);
+  }
+  for (const m of shoe.accentMats) {
+    if (m.emissive.getHex() === COL.magenta) {
+      m.emissiveIntensity = freshGlow ? 0.35 : Math.max(0.08, 0.2 - dirt * 0.12);
+    }
+  }
 }
 
 export function updateWalkingShoes3D(
@@ -216,23 +316,26 @@ export function updateWalkingShoes3D(
   const phase = args.walkPhase * Math.PI * 2;
   const dt = 0.016;
   const stride = args.airborne ? 0 : Math.sin(phase);
-  const lateral = args.portrait ? 0.32 : 0.4;
+  const lateral = args.portrait ? 0.2 : 0.26;
+  const toeIn = 0.1;
 
-  const bob = args.airborne ? 0.14 : Math.max(0, Math.sin(phase * 2)) * 0.05;
-  shoes.shoePivot.rotation.x = Math.sin(phase) * (args.airborne ? 0.04 : 0.06);
-  shoes.shoePivot.rotation.z = Math.sin(phase * 0.5) * 0.03;
+  const bob = args.airborne ? 0.12 : Math.max(0, Math.sin(phase * 2)) * 0.04;
+  shoes.shoePivot.rotation.x = Math.sin(phase) * (args.airborne ? 0.05 : 0.08);
+  shoes.shoePivot.rotation.z = Math.sin(phase * 0.5) * 0.025;
   shoes.shoePivot.position.y = bob;
 
   if (args.airborne) {
-    shoes.leftPivot.position.set(-lateral * 0.85, 0.1, 0.06);
-    shoes.rightPivot.position.set(lateral * 0.85, 0.08, 0.1);
-    shoes.leftPivot.rotation.x = -0.18;
-    shoes.rightPivot.rotation.x = -0.14;
+    shoes.leftPivot.position.set(-lateral * 0.9, 0.08, 0.05);
+    shoes.rightPivot.position.set(lateral * 0.9, 0.06, 0.08);
+    shoes.leftPivot.rotation.x = -0.22;
+    shoes.rightPivot.rotation.x = -0.18;
+    shoes.leftPivot.rotation.y = toeIn;
+    shoes.rightPivot.rotation.y = -toeIn;
   } else {
-    const leadLift = Math.max(0, stride) * 0.1;
-    const trailLift = Math.max(0, -stride) * 0.1;
-    const leadZ = stride > 0 ? -0.12 : 0.09;
-    const trailZ = stride > 0 ? 0.09 : -0.12;
+    const leadLift = Math.max(0, stride) * 0.09;
+    const trailLift = Math.max(0, -stride) * 0.09;
+    const leadZ = stride > 0 ? -0.12 : 0.1;
+    const trailZ = stride > 0 ? 0.1 : -0.12;
     const leftLead = stride > 0;
 
     shoes.leftPivot.position.set(
@@ -245,22 +348,22 @@ export function updateWalkingShoes3D(
       leftLead ? trailLift : leadLift,
       leftLead ? trailZ : leadZ,
     );
-    shoes.leftPivot.rotation.x = leftLead ? -0.08 : 0.04;
-    shoes.rightPivot.rotation.x = leftLead ? 0.04 : -0.08;
+    shoes.leftPivot.rotation.x = leftLead ? -0.12 : 0.06;
+    shoes.rightPivot.rotation.x = leftLead ? 0.06 : -0.12;
+    shoes.leftPivot.rotation.y = toeIn;
+    shoes.rightPivot.rotation.y = -toeIn;
   }
 
   if (!args.airborne && Math.sin(phase * 2) > 0.92) {
     spawnDust(shoes, stride > 0 ? -lateral : lateral);
   }
 
-  applyDirtToBillboard(shoes.leftMat, args.dirt, args.freshGlow);
-  applyDirtToBillboard(shoes.rightMat, args.dirt, args.freshGlow);
+  tintShoe(shoes.leftShoe, args.dirt, args.freshGlow);
+  tintShoe(shoes.rightShoe, args.dirt, args.freshGlow);
 
   shoes.shieldRing.visible = args.shieldActive;
   shoes.shieldGlow.intensity = args.shieldActive ? 1.2 : 0;
-  if (args.shieldActive) {
-    shoes.shieldRing.rotation.z += 0.035;
-  }
+  if (args.shieldActive) shoes.shieldRing.rotation.z += 0.035;
 
   for (let i = dustPool.length - 1; i >= 0; i--) {
     const p = dustPool[i]!;

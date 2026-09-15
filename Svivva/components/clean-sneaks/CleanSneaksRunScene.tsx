@@ -428,7 +428,8 @@ function PlayerShoes({
 
     host.position.x = laneWorldX(s.laneX);
     host.position.y = s.y < 0 ? -s.y / 120 : 0;
-    host.rotation.y = portrait ? 0 : mobile ? 0.22 : 0;
+    // Keep shoes facing down the road (−Z) so the camera sees the heel / rear view.
+    host.rotation.y = 0;
 
     updateWalkingShoes3D(shoes, {
       walkPhase: s.walkPhase,
