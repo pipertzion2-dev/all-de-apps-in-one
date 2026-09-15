@@ -1,7 +1,8 @@
 /**
- * Baloon8 puffer coupe — thin API over the procedural 3D car model.
- * Dark iridescent quilted pods (Tripo / hero refs), mirrored for the runner.
- * Real volumetric mesh — no presence-image / blueprint thumbnails.
+ * BALOON8 car-sneaker — thin API over the advanced procedural 3D model.
+ * Slip-on sneaker silhouette + packed iridescent balloons (orthographic
+ * blueprint + Tripo / Meshy refs). Mirrored for the runner. Real volumetric
+ * mesh — never a presence-image thumbnail.
  */
 import * as THREE from "three";
 import {
@@ -54,7 +55,7 @@ function runnerScale(opts: { mobile?: boolean; portrait?: boolean; pair?: boolea
 }
 
 function podBudgetFor(mobile: boolean, portrait: boolean, pair: boolean, cap: number): number {
-  const base = mobile ? (portrait ? 700 : 950) : pair ? 1400 : 2200;
+  const base = mobile ? (portrait ? 1000 : 1400) : pair ? 2200 : 3200;
   return Math.min(cap, base);
 }
 
@@ -93,15 +94,15 @@ export function ensureBaloon8RunnerVisible(shoe: Baloon8WalkerShoe, mobile: bool
   }
 }
 
-/** Homepage / orbit viewer — full-scale procedural puffer coupe. */
+/** Homepage / orbit viewer — full-scale procedural BALOON8 car-sneaker. */
 export function buildBaloon8Shoe(
   _blueprint?: THREE.Texture,
-  _bubbleCount = 1400,
+  _bubbleCount = 2800,
 ): Baloon8ShoeModel {
   const build = buildBaloon8Car({
     scale: BALOON8_SCENE_SCALE,
     mobile: false,
-    podBudget: 2200,
+    podBudget: 3200,
   });
   build.root.position.y = scaledDim(0.02, BALOON8_SCENE_SCALE);
 
@@ -123,7 +124,7 @@ export function buildBaloon8RunnerShoe(
   const portrait = opts?.portrait ?? false;
   const pair = opts?.pair ?? false;
   const scale = runnerScale({ mobile, portrait, pair });
-  const perShoeCap = mobile ? (pair ? 950 : 1100) : Math.max(bubbleCount, 1400);
+  const perShoeCap = mobile ? (pair ? 1400 : 1600) : Math.max(bubbleCount, 2200);
   const budget = podBudgetFor(mobile, portrait, pair, perShoeCap);
 
   const build = buildBaloon8Car({ scale, mobile, portrait, podBudget: budget });

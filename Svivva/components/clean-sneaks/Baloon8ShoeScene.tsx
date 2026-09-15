@@ -21,7 +21,9 @@ type Props = {
 };
 
 /**
- * Interactive Baloon8 car-shoe — textured from the user's four-view mockup.
+ * Interactive BALOON8 car-sneaker — advanced procedural Three.js mesh matching
+ * the orthographic brand blueprint (packed iridescent balloons, neon e8 grille,
+ * crystal wheels). Orbit to inspect; bloom accents the green grille.
  */
 export function Baloon8ShoeScene({ className = "", autoRotate = true, bubbleCount }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -39,7 +41,7 @@ export function Baloon8ShoeScene({ className = "", autoRotate = true, bubbleCoun
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const isMobile = window.innerWidth < 768;
-    const count = bubbleCount ?? (isMobile ? 480 : 1200);
+    const count = bubbleCount ?? (isMobile ? 1000 : 2800);
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x06080c);
@@ -57,7 +59,7 @@ export function Baloon8ShoeScene({ className = "", autoRotate = true, bubbleCoun
     renderer.setPixelRatio(dpr);
     renderer.setClearColor(0x06080c, 1);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.12;
+    renderer.toneMappingExposure = 1.2;
     host.appendChild(renderer.domElement);
     Object.assign(renderer.domElement.style, {
       width: "100%",
@@ -77,6 +79,9 @@ export function Baloon8ShoeScene({ className = "", autoRotate = true, bubbleCoun
     const rim = new THREE.DirectionalLight(0x7ec8d9, 0.65);
     rim.position.set(-3, 2, -4);
     scene.add(rim);
+    const grilleFill = new THREE.PointLight(0x36f078, 0.85, 8, 2);
+    grilleFill.position.set(2.2, 0.9, 0);
+    scene.add(grilleFill);
 
     const clock = new THREE.Clock();
     let userOrbiting = false;
@@ -118,7 +123,7 @@ export function Baloon8ShoeScene({ className = "", autoRotate = true, bubbleCoun
         composer = new EffectComposer(renderer);
         composer.setPixelRatio(dpr);
         composer.addPass(new RenderPass(scene, camera));
-        const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.35, 0.3, 0.82);
+        const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.55, 0.4, 0.72);
         composer.addPass(bloom);
         composer.addPass(new OutputPass());
 
