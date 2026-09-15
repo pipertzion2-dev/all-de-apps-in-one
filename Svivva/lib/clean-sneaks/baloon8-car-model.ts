@@ -223,8 +223,7 @@ function sneakerProfile(
   const collar = Math.exp(-Math.pow((t - 0.3) / 0.2, 2));
   const vamp = Math.sin(THREE.MathUtils.clamp((t - 0.08) / 0.78, 0, 1) * Math.PI);
   const heelDrop = t < 0.14 ? THREE.MathUtils.smoothstep(t, 0, 0.14) : 1;
-  const heightEnv =
-    (0.26 + 0.2 * vamp + 0.52 * collar + 0.2 * toeDome) * (0.72 + 0.28 * heelDrop);
+  const heightEnv = (0.26 + 0.2 * vamp + 0.52 * collar + 0.2 * toeDome) * (0.72 + 0.28 * heelDrop);
 
   if (yNorm > heightEnv * 1.02 || yNorm < 0.02) {
     return { halfW: 0, opening: false, inside: false, heightEnv };
@@ -240,8 +239,7 @@ function sneakerProfile(
   // Foot opening — large oval over mid/rear upper (top + side views)
   const openX = (t - 0.36) / 0.3;
   const openY = (yNorm - 0.7) / 0.26;
-  const opening =
-    openX * openX + openY * openY < 1 && yNorm > 0.52 && t > 0.14 && t < 0.64;
+  const opening = openX * openX + openY * openY < 1 && yNorm > 0.52 && t > 0.14 && t < 0.64;
 
   // Width vs height: fuller near sole, pinches at collar rim
   const hFrac = THREE.MathUtils.clamp(yNorm / Math.max(0.08, heightEnv), 0, 1);
@@ -437,7 +435,10 @@ function createInnerHull(scale: number): THREE.Group {
     roughness: 0.92,
     metalness: 0.04,
   });
-  const collar = new THREE.Mesh(new THREE.TorusGeometry(W * 0.24, s(0.055, scale), 12, 36), collarMat);
+  const collar = new THREE.Mesh(
+    new THREE.TorusGeometry(W * 0.24, s(0.055, scale), 12, 36),
+    collarMat,
+  );
   collar.rotation.x = Math.PI / 2;
   collar.position.set(-L * 0.04, H * 0.76, 0);
   collar.scale.set(1.2, 0.78, 1);
