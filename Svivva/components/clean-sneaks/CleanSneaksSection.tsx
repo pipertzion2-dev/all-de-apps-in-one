@@ -30,7 +30,7 @@ const Baloon8ShoeScene = dynamic(
 
 export function CleanSneaksSection() {
   const [best, setBest] = useState(0);
-  const [show3d, setShow3d] = useState(false);
+  const [show3d, setShow3d] = useState(true);
 
   useEffect(() => {
     setBest(readBestScore());
@@ -67,7 +67,7 @@ export function CleanSneaksSection() {
                 className="rounded-full border border-black/10 bg-white/80 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-black/60 backdrop-blur transition hover:bg-white"
                 data-testid="button-toggle-baloon8-3d"
               >
-                {show3d ? "Show sneaker" : "Orbit 3D"}
+                {show3d ? "Show photo" : "Orbit 3D"}
               </button>
             </div>
 
@@ -88,7 +88,7 @@ export function CleanSneaksSection() {
               </div>
 
               {show3d ? (
-                <div className="absolute inset-0 bg-[#06080c]">
+                <div className="absolute inset-0 bg-[#f2f3f5]">
                   <SceneErrorBoundary
                     fallback={
                       <div className="relative h-full w-full">
