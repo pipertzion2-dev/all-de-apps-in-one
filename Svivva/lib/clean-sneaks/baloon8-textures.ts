@@ -3,8 +3,11 @@ import * as THREE from "three";
 /** Four-quadrant layout of baloon8-blueprint.jpg (2×2 orthographic sheet). */
 export const BALOON8_BLUEPRINT_URL = "/assets/clean-sneaks/baloon8-blueprint.jpg";
 
-/** Polished 3/4 hero render — pixel target for the homepage viewer. */
-export const BALOON8_HERO_REFERENCE_URL = "/assets/clean-sneaks/baloon8-hero-reference.jpg";
+/** Official side-profile sneaker thumbnail (homepage / OG / fallbacks). */
+export const BALOON8_SNEAKER_THUMBNAIL_URL = "/assets/clean-sneaks/baloon8-sneaker-thumbnail.png";
+
+/** Polished side hero render — same asset as the sneaker thumbnail. */
+export const BALOON8_HERO_REFERENCE_URL = "/assets/clean-sneaks/baloon8-sneaker-thumbnail.png";
 
 export type Baloon8BlueprintQuadrant = "side" | "front" | "top" | "rear";
 
@@ -270,18 +273,39 @@ export function loadBaloon8BlueprintTexture(): Promise<THREE.Texture> {
   return blueprintLoad;
 }
 
-/** Canvas sprite — side profile from the user's Baloon8 mockup. */
+/** Canvas sprite — official Baloon8 sneaker side thumbnail (fallback: blueprint crop). */
 let sideSpriteLoad: Promise<HTMLCanvasElement> | null = null;
 
 export function loadBaloon8SideSprite(): Promise<HTMLCanvasElement> {
   if (!sideSpriteLoad) {
-    sideSpriteLoad = loadBaloon8BlueprintTexture().then((tex) => {
-      const prep = prepareBlueprintQuadrant(tex.image as CanvasImageSource, "side");
-      const canvas = document.createElement("canvas");
-      canvas.width = prep.map.image.width;
-      canvas.height = prep.map.image.height;
-      canvas.getContext("2d")!.drawImage(prep.map.image as CanvasImageSource, 0, 0);
-      return canvas;
+    sideSpriteLoad = new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.naturalWidth || img.width;
+        canvas.height = img.naturalHeight || img.height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("2d context unavailable"));
+          return;
+        }
+        ctx.drawImage(img, 0, 0);
+        resolve(canvas);
+      };
+      img.onerror = () => {
+        loadBaloon8BlueprintTexture()
+          .then((tex) => {
+            const prep = prepareBlueprintQuadrant(tex.image as CanvasImageSource, "side");
+            const canvas = document.createElement("canvas");
+            canvas.width = prep.map.image.width;
+            canvas.height = prep.map.image.height;
+            canvas.getContext("2d")!.drawImage(prep.map.image as CanvasImageSource, 0, 0);
+            resolve(canvas);
+          })
+          .catch(reject);
+      };
+      img.src = BALOON8_SNEAKER_THUMBNAIL_URL;
     });
   }
   return sideSpriteLoad;
