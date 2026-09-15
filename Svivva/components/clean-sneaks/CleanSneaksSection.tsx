@@ -3,34 +3,12 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { readBestScore } from "@/lib/clean-sneaks/storage";
 import { BALOON8_SNEAKER_THUMBNAIL_URL } from "@/lib/clean-sneaks/baloon8-textures";
-import { SceneErrorBoundary } from "./SceneErrorBoundary";
-
-const Baloon8ShoeScene = dynamic(
-  () => import("@/components/clean-sneaks/Baloon8ShoeScene").then((m) => m.Baloon8ShoeScene),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="relative flex h-full min-h-[200px] items-center justify-center bg-[#0a0c10]">
-        <Image
-          src={BALOON8_SNEAKER_THUMBNAIL_URL}
-          alt="Baloon8 car-sneaker"
-          fill
-          className="object-contain p-4 opacity-80"
-          sizes="(max-width: 1024px) 100vw, 55vw"
-          priority
-        />
-      </div>
-    ),
-  },
-);
 
 export function CleanSneaksSection() {
   const [best, setBest] = useState(0);
-  const [show3d, setShow3d] = useState(true);
 
   useEffect(() => {
     setBest(readBestScore());
@@ -57,55 +35,22 @@ export function CleanSneaksSection() {
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
         <div className="grid items-stretch gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-10">
           <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#f4f5f7] shadow-[0_0_60px_rgba(91,141,168,0.12)]">
-            <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-4 py-3">
+            <div className="absolute inset-x-0 top-0 z-10 flex items-center px-4 py-3">
               <p className="text-[10px] uppercase tracking-[0.35em] text-[#1a3040]/80">
                 Your Baloon8
               </p>
-              <button
-                type="button"
-                onClick={() => setShow3d((v) => !v)}
-                className="rounded-full border border-black/10 bg-white/80 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-black/60 backdrop-blur transition hover:bg-white"
-                data-testid="button-toggle-baloon8-3d"
-              >
-                {show3d ? "Show photo" : "Orbit 3D"}
-              </button>
             </div>
 
             <div className="relative h-[360px] sm:h-[440px] lg:h-[520px]">
-              {/* Always-visible brand thumbnail = user's sneaker render */}
-              <div
-                className={`absolute inset-0 transition-opacity duration-300 ${show3d ? "pointer-events-none opacity-0" : "opacity-100"}`}
-              >
-                <Image
-                  src={BALOON8_SNEAKER_THUMBNAIL_URL}
-                  alt="Baloon8 iridescent car-sneaker — packed balloon body, crystal wheels, e8 hubcaps"
-                  fill
-                  className="object-contain object-center p-6 sm:p-10"
-                  sizes="(max-width: 1024px) 100vw, 55vw"
-                  priority
-                  data-testid="img-baloon8-sneaker-thumbnail"
-                />
-              </div>
-
-              {show3d ? (
-                <div className="absolute inset-0 bg-[#f2f3f5]">
-                  <SceneErrorBoundary
-                    fallback={
-                      <div className="relative h-full w-full">
-                        <Image
-                          src={BALOON8_SNEAKER_THUMBNAIL_URL}
-                          alt="Baloon8 car-sneaker"
-                          fill
-                          className="object-contain p-8"
-                          sizes="(max-width: 1024px) 100vw, 55vw"
-                        />
-                      </div>
-                    }
-                  >
-                    <Baloon8ShoeScene className="h-full" />
-                  </SceneErrorBoundary>
-                </div>
-              ) : null}
+              <Image
+                src={BALOON8_SNEAKER_THUMBNAIL_URL}
+                alt="Baloon8 iridescent car-sneaker — packed balloon body, crystal wheels, e8 hubcaps"
+                fill
+                className="object-contain object-center p-6 sm:p-10"
+                sizes="(max-width: 1024px) 100vw, 55vw"
+                priority
+                data-testid="img-baloon8-sneaker-thumbnail"
+              />
             </div>
           </div>
 

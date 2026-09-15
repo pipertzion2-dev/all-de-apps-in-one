@@ -273,6 +273,35 @@ export function loadBaloon8BlueprintTexture(): Promise<THREE.Texture> {
   return blueprintLoad;
 }
 
+/** Cut white studio backdrop from the official sneaker thumbnail for 3D billboards. */
+export function prepareSneakerThumbnail(img: CanvasImageSource): PreparedQuadrant {
+  const iw =
+    "naturalWidth" in img && img.naturalWidth ? img.naturalWidth : (img as HTMLCanvasElement).width;
+  const ih =
+    "naturalHeight" in img && img.naturalHeight
+      ? img.naturalHeight
+      : (img as HTMLCanvasElement).height;
+  const canvas = document.createElement("canvas");
+  canvas.width = iw;
+  canvas.height = ih;
+  canvas.getContext("2d")!.drawImage(img, 0, 0);
+  const bounds = trimBounds(canvas);
+  const trimmed = trimCanvas(canvas, bounds);
+  const map = canvasTexture(trimmed);
+  const alphaMap = canvasTexture(buildAlphaMap(trimmed));
+  return {
+    map,
+    alphaMap,
+    aspect: trimmed.width / trimmed.height,
+    trim: {
+      u0: bounds.minX / iw,
+      v0: bounds.minY / ih,
+      u1: (bounds.maxX + 1) / iw,
+      v1: (bounds.maxY + 1) / ih,
+    },
+  };
+}
+
 /** Canvas sprite — official Baloon8 sneaker side thumbnail (fallback: blueprint crop). */
 let sideSpriteLoad: Promise<HTMLCanvasElement> | null = null;
 

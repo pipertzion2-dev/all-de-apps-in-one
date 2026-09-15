@@ -26,7 +26,6 @@ import {
   createWalkingShoes3D,
   preloadBaloon8RunnerShoe,
   updateWalkingShoes3D,
-  type WalkingShoes3D,
 } from "@/lib/clean-sneaks/walking-shoes-3d";
 import { CleanSneaksPostFX } from "./CleanSneaksPostFX";
 
