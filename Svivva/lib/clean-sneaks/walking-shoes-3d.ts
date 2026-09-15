@@ -1,8 +1,5 @@
 import * as THREE from "three";
-import {
-  loadBaloon8HeroReferenceTexture,
-  prepareSneakerThumbnail,
-} from "./baloon8-textures";
+import { loadBaloon8HeroReferenceTexture, prepareSneakerThumbnail } from "./baloon8-textures";
 
 export type WalkingShoes3D = {
   root: THREE.Group;
