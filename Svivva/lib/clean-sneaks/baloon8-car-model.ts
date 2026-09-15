@@ -298,16 +298,16 @@ function createCoupeHull(scale: number, mobile: boolean): {
   return { group: g, hullMat };
 }
 
-/** Densely quilted balloon pods following the coupe surface (Tripo puffer look). */
+/** Densely quilted balloon pods tight on the coupe surface (Tripo puffer look). */
 function createBalloonShell(scale: number, budget: number, mobile: boolean): THREE.InstancedMesh {
   const L = s(BALOON8_DIMS.length, scale);
   const W = s(BALOON8_DIMS.width, scale);
   const H = s(BALOON8_DIMS.height, scale);
-  const rows = mobile ? 26 : 42;
-  const maxCols = mobile ? 40 : 64;
-  // Larger pods so quilt cells read like Tripo pillows, not dust
-  const podR = s(mobile ? 0.048 : 0.042, scale);
-  const geo = new THREE.SphereGeometry(podR, mobile ? 8 : 12, mobile ? 6 : 10);
+  const rows = mobile ? 28 : 44;
+  const maxCols = mobile ? 44 : 68;
+  // Small tight pods — large spheres destroyed the coupe silhouette
+  const podR = s(mobile ? 0.028 : 0.026, scale);
+  const geo = new THREE.SphereGeometry(podR, mobile ? 7 : 10, mobile ? 6 : 8);
   const mat = balloonMat();
   const mesh = new THREE.InstancedMesh(geo, mat, budget);
   mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -327,7 +327,7 @@ function createBalloonShell(scale: number, budget: number, mobile: boolean): THR
     if (idx >= budget) return false;
     dummy.position.set(x, y, z);
     dummy.scale.set(sx, sy, sz);
-    dummy.rotation.set(((idx * 19) % 9) * 0.04, ((idx * 13) % 7) * 0.05, ((idx * 11) % 5) * 0.04);
+    dummy.rotation.set(((idx * 19) % 9) * 0.03, ((idx * 13) % 7) * 0.04, ((idx * 11) % 5) * 0.03);
     dummy.updateMatrix();
     mesh.setMatrixAt(idx, dummy.matrix);
     color.setHex(hex);
@@ -338,67 +338,62 @@ function createBalloonShell(scale: number, budget: number, mobile: boolean): THR
 
   for (let row = 0; row < rows && idx < budget; row++) {
     const yNorm = row / Math.max(1, rows - 1);
-    const y = s(0.04, scale) + yNorm * H * 0.96;
-    const cols = Math.floor(maxCols * (0.6 + 0.4 * Math.sin(yNorm * Math.PI)));
+    const y = s(0.05, scale) + yNorm * H * 0.94;
+    const cols = Math.floor(maxCols * (0.62 + 0.38 * Math.sin(yNorm * Math.PI)));
     for (let col = 0; col < cols && idx < budget; col++) {
       const u = col / Math.max(1, cols - 1);
       const xNorm = u * 2 - 1;
       const { halfW, cabin, inside, archCut } = coupeProfile(xNorm, yNorm);
-      if (archCut || !inside || halfW < 0.12) continue;
+      if (archCut || !inside || halfW < 0.14) continue;
 
-      const x = xNorm * L * 0.48;
-      const radius = halfW * W * 0.52;
-      const base = (0.95 + ((row * 5 + col * 3) % 7) / 18) * (cabin ? 0.88 : 1);
-      const sx = base * 1.15;
-      const sy = base * 0.95;
-      const sz = base * 1.15;
+      const x = xNorm * L * 0.47;
+      const radius = halfW * W * 0.5;
+      // Flattened quilt cells (ellipsoid) hug the body like Tripo pillows
+      const base = (0.9 + ((row * 5 + col * 3) % 7) / 20) * (cabin ? 0.85 : 1);
+      const sx = base * 1.35;
+      const sy = base * 0.72;
+      const sz = base * 1.2;
 
       for (const side of [-1, 1] as const) {
         if (idx >= budget) break;
-        const z = side * radius * (0.95 + ((row + col) % 3) * 0.015);
+        const z = side * radius * 0.98;
         place(x, y, z, sx, sy, sz, BALLOON[(row + col + (side > 0 ? 0 : 5)) % BALLOON.length]!);
       }
 
-      // Roof / hood top fill so the coupe reads solid from chase cam
-      if (yNorm > 0.35 && yNorm < 0.92 && Math.abs(xNorm) < 0.85) {
-        for (const f of [0.35, 0.0] as const) {
-          if (idx >= budget) break;
-          const z = f === 0 ? 0 : ((col % 2) * 2 - 1) * radius * f;
-          place(
-            x,
-            y + s(0.01, scale),
-            z,
-            sx * 0.95,
-            sy * 0.9,
-            sz * 0.95,
-            BALLOON[(row * 3 + col) % BALLOON.length]!,
-          );
-        }
+      // Top quilt along hood / roof centerline
+      if (yNorm > 0.28 && yNorm < 0.9 && Math.abs(xNorm) < 0.82 && col % 2 === 0) {
+        if (idx >= budget) break;
+        place(
+          x,
+          y + s(0.008, scale),
+          ((col % 4) - 1.5) * radius * 0.18,
+          sx * 1.1,
+          sy * 0.85,
+          sz * 0.95,
+          BALLOON[(row * 3 + col) % BALLOON.length]!,
+        );
       }
     }
   }
 
-  // Nose bumper quilt
-  const noseN = mobile ? 90 : 160;
+  // Nose bumper quilt (tight)
+  const noseN = mobile ? 60 : 110;
   for (let i = 0; i < noseN && idx < budget; i++) {
-    const a = (i / noseN) * Math.PI * 2;
-    const ring = 0.4 + (i % 4) * 0.14;
-    const y = H * (0.18 + (i % 6) * 0.06);
-    const z = Math.sin(a) * W * 0.3 * ring;
-    const x = L * 0.47 + Math.cos(a) * s(0.05, scale) * ring;
-    const base = 1.05 + (i % 3) * 0.06;
-    place(x, y, z, base, base * 0.9, base, BALLOON[i % BALLOON.length]!);
+    const a = ((i / noseN) * Math.PI - Math.PI / 2) * 0.95;
+    const y = H * (0.2 + (i % 5) * 0.05);
+    const z = Math.sin(a) * W * 0.32;
+    const x = L * 0.46 + Math.cos(a) * s(0.03, scale);
+    place(x, y, z, 1.2, 0.75, 1.1, BALLOON[i % BALLOON.length]!);
   }
 
   // Tail quilt
-  const tailN = mobile ? 70 : 130;
+  const tailN = mobile ? 50 : 90;
   for (let i = 0; i < tailN && idx < budget; i++) {
-    const a = (i / tailN) * Math.PI * 2;
-    const y = H * (0.22 + (i % 7) * 0.07);
-    const z = Math.sin(a) * W * 0.32;
-    const x = -L * 0.46 + Math.cos(a) * s(0.045, scale);
-    const base = 1.0 + (i % 4) * 0.05;
-    place(x, y, z, base, base * 0.9, base, BALLOON[(i + 4) % BALLOON.length]!);
+    const a = ((i / tailN) * Math.PI + Math.PI / 2) * 0.95;
+    const y = H * (0.24 + (i % 5) * 0.055);
+    const z = Math.sin(a) * W * 0.34;
+    const x = -L * 0.45 + Math.cos(a) * s(0.028, scale);
+    place(x, y, z, 1.15, 0.72, 1.05, BALLOON[(i + 4) % BALLOON.length]!);
   }
 
   mesh.count = idx;
@@ -537,13 +532,13 @@ function createRearPlate(scale: number): THREE.Group {
   const W = s(BALOON8_DIMS.width, scale);
 
   const plate = new THREE.Mesh(
-    new THREE.PlaneGeometry(W * 0.36, H * 0.1),
+    new THREE.PlaneGeometry(W * 0.32, H * 0.09),
     new THREE.MeshPhysicalMaterial({
       map: plateTexture(),
       emissive: new THREE.Color(0x22c860),
-      emissiveIntensity: 0.45,
-      metalness: 0.2,
-      roughness: 0.4,
+      emissiveIntensity: 0.25,
+      metalness: 0.25,
+      roughness: 0.45,
       side: THREE.DoubleSide,
     }),
   );

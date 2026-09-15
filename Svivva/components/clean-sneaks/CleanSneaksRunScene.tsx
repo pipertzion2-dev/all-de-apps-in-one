@@ -49,15 +49,15 @@ type CameraRig = { ox: number; oy: number; oz: number; lookY: number; lookZ: num
 
 function cameraRigFor(mobile: boolean, portrait: boolean): CameraRig {
   if (mobile && portrait) {
-    // Offset chase cam for a rear-quarter view so the coupe silhouette + wheels read
+    // Strong side offset — rear-dead chase hid the coupe; show wheels + profile
     const boost = portraitFramingBoost();
     return {
-      ox: 1.15 * boost,
-      oy: 1.35 * boost,
-      oz: 3.4 * boost,
-      lookY: 0.32,
-      lookZ: -2.8,
-      fov: 62 + (boost - 1) * 6,
+      ox: 1.55 * boost,
+      oy: 1.45 * boost,
+      oz: 3.55 * boost,
+      lookY: 0.35,
+      lookZ: -2.4,
+      fov: 58 + (boost - 1) * 5,
     };
   }
   if (mobile) {
