@@ -18,9 +18,9 @@ export { BALOON8_DIMS, BALOON8_BLUEPRINT_URL };
 export const BALOON8_SCENE_SCALE = 0.42;
 export const BALOON8_WALKER_SCALE = 0.42;
 export const BALOON8_WALKER_SCALE_MOBILE = 0.36;
-export const BALOON8_PAIR_SCALE = 0.26;
-export const BALOON8_PAIR_SCALE_MOBILE = 0.34;
-export const BALOON8_PAIR_SCALE_PORTRAIT = 0.31;
+export const BALOON8_PAIR_SCALE = 0.3;
+export const BALOON8_PAIR_SCALE_MOBILE = 0.38;
+export const BALOON8_PAIR_SCALE_PORTRAIT = 0.36;
 
 export type Baloon8WalkerShoe = {
   root: THREE.Group;
