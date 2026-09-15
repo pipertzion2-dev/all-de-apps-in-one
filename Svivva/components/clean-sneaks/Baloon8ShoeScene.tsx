@@ -13,7 +13,6 @@ import {
   BALOON8_SCENE_SCALE,
   buildBaloon8Shoe,
 } from "@/lib/clean-sneaks/baloon8-shoe-model";
-import { loadBaloon8BlueprintTexture } from "@/lib/clean-sneaks/baloon8-textures";
 
 type Props = {
   className?: string;
@@ -93,11 +92,11 @@ export function Baloon8ShoeScene({ className = "", autoRotate = true, bubbleCoun
       composer?.setSize(w, h);
     };
 
-    loadBaloon8BlueprintTexture()
-      .then((blueprint) => {
+    Promise.resolve()
+      .then(() => {
         if (disposed) return;
 
-        shoe = buildBaloon8Shoe(blueprint, count);
+        shoe = buildBaloon8Shoe(undefined, count);
         scene.add(shoe.root);
 
         controls = new OrbitControls(camera, renderer.domElement);
