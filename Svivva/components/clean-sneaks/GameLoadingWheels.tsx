@@ -30,45 +30,49 @@ export function GameLoadingWheels({ className, style }: GameLoadingWheelsProps) 
     media.addEventListener("change", sync);
     return () => media.removeEventListener("change", sync);
   }, []);
+
   return (
     <div
-      className={`relative flex flex-col items-center justify-center bg-white ${className ?? ""}`}
+      className={`relative flex h-[100dvh] min-h-[100dvh] w-full flex-col overflow-hidden bg-white ${className ?? ""}`}
       style={style}
       role="status"
       aria-label="Loading game"
       aria-live="polite"
     >
-      <div className="relative mb-6 h-24 w-full max-w-md px-6 sm:mb-8 sm:h-32 sm:max-w-lg">
+      <div className="relative min-h-0 w-full flex-[5] px-[6vw] pt-[max(0.75rem,env(safe-area-inset-top))]">
         <Image
           src={KAREN_THE_MUSCLE_LOGO_URL}
           alt="Karen the Muscle"
           fill
           priority
-          className="object-contain"
-          sizes="(max-width: 768px) 80vw, 480px"
+          className="object-contain object-center"
+          sizes="100vw"
           data-testid="img-karen-the-muscle-logo"
         />
       </div>
 
-      <div className="flex w-full max-w-3xl items-center justify-center gap-3 px-4 sm:gap-6 sm:px-8">
-        {LOADING_WHEEL_URLS.map((src, index) => (
-          <div
-            key={src}
-            className="relative aspect-square min-w-0 flex-1"
-            data-testid={`loading-wheel-${index}`}
-          >
-            <Image
-              src={src}
-              alt=""
-              aria-hidden
-              fill
-              priority
-              className={`object-contain ${reducedMotion ? "" : WHEEL_SPINS[index]}`}
-              sizes="(max-width: 640px) 28vw, 220px"
-            />
-          </div>
-        ))}
+      <div className="relative flex min-h-0 w-full flex-[6] items-center justify-center px-[4vw] pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <div className="flex w-full max-w-5xl items-center justify-center gap-[min(3vw,1rem)]">
+          {LOADING_WHEEL_URLS.map((src, index) => (
+            <div
+              key={src}
+              className="relative aspect-square h-[min(38vh,42vw)] w-auto flex-1"
+              data-testid={`loading-wheel-${index}`}
+            >
+              <Image
+                src={src}
+                alt=""
+                aria-hidden
+                fill
+                priority
+                className={`object-contain ${reducedMotion ? "" : WHEEL_SPINS[index]}`}
+                sizes="(max-width: 640px) 30vw, 240px"
+              />
+            </div>
+          ))}
+        </div>
       </div>
+
       <p className="sr-only">Loading</p>
     </div>
   );
