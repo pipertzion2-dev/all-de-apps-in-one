@@ -3,6 +3,9 @@ import * as THREE from "three";
 /** Four-quadrant layout of baloon8-blueprint.jpg (2×2 orthographic sheet). */
 export const BALOON8_BLUEPRINT_URL = "/assets/clean-sneaks/baloon8-blueprint.jpg";
 
+/** Polished 3/4 hero render — pixel target for the homepage viewer. */
+export const BALOON8_HERO_REFERENCE_URL = "/assets/clean-sneaks/baloon8-hero-reference.jpg";
+
 export type Baloon8BlueprintQuadrant = "side" | "front" | "top" | "rear";
 
 /** Image-space crop for each orthographic view on the 2×2 sheet (1536×1024 typical). */
@@ -181,6 +184,26 @@ export function cropBlueprintTexture(
   tex.repeat.set(uv.repeat[0], uv.repeat[1]);
   tex.needsUpdate = true;
   return tex;
+}
+
+let heroReferenceLoad: Promise<THREE.Texture> | null = null;
+
+export function loadBaloon8HeroReferenceTexture(): Promise<THREE.Texture> {
+  if (!heroReferenceLoad) {
+    heroReferenceLoad = new Promise((resolve, reject) => {
+      new THREE.TextureLoader().load(
+        BALOON8_HERO_REFERENCE_URL,
+        (tex) => {
+          tex.colorSpace = THREE.SRGBColorSpace;
+          tex.anisotropy = 8;
+          resolve(tex);
+        },
+        undefined,
+        reject,
+      );
+    });
+  }
+  return heroReferenceLoad;
 }
 
 let blueprintLoad: Promise<THREE.Texture> | null = null;

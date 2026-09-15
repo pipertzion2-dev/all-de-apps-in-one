@@ -22,6 +22,7 @@ import {
   runQualityFlags,
   type RunQuality,
 } from "@/lib/clean-sneaks/run-quality";
+import { loadBaloon8BlueprintTexture } from "@/lib/clean-sneaks/baloon8-textures";
 import {
   createWalkingShoes3D,
   preloadBaloon8RunnerShoe,
@@ -410,15 +411,17 @@ function PlayerShoes({
   stateRef,
   mobile,
   portrait,
+  blueprint,
 }: {
   stateRef: React.MutableRefObject<RunEngineState>;
   mobile: boolean;
   portrait: boolean;
+  blueprint: THREE.Texture | null;
 }) {
   const hostRef = useRef<THREE.Group>(null);
   const shoes = useMemo(
-    () => createWalkingShoes3D(undefined, mobile, portrait),
-    [mobile, portrait],
+    () => (blueprint ? createWalkingShoes3D(blueprint, mobile, portrait) : null),
+    [blueprint, mobile, portrait],
   );
 
   useFrame(() => {
@@ -473,7 +476,7 @@ function World({ stateRef, running, onGameOver, onStreakFlash, onStatsTick, qual
   const tickRef = useRef(0);
   const sunRef = useRef<THREE.DirectionalLight>(null);
   const { scene } = useThree();
-  const [ready, setReady] = useState(false);
+  const [blueprint, setBlueprint] = useState<THREE.Texture | null>(null);
 
   useEffect(() => {
     scene.background = new THREE.Color(0x0a0e14);
@@ -481,9 +484,19 @@ function World({ stateRef, running, onGameOver, onStreakFlash, onStatsTick, qual
 
   useEffect(() => {
     let alive = true;
-    preloadBaloon8RunnerShoe().finally(() => {
-      if (alive) setReady(true);
-    });
+    preloadBaloon8RunnerShoe()
+      .then((tex) => {
+        if (alive) setBlueprint(tex);
+      })
+      .catch(() => {
+        if (alive) {
+          loadBaloon8BlueprintTexture()
+            .then((tex) => {
+              if (alive) setBlueprint(tex);
+            })
+            .catch(() => {});
+        }
+      });
     return () => {
       alive = false;
     };
@@ -568,8 +581,13 @@ function World({ stateRef, running, onGameOver, onStreakFlash, onStatsTick, qual
         />
       ) : null}
 
-      {ready ? (
-        <PlayerShoes stateRef={stateRef} mobile={quality.mobile} portrait={quality.portrait} />
+      {blueprint ? (
+        <PlayerShoes
+          stateRef={stateRef}
+          mobile={quality.mobile}
+          portrait={quality.portrait}
+          blueprint={blueprint}
+        />
       ) : null}
       <DynamicEntities stateRef={stateRef} />
 

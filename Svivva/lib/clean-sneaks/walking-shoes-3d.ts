@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import { buildBaloon8RunnerShoe, type Baloon8WalkerShoe } from "./baloon8-shoe-model";
 import { loadBaloon8BlueprintTexture } from "./baloon8-textures";
-import { detectRunQuality, runQualityFlags } from "./run-quality";
 
 export type WalkingShoes3D = {
   root: THREE.Group;
@@ -15,24 +14,18 @@ export type WalkingShoes3D = {
   dustEmitter: THREE.Group;
 };
 
-function runnerBubbleCount(): number {
-  if (typeof window === "undefined") return 1200;
-  const flags = runQualityFlags(detectRunQuality());
-  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (reduced) return flags.bubbleCountReduced;
-  return flags.bubbleCount;
-}
-
-/** Preload — keeps blueprint warm for fallbacks; 3D car is procedural. */
+/** Preload blueprint artwork used for in-game sneakers. */
 export function preloadBaloon8RunnerShoe(): Promise<THREE.Texture> {
   return loadBaloon8BlueprintTexture();
 }
 
-function buildRunnerShoe(mobile: boolean, portrait: boolean, mirror: boolean): Baloon8WalkerShoe {
-  const preferred = mobile
-    ? Math.max(portrait ? 320 : 420, Math.floor(runnerBubbleCount() / (portrait ? 2.5 : 2)))
-    : Math.max(80, Math.floor(runnerBubbleCount() / 2));
-  return buildBaloon8RunnerShoe(undefined, preferred, {
+function buildRunnerShoe(
+  blueprint: THREE.Texture,
+  mobile: boolean,
+  portrait: boolean,
+  mirror: boolean,
+): Baloon8WalkerShoe {
+  return buildBaloon8RunnerShoe(blueprint, 0, {
     mobile,
     portrait,
     pair: true,
@@ -40,9 +33,9 @@ function buildRunnerShoe(mobile: boolean, portrait: boolean, mirror: boolean): B
   });
 }
 
-/** Baloon8 procedural car pair — left + right foot with walking stride. */
+/** Baloon8 blueprint-textured pair — left + right foot with walking stride. */
 export function createWalkingShoes3D(
-  _blueprint?: THREE.Texture,
+  blueprint: THREE.Texture,
   mobile = false,
   portrait = false,
 ): WalkingShoes3D {
@@ -51,8 +44,8 @@ export function createWalkingShoes3D(
   const leftPivot = new THREE.Group();
   const rightPivot = new THREE.Group();
 
-  const leftShoe = buildRunnerShoe(mobile, portrait, false);
-  const rightShoe = buildRunnerShoe(mobile, portrait, true);
+  const leftShoe = buildRunnerShoe(blueprint, mobile, portrait, false);
+  const rightShoe = buildRunnerShoe(blueprint, mobile, portrait, true);
   leftPivot.add(leftShoe.root);
   rightPivot.add(rightShoe.root);
   shoePivot.add(leftPivot, rightPivot);
