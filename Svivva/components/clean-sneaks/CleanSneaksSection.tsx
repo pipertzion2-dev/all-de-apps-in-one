@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { readBestScore } from "@/lib/clean-sneaks/storage";
 
@@ -13,6 +14,7 @@ const CleanSneaksLogoCube = dynamic(
 
 export function CleanSneaksSection() {
   const [best, setBest] = useState(0);
+  const router = useRouter();
 
   useEffect(() => {
     setBest(readBestScore());
@@ -38,9 +40,8 @@ export function CleanSneaksSection() {
 
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
         <div className="grid items-stretch gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-10">
-          <Link
-            href="/clean-sneaks"
-            className="group relative flex min-h-[280px] items-center justify-center overflow-hidden rounded-2xl border border-white/10 outline-none transition-[border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-[#A8BA48]/60 sm:min-h-[340px]"
+          <div
+            className="group relative flex min-h-[280px] items-center justify-center overflow-hidden rounded-2xl border border-white/10 sm:min-h-[340px]"
             style={{
               background: `
                 radial-gradient(ellipse 60% 55% at 50% 48%, rgba(58,32,72,0.55), rgba(8,6,12,0.92) 70%),
@@ -49,7 +50,6 @@ export function CleanSneaksSection() {
               boxShadow: "0 0 60px rgba(74,47,92,0.22)",
             }}
             data-testid="clean-sneaks-home-hero"
-            aria-label="Enter Clean Sneaks — goal: steal the old man's bundle"
           >
             <div
               className="absolute inset-0 opacity-40 mix-blend-soft-light"
@@ -59,11 +59,14 @@ export function CleanSneaksSection() {
                   "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E\")",
               }}
             />
-            <CleanSneaksLogoCube className="relative z-[1] h-[240px] w-full sm:h-[300px]" />
-            <span className="pointer-events-none absolute bottom-4 left-0 right-0 text-center text-[10px] uppercase tracking-[0.35em] text-white/45 transition-colors group-hover:text-white/70 sm:bottom-5">
-              Tap cube to enter
+            <CleanSneaksLogoCube
+              className="relative z-[1] h-[240px] w-full sm:h-[300px]"
+              onActivate={() => router.push("/clean-sneaks")}
+            />
+            <span className="pointer-events-none absolute bottom-4 left-0 right-0 text-center text-[10px] uppercase tracking-[0.35em] text-white/45 sm:bottom-5">
+              Drag to spin · Tap to enter
             </span>
-          </Link>
+          </div>
 
           <div className="flex flex-col justify-center text-center lg:text-left">
             <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.4em] text-[#A8BA48]/90">
