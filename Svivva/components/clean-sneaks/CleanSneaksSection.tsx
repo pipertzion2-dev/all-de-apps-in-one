@@ -33,9 +33,11 @@ export function CleanSneaksSection() {
 
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
         <div className="grid items-stretch gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-10">
-          <div className="rounded-2xl border border-white/10 bg-black/25 shadow-[0_0_60px_rgba(91,141,168,0.12)] backdrop-blur-sm">
-            <div className="flex items-center px-5 pb-0 pt-3 sm:px-7 sm:pt-4">
-              <p className="text-[10px] uppercase tracking-[0.35em] text-white/50">Your Baloon8</p>
+          <div className="overflow-hidden rounded-2xl border border-white/10 bg-white shadow-[0_0_60px_rgba(91,141,168,0.12)]">
+            <div className="flex items-center bg-black/90 px-5 py-2.5 sm:px-7">
+              <p className="text-[10px] uppercase tracking-[0.35em] text-white/55">
+                Karen The Muscle
+              </p>
             </div>
 
             <Baloon8HomeSneaker />
@@ -69,7 +71,7 @@ export function CleanSneaksSection() {
                 <Link href="/clean-sneaks">Play Clean Sneaks</Link>
               </Button>
               <p className="text-[11px] uppercase tracking-[0.25em] text-white/45">
-                Your Baloon8 · Full screen · Mobile &amp; desktop
+                Karen The Muscle · Full screen · Mobile &amp; desktop
               </p>
               {best > 0 && (
                 <p className="text-xs text-[#7EC8D9]/90" data-testid="text-clean-sneaks-best">

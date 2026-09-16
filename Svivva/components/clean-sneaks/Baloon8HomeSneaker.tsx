@@ -1,40 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { loadBaloon8TransparentSideSpriteUrl } from "@/lib/clean-sneaks/baloon8-textures";
+import { KAREN_THE_MUSCLE_LOGO_URL } from "@/lib/clean-sneaks/assets";
 
+/** Homepage Clean Sneaks visual — Karen The Muscle logo (not the Baloon8 car). */
 export function Baloon8HomeSneaker() {
-  const [src, setSrc] = useState<string | null>(null);
-
-  useEffect(() => {
-    let alive = true;
-    loadBaloon8TransparentSideSpriteUrl().then((url) => {
-      if (alive) setSrc(url);
-    });
-    return () => {
-      alive = false;
-    };
-  }, []);
-
   return (
     <div
-      className="flex min-h-[112px] items-center justify-center px-2 py-3 sm:min-h-[140px] sm:px-4 sm:py-4"
+      className="flex min-h-[140px] items-center justify-center bg-white px-3 py-4 sm:min-h-[180px] sm:px-5 sm:py-5"
       data-testid="baloon8-home-sneaker"
     >
-      {src ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={src}
-          alt="Baloon8 side profile — transparent in-game sneaker sprite"
-          className="mx-auto block h-auto max-h-[108px] w-auto max-w-full object-contain sm:max-h-[136px]"
-          draggable={false}
-        />
-      ) : (
-        <div
-          className="mx-auto h-[96px] w-[min(100%,260px)] animate-pulse rounded-lg bg-white/5 sm:h-[120px]"
-          aria-hidden
-        />
-      )}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={KAREN_THE_MUSCLE_LOGO_URL}
+        alt="Karen The Muscle"
+        className="mx-auto block h-auto max-h-[120px] w-auto max-w-full object-contain sm:max-h-[156px]"
+        draggable={false}
+      />
     </div>
   );
 }
