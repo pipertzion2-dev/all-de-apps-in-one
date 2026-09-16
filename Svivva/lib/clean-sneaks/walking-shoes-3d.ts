@@ -1,20 +1,20 @@
 import * as THREE from "three";
+import {
+  loadBaloon8BlueprintTexture,
+  prepareBlueprint,
+  type PreparedBlueprint,
+  type PreparedQuadrant,
+} from "./baloon8-textures";
 import { getColorway } from "./sneaker-catalog";
 
 /**
- * Walking sneakers for the Clean Sneaks runner.
- * Left/right feet stride, lift, and plant — they walk, they do not drive.
- * No wheels, no car chassis, no hubcap spin.
+ * YOUR Baloon8 sneakers from the orthographic blueprint (rear view toward the
+ * follow camera). Walk cycle is bipedal — left/right stride, not wheel drive.
  */
 
-export type RunnerShoe3D = {
+export type Baloon8OrthoShoe = {
   root: THREE.Group;
-  bodyMats: THREE.MeshStandardMaterial[];
-  accentMats: THREE.MeshStandardMaterial[];
-  soleMats: THREE.MeshStandardMaterial[];
-  baseBody: THREE.Color;
-  baseAccent: THREE.Color;
-  baseSole: THREE.Color;
+  mats: THREE.MeshBasicMaterial[];
 };
 
 export type WalkingShoes3D = {
@@ -22,198 +22,80 @@ export type WalkingShoes3D = {
   shoePivot: THREE.Group;
   leftPivot: THREE.Group;
   rightPivot: THREE.Group;
-  leftShoe: RunnerShoe3D | null;
-  rightShoe: RunnerShoe3D | null;
+  leftShoe: Baloon8OrthoShoe | null;
+  rightShoe: Baloon8OrthoShoe | null;
   shieldRing: THREE.Mesh;
   shieldGlow: THREE.PointLight;
   dustEmitter: THREE.Group;
 };
 
-const COL = {
-  upper: 0xf4f5f7,
-  sole: 0xe8e8ec,
-  soleEdge: 0xb0b0ba,
-  teal: 0x5b8da8,
-  magenta: 0xd94f9c,
-  lace: 0x8a8a94,
-  tongue: 0xffffff,
-  collar: 0x2a2a32,
-};
+let blueprintTex: THREE.Texture | null = null;
+let preparedCache: PreparedBlueprint | null = null;
 
-/** Immediate — shoes are procedural meshes (no car blueprint / wheels). */
 export function preloadBaloon8RunnerShoe(): Promise<THREE.Texture | null> {
-  return Promise.resolve(null);
+  return loadBaloon8BlueprintTexture()
+    .then((tex) => {
+      blueprintTex = tex;
+      try {
+        preparedCache = prepareBlueprint(tex);
+      } catch (err) {
+        console.warn("[walking-shoes-3d] blueprint prepare failed", err);
+        preparedCache = null;
+      }
+      return tex;
+    })
+    .catch((err) => {
+      console.warn("[walking-shoes-3d] blueprint preload failed", err);
+      blueprintTex = null;
+      preparedCache = null;
+      return null;
+    });
 }
 
-function mat(
-  color: number,
-  opts: Partial<THREE.MeshStandardMaterialParameters> = {},
-): THREE.MeshStandardMaterial {
-  return new THREE.MeshStandardMaterial({
-    color,
-    roughness: 0.55,
-    metalness: 0.08,
-    ...opts,
+function panelMat(q: PreparedQuadrant): THREE.MeshBasicMaterial {
+  return new THREE.MeshBasicMaterial({
+    map: q.map,
+    alphaMap: q.alphaMap,
+    transparent: true,
+    alphaTest: 0.1,
+    depthWrite: false,
+    toneMapped: false,
+    side: THREE.DoubleSide,
   });
-}
-
-function parseTint(hex: string): THREE.Color {
-  try {
-    return new THREE.Color(hex);
-  } catch {
-    return new THREE.Color(COL.teal);
-  }
 }
 
 /**
- * One low-poly sneaker. Local space: toe −Z, heel +Z, sole on Y≈0.
- * Camera sits at +Z looking toward −Z, so the heel faces the player.
+ * Baloon8 from the orthographic REAR VIEW — heel / BALOON8 plate toward camera.
+ * One clean rear panel per foot.
  */
-function buildRunnerSneaker(
+function buildOrthoShoe(
+  prepared: PreparedBlueprint,
   scale: number,
   mirror: boolean,
-  bodyTint: THREE.Color,
-  accentTint: THREE.Color,
-): RunnerShoe3D {
+): Baloon8OrthoShoe {
   const root = new THREE.Group();
-  const bodyMats: THREE.MeshStandardMaterial[] = [];
-  const accentMats: THREE.MeshStandardMaterial[] = [];
-  const soleMats: THREE.MeshStandardMaterial[] = [];
+  const mats: THREE.MeshBasicMaterial[] = [];
 
-  const upperMat = mat(bodyTint.getHex(), { roughness: 0.45 });
-  const soleMat = mat(COL.sole, { roughness: 0.7 });
-  const soleEdgeMat = mat(COL.soleEdge, { roughness: 0.75 });
-  const tealMat = mat(accentTint.getHex(), { roughness: 0.4, metalness: 0.15 });
-  const magentaMat = mat(COL.magenta, {
-    roughness: 0.35,
-    metalness: 0.2,
-    emissive: COL.magenta,
-    emissiveIntensity: 0.18,
-  });
-  const laceMat = mat(COL.lace, { roughness: 0.65 });
-  const tongueMat = mat(COL.tongue, { roughness: 0.5 });
-  const collarMat = mat(COL.collar, { roughness: 0.8 });
+  const rearH = 0.64 * scale;
+  const rearW = rearH * Math.max(0.95, Math.min(1.5, prepared.rear.aspect));
 
-  bodyMats.push(upperMat, tongueMat);
-  accentMats.push(tealMat, magentaMat, laceMat);
-  soleMats.push(soleMat, soleEdgeMat);
-
-  const L = 0.68 * scale;
-  const W = 0.26 * scale;
-  const H = 0.24 * scale;
-
-  const outsole = new THREE.Mesh(
-    new THREE.BoxGeometry(W * 1.06, 0.036 * scale, L * 1.02),
-    soleEdgeMat,
-  );
-  outsole.position.set(0, 0.018 * scale, 0);
-  outsole.castShadow = true;
-  root.add(outsole);
-
-  const heelStack = new THREE.Mesh(
-    new THREE.BoxGeometry(W * 1.02, 0.042 * scale, L * 0.3),
-    soleEdgeMat,
-  );
-  heelStack.position.set(0, 0.042 * scale, L * 0.34);
-  root.add(heelStack);
-
-  const midsole = new THREE.Mesh(new THREE.BoxGeometry(W, 0.048 * scale, L * 0.98), soleMat);
-  midsole.position.set(0, 0.056 * scale, 0);
-  midsole.castShadow = true;
-  root.add(midsole);
-
-  const upper = new THREE.Mesh(new THREE.BoxGeometry(W * 0.92, H, L * 0.7), upperMat);
-  upper.position.set(0, 0.08 * scale + H * 0.5, L * 0.04);
-  upper.castShadow = true;
-  root.add(upper);
-
-  const toe = new THREE.Mesh(new THREE.SphereGeometry(W * 0.48, 12, 10), upperMat);
-  toe.scale.set(1, 0.72, 1.2);
-  toe.position.set(0, 0.09 * scale + H * 0.28, -L * 0.34);
-  toe.castShadow = true;
-  root.add(toe);
-
-  const bumper = new THREE.Mesh(new THREE.SphereGeometry(W * 0.42, 10, 8), tealMat);
-  bumper.scale.set(1.05, 0.55, 0.72);
-  bumper.position.set(0, 0.07 * scale + H * 0.15, -L * 0.4);
-  root.add(bumper);
-
-  const heelCounter = new THREE.Mesh(
-    new THREE.BoxGeometry(W * 0.95, H * 0.9, L * 0.12),
-    magentaMat,
-  );
-  heelCounter.position.set(0, 0.08 * scale + H * 0.48, L * 0.38);
-  heelCounter.castShadow = true;
-  root.add(heelCounter);
-
-  const heelPlate = new THREE.Mesh(new THREE.CircleGeometry(W * 0.18, 16), tealMat);
-  heelPlate.position.set(0, 0.08 * scale + H * 0.5, L * 0.45);
-  root.add(heelPlate);
-
-  const soleLip = new THREE.Mesh(
-    new THREE.BoxGeometry(W * 1.02, 0.05 * scale, 0.06 * scale),
-    soleMat,
-  );
-  soleLip.position.set(0, 0.04 * scale, L * 0.5);
-  root.add(soleLip);
-
-  const heelTab = new THREE.Mesh(
-    new THREE.BoxGeometry(W * 0.34, H * 0.3, 0.04 * scale),
-    magentaMat,
-  );
-  heelTab.position.set(0, 0.08 * scale + H * 1.02, L * 0.45);
-  root.add(heelTab);
-
-  const collar = new THREE.Mesh(
-    new THREE.CylinderGeometry(W * 0.28, W * 0.32, H * 0.35, 12),
-    collarMat,
-  );
-  collar.position.set(0, 0.08 * scale + H * 0.88, L * 0.2);
-  root.add(collar);
-
-  const tongue = new THREE.Mesh(new THREE.BoxGeometry(W * 0.4, 0.025 * scale, L * 0.35), tongueMat);
-  tongue.position.set(0, 0.08 * scale + H * 0.95, L * 0.0);
-  tongue.rotation.x = -0.35;
-  root.add(tongue);
-
-  for (let i = 0; i < 3; i++) {
-    const lace = new THREE.Mesh(
-      new THREE.BoxGeometry(W * 0.38, 0.012 * scale, 0.018 * scale),
-      laceMat,
-    );
-    lace.position.set(0, 0.08 * scale + H * 0.8, -L * 0.04 - i * 0.075 * scale);
-    root.add(lace);
-  }
-
-  const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.02 * scale, H * 0.35, L * 0.45), tealMat);
-  stripe.position.set(W * 0.47, 0.08 * scale + H * 0.4, -L * 0.05);
-  root.add(stripe);
-
-  const stripeIn = new THREE.Mesh(new THREE.BoxGeometry(0.015 * scale, H * 0.28, L * 0.4), tealMat);
-  stripeIn.position.set(-W * 0.46, 0.08 * scale + H * 0.38, -L * 0.05);
-  root.add(stripeIn);
-
-  root.traverse((obj) => {
-    if (obj instanceof THREE.Mesh) obj.frustumCulled = false;
-  });
+  const rearMat = panelMat(prepared.rear);
+  mats.push(rearMat);
+  const rear = new THREE.Mesh(new THREE.PlaneGeometry(rearW, rearH), rearMat);
+  rear.position.set(0, rearH * 0.5, 0.06);
+  rear.renderOrder = 9;
+  rear.frustumCulled = false;
+  root.add(rear);
 
   if (mirror) root.scale.x = -1;
 
-  return {
-    root,
-    bodyMats,
-    accentMats,
-    soleMats,
-    baseBody: bodyTint.clone(),
-    baseAccent: accentTint.clone(),
-    baseSole: new THREE.Color(COL.sole),
-  };
+  return { root, mats };
 }
 
-function runnerScale(mobile: boolean, portrait: boolean): number {
-  if (portrait) return 1.05;
-  if (mobile) return 1.15;
-  return 1.1;
+function shoeScale(mobile: boolean, portrait: boolean): number {
+  if (portrait) return 1.1;
+  if (mobile) return 1.2;
+  return 1.15;
 }
 
 export function createWalkingShoes3D(
@@ -227,22 +109,42 @@ export function createWalkingShoes3D(
   const leftPivot = new THREE.Group();
   const rightPivot = new THREE.Group();
 
-  const cw = getColorway(colorwayId);
-  const accentTint = parseTint(cw.tint);
-  // Soft body wash from colorway hull so finishes read without becoming a car.
-  const bodyTint = new THREE.Color(COL.upper).lerp(new THREE.Color(cw.hull), 0.12);
+  let leftShoe: Baloon8OrthoShoe | null = null;
+  let rightShoe: Baloon8OrthoShoe | null = null;
 
-  const s = runnerScale(mobile, portrait);
-  const leftShoe = buildRunnerSneaker(s, true, bodyTint, accentTint);
-  const rightShoe = buildRunnerSneaker(s, false, bodyTint, accentTint);
-  leftPivot.add(leftShoe.root);
-  rightPivot.add(rightShoe.root);
-  leftPivot.rotation.y = 0.12;
-  rightPivot.rotation.y = -0.12;
+  let prepared = preparedCache;
+  if (!prepared && blueprintTex) {
+    try {
+      prepared = prepareBlueprint(blueprintTex);
+    } catch {
+      prepared = null;
+    }
+  }
+
+  if (prepared) {
+    const s = shoeScale(mobile, portrait);
+    leftShoe = buildOrthoShoe(prepared, s, false);
+    rightShoe = buildOrthoShoe(prepared, s, true);
+    leftPivot.add(leftShoe.root);
+    rightPivot.add(rightShoe.root);
+    leftPivot.rotation.y = 0.06;
+    rightPivot.rotation.y = -0.06;
+  }
+
+  const tintHex = getColorway(colorwayId).tint;
+  const tint = new THREE.Color(tintHex);
+  for (const shoe of [leftShoe, rightShoe]) {
+    if (!shoe) continue;
+    for (const m of shoe.mats) {
+      m.color.copy(tint);
+      m.userData.baseTint = tint.clone();
+    }
+  }
+
   shoePivot.add(leftPivot, rightPivot);
 
   const shieldRing = new THREE.Mesh(
-    new THREE.TorusGeometry(0.72, 0.022, 16, 64),
+    new THREE.TorusGeometry(0.8, 0.022, 16, 64),
     new THREE.MeshPhysicalMaterial({
       color: 0x5b8da8,
       emissive: 0x5b8da8,
@@ -256,11 +158,11 @@ export function createWalkingShoes3D(
     }),
   );
   shieldRing.rotation.x = Math.PI / 2;
-  shieldRing.position.y = 0.28;
+  shieldRing.position.y = 0.42;
   shieldRing.visible = false;
 
   const shieldGlow = new THREE.PointLight(0x5b8da8, 0, 4);
-  shieldGlow.position.y = 0.22;
+  shieldGlow.position.y = 0.28;
 
   const dustEmitter = new THREE.Group();
   dustEmitter.position.y = 0.02;
@@ -296,34 +198,21 @@ function spawnDust(shoes: WalkingShoes3D, xOffset: number): void {
   dustPool.push(p);
 }
 
-function tintShoe(shoe: RunnerShoe3D | null, dirt: number, freshGlow: boolean): void {
+function tintShoe(shoe: Baloon8OrthoShoe | null, dirt: number, freshGlow: boolean): void {
   if (!shoe) return;
-  const dirtAmt = dirt > 0.02 ? 0.12 + dirt * 0.55 : 0;
-  for (const m of shoe.bodyMats) {
-    const c = shoe.baseBody.clone();
-    if (dirtAmt) c.lerp(new THREE.Color(0x6b5340), dirtAmt);
-    if (freshGlow) c.lerp(new THREE.Color(0xe8f6fa), 0.1);
-    m.color.copy(c);
-  }
-  for (const m of shoe.soleMats) {
-    const c = shoe.baseSole.clone();
-    if (dirtAmt) c.lerp(new THREE.Color(0x5c4033), dirtAmt * 0.8);
-    m.color.copy(c);
-  }
-  for (const m of shoe.accentMats) {
-    if (m.emissive.getHex() === COL.magenta) {
-      m.emissiveIntensity = freshGlow ? 0.35 : Math.max(0.08, 0.2 - dirt * 0.12);
-    } else if (m.color.getHex() !== COL.lace) {
-      const c = shoe.baseAccent.clone();
-      if (dirtAmt) c.lerp(new THREE.Color(0x5c4033), dirtAmt * 0.35);
-      m.color.copy(c);
-    }
+  for (const m of shoe.mats) {
+    const base =
+      (m.userData.baseTint as THREE.Color | undefined)?.clone() ?? new THREE.Color(0xffffff);
+    if (dirt > 0.02) base.lerp(new THREE.Color(0x6b5340), 0.15 + dirt * 0.55);
+    if (freshGlow) base.lerp(new THREE.Color(0xe8f6fa), 0.08);
+    m.color.copy(base);
+    m.opacity = freshGlow ? 1 : Math.max(0.85, 1 - dirt * 0.12);
   }
 }
 
 /**
- * Bipedal walk cycle — alternating lead foot, lift, plant, dust.
- * Intentionally large stride so the pair reads as walking, not rolling.
+ * Bipedal walk — left and right feet alternate lift / plant.
+ * Visuals stay Baloon8; motion is walking, not driving.
  */
 export function updateWalkingShoes3D(
   shoes: WalkingShoes3D,
@@ -340,8 +229,8 @@ export function updateWalkingShoes3D(
   const phase = args.walkPhase * Math.PI * 2;
   const dt = 0.016;
   const stride = args.airborne ? 0 : Math.sin(phase);
-  const lateral = args.portrait ? 0.22 : 0.3;
-  const toeIn = 0.12;
+  const lateral = args.portrait ? 0.28 : 0.4;
+  const toeIn = 0.06;
 
   const bob = args.airborne ? 0.14 : Math.max(0, Math.sin(phase * 2)) * 0.07;
   shoes.shoePivot.rotation.x = Math.sin(phase) * (args.airborne ? 0.06 : 0.12);
@@ -349,14 +238,14 @@ export function updateWalkingShoes3D(
   shoes.shoePivot.position.y = bob;
 
   if (args.airborne) {
-    shoes.leftPivot.position.set(-lateral * 0.9, 0.12, 0.06);
-    shoes.rightPivot.position.set(lateral * 0.9, 0.1, 0.1);
+    shoes.leftPivot.position.set(-lateral * 0.85, 0.1, 0.06);
+    shoes.rightPivot.position.set(lateral * 0.85, 0.08, 0.1);
     shoes.leftPivot.rotation.x = -0.28;
     shoes.rightPivot.rotation.x = -0.22;
     shoes.leftPivot.rotation.y = toeIn;
     shoes.rightPivot.rotation.y = -toeIn;
   } else {
-    // True bipedal alternate: +stride → left lead, −stride → right lead.
+    // +stride → left lead, −stride → right lead
     const leftLift = Math.max(0, stride) * 0.18;
     const rightLift = Math.max(0, -stride) * 0.18;
     const leftZ = -stride * 0.18;
