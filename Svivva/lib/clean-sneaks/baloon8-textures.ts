@@ -465,6 +465,51 @@ export function prepareSneakerThumbnail(img: CanvasImageSource): PreparedQuadran
   };
 }
 
+/** PNG data URL — side view with white background removed (same trim as in-game panels). */
+let transparentSideUrlLoad: Promise<string> | null = null;
+
+function canvasToTransparentPng(canvas: HTMLCanvasElement): string {
+  const w = canvas.width;
+  const h = canvas.height;
+  const srcCtx = canvas.getContext("2d")!;
+  const { data } = srcCtx.getImageData(0, 0, w, h);
+  const out = document.createElement("canvas");
+  out.width = w;
+  out.height = h;
+  const outCtx = out.getContext("2d")!;
+  const imageData = outCtx.createImageData(w, h);
+  for (let i = 0; i < data.length; i += 4) {
+    if (isBackgroundPixel(data[i]!, data[i + 1]!, data[i + 2]!)) {
+      imageData.data[i + 3] = 0;
+    } else {
+      imageData.data[i] = data[i]!;
+      imageData.data[i + 1] = data[i + 1]!;
+      imageData.data[i + 2] = data[i + 2]!;
+      imageData.data[i + 3] = 255;
+    }
+  }
+  outCtx.putImageData(imageData, 0, 0);
+  return out.toDataURL("image/png");
+}
+
+/** Transparent side-profile sprite extracted from the in-game orthographic blueprint. */
+export function loadBaloon8TransparentSideSpriteUrl(): Promise<string> {
+  if (!transparentSideUrlLoad) {
+    transparentSideUrlLoad = loadBaloon8BlueprintTexture()
+      .then((tex) => {
+        const prep = prepareBlueprintQuadrant(tex.image as CanvasImageSource, "side");
+        const canvas = prep.map.image as HTMLCanvasElement;
+        return canvasToTransparentPng(canvas);
+      })
+      .catch((err) => {
+        console.warn("[Baloon8] transparent side sprite failed, using thumbnail", err);
+        transparentSideUrlLoad = null;
+        return BALOON8_SNEAKER_THUMBNAIL_URL;
+      });
+  }
+  return transparentSideUrlLoad;
+}
+
 /** Canvas sprite — official Baloon8 sneaker side thumbnail (fallback: blueprint crop). */
 let sideSpriteLoad: Promise<HTMLCanvasElement> | null = null;
 

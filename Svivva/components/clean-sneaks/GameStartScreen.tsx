@@ -13,7 +13,7 @@ export type GameStartScreenProps = {
 export function GameStartScreen({ className, style, onStart }: GameStartScreenProps) {
   return (
     <div
-      className={`relative overflow-hidden bg-black ${className ?? ""}`}
+      className={`fixed inset-0 z-[300] cursor-pointer overflow-hidden bg-black ${className ?? ""}`}
       style={style}
       role="button"
       aria-label="Start game"
@@ -27,7 +27,6 @@ export function GameStartScreen({ className, style, onStart }: GameStartScreenPr
         }
       }}
     >
-      {/* Full-viewport cover — parent is fixed inset-0 from page; no flex child that can collapse */}
       <Image
         src={MAIN_GAME_COVER_URL}
         alt="iPbw — Karen the Muscle"
