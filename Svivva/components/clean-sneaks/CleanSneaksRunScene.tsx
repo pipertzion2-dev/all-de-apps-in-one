@@ -542,23 +542,24 @@ function PlayerShoes({
     <group ref={hostRef}>
       <primitive object={shoes.root} />
       <pointLight
-        position={[0, 0.55, 0.65]}
-        intensity={mobile ? 2.2 : 0.9}
-        distance={10}
-        color="#7ec8d9"
+        position={[0, 0.7, 0.9]}
+        intensity={mobile ? 2.8 : 2.0}
+        distance={12}
+        color="#ffffff"
       />
       <pointLight
-        position={[1.4, 0.4, 0.55]}
-        intensity={mobile ? 1.35 : 0.55}
+        position={[1.4, 0.5, 0.55]}
+        intensity={mobile ? 1.6 : 1.1}
+        distance={9}
+        color="#e8f6fa"
+      />
+      <pointLight
+        position={[-1.1, 0.35, 0.45]}
+        intensity={mobile ? 1.1 : 0.75}
         distance={8}
-        color="#7ec8d9"
+        color="#f0e8ff"
       />
-      <pointLight
-        position={[-1.1, 0.25, 0.35]}
-        intensity={mobile ? 0.85 : 0.35}
-        distance={6}
-        color="#d94f9c"
-      />
+      <hemisphereLight args={["#ffffff", "#2a2030", mobile ? 0.85 : 0.65]} />
     </group>
   );
 }

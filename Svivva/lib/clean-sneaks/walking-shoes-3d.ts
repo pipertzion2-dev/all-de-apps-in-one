@@ -57,6 +57,7 @@ function panelMat(q: PreparedQuadrant): THREE.MeshBasicMaterial {
   return new THREE.MeshBasicMaterial({
     map: q.map,
     alphaMap: q.alphaMap,
+    color: 0xffffff,
     transparent: true,
     alphaTest: 0.08,
     depthWrite: false,
@@ -174,13 +175,14 @@ export function createWalkingShoes3D(
     rightPivot.rotation.y = -0.28;
   }
 
-  const tintHex = getColorway(colorwayId).tint;
-  const tint = new THREE.Color(tintHex);
+  // MeshBasicMaterial multiplies `color` × texture — keep near-white so the
+  // orthographic reference stays bright; colorway is a light wash only.
+  const wash = new THREE.Color(0xffffff).lerp(new THREE.Color(getColorway(colorwayId).tint), 0.12);
   for (const shoe of [leftShoe, rightShoe]) {
     if (!shoe) continue;
     for (const m of shoe.mats) {
-      m.color.copy(tint);
-      m.userData.baseTint = tint.clone();
+      m.color.copy(wash);
+      m.userData.baseTint = wash.clone();
     }
   }
 
@@ -246,10 +248,11 @@ function tintShoe(shoe: Baloon8OrthoShoe | null, dirt: number, freshGlow: boolea
   for (const m of shoe.mats) {
     const base =
       (m.userData.baseTint as THREE.Color | undefined)?.clone() ?? new THREE.Color(0xffffff);
-    if (dirt > 0.02) base.lerp(new THREE.Color(0x6b5340), 0.15 + dirt * 0.55);
-    if (freshGlow) base.lerp(new THREE.Color(0xe8f6fa), 0.08);
+    // Keep dirt readable without crushing the Baloon8 reference into mud.
+    if (dirt > 0.02) base.lerp(new THREE.Color(0x6b5340), 0.06 + dirt * 0.22);
+    if (freshGlow) base.lerp(new THREE.Color(0xffffff), 0.06);
     m.color.copy(base);
-    m.opacity = freshGlow ? 1 : Math.max(0.85, 1 - dirt * 0.12);
+    m.opacity = 1;
   }
 }
 
