@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { isPortraitViewport } from "@/lib/clean-sneaks/run-quality";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { CleanSneaksGame3D } from "@/components/clean-sneaks/CleanSneaksGame3D";
 import { GameLoadingWheels } from "@/components/clean-sneaks/GameLoadingWheels";
+import { GameStartScreen } from "@/components/clean-sneaks/GameStartScreen";
 import { SceneErrorBoundary } from "@/components/clean-sneaks/SceneErrorBoundary";
 import type { GamePhase } from "@/lib/clean-sneaks/types";
 
@@ -19,21 +20,27 @@ const shellStyle = {
 
 export default function CleanSneaksPage() {
   const router = useRouter();
+  const beginGameRef = useRef<(() => void) | null>(null);
   const [sceneAttempt, setSceneAttempt] = useState(0);
   const [gamePhase, setGamePhase] = useState<GamePhase>("loading");
   const [portrait, setPortrait] = useState(false);
 
   const preGame = gamePhase === "loading" || gamePhase === "start";
 
+  const registerBegin = useCallback((begin: () => void) => {
+    beginGameRef.current = begin;
+  }, []);
+
+  const handleStart = useCallback(() => {
+    beginGameRef.current?.();
+  }, []);
+
   useEffect(() => {
     const syncViewport = () => setPortrait(isPortraitViewport());
     syncViewport();
     window.addEventListener("resize", syncViewport);
     window.addEventListener("orientationchange", syncViewport);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = prev;
       window.removeEventListener("resize", syncViewport);
       window.removeEventListener("orientationchange", syncViewport);
     };
@@ -43,11 +50,18 @@ export default function CleanSneaksPage() {
     <div
       data-svivva-app-shell=""
       data-clean-sneaks-fullscreen=""
-      className={`fixed inset-0 z-[200] flex h-[100dvh] min-h-[100dvh] w-full flex-col ${
-        gamePhase === "loading" ? "bg-transparent" : preGame ? "bg-black" : "bg-[#0a0c10]"
+      className={`fixed inset-0 z-[200] flex h-[100dvh] min-h-[100dvh] w-full flex-col overflow-hidden ${
+        gamePhase === "loading" ? "bg-white" : preGame ? "bg-black" : "bg-[#0a0c10]"
       }`}
-      style={preGame ? { overflow: "hidden" } : shellStyle}
+      style={preGame ? undefined : shellStyle}
     >
+      {(gamePhase === "loading" || gamePhase === "start") && (
+        <GameStartScreen
+          preload={gamePhase === "loading"}
+          onStart={gamePhase === "start" ? handleStart : undefined}
+        />
+      )}
+
       {gamePhase === "loading" && <GameLoadingWheels fullscreen />}
 
       {!preGame && (
@@ -64,7 +78,7 @@ export default function CleanSneaksPage() {
         />
       )}
 
-      <div className="relative z-10 flex min-h-0 flex-1 flex-col">
+      <div className={`relative flex min-h-0 flex-1 flex-col ${preGame ? "hidden" : "z-30"}`}>
         {!preGame && (
           <div
             className={`flex shrink-0 items-center justify-between gap-2 sm:gap-3 sm:px-6 ${
@@ -130,8 +144,9 @@ export default function CleanSneaksPage() {
               key={sceneAttempt}
               active
               fullscreen
-              style={gamePhase === "loading" || gamePhase === "start" ? undefined : shellStyle}
+              style={shellStyle}
               onPhaseChange={setGamePhase}
+              onRegisterBegin={registerBegin}
               onExit={() => router.push("/#clean-sneaks")}
             />
           </SceneErrorBoundary>
