@@ -49,7 +49,7 @@ export function CleanSneaksSection() {
               boxShadow: "0 0 60px rgba(74,47,92,0.22)",
             }}
             data-testid="clean-sneaks-home-hero"
-            aria-label="Enter Clean Sneaks"
+            aria-label="Enter Clean Sneaks — goal: steal the old man's bundle"
           >
             <div
               className="absolute inset-0 opacity-40 mix-blend-soft-light"
@@ -75,12 +75,18 @@ export function CleanSneaksSection() {
             >
               CLEAN SNEAKS
             </h2>
-            <p className="mt-3 text-lg font-semibold tracking-[0.2em] text-[#D94F9C] sm:text-xl">
-              HOW CLEAN CAN YOU KEEP THE BALOON8?
+            <p
+              className="mt-4 text-xl font-semibold leading-snug tracking-[0.04em] text-[#E8D9A8] sm:text-2xl"
+              data-testid="text-clean-sneaks-goal"
+            >
+              Goal: Steal the old man&apos;s bundle
+            </p>
+            <p className="mt-2 text-[11px] uppercase tracking-[0.28em] text-white/45">
+              stiehl den alten Manns Bündel
             </p>
             <p className="mt-5 max-w-md text-sm leading-relaxed text-white/70 sm:text-base lg:max-w-none">
-              One chassis. Eight colorways. Mud, puddles, crowds, weather — every step lands dirt on
-              exact balloon zones. Pick your finish, then protect the fit.
+              Keep the Baloon8 clean while you chase the bundle — mud, puddles, crowds, and weather
+              land dirt on exact balloon zones. Pick your finish, protect the fit, steal the bag.
             </p>
 
             <div className="mt-8 flex flex-col items-center gap-3 lg:items-start">
@@ -93,7 +99,7 @@ export function CleanSneaksSection() {
                 <Link href="/clean-sneaks">Play Clean Sneaks</Link>
               </Button>
               <p className="text-[11px] uppercase tracking-[0.25em] text-white/45">
-                Logo cube entry · Full screen · Mobile &amp; desktop
+                Steal the bundle · Full screen · Mobile &amp; desktop
               </p>
               {best > 0 && (
                 <p className="text-xs text-[#7EC8D9]/90" data-testid="text-clean-sneaks-best">
