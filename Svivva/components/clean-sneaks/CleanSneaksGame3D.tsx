@@ -247,6 +247,7 @@ export function CleanSneaksGame3D({
 
   useEffect(() => {
     if (!active || phase !== "loading") return;
+    void import("./CleanSneaksRunScene");
     const reduced = prefersReducedMotion();
     const autoId = window.setTimeout(finishLoading, reduced ? 1400 : 2800);
     return () => window.clearTimeout(autoId);
@@ -402,9 +403,10 @@ export function CleanSneaksGame3D({
 
   if (preGame) {
     if (phase === "loading") {
-      return null;
+      // Mount cover behind loading wheels so it is decoded before wheels dismiss.
+      return <GameStartScreen preload />;
     }
-    return <GameStartScreen style={style} onStart={beginGame} />;
+    return <GameStartScreen onStart={beginGame} />;
   }
 
   return (

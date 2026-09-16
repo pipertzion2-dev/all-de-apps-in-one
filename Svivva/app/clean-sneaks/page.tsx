@@ -130,7 +130,7 @@ export default function CleanSneaksPage() {
               key={sceneAttempt}
               active
               fullscreen
-              style={shellStyle}
+              style={gamePhase === "loading" || gamePhase === "start" ? undefined : shellStyle}
               onPhaseChange={setGamePhase}
               onExit={() => router.push("/#clean-sneaks")}
             />
