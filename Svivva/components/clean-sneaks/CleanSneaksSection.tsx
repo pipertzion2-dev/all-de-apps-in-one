@@ -1,10 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { KAREN_THE_MUSCLE_LOGO_URL } from "@/lib/clean-sneaks/assets";
 import { readBestScore } from "@/lib/clean-sneaks/storage";
+
+const CleanSneaksLogoCube = dynamic(
+  () => import("./CleanSneaksLogoCube").then((m) => m.CleanSneaksLogoCube),
+  { ssr: false },
+);
 
 export function CleanSneaksSection() {
   const [best, setBest] = useState(0);
@@ -24,43 +29,44 @@ export function CleanSneaksSection() {
         aria-hidden
         style={{
           background: `
-            radial-gradient(ellipse 80% 50% at 20% 30%, rgba(91,141,168,0.14), transparent 55%),
-            radial-gradient(ellipse 70% 45% at 85% 70%, rgba(217,79,156,0.10), transparent 50%),
-            linear-gradient(180deg, transparent, rgba(10,12,16,0.85))
+            radial-gradient(ellipse 70% 55% at 28% 40%, rgba(74,47,92,0.42), transparent 58%),
+            radial-gradient(ellipse 55% 45% at 78% 65%, rgba(168,186,72,0.10), transparent 52%),
+            linear-gradient(180deg, transparent, rgba(10,12,16,0.9))
           `,
         }}
       />
 
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
         <div className="grid items-stretch gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-10">
-          <div
-            className="overflow-hidden rounded-2xl border border-white/10 bg-white shadow-[0_0_60px_rgba(91,141,168,0.12)]"
+          <Link
+            href="/clean-sneaks"
+            className="group relative flex min-h-[280px] items-center justify-center overflow-hidden rounded-2xl border border-white/10 outline-none transition-[border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-[#A8BA48]/60 sm:min-h-[340px]"
+            style={{
+              background: `
+                radial-gradient(ellipse 60% 55% at 50% 48%, rgba(58,32,72,0.55), rgba(8,6,12,0.92) 70%),
+                linear-gradient(160deg, #1a1022 0%, #0a080e 100%)
+              `,
+              boxShadow: "0 0 60px rgba(74,47,92,0.22)",
+            }}
             data-testid="clean-sneaks-home-hero"
+            aria-label="Enter Clean Sneaks"
           >
-            <div className="flex items-center bg-black px-5 py-2.5 sm:px-7">
-              <p className="text-[10px] uppercase tracking-[0.35em] text-white/60">
-                Karen The Muscle
-              </p>
-            </div>
-
             <div
-              className="flex min-h-[160px] items-center justify-center bg-white px-4 py-6 sm:min-h-[200px] sm:px-8 sm:py-8"
-              data-testid="baloon8-home-sneaker"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={`${KAREN_THE_MUSCLE_LOGO_URL}?v=home-karen-1`}
-                alt="Karen The Muscle"
-                className="mx-auto block h-auto max-h-[148px] w-auto max-w-full object-contain sm:max-h-[180px]"
-                draggable={false}
-                width={1448}
-                height={1086}
-              />
-            </div>
-          </div>
+              className="absolute inset-0 opacity-40 mix-blend-soft-light"
+              aria-hidden
+              style={{
+                backgroundImage:
+                  "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E\")",
+              }}
+            />
+            <CleanSneaksLogoCube className="relative z-[1] h-[240px] w-full sm:h-[300px]" />
+            <span className="pointer-events-none absolute bottom-4 left-0 right-0 text-center text-[10px] uppercase tracking-[0.35em] text-white/45 transition-colors group-hover:text-white/70 sm:bottom-5">
+              Tap cube to enter
+            </span>
+          </Link>
 
           <div className="flex flex-col justify-center text-center lg:text-left">
-            <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.4em] text-[#5B8DA8]">
+            <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.4em] text-[#A8BA48]/90">
               ZZAI Play Presents
             </p>
             <h2
@@ -87,7 +93,7 @@ export function CleanSneaksSection() {
                 <Link href="/clean-sneaks">Play Clean Sneaks</Link>
               </Button>
               <p className="text-[11px] uppercase tracking-[0.25em] text-white/45">
-                Karen The Muscle · Full screen · Mobile &amp; desktop
+                Logo cube entry · Full screen · Mobile &amp; desktop
               </p>
               {best > 0 && (
                 <p className="text-xs text-[#7EC8D9]/90" data-testid="text-clean-sneaks-best">
