@@ -64,7 +64,9 @@ export function CleanSneaksLogoCube({ className = "", cacheBust = "v1" }: Props)
     group.add(cube);
 
     const wire = new THREE.LineSegments(
-      new THREE.EdgesGeometry(new THREE.BoxGeometry(cubeSize * 1.002, cubeSize * 1.002, cubeSize * 1.002)),
+      new THREE.EdgesGeometry(
+        new THREE.BoxGeometry(cubeSize * 1.002, cubeSize * 1.002, cubeSize * 1.002),
+      ),
       new THREE.LineBasicMaterial({
         color: 0xe8d9a8,
         transparent: true,
