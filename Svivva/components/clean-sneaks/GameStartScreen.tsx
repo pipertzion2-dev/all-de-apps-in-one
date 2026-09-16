@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { CSSProperties } from "react";
 import { MAIN_GAME_COVER_URL } from "@/lib/clean-sneaks/assets";
@@ -9,31 +9,49 @@ export type GameStartScreenProps = {
   className?: string;
   style?: CSSProperties;
   onStart?: () => void;
-  /** Preload cover behind loading wheels (no interaction). */
+  /** When true, cover sits behind loading wheels and ignores taps. */
   preload?: boolean;
+  onCoverReady?: () => void;
 };
+
+let coverReadyPromise: Promise<void> | null = null;
+
+/** Warm the start cover JPEG once per session (shared by loading + start screen). */
+export function preloadMainGameCover(): Promise<void> {
+  if (typeof window === "undefined") return Promise.resolve();
+  if (coverReadyPromise) return coverReadyPromise;
+  coverReadyPromise = new Promise((resolve) => {
+    const img = new window.Image();
+    img.onload = () => resolve();
+    img.onerror = () => resolve();
+    img.src = MAIN_GAME_COVER_URL;
+  });
+  return coverReadyPromise;
+}
 
 export function GameStartScreen({
   className,
   style,
   onStart,
   preload = false,
+  onCoverReady,
 }: GameStartScreenProps) {
-  const [mounted, setMounted] = useState(false);
-  const [coverFailed, setCoverFailed] = useState(false);
+  const coverReadyRef = useRef(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const notifyCoverReady = useCallback(() => {
+    if (coverReadyRef.current) return;
+    coverReadyRef.current = true;
+    onCoverReady?.();
+  }, [onCoverReady]);
 
-  if (!mounted) return null;
+  if (typeof document === "undefined") return null;
 
   const interactive = Boolean(onStart) && !preload;
 
   return createPortal(
     <div
       className={`fixed inset-0 overflow-hidden bg-black ${
-        preload ? "z-[290] pointer-events-none" : "z-[300] cursor-pointer"
+        preload ? "z-[290] pointer-events-none" : "z-[400] cursor-pointer"
       } ${className ?? ""}`}
       style={style}
       role={interactive ? "button" : undefined}
@@ -52,25 +70,18 @@ export function GameStartScreen({
           : undefined
       }
     >
-      {!coverFailed ? (
-        // Native img — avoids Next/Image fill issues on mobile Safari after loading.
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={MAIN_GAME_COVER_URL}
-          alt=""
-          draggable={false}
-          decoding="async"
-          fetchPriority="high"
-          className="absolute inset-0 h-full w-full object-cover object-center"
-          data-testid="img-main-game-cover"
-          onError={() => setCoverFailed(true)}
-        />
-      ) : (
-        <div
-          className="absolute inset-0 bg-gradient-to-b from-zinc-900 via-[#1a1420] to-black"
-          aria-hidden
-        />
-      )}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={MAIN_GAME_COVER_URL}
+        alt=""
+        draggable={false}
+        decoding="sync"
+        fetchPriority="high"
+        className="absolute inset-0 h-full w-full object-cover object-center"
+        data-testid="img-main-game-cover"
+        onLoad={notifyCoverReady}
+        onError={notifyCoverReady}
+      />
 
       {!preload && (
         <div

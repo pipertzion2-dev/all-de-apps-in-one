@@ -31,7 +31,7 @@ import {
   writeSavedColorway,
   type Baloon8ColorwayId,
 } from "@/lib/clean-sneaks/sneaker-catalog";
-import { GameStartScreen } from "./GameStartScreen";
+import { GameStartScreen, preloadMainGameCover } from "./GameStartScreen";
 import { ShoeCamHud } from "./ShoeCamHud";
 import { PostMissionReveal } from "./PostMissionReveal";
 import { CleanPathHud, OhNoOverlay } from "./OhNoOverlay";
@@ -248,9 +248,27 @@ export function CleanSneaksGame3D({
   useEffect(() => {
     if (!active || phase !== "loading") return;
     void import("./CleanSneaksRunScene");
+
+    let cancelled = false;
+    let delayId = 0;
     const reduced = prefersReducedMotion();
-    const autoId = window.setTimeout(finishLoading, reduced ? 1400 : 2800);
-    return () => window.clearTimeout(autoId);
+    const minMs = reduced ? 1400 : 2800;
+    const started = performance.now();
+    const maxId = window.setTimeout(finishLoading, minMs + 6000);
+
+    const finishWhenReady = () => {
+      if (cancelled || loadingDoneRef.current) return;
+      const wait = Math.max(0, minMs - (performance.now() - started));
+      delayId = window.setTimeout(finishLoading, wait);
+    };
+
+    void preloadMainGameCover().then(finishWhenReady);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(maxId);
+      window.clearTimeout(delayId);
+    };
   }, [active, phase, finishLoading]);
 
   useEffect(() => {
@@ -402,11 +420,14 @@ export function CleanSneaksGame3D({
   const preGame = phase === "loading" || phase === "start";
 
   if (preGame) {
-    if (phase === "loading") {
-      // Mount cover behind loading wheels so it is decoded before wheels dismiss.
-      return <GameStartScreen preload />;
-    }
-    return <GameStartScreen onStart={beginGame} />;
+    // Single persistent overlay — do not remount between loading and start or the
+    // cover JPEG reloads and the screen flashes black on mobile.
+    return (
+      <GameStartScreen
+        preload={phase === "loading"}
+        onStart={phase === "start" ? beginGame : undefined}
+      />
+    );
   }
 
   return (
