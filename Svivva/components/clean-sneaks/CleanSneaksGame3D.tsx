@@ -31,7 +31,7 @@ import {
   writeSavedColorway,
   type Baloon8ColorwayId,
 } from "@/lib/clean-sneaks/sneaker-catalog";
-import { GameStartScreen, preloadMainGameCover } from "./GameStartScreen";
+import { preloadMainGameCover } from "./GameStartScreen";
 import { ShoeCamHud } from "./ShoeCamHud";
 import { PostMissionReveal } from "./PostMissionReveal";
 import { CleanPathHud, OhNoOverlay } from "./OhNoOverlay";
@@ -47,6 +47,7 @@ export type CleanSneaksGame3DProps = {
   onExit?: () => void;
   onStats?: (stats: RunStats) => void;
   onPhaseChange?: (phase: GamePhase) => void;
+  onRegisterBegin?: (begin: () => void) => void;
   sneakerOverride?: Partial<SneakerAssetRef> | null;
   fullscreen?: boolean;
   className?: string;
@@ -100,6 +101,7 @@ export function CleanSneaksGame3D({
   onExit,
   onStats,
   onPhaseChange,
+  onRegisterBegin,
   sneakerOverride,
   fullscreen = false,
   className,
@@ -228,6 +230,10 @@ export function CleanSneaksGame3D({
   const beginGame = useCallback(() => {
     startCountdown();
   }, [startCountdown]);
+
+  useEffect(() => {
+    onRegisterBegin?.(beginGame);
+  }, [beginGame, onRegisterBegin]);
 
   useEffect(() => {
     if (!active) return;
@@ -417,17 +423,8 @@ export function CleanSneaksGame3D({
   const visionOn = hud.sneakVisionActive;
   void ohNoTick;
 
-  const preGame = phase === "loading" || phase === "start";
-
-  if (preGame) {
-    // Single persistent overlay — do not remount between loading and start or the
-    // cover JPEG reloads and the screen flashes black on mobile.
-    return (
-      <GameStartScreen
-        preload={phase === "loading"}
-        onStart={phase === "start" ? beginGame : undefined}
-      />
-    );
+  if (phase === "loading" || phase === "start") {
+    return null;
   }
 
   return (

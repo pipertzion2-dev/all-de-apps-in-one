@@ -29,7 +29,7 @@ export function GameLoadingWheels({ fullscreen = false }: GameLoadingWheelsProps
     <div
       className={
         fullscreen
-          ? "fixed inset-0 z-[350] flex flex-col items-center justify-center overflow-hidden bg-white"
+          ? "fixed inset-0 z-[40] flex flex-col items-center justify-center overflow-hidden bg-white"
           : "relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-white"
       }
       style={{

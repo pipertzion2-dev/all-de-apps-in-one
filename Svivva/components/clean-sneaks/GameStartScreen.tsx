@@ -1,7 +1,5 @@
 "use client";
 
-import { useCallback, useRef } from "react";
-import { createPortal } from "react-dom";
 import type { CSSProperties } from "react";
 import { MAIN_GAME_COVER_URL } from "@/lib/clean-sneaks/assets";
 
@@ -11,12 +9,11 @@ export type GameStartScreenProps = {
   onStart?: () => void;
   /** When true, cover sits behind loading wheels and ignores taps. */
   preload?: boolean;
-  onCoverReady?: () => void;
 };
 
 let coverReadyPromise: Promise<void> | null = null;
 
-/** Warm the start cover JPEG once per session (shared by loading + start screen). */
+/** Warm the start cover JPEG once per session. */
 export function preloadMainGameCover(): Promise<void> {
   if (typeof window === "undefined") return Promise.resolve();
   if (coverReadyPromise) return coverReadyPromise;
@@ -34,24 +31,13 @@ export function GameStartScreen({
   style,
   onStart,
   preload = false,
-  onCoverReady,
 }: GameStartScreenProps) {
-  const coverReadyRef = useRef(false);
-
-  const notifyCoverReady = useCallback(() => {
-    if (coverReadyRef.current) return;
-    coverReadyRef.current = true;
-    onCoverReady?.();
-  }, [onCoverReady]);
-
-  if (typeof document === "undefined") return null;
-
   const interactive = Boolean(onStart) && !preload;
 
-  return createPortal(
+  return (
     <div
       className={`fixed inset-0 overflow-hidden bg-black ${
-        preload ? "z-[290] pointer-events-none" : "z-[400] cursor-pointer"
+        preload ? "z-[1] pointer-events-none" : "z-[30] cursor-pointer"
       } ${className ?? ""}`}
       style={style}
       role={interactive ? "button" : undefined}
@@ -78,9 +64,8 @@ export function GameStartScreen({
         decoding="sync"
         fetchPriority="high"
         className="absolute inset-0 h-full w-full object-cover object-center"
+        style={{ minHeight: "100%", minWidth: "100%" }}
         data-testid="img-main-game-cover"
-        onLoad={notifyCoverReady}
-        onError={notifyCoverReady}
       />
 
       {!preload && (
@@ -89,17 +74,16 @@ export function GameStartScreen({
           style={{ bottom: "max(1.75rem, env(safe-area-inset-bottom, 0px))" }}
         >
           <p
-            className="seeds-holo-text text-5xl font-bold uppercase tracking-[0.35em] sm:text-6xl"
+            className="text-5xl font-bold uppercase tracking-[0.35em] text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)] sm:text-6xl"
             data-testid="text-game-start"
           >
             Start
           </p>
-          <p className="text-xs uppercase tracking-[0.35em] text-white/60 animate-pulse sm:text-sm">
+          <p className="text-xs uppercase tracking-[0.35em] text-white/80 animate-pulse sm:text-sm">
             Tap to play
           </p>
         </div>
       )}
-    </div>,
-    document.body,
+    </div>
   );
 }
