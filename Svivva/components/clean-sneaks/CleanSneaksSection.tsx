@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { KAREN_THE_MUSCLE_LOGO_URL } from "@/lib/clean-sneaks/assets";
 import { readBestScore } from "@/lib/clean-sneaks/storage";
-import { Baloon8HomeSneaker } from "./Baloon8HomeSneaker";
 
 export function CleanSneaksSection() {
   const [best, setBest] = useState(0);
@@ -33,14 +33,30 @@ export function CleanSneaksSection() {
 
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
         <div className="grid items-stretch gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-10">
-          <div className="overflow-hidden rounded-2xl border border-white/10 bg-white shadow-[0_0_60px_rgba(91,141,168,0.12)]">
-            <div className="flex items-center bg-black/90 px-5 py-2.5 sm:px-7">
-              <p className="text-[10px] uppercase tracking-[0.35em] text-white/55">
+          <div
+            className="overflow-hidden rounded-2xl border border-white/10 bg-white shadow-[0_0_60px_rgba(91,141,168,0.12)]"
+            data-testid="clean-sneaks-home-hero"
+          >
+            <div className="flex items-center bg-black px-5 py-2.5 sm:px-7">
+              <p className="text-[10px] uppercase tracking-[0.35em] text-white/60">
                 Karen The Muscle
               </p>
             </div>
 
-            <Baloon8HomeSneaker />
+            <div
+              className="flex min-h-[160px] items-center justify-center bg-white px-4 py-6 sm:min-h-[200px] sm:px-8 sm:py-8"
+              data-testid="baloon8-home-sneaker"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`${KAREN_THE_MUSCLE_LOGO_URL}?v=home-karen-1`}
+                alt="Karen The Muscle"
+                className="mx-auto block h-auto max-h-[148px] w-auto max-w-full object-contain sm:max-h-[180px]"
+                draggable={false}
+                width={1448}
+                height={1086}
+              />
+            </div>
           </div>
 
           <div className="flex flex-col justify-center text-center lg:text-left">

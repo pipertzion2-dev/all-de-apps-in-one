@@ -2,7 +2,7 @@
 
 import { KAREN_THE_MUSCLE_LOGO_URL } from "@/lib/clean-sneaks/assets";
 
-/** Homepage Clean Sneaks visual — Karen The Muscle logo (not the Baloon8 car). */
+/** @deprecated Prefer inlined logo in CleanSneaksSection — kept for imports. */
 export function Baloon8HomeSneaker() {
   return (
     <div
@@ -11,7 +11,7 @@ export function Baloon8HomeSneaker() {
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={KAREN_THE_MUSCLE_LOGO_URL}
+        src={`${KAREN_THE_MUSCLE_LOGO_URL}?v=home-karen-1`}
         alt="Karen The Muscle"
         className="mx-auto block h-auto max-h-[120px] w-auto max-w-full object-contain sm:max-h-[156px]"
         draggable={false}
