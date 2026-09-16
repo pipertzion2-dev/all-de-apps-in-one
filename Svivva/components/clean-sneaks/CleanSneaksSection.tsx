@@ -35,9 +35,7 @@ export function CleanSneaksSection() {
         <div className="grid items-stretch gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-10">
           <div className="rounded-2xl border border-white/10 bg-black/25 shadow-[0_0_60px_rgba(91,141,168,0.12)] backdrop-blur-sm">
             <div className="flex items-center px-5 pb-0 pt-3 sm:px-7 sm:pt-4">
-              <p className="text-[10px] uppercase tracking-[0.35em] text-white/50">
-                Your Baloon8
-              </p>
+              <p className="text-[10px] uppercase tracking-[0.35em] text-white/50">Your Baloon8</p>
             </div>
 
             <Baloon8HomeSneaker />
