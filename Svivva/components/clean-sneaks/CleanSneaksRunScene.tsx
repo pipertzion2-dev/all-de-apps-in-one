@@ -519,8 +519,14 @@ function PlayerShoes({
     // Keep shoes facing down the road (−Z) so the camera sees the heel / rear view.
     host.rotation.y = 0;
 
+    const walkPhase = s.running
+      ? s.walkPhase
+      : s.grounded
+        ? ((performance.now() / 1000) * 1.4) % 1
+        : s.walkPhase;
+
     updateWalkingShoes3D(shoes, {
-      walkPhase: s.walkPhase,
+      walkPhase,
       airborne: !s.grounded,
       dirt: 1 - s.cleanliness / 100,
       freshGlow: s.cleanliness >= 80,

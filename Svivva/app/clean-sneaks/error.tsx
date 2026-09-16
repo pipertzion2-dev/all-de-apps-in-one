@@ -28,7 +28,12 @@ export default function CleanSneaksError({
           <Button type="button" className="bg-[#5B8DA8] text-white" onClick={() => reset()}>
             Try again
           </Button>
-          <Button type="button" variant="outline" className="border-[#1a3040]/20 text-[#1a3040]" asChild>
+          <Button
+            type="button"
+            variant="outline"
+            className="border-[#1a3040]/20 text-[#1a3040]"
+            asChild
+          >
             <Link href="/clean-sneaks">Reload game</Link>
           </Button>
           <Button type="button" variant="ghost" className="text-[#1a3040]/80" asChild>

@@ -34,22 +34,22 @@ export function CleanSneaksSection() {
 
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
         <div className="grid items-stretch gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-10">
-          <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#f4f5f7] shadow-[0_0_60px_rgba(91,141,168,0.12)]">
-            <div className="flex items-center px-4 pb-1 pt-3 sm:px-6 sm:pt-4">
+          <div className="rounded-2xl border border-white/10 bg-[#f4f5f7] shadow-[0_0_60px_rgba(91,141,168,0.12)]">
+            <div className="flex items-center px-5 pb-1 pt-3 sm:px-7 sm:pt-4">
               <p className="text-[10px] uppercase tracking-[0.35em] text-[#1a3040]/80">
                 Your Baloon8
               </p>
             </div>
 
-            <div className="px-2 pb-3 sm:px-5 sm:pb-5">
+            <div className="px-5 pb-4 pt-1 sm:px-7 sm:pb-5">
               <Image
                 src={BALOON8_SNEAKER_THUMBNAIL_URL}
                 alt="Baloon8 iridescent car-sneaker — packed balloon body, crystal wheels, e8 hubcaps"
                 width={883}
                 height={300}
                 priority
-                className="h-auto w-full"
-                sizes="(max-width: 1024px) 100vw, 55vw"
+                className="mx-auto block h-auto w-full max-w-[min(100%,_300px)] object-contain sm:max-w-[380px] lg:max-w-full"
+                sizes="(max-width: 640px) 300px, (max-width: 1024px) 380px, 520px"
                 data-testid="img-baloon8-sneaker-thumbnail"
               />
             </div>
