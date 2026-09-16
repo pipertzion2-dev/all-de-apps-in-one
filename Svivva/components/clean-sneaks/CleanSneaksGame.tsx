@@ -11,7 +11,6 @@ import {
   POWERUP_META,
 } from "@/lib/clean-sneaks/constants";
 import { cleanLabelFrom, resolvePlayerSneaker, streakLabelFrom } from "@/lib/clean-sneaks/assets";
-import { loadBaloon8SideSprite } from "@/lib/clean-sneaks/baloon8-textures";
 import {
   computeFrameScore,
   readBestScore,
@@ -341,19 +340,22 @@ export function CleanSneaksGame({
     let alive = true;
     stateRef.current.shoeImg = null;
 
+    // Default gameplay: animated walking pair (not the Baloon8 car side sprite).
+    if (sneaker.useWalkingSprite !== false) {
+      return () => {
+        alive = false;
+      };
+    }
+
     const apply = (img: CanvasImageSource) => {
       if (!alive) return;
       stateRef.current.shoeImg = img as HTMLImageElement;
     };
 
-    loadBaloon8SideSprite()
-      .then(apply)
-      .catch(() => {
-        const img = new Image();
-        img.decoding = "async";
-        img.onload = () => apply(img);
-        img.src = sneaker.spriteUrl;
-      });
+    const img = new Image();
+    img.decoding = "async";
+    img.onload = () => apply(img);
+    img.src = sneaker.spriteUrl;
 
     return () => {
       alive = false;

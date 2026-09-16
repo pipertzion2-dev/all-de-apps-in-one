@@ -516,7 +516,7 @@ function PlayerShoes({
 
     host.position.x = laneWorldX(s.laneX);
     host.position.y = s.y < 0 ? -s.y / 120 : 0;
-    // Keep shoes facing down the road (−Z) so the camera sees the heel / rear view.
+    // Keep shoes facing down the road (−Z). Heel toward camera — walking pair, not a car.
     host.rotation.y = 0;
 
     const walkPhase = s.running

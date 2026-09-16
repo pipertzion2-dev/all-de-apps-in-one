@@ -48,6 +48,7 @@ describe("clean-sneaks scoring", () => {
     expect(s.spriteUrl).toBe("/assets/clean-sneaks/baloon8-sneaker-thumbnail.png");
     expect(s.label).toBe("BALOON8 Oil Slick");
     expect(s.archetype).toBe("oilSlick");
+    expect(s.useWalkingSprite).toBe(true);
     const custom = resolvePlayerSneaker({
       spriteUrl: "/assets/clean-sneaks/user-design.png",
       source: "user",
@@ -56,6 +57,11 @@ describe("clean-sneaks scoring", () => {
     expect(custom.source).toBe("user");
     expect(custom.spriteUrl).toContain("user-design");
     expect(custom.useWalkingSprite).toBe(false);
+  });
+
+  it("defaults to walking sneakers — never the driving car-shoe sprite", () => {
+    expect(resolvePlayerSneaker().useWalkingSprite).toBe(true);
+    expect(shouldLoadSneakerSprite(resolvePlayerSneaker())).toBe(false);
   });
 
   it("never loads the legacy car-shoe PNG in gameplay", () => {

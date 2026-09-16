@@ -30,6 +30,8 @@ export const DEFAULT_SNEAKER: SneakerAssetRef = {
   label: "BALOON8 Oil Slick",
   source: "default",
   archetype: DEFAULT_COLORWAY,
+  /** In-game player walks — never rolls the car-sneaker chassis. */
+  useWalkingSprite: true,
 };
 
 /** True when the game should fetch a custom flat PNG (never the legacy car-shoe). */
