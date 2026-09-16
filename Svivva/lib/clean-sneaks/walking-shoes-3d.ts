@@ -8,8 +8,9 @@ import {
 import { getColorway } from "./sneaker-catalog";
 
 /**
- * YOUR Baloon8 sneakers from the orthographic blueprint (rear view toward the
- * follow camera). Walk cycle is bipedal — left/right stride, not wheel drive.
+ * YOUR Baloon8 from the full orthographic reference — side + front + rear panels
+ * assembled into one sneaker-shaped box (not a single front/rear crop).
+ * Walk cycle stays bipedal — no wheel drive.
  */
 
 export type Baloon8OrthoShoe = {
@@ -57,16 +58,37 @@ function panelMat(q: PreparedQuadrant): THREE.MeshBasicMaterial {
     map: q.map,
     alphaMap: q.alphaMap,
     transparent: true,
-    alphaTest: 0.1,
+    alphaTest: 0.08,
     depthWrite: false,
     toneMapped: false,
     side: THREE.DoubleSide,
   });
 }
 
+function addPanel(
+  root: THREE.Group,
+  mats: THREE.MeshBasicMaterial[],
+  q: PreparedQuadrant,
+  w: number,
+  h: number,
+  pos: [number, number, number],
+  rotY: number,
+  renderOrder: number,
+): void {
+  const mat = panelMat(q);
+  mats.push(mat);
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
+  mesh.position.set(pos[0], pos[1], pos[2]);
+  mesh.rotation.y = rotY;
+  mesh.renderOrder = renderOrder;
+  mesh.frustumCulled = false;
+  root.add(mesh);
+}
+
 /**
- * Baloon8 from the orthographic REAR VIEW — heel / BALOON8 plate toward camera.
- * One clean rear panel per foot.
+ * Full Baloon8 orthographic reference as a shoe-shaped panel box.
+ * Local space: toe −Z (down the road), heel +Z (toward camera), sole on Y≈0.
+ * SIDE panels carry the entire profile; front/rear are end caps — not a front-only crop.
  */
 function buildOrthoShoe(
   prepared: PreparedBlueprint,
@@ -76,16 +98,36 @@ function buildOrthoShoe(
   const root = new THREE.Group();
   const mats: THREE.MeshBasicMaterial[] = [];
 
-  const rearH = 0.64 * scale;
-  const rearW = rearH * Math.max(0.95, Math.min(1.5, prepared.rear.aspect));
+  // Side view aspect ≈ length / height of the full sneaker silhouette.
+  const sideAspect = Math.max(1.8, Math.min(3.6, prepared.side.aspect));
+  const H = 0.52 * scale;
+  const L = H * sideAspect;
+  const W = H * Math.max(0.55, Math.min(1.15, prepared.front.aspect));
 
-  const rearMat = panelMat(prepared.rear);
-  mats.push(rearMat);
-  const rear = new THREE.Mesh(new THREE.PlaneGeometry(rearW, rearH), rearMat);
-  rear.position.set(0, rearH * 0.5, 0.06);
-  rear.renderOrder = 9;
-  rear.frustumCulled = false;
-  root.add(rear);
+  // Outer flanks — full SIDE VIEW reference (entire sneaker, wheels to collar).
+  addPanel(root, mats, prepared.side, L, H, [W * 0.5, H * 0.5, 0], Math.PI / 2, 10);
+  addPanel(root, mats, prepared.side, L, H, [-W * 0.5, H * 0.5, 0], -Math.PI / 2, 10);
+
+  // Heel — REAR VIEW toward chase camera.
+  const rearW = Math.min(W * 1.05, H * Math.max(0.7, Math.min(1.4, prepared.rear.aspect)));
+  addPanel(root, mats, prepared.rear, rearW, H, [0, H * 0.5, L * 0.5], 0, 11);
+
+  // Toe — FRONT VIEW (grille / e8) down the road.
+  const frontW = Math.min(W * 1.05, H * Math.max(0.7, Math.min(1.4, prepared.front.aspect)));
+  addPanel(root, mats, prepared.front, frontW, H * 0.92, [0, H * 0.46, -L * 0.5], Math.PI, 9);
+
+  // Top — cockpit / insole from the orthographic TOP VIEW.
+  const topAspect = Math.max(1.2, Math.min(3.2, prepared.top.aspect));
+  const topL = L * 0.92;
+  const topW = Math.min(W * 0.95, topL / topAspect);
+  const topMat = panelMat(prepared.top);
+  mats.push(topMat);
+  const top = new THREE.Mesh(new THREE.PlaneGeometry(topL, topW), topMat);
+  top.position.set(0, H * 0.98, 0);
+  top.rotation.x = -Math.PI / 2;
+  top.renderOrder = 8;
+  top.frustumCulled = false;
+  root.add(top);
 
   if (mirror) root.scale.x = -1;
 
@@ -93,9 +135,9 @@ function buildOrthoShoe(
 }
 
 function shoeScale(mobile: boolean, portrait: boolean): number {
-  if (portrait) return 1.1;
-  if (mobile) return 1.2;
-  return 1.15;
+  if (portrait) return 1.05;
+  if (mobile) return 1.15;
+  return 1.1;
 }
 
 export function createWalkingShoes3D(
@@ -127,8 +169,9 @@ export function createWalkingShoes3D(
     rightShoe = buildOrthoShoe(prepared, s, true);
     leftPivot.add(leftShoe.root);
     rightPivot.add(rightShoe.root);
-    leftPivot.rotation.y = 0.06;
-    rightPivot.rotation.y = -0.06;
+    // Mild toe-in so both SIDE panels and the REAR read from chase cam.
+    leftPivot.rotation.y = 0.28;
+    rightPivot.rotation.y = -0.28;
   }
 
   const tintHex = getColorway(colorwayId).tint;
@@ -144,7 +187,7 @@ export function createWalkingShoes3D(
   shoePivot.add(leftPivot, rightPivot);
 
   const shieldRing = new THREE.Mesh(
-    new THREE.TorusGeometry(0.8, 0.022, 16, 64),
+    new THREE.TorusGeometry(0.95, 0.022, 16, 64),
     new THREE.MeshPhysicalMaterial({
       color: 0x5b8da8,
       emissive: 0x5b8da8,
@@ -158,7 +201,7 @@ export function createWalkingShoes3D(
     }),
   );
   shieldRing.rotation.x = Math.PI / 2;
-  shieldRing.position.y = 0.42;
+  shieldRing.position.y = 0.35;
   shieldRing.visible = false;
 
   const shieldGlow = new THREE.PointLight(0x5b8da8, 0, 4);
@@ -210,10 +253,7 @@ function tintShoe(shoe: Baloon8OrthoShoe | null, dirt: number, freshGlow: boolea
   }
 }
 
-/**
- * Bipedal walk — left and right feet alternate lift / plant.
- * Visuals stay Baloon8; motion is walking, not driving.
- */
+/** Bipedal walk — left/right alternate; Baloon8 full-reference visuals stay. */
 export function updateWalkingShoes3D(
   shoes: WalkingShoes3D,
   args: {
@@ -229,32 +269,31 @@ export function updateWalkingShoes3D(
   const phase = args.walkPhase * Math.PI * 2;
   const dt = 0.016;
   const stride = args.airborne ? 0 : Math.sin(phase);
-  const lateral = args.portrait ? 0.28 : 0.4;
-  const toeIn = 0.06;
+  const lateral = args.portrait ? 0.42 : 0.55;
+  const toeIn = 0.28;
 
   const bob = args.airborne ? 0.14 : Math.max(0, Math.sin(phase * 2)) * 0.07;
-  shoes.shoePivot.rotation.x = Math.sin(phase) * (args.airborne ? 0.06 : 0.12);
-  shoes.shoePivot.rotation.z = Math.sin(phase * 0.5) * 0.04;
+  shoes.shoePivot.rotation.x = Math.sin(phase) * (args.airborne ? 0.06 : 0.1);
+  shoes.shoePivot.rotation.z = Math.sin(phase * 0.5) * 0.035;
   shoes.shoePivot.position.y = bob;
 
   if (args.airborne) {
-    shoes.leftPivot.position.set(-lateral * 0.85, 0.1, 0.06);
-    shoes.rightPivot.position.set(lateral * 0.85, 0.08, 0.1);
-    shoes.leftPivot.rotation.x = -0.28;
-    shoes.rightPivot.rotation.x = -0.22;
+    shoes.leftPivot.position.set(-lateral * 0.9, 0.12, 0.06);
+    shoes.rightPivot.position.set(lateral * 0.9, 0.1, 0.1);
+    shoes.leftPivot.rotation.x = -0.24;
+    shoes.rightPivot.rotation.x = -0.2;
     shoes.leftPivot.rotation.y = toeIn;
     shoes.rightPivot.rotation.y = -toeIn;
   } else {
-    // +stride → left lead, −stride → right lead
-    const leftLift = Math.max(0, stride) * 0.18;
-    const rightLift = Math.max(0, -stride) * 0.18;
-    const leftZ = -stride * 0.18;
-    const rightZ = stride * 0.18;
+    const leftLift = Math.max(0, stride) * 0.16;
+    const rightLift = Math.max(0, -stride) * 0.16;
+    const leftZ = -stride * 0.16;
+    const rightZ = stride * 0.16;
 
     shoes.leftPivot.position.set(-lateral, leftLift, leftZ);
     shoes.rightPivot.position.set(lateral, rightLift, rightZ);
-    shoes.leftPivot.rotation.x = -stride * 0.22;
-    shoes.rightPivot.rotation.x = stride * 0.22;
+    shoes.leftPivot.rotation.x = -stride * 0.18;
+    shoes.rightPivot.rotation.x = stride * 0.18;
     shoes.leftPivot.rotation.y = toeIn;
     shoes.rightPivot.rotation.y = -toeIn;
   }
