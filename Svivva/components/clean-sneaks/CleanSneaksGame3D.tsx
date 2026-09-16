@@ -404,13 +404,7 @@ export function CleanSneaksGame3D({
     if (phase === "loading") {
       return null;
     }
-    return (
-      <GameStartScreen
-        className={`fixed inset-0 z-[300] cursor-pointer ${className ?? ""}`}
-        style={style}
-        onStart={beginGame}
-      />
-    );
+    return <GameStartScreen style={style} onStart={beginGame} />;
   }
 
   return (

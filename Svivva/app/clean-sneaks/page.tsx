@@ -43,7 +43,9 @@ export default function CleanSneaksPage() {
     <div
       data-svivva-app-shell=""
       data-clean-sneaks-fullscreen=""
-      className={`fixed inset-0 z-[200] flex h-[100dvh] min-h-[100dvh] w-full flex-col ${preGame ? "bg-transparent" : "bg-[#0a0c10]"}`}
+      className={`fixed inset-0 z-[200] flex h-[100dvh] min-h-[100dvh] w-full flex-col ${
+        gamePhase === "loading" ? "bg-transparent" : preGame ? "bg-black" : "bg-[#0a0c10]"
+      }`}
       style={preGame ? { overflow: "hidden" } : shellStyle}
     >
       {gamePhase === "loading" && <GameLoadingWheels fullscreen />}
