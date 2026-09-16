@@ -10,6 +10,9 @@ import {
 /** Main game logo — brand splash. */
 export const KAREN_THE_MUSCLE_LOGO_URL = "/assets/clean-sneaks/karen-the-muscle-logo.jpg";
 
+/** Homepage entry logo — same art on all faces of the rotating transparent cube. */
+export const STIEHL_LOGO_CUBE_URL = "/assets/clean-sneaks/stiehl-logo-cube.jpg";
+
 /** Main cover art — start screen after loading wheels. */
 export const MAIN_GAME_COVER_URL = "/assets/clean-sneaks/ipbw-main-cover.jpg";
 

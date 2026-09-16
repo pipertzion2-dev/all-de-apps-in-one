@@ -8,7 +8,15 @@
 public/assets/clean-sneaks/karen-the-muscle-logo.jpg
 ```
 
-Brand logo asset for Karen the Muscle.
+Brand logo asset for Karen the Muscle (loading / splash).
+
+## Homepage entry cube logo
+
+```
+public/assets/clean-sneaks/stiehl-logo-cube.jpg
+```
+
+Exact artwork mapped to all six faces of the transparent rotating cube on the homepage Clean Sneaks entry.
 
 ## Loading wheels (pre-run splash)
 
