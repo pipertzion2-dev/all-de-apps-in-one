@@ -19,7 +19,9 @@ export default function CleanSneaksError({
   return (
     <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-white px-6 text-center">
       <div className="max-w-md space-y-4">
-        <p className="text-[10px] uppercase tracking-[0.35em] text-[#5B8DA8]">{KLEAN_SNEAKS.title}</p>
+        <p className="text-[10px] uppercase tracking-[0.35em] text-[#5B8DA8]">
+          {KLEAN_SNEAKS.title}
+        </p>
         <h1 className="text-xl font-bold text-[#1a3040]">Game couldn&apos;t load</h1>
         <p className="text-sm leading-relaxed text-[#1a3040]/70">
           Try again, or head back to the ZZAI homepage. If you&apos;re on mobile, closing other tabs

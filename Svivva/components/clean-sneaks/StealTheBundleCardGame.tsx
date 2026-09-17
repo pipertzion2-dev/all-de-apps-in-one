@@ -90,7 +90,9 @@ export function StealTheBundleCardGame({ onBack }: Props) {
       data-testid="steal-bundle-card-game"
     >
       <div className="border-b border-white/10 px-4 py-3 sm:px-6">
-        <p className="text-[10px] uppercase tracking-[0.35em] text-[#5B8DA8]">{KLEAN_SNEAKS.title}</p>
+        <p className="text-[10px] uppercase tracking-[0.35em] text-[#5B8DA8]">
+          {KLEAN_SNEAKS.title}
+        </p>
         <h2 className="seeds-holo-text text-xl font-bold tracking-wide sm:text-2xl">
           Steal the Old Man&apos;s Bundle
         </h2>
