@@ -134,9 +134,14 @@ export function deployVerifyTargets(changedFiles, expectedSha) {
   }
 
   if (files.some((f) => /clean-sneaks/i.test(f))) {
+    targets[0].markers.push("KLEAN SNEAKS");
+    targets.push({
+      url: `https://${domain}/#clean-sneaks`,
+      markers: ["KLEAN SNEAKS", "Play Klean Sneaks"],
+    });
     targets.push({
       url: `https://${domain}/clean-sneaks`,
-      markers: ["Baloon8 Blueprint · 3D Run"],
+      markers: ["KLEAN SNEAKS"],
     });
   }
 

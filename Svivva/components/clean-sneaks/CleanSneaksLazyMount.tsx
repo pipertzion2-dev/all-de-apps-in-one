@@ -8,7 +8,7 @@ type Props = {
   rootMargin?: string;
 };
 
-/** Mount heavy Clean Sneaks UI only when the section nears the viewport. */
+/** Mount heavy Klean Sneaks UI only when the section nears the viewport. */
 export function CleanSneaksLazyMount({ children, placeholder, rootMargin = "320px" }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
