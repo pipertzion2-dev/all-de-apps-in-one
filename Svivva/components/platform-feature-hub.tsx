@@ -2,7 +2,16 @@
 
 import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Loader2, Radio, SlidersHorizontal, Sparkles, Sprout } from "lucide-react";
+import {
+  ArrowRight,
+  ChevronDown,
+  Loader2,
+  Radio,
+  SlidersHorizontal,
+  Sparkles,
+  Sprout,
+} from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -37,9 +46,59 @@ type PlatformFeatureHubProps = {
   variant?: "home" | "compact";
   /** When true, flower/camo background is rendered by a parent wrapper (homepage). */
   hideBackground?: boolean;
-  /** Hide channel strip / subgroup bus grid (homepage keeps patch bay only). */
+  /** Collapse channel strip / subgroup bus grid by default (homepage keeps patch bay primary). */
   hideChannelStrips?: boolean;
 };
+
+type BusChannelGroup = {
+  bus: (typeof MIXING_BUSES)[number];
+  channels: ReturnType<typeof getFeaturesByBus>;
+};
+
+function ChannelStripGrid({ busChannels }: { busChannels: BusChannelGroup[] }) {
+  return (
+    <div className="space-y-6">
+      {busChannels.map(({ bus, channels }) => (
+        <div key={bus.id} className="space-y-2">
+          <div className="flex flex-wrap items-baseline gap-2 px-1">
+            <span className="text-xs font-bold text-[#5B8DA8]">{bus.consoleName}</span>
+            <span className="text-[10px] text-muted-foreground">{bus.description}</span>
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+            {channels.map((f) => (
+              <ChannelStrip
+                key={f.id}
+                channelLabel={f.channelLabel}
+                shortTitle={f.shortTitle}
+                href={f.href}
+                mainBus={f.mainBus}
+                isSeeds={f.id === "seeds"}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+
+      <div className="rounded-xl border-2 border-amber-500/40 bg-gradient-to-r from-amber-500/5 via-card/35 to-amber-500/5 backdrop-blur-sm p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <p className="text-sm font-bold text-amber-600 dark:text-amber-400">
+              {MASTER_BUS.consoleName} — {MASTER_BUS.label}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">{MASTER_BUS.description}</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {MASTER_BUS.outputs.map((out) => (
+              <Badge key={out} variant="outline" className="text-[10px] border-amber-500/40">
+                {out}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function ChannelStrip({
   channelLabel,
@@ -280,51 +339,33 @@ export function PlatformFeatureHub({
           </CardContent>
         </Card>
 
-        {!isCompact && !hideChannelStrips && (
-          <div className="space-y-6">
-            <p className="text-center text-[10px] font-bold uppercase tracking-[0.35em] text-muted-foreground">
-              Channel strips · subgroup buses
-            </p>
-            {busChannels.map(({ bus, channels }) => (
-              <div key={bus.id} className="space-y-2">
-                <div className="flex flex-wrap items-baseline gap-2 px-1">
-                  <span className="text-xs font-bold text-[#5B8DA8]">{bus.consoleName}</span>
-                  <span className="text-[10px] text-muted-foreground">{bus.description}</span>
-                </div>
-                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
-                  {channels.map((f) => (
-                    <ChannelStrip
-                      key={f.id}
-                      channelLabel={f.channelLabel}
-                      shortTitle={f.shortTitle}
-                      href={f.href}
-                      mainBus={f.mainBus}
-                      isSeeds={f.id === "seeds"}
-                    />
-                  ))}
-                </div>
-              </div>
-            ))}
-
-            <div className="rounded-xl border-2 border-amber-500/40 bg-gradient-to-r from-amber-500/5 via-card/35 to-amber-500/5 backdrop-blur-sm p-4 sm:p-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div>
-                  <p className="text-sm font-bold text-amber-600 dark:text-amber-400">
-                    {MASTER_BUS.consoleName} — {MASTER_BUS.label}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">{MASTER_BUS.description}</p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {MASTER_BUS.outputs.map((out) => (
-                    <Badge key={out} variant="outline" className="text-[10px] border-amber-500/40">
-                      {out}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
+        {!isCompact &&
+          (hideChannelStrips ? (
+            <Collapsible defaultOpen={false} className="group rounded-xl border border-border/60 bg-card/20">
+              <CollapsibleTrigger asChild>
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-muted/30 transition-colors rounded-xl"
+                  data-testid="toggle-channel-strips"
+                >
+                  <span className="text-[10px] font-bold uppercase tracking-[0.35em] text-muted-foreground">
+                    Channel strips · subgroup buses
+                  </span>
+                  <ChevronDown className="w-4 h-4 shrink-0 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="px-4 pb-4 pt-1 space-y-4">
+                <ChannelStripGrid busChannels={busChannels} />
+              </CollapsibleContent>
+            </Collapsible>
+          ) : (
+            <div className="space-y-6">
+              <p className="text-center text-[10px] font-bold uppercase tracking-[0.35em] text-muted-foreground">
+                Channel strips · subgroup buses
+              </p>
+              <ChannelStripGrid busChannels={busChannels} />
             </div>
-          </div>
-        )}
+          ))}
       </div>
     </section>
   );
