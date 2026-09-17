@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { isPortraitViewport } from "@/lib/clean-sneaks/run-quality";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -23,7 +23,7 @@ const shellStyle = {
   paddingLeft: "env(safe-area-inset-left)",
 } as const;
 
-export default function CleanSneaksPage() {
+function CleanSneaksPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const beginGameRef = useRef<(() => void) | null>(null);
@@ -207,5 +207,19 @@ export default function CleanSneaksPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CleanSneaksPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="fixed inset-0 z-[200] flex h-[100dvh] items-center justify-center bg-white">
+          <GameLoadingWheels fullscreen />
+        </div>
+      }
+    >
+      <CleanSneaksPageContent />
+    </Suspense>
   );
 }
