@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { STIEHL_LOGO_CUBE_URL } from "@/lib/clean-sneaks/assets";
+import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
 
 type Props = {
   className?: string;
@@ -13,7 +14,7 @@ type Props = {
 };
 
 /**
- * Six-sided transparent logo cube — the Clean Sneaks homepage entry brand.
+ * Six-sided transparent logo cube — the Klean Sneaks homepage entry brand.
  * Drag to spin (with momentum); idle auto-spin continues like the ZZAI artifact cube.
  */
 export function CleanSneaksLogoCube({ className = "", cacheBust = "v1", onActivate }: Props) {
@@ -239,7 +240,7 @@ export function CleanSneaksLogoCube({ className = "", cacheBust = "v1", onActiva
       className={className}
       data-testid="clean-sneaks-logo-cube"
       role="img"
-      aria-label="Clean Sneaks logo — drag to spin, tap to enter"
+      aria-label={`${KLEAN_SNEAKS.title} logo — drag to spin, tap to enter`}
     />
   );
 }

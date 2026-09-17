@@ -68,6 +68,11 @@ export interface GameOverPayload extends RunStats {
   worstHit: ContaminationEvent | null;
   perfectClean: boolean;
   conditionScore: number;
+  /** Card game permanently unlocked (localStorage). */
+  bundleCardUnlocked: boolean;
+  /** This run triggered the unlock. */
+  bundleNewlyUnlocked: boolean;
+  bundleUnlockReason?: string;
 }
 
 export type HudShoeSnapshot = {

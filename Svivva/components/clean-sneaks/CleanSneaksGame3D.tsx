@@ -16,6 +16,12 @@ import {
   tryOhNoAction,
   type RunEngineState,
 } from "@/lib/clean-sneaks/run-engine";
+import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
+import {
+  evaluateBundleUnlock,
+  isBundleCardUnlocked,
+  markBundleCardUnlocked,
+} from "@/lib/clean-sneaks/bundle-unlock";
 import { readBestScore, shareScore, writeBestScore } from "@/lib/clean-sneaks/storage";
 import type {
   GameOverPayload,
@@ -48,6 +54,7 @@ export type CleanSneaksGame3DProps = {
   onStats?: (stats: RunStats) => void;
   onPhaseChange?: (phase: GamePhase) => void;
   onRegisterBegin?: (begin: () => void) => void;
+  onPlayBundleCard?: () => void;
   sneakerOverride?: Partial<SneakerAssetRef> | null;
   fullscreen?: boolean;
   className?: string;
@@ -102,6 +109,7 @@ export function CleanSneaksGame3D({
   onStats,
   onPhaseChange,
   onRegisterBegin,
+  onPlayBundleCard,
   sneakerOverride,
   fullscreen = false,
   className,
@@ -171,9 +179,20 @@ export function CleanSneaksGame3D({
     const s = stateRef.current;
     if (!s.running && phase === "over") return;
     s.running = false;
+    const previousBest = readBestScore();
     const best = writeBestScore(s.score);
     s.best = best;
     const payload = buildGameOverPayload(s, best, { cleanLabelFrom, streakLabelFrom });
+    const alreadyUnlocked = isBundleCardUnlocked();
+    const unlockEval = evaluateBundleUnlock({
+      score: payload.score,
+      distance: payload.distance,
+      previousBest,
+    });
+    if (unlockEval.newlyUnlocked) markBundleCardUnlocked();
+    payload.bundleCardUnlocked = alreadyUnlocked || unlockEval.unlocked;
+    payload.bundleNewlyUnlocked = unlockEval.newlyUnlocked;
+    payload.bundleUnlockReason = payload.bundleCardUnlocked ? undefined : unlockEval.reason;
     setGameOver(payload);
     setPhase("over");
     emitStats();
@@ -433,7 +452,7 @@ export function CleanSneaksGame3D({
       className={`flex min-h-0 flex-col ${fullscreen ? "h-full flex-1" : ""} ${className ?? ""}`}
       style={style}
       role="application"
-      aria-label="Clean Sneaks 3D game"
+      aria-label={`${KLEAN_SNEAKS.title} 3D game`}
     >
       <div
         className={`relative flex min-h-0 flex-1 flex-col overflow-hidden bg-[#0a0c10]/85 ${
@@ -566,7 +585,9 @@ export function CleanSneaksGame3D({
 
         {phase === "countdown" && (
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
-            <p className="seeds-holo-text mb-2 text-xs uppercase tracking-[0.35em]">Clean Sneaks</p>
+            <p className="seeds-holo-text mb-2 text-xs uppercase tracking-[0.35em]">
+              {KLEAN_SNEAKS.title}
+            </p>
             <p className="mb-1 text-sm text-[#7EC8D9]">
               {sneaker.label ?? "BALOON8"} · Keep the fit clean
             </p>
@@ -576,8 +597,11 @@ export function CleanSneaksGame3D({
             <p className="mb-2 max-w-xs text-center text-[11px] text-white/50">
               Look at the ground. V = Sneak Vision · C = walk style · 1–6 = Oh No saves
             </p>
-            <p className="mb-6 text-sm text-[#7EC8D9]/80">
+            <p className="mb-2 text-sm text-[#7EC8D9]/80">
               100% CLEAN · TWO SHOES · {FINISH_DISTANCE}m destination
+            </p>
+            <p className="mb-6 max-w-xs text-center text-[11px] text-white/45">
+              Chase the bundle · beat your highest score on a full run to unlock Steal the Bundle
             </p>
             <p className="text-6xl font-bold tabular-nums text-foreground sm:text-7xl">
               {countdown > 0 ? countdown : "RUN."}
@@ -591,6 +615,7 @@ export function CleanSneaksGame3D({
             onRetry={runItBack}
             onShare={onShare}
             onExit={onExit}
+            onPlayBundleCard={onPlayBundleCard}
             shareMsg={shareMsg}
           />
         )}

@@ -11,6 +11,7 @@ import {
   POWERUP_META,
 } from "@/lib/clean-sneaks/constants";
 import { cleanLabelFrom, resolvePlayerSneaker, streakLabelFrom } from "@/lib/clean-sneaks/assets";
+import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
 import {
   computeFrameScore,
   readBestScore,
@@ -275,6 +276,8 @@ export function CleanSneaksGame({
       worstHit: null,
       perfectClean: clean >= 100,
       conditionScore: clean,
+      bundleCardUnlocked: false,
+      bundleNewlyUnlocked: false,
     };
     setGameOver(payload);
     setPhase("over");
@@ -906,7 +909,7 @@ export function CleanSneaksGame({
       className={`flex min-h-0 flex-col ${fullscreen ? "h-full flex-1" : ""} ${className ?? ""}`}
       style={style}
       role="application"
-      aria-label="Clean Sneaks game"
+      aria-label={`${KLEAN_SNEAKS.title} game`}
     >
       <div
         className={`relative flex min-h-0 flex-1 flex-col overflow-hidden bg-[#0a0c10]/85 ${
@@ -916,7 +919,7 @@ export function CleanSneaksGame({
         <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex flex-wrap items-start justify-between gap-2 p-3 sm:p-4">
           <div className="space-y-1">
             <p className="text-[10px] uppercase tracking-[0.25em] text-[#5B8DA8]/80">
-              {sneaker.label ?? "Baloon8"} · Clean Sneaks
+              {sneaker.label ?? "Baloon8"} · {KLEAN_SNEAKS.title}
             </p>
             <p className="text-lg font-bold tabular-nums text-foreground sm:text-xl">
               {hud.score.toLocaleString()}
@@ -970,7 +973,9 @@ export function CleanSneaksGame({
 
         {phase === "countdown" && (
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm">
-            <p className="seeds-holo-text mb-2 text-xs uppercase tracking-[0.35em]">Clean Sneaks</p>
+            <p className="seeds-holo-text mb-2 text-xs uppercase tracking-[0.35em]">
+              {KLEAN_SNEAKS.title}
+            </p>
             <p className="mb-6 text-sm text-[#7EC8D9]">100% CLEAN</p>
             <p className="text-6xl font-bold tabular-nums text-foreground sm:text-7xl">
               {countdown > 0 ? countdown : "RUN."}
@@ -980,7 +985,9 @@ export function CleanSneaksGame({
 
         {phase === "over" && gameOver && (
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/80 px-4 backdrop-blur-md">
-            <p className="text-[10px] uppercase tracking-[0.35em] text-[#5B8DA8]">Clean Sneaks</p>
+            <p className="text-[10px] uppercase tracking-[0.35em] text-[#5B8DA8]">
+              {KLEAN_SNEAKS.title}
+            </p>
             <h3 className="seeds-holo-text mt-2 text-3xl font-bold tracking-wide sm:text-4xl">
               KICKS COOKED.
             </h3>

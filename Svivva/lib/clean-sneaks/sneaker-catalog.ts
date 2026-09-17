@@ -1,5 +1,5 @@
 /**
- * BALOON8 is the only sneaker in Clean Sneaks.
+ * BALOON8 is the only sneaker in Klean Sneaks.
  * Unlockable options are colorways of the same car-sneaker — never other silhouettes.
  */
 

@@ -5,6 +5,8 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
+import { bundleUnlockHint, isBundleCardUnlocked } from "@/lib/clean-sneaks/bundle-unlock";
 import { readBestScore } from "@/lib/clean-sneaks/storage";
 
 const CleanSneaksLogoCube = dynamic(
@@ -14,10 +16,12 @@ const CleanSneaksLogoCube = dynamic(
 
 export function CleanSneaksSection() {
   const [best, setBest] = useState(0);
+  const [bundleUnlocked, setBundleUnlocked] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     setBest(readBestScore());
+    setBundleUnlocked(isBundleCardUnlocked());
   }, []);
 
   return (
@@ -76,7 +80,7 @@ export function CleanSneaksSection() {
               id="clean-sneaks-heading"
               className="seeds-holo-text text-4xl font-bold tracking-[0.08em] sm:text-5xl md:text-6xl"
             >
-              CLEAN SNEAKS
+              {KLEAN_SNEAKS.display}
             </h2>
             <p
               className="mt-4 text-xl font-semibold leading-snug tracking-[0.04em] text-[#E8D9A8] sm:text-2xl"
@@ -99,8 +103,23 @@ export function CleanSneaksSection() {
                 asChild
                 data-testid="button-play-clean-sneaks"
               >
-                <Link href="/clean-sneaks">Play Clean Sneaks</Link>
+                <Link href="/clean-sneaks">{KLEAN_SNEAKS.playLabel}</Link>
               </Button>
+              {bundleUnlocked ? (
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="min-w-[220px] border-[#D94F9C]/50 text-[#E8D9A8]"
+                  asChild
+                  data-testid="button-steal-bundle-home"
+                >
+                  <Link href="/clean-sneaks?mode=bundle">Steal the Old Man&apos;s Bundle</Link>
+                </Button>
+              ) : (
+                <p className="max-w-sm text-xs text-white/50" data-testid="text-bundle-unlock-hint">
+                  {bundleUnlockHint(best)}
+                </p>
+              )}
               <p className="text-[11px] uppercase tracking-[0.25em] text-white/45">
                 Steal the bundle · Full screen · Mobile &amp; desktop
               </p>
