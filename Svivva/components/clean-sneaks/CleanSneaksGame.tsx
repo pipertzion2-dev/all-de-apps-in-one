@@ -105,7 +105,7 @@ export function CleanSneaksGame({
     rightClean: 100,
     cleanLabel: "FRESH",
     streak: 0,
-    streakLabel: "CLEAN x1",
+    streakLabel: "KLEAN x1",
     bestScore: 0,
     closeCalls: 0,
     styleScore: 0,
@@ -943,7 +943,7 @@ export function CleanSneaksGame({
               aria-valuenow={cleanPct}
               aria-valuemin={0}
               aria-valuemax={100}
-              aria-label="Clean meter"
+              aria-label="Klean meter"
             >
               <div
                 className="h-full rounded-full transition-[width] duration-150"
@@ -976,7 +976,7 @@ export function CleanSneaksGame({
             <p className="seeds-holo-text mb-2 text-xs uppercase tracking-[0.35em]">
               {KLEAN_SNEAKS.title}
             </p>
-            <p className="mb-6 text-sm text-[#7EC8D9]">100% CLEAN</p>
+            <p className="mb-6 text-sm text-[#7EC8D9]">100% KLEAN</p>
             <p className="text-6xl font-bold tabular-nums text-foreground sm:text-7xl">
               {countdown > 0 ? countdown : "RUN."}
             </p>
@@ -1001,7 +1001,7 @@ export function CleanSneaksGame({
                 <dd className="font-semibold tabular-nums">{gameOver.finalCleanliness}%</dd>
               </div>
               <div>
-                <dt className="text-muted-foreground">Clean streak</dt>
+                <dt className="text-muted-foreground">Klean streak</dt>
                 <dd className="font-semibold">{gameOver.streakLabel}</dd>
               </div>
               <div>

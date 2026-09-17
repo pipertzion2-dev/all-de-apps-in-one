@@ -3,7 +3,7 @@ import type { ContaminationEvent, DirtZone, ShoeCondition, ShoeSide } from "./di
 import type { CleanPathOption } from "./sneak-vision";
 import type { OhNoAction, OhNoWindow, WalkStyleId, WeatherId } from "./contact-map";
 
-export type CleanLabel = "FRESH" | "CLEAN" | "GETTING DIRTY" | "DIRTY" | "FILTHY" | "COOKED";
+export type CleanLabel = "FRESH" | "KLEAN" | "GETTING DIRTY" | "DIRTY" | "FILTHY" | "COOKED";
 
 export type ObstacleKind =
   | "mud"

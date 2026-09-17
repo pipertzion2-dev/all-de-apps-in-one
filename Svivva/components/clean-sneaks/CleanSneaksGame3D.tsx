@@ -598,7 +598,7 @@ export function CleanSneaksGame3D({
               Look at the ground. V = Sneak Vision · C = walk style · 1–6 = Oh No saves
             </p>
             <p className="mb-2 text-sm text-[#7EC8D9]/80">
-              100% CLEAN · TWO SHOES · {FINISH_DISTANCE}m destination
+              100% KLEAN · TWO SHOES · {FINISH_DISTANCE}m destination
             </p>
             <p className="mb-6 max-w-xs text-center text-[11px] text-white/45">
               Chase the bundle · beat your highest score on a full run to unlock Steal the Bundle

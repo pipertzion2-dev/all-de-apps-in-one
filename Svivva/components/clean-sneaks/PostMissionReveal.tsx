@@ -58,7 +58,7 @@ export function PostMissionReveal({
         <Stat label="Crease" value={`${payload.creases}%`} />
         <Stat label="Style" value={payload.styleScore.toLocaleString()} />
         <Stat label="Close Calls" value={String(payload.closeCalls)} />
-        <Stat label="Clean Chain" value={`x${payload.maxCleanChain}`} />
+        <Stat label="Klean Chain" value={`x${payload.maxCleanChain}`} />
         <Stat label="Distance" value={`${payload.distance}m`} />
         <Stat label="Score" value={payload.score.toLocaleString()} accent />
       </dl>

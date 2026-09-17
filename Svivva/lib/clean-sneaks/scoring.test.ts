@@ -12,7 +12,7 @@ import { computeFrameScore } from "@/lib/clean-sneaks/storage";
 describe("clean-sneaks scoring", () => {
   it("labels cleanliness bands", () => {
     expect(cleanLabelFrom(100)).toBe("FRESH");
-    expect(cleanLabelFrom(70)).toBe("CLEAN");
+    expect(cleanLabelFrom(70)).toBe("KLEAN");
     expect(cleanLabelFrom(50)).toBe("GETTING DIRTY");
     expect(cleanLabelFrom(30)).toBe("DIRTY");
     expect(cleanLabelFrom(10)).toBe("FILTHY");

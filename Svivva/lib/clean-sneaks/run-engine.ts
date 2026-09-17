@@ -704,7 +704,7 @@ function bumpStreak(s: RunEngineState, onStreakFlash?: () => void): void {
     const bonus = s.streak * 25 + s.cleanChain * 5;
     s.score += bonus;
     s.popups.push({
-      text: `CLEAN CHAIN x${s.cleanChain} +${bonus}`,
+      text: `KLEAN CHAIN x${s.cleanChain} +${bonus}`,
       life: 0.9,
       color: "#7EC8D9",
     });

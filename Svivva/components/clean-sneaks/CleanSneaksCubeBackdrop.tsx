@@ -12,7 +12,7 @@ const ZZAI_MAGENTA = 0xd94f9c;
 const ZZAI_CYAN = 0x7ec8d9;
 
 /**
- * Ambient Three.js cube field for Clean Sneaks fullscreen play.
+ * Ambient Three.js cube field for Klean Sneaks fullscreen play.
  * Spinning wireframe cubes echo the ZZAI homepage cube motif.
  */
 export function CleanSneaksCubeBackdrop({ className = "" }: Props) {

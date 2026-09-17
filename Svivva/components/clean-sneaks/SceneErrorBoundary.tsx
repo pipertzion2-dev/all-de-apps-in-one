@@ -11,7 +11,7 @@ type State = {
   failed: boolean;
 };
 
-/** Prevents a Three.js scene crash from breaking the whole Clean Sneaks section. */
+/** Prevents a Three.js scene crash from breaking the whole Klean Sneaks section. */
 export class SceneErrorBoundary extends Component<Props, State> {
   state: State = { failed: false };
 
