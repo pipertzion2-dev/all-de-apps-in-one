@@ -769,6 +769,8 @@ export function buildGameOverPayload(
     worstHit: worst,
     perfectClean: clean >= 99.5 && s.contaminations.length === 0,
     conditionScore: Math.floor(condition),
+    bundleCardUnlocked: false,
+    bundleNewlyUnlocked: false,
   };
 }
 

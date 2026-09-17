@@ -9,11 +9,19 @@ type Props = {
   onRetry: () => void;
   onShare: () => void;
   onExit?: () => void;
+  onPlayBundleCard?: () => void;
   shareMsg?: string | null;
 };
 
 /** Post-mission shoe reveal — numbers after the cinematic look-down. */
-export function PostMissionReveal({ payload, onRetry, onShare, onExit, shareMsg }: Props) {
+export function PostMissionReveal({
+  payload,
+  onRetry,
+  onShare,
+  onExit,
+  onPlayBundleCard,
+  shareMsg,
+}: Props) {
   const perfect = payload.perfectClean;
   const worst = payload.worstHit;
 
@@ -54,6 +62,24 @@ export function PostMissionReveal({ payload, onRetry, onShare, onExit, shareMsg 
         <Stat label="Score" value={payload.score.toLocaleString()} accent />
       </dl>
 
+      {payload.bundleNewlyUnlocked && (
+        <div
+          className="mt-5 w-full max-w-md rounded-lg border border-[#7EC8D9]/40 bg-[#7EC8D9]/10 px-4 py-3 text-center"
+          data-testid="bundle-unlock-banner"
+        >
+          <p className="text-[10px] uppercase tracking-[0.3em] text-[#7EC8D9]">New high score</p>
+          <p className="mt-1 text-sm font-semibold text-foreground">
+            Steal the Old Man&apos;s Bundle — card game unlocked.
+          </p>
+        </div>
+      )}
+
+      {!payload.bundleCardUnlocked && payload.bundleUnlockReason && (
+        <p className="mt-4 max-w-md text-center text-xs text-white/50">
+          {payload.bundleUnlockReason}
+        </p>
+      )}
+
       {worst && (
         <div className="mt-5 w-full max-w-md rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-left text-sm">
           <p className="text-[10px] uppercase tracking-[0.25em] text-[#D94F9C]">
@@ -86,6 +112,16 @@ export function PostMissionReveal({ payload, onRetry, onShare, onExit, shareMsg 
         >
           Share Score
         </Button>
+        {payload.bundleCardUnlocked && onPlayBundleCard && (
+          <Button
+            size="lg"
+            className="bg-[#D94F9C] text-white hover:bg-[#D94F9C]/90"
+            onClick={onPlayBundleCard}
+            data-testid="button-play-steal-bundle"
+          >
+            Steal the Bundle
+          </Button>
+        )}
         {onExit && (
           <Button size="lg" variant="ghost" onClick={onExit} data-testid="button-clean-sneaks-exit">
             Close

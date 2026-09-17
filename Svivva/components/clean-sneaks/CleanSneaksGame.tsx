@@ -275,6 +275,8 @@ export function CleanSneaksGame({
       worstHit: null,
       perfectClean: clean >= 100,
       conditionScore: clean,
+      bundleCardUnlocked: false,
+      bundleNewlyUnlocked: false,
     };
     setGameOver(payload);
     setPhase("over");
