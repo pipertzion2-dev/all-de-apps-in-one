@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { runBodyLayerHygiene } from "@/lib/body-layer-cleanup";
+import { showHomepageSection } from "@/lib/homepage-layout";
 import { usePlatform } from "@/lib/platform-context";
 import { ZzaiModeToggle } from "@/components/zzai-mode-toggle";
 import Link from "next/link";
@@ -195,6 +196,7 @@ export default function LandingPage() {
   }, [flipComplete]);
 
   useEffect(() => {
+    if (!showHomepageSection("tractionBar")) return;
     fetch("/api/public-stats")
       .then((r) => r.json())
       .then((d) => setStats(d))
@@ -762,6 +764,39 @@ export default function LandingPage() {
               </ClientErrorBoundary>
             </div>
 
+            {showHomepageSection("quickLinks") && (
+              <section className="relative z-10 pb-6 sm:pb-8 pt-2">
+                <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Spin the cube to explore — or jump straight to a channel.
+                  </p>
+                  <div className="flex flex-wrap items-center justify-center gap-2">
+                    <Link href="/seeds">
+                      <Button size="sm" variant="outline" className="border-[#5B8DA8]/40">
+                        ZZAI Seeds
+                      </Button>
+                    </Link>
+                    <Link href="/play">
+                      <Button size="sm" variant="outline" className="border-[#5B8DA8]/40">
+                        Play
+                      </Button>
+                    </Link>
+                    <Link href="/dashboard">
+                      <Button size="sm" className="bg-[#5B8DA8]">
+                        Dashboard
+                      </Button>
+                    </Link>
+                    <a href="/signup">
+                      <Button size="sm" variant="outline">
+                        Start Free
+                      </Button>
+                    </a>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {showHomepageSection("oaasIntro") && (
             <section id="oaas-intro" className="pt-8 sm:pt-10 pb-8 sm:pb-10 relative z-10">
               <div className="max-w-5xl mx-auto px-4 sm:px-6">
                 <div className="rounded-2xl border-2 border-[#5B8DA8]/55 bg-card/95 backdrop-blur-sm p-6 sm:p-10 shadow-lg shadow-[#5B8DA8]/10">
@@ -824,7 +859,9 @@ export default function LandingPage() {
                 </div>
               </div>
             </section>
+            )}
 
+            {showHomepageSection("eventTracker") && (
             <section id="event-tracker" className="pb-6 sm:pb-8 relative z-10">
               <div className="max-w-5xl mx-auto px-4 sm:px-6">
                 <Link href="/dashboard/zzai-show">
@@ -874,10 +911,13 @@ export default function LandingPage() {
                 </Link>
               </div>
             </section>
+            )}
 
+            {showHomepageSection("oaasHub") && (
             <div className="relative z-10 pb-8 sm:pb-12">
               <PlatformFeatureHub hideBackground hideChannelStrips />
             </div>
+            )}
 
             <div
               className="pointer-events-none absolute inset-x-0 bottom-0 h-28 sm:h-36 z-[1]"
@@ -888,6 +928,7 @@ export default function LandingPage() {
             />
           </div>
 
+          {showHomepageSection("buildSystem") && (
           <section id="platforms" className="py-16 sm:py-24 relative z-10 overflow-visible">
             <div className="max-w-7xl mx-auto px-4 sm:px-6">
               <div className="text-center space-y-4 mb-16">
@@ -947,8 +988,10 @@ export default function LandingPage() {
               </div>
             </div>
           </section>
+          )}
 
           {/* ── Live Traction Bar ─────────────────────────────────────────────── */}
+          {showHomepageSection("tractionBar") && (
           <section className="py-8 md:bg-background/40 md:backdrop-blur-sm">
             <div className="max-w-4xl mx-auto px-4 sm:px-6">
               <div className="grid grid-cols-3 gap-4 text-center">
@@ -1006,8 +1049,10 @@ export default function LandingPage() {
               </div>
             </div>
           </section>
+          )}
           {/* ── End Traction Bar ──────────────────────────────────────────────── */}
 
+          {showHomepageSection("features") && (
           <section
             id="features"
             className="py-16 sm:py-24 min-h-[600px] relative overflow-hidden -mt-1"
@@ -1191,8 +1236,10 @@ export default function LandingPage() {
               )}
             </div>
           </section>
+          )}
 
           {/* Founder Story */}
+          {showHomepageSection("founderStory") && (
           <section className="py-16 sm:py-24 relative overflow-hidden">
             <div className="max-w-6xl mx-auto px-4 sm:px-6">
               <div className="grid lg:grid-cols-2 gap-10 sm:gap-16 items-center">
@@ -1267,7 +1314,9 @@ export default function LandingPage() {
               </div>
             </div>
           </section>
+          )}
 
+          {showHomepageSection("howItWorks") && (
           <section
             id="how-it-works"
             className="py-16 sm:py-24 min-h-[600px] relative overflow-hidden"
@@ -1529,7 +1578,9 @@ export default function LandingPage() {
               </div>
             </div>
           </section>
+          )}
 
+          {showHomepageSection("evaluation") && (
           <section className="py-16 sm:py-24 min-h-[600px] relative overflow-hidden">
             <div className="absolute inset-0 opacity-60 md:opacity-50">
               <CamoThreeOverlay preset="evals" />
@@ -1761,7 +1812,9 @@ export default function LandingPage() {
               )}
             </div>
           </section>
+          )}
 
+          {showHomepageSection("pricing") && (
           <section id="pricing" className="py-16 sm:py-24 min-h-[600px] relative overflow-hidden">
             <div className="absolute inset-0 opacity-60 md:opacity-50">
               <CamoThreeOverlay preset="pricing" />
@@ -1871,7 +1924,9 @@ export default function LandingPage() {
               </p>
             </div>
           </section>
+          )}
 
+          {showHomepageSection("finalCta") && (
           <section className="py-24 relative bg-gradient-to-b from-transparent to-background/50">
             <div className="max-w-4xl mx-auto px-6 text-center">
               <div className="rounded-3xl p-6 sm:p-8 md:p-12 space-y-6 sm:space-y-8 bg-card/95 backdrop-blur-xl border border-border/50">
@@ -1945,7 +2000,9 @@ export default function LandingPage() {
               </div>
             </div>
           </section>
+          )}
 
+          {showHomepageSection("cleanSneaks") && (
           <ClientErrorBoundary
             fallback={
               <section
@@ -1973,6 +2030,7 @@ export default function LandingPage() {
               <CleanSneaksSection />
             </CleanSneaksLazyMount>
           </ClientErrorBoundary>
+          )}
 
           <footer className="border-t border-white/10 py-8 sm:py-12">
             <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -1995,14 +2053,17 @@ export default function LandingPage() {
                   <h4 className="font-semibold mb-4">Product</h4>
                   <ul className="space-y-2 text-sm text-muted-foreground">
                     <li>
-                      <a href="#features" className="hover:text-foreground transition-colors">
+                      <Link href="/about" className="hover:text-foreground transition-colors">
                         Features
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a href="#pricing" className="hover:text-foreground transition-colors">
+                      <Link
+                        href="/dashboard/billing"
+                        className="hover:text-foreground transition-colors"
+                      >
                         Pricing
-                      </a>
+                      </Link>
                     </li>
                     <li>
                       <Link href="/play" className="hover:text-foreground transition-colors">
@@ -2018,9 +2079,9 @@ export default function LandingPage() {
                       </Link>
                     </li>
                     <li>
-                      <a href="#oaas" className="hover:text-foreground transition-colors">
+                      <Link href="/about" className="hover:text-foreground transition-colors">
                         OaaS
-                      </a>
+                      </Link>
                     </li>
                     <li>
                       <Link href="/seeds" className="hover:text-foreground transition-colors">
