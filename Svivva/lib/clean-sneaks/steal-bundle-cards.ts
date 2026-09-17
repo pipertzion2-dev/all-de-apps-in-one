@@ -24,7 +24,7 @@ export const PLAYER_TACTICS: StealCard[] = [
   { id: "protect", kind: "tactic", label: "Protect Fit", power: 4, blurb: "Shield the balloons." },
   { id: "dash", kind: "tactic", label: "Dash", power: 5, blurb: "Cut through the lane." },
   { id: "sneak", kind: "tactic", label: "Sneak", power: 6, blurb: "Slip past unnoticed." },
-  { id: "clean", kind: "tactic", label: "Quick Clean", power: 7, blurb: "Wipe mid-run." },
+  { id: "clean", kind: "tactic", label: "Quick Klean", power: 7, blurb: "Wipe mid-run." },
   { id: "steal", kind: "tactic", label: "Steal", power: 8, blurb: "Grab the bundle." },
 ];
 

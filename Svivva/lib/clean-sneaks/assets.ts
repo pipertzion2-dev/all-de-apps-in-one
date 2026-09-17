@@ -73,7 +73,7 @@ export function resolveColorway(id?: Baloon8ColorwayId | string | null) {
 export function cleanLabelFrom(cleanliness: number): CleanLabel {
   if (cleanliness <= 0) return "COOKED";
   if (cleanliness >= 80) return "FRESH";
-  if (cleanliness >= 60) return "CLEAN";
+  if (cleanliness >= 60) return "KLEAN";
   if (cleanliness >= 40) return "GETTING DIRTY";
   if (cleanliness >= 20) return "DIRTY";
   return "FILTHY";
@@ -81,10 +81,10 @@ export function cleanLabelFrom(cleanliness: number): CleanLabel {
 
 export function streakLabelFrom(streak: number): string {
   if (streak >= 12) return "FRESH x5";
-  if (streak >= 8) return "CLEAN x4";
-  if (streak >= 5) return "CLEAN x3";
-  if (streak >= 3) return "CLEAN x2";
-  return "CLEAN x1";
+  if (streak >= 8) return "KLEAN x4";
+  if (streak >= 5) return "KLEAN x3";
+  if (streak >= 3) return "KLEAN x2";
+  return "KLEAN x1";
 }
 
 export function streakMultiplier(streak: number): number {

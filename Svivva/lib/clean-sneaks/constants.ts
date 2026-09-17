@@ -42,7 +42,7 @@ export const POWERUP_META: Record<
   { label: string; color: string; durationMs: number; cleanRestore?: number }
 > = {
   shield: { label: "SHOE SHIELD", color: "#5B8DA8", durationMs: 4500 },
-  quickClean: { label: "QUICK CLEAN", color: "#7EC8D9", durationMs: 0, cleanRestore: 18 },
+  quickClean: { label: "QUICK KLEAN", color: "#7EC8D9", durationMs: 0, cleanRestore: 18 },
   freshKicks: { label: "FRESH KICKS", color: "#D94F9C", durationMs: 5000 },
   perfectStep: { label: "PERFECT STEP", color: "#e8e8ec", durationMs: 2800 },
 };
