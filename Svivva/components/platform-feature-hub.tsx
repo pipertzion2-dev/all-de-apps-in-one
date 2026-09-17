@@ -37,6 +37,8 @@ type PlatformFeatureHubProps = {
   variant?: "home" | "compact";
   /** When true, flower/camo background is rendered by a parent wrapper (homepage). */
   hideBackground?: boolean;
+  /** Hide channel strip / subgroup bus grid (homepage keeps patch bay only). */
+  hideChannelStrips?: boolean;
 };
 
 function ChannelStrip({
@@ -82,6 +84,7 @@ function ChannelStrip({
 export function PlatformFeatureHub({
   variant = "home",
   hideBackground = false,
+  hideChannelStrips = false,
 }: PlatformFeatureHubProps) {
   const [goal, setGoal] = useState(PRESET_SCENES[0]);
   const [result, setResult] = useState<FeatureSuggestionResult | null>(null);
@@ -277,7 +280,7 @@ export function PlatformFeatureHub({
           </CardContent>
         </Card>
 
-        {!isCompact && (
+        {!isCompact && !hideChannelStrips && (
           <div className="space-y-6">
             <p className="text-center text-[10px] font-bold uppercase tracking-[0.35em] text-muted-foreground">
               Channel strips · subgroup buses

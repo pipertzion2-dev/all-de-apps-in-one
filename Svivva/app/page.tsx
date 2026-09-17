@@ -876,7 +876,7 @@ export default function LandingPage() {
             </section>
 
             <div className="relative z-10 pb-8 sm:pb-12">
-              <PlatformFeatureHub hideBackground />
+              <PlatformFeatureHub hideBackground hideChannelStrips />
             </div>
 
             <div
