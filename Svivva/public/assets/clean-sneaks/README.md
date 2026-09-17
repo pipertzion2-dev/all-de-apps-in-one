@@ -1,4 +1,4 @@
-# Clean Sneaks — BALOON8 Car-Sneaker
+# Klean Sneaks — BALOON8 Car-Sneaker
 
 **Only sneaker in the game:** BALOON8 (car × slip-on balloon chassis).
 
@@ -16,7 +16,7 @@ Brand logo asset for Karen the Muscle (loading / splash).
 public/assets/clean-sneaks/stiehl-logo-cube.jpg
 ```
 
-Exact artwork mapped to all six faces of the transparent rotating cube on the homepage Clean Sneaks entry.
+Exact artwork mapped to all six faces of the transparent rotating cube on the homepage Klean Sneaks entry.
 
 ## Loading wheels (pre-run splash)
 

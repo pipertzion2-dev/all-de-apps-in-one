@@ -16,6 +16,7 @@ import {
   tryOhNoAction,
   type RunEngineState,
 } from "@/lib/clean-sneaks/run-engine";
+import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
 import {
   evaluateBundleUnlock,
   isBundleCardUnlocked,
@@ -451,7 +452,7 @@ export function CleanSneaksGame3D({
       className={`flex min-h-0 flex-col ${fullscreen ? "h-full flex-1" : ""} ${className ?? ""}`}
       style={style}
       role="application"
-      aria-label="Clean Sneaks 3D game"
+      aria-label={`${KLEAN_SNEAKS.title} 3D game`}
     >
       <div
         className={`relative flex min-h-0 flex-1 flex-col overflow-hidden bg-[#0a0c10]/85 ${
@@ -584,7 +585,9 @@ export function CleanSneaksGame3D({
 
         {phase === "countdown" && (
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
-            <p className="seeds-holo-text mb-2 text-xs uppercase tracking-[0.35em]">Clean Sneaks</p>
+            <p className="seeds-holo-text mb-2 text-xs uppercase tracking-[0.35em]">
+              {KLEAN_SNEAKS.title}
+            </p>
             <p className="mb-1 text-sm text-[#7EC8D9]">
               {sneaker.label ?? "BALOON8"} · Keep the fit clean
             </p>

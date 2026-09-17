@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
 import { ZONE_LABELS } from "@/lib/clean-sneaks/dirt-system";
 import type { GameOverPayload } from "@/lib/clean-sneaks/types";
 
@@ -30,7 +31,7 @@ export function PostMissionReveal({
       className="absolute inset-0 z-20 flex flex-col items-center justify-center overflow-y-auto bg-black/85 px-4 py-6 backdrop-blur-md"
       data-testid="post-mission-reveal"
     >
-      <p className="text-[10px] uppercase tracking-[0.35em] text-[#5B8DA8]">Clean Sneaks</p>
+      <p className="text-[10px] uppercase tracking-[0.35em] text-[#5B8DA8]">{KLEAN_SNEAKS.title}</p>
 
       {perfect ? (
         <>

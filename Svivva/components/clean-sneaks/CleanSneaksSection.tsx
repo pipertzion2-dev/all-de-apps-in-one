@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
 import { bundleUnlockHint, isBundleCardUnlocked } from "@/lib/clean-sneaks/bundle-unlock";
 import { readBestScore } from "@/lib/clean-sneaks/storage";
 
@@ -79,7 +80,7 @@ export function CleanSneaksSection() {
               id="clean-sneaks-heading"
               className="seeds-holo-text text-4xl font-bold tracking-[0.08em] sm:text-5xl md:text-6xl"
             >
-              CLEAN SNEAKS
+              {KLEAN_SNEAKS.display}
             </h2>
             <p
               className="mt-4 text-xl font-semibold leading-snug tracking-[0.04em] text-[#E8D9A8] sm:text-2xl"
@@ -102,7 +103,7 @@ export function CleanSneaksSection() {
                 asChild
                 data-testid="button-play-clean-sneaks"
               >
-                <Link href="/clean-sneaks">Play Clean Sneaks</Link>
+                <Link href="/clean-sneaks">{KLEAN_SNEAKS.playLabel}</Link>
               </Button>
               {bundleUnlocked ? (
                 <Button

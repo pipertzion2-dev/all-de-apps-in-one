@@ -1,5 +1,5 @@
 /**
- * Clean Sneaks dirt-zone system.
+ * Klean Sneaks dirt-zone system.
  * Each shoe is divided into zones; substances land where contact happens.
  */
 

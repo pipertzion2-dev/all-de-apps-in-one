@@ -1,3 +1,5 @@
+import { KLEAN_SNEAKS } from "./brand";
+
 /** Card definitions for "Steal the Old Man's Bundle". */
 
 export type StealCardKind = "hazard" | "tactic";
@@ -52,5 +54,5 @@ export function resolveStealRound(playerCard: StealCard, oldManCard: StealCard):
 }
 
 export function stealBundleShareText(wins: number): string {
-  return `STEAL THE BUNDLE — I stole the old man's bundle ${wins}× on Clean Sneaks. zzaizzai.com/clean-sneaks`;
+  return `STEAL THE BUNDLE — I stole the old man's bundle ${wins}× on ${KLEAN_SNEAKS.title}. zzaizzai.com/clean-sneaks`;
 }

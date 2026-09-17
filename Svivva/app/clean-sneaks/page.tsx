@@ -10,6 +10,7 @@ import { GameLoadingWheels } from "@/components/clean-sneaks/GameLoadingWheels";
 import { GameStartScreen } from "@/components/clean-sneaks/GameStartScreen";
 import { SceneErrorBoundary } from "@/components/clean-sneaks/SceneErrorBoundary";
 import { StealTheBundleCardGame } from "@/components/clean-sneaks/StealTheBundleCardGame";
+import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
 import { isBundleCardUnlocked } from "@/lib/clean-sneaks/bundle-unlock";
 import type { GamePhase } from "@/lib/clean-sneaks/types";
 
@@ -119,7 +120,7 @@ export default function CleanSneaksPage() {
               <h1
                 className={`seeds-holo-text font-bold ${portrait ? "text-base" : "text-xl sm:text-2xl"}`}
               >
-                CLEAN SNEAKS
+                {KLEAN_SNEAKS.display}
               </h1>
             </div>
             <div className="flex items-center gap-2">
@@ -166,7 +167,7 @@ export default function CleanSneaksPage() {
               <div className="fixed inset-0 z-[300] flex flex-col items-center justify-center bg-white px-6 text-center">
                 <div className="max-w-md space-y-4">
                   <p className="text-[10px] uppercase tracking-[0.35em] text-[#5B8DA8]">
-                    Clean Sneaks
+                    {KLEAN_SNEAKS.title}
                   </p>
                   <h1 className="text-xl font-bold text-[#1a3040]">Game couldn&apos;t load</h1>
                   <p className="text-sm leading-relaxed text-[#1a3040]/70">

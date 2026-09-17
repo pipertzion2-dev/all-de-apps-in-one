@@ -11,6 +11,7 @@ import {
   type StealCard,
   type StealRoundResult,
 } from "@/lib/clean-sneaks/steal-bundle-cards";
+import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
 import { readBundleCardWins, writeBundleCardWin } from "@/lib/clean-sneaks/bundle-unlock";
 
 type Props = {
@@ -89,7 +90,7 @@ export function StealTheBundleCardGame({ onBack }: Props) {
       data-testid="steal-bundle-card-game"
     >
       <div className="border-b border-white/10 px-4 py-3 sm:px-6">
-        <p className="text-[10px] uppercase tracking-[0.35em] text-[#5B8DA8]">Clean Sneaks</p>
+        <p className="text-[10px] uppercase tracking-[0.35em] text-[#5B8DA8]">{KLEAN_SNEAKS.title}</p>
         <h2 className="seeds-holo-text text-xl font-bold tracking-wide sm:text-2xl">
           Steal the Old Man&apos;s Bundle
         </h2>

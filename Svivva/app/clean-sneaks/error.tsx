@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -12,13 +13,13 @@ export default function CleanSneaksError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("Clean Sneaks failed to load:", error);
+    console.error(`${KLEAN_SNEAKS.title} failed to load:`, error);
   }, [error]);
 
   return (
     <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-white px-6 text-center">
       <div className="max-w-md space-y-4">
-        <p className="text-[10px] uppercase tracking-[0.35em] text-[#5B8DA8]">Clean Sneaks</p>
+        <p className="text-[10px] uppercase tracking-[0.35em] text-[#5B8DA8]">{KLEAN_SNEAKS.title}</p>
         <h1 className="text-xl font-bold text-[#1a3040]">Game couldn&apos;t load</h1>
         <p className="text-sm leading-relaxed text-[#1a3040]/70">
           Try again, or head back to the ZZAI homepage. If you&apos;re on mobile, closing other tabs

@@ -1,4 +1,5 @@
 import { cleanlinessMultiplier, streakMultiplier } from "./assets";
+import { KLEAN_SNEAKS } from "./brand";
 
 export const BEST_SCORE_KEY = "zzai.clean-sneaks.bestScore";
 
@@ -43,7 +44,7 @@ export function computeFrameScore(args: {
 }
 
 export function shareText(score: number, distance: number, cleanliness: number): string {
-  return `CLEAN SNEAKS — Score ${Math.floor(score)} · ${Math.floor(distance)}m · ${Math.floor(cleanliness)}% clean. Keep 'em fresh. zzaizzai.com`;
+  return `${KLEAN_SNEAKS.display} — Score ${Math.floor(score)} · ${Math.floor(distance)}m · ${Math.floor(cleanliness)}% clean. Keep 'em klean. zzaizzai.com`;
 }
 
 export async function shareScore(payload: {
@@ -55,7 +56,7 @@ export async function shareScore(payload: {
   try {
     if (typeof navigator !== "undefined" && navigator.share) {
       await navigator.share({
-        title: "CLEAN SNEAKS",
+        title: KLEAN_SNEAKS.display,
         text,
         url: "https://zzaizzai.com/clean-sneaks",
       });

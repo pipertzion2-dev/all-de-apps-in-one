@@ -12,6 +12,7 @@ import { runBodyLayerHygiene } from "@/lib/body-layer-cleanup";
 import { usePlatform } from "@/lib/platform-context";
 import { ZzaiModeToggle } from "@/components/zzai-mode-toggle";
 import Link from "next/link";
+import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
 import Image from "next/image";
 import zzaiLogo from "@/attached_assets/ZZAI_OFFICIAL_LOGO.png";
 import seedsLogo from "@/attached_assets/Svivva_Seeds_6_1771888740460.png";
@@ -1951,7 +1952,7 @@ export default function LandingPage() {
                 id="clean-sneaks"
                 className="border-t border-white/10 py-16 text-center text-sm text-muted-foreground"
               >
-                Clean Sneaks is temporarily unavailable.{" "}
+                {KLEAN_SNEAKS.title} is temporarily unavailable.{" "}
                 <Link href="/clean-sneaks" className="text-[#5B8DA8] underline">
                   Open the game
                 </Link>
@@ -1965,7 +1966,7 @@ export default function LandingPage() {
                   id="clean-sneaks"
                   className="border-t border-white/10 py-20 text-center text-sm text-muted-foreground"
                 >
-                  Loading Clean Sneaks…
+                  Loading {KLEAN_SNEAKS.title}…
                 </section>
               }
             >
@@ -2013,7 +2014,7 @@ export default function LandingPage() {
                         href="/clean-sneaks"
                         className="hover:text-foreground transition-colors"
                       >
-                        Clean Sneaks
+                        {KLEAN_SNEAKS.title}
                       </Link>
                     </li>
                     <li>
