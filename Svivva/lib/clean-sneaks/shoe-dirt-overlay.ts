@@ -97,11 +97,7 @@ export function createShoeDirtOverlay(rearW: number, rearH: number): ShoeDirtOve
     );
     mesh.visible = false;
     mesh.frustumCulled = false;
-    mesh.position.set(
-      layout.x * rearW,
-      layout.y * rearH,
-      0.045,
-    );
+    mesh.position.set(layout.x * rearW, layout.y * rearH, 0.045);
     mesh.scale.set(layout.rx * rearW * 0.5, layout.ry * rearH * 0.5, 1);
     if (layout.rot) mesh.rotation.z = layout.rot;
     group.add(mesh);
