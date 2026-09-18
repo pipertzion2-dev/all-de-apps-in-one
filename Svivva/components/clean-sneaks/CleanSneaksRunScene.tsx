@@ -533,6 +533,8 @@ function PlayerShoes({
       shieldActive: now < s.shieldUntil,
       speed: s.speed,
       portrait,
+      leftShoe: s.left,
+      rightShoe: s.right,
     });
   });
 
