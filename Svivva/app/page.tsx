@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { runBodyLayerHygiene } from "@/lib/body-layer-cleanup";
 import { showHomepageSection } from "@/lib/homepage-layout";
+import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
 import { HomepageExplorePanel } from "@/components/homepage-explore-panel";
 import { HomepageGamePanel } from "@/components/homepage-game-panel";
 import { HomepageHeroBlock } from "@/components/homepage-hero-block";
@@ -216,6 +217,18 @@ export default function LandingPage() {
     const root = document.documentElement;
     root.classList.add("homepage-scroll-snap");
     return () => root.classList.remove("homepage-scroll-snap");
+  }, [flipComplete]);
+
+  useEffect(() => {
+    if (!flipComplete || !showHomepageSection("scrollSnap")) return;
+    const hash = window.location.hash.replace("#", "");
+    if (hash === "home-game" || hash === "clean-sneaks") {
+      scrollToHomepagePanel("home-game");
+    } else if (hash === "nav-cube") {
+      scrollToHomepagePanel("nav-cube");
+    } else if (hash === "home-explore") {
+      scrollToHomepagePanel("home-explore");
+    }
   }, [flipComplete]);
 
   useEffect(() => {

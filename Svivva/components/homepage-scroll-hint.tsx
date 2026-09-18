@@ -3,17 +3,26 @@
 type HomepageScrollHintProps = {
   label: string;
   direction?: "down" | "up";
+  onActivate?: () => void;
 };
 
-export function HomepageScrollHint({ label, direction = "down" }: HomepageScrollHintProps) {
+export function HomepageScrollHint({
+  label,
+  direction = "down",
+  onActivate,
+}: HomepageScrollHintProps) {
+  const Tag = onActivate ? "button" : "div";
+
   return (
-    <div
-      className={`pointer-events-none absolute left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-1 ${
-        direction === "down" ? "bottom-6 sm:bottom-8" : "top-20 sm:top-24"
-      }`}
-      aria-hidden
+    <Tag
+      type={onActivate ? "button" : undefined}
+      onClick={onActivate}
+      className={`absolute left-1/2 z-30 flex -translate-x-1/2 flex-col items-center gap-1 ${
+        onActivate ? "pointer-events-auto cursor-pointer" : "pointer-events-none"
+      } ${direction === "down" ? "bottom-6 sm:bottom-8" : "top-20 sm:top-24"}`}
+      aria-label={onActivate ? label : undefined}
     >
-      <span className="rounded-full bg-background/75 px-4 py-1.5 text-[11px] font-medium tracking-wide text-muted-foreground shadow-sm ring-1 ring-border/40 backdrop-blur-sm">
+      <span className="rounded-full bg-background/85 px-4 py-1.5 text-[11px] font-medium tracking-wide text-muted-foreground shadow-sm ring-1 ring-border/40 backdrop-blur-sm">
         {label}
       </span>
       <svg
@@ -25,9 +34,10 @@ export function HomepageScrollHint({ label, direction = "down" }: HomepageScroll
         strokeWidth="2"
         className={`text-muted-foreground ${direction === "up" ? "rotate-180" : ""}`}
         style={direction === "down" ? { animation: "scrollBounce 1.5s ease-in-out infinite" } : undefined}
+        aria-hidden
       >
         <path d="M10 4v12M5 11l5 5 5-5" />
       </svg>
-    </div>
+    </Tag>
   );
 }
