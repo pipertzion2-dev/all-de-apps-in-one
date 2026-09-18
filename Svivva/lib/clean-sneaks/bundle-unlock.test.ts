@@ -11,7 +11,7 @@ describe("bundle card unlock", () => {
       previousBest: 0,
     });
     expect(r.unlocked).toBe(false);
-    expect(r.reason).toMatch(/90m/i);
+    expect(r.reason).toMatch(new RegExp(`${FINISH_DISTANCE}m`, "i"));
   });
 
   it("requires beating the previous best on a qualifying score", () => {

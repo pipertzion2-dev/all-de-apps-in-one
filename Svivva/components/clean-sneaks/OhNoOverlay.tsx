@@ -1,6 +1,7 @@
 "use client";
 
 import { OH_NO_ACTIONS, type OhNoAction } from "@/lib/clean-sneaks/contact-map";
+import { OH_NO_WINDOW_MS } from "@/lib/clean-sneaks/run-engine";
 import type { OhNoWindow } from "@/lib/clean-sneaks/types";
 import type { CleanPathOption } from "@/lib/clean-sneaks/sneak-vision";
 
@@ -13,7 +14,7 @@ type OhNoProps = {
 export function OhNoOverlay({ window, onAction }: OhNoProps) {
   if (!window.active || window.resolved) return null;
   const remaining = Math.max(0, window.endsAt - performance.now());
-  const pct = Math.min(100, (remaining / 720) * 100);
+  const pct = Math.min(100, (remaining / OH_NO_WINDOW_MS) * 100);
 
   return (
     <div
