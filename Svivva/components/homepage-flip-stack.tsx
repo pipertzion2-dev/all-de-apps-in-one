@@ -115,16 +115,28 @@ export function HomepageFlipStack({
     return index;
   }, []);
 
+  const clearSnapTimer = useCallback(() => {
+    if (wheelSnapTimerRef.current) {
+      window.clearTimeout(wheelSnapTimerRef.current);
+      wheelSnapTimerRef.current = 0;
+    }
+  }, []);
+
   const goToPanel = useCallback(
     (panel: HomepageFlipPanelId) => {
       const next = flipPanelIndex(panel);
-      if (next === targetIndexRef.current && !isAnimating()) return;
+      const settled =
+        Math.abs(displayedIndexRef.current - next) <= FLIP_SETTLE_EPSILON &&
+        Math.abs(targetIndexRef.current - next) <= FLIP_SETTLE_EPSILON;
+      if (settled) return;
+
+      clearSnapTimer();
       virtualIndexRef.current = next;
       targetIndexRef.current = next;
       commitPanel(panel);
       ensureTick();
     },
-    [commitPanel, ensureTick, isAnimating],
+    [clearSnapTimer, commitPanel, ensureTick],
   );
 
   const snapToNearestPanel = useCallback(() => {
@@ -203,12 +215,15 @@ export function HomepageFlipStack({
 
     const canFlipFromFace = (face: HTMLDivElement, direction: 1 | -1) => {
       const threshold = 8;
+      if (!face) return true;
       const notScrollable = face.scrollHeight <= face.clientHeight + threshold;
       if (notScrollable) return true;
-      if (direction > 0) {
-        return face.scrollTop + face.clientHeight >= face.scrollHeight - threshold;
-      }
-      return face.scrollTop <= threshold;
+
+      const atTop = face.scrollTop <= threshold;
+      const atBottom = face.scrollTop + face.clientHeight >= face.scrollHeight - threshold;
+      // Full-viewport stack faces: swipe up at the top advances, swipe down at the bottom retreats.
+      if (direction > 0) return atTop || atBottom;
+      return atTop || atBottom;
     };
 
     const applyDelta = (deltaY: number) => {

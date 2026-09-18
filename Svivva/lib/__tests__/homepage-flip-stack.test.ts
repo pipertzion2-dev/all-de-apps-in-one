@@ -50,6 +50,15 @@ describe("homepage flip stack", () => {
     expect(flipSrc).not.toContain("rotateX(${-index * 90}deg)");
   });
 
+  it("allows stack flips from the top or bottom edge of a scrollable face", () => {
+    const flipSrc = readFileSync(
+      resolve(__dirname, "../../components/homepage-flip-stack.tsx"),
+      "utf8",
+    );
+    expect(flipSrc).toContain("const atTop = face.scrollTop <= threshold");
+    expect(flipSrc).toContain("return atTop || atBottom");
+  });
+
   it("supports touch swipes for mobile flip navigation", () => {
     const flipSrc = readFileSync(
       resolve(__dirname, "../../components/homepage-flip-stack.tsx"),

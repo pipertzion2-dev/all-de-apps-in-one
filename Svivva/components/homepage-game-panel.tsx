@@ -58,7 +58,7 @@ export function HomepageGamePanel() {
       </div>
 
       <HomepageScrollHint
-        label="Explore"
+        label="Home"
         direction="down"
         prominent
         onActivate={() => scrollToHomepagePanel("home-explore")}
