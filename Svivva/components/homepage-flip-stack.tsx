@@ -128,10 +128,7 @@ export function HomepageFlipStack({
   );
 
   const snapToNearestPanel = useCallback(() => {
-    const snapped = Math.min(
-      MAX_PANEL_INDEX,
-      Math.max(0, Math.round(virtualIndexRef.current)),
-    );
+    const snapped = Math.min(MAX_PANEL_INDEX, Math.max(0, Math.round(virtualIndexRef.current)));
     if (
       snapped === Math.round(targetIndexRef.current) &&
       Math.abs(displayedIndexRef.current - snapped) <= FLIP_SETTLE_EPSILON
@@ -223,7 +220,8 @@ export function HomepageFlipStack({
       if (face && !canFlipFromFace(face, direction)) return false;
 
       const atMin = virtualIndexRef.current <= FLIP_SETTLE_EPSILON && direction < 0;
-      const atMax = virtualIndexRef.current >= MAX_PANEL_INDEX - FLIP_SETTLE_EPSILON && direction > 0;
+      const atMax =
+        virtualIndexRef.current >= MAX_PANEL_INDEX - FLIP_SETTLE_EPSILON && direction > 0;
       if (atMin || atMax) return false;
 
       if (reducedMotion) {
