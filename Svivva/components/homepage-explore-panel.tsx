@@ -12,7 +12,10 @@ type HomepageExplorePanelProps = {
 };
 
 /** Third scroll panel — digi camo three.js backdrop plus site links / footer. */
-export function HomepageExplorePanel({ mountBackground = true, children }: HomepageExplorePanelProps) {
+export function HomepageExplorePanel({
+  mountBackground = true,
+  children,
+}: HomepageExplorePanelProps) {
   return (
     <section
       id="home-explore"
@@ -27,7 +30,12 @@ export function HomepageExplorePanel({ mountBackground = true, children }: Homep
 
       <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
         {mountBackground ? (
-          <CamoThreeOverlay preset="features" eagerMount keepMounted className="h-full w-full opacity-70" />
+          <CamoThreeOverlay
+            preset="features"
+            eagerMount
+            keepMounted
+            className="h-full w-full opacity-70"
+          />
         ) : null}
         <div
           className="absolute inset-0"

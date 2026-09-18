@@ -341,7 +341,10 @@ export function PlatformFeatureHub({
 
         {!isCompact &&
           (hideChannelStrips ? (
-            <Collapsible defaultOpen={false} className="group rounded-xl border border-border/60 bg-card/20">
+            <Collapsible
+              defaultOpen={false}
+              className="group rounded-xl border border-border/60 bg-card/20"
+            >
               <CollapsibleTrigger asChild>
                 <button
                   type="button"

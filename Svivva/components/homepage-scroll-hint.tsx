@@ -33,7 +33,9 @@ export function HomepageScrollHint({
         stroke="currentColor"
         strokeWidth="2"
         className={`text-muted-foreground ${direction === "up" ? "rotate-180" : ""}`}
-        style={direction === "down" ? { animation: "scrollBounce 1.5s ease-in-out infinite" } : undefined}
+        style={
+          direction === "down" ? { animation: "scrollBounce 1.5s ease-in-out infinite" } : undefined
+        }
         aria-hidden
       >
         <path d="M10 4v12M5 11l5 5 5-5" />

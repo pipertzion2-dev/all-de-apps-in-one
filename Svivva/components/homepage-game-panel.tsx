@@ -1,13 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
-import { bundleUnlockHint, isBundleCardUnlocked } from "@/lib/clean-sneaks/bundle-unlock";
-import { readBestScore } from "@/lib/clean-sneaks/storage";
 import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
 import { HomepageScrollHint } from "@/components/homepage-scroll-hint";
 
@@ -16,32 +10,25 @@ const CleanSneaksLogoCube = dynamic(
   { ssr: false },
 );
 
-/** Scroll-friendly game panel — no fixed fullscreen overlays that trap page scroll. */
+/** Second scroll panel — Steal the old man&apos;s bundle cube; tap to open loading → game. */
 export function HomepageGamePanel() {
-  const router = useRouter();
-  const [best, setBest] = useState(0);
-  const [bundleUnlocked, setBundleUnlocked] = useState(false);
-
-  useEffect(() => {
-    setBest(readBestScore());
-    setBundleUnlocked(isBundleCardUnlocked());
-  }, []);
+  const enterGame = () => {
+    sessionStorage.setItem("svivva:home-game-enter", "1");
+    scrollToHomepagePanel("home-game-loading");
+  };
 
   return (
     <section
       id="home-game"
       data-homepage-scroll-panel=""
-      className="homepage-scroll-panel relative flex min-h-[100svh] flex-col overflow-hidden bg-[#0a0c10]"
+      className="homepage-scroll-panel relative flex min-h-[100svh] flex-col overflow-hidden bg-black"
     >
       <div
-        className="pointer-events-none absolute inset-0"
+        className="pointer-events-none absolute inset-0 opacity-35 mix-blend-soft-light"
         aria-hidden
         style={{
-          background: `
-            radial-gradient(ellipse 70% 55% at 28% 40%, rgba(74,47,92,0.42), transparent 58%),
-            radial-gradient(ellipse 55% 45% at 78% 65%, rgba(168,186,72,0.10), transparent 52%),
-            linear-gradient(180deg, #0a0c10, #06080c)
-          `,
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E\")",
         }}
       />
 
@@ -51,63 +38,37 @@ export function HomepageGamePanel() {
         onActivate={() => scrollToHomepagePanel("nav-cube")}
       />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-lg flex-1 flex-col justify-center gap-6 px-4 pb-20 pt-24 sm:px-6 sm:pt-28">
-        <div className="text-center">
-          <p className="text-[10px] uppercase tracking-[0.35em] text-[#A8BA48]/90">ZZAI Play</p>
-          <h2 className="seeds-holo-text mt-2 text-3xl font-bold sm:text-4xl">{KLEAN_SNEAKS.display}</h2>
-          <p className="mt-3 text-sm text-white/65">Steal the old man&apos;s bundle — keep the Baloon8 clean.</p>
-        </div>
+      <div className="relative z-10 flex min-h-0 flex-1 flex-col items-center justify-center px-4 pb-24 pt-24 sm:px-6 sm:pt-28">
+        <p className="mb-2 text-[10px] uppercase tracking-[0.4em] text-[#A8BA48]/90">ZZAI Play</p>
+        <h2 className="seeds-holo-text text-center text-2xl font-bold tracking-[0.06em] sm:text-3xl">
+          {KLEAN_SNEAKS.display}
+        </h2>
+        <p
+          className="mt-3 max-w-md text-center text-sm font-semibold text-[#E8D9A8] sm:text-base"
+          data-testid="text-clean-sneaks-goal"
+        >
+          Goal: Steal the old man&apos;s bundle
+        </p>
+        <p className="mt-1 text-[11px] uppercase tracking-[0.28em] text-white/45">
+          stiehl den alten Manns Bündel
+        </p>
 
         <div
-          className="relative flex min-h-[220px] items-center justify-center overflow-hidden rounded-2xl border border-white/10 sm:min-h-[260px]"
-          style={{
-            background: `
-              radial-gradient(ellipse 60% 55% at 50% 48%, rgba(58,32,72,0.55), rgba(8,6,12,0.92) 70%),
-              linear-gradient(160deg, #1a1022 0%, #0a080e 100%)
-            `,
-          }}
-          data-testid="homepage-game-panel-hero"
+          className="relative mt-8 flex h-[min(52vh,420px)] w-full max-w-xl items-center justify-center"
+          data-testid="homepage-bundle-cube"
         >
-          <CleanSneaksLogoCube
-            className="relative z-[1] h-[200px] w-full sm:h-[240px]"
-            onActivate={() => router.push("/clean-sneaks")}
-          />
-          <span className="pointer-events-none absolute bottom-3 left-0 right-0 text-center text-[10px] uppercase tracking-[0.35em] text-white/45">
-            Drag to spin · Tap to play
-          </span>
+          <CleanSneaksLogoCube className="h-full w-full" onActivate={enterGame} />
         </div>
 
-        <div className="flex flex-col items-center gap-3">
-          <Button
-            size="lg"
-            className="min-w-[220px] bg-[#5B8DA8] text-white shadow-[0_0_28px_rgba(91,141,168,0.35)]"
-            asChild
-            data-testid="button-homepage-play-game"
-          >
-            <Link href="/clean-sneaks">{KLEAN_SNEAKS.playLabel}</Link>
-          </Button>
-          {bundleUnlocked ? (
-            <Button
-              size="lg"
-              variant="outline"
-              className="min-w-[220px] border-[#D94F9C]/50 text-[#E8D9A8]"
-              asChild
-            >
-              <Link href="/clean-sneaks?mode=bundle">Steal the Old Man&apos;s Bundle</Link>
-            </Button>
-          ) : (
-            <p className="max-w-sm text-center text-xs text-white/50">{bundleUnlockHint(best)}</p>
-          )}
-          {best > 0 && (
-            <p className="text-xs text-[#7EC8D9]/90">Best score: {best.toLocaleString()}</p>
-          )}
-        </div>
+        <p className="mt-6 text-center text-[11px] uppercase tracking-[0.32em] text-white/50">
+          Drag to spin · Tap cube to play
+        </p>
       </div>
 
       <HomepageScrollHint
-        label="Scroll · explore"
+        label="Tap cube · or scroll"
         direction="down"
-        onActivate={() => scrollToHomepagePanel("home-explore")}
+        onActivate={() => scrollToHomepagePanel("home-game-loading")}
       />
     </section>
   );
