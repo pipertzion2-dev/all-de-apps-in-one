@@ -1,7 +1,4 @@
-import {
-  dispatchHomepageFlip,
-  type HomepageFlipPanelId,
-} from "./homepage-flip-stack";
+import { dispatchHomepageFlip, type HomepageFlipPanelId } from "./homepage-flip-stack";
 
 export type HomepageScrollPanelId = HomepageFlipPanelId;
 

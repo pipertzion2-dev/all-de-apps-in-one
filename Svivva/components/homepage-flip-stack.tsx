@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import {
   flipPanelFromIndex,
   flipPanelIndex,
@@ -72,13 +65,16 @@ export function HomepageFlipStack({
     paintRotor(displayedIndexRef.current);
   }, [paintRotor]);
 
-  const goToPanel = useCallback((panel: HomepageFlipPanelId) => {
-    const next = flipPanelIndex(panel);
-    if (next === targetIndexRef.current && !isAnimating()) return;
-    targetIndexRef.current = next;
-    setActivePanel(panel);
-    window.history.replaceState(null, "", `/#${hashForFlipPanel(panel)}`);
-  }, [isAnimating]);
+  const goToPanel = useCallback(
+    (panel: HomepageFlipPanelId) => {
+      const next = flipPanelIndex(panel);
+      if (next === targetIndexRef.current && !isAnimating()) return;
+      targetIndexRef.current = next;
+      setActivePanel(panel);
+      window.history.replaceState(null, "", `/#${hashForFlipPanel(panel)}`);
+    },
+    [isAnimating],
+  );
 
   useLayoutEffect(() => {
     syncDepth();

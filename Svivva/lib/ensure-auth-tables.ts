@@ -41,6 +41,7 @@ export async function ensureAuthTables(): Promise<void> {
 export function isMissingAuthTableError(error: unknown): boolean {
   const msg = error instanceof Error ? error.message : String(error);
   return (
-    /relation .*users.* does not exist/i.test(msg) || /relation .*sessions.* does not exist/i.test(msg)
+    /relation .*users.* does not exist/i.test(msg) ||
+    /relation .*sessions.* does not exist/i.test(msg)
   );
 }

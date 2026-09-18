@@ -1,11 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "fs";
 import { resolve } from "path";
-import {
-  flipPanelFromHash,
-  flipPanelIndex,
-  hashForFlipPanel,
-} from "../homepage-flip-stack";
+import { flipPanelFromHash, flipPanelIndex, hashForFlipPanel } from "../homepage-flip-stack";
 
 describe("homepage flip stack", () => {
   it("maps legacy hash ids to flip panels", () => {
