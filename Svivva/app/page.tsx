@@ -10,10 +10,12 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { runBodyLayerHygiene } from "@/lib/body-layer-cleanup";
 import { showHomepageSection } from "@/lib/homepage-layout";
-import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
+import { journeyFaceFromHash, scrollToHomepagePanel } from "@/lib/homepage-scroll";
+import { HomepageCubeJourney } from "@/components/homepage-cube-journey";
 import { HomepageExplorePanel } from "@/components/homepage-explore-panel";
 import { HomepageGamePanel } from "@/components/homepage-game-panel";
 import { HomepageHeroBlock } from "@/components/homepage-hero-block";
+import type { HomepageJourneyFace } from "@/lib/homepage-cube-journey";
 import { usePlatform } from "@/lib/platform-context";
 import { ZzaiModeToggle } from "@/components/zzai-mode-toggle";
 import Link from "next/link";
@@ -186,6 +188,7 @@ export default function LandingPage() {
     apiCalls: number;
   } | null>(null);
   const [canMountHeavy3d, setCanMountHeavy3d] = useState(false);
+  const [journeyInitialFace, setJourneyInitialFace] = useState<HomepageJourneyFace>("begin");
   const skipIntroRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
@@ -213,20 +216,35 @@ export default function LandingPage() {
   }, [flipComplete]);
 
   useEffect(() => {
-    if (!flipComplete || !showHomepageSection("scrollSnap")) return;
+    if (!flipComplete || !showHomepageSection("scrollSnap") || showHomepageSection("cubeJourney")) {
+      return;
+    }
     const root = document.documentElement;
     root.classList.add("homepage-scroll-snap");
     return () => root.classList.remove("homepage-scroll-snap");
   }, [flipComplete]);
 
   useEffect(() => {
-    if (!flipComplete || !showHomepageSection("scrollSnap")) return;
+    if (!flipComplete) return;
+    if (!showHomepageSection("scrollSnap") && !showHomepageSection("cubeJourney")) return;
 
     const previousScrollRestoration = history.scrollRestoration;
     history.scrollRestoration = "manual";
 
     const hash = window.location.hash.replace("#", "");
-    if (hash === "home-game" || hash === "clean-sneaks") {
+    const journeyFace = journeyFaceFromHash(hash);
+
+    if (showHomepageSection("cubeJourney")) {
+      if (journeyFace) {
+        setJourneyInitialFace(journeyFace);
+        window.dispatchEvent(
+          new CustomEvent("svivva:homepage-journey", { detail: { face: journeyFace } }),
+        );
+      } else {
+        setJourneyInitialFace("begin");
+      }
+      window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+    } else if (hash === "home-game" || hash === "clean-sneaks") {
       scrollToHomepagePanel("home-game");
     } else if (hash === "nav-cube") {
       scrollToHomepagePanel("nav-cube");
@@ -757,7 +775,13 @@ export default function LandingPage() {
             </div>
           </nav>
 
-          {showHomepageSection("scrollSnap") ? (
+          {showHomepageSection("cubeJourney") ? (
+            <HomepageCubeJourney
+              mountCanvas={canMountHeavy3d}
+              interactive={flipComplete}
+              initialFace={journeyInitialFace}
+            />
+          ) : showHomepageSection("scrollSnap") ? (
             <>
               <ClientErrorBoundary
                 fallback={
@@ -2070,7 +2094,7 @@ export default function LandingPage() {
             </ClientErrorBoundary>
           )}
 
-          {showHomepageSection("scrollSnap") ? (
+          {showHomepageSection("scrollSnap") && !showHomepageSection("cubeJourney") ? (
             <HomepageExplorePanel mountBackground={canMountHeavy3d}>
               <footer className="border-t border-white/10 py-8 sm:py-12 bg-background/80 backdrop-blur-sm rounded-2xl">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6">

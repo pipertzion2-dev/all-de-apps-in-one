@@ -9,7 +9,8 @@ describe("homepage-layout", () => {
     expect(HOMEPAGE_SECTIONS.cleanSneaks).toBe(false);
   });
 
-  it("uses scroll snap panels for cube, game, and explore", () => {
+  it("uses scroll snap panels and the three-face cube journey", () => {
     expect(showHomepageSection("scrollSnap")).toBe(true);
+    expect(showHomepageSection("cubeJourney")).toBe(true);
   });
 });
