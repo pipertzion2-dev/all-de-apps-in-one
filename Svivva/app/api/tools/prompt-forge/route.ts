@@ -109,7 +109,9 @@ export async function POST(req: NextRequest) {
       finishReason: choice.finish_reason,
     });
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : "OpenAI request failed";
-    return NextResponse.json({ error: msg }, { status: 500 });
+    // Cloud provider may be rate-limited / out of quota (e.g. EasyPeasy word plan).
+    // Fall back to local forge so the public tool never dead-ends with a red error.
+    console.warn("[prompt-forge] cloud AI failed, using local forge:", err);
+    return NextResponse.json(runLocalPromptForge({ systemPrompt, userMessage, model }));
   }
 }
