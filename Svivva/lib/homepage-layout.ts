@@ -1,7 +1,7 @@
 /** Which below-the-fold homepage sections render. Cube + nav + footer always show. */
 export const HOMEPAGE_SECTIONS = {
-  /** Full-viewport scroll snap: cube → bundle cube → loading → explore. */
-  scrollSnap: true,
+  /** Full-viewport scroll snap panels (off — intro flip uses loading → cube → start instead). */
+  scrollSnap: false,
   oaasIntro: false,
   eventTracker: false,
   oaasHub: false,
