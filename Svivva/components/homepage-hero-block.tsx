@@ -15,6 +15,8 @@ type HomepageHeroBlockProps = {
   interactive?: boolean;
   /** Defer WebGL cube until intro completes. */
   mountCanvas?: boolean;
+  /** Show stack navigation hint (disabled when parent wraps cube + pricing). */
+  showFlipHint?: boolean;
   className?: string;
 };
 
@@ -22,6 +24,7 @@ type HomepageHeroBlockProps = {
 export function HomepageHeroBlock({
   interactive = true,
   mountCanvas = true,
+  showFlipHint = true,
   className = "",
 }: HomepageHeroBlockProps) {
   return (
@@ -38,11 +41,11 @@ export function HomepageHeroBlock({
       <div className="relative z-10">
         <SvivvaArtifact mountCanvas={mountCanvas} />
       </div>
-      {interactive ? (
+      {interactive && showFlipHint ? (
         <HomepageScrollHint
-          label="Flip down · explore"
-          direction="down"
-          onActivate={() => scrollToHomepagePanel("home-explore")}
+          label="Flip up · game"
+          direction="up"
+          onActivate={() => scrollToHomepagePanel("home-game")}
         />
       ) : null}
       <div
