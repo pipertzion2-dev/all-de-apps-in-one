@@ -4,7 +4,10 @@ import { resolve } from "path";
 
 describe("homepage scroll panels", () => {
   it("bundle cube panel hands off to a separate loading panel", () => {
-    const cubeSrc = readFileSync(resolve(__dirname, "../../components/homepage-game-panel.tsx"), "utf8");
+    const cubeSrc = readFileSync(
+      resolve(__dirname, "../../components/homepage-game-panel.tsx"),
+      "utf8",
+    );
     const loadingSrc = readFileSync(
       resolve(__dirname, "../../components/homepage-game-loading-panel.tsx"),
       "utf8",
@@ -16,7 +19,10 @@ describe("homepage scroll panels", () => {
   });
 
   it("scroll hints can navigate between panels", () => {
-    const hintSrc = readFileSync(resolve(__dirname, "../../components/homepage-scroll-hint.tsx"), "utf8");
+    const hintSrc = readFileSync(
+      resolve(__dirname, "../../components/homepage-scroll-hint.tsx"),
+      "utf8",
+    );
     expect(hintSrc).toContain("onActivate");
   });
 });
