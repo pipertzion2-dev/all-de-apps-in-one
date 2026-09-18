@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getStaticSitemapFallback } from "./registry";
+import { blogPostsToSitemapEntries, getStaticSitemapFallback } from "./registry";
 import { NATIVE_SVIVVA_TOOLS } from "@/lib/orbit/mini-app-curation";
 import { FEATURE_MINI_APPS } from "@/lib/tools/feature-mini-apps";
 import { HUB_FEATURE_PATHS } from "@/lib/tools/catalogs/hub-feature-pages";
@@ -28,5 +28,23 @@ describe("sitemap native mini-apps", () => {
     );
     const hub = entries.find((e) => e.url.endsWith("/cyber-security-mini-apps"));
     expect(password?.priority ?? 0).toBeGreaterThan(hub?.priority ?? 0);
+  });
+});
+
+describe("sitemap blog posts", () => {
+  it("includes published blog posts regardless of landing-page quality thresholds", () => {
+    const entries = blogPostsToSitemapEntries(
+      [
+        {
+          slug: "short-post",
+          title: "Short post",
+          publishedAt: new Date("2026-01-01"),
+        },
+      ],
+      "https://zzaizzai.com",
+    );
+    expect(entries).toHaveLength(1);
+    expect(entries[0]?.url).toBe("https://zzaizzai.com/blog/short-post");
+    expect(entries[0]?.chunk).toBe("blog");
   });
 });
