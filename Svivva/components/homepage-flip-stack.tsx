@@ -32,7 +32,7 @@ export function HomepageFlipStack({
   begin,
   game,
   home,
-  initialPanel = "nav-cube",
+  initialPanel = "home-game",
   interactive = true,
 }: HomepageFlipStackProps) {
   const shellRef = useRef<HTMLDivElement>(null);
@@ -46,9 +46,9 @@ export function HomepageFlipStack({
   const [activePanel, setActivePanel] = useState<HomepageFlipPanelId>(initialPanel);
 
   const panels = [
-    { id: "nav-cube" as const, node: begin },
     { id: "home-game" as const, node: game },
     { id: "home-explore" as const, node: home },
+    { id: "nav-cube" as const, node: begin },
   ];
 
   const paintRotor = useCallback((index: number) => {

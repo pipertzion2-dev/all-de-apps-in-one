@@ -9,6 +9,7 @@ import {
 
 describe("homepage flip stack", () => {
   it("maps legacy hash ids to flip panels", () => {
+    expect(flipPanelFromHash("")).toBe("home-game");
     expect(flipPanelFromHash("nav-cube")).toBe("nav-cube");
     expect(flipPanelFromHash("home-game")).toBe("home-game");
     expect(flipPanelFromHash("clean-sneaks")).toBe("home-game");
@@ -21,10 +22,10 @@ describe("homepage flip stack", () => {
     expect(hashForFlipPanel("home-explore")).toBe("home-explore");
   });
 
-  it("orders begin, game, home", () => {
-    expect(flipPanelIndex("nav-cube")).toBe(0);
-    expect(flipPanelIndex("home-game")).toBe(1);
-    expect(flipPanelIndex("home-explore")).toBe(2);
+  it("orders game, home, then nav cube after intro", () => {
+    expect(flipPanelIndex("home-game")).toBe(0);
+    expect(flipPanelIndex("home-explore")).toBe(1);
+    expect(flipPanelIndex("nav-cube")).toBe(2);
   });
 
   it("locks wheel navigation to the settled panel index", () => {

@@ -49,8 +49,7 @@ export function HomepageExplorePanel({
           </p>
           <h2 className="text-2xl font-bold sm:text-3xl">From seed to symphony</h2>
           <p className="text-sm text-muted-foreground sm:text-base">
-            Flip the page cube back to Begin for product navigation, or jump directly into the
-            stack.
+            Flip down for the product cube, or jump directly into the stack.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
             <Button
@@ -59,7 +58,7 @@ export function HomepageExplorePanel({
               className="border-[#5B8DA8]/40"
               onClick={() => scrollToHomepagePanel("nav-cube")}
             >
-              Back to begin
+              Product cube
             </Button>
             <Link href="/seeds">
               <Button size="sm" variant="outline" className="border-[#5B8DA8]/40">
@@ -86,6 +85,12 @@ export function HomepageExplorePanel({
 
         {children ? <div className="mt-10 w-full">{children}</div> : null}
       </div>
+
+      <HomepageScrollHint
+        label="Flip · cube"
+        direction="down"
+        onActivate={() => scrollToHomepagePanel("nav-cube")}
+      />
     </section>
   );
 }

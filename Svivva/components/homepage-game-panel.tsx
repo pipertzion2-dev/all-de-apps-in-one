@@ -11,7 +11,7 @@ const CleanSneaksLogoCube = dynamic(
   { ssr: false },
 );
 
-/** Game face — Steal the old man&apos;s bundle cube; tap to open the full game. */
+/** Game face — first panel after the intro flip. */
 export function HomepageGamePanel() {
   const router = useRouter();
 
@@ -28,12 +28,6 @@ export function HomepageGamePanel() {
           backgroundImage:
             "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E\")",
         }}
-      />
-
-      <HomepageScrollHint
-        label="Flip up · cube"
-        direction="up"
-        onActivate={() => scrollToHomepagePanel("nav-cube")}
       />
 
       <div className="relative z-10 flex min-h-0 flex-1 flex-col items-center justify-center px-4 pb-24 pt-24 sm:px-6 sm:pt-28">
