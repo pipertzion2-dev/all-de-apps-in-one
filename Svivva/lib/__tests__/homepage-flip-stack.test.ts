@@ -24,14 +24,20 @@ describe("homepage flip stack", () => {
     expect(flipPanelIndex("nav-cube")).toBe(2);
   });
 
-  it("locks wheel navigation to the settled panel index", () => {
+  it("scrubs continuously and snaps without an always-on RAF loop", () => {
     const flipSrc = readFileSync(
       resolve(__dirname, "../../components/homepage-flip-stack.tsx"),
       "utf8",
     );
-    expect(flipSrc).toContain("targetIndexRef.current");
-    expect(flipSrc).toContain("FLIP_SETTLE_EPSILON");
+    expect(flipSrc).toContain("virtualIndexRef");
+    expect(flipSrc).toContain("ensureTick");
+    expect(flipSrc).toContain("scheduleSnap");
+    expect(flipSrc).toContain("snapToNearestPanel");
     expect(flipSrc).not.toContain("Math.round(displayedIndexRef.current)");
+    expect(flipSrc).toMatch(/const tick = \(now: number\) => \{[\s\S]*animRef\.current = 0/);
+    expect(flipSrc).not.toMatch(
+      /const tick = \(now: number\) => \{[\s\S]*?animRef\.current = requestAnimationFrame\(tick\);[\s\S]*?const dt/,
+    );
   });
 
   it("rotates forward like the intro reveal (positive rotor, negative face hinge)", () => {
@@ -50,6 +56,7 @@ describe("homepage flip stack", () => {
       "utf8",
     );
     expect(flipSrc).toContain('addEventListener("touchstart"');
+    expect(flipSrc).toContain('addEventListener("touchmove"');
     expect(flipSrc).toContain('addEventListener("touchend"');
     expect(flipSrc).toContain("SWIPE_THRESHOLD_PX");
   });

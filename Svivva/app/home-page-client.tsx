@@ -224,11 +224,8 @@ export default function LandingPage() {
     const hash = window.location.hash.replace("#", "");
     const flipPanel = flipPanelFromHash(hash);
 
-    if (flipPanel) {
-      setFlipInitialPanel(flipPanel);
-    } else {
-      setFlipInitialPanel("home-game");
-    }
+    const nextPanel = flipPanel ?? "home-game";
+    setFlipInitialPanel((current) => (current === nextPanel ? current : nextPanel));
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
 
     return () => {
