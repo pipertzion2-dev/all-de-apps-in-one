@@ -41,4 +41,16 @@ describe("clean path footprints", () => {
     expect(pool.group.children.length).toBe(n);
     disposeCleanPathFootprintPool(pool);
   });
+
+  it("survives a long-run path window without allocating new children (~2min @60fps)", () => {
+    const pool = createCleanPathFootprintPool();
+    const n = pool.group.children.length;
+    const until = 120_000;
+    for (let i = 0; i < 7200; i++) {
+      syncCleanPathFootprints(pool, samplePaths, i * 16, until);
+    }
+    expect(pool.group.children.length).toBe(n);
+    expect(pool.meshes.filter((m) => m.visible).length).toBe(10);
+    disposeCleanPathFootprintPool(pool);
+  });
 });
