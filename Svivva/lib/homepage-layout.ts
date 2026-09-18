@@ -1,7 +1,9 @@
 /** Which below-the-fold homepage sections render. Cube + nav + footer always show. */
 export const HOMEPAGE_SECTIONS = {
-  /** Full-viewport scroll snap: cube → bundle cube → loading → explore. */
+/** Full-viewport scroll snap: cube → bundle cube → explore. Legacy fallback when cubeJourney is off. */
   scrollSnap: true,
+  /** Three-face journey cube: begin → game → home (replaces scroll snap panels). */
+  cubeJourney: true,
   oaasIntro: false,
   eventTracker: false,
   oaasHub: false,
