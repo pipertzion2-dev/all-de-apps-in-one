@@ -33,4 +33,14 @@ describe("homepage flip stack", () => {
     expect(flipSrc).toContain("FLIP_SETTLE_EPSILON");
     expect(flipSrc).not.toContain("Math.round(displayedIndexRef.current)");
   });
+
+  it("supports touch swipes for mobile flip navigation", () => {
+    const flipSrc = readFileSync(
+      resolve(__dirname, "../../components/homepage-flip-stack.tsx"),
+      "utf8",
+    );
+    expect(flipSrc).toContain('addEventListener("touchstart"');
+    expect(flipSrc).toContain('addEventListener("touchend"');
+    expect(flipSrc).toContain("SWIPE_THRESHOLD_PX");
+  });
 });

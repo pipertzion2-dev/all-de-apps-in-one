@@ -4,12 +4,14 @@ type HomepageScrollHintProps = {
   label: string;
   direction?: "down" | "up";
   onActivate?: () => void;
+  prominent?: boolean;
 };
 
 export function HomepageScrollHint({
   label,
   direction = "down",
   onActivate,
+  prominent = false,
 }: HomepageScrollHintProps) {
   const Tag = onActivate ? "button" : "div";
 
@@ -17,12 +19,18 @@ export function HomepageScrollHint({
     <Tag
       type={onActivate ? "button" : undefined}
       onClick={onActivate}
-      className={`absolute left-1/2 z-30 flex -translate-x-1/2 flex-col items-center gap-1 ${
-        onActivate ? "pointer-events-auto cursor-pointer" : "pointer-events-none"
-      } ${direction === "down" ? "bottom-6 sm:bottom-8" : "top-20 sm:top-24"}`}
+      className={`absolute left-1/2 z-30 flex -translate-x-1/2 flex-col items-center gap-1.5 ${
+        onActivate ? "pointer-events-auto cursor-pointer active:scale-95" : "pointer-events-none"
+      } ${direction === "down" ? "bottom-5 sm:bottom-8" : "top-20 sm:top-24"}`}
       aria-label={onActivate ? label : undefined}
     >
-      <span className="rounded-full bg-background/85 px-4 py-1.5 text-[11px] font-medium tracking-wide text-muted-foreground shadow-sm ring-1 ring-border/40 backdrop-blur-sm">
+      <span
+        className={`rounded-full shadow-md ring-1 backdrop-blur-sm ${
+          prominent
+            ? "bg-[#5B8DA8] px-6 py-2.5 text-sm font-semibold tracking-wide text-white ring-[#5B8DA8]/50"
+            : "bg-background/85 px-4 py-1.5 text-[11px] font-medium tracking-wide text-muted-foreground ring-border/40"
+        }`}
+      >
         {label}
       </span>
       <svg

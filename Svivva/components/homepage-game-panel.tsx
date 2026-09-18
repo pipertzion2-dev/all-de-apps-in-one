@@ -53,13 +53,14 @@ export function HomepageGamePanel() {
         </div>
 
         <p className="mt-6 text-center text-[11px] uppercase tracking-[0.32em] text-white/50">
-          Drag to spin · Tap cube to play
+          Swipe up for home · Drag cube to spin
         </p>
       </div>
 
       <HomepageScrollHint
-        label="Flip · home"
+        label="Home"
         direction="down"
+        prominent
         onActivate={() => scrollToHomepagePanel("home-explore")}
       />
     </section>

@@ -18,7 +18,8 @@ type HomepageFlipStackProps = {
 };
 
 const FLIP_SETTLE_EPSILON = 0.02;
-const WHEEL_DEBOUNCE_MS = 420;
+const WHEEL_DEBOUNCE_MS = 220;
+const SWIPE_THRESHOLD_PX = 36;
 
 /** Three full-viewport faces — same Dune-style rotateX cube as the intro reveal. */
 export function HomepageFlipStack({
@@ -141,6 +142,8 @@ export function HomepageFlipStack({
 
     const canFlipFromFace = (face: HTMLDivElement, direction: 1 | -1) => {
       const threshold = 8;
+      const notScrollable = face.scrollHeight <= face.clientHeight + threshold;
+      if (notScrollable) return true;
       if (direction > 0) {
         return face.scrollTop + face.clientHeight >= face.scrollHeight - threshold;
       }
@@ -173,8 +176,50 @@ export function HomepageFlipStack({
       nudge(direction);
     };
 
+    let touchStartY = 0;
+    let touchStartScrollTop = 0;
+    let touchMoved = false;
+
+    const onTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0]?.clientY ?? 0;
+      touchMoved = false;
+      const face = faceRefs.current[targetIndexRef.current];
+      touchStartScrollTop = face?.scrollTop ?? 0;
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      const y = e.touches[0]?.clientY ?? touchStartY;
+      if (Math.abs(touchStartY - y) > 6) touchMoved = true;
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      if (!touchMoved) return;
+      const endY = e.changedTouches[0]?.clientY ?? touchStartY;
+      const delta = touchStartY - endY;
+      if (Math.abs(delta) < SWIPE_THRESHOLD_PX) return;
+
+      const direction: 1 | -1 = delta > 0 ? 1 : -1;
+      const current = targetIndexRef.current;
+      const face = faceRefs.current[current];
+      if (face && face.scrollTop !== touchStartScrollTop) {
+        if (!canFlipFromFace(face, direction)) return;
+      } else if (face && !canFlipFromFace(face, direction)) {
+        return;
+      }
+
+      nudge(direction);
+    };
+
     window.addEventListener("wheel", onWheel, { passive: false });
-    return () => window.removeEventListener("wheel", onWheel);
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: true });
+    window.addEventListener("touchend", onTouchEnd, { passive: true });
+    return () => {
+      window.removeEventListener("wheel", onWheel);
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onTouchEnd);
+    };
   }, [interactive, goToPanel, isAnimating, panels.length]);
 
   return (
