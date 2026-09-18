@@ -9,19 +9,17 @@ describe("homepage flip stack", () => {
     expect(flipPanelFromHash("nav-cube")).toBe("nav-cube");
     expect(flipPanelFromHash("home-game")).toBe("home-game");
     expect(flipPanelFromHash("clean-sneaks")).toBe("home-game");
-    expect(flipPanelFromHash("home-explore")).toBe("home-explore");
+    expect(flipPanelFromHash("home-explore")).toBe("nav-cube");
   });
 
   it("round-trips hash helpers", () => {
     expect(hashForFlipPanel("nav-cube")).toBe("nav-cube");
     expect(hashForFlipPanel("home-game")).toBe("home-game");
-    expect(hashForFlipPanel("home-explore")).toBe("home-explore");
   });
 
-  it("orders game, home, then nav cube after intro", () => {
+  it("orders game then nav cube after intro", () => {
     expect(flipPanelIndex("home-game")).toBe(0);
-    expect(flipPanelIndex("home-explore")).toBe(1);
-    expect(flipPanelIndex("nav-cube")).toBe(2);
+    expect(flipPanelIndex("nav-cube")).toBe(1);
   });
 
   it("scrubs continuously and snaps without an always-on RAF loop", () => {
@@ -48,6 +46,7 @@ describe("homepage flip stack", () => {
     expect(flipSrc).toContain("rotateX(${index * 90}deg)");
     expect(flipSrc).toContain("rotateX(${-i * 90}deg)");
     expect(flipSrc).not.toContain("rotateX(${-index * 90}deg)");
+    expect(flipSrc).not.toContain("home-explore");
   });
 
   it("supports touch swipes for mobile flip navigation", () => {
