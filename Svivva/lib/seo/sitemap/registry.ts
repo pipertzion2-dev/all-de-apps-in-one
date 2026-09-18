@@ -104,33 +104,49 @@ export function getStaticSitemapFallback(): SitemapEntry[] {
   return [...staticPagesEntries(), ...nativeToolEntries(), ...hubFeatureEntries(), ...lpEntries()];
 }
 
+type BlogPostSitemapRow = {
+  slug: string | null;
+  title: string | null;
+  updatedAt?: Date | null;
+  publishedAt?: Date | null;
+  createdAt?: Date | null;
+};
+
+/** Published blog posts always ship in the sitemap (quality gate applies to programmatic SEO pages). */
+export function blogPostsToSitemapEntries(
+  posts: BlogPostSitemapRow[],
+  siteBase: string,
+): SitemapEntry[] {
+  const b = siteBase.replace(/\/$/, "");
+  const seenTitles = new Set<string>();
+  const entries: SitemapEntry[] = [];
+
+  for (const post of posts) {
+    if (!post.slug?.trim()) continue;
+
+    const titleKey = (post.title || "").trim().toLowerCase();
+    if (titleKey && seenTitles.has(titleKey)) continue;
+    if (titleKey) seenTitles.add(titleKey);
+
+    entries.push({
+      url: `${b}/blog/${post.slug}`,
+      lastModified: post.updatedAt || post.publishedAt || post.createdAt || new Date(),
+      changeFrequency: "weekly",
+      priority: 0.85,
+      chunk: "blog",
+    });
+  }
+
+  return entries;
+}
+
 export async function getSitemapEntries(): Promise<SitemapEntry[]> {
   const b = base();
   const entries: SitemapEntry[] = getStaticSitemapFallback();
 
   try {
     const posts = await db.select().from(blogPosts).where(eq(blogPosts.published, true));
-    const seenTitles = new Set<string>();
-    for (const post of posts) {
-      const titleKey = (post.title || "").trim().toLowerCase();
-      if (titleKey && seenTitles.has(titleKey)) continue;
-      if (titleKey) seenTitles.add(titleKey);
-
-      const quality = scorePageContent({
-        title: post.title,
-        content: post.content || "",
-        hasFaq: /\[FAQ_JSON\]/i.test(post.content || ""),
-      });
-      if (!quality.passed) continue;
-
-      entries.push({
-        url: `${b}/blog/${post.slug}`,
-        lastModified: post.updatedAt || post.publishedAt || post.createdAt || new Date(),
-        changeFrequency: "weekly",
-        priority: 0.8,
-        chunk: "blog",
-      });
-    }
+    entries.push(...blogPostsToSitemapEntries(posts, b));
   } catch {
     /* db */
   }

@@ -70,6 +70,16 @@ export function HomepageExplorePanel({
                 Play
               </Button>
             </Link>
+            <Link href="/blog">
+              <Button size="sm" variant="outline" className="border-[#5B8DA8]/40">
+                Blog
+              </Button>
+            </Link>
+            <Link href="/tools">
+              <Button size="sm" variant="outline" className="border-[#5B8DA8]/40">
+                Free tools
+              </Button>
+            </Link>
             <Link href="/dashboard">
               <Button size="sm" className="bg-[#5B8DA8]">
                 Dashboard
