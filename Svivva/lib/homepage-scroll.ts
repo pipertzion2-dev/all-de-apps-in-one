@@ -1,25 +1,17 @@
-import type { HomepageJourneyFace } from "./homepage-cube-journey";
-import { hashForJourneyFace, journeyFaceFromHash } from "./homepage-cube-journey";
+import {
+  dispatchHomepageFlip,
+  type HomepageFlipPanelId,
+} from "./homepage-flip-stack";
 
-export type HomepageScrollPanelId = "nav-cube" | "home-game" | "home-explore";
+export type HomepageScrollPanelId = HomepageFlipPanelId;
 
-const PANEL_TO_JOURNEY: Record<HomepageScrollPanelId, HomepageJourneyFace> = {
-  "nav-cube": "begin",
-  "home-game": "game",
-  "home-explore": "home",
-};
-
-/** Dispatch a custom event so the journey cube can navigate without scroll snap. */
+/** Navigate between homepage flip faces (begin → game → home). */
 export function scrollToHomepagePanel(id: HomepageScrollPanelId) {
-  const face = PANEL_TO_JOURNEY[id];
-  window.dispatchEvent(
-    new CustomEvent("svivva:homepage-journey", { detail: { face, hash: hashForJourneyFace(face) } }),
-  );
-  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  dispatchHomepageFlip(id);
 }
 
-export function journeyFaceFromPanelId(id: HomepageScrollPanelId): HomepageJourneyFace {
-  return PANEL_TO_JOURNEY[id];
-}
-
-export { journeyFaceFromHash, hashForJourneyFace };
+export {
+  flipPanelFromHash,
+  hashForFlipPanel,
+  type HomepageFlipPanelId,
+} from "./homepage-flip-stack";
