@@ -6,6 +6,7 @@ import { users } from "@/lib/schema";
 import { setSession } from "@/lib/auth/session";
 import type { SessionUser } from "@/lib/auth/session";
 import { checkRateLimit, clientIp } from "@/lib/auth/rate-limit";
+import { authDatabaseErrorResponse, prepareAuthDatabase } from "@/lib/auth/auth-db";
 
 export async function GET(request: NextRequest) {
   const redirect = request.nextUrl.searchParams.get("redirect");
@@ -32,6 +33,8 @@ export async function POST(request: NextRequest) {
     if (!email || !password) {
       return NextResponse.json({ error: "Email and password are required." }, { status: 400 });
     }
+
+    await prepareAuthDatabase();
 
     const [user] = await db
       .select()
@@ -61,7 +64,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ ok: true, token });
   } catch (error) {
-    console.error("Login error:", error);
-    return NextResponse.json({ error: "Sign-in failed. Please try again." }, { status: 500 });
+    return authDatabaseErrorResponse(error, "Sign-in failed. Please try again.");
   }
 }

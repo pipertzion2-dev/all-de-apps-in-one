@@ -3,10 +3,14 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
   try {
     const { password } = await request.json();
-    const sitePassword = process.env.SITE_PASSWORD;
+    const sitePassword = process.env.SITE_PASSWORD?.trim();
 
+    // Gate is optional — when unset, do not surface a 500 "error sign" to visitors.
     if (!sitePassword) {
-      return NextResponse.json({ error: "No password configured" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Site passcode is not enabled. Continue from the homepage." },
+        { status: 403 },
+      );
     }
 
     if (password === sitePassword) {

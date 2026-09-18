@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { openai } from "@/lib/llm/openai";
+import { openai, resetOpenAIClientCache } from "@/lib/llm/openai";
 import { isAnyAiProviderAvailable } from "@/lib/llm/providers";
+import { runLocalPromptForge } from "@/lib/tools/local-prompt-forge";
 
 const ALLOWED_MODELS = ["gpt-4o-mini", "gpt-4o", "gpt-4o-2024-11-20", "gpt-4-turbo"] as const;
 type AllowedModel = (typeof ALLOWED_MODELS)[number];
@@ -19,6 +20,16 @@ function checkRateLimit(ip: string): boolean {
   if (entry.count >= limit) return false;
   entry.count++;
   return true;
+}
+
+async function tryHydrateAiSecrets(): Promise<void> {
+  try {
+    const { hydratePlatformSecrets } = await import("@/lib/platform-runtime-secrets");
+    await hydratePlatformSecrets();
+    resetOpenAIClientCache();
+  } catch {
+    /* env-only / offline */
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -51,11 +62,12 @@ export async function POST(req: NextRequest) {
       { status: 400 },
     );
   }
+
+  await tryHydrateAiSecrets();
+
+  // Keep the public tool usable even when cloud keys are missing — no red error dead-end.
   if (!isAnyAiProviderAvailable()) {
-    return NextResponse.json(
-      { error: "No AI provider configured. Set OPENAI_API_KEY, GEMINI_API_KEY, or OLLAMA_URL." },
-      { status: 503 },
-    );
+    return NextResponse.json(runLocalPromptForge({ systemPrompt, userMessage, model }));
   }
 
   const messages: { role: "system" | "user"; content: string }[] = [];

@@ -37,12 +37,20 @@ export default function GatePage() {
 
       if (res.ok) {
         window.location.href = "/";
-      } else {
+        return;
+      }
+      const data = (await res.json().catch(() => null)) as { error?: string } | null;
+      if (res.status === 403) {
+        setError(data?.error || "Passcode gate is not enabled.");
+      } else if (res.status === 401) {
         setError("Incorrect code");
+        setCode("");
+      } else {
+        setError(data?.error || "Could not verify that code. Try again.");
         setCode("");
       }
     } catch {
-      setError("Something went wrong");
+      setError("Could not reach the server. Try again.");
     } finally {
       setLoading(false);
     }

@@ -7,6 +7,7 @@ import { users } from "@/lib/schema";
 import { setSession } from "@/lib/auth/session";
 import type { SessionUser } from "@/lib/auth/session";
 import { checkRateLimit, clientIp } from "@/lib/auth/rate-limit";
+import { authDatabaseErrorResponse, prepareAuthDatabase } from "@/lib/auth/auth-db";
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,6 +33,8 @@ export async function POST(request: NextRequest) {
     }
 
     const normalizedEmail = email.toLowerCase().trim();
+
+    await prepareAuthDatabase();
 
     const [existing] = await db
       .select({ id: users.id })
@@ -69,10 +72,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ ok: true, token });
   } catch (error) {
-    console.error("Signup error:", error);
-    return NextResponse.json(
-      { error: "Account creation failed. Please try again." },
-      { status: 500 },
-    );
+    return authDatabaseErrorResponse(error, "Account creation failed. Please try again.");
   }
 }

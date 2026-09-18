@@ -52,6 +52,7 @@ interface Result {
   costUsd: number;
   model: string;
   error?: string;
+  localMode?: boolean;
 }
 
 function CopyBtn({ text }: { text: string }) {
@@ -283,6 +284,11 @@ export default function PromptForgePage() {
                 Output
               </span>
               <div className="flex items-center gap-2">
+                {result?.localMode && (
+                  <span className="text-xs px-2 py-1 rounded-lg bg-[#5B8DA8]/15 text-[#5B8DA8]">
+                    Local forge
+                  </span>
+                )}
                 {result?.content && <CopyBtn text={result.content} />}
                 {result && (
                   <button
