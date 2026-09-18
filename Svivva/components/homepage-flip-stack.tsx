@@ -48,12 +48,13 @@ export function HomepageFlipStack({
   const paintRotor = useCallback((index: number) => {
     const halfH = halfHRef.current;
     if (rotorRef.current) {
-      rotorRef.current.style.transform = `translate3d(0, 0, ${-halfH}px) rotateX(${-index * 90}deg)`;
+      // Positive rotateX matches the intro reveal (page rising into view).
+      rotorRef.current.style.transform = `translate3d(0, 0, ${-halfH}px) rotateX(${index * 90}deg)`;
     }
     faceRefs.current.forEach((face, i) => {
       if (!face) return;
       face.style.transformOrigin = "center center";
-      face.style.transform = `rotateX(${i * 90}deg) translate3d(0, 0, ${halfH}px)`;
+      face.style.transform = `rotateX(${-i * 90}deg) translate3d(0, 0, ${halfH}px)`;
     });
   }, []);
 

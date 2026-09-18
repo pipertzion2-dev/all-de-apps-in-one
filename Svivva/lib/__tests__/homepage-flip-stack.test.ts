@@ -34,6 +34,16 @@ describe("homepage flip stack", () => {
     expect(flipSrc).not.toContain("Math.round(displayedIndexRef.current)");
   });
 
+  it("rotates forward like the intro reveal (positive rotor, negative face hinge)", () => {
+    const flipSrc = readFileSync(
+      resolve(__dirname, "../../components/homepage-flip-stack.tsx"),
+      "utf8",
+    );
+    expect(flipSrc).toContain("rotateX(${index * 90}deg)");
+    expect(flipSrc).toContain("rotateX(${-i * 90}deg)");
+    expect(flipSrc).not.toContain("rotateX(${-index * 90}deg)");
+  });
+
   it("supports touch swipes for mobile flip navigation", () => {
     const flipSrc = readFileSync(
       resolve(__dirname, "../../components/homepage-flip-stack.tsx"),
