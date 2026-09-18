@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
 import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
 import { HomepageScrollHint } from "@/components/homepage-scroll-hint";
@@ -10,11 +11,12 @@ const CleanSneaksLogoCube = dynamic(
   { ssr: false },
 );
 
-/** Second scroll panel — Steal the old man&apos;s bundle cube; tap to open loading → game. */
+/** Second scroll panel — Steal the old man&apos;s bundle cube; tap to open the game. */
 export function HomepageGamePanel() {
+  const router = useRouter();
+
   const enterGame = () => {
-    sessionStorage.setItem("svivva:home-game-enter", "1");
-    scrollToHomepagePanel("home-game-loading");
+    router.push("/clean-sneaks");
   };
 
   return (
@@ -66,9 +68,9 @@ export function HomepageGamePanel() {
       </div>
 
       <HomepageScrollHint
-        label="Tap cube · or scroll"
+        label="Scroll · explore"
         direction="down"
-        onActivate={() => scrollToHomepagePanel("home-game-loading")}
+        onActivate={() => scrollToHomepagePanel("home-explore")}
       />
     </section>
   );

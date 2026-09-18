@@ -12,7 +12,6 @@ import { runBodyLayerHygiene } from "@/lib/body-layer-cleanup";
 import { showHomepageSection } from "@/lib/homepage-layout";
 import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
 import { HomepageExplorePanel } from "@/components/homepage-explore-panel";
-import { HomepageGameLoadingPanel } from "@/components/homepage-game-loading-panel";
 import { HomepageGamePanel } from "@/components/homepage-game-panel";
 import { HomepageHeroBlock } from "@/components/homepage-hero-block";
 import { usePlatform } from "@/lib/platform-context";
@@ -222,6 +221,10 @@ export default function LandingPage() {
 
   useEffect(() => {
     if (!flipComplete || !showHomepageSection("scrollSnap")) return;
+
+    const previousScrollRestoration = history.scrollRestoration;
+    history.scrollRestoration = "manual";
+
     const hash = window.location.hash.replace("#", "");
     if (hash === "home-game" || hash === "clean-sneaks") {
       scrollToHomepagePanel("home-game");
@@ -229,7 +232,13 @@ export default function LandingPage() {
       scrollToHomepagePanel("nav-cube");
     } else if (hash === "home-explore") {
       scrollToHomepagePanel("home-explore");
+    } else {
+      window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
     }
+
+    return () => {
+      history.scrollRestoration = previousScrollRestoration;
+    };
   }, [flipComplete]);
 
   useEffect(() => {
@@ -764,7 +773,6 @@ export default function LandingPage() {
                 <HomepageHeroBlock mountCanvas={canMountHeavy3d} interactive={flipComplete} />
               </ClientErrorBoundary>
               <HomepageGamePanel />
-              <HomepageGameLoadingPanel />
             </>
           ) : (
             <div className="relative overflow-x-hidden">
