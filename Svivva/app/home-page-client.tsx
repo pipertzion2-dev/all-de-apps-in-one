@@ -12,9 +12,10 @@ import { runBodyLayerHygiene } from "@/lib/body-layer-cleanup";
 import { showHomepageSection } from "@/lib/homepage-layout";
 import { flipPanelFromHash, scrollToHomepagePanel } from "@/lib/homepage-scroll";
 import { HomepageFlipStack } from "@/components/homepage-flip-stack";
-import { HomepageExplorePanel } from "@/components/homepage-explore-panel";
+import { HomepageCubePanel } from "@/components/homepage-cube-panel";
 import { HomepageGamePanel } from "@/components/homepage-game-panel";
 import { HomepageHeroBlock } from "@/components/homepage-hero-block";
+import { HOMEPAGE_PRICING_TIERS } from "@/lib/homepage-pricing";
 import type { HomepageFlipPanelId } from "@/lib/homepage-flip-stack";
 import { usePlatform } from "@/lib/platform-context";
 import { ZzaiModeToggle } from "@/components/zzai-mode-toggle";
@@ -107,53 +108,6 @@ const features = [
       "TypeScript-first SDK, full type safety, auto-generated OpenAPI spec, Python and Node clients. Your users integrate in minutes and never suspect the backend is mostly words.",
     code: "import { PromptAPI } from 'zzai'",
     highlight: "TypeScript-first",
-  },
-];
-
-const pricingTiers = [
-  {
-    name: "Pro",
-    price: "$49",
-    period: "/month",
-    description: "Full platform access",
-    features: [
-      "Signal + Crest unlimited",
-      "Unlimited API endpoints",
-      "Unlimited hardware projects",
-      "100,000 API requests/month",
-      "AI material sourcing",
-      "Hardware layout preview & optional AI sketches",
-      "ZZAI Play — full access",
-      "Mixing-console OS — 16 channels + Master bus",
-      "ZZAI Seeds — multi-app factory",
-      "Auto-rollback & versioning",
-      "Priority support",
-    ],
-    cta: "Subscribe to Pro",
-    popular: true,
-    hasSeeds: true,
-    href: "/dashboard/checkout?tier=pro",
-  },
-  {
-    name: "Enterprise",
-    price: "$299",
-    period: "/month",
-    description: "For teams at scale",
-    features: [
-      "Everything in Pro",
-      "Unlimited API requests",
-      "Dedicated supplier network",
-      "ZZAI Play — full access",
-      "OaaS patch bay — unlimited channel routing",
-      "ZZAI Seeds — unlimited builds",
-      "SSO & SAML",
-      "Custom integrations",
-      "SLA guarantee",
-    ],
-    cta: "Contact Sales",
-    popular: false,
-    hasSeeds: true,
-    href: "mailto:hello@zzaizzai.com?subject=Enterprise%20Plan%20Inquiry",
   },
 ];
 
@@ -765,11 +719,10 @@ export default function LandingPage() {
                     </p>
                   }
                 >
-                  <HomepageHeroBlock mountCanvas={canMountHeavy3d} interactive={flipComplete} />
+                  <HomepageCubePanel mountCanvas={canMountHeavy3d} interactive={flipComplete} />
                 </ClientErrorBoundary>
               }
               game={<HomepageGamePanel />}
-              explore={<HomepageExplorePanel mountBackground={canMountHeavy3d} />}
             />
           ) : (
             <div className="relative overflow-x-hidden">
@@ -1891,7 +1844,7 @@ export default function LandingPage() {
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
-                  {pricingTiers.map((tier, index) => (
+                  {HOMEPAGE_PRICING_TIERS.map((tier, index) => (
                     <div
                       key={index}
                       className={`relative ${tier.popular ? "p-[3px] rounded-2xl" : ""}`}

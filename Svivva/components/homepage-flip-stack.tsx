@@ -12,7 +12,6 @@ import {
 type HomepageFlipStackProps = {
   begin: ReactNode;
   game: ReactNode;
-  explore: ReactNode;
   initialPanel?: HomepageFlipPanelId;
   interactive?: boolean;
 };
@@ -20,13 +19,12 @@ type HomepageFlipStackProps = {
 const FLIP_SETTLE_EPSILON = 0.02;
 const NUDGE_DEBOUNCE_MS = 260;
 const SWIPE_THRESHOLD_PX = 36;
-const MAX_PANEL_INDEX = 2;
+const MAX_PANEL_INDEX = 1;
 
-/** Three full-viewport faces — same Dune-style rotateX cube as the intro reveal. */
+/** Two full-viewport faces — game, then product-cube homepage with pricing. */
 export function HomepageFlipStack({
   begin,
   game,
-  explore,
   initialPanel = "home-game",
   interactive = true,
 }: HomepageFlipStackProps) {
@@ -42,7 +40,6 @@ export function HomepageFlipStack({
 
   const panels = [
     { id: "home-game" as const, node: game },
-    { id: "home-explore" as const, node: explore },
     { id: "nav-cube" as const, node: begin },
   ];
 
@@ -58,7 +55,6 @@ export function HomepageFlipStack({
   const paintRotor = useCallback((index: number) => {
     const halfH = halfHRef.current;
     if (rotorRef.current) {
-      // Positive rotateX matches the intro reveal (page rising into view).
       rotorRef.current.style.transform = `translate3d(0, 0, ${-halfH}px) rotateX(${index * 90}deg)`;
     }
   }, []);
@@ -235,9 +231,7 @@ export function HomepageFlipStack({
       const endY = e.changedTouches[0]?.clientY ?? touchStartY;
       const delta = touchStartY - endY;
       if (Math.abs(delta) < SWIPE_THRESHOLD_PX) return;
-
-      const direction: 1 | -1 = delta > 0 ? 1 : -1;
-      nudge(direction);
+      nudge(delta > 0 ? 1 : -1);
     };
 
     window.addEventListener("wheel", onWheel, { passive: false });
@@ -289,7 +283,7 @@ export function HomepageFlipStack({
             style={{
               position: "absolute",
               inset: 0,
-              overflowY: panel.id === "home-explore" ? "auto" : "hidden",
+              overflowY: panel.id === "nav-cube" ? "auto" : "hidden",
               overflowX: "hidden",
               backfaceVisibility: "hidden",
               WebkitBackfaceVisibility: "hidden",
