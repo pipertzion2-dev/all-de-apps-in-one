@@ -32,9 +32,9 @@ export function HomepageGamePanel() {
 
       <div className="relative z-10 flex min-h-0 flex-1 flex-col items-center justify-center px-4 pb-24 pt-24 sm:px-6 sm:pt-28">
         <p className="mb-2 text-[10px] uppercase tracking-[0.4em] text-[#A8BA48]/90">ZZAI Play</p>
-        <h2 className="seeds-holo-text text-center text-2xl font-bold tracking-[0.06em] sm:text-3xl">
+        <h1 className="seeds-holo-text text-center text-2xl font-bold tracking-[0.06em] sm:text-3xl">
           {KLEAN_SNEAKS.display}
-        </h2>
+        </h1>
         <p
           className="mt-3 max-w-md text-center text-sm font-semibold text-[#E8D9A8] sm:text-base"
           data-testid="text-clean-sneaks-goal"
