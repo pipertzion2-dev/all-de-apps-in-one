@@ -1,6 +1,6 @@
 /** Which below-the-fold homepage sections render. Cube + nav + footer always show. */
 export const HOMEPAGE_SECTIONS = {
-  /** Full-viewport Dune-style cube flip: begin → game → home. */
+  /** Full-viewport Dune-style cube flip: game → product cube. */
   scrollSnap: true,
   oaasIntro: false,
   eventTracker: false,
@@ -14,7 +14,7 @@ export const HOMEPAGE_SECTIONS = {
   pricing: false,
   finalCta: false,
   cleanSneaks: false,
-  /** Legacy inline quick links (scrollSnap uses explore panel instead). */
+  /** Legacy inline quick links below the hero when scrollSnap is off. */
   quickLinks: false,
 } as const;
 

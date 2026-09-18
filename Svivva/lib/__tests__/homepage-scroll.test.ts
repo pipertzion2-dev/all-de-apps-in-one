@@ -14,6 +14,7 @@ describe("homepage scroll panels", () => {
     expect(pageSrc).toContain("HomepageFlipStack");
     expect(pageSrc).not.toContain("HomepageCubeJourney");
     expect(pageSrc).not.toContain("JourneyCubeCanvas");
+    expect(pageSrc).not.toContain("HomepageExplorePanel");
   });
 
   it("bundle cube panel opens the game route directly", () => {
