@@ -1,142 +1,114 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ClientErrorBoundary } from "@/components/client-error-boundary";
-import { SceneErrorBoundary } from "@/components/clean-sneaks/SceneErrorBoundary";
 import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
-import type { GamePhase } from "@/lib/clean-sneaks/types";
+import { bundleUnlockHint, isBundleCardUnlocked } from "@/lib/clean-sneaks/bundle-unlock";
+import { readBestScore } from "@/lib/clean-sneaks/storage";
+import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
 import { HomepageScrollHint } from "@/components/homepage-scroll-hint";
 
-const CleanSneaksGame3D = dynamic(
-  () => import("@/components/clean-sneaks/CleanSneaksGame3D").then((m) => m.CleanSneaksGame3D),
+const CleanSneaksLogoCube = dynamic(
+  () => import("@/components/clean-sneaks/CleanSneaksLogoCube").then((m) => m.CleanSneaksLogoCube),
   { ssr: false },
 );
-const GameStartScreen = dynamic(
-  () => import("@/components/clean-sneaks/GameStartScreen").then((m) => m.GameStartScreen),
-  { ssr: false },
-);
-const GameLoadingWheels = dynamic(
-  () => import("@/components/clean-sneaks/GameLoadingWheels").then((m) => m.GameLoadingWheels),
-  { ssr: false },
-);
+
+/** Scroll-friendly game panel — no fixed fullscreen overlays that trap page scroll. */
 export function HomepageGamePanel() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const beginRef = useRef<(() => void) | null>(null);
-  const [mounted, setMounted] = useState(false);
-  const [active, setActive] = useState(false);
-  const [gamePhase, setGamePhase] = useState<GamePhase>("loading");
-  const [sceneAttempt, setSceneAttempt] = useState(0);
+  const router = useRouter();
+  const [best, setBest] = useState(0);
+  const [bundleUnlocked, setBundleUnlocked] = useState(false);
 
   useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) setMounted(true);
-        setActive(Boolean(entry?.isIntersecting && entry.intersectionRatio >= 0.45));
-      },
-      { threshold: [0, 0.45, 0.75] },
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
+    setBest(readBestScore());
+    setBundleUnlocked(isBundleCardUnlocked());
   }, []);
-
-  const scrollToCube = useCallback(() => {
-    document.getElementById("nav-cube")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, []);
-
-  const handleStart = useCallback(() => {
-    beginRef.current?.();
-  }, []);
-
-  const registerBegin = useCallback((begin: () => void) => {
-    beginRef.current = begin;
-  }, []);
-
-  const preGame = gamePhase === "loading" || gamePhase === "start";
 
   return (
     <section
-      ref={sectionRef}
       id="home-game"
       data-homepage-scroll-panel=""
       className="homepage-scroll-panel relative flex min-h-[100svh] flex-col overflow-hidden bg-[#0a0c10]"
     >
-      <HomepageScrollHint label="Scroll up · cube" direction="up" />
+      <div
+        className="pointer-events-none absolute inset-0"
+        aria-hidden
+        style={{
+          background: `
+            radial-gradient(ellipse 70% 55% at 28% 40%, rgba(74,47,92,0.42), transparent 58%),
+            radial-gradient(ellipse 55% 45% at 78% 65%, rgba(168,186,72,0.10), transparent 52%),
+            linear-gradient(180deg, #0a0c10, #06080c)
+          `,
+        }}
+      />
 
-      <div className="relative z-10 flex shrink-0 items-center justify-between gap-2 px-4 pb-2 pt-20 sm:px-6 sm:pt-24">
-        <div>
-          <p className="text-[10px] uppercase tracking-[0.35em] text-[#5B8DA8]">ZZAI Play</p>
-          <h2 className="seeds-holo-text text-lg font-bold sm:text-xl">{KLEAN_SNEAKS.display}</h2>
+      <HomepageScrollHint
+        label="Scroll up · cube"
+        direction="up"
+        onActivate={() => scrollToHomepagePanel("nav-cube")}
+      />
+
+      <div className="relative z-10 mx-auto flex w-full max-w-lg flex-1 flex-col justify-center gap-6 px-4 pb-20 pt-24 sm:px-6 sm:pt-28">
+        <div className="text-center">
+          <p className="text-[10px] uppercase tracking-[0.35em] text-[#A8BA48]/90">ZZAI Play</p>
+          <h2 className="seeds-holo-text mt-2 text-3xl font-bold sm:text-4xl">{KLEAN_SNEAKS.display}</h2>
+          <p className="mt-3 text-sm text-white/65">Steal the old man&apos;s bundle — keep the Baloon8 clean.</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline" className="h-8 border-white/20 text-xs" asChild>
-            <Link href="/clean-sneaks">Full screen</Link>
-          </Button>
-          <Button size="sm" variant="ghost" className="h-8 text-xs text-white/70" onClick={scrollToCube}>
-            Back to cube
-          </Button>
-        </div>
-      </div>
 
-      {(gamePhase === "loading" || gamePhase === "start") && (
-        <GameStartScreen preload={gamePhase === "loading"} onStart={gamePhase === "start" ? handleStart : undefined} />
-      )}
-
-      {gamePhase === "loading" && <GameLoadingWheels fullscreen />}
-
-      <div className={`relative z-10 flex min-h-0 flex-1 flex-col px-3 pb-16 pt-1 sm:px-6 ${preGame ? "opacity-0 pointer-events-none" : ""}`}>
-        <ClientErrorBoundary
-          fallback={
-            <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center text-sm text-white/70">
-              <p>{KLEAN_SNEAKS.title} couldn&apos;t load here.</p>
-              <Button asChild className="bg-[#5B8DA8]">
-                <Link href="/clean-sneaks">Open full-screen game</Link>
-              </Button>
-            </div>
-          }
+        <div
+          className="relative flex min-h-[220px] items-center justify-center overflow-hidden rounded-2xl border border-white/10 sm:min-h-[260px]"
+          style={{
+            background: `
+              radial-gradient(ellipse 60% 55% at 50% 48%, rgba(58,32,72,0.55), rgba(8,6,12,0.92) 70%),
+              linear-gradient(160deg, #1a1022 0%, #0a080e 100%)
+            `,
+          }}
+          data-testid="homepage-game-panel-hero"
         >
-          {mounted ? (
-            <SceneErrorBoundary
-              key={sceneAttempt}
-              fallback={
-                <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center text-sm text-white/70">
-                  <p>Game engine failed — tap retry or open full screen.</p>
-                  <div className="flex gap-2">
-                    <Button type="button" className="bg-[#5B8DA8]" onClick={() => setSceneAttempt((n) => n + 1)}>
-                      Retry
-                    </Button>
-                    <Button type="button" variant="outline" asChild>
-                      <Link href="/clean-sneaks">Full screen</Link>
-                    </Button>
-                  </div>
-                </div>
-              }
+          <CleanSneaksLogoCube
+            className="relative z-[1] h-[200px] w-full sm:h-[240px]"
+            onActivate={() => router.push("/clean-sneaks")}
+          />
+          <span className="pointer-events-none absolute bottom-3 left-0 right-0 text-center text-[10px] uppercase tracking-[0.35em] text-white/45">
+            Drag to spin · Tap to play
+          </span>
+        </div>
+
+        <div className="flex flex-col items-center gap-3">
+          <Button
+            size="lg"
+            className="min-w-[220px] bg-[#5B8DA8] text-white shadow-[0_0_28px_rgba(91,141,168,0.35)]"
+            asChild
+            data-testid="button-homepage-play-game"
+          >
+            <Link href="/clean-sneaks">{KLEAN_SNEAKS.playLabel}</Link>
+          </Button>
+          {bundleUnlocked ? (
+            <Button
+              size="lg"
+              variant="outline"
+              className="min-w-[220px] border-[#D94F9C]/50 text-[#E8D9A8]"
+              asChild
             >
-              <CleanSneaksGame3D
-                key={sceneAttempt}
-                active={active}
-                fullscreen
-                onPhaseChange={setGamePhase}
-                onRegisterBegin={registerBegin}
-                onExit={scrollToCube}
-                className="min-h-0 flex-1"
-              />
-            </SceneErrorBoundary>
+              <Link href="/clean-sneaks?mode=bundle">Steal the Old Man&apos;s Bundle</Link>
+            </Button>
           ) : (
-            <div className="flex flex-1 items-center justify-center text-xs uppercase tracking-[0.3em] text-white/35">
-              Scroll to load game
-            </div>
+            <p className="max-w-sm text-center text-xs text-white/50">{bundleUnlockHint(best)}</p>
           )}
-        </ClientErrorBoundary>
+          {best > 0 && (
+            <p className="text-xs text-[#7EC8D9]/90">Best score: {best.toLocaleString()}</p>
+          )}
+        </div>
       </div>
 
-      <HomepageScrollHint label="Scroll · explore" direction="down" />
+      <HomepageScrollHint
+        label="Scroll · explore"
+        direction="down"
+        onActivate={() => scrollToHomepagePanel("home-explore")}
+      />
     </section>
   );
 }

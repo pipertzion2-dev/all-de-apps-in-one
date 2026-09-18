@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CamoThreeOverlay } from "@/components/camo-three-overlay";
 import { HomepageScrollHint } from "@/components/homepage-scroll-hint";
+import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
 
 type HomepageExplorePanelProps = {
   mountBackground?: boolean;
@@ -18,7 +19,11 @@ export function HomepageExplorePanel({ mountBackground = true, children }: Homep
       data-homepage-scroll-panel=""
       className="homepage-scroll-panel relative min-h-[100svh] overflow-hidden bg-background"
     >
-      <HomepageScrollHint label="Scroll up · game" direction="up" />
+      <HomepageScrollHint
+        label="Scroll up · game"
+        direction="up"
+        onActivate={() => scrollToHomepagePanel("home-game")}
+      />
 
       <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
         {mountBackground ? (
@@ -48,9 +53,7 @@ export function HomepageExplorePanel({ mountBackground = true, children }: Homep
               size="sm"
               variant="outline"
               className="border-[#5B8DA8]/40"
-              onClick={() =>
-                document.getElementById("nav-cube")?.scrollIntoView({ behavior: "smooth", block: "start" })
-              }
+              onClick={() => scrollToHomepagePanel("nav-cube")}
             >
               Back to cube
             </Button>

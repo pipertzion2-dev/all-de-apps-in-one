@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { CamoThreeOverlay } from "@/components/camo-three-overlay";
 import { HomepageScrollHint } from "@/components/homepage-scroll-hint";
+import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
 
 const SvivvaArtifact = dynamic(
   () => import("@/components/svivva-artifact").then((m) => m.SvivvaArtifact),
@@ -37,7 +38,13 @@ export function HomepageHeroBlock({
       <div className="relative z-10">
         <SvivvaArtifact mountCanvas={mountCanvas} />
       </div>
-      {interactive ? <HomepageScrollHint label="Scroll · game" direction="down" /> : null}
+      {interactive ? (
+        <HomepageScrollHint
+          label="Scroll · game"
+          direction="down"
+          onActivate={() => scrollToHomepagePanel("home-game")}
+        />
+      ) : null}
       <div
         className="pointer-events-none absolute inset-x-0 bottom-0 h-28 sm:h-36 z-[1]"
         style={{

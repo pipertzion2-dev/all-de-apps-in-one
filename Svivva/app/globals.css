@@ -533,13 +533,14 @@
 
 /* Homepage scroll panels: cube → game → explore */
 html.homepage-scroll-snap {
-  scroll-snap-type: y mandatory;
+  scroll-snap-type: y proximity;
   scroll-behavior: smooth;
+  overscroll-behavior-y: contain;
 }
 
 .homepage-scroll-panel {
   scroll-snap-align: start;
-  scroll-snap-stop: always;
+  scroll-snap-stop: normal;
 }
 
 @media (prefers-reduced-motion: reduce) {
