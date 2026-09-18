@@ -47,7 +47,11 @@ export const COLLISION_Z_MAX = 1.4;
 export const OH_NO_Z_ENTER = -2.4;
 export const OH_NO_Z_EXIT = -1.35;
 /** Reach the destination for a post-mission shoe reveal (not only when cooked). */
-export const FINISH_DISTANCE = 90;
+export const FINISH_DISTANCE = 120;
+/** Meters gained per scroll unit — lower = longer real-time runs at the same speed. */
+export const DISTANCE_SCALE = 0.032;
+/** Reaction window for Oh No! quick-time saves (ms). */
+export const OH_NO_WINDOW_MS = 900;
 
 export type RunObstacle = {
   id: number;
@@ -472,7 +476,7 @@ export function stepRunEngine(
   const baseSpeed = Math.min(620, 280 + s.distance * 0.35) * arch.agility;
   s.speed = baseSpeed;
   const scroll = s.speed * step;
-  s.distance += scroll * 0.05;
+  s.distance += scroll * DISTANCE_SCALE;
 
   if (s.distance >= FINISH_DISTANCE) {
     s.distance = FINISH_DISTANCE;
@@ -484,7 +488,7 @@ export function stepRunEngine(
 
   s.score +=
     computeFrameScore({
-      distanceDelta: scroll * 0.05,
+      distanceDelta: scroll * DISTANCE_SCALE,
       cleanliness: s.cleanliness,
       streak: s.streak,
       freshKicksActive: ts < s.freshUntil,
@@ -533,10 +537,10 @@ export function stepRunEngine(
   if (s.paths && ts > s.pathsUntil) s.paths = null;
 
   s.spawnAcc += step;
-  const spawnEvery = Math.max(0.55, 1.35 - s.distance * 0.002);
+  const spawnEvery = Math.max(0.72, 1.5 - s.distance * 0.0012);
   if (s.spawnAcc >= spawnEvery) {
     s.spawnAcc = 0;
-    const count = s.distance > 80 && Math.random() < 0.35 ? 2 : 1;
+    const count = s.distance > 100 && Math.random() < 0.3 ? 2 : 1;
     const used = new Set<number>();
     for (let i = 0; i < count; i++) {
       let lane = Math.floor(Math.random() * LANES);
@@ -557,7 +561,7 @@ export function stepRunEngine(
   }
 
   s.powerAcc += step;
-  if (s.powerAcc >= 4.5 + Math.random() * 2) {
+  if (s.powerAcc >= 3.6 + Math.random() * 2) {
     s.powerAcc = 0;
     s.powerups.push({
       id: s.nextId++,
@@ -595,7 +599,7 @@ export function stepRunEngine(
         obstacleId: o.id,
         shoe,
         startedAt: ts,
-        endsAt: ts + 720,
+        endsAt: ts + OH_NO_WINDOW_MS,
         correctAction: pickOhNoAction(),
         resolved: false,
       };

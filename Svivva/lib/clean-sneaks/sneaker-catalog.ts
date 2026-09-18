@@ -49,7 +49,7 @@ export type Baloon8Colorway = {
 const CHASSIS = {
   material: "patent" as SneakerMaterial,
   styleMul: 1.35,
-  damagePenalty: 1.25,
+  damagePenalty: 1.15,
   agility: 1.05,
   ankleProtection: 0.12,
   reputation: 1.4,
