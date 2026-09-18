@@ -24,11 +24,7 @@ export function HomepageCubePanel({
           onActivate={() => scrollToHomepagePanel("home-game")}
         />
       ) : null}
-      <HomepageHeroBlock
-        mountCanvas={mountCanvas}
-        interactive={interactive}
-        showFlipHint={false}
-      />
+      <HomepageHeroBlock mountCanvas={mountCanvas} interactive={interactive} showFlipHint={false} />
       <HomepagePricingSection />
     </div>
   );
