@@ -1,9 +1,10 @@
 /** Full-viewport homepage panels flipped like the intro Dune cube. */
-export type HomepageFlipPanelId = "nav-cube" | "home-game";
+export type HomepageFlipPanelId = "nav-cube" | "home-game" | "home-explore";
 
-/** Flip order after intro: game → product cube. */
+/** Flip order after intro: game → explore → product cube (3 faces). */
 export const HOMEPAGE_FLIP_PANELS: readonly HomepageFlipPanelId[] = [
   "home-game",
+  "home-explore",
   "nav-cube",
 ] as const;
 
@@ -20,8 +21,7 @@ export function flipPanelFromHash(hash: string): HomepageFlipPanelId | null {
   if (!id) return "home-game";
   if (id === "nav-cube") return "nav-cube";
   if (id === "home-game" || id === "clean-sneaks") return "home-game";
-  // Legacy explore face — same links live on nav + footer routes now.
-  if (id === "home-explore") return "nav-cube";
+  if (id === "home-explore") return "home-explore";
   return null;
 }
 

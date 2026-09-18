@@ -12,6 +12,7 @@ import {
 type HomepageFlipStackProps = {
   begin: ReactNode;
   game: ReactNode;
+  explore: ReactNode;
   initialPanel?: HomepageFlipPanelId;
   interactive?: boolean;
 };
@@ -19,12 +20,13 @@ type HomepageFlipStackProps = {
 const FLIP_SETTLE_EPSILON = 0.02;
 const WHEEL_SNAP_MS = 140;
 const SWIPE_THRESHOLD_PX = 36;
-const MAX_PANEL_INDEX = 1;
+const MAX_PANEL_INDEX = 2;
 
-/** Two full-viewport faces — same Dune-style rotateX cube as the intro reveal. */
+/** Three full-viewport faces — same Dune-style rotateX cube as the intro reveal. */
 export function HomepageFlipStack({
   begin,
   game,
+  explore,
   initialPanel = "home-game",
   interactive = true,
 }: HomepageFlipStackProps) {
@@ -41,6 +43,7 @@ export function HomepageFlipStack({
 
   const panels = [
     { id: "home-game" as const, node: game },
+    { id: "home-explore" as const, node: explore },
     { id: "nav-cube" as const, node: begin },
   ];
 
