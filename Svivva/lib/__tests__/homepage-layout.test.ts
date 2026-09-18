@@ -9,7 +9,7 @@ describe("homepage-layout", () => {
     expect(HOMEPAGE_SECTIONS.cleanSneaks).toBe(false);
   });
 
-  it("shows quick links under the cube", () => {
-    expect(showHomepageSection("quickLinks")).toBe(true);
+  it("uses scroll snap panels for cube, game, and explore", () => {
+    expect(showHomepageSection("scrollSnap")).toBe(true);
   });
 });

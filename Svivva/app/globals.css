@@ -530,3 +530,20 @@
     animation: none !important;
   }
 }
+
+/* Homepage scroll panels: cube → game → explore */
+html.homepage-scroll-snap {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+
+.homepage-scroll-panel {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.homepage-scroll-snap {
+    scroll-behavior: auto;
+  }
+}

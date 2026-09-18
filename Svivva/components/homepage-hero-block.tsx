@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { CamoThreeOverlay } from "@/components/camo-three-overlay";
+import { HomepageScrollHint } from "@/components/homepage-scroll-hint";
 
 const SvivvaArtifact = dynamic(
   () => import("@/components/svivva-artifact").then((m) => m.SvivvaArtifact),
@@ -11,14 +12,21 @@ const SvivvaArtifact = dynamic(
 type HomepageHeroBlockProps = {
   /** When true, cube face buttons are clickable (end of intro flip). */
   interactive?: boolean;
+  /** Defer WebGL cube until intro completes. */
+  mountCanvas?: boolean;
   className?: string;
 };
 
 /** Homepage hero: digi camo + ZZAI6 navigation cube — used on intro back face and main flow. */
-export function HomepageHeroBlock({ interactive = true, className = "" }: HomepageHeroBlockProps) {
+export function HomepageHeroBlock({
+  interactive = true,
+  mountCanvas = true,
+  className = "",
+}: HomepageHeroBlockProps) {
   return (
     <div
-      className={`relative w-full min-h-[100svh] overflow-x-hidden bg-background ${className}`}
+      data-homepage-scroll-panel=""
+      className={`homepage-scroll-panel relative w-full min-h-[100svh] overflow-x-hidden bg-background ${className}`}
       style={{ pointerEvents: interactive ? "auto" : "none" }}
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 bottom-0 z-0" aria-hidden>
@@ -27,8 +35,9 @@ export function HomepageHeroBlock({ interactive = true, className = "" }: Homepa
         </div>
       </div>
       <div className="relative z-10">
-        <SvivvaArtifact />
+        <SvivvaArtifact mountCanvas={mountCanvas} />
       </div>
+      {interactive ? <HomepageScrollHint label="Scroll · game" direction="down" /> : null}
       <div
         className="pointer-events-none absolute inset-x-0 bottom-0 h-28 sm:h-36 z-[1]"
         style={{
