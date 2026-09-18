@@ -8,7 +8,7 @@ describe("homepage scroll panels", () => {
       resolve(__dirname, "../../components/homepage-flip-stack.tsx"),
       "utf8",
     );
-    const pageSrc = readFileSync(resolve(__dirname, "../../app/page.tsx"), "utf8");
+    const pageSrc = readFileSync(resolve(__dirname, "../../app/home-page-client.tsx"), "utf8");
     expect(flipSrc).toContain("data-homepage-flip-stack");
     expect(flipSrc).toContain("rotateX");
     expect(pageSrc).toContain("HomepageFlipStack");
@@ -27,7 +27,7 @@ describe("homepage scroll panels", () => {
 
   it("lands on the game panel first after intro", () => {
     const stackSrc = readFileSync(resolve(__dirname, "../../lib/homepage-flip-stack.ts"), "utf8");
-    const pageSrc = readFileSync(resolve(__dirname, "../../app/page.tsx"), "utf8");
+    const pageSrc = readFileSync(resolve(__dirname, "../../app/home-page-client.tsx"), "utf8");
     expect(stackSrc).toMatch(/HOMEPAGE_FLIP_PANELS[\s\S]*"home-game"[\s\S]*"nav-cube"/);
     expect(pageSrc).toContain('useState<HomepageFlipPanelId>("home-game")');
   });
