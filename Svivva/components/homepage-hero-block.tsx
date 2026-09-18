@@ -40,7 +40,7 @@ export function HomepageHeroBlock({
       </div>
       {interactive ? (
         <HomepageScrollHint
-          label="Scroll · game"
+          label="Flip · game"
           direction="down"
           onActivate={() => scrollToHomepagePanel("home-game")}
         />

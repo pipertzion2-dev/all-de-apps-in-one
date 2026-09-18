@@ -9,8 +9,7 @@ describe("homepage-layout", () => {
     expect(HOMEPAGE_SECTIONS.cleanSneaks).toBe(false);
   });
 
-  it("uses scroll snap panels and the three-face cube journey", () => {
+  it("uses the Dune-style flip stack for begin, game, and home", () => {
     expect(showHomepageSection("scrollSnap")).toBe(true);
-    expect(showHomepageSection("cubeJourney")).toBe(true);
   });
 });

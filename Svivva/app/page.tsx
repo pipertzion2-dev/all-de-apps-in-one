@@ -10,12 +10,12 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { runBodyLayerHygiene } from "@/lib/body-layer-cleanup";
 import { showHomepageSection } from "@/lib/homepage-layout";
-import { journeyFaceFromHash, scrollToHomepagePanel } from "@/lib/homepage-scroll";
-import { HomepageCubeJourney } from "@/components/homepage-cube-journey";
+import { flipPanelFromHash, scrollToHomepagePanel } from "@/lib/homepage-scroll";
+import { HomepageFlipStack } from "@/components/homepage-flip-stack";
 import { HomepageExplorePanel } from "@/components/homepage-explore-panel";
 import { HomepageGamePanel } from "@/components/homepage-game-panel";
 import { HomepageHeroBlock } from "@/components/homepage-hero-block";
-import type { HomepageJourneyFace } from "@/lib/homepage-cube-journey";
+import type { HomepageFlipPanelId } from "@/lib/homepage-flip-stack";
 import { usePlatform } from "@/lib/platform-context";
 import { ZzaiModeToggle } from "@/components/zzai-mode-toggle";
 import Link from "next/link";
@@ -188,7 +188,7 @@ export default function LandingPage() {
     apiCalls: number;
   } | null>(null);
   const [canMountHeavy3d, setCanMountHeavy3d] = useState(false);
-  const [journeyInitialFace, setJourneyInitialFace] = useState<HomepageJourneyFace>("begin");
+  const [flipInitialPanel, setFlipInitialPanel] = useState<HomepageFlipPanelId>("nav-cube");
   const skipIntroRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
@@ -216,43 +216,21 @@ export default function LandingPage() {
   }, [flipComplete]);
 
   useEffect(() => {
-    if (!flipComplete || !showHomepageSection("scrollSnap") || showHomepageSection("cubeJourney")) {
-      return;
-    }
-    const root = document.documentElement;
-    root.classList.add("homepage-scroll-snap");
-    return () => root.classList.remove("homepage-scroll-snap");
-  }, [flipComplete]);
-
-  useEffect(() => {
-    if (!flipComplete) return;
-    if (!showHomepageSection("scrollSnap") && !showHomepageSection("cubeJourney")) return;
+    if (!flipComplete || !showHomepageSection("scrollSnap")) return;
 
     const previousScrollRestoration = history.scrollRestoration;
     history.scrollRestoration = "manual";
 
     const hash = window.location.hash.replace("#", "");
-    const journeyFace = journeyFaceFromHash(hash);
+    const flipPanel = flipPanelFromHash(hash);
 
-    if (showHomepageSection("cubeJourney")) {
-      if (journeyFace) {
-        setJourneyInitialFace(journeyFace);
-        window.dispatchEvent(
-          new CustomEvent("svivva:homepage-journey", { detail: { face: journeyFace } }),
-        );
-      } else {
-        setJourneyInitialFace("begin");
-      }
-      window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
-    } else if (hash === "home-game" || hash === "clean-sneaks") {
-      scrollToHomepagePanel("home-game");
-    } else if (hash === "nav-cube") {
-      scrollToHomepagePanel("nav-cube");
-    } else if (hash === "home-explore") {
-      scrollToHomepagePanel("home-explore");
+    if (flipPanel) {
+      setFlipInitialPanel(flipPanel);
+      scrollToHomepagePanel(flipPanel);
     } else {
-      window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+      setFlipInitialPanel("nav-cube");
     }
+    window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
 
     return () => {
       history.scrollRestoration = previousScrollRestoration;
@@ -775,29 +753,28 @@ export default function LandingPage() {
             </div>
           </nav>
 
-          {showHomepageSection("cubeJourney") ? (
-            <HomepageCubeJourney
-              mountCanvas={canMountHeavy3d}
+          {showHomepageSection("scrollSnap") ? (
+            <HomepageFlipStack
               interactive={flipComplete}
-              initialFace={journeyInitialFace}
+              initialPanel={flipInitialPanel}
+              begin={
+                <ClientErrorBoundary
+                  fallback={
+                    <p className="text-center text-sm text-muted-foreground py-12 px-4 min-h-[100svh]">
+                      Cube navigation is temporarily unavailable.{" "}
+                      <Link href="/dashboard" className="text-[#5B8DA8] underline">
+                        Open the dashboard
+                      </Link>
+                      .
+                    </p>
+                  }
+                >
+                  <HomepageHeroBlock mountCanvas={canMountHeavy3d} interactive={flipComplete} />
+                </ClientErrorBoundary>
+              }
+              game={<HomepageGamePanel />}
+              home={<HomepageExplorePanel mountBackground={canMountHeavy3d} />}
             />
-          ) : showHomepageSection("scrollSnap") ? (
-            <>
-              <ClientErrorBoundary
-                fallback={
-                  <p className="text-center text-sm text-muted-foreground py-12 px-4 min-h-[100svh]">
-                    Cube navigation is temporarily unavailable.{" "}
-                    <Link href="/dashboard" className="text-[#5B8DA8] underline">
-                      Open the dashboard
-                    </Link>
-                    .
-                  </p>
-                }
-              >
-                <HomepageHeroBlock mountCanvas={canMountHeavy3d} interactive={flipComplete} />
-              </ClientErrorBoundary>
-              <HomepageGamePanel />
-            </>
           ) : (
             <div className="relative overflow-x-hidden">
               <ClientErrorBoundary
@@ -2094,10 +2071,9 @@ export default function LandingPage() {
             </ClientErrorBoundary>
           )}
 
-          {showHomepageSection("scrollSnap") && !showHomepageSection("cubeJourney") ? (
-            <HomepageExplorePanel mountBackground={canMountHeavy3d}>
-              <footer className="border-t border-white/10 py-8 sm:py-12 bg-background/80 backdrop-blur-sm rounded-2xl">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          {showHomepageSection("scrollSnap") ? null : (
+            <footer className="border-t border-white/10 py-8 sm:py-12">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
                     <div className="space-y-4 col-span-2 md:col-span-1">
                       <div className="flex flex-col items-center gap-2 text-center">
@@ -2295,204 +2271,6 @@ export default function LandingPage() {
                   </div>
                 </div>
               </footer>
-            </HomepageExplorePanel>
-          ) : (
-            <footer className="border-t border-white/10 py-8 sm:py-12">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
-                  <div className="space-y-4 col-span-2 md:col-span-1">
-                    <div className="flex flex-col items-center gap-2 text-center">
-                      <Image
-                        src={zzaiLogo}
-                        alt="zzai zzai"
-                        width={48}
-                        height={48}
-                        className="h-12 w-12 object-contain drop-shadow-[0_0_12px_rgba(91, 141, 168,0.35)]"
-                      />
-                      <span className="text-sm font-bold tracking-[0.2em] text-foreground/90">
-                        zzai zzai
-                      </span>
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-4">Product</h4>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li>
-                        <Link href="/about" className="hover:text-foreground transition-colors">
-                          Features
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          href="/dashboard/billing"
-                          className="hover:text-foreground transition-colors"
-                        >
-                          Pricing
-                        </Link>
-                      </li>
-                      <li>
-                        <Link href="/play" className="hover:text-foreground transition-colors">
-                          ZZAI Play
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          href="/clean-sneaks"
-                          className="hover:text-foreground transition-colors"
-                        >
-                          {KLEAN_SNEAKS.title}
-                        </Link>
-                      </li>
-                      <li>
-                        <Link href="/about" className="hover:text-foreground transition-colors">
-                          OaaS
-                        </Link>
-                      </li>
-                      <li>
-                        <Link href="/seeds" className="hover:text-foreground transition-colors">
-                          ZZAI Seeds
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          href="/dashboard/zzai-show"
-                          className="hover:text-foreground transition-colors"
-                        >
-                          Event tracker (ZZAI Show)
-                        </Link>
-                      </li>
-                      <li>
-                        <Link href="/tools" className="hover:text-foreground transition-colors">
-                          Free AI Tools
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          href="/ai-tools-hub"
-                          className="hover:text-foreground transition-colors"
-                        >
-                          AI Tools Hub
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          href="/cyber-security-mini-apps"
-                          className="hover:text-foreground transition-colors"
-                        >
-                          Security Tools (Clutety)
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          href="/cyber-security-mini-apps/password-strength"
-                          className="hover:text-foreground transition-colors"
-                        >
-                          Password strength checker
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          href="/cyber-security-mini-apps/ssl-inspector"
-                          className="hover:text-foreground transition-colors"
-                        >
-                          SSL certificate checker
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          href="/ai-tools-hub/text-summarizer"
-                          className="hover:text-foreground transition-colors"
-                        >
-                          Text summarizer
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          href="/ai-tools-hub/grammar-checker"
-                          className="hover:text-foreground transition-colors"
-                        >
-                          Grammar checker
-                        </Link>
-                      </li>
-                      <li>
-                        <Link href="/seo-pack" className="hover:text-foreground transition-colors">
-                          SEO Pack
-                        </Link>
-                      </li>
-                      <li>
-                        <Link href="/blog" className="hover:text-foreground transition-colors">
-                          Blog
-                        </Link>
-                      </li>
-                      <li>
-                        <Link href="/orbit" className="hover:text-foreground transition-colors">
-                          Orbit Growth
-                        </Link>
-                      </li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-4">Developers</h4>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li>
-                        <Link href="/docs" className="hover:text-foreground transition-colors">
-                          Documentation
-                        </Link>
-                      </li>
-                      <li>
-                        <Link href="/docs" className="hover:text-foreground transition-colors">
-                          API Reference
-                        </Link>
-                      </li>
-                      <li>
-                        <Link href="/docs" className="hover:text-foreground transition-colors">
-                          SDK
-                        </Link>
-                      </li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-4">Company</h4>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li>
-                        <Link href="/about" className="hover:text-foreground transition-colors">
-                          About
-                        </Link>
-                      </li>
-                      <li>
-                        <Link href="/contact" className="hover:text-foreground transition-colors">
-                          Contact
-                        </Link>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-                <div className="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-                  <p>2026 zzai zzai. All rights reserved.</p>
-                  <div className="flex items-center gap-6">
-                    {userIsAdmin && (
-                      <Link href="/dashboard/traffic">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="gap-2 border-[#5B8DA8]/40 text-[#5B8DA8] hover:bg-[#5B8DA8]/10"
-                          data-testid="button-homepage-traffic"
-                        >
-                          <BarChart3 className="h-3.5 w-3.5" />
-                          Traffic & Analytics
-                        </Button>
-                      </Link>
-                    )}
-                    <Link href="/privacy" className="hover:text-foreground transition-colors">
-                      Privacy
-                    </Link>
-                    <Link href="/terms" className="hover:text-foreground transition-colors">
-                      Terms
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </footer>
           )}
         </div>
       </div>
