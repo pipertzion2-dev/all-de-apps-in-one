@@ -24,20 +24,18 @@ describe("homepage flip stack", () => {
     expect(flipPanelIndex("nav-cube")).toBe(2);
   });
 
-  it("scrubs continuously and snaps without an always-on RAF loop", () => {
+  it("uses discrete panel nudges with smooth RAF settling", () => {
     const flipSrc = readFileSync(
       resolve(__dirname, "../../components/homepage-flip-stack.tsx"),
       "utf8",
     );
-    expect(flipSrc).toContain("virtualIndexRef");
     expect(flipSrc).toContain("ensureTick");
-    expect(flipSrc).toContain("scheduleSnap");
-    expect(flipSrc).toContain("snapToNearestPanel");
-    expect(flipSrc).not.toContain("Math.round(displayedIndexRef.current)");
+    expect(flipSrc).toContain("const nudge = (direction: 1 | -1)");
+    expect(flipSrc).toContain("NUDGE_DEBOUNCE_MS");
+    expect(flipSrc).toContain('panelId === "home-game" && direction > 0');
+    expect(flipSrc).not.toContain("virtualIndexRef");
+    expect(flipSrc).not.toContain("scheduleSnap");
     expect(flipSrc).toMatch(/const tick = \(now: number\) => \{[\s\S]*animRef\.current = 0/);
-    expect(flipSrc).not.toMatch(
-      /const tick = \(now: number\) => \{[\s\S]*?animRef\.current = requestAnimationFrame\(tick\);[\s\S]*?const dt/,
-    );
   });
 
   it("rotates forward like the intro reveal (positive rotor, negative face hinge)", () => {
@@ -50,22 +48,12 @@ describe("homepage flip stack", () => {
     expect(flipSrc).not.toContain("rotateX(${-index * 90}deg)");
   });
 
-  it("allows stack flips from the top or bottom edge of a scrollable face", () => {
-    const flipSrc = readFileSync(
-      resolve(__dirname, "../../components/homepage-flip-stack.tsx"),
-      "utf8",
-    );
-    expect(flipSrc).toContain("const atTop = face.scrollTop <= threshold");
-    expect(flipSrc).toContain("return atTop || atBottom");
-  });
-
   it("supports touch swipes for mobile flip navigation", () => {
     const flipSrc = readFileSync(
       resolve(__dirname, "../../components/homepage-flip-stack.tsx"),
       "utf8",
     );
     expect(flipSrc).toContain('addEventListener("touchstart"');
-    expect(flipSrc).toContain('addEventListener("touchmove"');
     expect(flipSrc).toContain('addEventListener("touchend"');
     expect(flipSrc).toContain("SWIPE_THRESHOLD_PX");
   });

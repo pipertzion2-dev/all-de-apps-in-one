@@ -20,7 +20,7 @@ export function HomepageGamePanel() {
   };
 
   return (
-    <section className="relative flex min-h-[100svh] flex-col overflow-hidden bg-black">
+    <section className="relative flex h-[100svh] flex-col overflow-hidden bg-black">
       <div
         className="pointer-events-none absolute inset-0 opacity-35 mix-blend-soft-light"
         aria-hidden
