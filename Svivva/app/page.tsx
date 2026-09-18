@@ -12,6 +12,7 @@ import { runBodyLayerHygiene } from "@/lib/body-layer-cleanup";
 import { showHomepageSection } from "@/lib/homepage-layout";
 import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
 import { HomepageExplorePanel } from "@/components/homepage-explore-panel";
+import { HomepageGameLoadingPanel } from "@/components/homepage-game-loading-panel";
 import { HomepageGamePanel } from "@/components/homepage-game-panel";
 import { HomepageHeroBlock } from "@/components/homepage-hero-block";
 import { usePlatform } from "@/lib/platform-context";
@@ -763,6 +764,7 @@ export default function LandingPage() {
                 <HomepageHeroBlock mountCanvas={canMountHeavy3d} interactive={flipComplete} />
               </ClientErrorBoundary>
               <HomepageGamePanel />
+              <HomepageGameLoadingPanel />
             </>
           ) : (
           <div className="relative overflow-x-hidden">
