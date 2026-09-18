@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "fs";
+import { resolve } from "path";
 import {
   flipPanelFromHash,
   flipPanelIndex,
@@ -23,5 +25,15 @@ describe("homepage flip stack", () => {
     expect(flipPanelIndex("nav-cube")).toBe(0);
     expect(flipPanelIndex("home-game")).toBe(1);
     expect(flipPanelIndex("home-explore")).toBe(2);
+  });
+
+  it("locks wheel navigation to the settled panel index", () => {
+    const flipSrc = readFileSync(
+      resolve(__dirname, "../../components/homepage-flip-stack.tsx"),
+      "utf8",
+    );
+    expect(flipSrc).toContain("targetIndexRef.current");
+    expect(flipSrc).toContain("FLIP_SETTLE_EPSILON");
+    expect(flipSrc).not.toContain("Math.round(displayedIndexRef.current)");
   });
 });

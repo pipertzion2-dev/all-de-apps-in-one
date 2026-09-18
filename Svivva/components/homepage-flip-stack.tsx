@@ -24,6 +24,9 @@ type HomepageFlipStackProps = {
   interactive?: boolean;
 };
 
+const FLIP_SETTLE_EPSILON = 0.02;
+const WHEEL_DEBOUNCE_MS = 420;
+
 /** Three full-viewport faces — same Dune-style rotateX cube as the intro reveal. */
 export function HomepageFlipStack({
   begin,
@@ -39,6 +42,7 @@ export function HomepageFlipStack({
   const targetIndexRef = useRef(flipPanelIndex(initialPanel));
   const displayedIndexRef = useRef(flipPanelIndex(initialPanel));
   const animRef = useRef(0);
+  const lastWheelFlipAtRef = useRef(0);
   const [activePanel, setActivePanel] = useState<HomepageFlipPanelId>(initialPanel);
 
   const panels = [
@@ -54,8 +58,13 @@ export function HomepageFlipStack({
     }
     faceRefs.current.forEach((face, i) => {
       if (!face) return;
+      face.style.transformOrigin = "center center";
       face.style.transform = `rotateX(${i * 90}deg) translate3d(0, 0, ${halfH}px)`;
     });
+  }, []);
+
+  const isAnimating = useCallback(() => {
+    return Math.abs(displayedIndexRef.current - targetIndexRef.current) > FLIP_SETTLE_EPSILON;
   }, []);
 
   const syncDepth = useCallback(() => {
@@ -65,10 +74,11 @@ export function HomepageFlipStack({
 
   const goToPanel = useCallback((panel: HomepageFlipPanelId) => {
     const next = flipPanelIndex(panel);
+    if (next === targetIndexRef.current && !isAnimating()) return;
     targetIndexRef.current = next;
     setActivePanel(panel);
     window.history.replaceState(null, "", `/#${hashForFlipPanel(panel)}`);
-  }, []);
+  }, [isAnimating]);
 
   useLayoutEffect(() => {
     syncDepth();
@@ -78,47 +88,46 @@ export function HomepageFlipStack({
   }, [syncDepth]);
 
   useEffect(() => {
-    goToPanel(initialPanel);
-    displayedIndexRef.current = flipPanelIndex(initialPanel);
+    const index = flipPanelIndex(initialPanel);
+    targetIndexRef.current = index;
+    displayedIndexRef.current = index;
+    setActivePanel(initialPanel);
     syncDepth();
-  }, [initialPanel, goToPanel, syncDepth]);
+  }, [initialPanel, syncDepth]);
 
   useEffect(() => {
     let last = performance.now();
     const tick = (now: number) => {
-      animRef.current = 0;
+      animRef.current = requestAnimationFrame(tick);
       const dt = Math.min((now - last) / 1000, 0.032);
       last = now;
+
       const target = targetIndexRef.current;
       let current = displayedIndexRef.current;
       const delta = target - current;
-      if (Math.abs(delta) > 0.0005) {
-        const smoothing = 1 - Math.exp(-10 * dt);
-        current += delta * smoothing;
-        if ((delta > 0 && current > target) || (delta < 0 && current < target)) {
-          current = target;
+
+      if (Math.abs(delta) <= FLIP_SETTLE_EPSILON) {
+        if (current !== target) {
+          displayedIndexRef.current = target;
+          paintRotor(target);
         }
-        displayedIndexRef.current = current;
-        paintRotor(current);
-        animRef.current = requestAnimationFrame(tick);
-      } else if (current !== target) {
-        displayedIndexRef.current = target;
-        paintRotor(target);
+        return;
       }
+
+      const smoothing = 1 - Math.exp(-10 * dt);
+      current += delta * smoothing;
+      if ((delta > 0 && current > target) || (delta < 0 && current < target)) {
+        current = target;
+      }
+      displayedIndexRef.current = current;
+      paintRotor(current);
     };
 
-    const ensureTick = () => {
-      if (!animRef.current) {
-        last = performance.now();
-        animRef.current = requestAnimationFrame(tick);
-      }
-    };
-
-    ensureTick();
+    animRef.current = requestAnimationFrame(tick);
     return () => {
       if (animRef.current) cancelAnimationFrame(animRef.current);
     };
-  }, [activePanel, paintRotor]);
+  }, [paintRotor]);
 
   useEffect(() => {
     const onFlip = (event: Event) => {
@@ -133,7 +142,6 @@ export function HomepageFlipStack({
     if (!interactive) return;
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reducedMotion) return;
 
     const canFlipFromFace = (face: HTMLDivElement, direction: 1 | -1) => {
       const threshold = 8;
@@ -144,18 +152,25 @@ export function HomepageFlipStack({
     };
 
     const nudge = (direction: 1 | -1) => {
-      const current = Math.round(displayedIndexRef.current);
+      if (isAnimating()) return;
+      const now = performance.now();
+      if (now - lastWheelFlipAtRef.current < WHEEL_DEBOUNCE_MS) return;
+
+      const current = targetIndexRef.current;
       const face = faceRefs.current[current];
       if (face && !canFlipFromFace(face, direction)) return;
+
       const next = Math.min(Math.max(current + direction, 0), panels.length - 1);
       if (next === current) return;
+
+      lastWheelFlipAtRef.current = now;
       goToPanel(flipPanelFromIndex(next));
     };
 
     const onWheel = (e: WheelEvent) => {
       if (Math.abs(e.deltaY) < 4) return;
       const direction = e.deltaY > 0 ? 1 : -1;
-      const current = Math.round(displayedIndexRef.current);
+      const current = targetIndexRef.current;
       const face = faceRefs.current[current];
       if (face && !canFlipFromFace(face, direction)) return;
       e.preventDefault();
@@ -164,12 +179,13 @@ export function HomepageFlipStack({
 
     window.addEventListener("wheel", onWheel, { passive: false });
     return () => window.removeEventListener("wheel", onWheel);
-  }, [interactive, goToPanel, panels.length]);
+  }, [interactive, goToPanel, isAnimating, panels.length]);
 
   return (
     <div
       ref={shellRef}
       data-homepage-flip-stack=""
+      data-active-panel={activePanel}
       className="relative w-full"
       style={{
         height: "100svh",
@@ -199,6 +215,7 @@ export function HomepageFlipStack({
               faceRefs.current[i] = el;
             }}
             data-homepage-flip-face=""
+            data-flip-index={i}
             className="bg-background"
             style={{
               position: "absolute",
