@@ -10,6 +10,9 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { runBodyLayerHygiene } from "@/lib/body-layer-cleanup";
 import { showHomepageSection } from "@/lib/homepage-layout";
+import { HomepageExplorePanel } from "@/components/homepage-explore-panel";
+import { HomepageGamePanel } from "@/components/homepage-game-panel";
+import { HomepageHeroBlock } from "@/components/homepage-hero-block";
 import { usePlatform } from "@/lib/platform-context";
 import { ZzaiModeToggle } from "@/components/zzai-mode-toggle";
 import Link from "next/link";
@@ -40,10 +43,6 @@ import {
   Users,
 } from "lucide-react";
 import dynamic from "next/dynamic";
-const SvivvaArtifact = dynamic(
-  () => import("@/components/svivva-artifact").then((m) => m.SvivvaArtifact),
-  { ssr: false },
-);
 const PlatformFeatureHub = dynamic(
   () => import("@/components/platform-feature-hub").then((m) => m.PlatformFeatureHub),
   { ssr: false },
@@ -210,6 +209,13 @@ export default function LandingPage() {
   useEffect(() => {
     if (!flipComplete) return;
     runBodyLayerHygiene();
+  }, [flipComplete]);
+
+  useEffect(() => {
+    if (!flipComplete || !showHomepageSection("scrollSnap")) return;
+    const root = document.documentElement;
+    root.classList.add("homepage-scroll-snap");
+    return () => root.classList.remove("homepage-scroll-snap");
   }, [flipComplete]);
 
   useEffect(() => {
@@ -728,41 +734,38 @@ export default function LandingPage() {
             </div>
           </nav>
 
-          {/* ── ZZAI6 cube + OaaS — sticky digi camo water behind the cube on mobile ── */}
-          <div className="relative overflow-x-hidden">
-            <div className="pointer-events-none absolute inset-x-0 top-0 bottom-0 z-0" aria-hidden>
-              <div className="sticky top-0 h-[100svh] w-full overflow-hidden opacity-80 md:opacity-65">
-                {canMountHeavy3d ? (
-                  <CamoThreeOverlay
-                    preset="oaas"
-                    eagerMount
-                    keepMounted
-                    className="h-full w-full"
-                  />
-                ) : null}
-              </div>
-            </div>
-
-            {/* The shell always renders so the hero holds its layout and reads as
-                the page's first screen; only the WebGL canvas waits for
-                canMountHeavy3d. Gating the whole section collapsed the hero, so
-                the top of the page was the OaaS block until the cube mounted and
-                shoved everything down. */}
-            <div className="relative z-10">
+          {showHomepageSection("scrollSnap") ? (
+            <>
               <ClientErrorBoundary
                 fallback={
-                  <p className="text-center text-sm text-muted-foreground py-12 px-4">
-                    Cube navigation is temporarily unavailable. Scroll down to explore ZZAI, or{" "}
+                  <p className="text-center text-sm text-muted-foreground py-12 px-4 min-h-[100svh]">
+                    Cube navigation is temporarily unavailable.{" "}
                     <Link href="/dashboard" className="text-[#5B8DA8] underline">
-                      open the dashboard
+                      Open the dashboard
                     </Link>
                     .
                   </p>
                 }
               >
-                <SvivvaArtifact mountCanvas={canMountHeavy3d} />
+                <HomepageHeroBlock mountCanvas={canMountHeavy3d} interactive={flipComplete} />
               </ClientErrorBoundary>
-            </div>
+              <HomepageGamePanel />
+            </>
+          ) : (
+          <div className="relative overflow-x-hidden">
+            <ClientErrorBoundary
+              fallback={
+                <p className="text-center text-sm text-muted-foreground py-12 px-4">
+                  Cube navigation is temporarily unavailable. Scroll down to explore ZZAI, or{" "}
+                  <Link href="/dashboard" className="text-[#5B8DA8] underline">
+                    open the dashboard
+                  </Link>
+                  .
+                </p>
+              }
+            >
+              <HomepageHeroBlock mountCanvas={canMountHeavy3d} interactive={flipComplete} />
+            </ClientErrorBoundary>
 
             {showHomepageSection("quickLinks") && (
               <section className="relative z-10 pb-6 sm:pb-8 pt-2">
@@ -919,14 +922,8 @@ export default function LandingPage() {
             </div>
             )}
 
-            <div
-              className="pointer-events-none absolute inset-x-0 bottom-0 h-28 sm:h-36 z-[1]"
-              style={{
-                background:
-                  "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background) / 0.85) 35%, transparent 100%)",
-              }}
-            />
           </div>
+          )}
 
           {showHomepageSection("buildSystem") && (
           <section id="platforms" className="py-16 sm:py-24 relative z-10 overflow-visible">
@@ -2032,8 +2029,10 @@ export default function LandingPage() {
           </ClientErrorBoundary>
           )}
 
-          <footer className="border-t border-white/10 py-8 sm:py-12">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          {showHomepageSection("scrollSnap") ? (
+            <HomepageExplorePanel mountBackground={canMountHeavy3d}>
+              <footer className="border-t border-white/10 py-8 sm:py-12 bg-background/80 backdrop-blur-sm rounded-2xl">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
                 <div className="space-y-4 col-span-2 md:col-span-1">
                   <div className="flex flex-col items-center gap-2 text-center">
@@ -2227,7 +2226,206 @@ export default function LandingPage() {
                 </div>
               </div>
             </div>
-          </footer>
+              </footer>
+            </HomepageExplorePanel>
+          ) : (
+            <footer className="border-t border-white/10 py-8 sm:py-12">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
+                  <div className="space-y-4 col-span-2 md:col-span-1">
+                    <div className="flex flex-col items-center gap-2 text-center">
+                      <Image
+                        src={zzaiLogo}
+                        alt="zzai zzai"
+                        width={48}
+                        height={48}
+                        className="h-12 w-12 object-contain drop-shadow-[0_0_12px_rgba(91, 141, 168,0.35)]"
+                      />
+                      <span className="text-sm font-bold tracking-[0.2em] text-foreground/90">
+                        zzai zzai
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-4">Product</h4>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li>
+                        <Link href="/about" className="hover:text-foreground transition-colors">
+                          Features
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/dashboard/billing"
+                          className="hover:text-foreground transition-colors"
+                        >
+                          Pricing
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/play" className="hover:text-foreground transition-colors">
+                          ZZAI Play
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/clean-sneaks"
+                          className="hover:text-foreground transition-colors"
+                        >
+                          {KLEAN_SNEAKS.title}
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/about" className="hover:text-foreground transition-colors">
+                          OaaS
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/seeds" className="hover:text-foreground transition-colors">
+                          ZZAI Seeds
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/dashboard/zzai-show"
+                          className="hover:text-foreground transition-colors"
+                        >
+                          Event tracker (ZZAI Show)
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/tools" className="hover:text-foreground transition-colors">
+                          Free AI Tools
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/ai-tools-hub"
+                          className="hover:text-foreground transition-colors"
+                        >
+                          AI Tools Hub
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/cyber-security-mini-apps"
+                          className="hover:text-foreground transition-colors"
+                        >
+                          Security Tools (Clutety)
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/cyber-security-mini-apps/password-strength"
+                          className="hover:text-foreground transition-colors"
+                        >
+                          Password strength checker
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/cyber-security-mini-apps/ssl-inspector"
+                          className="hover:text-foreground transition-colors"
+                        >
+                          SSL certificate checker
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/ai-tools-hub/text-summarizer"
+                          className="hover:text-foreground transition-colors"
+                        >
+                          Text summarizer
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/ai-tools-hub/grammar-checker"
+                          className="hover:text-foreground transition-colors"
+                        >
+                          Grammar checker
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/seo-pack" className="hover:text-foreground transition-colors">
+                          SEO Pack
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/blog" className="hover:text-foreground transition-colors">
+                          Blog
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/orbit" className="hover:text-foreground transition-colors">
+                          Orbit Growth
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-4">Developers</h4>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li>
+                        <Link href="/docs" className="hover:text-foreground transition-colors">
+                          Documentation
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/docs" className="hover:text-foreground transition-colors">
+                          API Reference
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/docs" className="hover:text-foreground transition-colors">
+                          SDK
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-4">Company</h4>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li>
+                        <Link href="/about" className="hover:text-foreground transition-colors">
+                          About
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/contact" className="hover:text-foreground transition-colors">
+                          Contact
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                <div className="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
+                  <p>2026 zzai zzai. All rights reserved.</p>
+                  <div className="flex items-center gap-6">
+                    {userIsAdmin && (
+                      <Link href="/dashboard/traffic">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-2 border-[#5B8DA8]/40 text-[#5B8DA8] hover:bg-[#5B8DA8]/10"
+                          data-testid="button-homepage-traffic"
+                        >
+                          <BarChart3 className="h-3.5 w-3.5" />
+                          Traffic & Analytics
+                        </Button>
+                      </Link>
+                    )}
+                    <Link href="/privacy" className="hover:text-foreground transition-colors">
+                      Privacy
+                    </Link>
+                    <Link href="/terms" className="hover:text-foreground transition-colors">
+                      Terms
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </footer>
+          )}
         </div>
       </div>
     </div>
