@@ -9,6 +9,10 @@ export type GameStartScreenProps = {
   onStart?: () => void;
   /** When true, cover sits behind loading wheels and ignores taps. */
   preload?: boolean;
+  /** When true, fills the parent instead of the viewport (homepage intro flow). */
+  contained?: boolean;
+  /** Override the hint under the Start label. */
+  actionHint?: string;
 };
 
 let coverReadyPromise: Promise<void> | null = null;
@@ -31,12 +35,15 @@ export function GameStartScreen({
   style,
   onStart,
   preload = false,
+  contained = false,
+  actionHint = "Tap to play",
 }: GameStartScreenProps) {
   const interactive = Boolean(onStart) && !preload;
+  const positionClass = contained ? "absolute inset-0" : "fixed inset-0";
 
   return (
     <div
-      className={`fixed inset-0 overflow-hidden bg-black ${
+      className={`${positionClass} overflow-hidden bg-black ${
         preload ? "z-[1] pointer-events-none" : "z-[30] cursor-pointer"
       } ${className ?? ""}`}
       style={style}
@@ -80,7 +87,7 @@ export function GameStartScreen({
             Start
           </p>
           <p className="text-xs uppercase tracking-[0.35em] text-white/80 animate-pulse sm:text-sm">
-            Tap to play
+            {actionHint}
           </p>
         </div>
       )}

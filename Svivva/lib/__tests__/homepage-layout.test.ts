@@ -9,7 +9,7 @@ describe("homepage-layout", () => {
     expect(HOMEPAGE_SECTIONS.cleanSneaks).toBe(false);
   });
 
-  it("uses scroll snap panels for cube, game, and explore", () => {
-    expect(showHomepageSection("scrollSnap")).toBe(true);
+  it("uses intro flip game flow instead of scroll snap panels", () => {
+    expect(showHomepageSection("scrollSnap")).toBe(false);
   });
 });
