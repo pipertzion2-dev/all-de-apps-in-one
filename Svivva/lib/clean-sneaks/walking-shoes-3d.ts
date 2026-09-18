@@ -6,6 +6,13 @@ import {
   type PreparedQuadrant,
 } from "./baloon8-textures";
 import { getColorway } from "./sneaker-catalog";
+import { createEmptyShoeCondition, type ShoeCondition } from "./dirt-system";
+import {
+  createShoeDirtOverlay,
+  disposeShoeDirtOverlay,
+  updateShoeDirtOverlay,
+  type ShoeDirtOverlay,
+} from "./shoe-dirt-overlay";
 
 /**
  * YOUR Baloon8 sneakers from the orthographic blueprint (rear view toward the
@@ -15,6 +22,9 @@ import { getColorway } from "./sneaker-catalog";
 export type Baloon8OrthoShoe = {
   root: THREE.Group;
   mats: THREE.MeshBasicMaterial[];
+  rearW: number;
+  rearH: number;
+  dirtOverlay: ShoeDirtOverlay | null;
 };
 
 export type WalkingShoes3D = {
@@ -88,9 +98,12 @@ function buildOrthoShoe(
   rear.frustumCulled = false;
   root.add(rear);
 
+  const dirtOverlay = createShoeDirtOverlay(rearW, rearH);
+  root.add(dirtOverlay.group);
+
   if (mirror) root.scale.x = -1;
 
-  return { root, mats };
+  return { root, mats, rearW, rearH, dirtOverlay };
 }
 
 function shoeScale(mobile: boolean, portrait: boolean): number {
@@ -199,15 +212,26 @@ function spawnDust(shoes: WalkingShoes3D, xOffset: number): void {
   dustPool.push(p);
 }
 
-function tintShoe(shoe: Baloon8OrthoShoe | null, dirt: number, freshGlow: boolean): void {
+function tintShoe(
+  shoe: Baloon8OrthoShoe | null,
+  dirt: number,
+  freshGlow: boolean,
+  condition?: ShoeCondition,
+): void {
   if (!shoe) return;
   for (const m of shoe.mats) {
     const base =
       (m.userData.baseTint as THREE.Color | undefined)?.clone() ?? new THREE.Color(0xffffff);
-    if (dirt > 0.02) base.lerp(new THREE.Color(0x6b5340), 0.06 + dirt * 0.22);
+    // Light global wash only — zone splats carry the real dirt.
+    if (dirt > 0.02) base.lerp(new THREE.Color(0x6b5340), 0.02 + dirt * 0.08);
     if (freshGlow) base.lerp(new THREE.Color(0xffffff), 0.06);
     m.color.copy(base);
     m.opacity = 1;
+  }
+  if (shoe.dirtOverlay && condition) {
+    updateShoeDirtOverlay(shoe.dirtOverlay, condition, shoe.rearW, shoe.rearH);
+  } else if (shoe.dirtOverlay) {
+    updateShoeDirtOverlay(shoe.dirtOverlay, createEmptyShoeCondition(), shoe.rearW, shoe.rearH);
   }
 }
 
@@ -225,6 +249,8 @@ export function updateWalkingShoes3D(
     shieldActive: boolean;
     speed?: number;
     portrait?: boolean;
+    leftShoe?: ShoeCondition;
+    rightShoe?: ShoeCondition;
   },
 ): void {
   const phase = args.walkPhase * Math.PI * 2;
@@ -264,8 +290,8 @@ export function updateWalkingShoes3D(
     spawnDust(shoes, stride > 0 ? -lateral : lateral);
   }
 
-  tintShoe(shoes.leftShoe, args.dirt, args.freshGlow);
-  tintShoe(shoes.rightShoe, args.dirt, args.freshGlow);
+  tintShoe(shoes.leftShoe, args.dirt, args.freshGlow, args.leftShoe);
+  tintShoe(shoes.rightShoe, args.dirt, args.freshGlow, args.rightShoe);
 
   shoes.shieldRing.visible = args.shieldActive;
   shoes.shieldGlow.intensity = args.shieldActive ? 1.2 : 0;
