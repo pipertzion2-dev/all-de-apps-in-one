@@ -40,6 +40,7 @@ function CleanSneaksPageContent() {
   const immersiveRun =
     playMode === "runner" &&
     (gamePhase === "running" ||
+      gamePhase === "paused" ||
       gamePhase === "countdown" ||
       gamePhase === "colorPick" ||
       gamePhase === "walkComplete" ||

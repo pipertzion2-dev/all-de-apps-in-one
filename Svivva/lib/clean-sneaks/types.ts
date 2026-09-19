@@ -29,6 +29,7 @@ export type GamePhase =
   | "colorPick"
   | "countdown"
   | "running"
+  | "paused"
   | "walkComplete"
   | "casino"
   | "over";

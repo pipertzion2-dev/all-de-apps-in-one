@@ -347,6 +347,7 @@ export function CleanSneaksGame3D({
         p === "colorPick" ||
         p === "countdown" ||
         p === "running" ||
+        p === "paused" ||
         p === "over" ||
         p === "walkComplete" ||
         p === "casino"
@@ -418,12 +419,37 @@ export function CleanSneaksGame3D({
     };
   }, [active, phase, finishLoading]);
 
+  const pauseRun = useCallback(() => {
+    if (phase !== "running") return;
+    stateRef.current.running = false;
+    setPhase("paused");
+  }, [phase]);
+
+  const resumeRun = useCallback(() => {
+    if (phase !== "paused") return;
+    stateRef.current.running = true;
+    stateRef.current.lastTs = performance.now();
+    setPhase("running");
+  }, [phase]);
+
   useEffect(() => {
     if (!active) return;
     const onKey = (e: KeyboardEvent) => {
       if (phase === "over" || phase === "loading" || phase === "walkComplete" || phase === "casino")
         return;
       const k = e.key.toLowerCase();
+      if (phase === "paused") {
+        if (k === "escape" || k === "p" || k === " " || k === "enter" || e.code === "Space") {
+          e.preventDefault();
+          resumeRun();
+        }
+        return;
+      }
+      if (phase === "running" && (k === "escape" || k === "p")) {
+        e.preventDefault();
+        pauseRun();
+        return;
+      }
       if (phase === "start") {
         if (k === " " || k === "enter" || e.code === "Space") {
           e.preventDefault();
@@ -476,7 +502,7 @@ export function CleanSneaksGame3D({
     };
     window.addEventListener("keydown", onKey, { passive: false });
     return () => window.removeEventListener("keydown", onKey);
-  }, [active, phase, beginGame, confirmColorwayAndCountdown, onOhNo]);
+  }, [active, phase, beginGame, confirmColorwayAndCountdown, onOhNo, pauseRun, resumeRun]);
 
   useEffect(() => {
     if (!active || phase !== "running") return;
@@ -629,19 +655,92 @@ export function CleanSneaksGame3D({
           fullscreen ? "rounded-lg border border-white/10" : "rounded-xl border border-white/10"
         }`}
       >
-        {phase === "running" && onExit && (
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            className={`pointer-events-auto absolute z-20 border-white/20 bg-black/55 text-[10px] uppercase tracking-wider ${
-              portrait ? "right-2 top-2 h-7 px-2" : "right-3 top-3"
+        {(phase === "running" || phase === "paused") && (
+          <div
+            className={`pointer-events-auto absolute z-20 flex gap-2 ${
+              portrait ? "right-2 top-2" : "right-3 top-3"
             }`}
-            onClick={onExit}
-            data-testid="button-run-exit"
           >
-            Exit
-          </Button>
+            {phase === "running" ? (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className={`border-white/20 bg-black/55 text-[10px] uppercase tracking-wider ${
+                  portrait ? "h-7 px-2" : ""
+                }`}
+                onClick={pauseRun}
+                data-testid="button-run-pause"
+              >
+                Pause
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                size="sm"
+                className={`bg-[#d4af37] text-[10px] uppercase tracking-wider text-[#1a1008] ${
+                  portrait ? "h-7 px-2" : ""
+                }`}
+                onClick={resumeRun}
+                data-testid="button-run-resume-top"
+              >
+                Resume
+              </Button>
+            )}
+            {onExit && (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className={`border-white/20 bg-black/55 text-[10px] uppercase tracking-wider ${
+                  portrait ? "h-7 px-2" : ""
+                }`}
+                onClick={onExit}
+                data-testid="button-run-exit"
+              >
+                Exit
+              </Button>
+            )}
+          </div>
+        )}
+
+        {phase === "paused" && (
+          <div
+            className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/75 px-4 text-center backdrop-blur-sm"
+            data-testid="pause-overlay"
+          >
+            <p className="text-[10px] uppercase tracking-[0.4em] text-[#d4af37]">Paused</p>
+            <h3 className="mt-2 font-serif text-3xl text-[#f7e7b0]">Walk on hold</h3>
+            <p className="mt-2 max-w-sm text-sm text-[#e8dcc0]/70">
+              Credits so far: {scoreToCredits(hud.score).toLocaleString()} · {hud.distance}m ·{" "}
+              {hud.cleanliness}% clean
+            </p>
+            <CasinoEntryRules compact className="mt-4" />
+            <div className="mt-6 flex flex-wrap justify-center gap-2">
+              <Button
+                size="lg"
+                className="bg-[#d4af37] text-[#1a1008] hover:bg-[#e0c15a]"
+                onClick={resumeRun}
+                data-testid="button-run-resume"
+              >
+                Resume
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-[#d4af37]/40 text-[#ffd76a] disabled:opacity-40"
+                disabled={!canAffordTable(scoreToCredits(hud.score))}
+                onClick={cashOutToBundle}
+                data-testid="button-pause-cashout"
+              >
+                Steal Bundle · {scoreToCredits(hud.score).toLocaleString()}
+              </Button>
+              <Button size="lg" variant="ghost" className="text-[#e8dcc0]/70" onClick={runItBack}>
+                New Walk
+              </Button>
+            </div>
+            <p className="mt-3 text-[11px] text-white/40">Esc / P to resume</p>
+          </div>
         )}
 
         <div
