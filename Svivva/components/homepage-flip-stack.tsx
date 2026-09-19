@@ -17,30 +17,31 @@ type HomepageFlipStackProps = {
 };
 
 const FLIP_SETTLE_EPSILON = 0.02;
-const NUDGE_DEBOUNCE_MS = 260;
+const WHEEL_SNAP_MS = 140;
 const SWIPE_THRESHOLD_PX = 36;
 const MAX_PANEL_INDEX = 1;
 
-/** Two full-viewport faces — game, then product-cube homepage with pricing. */
+/** Two full-viewport faces — homepage (cube + pricing), then game. */
 export function HomepageFlipStack({
   begin,
   game,
-  initialPanel = "home-game",
+  initialPanel = "nav-cube",
   interactive = true,
 }: HomepageFlipStackProps) {
   const shellRef = useRef<HTMLDivElement>(null);
   const rotorRef = useRef<HTMLDivElement>(null);
   const faceRefs = useRef<(HTMLDivElement | null)[]>([]);
   const halfHRef = useRef(400);
+  const virtualIndexRef = useRef(flipPanelIndex(initialPanel));
   const targetIndexRef = useRef(flipPanelIndex(initialPanel));
   const displayedIndexRef = useRef(flipPanelIndex(initialPanel));
   const animRef = useRef(0);
-  const lastNudgeAtRef = useRef(0);
+  const wheelSnapTimerRef = useRef(0);
   const [activePanel, setActivePanel] = useState<HomepageFlipPanelId>(initialPanel);
 
   const panels = [
-    { id: "home-game" as const, node: game },
     { id: "nav-cube" as const, node: begin },
+    { id: "home-game" as const, node: game },
   ];
 
   const paintFaces = useCallback(() => {
@@ -57,10 +58,6 @@ export function HomepageFlipStack({
     if (rotorRef.current) {
       rotorRef.current.style.transform = `translate3d(0, 0, ${-halfH}px) rotateX(${index * 90}deg)`;
     }
-  }, []);
-
-  const isAnimating = useCallback(() => {
-    return Math.abs(displayedIndexRef.current - targetIndexRef.current) > FLIP_SETTLE_EPSILON;
   }, []);
 
   const syncDepth = useCallback(() => {
@@ -108,6 +105,13 @@ export function HomepageFlipStack({
     window.history.replaceState(null, "", `/#${hashForFlipPanel(panel)}`);
   }, []);
 
+  const clearSnapTimer = useCallback(() => {
+    if (wheelSnapTimerRef.current) {
+      window.clearTimeout(wheelSnapTimerRef.current);
+      wheelSnapTimerRef.current = 0;
+    }
+  }, []);
+
   const goToPanel = useCallback(
     (panel: HomepageFlipPanelId) => {
       const next = flipPanelIndex(panel);
@@ -116,12 +120,40 @@ export function HomepageFlipStack({
         Math.abs(targetIndexRef.current - next) <= FLIP_SETTLE_EPSILON;
       if (settled) return;
 
+      clearSnapTimer();
+      virtualIndexRef.current = next;
       targetIndexRef.current = next;
       commitPanel(panel);
       ensureTick();
     },
-    [commitPanel, ensureTick],
+    [clearSnapTimer, commitPanel, ensureTick],
   );
+
+  const snapToNearestPanel = useCallback(() => {
+    const snapped = Math.min(MAX_PANEL_INDEX, Math.max(0, Math.round(virtualIndexRef.current)));
+    if (
+      snapped === Math.round(targetIndexRef.current) &&
+      Math.abs(displayedIndexRef.current - snapped) <= FLIP_SETTLE_EPSILON
+    ) {
+      virtualIndexRef.current = snapped;
+      targetIndexRef.current = snapped;
+      return;
+    }
+    virtualIndexRef.current = snapped;
+    targetIndexRef.current = snapped;
+    commitPanel(flipPanelFromIndex(snapped));
+    ensureTick();
+  }, [commitPanel, ensureTick]);
+
+  const scheduleSnap = useCallback(() => {
+    if (wheelSnapTimerRef.current) {
+      window.clearTimeout(wheelSnapTimerRef.current);
+    }
+    wheelSnapTimerRef.current = window.setTimeout(() => {
+      wheelSnapTimerRef.current = 0;
+      snapToNearestPanel();
+    }, WHEEL_SNAP_MS);
+  }, [snapToNearestPanel]);
 
   useLayoutEffect(() => {
     syncDepth();
@@ -138,6 +170,7 @@ export function HomepageFlipStack({
     ) {
       return;
     }
+    virtualIndexRef.current = index;
     targetIndexRef.current = index;
     displayedIndexRef.current = index;
     setActivePanel(initialPanel);
@@ -147,6 +180,7 @@ export function HomepageFlipStack({
   useEffect(() => {
     return () => {
       if (animRef.current) cancelAnimationFrame(animRef.current);
+      if (wheelSnapTimerRef.current) window.clearTimeout(wheelSnapTimerRef.current);
     };
   }, []);
 
@@ -162,13 +196,20 @@ export function HomepageFlipStack({
   useEffect(() => {
     if (!interactive) return;
 
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const mobile = window.matchMedia("(max-width: 767px)").matches;
+    const scrollGain = mobile ? 0.0028 : 0.0022;
+
+    const settledPanelIndex = () =>
+      Math.min(MAX_PANEL_INDEX, Math.max(0, Math.round(targetIndexRef.current)));
+
     const canFlipFromFace = (
       face: HTMLDivElement | null,
       direction: 1 | -1,
       panelId: HomepageFlipPanelId,
     ) => {
-      if (panelId === "home-game" && direction > 0) return true;
-      if (panelId === "nav-cube" && direction < 0) return true;
+      // Game face: always allow flip back to the homepage.
+      if (panelId === "home-game" && direction < 0) return true;
       if (!face) return true;
 
       const threshold = 8;
@@ -181,25 +222,35 @@ export function HomepageFlipStack({
       return atTop || atBottom;
     };
 
-    const settledPanelIndex = () =>
-      Math.min(MAX_PANEL_INDEX, Math.max(0, Math.round(displayedIndexRef.current)));
+    const applyDelta = (deltaY: number) => {
+      if (Math.abs(deltaY) < 0.5) return false;
 
-    const nudge = (direction: 1 | -1) => {
-      if (isAnimating()) return;
-
-      const now = performance.now();
-      if (now - lastNudgeAtRef.current < NUDGE_DEBOUNCE_MS) return;
-
+      const direction: 1 | -1 = deltaY > 0 ? 1 : -1;
       const current = settledPanelIndex();
-      const panelId = panels[current]?.id ?? "home-game";
+      const panelId = panels[current]?.id ?? "nav-cube";
       const face = faceRefs.current[current];
-      if (!canFlipFromFace(face, direction, panelId)) return;
+      if (!canFlipFromFace(face, direction, panelId)) return false;
 
-      const next = Math.min(MAX_PANEL_INDEX, Math.max(0, current + direction));
-      if (next === current) return;
+      const atMin = virtualIndexRef.current <= FLIP_SETTLE_EPSILON && direction < 0;
+      const atMax =
+        virtualIndexRef.current >= MAX_PANEL_INDEX - FLIP_SETTLE_EPSILON && direction > 0;
+      if (atMin || atMax) return false;
 
-      lastNudgeAtRef.current = now;
-      goToPanel(flipPanelFromIndex(next));
+      if (reducedMotion) {
+        const next = Math.min(MAX_PANEL_INDEX, Math.max(0, current + direction));
+        if (next === current) return false;
+        goToPanel(flipPanelFromIndex(next));
+        return true;
+      }
+
+      virtualIndexRef.current = Math.min(
+        MAX_PANEL_INDEX,
+        Math.max(0, virtualIndexRef.current + deltaY * scrollGain),
+      );
+      targetIndexRef.current = virtualIndexRef.current;
+      ensureTick();
+      scheduleSnap();
+      return true;
     };
 
     const normalizeWheelDelta = (e: WheelEvent) => {
@@ -212,37 +263,85 @@ export function HomepageFlipStack({
     const onWheel = (e: WheelEvent) => {
       const delta = normalizeWheelDelta(e);
       if (Math.abs(delta) < 4) return;
-      const direction: 1 | -1 = delta > 0 ? 1 : -1;
-      const current = settledPanelIndex();
-      const panelId = panels[current]?.id ?? "home-game";
-      const face = faceRefs.current[current];
-      if (!canFlipFromFace(face, direction, panelId)) return;
-      e.preventDefault();
-      nudge(direction);
+      if (applyDelta(delta)) {
+        e.preventDefault();
+      }
     };
 
     let touchStartY = 0;
+    let touchStartScrollTop = 0;
+    let touchScrubbing = false;
 
     const onTouchStart = (e: TouchEvent) => {
       touchStartY = e.touches[0]?.clientY ?? 0;
+      touchScrubbing = false;
+      const face = faceRefs.current[settledPanelIndex()];
+      touchStartScrollTop = face?.scrollTop ?? 0;
+      if (wheelSnapTimerRef.current) {
+        window.clearTimeout(wheelSnapTimerRef.current);
+        wheelSnapTimerRef.current = 0;
+      }
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      const y = e.touches[0]?.clientY ?? touchStartY;
+      const delta = touchStartY - y;
+      if (Math.abs(delta) < 6) return;
+
+      const face = faceRefs.current[settledPanelIndex()];
+      if (face && face.scrollTop !== touchStartScrollTop) {
+        touchScrubbing = false;
+        return;
+      }
+
+      touchScrubbing = true;
+      touchStartY = y;
+      if (applyDelta(delta)) {
+        e.preventDefault();
+      }
     };
 
     const onTouchEnd = (e: TouchEvent) => {
+      if (touchScrubbing) {
+        snapToNearestPanel();
+        return;
+      }
+
       const endY = e.changedTouches[0]?.clientY ?? touchStartY;
       const delta = touchStartY - endY;
       if (Math.abs(delta) < SWIPE_THRESHOLD_PX) return;
-      nudge(delta > 0 ? 1 : -1);
+
+      const direction: 1 | -1 = delta > 0 ? 1 : -1;
+      const current = settledPanelIndex();
+      const panelId = panels[current]?.id ?? "nav-cube";
+      const face = faceRefs.current[current];
+      if (!canFlipFromFace(face, direction, panelId)) return;
+
+      if (reducedMotion) {
+        const next = Math.min(MAX_PANEL_INDEX, Math.max(0, current + direction));
+        if (next !== current) goToPanel(flipPanelFromIndex(next));
+        return;
+      }
+
+      const next = Math.min(MAX_PANEL_INDEX, Math.max(0, current + direction));
+      if (next === current) return;
+      virtualIndexRef.current = next;
+      targetIndexRef.current = next;
+      commitPanel(flipPanelFromIndex(next));
+      ensureTick();
     };
 
     window.addEventListener("wheel", onWheel, { passive: false });
     window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: false });
     window.addEventListener("touchend", onTouchEnd, { passive: true });
     return () => {
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("touchend", onTouchEnd);
     };
-  }, [interactive, goToPanel, isAnimating, panels]);
+  }, [interactive, commitPanel, ensureTick, goToPanel, panels, scheduleSnap, snapToNearestPanel]);
 
   return (
     <div
@@ -256,6 +355,8 @@ export function HomepageFlipStack({
         perspectiveOrigin: "50% 50%",
         overflow: "hidden",
         pointerEvents: interactive ? "auto" : "none",
+        transformStyle: "preserve-3d",
+        WebkitTransformStyle: "preserve-3d",
       }}
     >
       <div

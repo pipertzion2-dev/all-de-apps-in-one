@@ -5,7 +5,7 @@ import { flipPanelFromHash, flipPanelIndex, hashForFlipPanel } from "../homepage
 
 describe("homepage flip stack", () => {
   it("maps legacy hash ids to flip panels", () => {
-    expect(flipPanelFromHash("")).toBe("home-game");
+    expect(flipPanelFromHash("")).toBe("nav-cube");
     expect(flipPanelFromHash("nav-cube")).toBe("nav-cube");
     expect(flipPanelFromHash("home-game")).toBe("home-game");
     expect(flipPanelFromHash("clean-sneaks")).toBe("home-game");
@@ -17,22 +17,20 @@ describe("homepage flip stack", () => {
     expect(hashForFlipPanel("home-game")).toBe("home-game");
   });
 
-  it("orders game then nav cube (two faces)", () => {
-    expect(flipPanelIndex("home-game")).toBe(0);
-    expect(flipPanelIndex("nav-cube")).toBe(1);
+  it("orders nav cube then game (two faces)", () => {
+    expect(flipPanelIndex("nav-cube")).toBe(0);
+    expect(flipPanelIndex("home-game")).toBe(1);
   });
 
-  it("uses discrete panel nudges with smooth RAF settling", () => {
+  it("uses continuous virtual scroll with smooth RAF settling", () => {
     const flipSrc = readFileSync(
       resolve(__dirname, "../../components/homepage-flip-stack.tsx"),
       "utf8",
     );
     expect(flipSrc).toContain("ensureTick");
-    expect(flipSrc).toContain("const nudge = (direction: 1 | -1)");
-    expect(flipSrc).toContain("NUDGE_DEBOUNCE_MS");
-    expect(flipSrc).toContain('panelId === "home-game" && direction > 0');
-    expect(flipSrc).not.toContain("virtualIndexRef");
-    expect(flipSrc).not.toContain("scheduleSnap");
+    expect(flipSrc).toContain("virtualIndexRef");
+    expect(flipSrc).toContain("scheduleSnap");
+    expect(flipSrc).toContain('panelId === "home-game" && direction < 0');
     expect(flipSrc).toMatch(/const tick = \(now: number\) => \{[\s\S]*animRef\.current = 0/);
   });
 
@@ -52,6 +50,7 @@ describe("homepage flip stack", () => {
       "utf8",
     );
     expect(flipSrc).toContain('addEventListener("touchstart"');
+    expect(flipSrc).toContain('addEventListener("touchmove"');
     expect(flipSrc).toContain('addEventListener("touchend"');
     expect(flipSrc).toContain("SWIPE_THRESHOLD_PX");
   });

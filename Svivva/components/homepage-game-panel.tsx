@@ -11,7 +11,7 @@ const CleanSneaksLogoCube = dynamic(
   { ssr: false },
 );
 
-/** Game face — first panel after the intro flip. */
+/** Game face — flip up from the homepage to reach this panel. */
 export function HomepageGamePanel() {
   const router = useRouter();
 
@@ -53,7 +53,7 @@ export function HomepageGamePanel() {
         </div>
 
         <p className="mt-6 text-center text-[11px] uppercase tracking-[0.32em] text-white/50">
-          Swipe up for home · Drag cube to spin
+          Swipe down for home · Drag cube to spin
         </p>
       </div>
 

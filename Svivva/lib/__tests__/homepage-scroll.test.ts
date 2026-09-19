@@ -27,10 +27,10 @@ describe("homepage scroll panels", () => {
     expect(cubeSrc).toContain('router.push("/clean-sneaks")');
   });
 
-  it("lands on the game panel first after intro", () => {
+  it("lands on the homepage cube panel first after intro", () => {
     const stackSrc = readFileSync(resolve(__dirname, "../../lib/homepage-flip-stack.ts"), "utf8");
     const pageSrc = readFileSync(resolve(__dirname, "../../app/home-page-client.tsx"), "utf8");
-    expect(stackSrc).toMatch(/HOMEPAGE_FLIP_PANELS[\s\S]*"home-game"[\s\S]*"nav-cube"/);
-    expect(pageSrc).toContain('useState<HomepageFlipPanelId>("home-game")');
+    expect(stackSrc).toMatch(/HOMEPAGE_FLIP_PANELS[\s\S]*"nav-cube"[\s\S]*"home-game"/);
+    expect(pageSrc).toContain('useState<HomepageFlipPanelId>("nav-cube")');
   });
 });
