@@ -31,6 +31,7 @@ describe("homepage flip stack", () => {
     expect(flipSrc).toContain("virtualIndexRef");
     expect(flipSrc).toContain("scheduleSnap");
     expect(flipSrc).toContain('panelId === "home-game" && direction > 0');
+    expect(flipSrc).toContain("scrollFaceIfNeeded");
     expect(flipSrc).toMatch(/const tick = \(now: number\) => \{[\s\S]*animRef\.current = 0/);
   });
 

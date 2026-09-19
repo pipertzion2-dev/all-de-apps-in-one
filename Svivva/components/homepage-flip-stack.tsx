@@ -203,6 +203,27 @@ export function HomepageFlipStack({
     const settledPanelIndex = () =>
       Math.min(MAX_PANEL_INDEX, Math.max(0, Math.round(targetIndexRef.current)));
 
+    const scrollFaceIfNeeded = (face: HTMLDivElement | null, deltaY: number) => {
+      if (!face) return false;
+
+      const threshold = 8;
+      const notScrollable = face.scrollHeight <= face.clientHeight + threshold;
+      if (notScrollable) return false;
+
+      const canScrollDown = face.scrollTop + face.clientHeight < face.scrollHeight - threshold;
+      const canScrollUp = face.scrollTop > threshold;
+
+      if (deltaY > 0 && canScrollDown) {
+        face.scrollTop += deltaY;
+        return true;
+      }
+      if (deltaY < 0 && canScrollUp) {
+        face.scrollTop += deltaY;
+        return true;
+      }
+      return false;
+    };
+
     const canFlipFromFace = (
       face: HTMLDivElement | null,
       direction: 1 | -1,
@@ -210,8 +231,6 @@ export function HomepageFlipStack({
     ) => {
       // Game face: always allow flip forward to the homepage (cube + pricing).
       if (panelId === "home-game" && direction > 0) return true;
-      // Homepage face: always allow flip back to the game.
-      if (panelId === "nav-cube" && direction < 0) return true;
       if (!face) return true;
 
       const threshold = 8;
@@ -265,6 +284,14 @@ export function HomepageFlipStack({
     const onWheel = (e: WheelEvent) => {
       const delta = normalizeWheelDelta(e);
       if (Math.abs(delta) < 4) return;
+
+      const current = settledPanelIndex();
+      const face = faceRefs.current[current];
+      if (panels[current]?.id === "nav-cube" && scrollFaceIfNeeded(face, delta)) {
+        e.preventDefault();
+        return;
+      }
+
       if (applyDelta(delta)) {
         e.preventDefault();
       }
@@ -290,7 +317,16 @@ export function HomepageFlipStack({
       const delta = touchStartY - y;
       if (Math.abs(delta) < 6) return;
 
-      const face = faceRefs.current[settledPanelIndex()];
+      const current = settledPanelIndex();
+      const face = faceRefs.current[current];
+
+      if (panels[current]?.id === "nav-cube" && scrollFaceIfNeeded(face, delta)) {
+        touchScrubbing = false;
+        touchStartY = y;
+        e.preventDefault();
+        return;
+      }
+
       if (face && face.scrollTop !== touchStartScrollTop) {
         touchScrubbing = false;
         return;
@@ -388,6 +424,8 @@ export function HomepageFlipStack({
               inset: 0,
               overflowY: panel.id === "nav-cube" ? "auto" : "hidden",
               overflowX: "hidden",
+              overscrollBehavior: panel.id === "nav-cube" ? "contain" : undefined,
+              WebkitOverflowScrolling: panel.id === "nav-cube" ? "touch" : undefined,
               backfaceVisibility: "hidden",
               WebkitBackfaceVisibility: "hidden",
               willChange: "transform",
