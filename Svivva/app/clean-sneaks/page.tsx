@@ -32,8 +32,13 @@ function CleanSneaksPageContent() {
   const [portrait, setPortrait] = useState(false);
   const [playMode, setPlayMode] = useState<PlayMode>("runner");
   const [bundleUnlocked, setBundleUnlocked] = useState(false);
+  /** Cover "Start" was tapped — do not show the start splash again this visit. */
+  const [introComplete, setIntroComplete] = useState(false);
 
-  const preGame = playMode === "runner" && (gamePhase === "loading" || gamePhase === "start");
+  const preGame =
+    playMode === "runner" &&
+    !introComplete &&
+    (gamePhase === "loading" || gamePhase === "start");
   const immersiveRun =
     playMode === "runner" &&
     (gamePhase === "running" || gamePhase === "countdown" || gamePhase === "colorPick");
@@ -44,6 +49,7 @@ function CleanSneaksPageContent() {
   }, []);
 
   const handleStart = useCallback(() => {
+    setIntroComplete(true);
     beginGameRef.current?.();
   }, []);
 
@@ -87,7 +93,7 @@ function CleanSneaksPageContent() {
         />
       )}
 
-      {gamePhase === "loading" && <GameLoadingWheels fullscreen />}
+      {gamePhase === "loading" && !introComplete && <GameLoadingWheels fullscreen />}
 
       {!preGame && (
         <div
