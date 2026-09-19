@@ -127,8 +127,12 @@ export function CasinoExperience({
           >
             {score.toLocaleString()}
           </p>
-          <p className="mt-2 text-sm text-[#e8dcc0]/75">
+          <p className="mt-4 max-w-sm text-sm text-[#e8dcc0]/75">
             Cash out {credits.toLocaleString()} credits — that&apos;s all you can spend inside.
+          </p>
+          <p className="mt-2 max-w-md text-[11px] leading-relaxed text-[#e8dcc0]/55">
+            Rule: your walking score is the ticket. Hand it in here to unlock the doors, then use
+            those same credits as your chip stack at Steal the Old Man&apos;s Bundle.
           </p>
           <button
             type="button"

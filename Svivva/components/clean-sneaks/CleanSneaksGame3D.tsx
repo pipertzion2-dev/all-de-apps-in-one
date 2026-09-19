@@ -49,6 +49,7 @@ import { ShoeCamHud } from "./ShoeCamHud";
 import { PostMissionReveal } from "./PostMissionReveal";
 import { CleanPathHud, OhNoOverlay } from "./OhNoOverlay";
 import { Baloon8ColorwayPicker } from "./Baloon8ColorwayPicker";
+import { CasinoEntryRules } from "./CasinoEntryRules";
 
 const CleanSneaksRunScene = dynamic(
   () => import("./CleanSneaksRunScene").then((m) => ({ default: m.CleanSneaksRunScene })),
@@ -821,24 +822,19 @@ export function CleanSneaksGame3D({
         )}
 
         {phase === "countdown" && (
-          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center overflow-y-auto bg-black/70 px-4 py-6 backdrop-blur-sm">
             <p className="seeds-holo-text mb-2 text-xs uppercase tracking-[0.35em]">
               {KLEAN_SNEAKS.title}
             </p>
             <p className="mb-1 text-sm text-[#7EC8D9]">
               {sneaker.label ?? "BALOON8"} · Keep the fit clean
             </p>
-            <p className="mb-4 text-[11px] uppercase tracking-wider text-white/50">
+            <p className="mb-3 text-[11px] uppercase tracking-wider text-white/50">
               Color locked · get ready
             </p>
+            <CasinoEntryRules className="mb-4" />
             <p className="mb-2 max-w-xs text-center text-[11px] text-white/50">
               V = Sneak Vision · C = walk style · 1–6 = Oh No saves
-            </p>
-            <p className="mb-2 text-sm text-[#7EC8D9]/80">
-              Hit {FINISH_DISTANCE}m — casino unlocks · bonus strip after
-            </p>
-            <p className="mb-6 max-w-xs text-center text-[11px] text-white/45">
-              Stay clean for score multipliers · stack your clean chain
             </p>
             <p className="text-6xl font-bold tabular-nums text-foreground sm:text-7xl">
               {countdown > 0 ? countdown : "RUN."}
@@ -856,8 +852,12 @@ export function CleanSneaksGame3D({
             <p className="mt-3 font-serif text-5xl tabular-nums text-[#ffd76a]">
               {gameOver.score.toLocaleString()}
             </p>
-            <p className="mt-4 max-w-sm text-sm text-[#e8dcc0]/75">
-              The casino is lit. Turn in your score for admission — or keep running the bonus strip.
+            <p className="mt-2 text-sm text-[#e8dcc0]/80">
+              {gameOver.score.toLocaleString()} credits ready — turn them in at the casino door.
+            </p>
+            <p className="mt-3 max-w-sm text-sm text-[#e8dcc0]/65">
+              Your walking score is your admission ticket. Enter the casino, cash the ticket, then
+              sit down for Steal the Old Man&apos;s Bundle.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Button

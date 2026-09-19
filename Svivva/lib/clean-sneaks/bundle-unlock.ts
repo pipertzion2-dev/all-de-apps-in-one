@@ -1,4 +1,5 @@
 import { FINISH_DISTANCE } from "./run-engine";
+import { CREDITS_MIN_ANTE } from "./casino/credits";
 
 /** Soft guidance score — casino admission uses any finishing score. */
 export const BUNDLE_CARD_MIN_SCORE = 800;
@@ -79,8 +80,8 @@ export function writeBundleCardWin(): number {
 /** Progress hint for homepage / HUD — how close the player is to unlocking. */
 export function bundleUnlockHint(bestScore: number): string {
   if (isBundleCardUnlocked()) {
-    return "Casino unlocked — turn in your score to play Steal the Bundle.";
+    return "Casino unlocked — cash out credits, turn in your score ticket, then Steal the Bundle.";
   }
   void bestScore;
-  return `Reach ${FINISH_DISTANCE}m to unlock the casino and Steal the Old Man's Bundle.`;
+  return `How to get in: walk ${FINISH_DISTANCE}m (or cash out with ${CREDITS_MIN_ANTE}+ credits), turn in your ticket at the door.`;
 }

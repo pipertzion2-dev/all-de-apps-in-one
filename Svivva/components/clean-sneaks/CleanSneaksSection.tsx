@@ -92,8 +92,9 @@ export function CleanSneaksSection() {
               stiehl den alten Manns Bündel
             </p>
             <p className="mt-5 max-w-md text-sm leading-relaxed text-white/70 sm:text-base lg:max-w-none">
-              Keep the Baloon8 clean while you chase the bundle — mud, puddles, crowds, and weather
-              land dirt on exact balloon zones. Pick your finish, protect the fit, steal the bag.
+              Keep the Baloon8 clean while you chase the casino. Street trash and grit dirty the
+              shoes for real — score becomes casino credits. Reach the destination or cash out
+              early, turn in your ticket, then play Steal the Old Man&apos;s Bundle.
             </p>
 
             <div className="mt-8 flex flex-col items-center gap-3 lg:items-start">
