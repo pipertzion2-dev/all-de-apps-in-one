@@ -5,7 +5,7 @@ import { flipPanelFromHash, flipPanelIndex, hashForFlipPanel } from "../homepage
 
 describe("homepage flip stack", () => {
   it("maps legacy hash ids to flip panels", () => {
-    expect(flipPanelFromHash("")).toBe("nav-cube");
+    expect(flipPanelFromHash("")).toBe("home-game");
     expect(flipPanelFromHash("nav-cube")).toBe("nav-cube");
     expect(flipPanelFromHash("home-game")).toBe("home-game");
     expect(flipPanelFromHash("clean-sneaks")).toBe("home-game");
@@ -17,9 +17,9 @@ describe("homepage flip stack", () => {
     expect(hashForFlipPanel("home-game")).toBe("home-game");
   });
 
-  it("orders nav cube then game (two faces)", () => {
-    expect(flipPanelIndex("nav-cube")).toBe(0);
-    expect(flipPanelIndex("home-game")).toBe(1);
+  it("orders game then nav cube (two faces)", () => {
+    expect(flipPanelIndex("home-game")).toBe(0);
+    expect(flipPanelIndex("nav-cube")).toBe(1);
   });
 
   it("uses continuous virtual scroll with smooth RAF settling", () => {
@@ -30,7 +30,7 @@ describe("homepage flip stack", () => {
     expect(flipSrc).toContain("ensureTick");
     expect(flipSrc).toContain("virtualIndexRef");
     expect(flipSrc).toContain("scheduleSnap");
-    expect(flipSrc).toContain('panelId === "home-game" && direction < 0');
+    expect(flipSrc).toContain('panelId === "home-game" && direction > 0');
     expect(flipSrc).toMatch(/const tick = \(now: number\) => \{[\s\S]*animRef\.current = 0/);
   });
 

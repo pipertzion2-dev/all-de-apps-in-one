@@ -19,8 +19,8 @@ export function HomepageCubePanel({
     <div className="relative bg-background">
       {interactive ? (
         <HomepageScrollHint
-          label="Flip up · game"
-          direction="up"
+          label="Flip down · game"
+          direction="down"
           onActivate={() => scrollToHomepagePanel("home-game")}
         />
       ) : null}
