@@ -1,5 +1,9 @@
 import type { AdPlacementId, HouseCreative } from "./types";
-import { isValidAdsenseClientId, isValidAdsenseSlotId } from "@/lib/adsense-credentials";
+import {
+  isValidAdsenseClientId,
+  isValidAdsenseSlotId,
+  resolveSiteAdsenseClient,
+} from "@/lib/adsense-credentials";
 
 declare global {
   interface Window {
@@ -15,8 +19,7 @@ function readRuntimeClient(): string | null {
     const w = window.__ADSENSE_CLIENT__?.trim();
     if (isValidAdsenseClientId(w)) return w!;
   }
-  const env = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim() || "";
-  return isValidAdsenseClientId(env) ? env : null;
+  return resolveSiteAdsenseClient();
 }
 
 function readRuntimeSlot(placement: AdPlacementId): string | null {

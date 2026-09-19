@@ -3,18 +3,16 @@
  * https://support.google.com/adsense/answer/7532444
  *
  * Set via Orbit admin → AdSense, or NEXT_PUBLIC_ADSENSE_CLIENT / ADSENSE_PUB_ID.
+ * Falls back to SITE_ADSENSE_CLIENT so verification works out of the box.
  */
 import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
+import { resolveSiteAdsenseClient } from "@/lib/adsense-credentials";
 
 export const dynamic = "force-dynamic";
 
 function publisherId(): string | null {
-  const client = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim() || "";
+  const client = resolveSiteAdsenseClient();
   if (client.startsWith("ca-pub-")) return client.slice(3);
-  if (client.startsWith("pub-")) return client;
-  const pub = process.env.ADSENSE_PUB_ID?.trim() || "";
-  if (pub.startsWith("pub-")) return pub;
-  if (pub.startsWith("ca-pub-")) return pub.slice(3);
   return null;
 }
 

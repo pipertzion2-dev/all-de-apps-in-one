@@ -40,8 +40,8 @@ describe("clean-sneaks advertising", () => {
     vi.unstubAllEnvs();
   });
 
-  it("stays unconfigured without AdSense publisher id (no fake paid ads)", () => {
-    expect(resolveAdNetwork("menu_banner")).toBe("unconfigured");
+  it("uses site AdSense publisher by default (verification + Auto ads)", () => {
+    expect(resolveAdNetwork("menu_banner")).toBe("adsense");
   });
 
   it("uses AdSense when NEXT_PUBLIC_ADSENSE_CLIENT is set", () => {

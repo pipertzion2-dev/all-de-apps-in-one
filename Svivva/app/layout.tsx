@@ -13,6 +13,7 @@ import { getPrimaryAdminUserId } from "@/lib/auth/admin";
 import { getSiteUrl } from "@/lib/site-url";
 import { BRAND } from "@/lib/brand";
 import { MEDIA } from "@/lib/media-assets";
+import { resolveSiteAdsenseClient } from "@/lib/adsense-credentials";
 
 const zcFont = localFont({
   src: "../media/fonts/Zc-Regular.ttf",
@@ -114,8 +115,7 @@ const gadsId = process.env.NEXT_PUBLIC_GADS_ID;
 const clarityId = process.env.NEXT_PUBLIC_CLARITY_ID;
 
 function resolveAdsenseClient(): string | null {
-  const raw = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim() || "";
-  return raw.startsWith("ca-pub-") ? raw : null;
+  return resolveSiteAdsenseClient();
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -304,12 +304,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </Script>
         )}
         {adsenseClient && (
-          <Script
-            id="adsense-sitewide"
+          // Native <script> in <head> — required for Google AdSense "Verify site ownership"
+          // (same snippet AdSense shows: pagead2…adsbygoogle.js?client=ca-pub-…)
+          <script
             async
             src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
             crossOrigin="anonymous"
-            strategy="afterInteractive"
           />
         )}
       </head>
