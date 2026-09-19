@@ -21,6 +21,7 @@ const WHEEL_SNAP_MS = 280;
 const SWIPE_THRESHOLD_PX = 36;
 const MAX_PANEL_INDEX = 1;
 const SCROLL_EDGE_THRESHOLD = 8;
+const NAV_CUBE_INDEX = 1;
 
 /** Two full-viewport faces — game, then homepage (cube + pricing). */
 export function HomepageFlipStack({
@@ -41,6 +42,7 @@ export function HomepageFlipStack({
   const animRef = useRef(0);
   const wheelSnapTimerRef = useRef(0);
   const [activePanel, setActivePanel] = useState<HomepageFlipPanelId>(initialPanel);
+  const [navCubeScrollMode, setNavCubeScrollMode] = useState(initialPanel === "nav-cube");
 
   const panels = [
     { id: "home-game" as const, node: game },
@@ -121,6 +123,7 @@ export function HomepageFlipStack({
 
   const commitPanel = useCallback((panel: HomepageFlipPanelId) => {
     setActivePanel(panel);
+    setNavCubeScrollMode(panel === "nav-cube");
     window.history.replaceState(null, "", `/#${hashForFlipPanel(panel)}`);
   }, []);
 
@@ -143,6 +146,9 @@ export function HomepageFlipStack({
       clearSnapTimer();
       virtualIndexRef.current = next;
       targetIndexRef.current = next;
+      if (panel === "home-game") {
+        setNavCubeScrollMode(false);
+      }
       commitPanel(panel);
       ensureTick();
     },
@@ -195,6 +201,7 @@ export function HomepageFlipStack({
     targetIndexRef.current = index;
     displayedIndexRef.current = index;
     setActivePanel(initialPanel);
+    setNavCubeScrollMode(initialPanel === "nav-cube");
     syncDepth();
   }, [initialPanel, syncDepth]);
 
@@ -226,8 +233,8 @@ export function HomepageFlipStack({
 
     const scrollSurfaceFor = (index: number) => {
       const panel = panels[index];
-      if (panel?.id === "nav-cube") {
-        return scrollRefs.current[index] ?? faceRefs.current[index];
+      if (panel?.id === "nav-cube" && navCubeScrollMode) {
+        return scrollRefs.current[NAV_CUBE_INDEX] ?? faceRefs.current[index];
       }
       return faceRefs.current[index];
     };
@@ -272,13 +279,12 @@ export function HomepageFlipStack({
       return atTop || atBottom;
     };
 
-    /** Let the browser scroll nav-cube natively when content extends beyond the viewport. */
     const shouldDeferToNativeScroll = (
       panelId: HomepageFlipPanelId,
       face: HTMLDivElement | null,
       deltaY: number,
     ) => {
-      if (panelId !== "nav-cube") return false;
+      if (panelId !== "nav-cube" || !navCubeScrollMode) return false;
       const { canScrollDown, canScrollUp } = faceScrollState(face);
       if (deltaY > 0 && canScrollDown) return true;
       if (deltaY < 0 && canScrollUp) return true;
@@ -307,6 +313,9 @@ export function HomepageFlipStack({
       }
 
       scrubbingRef.current = true;
+      if (direction < 0 && panelId === "nav-cube") {
+        setNavCubeScrollMode(false);
+      }
       virtualIndexRef.current = Math.min(
         MAX_PANEL_INDEX,
         Math.max(0, virtualIndexRef.current + deltaY * scrollGain),
@@ -333,8 +342,6 @@ export function HomepageFlipStack({
       const face = scrollSurfaceFor(current);
 
       if (shouldDeferToNativeScroll(panelId, face, delta)) {
-        face?.scrollBy({ top: delta });
-        e.preventDefault();
         return;
       }
 
@@ -359,7 +366,7 @@ export function HomepageFlipStack({
       const current = settledPanelIndex();
       const panelId = panels[current]?.id ?? "home-game";
 
-      if (panelId === "nav-cube") {
+      if (panelId === "nav-cube" && navCubeScrollMode) {
         return;
       }
 
@@ -399,6 +406,9 @@ export function HomepageFlipStack({
       const next = Math.min(MAX_PANEL_INDEX, Math.max(0, current + direction));
       if (next === current) return;
       scrubbingRef.current = false;
+      if (next === 0) {
+        setNavCubeScrollMode(false);
+      }
       virtualIndexRef.current = next;
       targetIndexRef.current = next;
       commitPanel(flipPanelFromIndex(next));
@@ -417,6 +427,7 @@ export function HomepageFlipStack({
     };
   }, [
     interactive,
+    navCubeScrollMode,
     commitPanel,
     ensureTick,
     goToPanel,
@@ -427,74 +438,79 @@ export function HomepageFlipStack({
   ]);
 
   return (
-    <div
-      ref={shellRef}
-      data-homepage-flip-stack=""
-      data-active-panel={activePanel}
-      className="relative w-full"
-      style={{
-        height: "100svh",
-        perspective: "2400px",
-        perspectiveOrigin: "50% 50%",
-        overflow: "hidden",
-        pointerEvents: interactive ? "auto" : "none",
-        transformStyle: "preserve-3d",
-        WebkitTransformStyle: "preserve-3d",
-      }}
-    >
+    <>
       <div
-        ref={rotorRef}
+        ref={shellRef}
+        data-homepage-flip-stack=""
+        data-active-panel={activePanel}
+        className="relative w-full"
         style={{
-          width: "100%",
-          height: "100%",
-          position: "relative",
+          height: "100svh",
+          perspective: "2400px",
+          perspectiveOrigin: "50% 50%",
+          overflow: "hidden",
+          pointerEvents: interactive ? "auto" : "none",
           transformStyle: "preserve-3d",
           WebkitTransformStyle: "preserve-3d",
-          transformOrigin: "center center",
-          willChange: "transform",
         }}
       >
-        {panels.map((panel, i) => (
-          <div
-            key={panel.id}
-            id={panel.id}
-            ref={(el) => {
-              faceRefs.current[i] = el;
-            }}
-            data-homepage-flip-face=""
-            data-flip-index={i}
-            className="bg-background"
-            style={{
-              position: "absolute",
-              inset: 0,
-              overflow: "hidden",
-              touchAction: panel.id === "nav-cube" ? "none" : "none",
-              backfaceVisibility: "hidden",
-              WebkitBackfaceVisibility: "hidden",
-              willChange: "transform",
-            }}
-          >
-            {panel.id === "nav-cube" ? (
-              <div
-                ref={(el) => {
-                  scrollRefs.current[i] = el;
-                }}
-                data-homepage-flip-scroll=""
-                className="h-full w-full overflow-x-hidden overflow-y-auto bg-background"
-                style={{
-                  overscrollBehavior: "contain",
-                  WebkitOverflowScrolling: "touch",
-                  touchAction: "pan-y",
-                }}
-              >
-                {panel.node}
-              </div>
-            ) : (
-              panel.node
-            )}
-          </div>
-        ))}
+        <div
+          ref={rotorRef}
+          style={{
+            width: "100%",
+            height: "100%",
+            position: "relative",
+            transformStyle: "preserve-3d",
+            WebkitTransformStyle: "preserve-3d",
+            transformOrigin: "center center",
+            willChange: "transform",
+          }}
+        >
+          {panels.map((panel, i) => (
+            <div
+              key={panel.id}
+              id={panel.id}
+              ref={(el) => {
+                faceRefs.current[i] = el;
+              }}
+              data-homepage-flip-face=""
+              data-flip-index={i}
+              className="bg-background"
+              style={{
+                position: "absolute",
+                inset: 0,
+                overflow: "hidden",
+                backfaceVisibility: "hidden",
+                WebkitBackfaceVisibility: "hidden",
+                willChange: "transform",
+              }}
+            >
+              {panel.id === "nav-cube" && navCubeScrollMode ? (
+                <div className="h-full w-full bg-background" aria-hidden />
+              ) : (
+                panel.node
+              )}
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
+
+      {navCubeScrollMode ? (
+        <div
+          ref={(el) => {
+            scrollRefs.current[NAV_CUBE_INDEX] = el;
+          }}
+          data-homepage-flip-scroll=""
+          className="fixed inset-x-0 bottom-0 top-16 z-[15] overflow-x-hidden overflow-y-auto bg-background sm:top-20"
+          style={{
+            overscrollBehavior: "contain",
+            WebkitOverflowScrolling: "touch",
+            touchAction: "pan-y",
+          }}
+        >
+          {begin}
+        </div>
+      ) : null}
+    </>
   );
 }
