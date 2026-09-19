@@ -35,7 +35,8 @@ function CleanSneaksPageContent() {
 
   const preGame = playMode === "runner" && (gamePhase === "loading" || gamePhase === "start");
   const immersiveRun =
-    playMode === "runner" && (gamePhase === "running" || gamePhase === "countdown");
+    playMode === "runner" &&
+    (gamePhase === "running" || gamePhase === "countdown" || gamePhase === "colorPick");
   const showGameShell = playMode === "bundle-card" || !preGame;
 
   const registerBegin = useCallback((begin: () => void) => {
