@@ -1,6 +1,12 @@
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
     try {
+      const { ensureDatabaseUrl } = await import("./lib/resolve-database-url");
+      ensureDatabaseUrl();
+    } catch {
+      /* optional */
+    }
+    try {
       const { hydratePlatformSecrets } = await import("./lib/platform-runtime-secrets");
       await hydratePlatformSecrets();
     } catch (err: unknown) {
