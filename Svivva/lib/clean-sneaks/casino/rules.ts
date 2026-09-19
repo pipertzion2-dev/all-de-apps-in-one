@@ -26,10 +26,13 @@ export const STEAL_BUNDLE_RULES = {
     "Q",
     "K",
   ] as const satisfies readonly Rank[],
-  /** Delay before AI acts so humans can follow the play. */
-  aiThinkMs: 900,
-  /** Extra delay after AI commits a move for animations. */
-  aiResolveMs: 650,
+  /** Delay before AI acts after a human move (brief beat to read the table). */
+  aiThinkMs: 320,
+  /** Extra delay after AI commits a move before the next actor. */
+  aiResolveMs: 180,
+  /** Faster timing when several AI players act in a row. */
+  aiChainThinkMs: 90,
+  aiChainResolveMs: 70,
   minPlayers: 2,
   maxPlayers: 3,
 } as const;

@@ -39,6 +39,16 @@ export function chooseAiMove(
   return moves[0] ?? null;
 }
 
-export function aiDelayMs(rules = STEAL_BUNDLE_RULES): number {
-  return rules.aiThinkMs;
+export function aiDelayMs(
+  chain = false,
+  rules: typeof STEAL_BUNDLE_RULES = STEAL_BUNDLE_RULES,
+): number {
+  return chain ? rules.aiChainThinkMs : rules.aiThinkMs;
+}
+
+export function aiResolveDelayMs(
+  chain = false,
+  rules: typeof STEAL_BUNDLE_RULES = STEAL_BUNDLE_RULES,
+): number {
+  return chain ? rules.aiChainResolveMs : rules.aiResolveMs;
 }

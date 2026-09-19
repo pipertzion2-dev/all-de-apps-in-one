@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   aiDelayMs,
+  aiResolveDelayMs,
   applyAiMove,
   chooseAiMove,
   currentPlayer,
@@ -14,7 +15,6 @@ import {
   selectHandCard,
   setSessionCredits,
   startCardGame,
-  STEAL_BUNDLE_RULES,
   tryHumanPlay,
   type CardGameState,
   type PlayMove,
@@ -51,6 +51,8 @@ export function StealBundleBoard({
   const [credits, setCredits] = useState(startingCredits);
   const [anteLocked, setAnteLocked] = useState(0);
   const recordedRef = useRef(false);
+  /** After a human move, use full AI pacing; chain AI→AI turns stay snappy. */
+  const aiPaceAfterHumanRef = useRef(true);
 
   const deal = useCallback(() => {
     const paid = Math.min(ante, credits);
@@ -64,6 +66,7 @@ export function StealBundleBoard({
     setState(next);
     playCue("card_deal");
     recordedRef.current = false;
+    aiPaceAfterHumanRef.current = true;
   }, [playerCount, ante, credits, onCreditsChange]);
 
   useEffect(() => {
@@ -118,6 +121,7 @@ export function StealBundleBoard({
         showFlash(result.reason, "info");
         return;
       }
+      aiPaceAfterHumanRef.current = true;
       if (move.type === "stealBundle") {
         playCue("bundle_steal");
         showFlash("BUNDLE STOLEN!", "steal");
@@ -140,6 +144,7 @@ export function StealBundleBoard({
     if (!cur || cur.isHuman) return;
 
     setBusy(true);
+    const afterHuman = aiPaceAfterHumanRef.current;
     const think = window.setTimeout(() => {
       const move = chooseAiMove(state, cur.id);
       if (!move) {
@@ -158,9 +163,10 @@ export function StealBundleBoard({
           playCue("card_deal");
         }
         setState(next);
+        aiPaceAfterHumanRef.current = false;
       }
-      window.setTimeout(() => setBusy(false), STEAL_BUNDLE_RULES.aiResolveMs);
-    }, aiDelayMs());
+      window.setTimeout(() => setBusy(false), aiResolveDelayMs(afterHuman));
+    }, aiDelayMs(afterHuman));
 
     return () => window.clearTimeout(think);
   }, [state, busy]);
@@ -295,7 +301,7 @@ export function StealBundleBoard({
             }`}
             data-testid="turn-indicator"
           >
-            {cur?.isHuman ? "Player 1 — Your Turn" : `${cur?.name ?? ""} — Thinking…`}
+            {cur?.isHuman ? "Player 1 — Your Turn" : `${cur?.name ?? ""} — Playing…`}
           </p>
           <p className="text-[10px] tabular-nums text-[#d4af37]/80" data-testid="table-credits">
             Credits {credits.toLocaleString()} · Ante {anteLocked.toLocaleString()}
