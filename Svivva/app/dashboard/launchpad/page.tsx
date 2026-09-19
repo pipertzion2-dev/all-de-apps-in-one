@@ -3215,10 +3215,7 @@ export default function LaunchpadPage() {
 
       const allSteps = [...SVIVVA_STEPS, ...miniSteps];
       type Unit =
-        | { t: "connect" }
-        | { t: "autopilot" }
-        | { t: "step"; step: Step }
-        | { t: "finish" };
+        { t: "connect" } | { t: "autopilot" } | { t: "step"; step: Step } | { t: "finish" };
 
       const units: Unit[] = [
         { t: "connect" },
