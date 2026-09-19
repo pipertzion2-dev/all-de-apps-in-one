@@ -6,6 +6,11 @@ import {
   payoutWin,
   scoreToCredits,
 } from "@/lib/clean-sneaks/casino/credits";
+import {
+  addSessionCredits,
+  emptyCasinoSession,
+  writeCasinoSession,
+} from "@/lib/clean-sneaks/casino/session";
 
 describe("casino credits", () => {
   it("maps walking score 1:1 into credits", () => {
@@ -27,5 +32,27 @@ describe("casino credits", () => {
   it("pays winners more than the ante", () => {
     const ante = 100;
     expect(payoutWin(ante)).toBeGreaterThan(ante);
+  });
+
+  it("adds rewarded-ad credits on top of the current stack", () => {
+    const store = new Map<string, string>();
+    (globalThis as unknown as { window: { localStorage: Storage } }).window = {
+      localStorage: {
+        getItem: (k: string) => store.get(k) ?? null,
+        setItem: (k: string, v: string) => {
+          store.set(k, String(v));
+        },
+        removeItem: (k: string) => {
+          store.delete(k);
+        },
+        clear: () => store.clear(),
+        key: () => null,
+        length: 0,
+      },
+    };
+    writeCasinoSession({ ...emptyCasinoSession(), credits: 40 });
+    const next = addSessionCredits(75);
+    expect(next.credits).toBe(115);
+    delete (globalThis as { window?: unknown }).window;
   });
 });

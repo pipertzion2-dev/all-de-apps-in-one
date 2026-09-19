@@ -86,6 +86,15 @@ export function setSessionCredits(credits: number): SessionCasinoState {
   });
 }
 
+/** Add chips from a rewarded ad (or other bonus) without wiping walking score. */
+export function addSessionCredits(delta: number): SessionCasinoState {
+  const prev = readCasinoSession();
+  return writeCasinoSession({
+    ...prev,
+    credits: Math.max(0, Math.floor(prev.credits + delta)),
+  });
+}
+
 export function recordCardGameResult(won: boolean, creditDelta = 0): SessionCasinoState {
   const prev = readCasinoSession();
   return writeCasinoSession({
