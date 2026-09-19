@@ -32,6 +32,8 @@ describe("homepage flip stack", () => {
     expect(flipSrc).toContain("scheduleSnap");
     expect(flipSrc).toContain("paintDirect");
     expect(flipSrc).toContain("shouldDeferToNativeScroll");
+    expect(flipSrc).toContain("data-homepage-flip-scroll");
+    expect(flipSrc).toContain("scrollRefs");
     expect(flipSrc).toContain('panelId === "home-game" && direction > 0');
     expect(flipSrc).toContain('panelId === "nav-cube"');
     expect(flipSrc).toMatch(/panelId === "nav-cube"[\s\S]*direction > 0[\s\S]*return false/);

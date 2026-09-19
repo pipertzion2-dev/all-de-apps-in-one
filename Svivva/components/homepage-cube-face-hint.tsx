@@ -10,16 +10,16 @@ export function HomepageCubeFaceHint() {
   const [atTop, setAtTop] = useState(true);
 
   useEffect(() => {
-    const face = document.getElementById("nav-cube");
-    if (!face) return;
+    const scroller = document.querySelector<HTMLElement>("[data-homepage-flip-scroll]");
+    if (!scroller) return;
 
     const onScroll = () => {
-      setAtTop(face.scrollTop <= SCROLL_TOP_THRESHOLD);
+      setAtTop(scroller.scrollTop <= SCROLL_TOP_THRESHOLD);
     };
 
     onScroll();
-    face.addEventListener("scroll", onScroll, { passive: true });
-    return () => face.removeEventListener("scroll", onScroll);
+    scroller.addEventListener("scroll", onScroll, { passive: true });
+    return () => scroller.removeEventListener("scroll", onScroll);
   }, []);
 
   if (!atTop) return null;

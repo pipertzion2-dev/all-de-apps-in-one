@@ -50,7 +50,6 @@ export function SvivvaArtifact({ mountCanvas = true }: SvivvaArtifactProps) {
 
   return (
     <section
-      id="nav-cube"
       data-svivva-artifact
       className="w-full flex flex-col items-center gap-0 pt-24 sm:pt-28 pb-10 sm:pb-12 px-4 overflow-visible relative z-10"
     >
