@@ -29,6 +29,8 @@ export type GamePhase =
   | "colorPick"
   | "countdown"
   | "running"
+  | "walkComplete"
+  | "casino"
   | "over";
 
 export interface SneakerAssetRef {

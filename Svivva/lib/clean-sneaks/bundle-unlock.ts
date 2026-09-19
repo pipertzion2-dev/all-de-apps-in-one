@@ -1,6 +1,6 @@
 import { FINISH_DISTANCE } from "./run-engine";
 
-/** Minimum score on a destination run before the card game can unlock. */
+/** Soft guidance score — casino admission uses any finishing score. */
 export const BUNDLE_CARD_MIN_SCORE = 800;
 
 export const BUNDLE_CARD_UNLOCK_KEY = "zzai.clean-sneaks.bundleCardUnlocked";
@@ -18,39 +18,23 @@ export type BundleUnlockResult = {
   reason?: string;
 };
 
-/** Card game unlocks after a full chase (destination) with a new personal best. */
-export function evaluateBundleUnlock({
-  score,
-  distance,
-  previousBest,
-}: BundleUnlockAttempt): BundleUnlockResult {
+/**
+ * Casino + Steal the Bundle unlock when the player reaches the destination.
+ * The walking score becomes casino admission — no high-score gate.
+ */
+export function evaluateBundleUnlock({ score, distance }: BundleUnlockAttempt): BundleUnlockResult {
   const floored = Math.max(0, Math.floor(score));
   const reachedDestination = distance >= FINISH_DISTANCE;
-  const newHighScore = floored > previousBest;
-  const meetsMin = floored >= BUNDLE_CARD_MIN_SCORE;
 
   if (!reachedDestination) {
     return {
       unlocked: false,
       newlyUnlocked: false,
-      reason: `Reach ${FINISH_DISTANCE}m to catch the bundle.`,
-    };
-  }
-  if (!meetsMin) {
-    return {
-      unlocked: false,
-      newlyUnlocked: false,
-      reason: `Score ${BUNDLE_CARD_MIN_SCORE}+ on a clean chase to unlock the card game.`,
-    };
-  }
-  if (!newHighScore) {
-    return {
-      unlocked: false,
-      newlyUnlocked: false,
-      reason: "Beat your highest score on a destination run to unlock Steal the Bundle.",
+      reason: `Reach ${FINISH_DISTANCE}m to turn in your score at the casino.`,
     };
   }
 
+  void floored;
   return { unlocked: true, newlyUnlocked: true };
 }
 
@@ -94,9 +78,9 @@ export function writeBundleCardWin(): number {
 
 /** Progress hint for homepage / HUD — how close the player is to unlocking. */
 export function bundleUnlockHint(bestScore: number): string {
-  if (isBundleCardUnlocked()) return "Steal the Bundle card game unlocked.";
-  if (bestScore < BUNDLE_CARD_MIN_SCORE) {
-    return `Chase ${FINISH_DISTANCE}m · score ${BUNDLE_CARD_MIN_SCORE}+ · beat your best to unlock the card game.`;
+  if (isBundleCardUnlocked()) {
+    return "Casino unlocked — turn in your score to play Steal the Bundle.";
   }
-  return `Beat ${bestScore.toLocaleString()} on a ${FINISH_DISTANCE}m run to unlock Steal the Bundle.`;
+  void bestScore;
+  return `Reach ${FINISH_DISTANCE}m to unlock the casino and Steal the Old Man's Bundle.`;
 }

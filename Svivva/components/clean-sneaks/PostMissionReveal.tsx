@@ -70,7 +70,7 @@ export function PostMissionReveal({
         >
           <p className="text-[10px] uppercase tracking-[0.3em] text-[#7EC8D9]">New high score</p>
           <p className="mt-1 text-sm font-semibold text-foreground">
-            Steal the Old Man&apos;s Bundle — card game unlocked.
+            Casino unlocked — turn in your score to play Steal the Old Man&apos;s Bundle.
           </p>
         </div>
       )}
@@ -116,11 +116,11 @@ export function PostMissionReveal({
         {payload.bundleCardUnlocked && onPlayBundleCard && (
           <Button
             size="lg"
-            className="bg-[#D94F9C] text-white hover:bg-[#D94F9C]/90"
+            className="bg-[#d4af37] text-[#1a1008] hover:bg-[#e0c15a]"
             onClick={onPlayBundleCard}
             data-testid="button-play-steal-bundle"
           >
-            Steal the Bundle
+            Enter Casino
           </Button>
         )}
         {onExit && (
