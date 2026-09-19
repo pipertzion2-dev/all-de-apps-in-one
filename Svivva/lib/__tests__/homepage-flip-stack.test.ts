@@ -22,7 +22,7 @@ describe("homepage flip stack", () => {
     expect(flipPanelIndex("nav-cube")).toBe(1);
   });
 
-  it("uses continuous virtual scroll with smooth RAF settling", () => {
+  it("uses continuous virtual scroll with direct scrub paint and RAF settling", () => {
     const flipSrc = readFileSync(
       resolve(__dirname, "../../components/homepage-flip-stack.tsx"),
       "utf8",
@@ -30,8 +30,9 @@ describe("homepage flip stack", () => {
     expect(flipSrc).toContain("ensureTick");
     expect(flipSrc).toContain("virtualIndexRef");
     expect(flipSrc).toContain("scheduleSnap");
+    expect(flipSrc).toContain("paintDirect");
+    expect(flipSrc).toContain("shouldDeferToNativeScroll");
     expect(flipSrc).toContain('panelId === "home-game" && direction > 0');
-    expect(flipSrc).toContain("scrollFaceIfNeeded");
     expect(flipSrc).toMatch(/const tick = \(now: number\) => \{[\s\S]*animRef\.current = 0/);
   });
 
