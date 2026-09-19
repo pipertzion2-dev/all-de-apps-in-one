@@ -31,6 +31,12 @@ import {
 } from "@/lib/easypeasy/tiers";
 import { migrateStoredPremiumTierIfNeeded } from "@/lib/easypeasy/ensure";
 import { getStripeReadyStatus } from "@/lib/billing/stripe-ready";
+import {
+  isValidAdsenseClientId,
+  isValidAdsenseSlotId,
+  normalizeAdsenseClientId,
+  normalizeAdsenseSlotId,
+} from "@/lib/adsense-credentials";
 const patchSchema = z
   .object({
     openaiApiKey: z.string().optional(),
@@ -57,6 +63,10 @@ const patchSchema = z
     lemonSqueezyWebhookSecret: z.string().optional(),
     lemonSqueezyCheckoutUrlPro: z.string().optional(),
     lemonSqueezyCheckoutUrlEnterprise: z.string().optional(),
+    adsenseClientId: z.string().optional(),
+    adsenseSlotBanner: z.string().optional(),
+    adsenseSlotInterstitial: z.string().optional(),
+    adsenseSlotRewarded: z.string().optional(),
   })
   .strict();
 
@@ -135,6 +145,10 @@ export async function GET() {
         lemonSqueezyWebhookSecret: !!row?.lemonSqueezyWebhookSecret?.trim(),
         lemonSqueezyCheckoutUrlPro: !!row?.lemonSqueezyCheckoutUrlPro?.trim(),
         lemonSqueezyCheckoutUrlEnterprise: !!row?.lemonSqueezyCheckoutUrlEnterprise?.trim(),
+        adsenseClient: !!row?.adsenseClientId?.trim(),
+        adsenseSlotBanner: !!row?.adsenseSlotBanner?.trim(),
+        adsenseSlotInterstitial: !!row?.adsenseSlotInterstitial?.trim(),
+        adsenseSlotRewarded: !!row?.adsenseSlotRewarded?.trim(),
       },
       deploymentOverrides: runtimeSecretColdStart,
       effective: {
@@ -148,6 +162,20 @@ export async function GET() {
         ),
         stripeWebhook: !!process.env.STRIPE_WEBHOOK_SECRET?.trim(),
         siteUrl: !!process.env.NEXT_PUBLIC_SITE_URL?.trim(),
+        adsenseClient: isValidAdsenseClientId(process.env.NEXT_PUBLIC_ADSENSE_CLIENT),
+        adsenseSlotBanner: isValidAdsenseSlotId(process.env.NEXT_PUBLIC_ADSENSE_SLOT_BANNER),
+        adsenseSlotInterstitial: isValidAdsenseSlotId(
+          process.env.NEXT_PUBLIC_ADSENSE_SLOT_INTERSTITIAL,
+        ),
+        adsenseSlotRewarded: isValidAdsenseSlotId(process.env.NEXT_PUBLIC_ADSENSE_SLOT_REWARDED),
+      },
+      adsense: {
+        clientId: process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim() || null,
+        slotBanner: process.env.NEXT_PUBLIC_ADSENSE_SLOT_BANNER?.trim() || null,
+        slotInterstitial: process.env.NEXT_PUBLIC_ADSENSE_SLOT_INTERSTITIAL?.trim() || null,
+        slotRewarded: process.env.NEXT_PUBLIC_ADSENSE_SLOT_REWARDED?.trim() || null,
+        adsTxtUrl: "/ads.txt",
+        gameUrl: "/clean-sneaks",
       },
       interim: {
         active: isInterimPaymentActive(interim),
@@ -251,6 +279,44 @@ export async function POST(request: Request) {
       patch.lemonSqueezyCheckoutUrlEnterprise = toPatchValue(
         body.lemonSqueezyCheckoutUrlEnterprise,
       );
+
+    if ("adsenseClientId" in body) {
+      const raw = body.adsenseClientId?.trim() ?? "";
+      if (raw.length === 0) {
+        patch.adsenseClientId = null;
+      } else {
+        const norm = normalizeAdsenseClientId(raw);
+        if (!norm) {
+          return NextResponse.json(
+            { error: "AdSense client must look like ca-pub-1234567890123456" },
+            { status: 400 },
+          );
+        }
+        patch.adsenseClientId = norm;
+      }
+    }
+    const slotFields = [
+      ["adsenseSlotBanner", "adsenseSlotBanner"],
+      ["adsenseSlotInterstitial", "adsenseSlotInterstitial"],
+      ["adsenseSlotRewarded", "adsenseSlotRewarded"],
+    ] as const;
+    for (const [bodyKey, patchKey] of slotFields) {
+      if (bodyKey in body) {
+        const raw = body[bodyKey]?.trim() ?? "";
+        if (raw.length === 0) {
+          patch[patchKey] = null;
+        } else {
+          const norm = normalizeAdsenseSlotId(raw);
+          if (!norm) {
+            return NextResponse.json(
+              { error: `${bodyKey} must be a numeric AdSense slot id` },
+              { status: 400 },
+            );
+          }
+          patch[patchKey] = norm;
+        }
+      }
+    }
 
     if (Object.keys(patch).length === 0) {
       return NextResponse.json({ error: "No fields to update" }, { status: 400 });

@@ -178,6 +178,7 @@ export function OrbitPaidServicesHub({
   const [gscPropertyOk, setGscPropertyOk] = useState(gscPropertyOkProp ?? false);
   const [hasServiceAccount, setHasServiceAccount] = useState(false);
   const [indexNowActive, setIndexNowActive] = useState(indexNowActiveProp ?? false);
+  const [adsenseReady, setAdsenseReady] = useState(false);
   // Default to the $0 path — paid services are opt-in, not the starting point.
   const [freeOnly, setFreeOnly] = useState(true);
 
@@ -198,16 +199,34 @@ export function OrbitPaidServicesHub({
   ]);
 
   useEffect(() => {
+    let alive = true;
+    void (async () => {
+      try {
+        const secretsR = await authFetch("/api/admin/platform-secrets");
+        if (!alive || !secretsR.ok) return;
+        const sec = (await secretsR.json()) as { effective?: { adsenseClient?: boolean } };
+        if (sec.effective?.adsenseClient) setAdsenseReady(true);
+      } catch {
+        /* non-blocking */
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  useEffect(() => {
     if (configuredKeysProp && aiConfiguredProp !== undefined && gscConnectedProp !== undefined) {
       return;
     }
     let alive = true;
     void (async () => {
       try {
-        const [autoR, gscR, statusR] = await Promise.all([
+        const [autoR, gscR, statusR, secretsR] = await Promise.all([
           authFetch("/api/orbit/marketing-autopilot"),
           authFetch("/api/gsc/diagnose"),
           authFetch("/api/orbit/status"),
+          authFetch("/api/admin/platform-secrets"),
         ]);
         if (!alive) return;
         if (autoR.ok) {
@@ -232,6 +251,10 @@ export function OrbitPaidServicesHub({
         if (statusR.ok) {
           const s = (await statusR.json()) as { indexNowKey?: boolean };
           if (s.indexNowKey) setIndexNowActive(true);
+        }
+        if (secretsR.ok) {
+          const sec = (await secretsR.json()) as { effective?: { adsenseClient?: boolean } };
+          if (sec.effective?.adsenseClient) setAdsenseReady(true);
         }
       } catch {
         /* non-blocking */
@@ -258,6 +281,9 @@ export function OrbitPaidServicesHub({
         process.env.NEXT_PUBLIC_CLARITY_ID?.trim() &&
         process.env.NEXT_PUBLIC_CLARITY_ID !== "undefined"
       );
+    }
+    if (item.envKey === "NEXT_PUBLIC_ADSENSE_CLIENT" || item.id === "adsense") {
+      return adsenseReady;
     }
     if (item.credentialKey) return !!configuredKeys[item.credentialKey];
     return false;

@@ -8,6 +8,7 @@ import {
   isValidGscOAuthClientSecret,
   isValidGscOAuthCredentials,
 } from "@/lib/gsc-oauth-credentials";
+import { isValidAdsenseClientId, isValidAdsenseSlotId } from "@/lib/adsense-credentials";
 
 const ROW_ID = "default";
 
@@ -16,6 +17,29 @@ let interimPaymentColumnsEnsured = false;
 let lemonSqueezyColumnsEnsured = false;
 let easypeasyColumnsEnsured = false;
 let geminiColumnsEnsured = false;
+let adsenseColumnsEnsured = false;
+
+async function ensureAdsenseColumns(): Promise<void> {
+  if (adsenseColumnsEnsured) return;
+  try {
+    await ensureCoreDbTables();
+    await db.execute(
+      sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS adsense_client_id TEXT`,
+    );
+    await db.execute(
+      sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS adsense_slot_banner TEXT`,
+    );
+    await db.execute(
+      sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS adsense_slot_interstitial TEXT`,
+    );
+    await db.execute(
+      sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS adsense_slot_rewarded TEXT`,
+    );
+    adsenseColumnsEnsured = true;
+  } catch {
+    /* test env */
+  }
+}
 
 async function ensureGeminiColumns(): Promise<void> {
   if (geminiColumnsEnsured) return;
@@ -163,6 +187,10 @@ export const runtimeSecretColdStart = {
   siteUrl: !!process.env.NEXT_PUBLIC_SITE_URL?.trim(),
   googleGscClientId: isValidGscOAuthClientId(process.env.GOOGLE_GSC_CLIENT_ID),
   googleGscClientSecret: isValidGscOAuthClientSecret(process.env.GOOGLE_GSC_CLIENT_SECRET),
+  adsenseClient: isValidAdsenseClientId(process.env.NEXT_PUBLIC_ADSENSE_CLIENT),
+  adsenseSlotBanner: isValidAdsenseSlotId(process.env.NEXT_PUBLIC_ADSENSE_SLOT_BANNER),
+  adsenseSlotInterstitial: isValidAdsenseSlotId(process.env.NEXT_PUBLIC_ADSENSE_SLOT_INTERSTITIAL),
+  adsenseSlotRewarded: isValidAdsenseSlotId(process.env.NEXT_PUBLIC_ADSENSE_SLOT_REWARDED),
 };
 
 export type PlatformRuntimeSecretsPatch = Partial<{
@@ -196,6 +224,10 @@ export type PlatformRuntimeSecretsPatch = Partial<{
   lemonSqueezyCheckoutUrlEnterprise: string | null;
   easypeasyTier: string | null;
   easypeasySkipReason: string | null;
+  adsenseClientId: string | null;
+  adsenseSlotBanner: string | null;
+  adsenseSlotInterstitial: string | null;
+  adsenseSlotRewarded: string | null;
 }>;
 
 export async function getPlatformRuntimeSecretsRow() {
@@ -203,6 +235,7 @@ export async function getPlatformRuntimeSecretsRow() {
   await ensureLemonSqueezyColumns();
   await ensureEasyPeasyColumns();
   await ensureGeminiColumns();
+  await ensureAdsenseColumns();
   const [row] = await db
     .select()
     .from(platformRuntimeSecrets)
@@ -267,7 +300,33 @@ function syncProcessEnvFromRow(
     else delete process.env.NEXT_PUBLIC_SITE_URL;
   }
 
+  applyAdsenseFromRow(row);
   applyGoogleGscOAuthFromRow(row);
+}
+
+function applyAdsenseFromRow(
+  row: NonNullable<Awaited<ReturnType<typeof getPlatformRuntimeSecretsRow>>>,
+) {
+  if (!runtimeSecretColdStart.adsenseClient) {
+    const v = row.adsenseClientId?.trim();
+    if (isValidAdsenseClientId(v)) process.env.NEXT_PUBLIC_ADSENSE_CLIENT = v!;
+    else delete process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
+  }
+  if (!runtimeSecretColdStart.adsenseSlotBanner) {
+    const v = row.adsenseSlotBanner?.trim();
+    if (isValidAdsenseSlotId(v)) process.env.NEXT_PUBLIC_ADSENSE_SLOT_BANNER = v!;
+    else delete process.env.NEXT_PUBLIC_ADSENSE_SLOT_BANNER;
+  }
+  if (!runtimeSecretColdStart.adsenseSlotInterstitial) {
+    const v = row.adsenseSlotInterstitial?.trim();
+    if (isValidAdsenseSlotId(v)) process.env.NEXT_PUBLIC_ADSENSE_SLOT_INTERSTITIAL = v!;
+    else delete process.env.NEXT_PUBLIC_ADSENSE_SLOT_INTERSTITIAL;
+  }
+  if (!runtimeSecretColdStart.adsenseSlotRewarded) {
+    const v = row.adsenseSlotRewarded?.trim();
+    if (isValidAdsenseSlotId(v)) process.env.NEXT_PUBLIC_ADSENSE_SLOT_REWARDED = v!;
+    else delete process.env.NEXT_PUBLIC_ADSENSE_SLOT_REWARDED;
+  }
 }
 
 /** Prefer valid env; fall back to DB when Vercel has placeholder values like your-client-id. */
@@ -353,6 +412,14 @@ export async function patchPlatformRuntimeSecrets(patch: PlatformRuntimeSecretsP
   if ("geminiApiKey" in patch) {
     await ensureGeminiColumns();
   }
+  if (
+    "adsenseClientId" in patch ||
+    "adsenseSlotBanner" in patch ||
+    "adsenseSlotInterstitial" in patch ||
+    "adsenseSlotRewarded" in patch
+  ) {
+    await ensureAdsenseColumns();
+  }
   const existing = await getPlatformRuntimeSecretsRow();
   const base = {
     id: ROW_ID,
@@ -386,6 +453,10 @@ export async function patchPlatformRuntimeSecrets(patch: PlatformRuntimeSecretsP
     lemonSqueezyCheckoutUrlEnterprise: existing?.lemonSqueezyCheckoutUrlEnterprise ?? null,
     easypeasyTier: existing?.easypeasyTier ?? null,
     easypeasySkipReason: existing?.easypeasySkipReason ?? null,
+    adsenseClientId: existing?.adsenseClientId ?? null,
+    adsenseSlotBanner: existing?.adsenseSlotBanner ?? null,
+    adsenseSlotInterstitial: existing?.adsenseSlotInterstitial ?? null,
+    adsenseSlotRewarded: existing?.adsenseSlotRewarded ?? null,
     updatedAt: new Date(),
   };
 
@@ -427,6 +498,10 @@ export async function patchPlatformRuntimeSecrets(patch: PlatformRuntimeSecretsP
         lemonSqueezyCheckoutUrlEnterprise: merged.lemonSqueezyCheckoutUrlEnterprise,
         easypeasyTier: merged.easypeasyTier,
         easypeasySkipReason: merged.easypeasySkipReason,
+        adsenseClientId: merged.adsenseClientId,
+        adsenseSlotBanner: merged.adsenseSlotBanner,
+        adsenseSlotInterstitial: merged.adsenseSlotInterstitial,
+        adsenseSlotRewarded: merged.adsenseSlotRewarded,
         updatedAt: merged.updatedAt,
       },
     });

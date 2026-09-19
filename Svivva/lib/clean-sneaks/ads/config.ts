@@ -1,21 +1,50 @@
 import type { AdPlacementId, HouseCreative } from "./types";
+import { isValidAdsenseClientId, isValidAdsenseSlotId } from "@/lib/adsense-credentials";
+
+declare global {
+  interface Window {
+    __ADSENSE_CLIENT__?: string;
+    __ADSENSE_SLOT_BANNER__?: string;
+    __ADSENSE_SLOT_INTERSTITIAL__?: string;
+    __ADSENSE_SLOT_REWARDED__?: string;
+  }
+}
+
+function readRuntimeClient(): string | null {
+  if (typeof window !== "undefined") {
+    const w = window.__ADSENSE_CLIENT__?.trim();
+    if (isValidAdsenseClientId(w)) return w!;
+  }
+  const env = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim() || "";
+  return isValidAdsenseClientId(env) ? env : null;
+}
+
+function readRuntimeSlot(placement: AdPlacementId): string | null {
+  const winKey =
+    placement === "menu_banner"
+      ? "__ADSENSE_SLOT_BANNER__"
+      : placement === "run_interstitial"
+        ? "__ADSENSE_SLOT_INTERSTITIAL__"
+        : "__ADSENSE_SLOT_REWARDED__";
+  if (typeof window !== "undefined") {
+    const w = window[winKey]?.trim();
+    if (isValidAdsenseSlotId(w)) return w!;
+  }
+  const map: Record<AdPlacementId, string | undefined> = {
+    menu_banner: process.env.NEXT_PUBLIC_ADSENSE_SLOT_BANNER?.trim(),
+    run_interstitial: process.env.NEXT_PUBLIC_ADSENSE_SLOT_INTERSTITIAL?.trim(),
+    rewarded_credits: process.env.NEXT_PUBLIC_ADSENSE_SLOT_REWARDED?.trim(),
+  };
+  const slot = map[placement];
+  return isValidAdsenseSlotId(slot) ? slot! : null;
+}
 
 /**
  * Real paid ads = Google AdSense.
- *
- * 1. https://www.google.com/adsense/start — create/sign in
- * 2. Add site zzaizzai.com, wait for approval
- * 3. Sites → turn on Auto ads (recommended) OR create Display ad units
- * 4. Vercel → Production env:
- *      NEXT_PUBLIC_ADSENSE_CLIENT=ca-pub-XXXXXXXXXXXXXXXX
- *      NEXT_PUBLIC_ADSENSE_SLOT_BANNER=…          (optional if Auto ads on)
- *      NEXT_PUBLIC_ADSENSE_SLOT_INTERSTITIAL=…
- *      NEXT_PUBLIC_ADSENSE_SLOT_REWARDED=…
- * 5. Redeploy — live Google ads replace placeholders
+ * Configure in Orbit admin → AdSense tab (stores in Platform Secrets) or Vercel env.
  */
 export function adsenseClientId(): string | null {
-  const raw = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim() || "";
-  return raw.startsWith("ca-pub-") ? raw : null;
+  return readRuntimeClient();
 }
 
 /** pub-XXXX form for ads.txt */
@@ -29,13 +58,7 @@ export function adsensePublisherId(): string | null {
 }
 
 export function adsenseSlot(placement: AdPlacementId): string | null {
-  const map: Record<AdPlacementId, string | undefined> = {
-    menu_banner: process.env.NEXT_PUBLIC_ADSENSE_SLOT_BANNER?.trim(),
-    run_interstitial: process.env.NEXT_PUBLIC_ADSENSE_SLOT_INTERSTITIAL?.trim(),
-    rewarded_credits: process.env.NEXT_PUBLIC_ADSENSE_SLOT_REWARDED?.trim(),
-  };
-  const slot = map[placement];
-  return slot && /^\d+$/.test(slot) ? slot : null;
+  return readRuntimeSlot(placement);
 }
 
 /** Any configured display slot — used when a placement-specific slot is missing. */

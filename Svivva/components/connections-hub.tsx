@@ -691,6 +691,22 @@ export function ConnectionsHub({ compact = false }: { compact?: boolean }) {
                         </p>
                       )}
                     </div>
+
+                    <div className="rounded-xl border border-amber-200 dark:border-amber-900/40 bg-amber-50 dark:bg-amber-950/20 px-4 py-3 space-y-2">
+                      <p className="text-sm font-bold text-amber-900 dark:text-amber-200">
+                        Google AdSense — get paid from ads
+                      </p>
+                      <p className="text-xs text-amber-800 dark:text-amber-300/90">
+                        Paste your <code className="font-mono">ca-pub-…</code> publisher id in Orbit
+                        so Klean Sneaks serves real Google ads. Payouts go to your AdSense account.
+                      </p>
+                      <a
+                        href="/dashboard/orbit?tab=adsense"
+                        className="inline-flex items-center gap-1 text-xs font-bold text-amber-900 dark:text-amber-200 underline"
+                      >
+                        Open Orbit → AdSense setup
+                      </a>
+                    </div>
                   </div>
                 }
               />

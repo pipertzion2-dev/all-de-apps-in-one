@@ -112,11 +112,33 @@ export async function generateMetadata(): Promise<Metadata> {
 const gaId = process.env.NEXT_PUBLIC_GA_ID || "G-QL8EXZZMS6";
 const gadsId = process.env.NEXT_PUBLIC_GADS_ID;
 const clarityId = process.env.NEXT_PUBLIC_CLARITY_ID;
-const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim()?.startsWith("ca-pub-")
-  ? process.env.NEXT_PUBLIC_ADSENSE_CLIENT.trim()
-  : null;
+
+function resolveAdsenseClient(): string | null {
+  const raw = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim() || "";
+  return raw.startsWith("ca-pub-") ? raw : null;
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const adsenseClient = resolveAdsenseClient();
+  const adsenseBanner = process.env.NEXT_PUBLIC_ADSENSE_SLOT_BANNER?.trim() || "";
+  const adsenseInterstitial = process.env.NEXT_PUBLIC_ADSENSE_SLOT_INTERSTITIAL?.trim() || "";
+  const adsenseRewarded = process.env.NEXT_PUBLIC_ADSENSE_SLOT_REWARDED?.trim() || "";
+  const adsenseRuntimeJs = adsenseClient
+    ? `window.__ADSENSE_CLIENT__=${JSON.stringify(adsenseClient)};${
+        /^\d+$/.test(adsenseBanner)
+          ? `window.__ADSENSE_SLOT_BANNER__=${JSON.stringify(adsenseBanner)};`
+          : ""
+      }${
+        /^\d+$/.test(adsenseInterstitial)
+          ? `window.__ADSENSE_SLOT_INTERSTITIAL__=${JSON.stringify(adsenseInterstitial)};`
+          : ""
+      }${
+        /^\d+$/.test(adsenseRewarded)
+          ? `window.__ADSENSE_SLOT_REWARDED__=${JSON.stringify(adsenseRewarded)};`
+          : ""
+      }`
+    : null;
+
   return (
     <html lang="en" suppressHydrationWarning className={`min-h-full w-full ${zcFont.variable}`}>
       <head>
@@ -274,6 +296,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {clarityId && (
           <Script id="microsoft-clarity" strategy="afterInteractive">
             {`(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,"clarity","script","${clarityId}");`}
+          </Script>
+        )}
+        {adsenseRuntimeJs && (
+          <Script id="adsense-runtime-config" strategy="beforeInteractive">
+            {adsenseRuntimeJs}
           </Script>
         )}
         {adsenseClient && (

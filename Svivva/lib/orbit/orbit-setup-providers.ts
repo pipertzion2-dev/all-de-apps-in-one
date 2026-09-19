@@ -120,6 +120,19 @@ export const ORBIT_SETUP_PROVIDERS: OrbitSetupProvider[] = [
     priority: 4,
   },
   {
+    id: "adsense",
+    name: "Google AdSense (paid ads)",
+    purpose: "Earn from Klean Sneaks + site traffic — Google pays your AdSense account",
+    priceLabel: "Free to join · Google pays you",
+    payUrl: "https://www.google.com/adsense/start",
+    docsUrl: "https://support.google.com/adsense/answer/12187279",
+    payNote:
+      "Approve zzaizzai.com → paste ca-pub-… in Orbit → AdSense tab (Platform Secrets). Auto ads optional slots.",
+    envKey: "NEXT_PUBLIC_ADSENSE_CLIENT",
+    bestPick: true,
+    priority: 3,
+  },
+  {
     id: "gemini",
     name: "Google Gemini (free AI)",
     purpose:
