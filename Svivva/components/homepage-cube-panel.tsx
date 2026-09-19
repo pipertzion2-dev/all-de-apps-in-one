@@ -25,6 +25,15 @@ export function HomepageCubePanel({
         />
       ) : null}
       <HomepageHeroBlock mountCanvas={mountCanvas} interactive={interactive} showFlipHint={false} />
+      {interactive ? (
+        <HomepageScrollHint
+          label="Scroll · pricing"
+          direction="down"
+          onActivate={() => {
+            document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" });
+          }}
+        />
+      ) : null}
       <HomepagePricingSection />
     </div>
   );
