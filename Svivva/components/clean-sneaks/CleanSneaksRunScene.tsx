@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { ContactShadows, Sky, Sparkles } from "@react-three/drei";
+import { ContactShadows, Sparkles } from "@react-three/drei";
 import { Baloon8RunEnvironment } from "./Baloon8RunEnvironment";
 import * as THREE from "three";
 import { POWERUP_META } from "@/lib/clean-sneaks/constants";
@@ -29,6 +29,7 @@ import {
   updateWalkingShoes3D,
 } from "@/lib/clean-sneaks/walking-shoes-3d";
 import { CleanSneaksPostFX } from "./CleanSneaksPostFX";
+import { VegasRunBackdrop } from "./VegasRunBackdrop";
 
 type QualityFlags = ReturnType<typeof runQualityFlags>;
 
@@ -266,15 +267,15 @@ function StreetLights({ count }: { count: number }) {
             <sphereGeometry args={[0.12, 12, 12]} />
             <meshStandardMaterial
               color="#ffe8c8"
-              emissive="#ffaa55"
-              emissiveIntensity={2}
+              emissive="#ffb347"
+              emissiveIntensity={2.4}
               roughness={0.2}
             />
           </mesh>
           {count >= 12 ? (
             <pointLight
               position={[0, 4, 0.3]}
-              color="#ffcc88"
+              color="#ffd699"
               intensity={0.35}
               distance={14}
               decay={2}
@@ -287,6 +288,8 @@ function StreetLights({ count }: { count: number }) {
 }
 
 function CityBlock({ count, castShadows }: { count: number; castShadows: boolean }) {
+  const neonColors = ["#ff3da5", "#ffb347", "#5ce1ff"] as const;
+
   const buildings = useMemo(() => {
     return Array.from({ length: count }, (_, i) => {
       const seed = i + 1;
@@ -297,31 +300,43 @@ function CityBlock({ count, castShadows }: { count: number; castShadows: boolean
         h: 4 + (i % 7) * 2.2,
         d: 2.5 + (i % 3) * 0.5,
         seed,
+        neon: neonColors[seed % neonColors.length]!,
       };
     });
   }, [count]);
 
   return (
-    <group>
+    <group name="vegas-flanking-towers">
       {buildings.map((b) => {
         const facade = buildingFacadeTexture(b.seed);
         return (
-          <mesh
-            key={`${b.x}-${b.z}`}
-            position={[b.x, b.h / 2, b.z]}
-            castShadow={castShadows}
-            receiveShadow={castShadows}
-          >
-            <boxGeometry args={[b.w, b.h, b.d]} />
-            <meshStandardMaterial
-              map={facade}
-              roughness={0.82}
-              metalness={0.08}
-              emissive="#ffaa44"
-              emissiveMap={facade}
-              emissiveIntensity={0.35}
-            />
-          </mesh>
+          <group key={`${b.x}-${b.z}`} position={[b.x, 0, b.z]}>
+            <mesh position={[0, b.h / 2, 0]} castShadow={castShadows} receiveShadow={castShadows}>
+              <boxGeometry args={[b.w, b.h, b.d]} />
+              <meshStandardMaterial
+                map={facade}
+                color="#0a0610"
+                roughness={0.88}
+                metalness={0.12}
+                emissive={b.neon}
+                emissiveMap={facade}
+                emissiveIntensity={0.62}
+              />
+            </mesh>
+            <mesh position={[0, b.h + 0.08, b.d * 0.52]}>
+              <boxGeometry args={[b.w * 0.85, 0.12, 0.06]} />
+              <meshBasicMaterial color={b.neon} toneMapped={false} />
+            </mesh>
+            {b.seed % 3 === 0 ? (
+              <pointLight
+                position={[0, b.h * 0.7, b.d * 0.6]}
+                color={b.neon}
+                intensity={0.25}
+                distance={10}
+                decay={2}
+              />
+            ) : null}
+          </group>
         );
       })}
     </group>
@@ -583,7 +598,7 @@ function World({
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    scene.background = new THREE.Color(0x0a0e14);
+    scene.background = new THREE.Color(0x080510);
   }, [scene]);
 
   useEffect(() => {
@@ -620,22 +635,13 @@ function World({
 
   return (
     <>
-      <fog attach="fog" args={["#0a0e18", 22, 68]} />
+      <fog attach="fog" args={["#140818", 20, 64]} />
 
-      {quality.sky ? (
-        <Sky
-          distance={450000}
-          sunPosition={[8, 3, -20]}
-          inclination={0.52}
-          azimuth={0.28}
-          mieCoefficient={0.012}
-          mieDirectionalG={0.85}
-          rayleigh={0.4}
-          turbidity={8}
-        />
-      ) : null}
+      <Suspense fallback={null}>
+        <VegasRunBackdrop segments={quality.mobile ? 3 : 5} mobile={quality.mobile} />
+      </Suspense>
 
-      <hemisphereLight args={["#7ec8d9", "#1a1420", 0.45]} />
+      <hemisphereLight args={["#ffb8e8", "#120818", 0.38]} />
       <ambientLight intensity={0.32} color="#ffffff" />
       <directionalLight
         ref={sunRef}
@@ -658,7 +664,8 @@ function World({
         shadow-normalBias={0.02}
       />
       <directionalLight position={[-4, 3, -6]} intensity={0.55} color="#7ec8d9" />
-      <pointLight position={[-2, 2, 3]} intensity={0.45} color="#d94f9c" distance={18} />
+      <pointLight position={[-2, 2, 3]} intensity={0.55} color="#ff4db8" distance={18} />
+      <pointLight position={[3, 1.5, -8]} intensity={0.35} color="#ffb347" distance={22} />
 
       <Baloon8RunEnvironment lite={quality.pmremLite} />
 

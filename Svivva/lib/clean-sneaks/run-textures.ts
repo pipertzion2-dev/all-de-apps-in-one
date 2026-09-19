@@ -223,28 +223,70 @@ export function soleTreadTexture(): THREE.CanvasTexture {
   );
 }
 
-/** Building facade with lit windows. */
-export function buildingFacadeTexture(seed: number): THREE.CanvasTexture {
-  return canvasTex(256, 512, (ctx, w, h) => {
-    ctx.fillStyle = "#121820";
+const VEGAS_NEON = ["#ff2d8a", "#ffb347", "#4de8ff", "#ff5ec8", "#ffd166"] as const;
+
+const facadeCache = new Map<number, THREE.CanvasTexture>();
+
+function vegasBuildingFacadeTexture(seed: number): THREE.CanvasTexture {
+  return canvasTex(128, 512, (ctx, w, h) => {
+    const rnd = (n: number) => ((seed * 997 + n * 131) % 1000) / 1000;
+
+    const bg = ctx.createLinearGradient(0, 0, 0, h);
+    bg.addColorStop(0, "#1c0a28");
+    bg.addColorStop(0.45, "#100818");
+    bg.addColorStop(1, "#06040a");
+    ctx.fillStyle = bg;
     ctx.fillRect(0, 0, w, h);
-    const cols = 6;
-    const rows = 14;
-    const cw = w / cols;
-    const rh = h / rows;
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const hash = ((seed * 997 + r * 131 + c * 73) % 100) / 100;
-        if (hash < 0.15) continue;
-        const lit = hash > 0.55;
-        ctx.fillStyle = lit
-          ? `rgba(255,${200 + Math.floor(hash * 40)},${120 + Math.floor(hash * 80)},${0.5 + hash * 0.4})`
-          : "rgba(20,28,36,0.9)";
-        const pad = 3;
-        ctx.fillRect(c * cw + pad, r * rh + pad, cw - pad * 2, rh - pad * 2);
-      }
+
+    for (let i = 0; i < 5; i++) {
+      const x = rnd(i) * (w - 10) + 5;
+      const color = VEGAS_NEON[Math.floor(rnd(i + 11) * VEGAS_NEON.length)]!;
+      ctx.fillStyle = color;
+      ctx.globalAlpha = 0.12 + rnd(i + 2) * 0.28;
+      ctx.fillRect(x, h * 0.08, 2 + rnd(i + 3) * 5, h * 0.78);
+      ctx.globalAlpha = 1;
     }
+
+    for (let i = 0; i < 48; i++) {
+      if (rnd(i + 40) < 0.38) continue;
+      const wx = rnd(i + 50) * (w - 10) + 5;
+      const wy = rnd(i + 60) * (h - 14) + 7;
+      const lit = rnd(i + 70) > 0.42;
+      ctx.fillStyle = lit
+        ? `rgba(255,${175 + Math.floor(rnd(i) * 70)},${90 + Math.floor(rnd(i + 1) * 90)},${0.35 + rnd(i + 2) * 0.55})`
+        : "rgba(6,4,10,0.55)";
+      ctx.fillRect(wx, wy, 3 + rnd(i + 4) * 7, 2 + rnd(i + 5) * 6);
+    }
+
+    const bandY = h * (0.32 + rnd(99) * 0.28);
+    const bandColor = VEGAS_NEON[Math.floor(rnd(100) * VEGAS_NEON.length)]!;
+    ctx.fillStyle = bandColor;
+    ctx.globalAlpha = 0.75;
+    ctx.fillRect(0, bandY, w, 7 + rnd(101) * 8);
+    ctx.globalAlpha = 1;
+    for (let d = 0; d < 14; d++) {
+      ctx.fillStyle = rnd(d + 200) > 0.45 ? "#fff6e0" : "#ff2d8a";
+      ctx.beginPath();
+      ctx.arc(6 + d * (w / 15), bandY + 5, 1.8, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    const crown = ctx.createLinearGradient(0, 0, 0, h * 0.2);
+    crown.addColorStop(0, "rgba(255,180,80,0.35)");
+    crown.addColorStop(1, "rgba(255,60,160,0)");
+    ctx.fillStyle = crown;
+    ctx.fillRect(0, 0, w, h * 0.22);
   });
+}
+
+/** Night-club / strip tower siding — neon marquees, not a window checker grid. */
+export function buildingFacadeTexture(seed: number): THREE.CanvasTexture {
+  let tex = facadeCache.get(seed);
+  if (!tex) {
+    tex = vegasBuildingFacadeTexture(seed);
+    facadeCache.set(seed, tex);
+  }
+  return tex;
 }
 
 /** Shared material cache — textures are expensive to regenerate. */
