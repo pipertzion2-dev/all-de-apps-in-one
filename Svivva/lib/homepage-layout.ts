@@ -1,6 +1,6 @@
 /** Which below-the-fold homepage sections render. Cube + nav + footer always show. */
 export const HOMEPAGE_SECTIONS = {
-  /** Full-viewport Dune-style cube flip: product cube homepage (with pricing) → game. */
+  /** Full-viewport Dune-style cube flip: game → product cube homepage (with pricing). */
   scrollSnap: true,
   oaasIntro: false,
   eventTracker: false,

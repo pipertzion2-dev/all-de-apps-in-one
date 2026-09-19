@@ -21,11 +21,11 @@ const WHEEL_SNAP_MS = 140;
 const SWIPE_THRESHOLD_PX = 36;
 const MAX_PANEL_INDEX = 1;
 
-/** Two full-viewport faces — homepage (cube + pricing), then game. */
+/** Two full-viewport faces — game, then homepage (cube + pricing). */
 export function HomepageFlipStack({
   begin,
   game,
-  initialPanel = "nav-cube",
+  initialPanel = "home-game",
   interactive = true,
 }: HomepageFlipStackProps) {
   const shellRef = useRef<HTMLDivElement>(null);
@@ -40,8 +40,8 @@ export function HomepageFlipStack({
   const [activePanel, setActivePanel] = useState<HomepageFlipPanelId>(initialPanel);
 
   const panels = [
-    { id: "nav-cube" as const, node: begin },
     { id: "home-game" as const, node: game },
+    { id: "nav-cube" as const, node: begin },
   ];
 
   const paintFaces = useCallback(() => {
@@ -208,8 +208,10 @@ export function HomepageFlipStack({
       direction: 1 | -1,
       panelId: HomepageFlipPanelId,
     ) => {
-      // Game face: always allow flip back to the homepage.
-      if (panelId === "home-game" && direction < 0) return true;
+      // Game face: always allow flip forward to the homepage (cube + pricing).
+      if (panelId === "home-game" && direction > 0) return true;
+      // Homepage face: always allow flip back to the game.
+      if (panelId === "nav-cube" && direction < 0) return true;
       if (!face) return true;
 
       const threshold = 8;
@@ -227,7 +229,7 @@ export function HomepageFlipStack({
 
       const direction: 1 | -1 = deltaY > 0 ? 1 : -1;
       const current = settledPanelIndex();
-      const panelId = panels[current]?.id ?? "nav-cube";
+      const panelId = panels[current]?.id ?? "home-game";
       const face = faceRefs.current[current];
       if (!canFlipFromFace(face, direction, panelId)) return false;
 
@@ -313,7 +315,7 @@ export function HomepageFlipStack({
 
       const direction: 1 | -1 = delta > 0 ? 1 : -1;
       const current = settledPanelIndex();
-      const panelId = panels[current]?.id ?? "nav-cube";
+      const panelId = panels[current]?.id ?? "home-game";
       const face = faceRefs.current[current];
       if (!canFlipFromFace(face, direction, panelId)) return;
 
