@@ -26,10 +26,7 @@ import {
   Play,
   BarChart3,
 } from "lucide-react";
-import type {
-  AcquisitionPlaybook,
-  AcquisitionQuickAction,
-} from "@/lib/orbit/customer-acquisition";
+import type { AcquisitionPlaybook, AcquisitionQuickAction } from "@/lib/orbit/customer-acquisition";
 import {
   acquisitionChannelLabel,
   CUSTOMER_ACQUISITION_VERSION,

@@ -131,8 +131,7 @@ async function amplifyContent(sourceContent: string, channels: string[]) {
       "Rewrite as a punchy Twitter/X thread (5-7 tweets). Hook first. End with a CTA linking to ZZAI.",
     linkedin:
       "Rewrite as a professional LinkedIn post. Insight first, short paragraphs, clear CTA.",
-    email:
-      "Rewrite as a marketing email with Subject, preview, body, and CTA button label.",
+    email: "Rewrite as a marketing email with Subject, preview, body, and CTA button label.",
     reddit:
       "Rewrite as a genuine builder Reddit post (no hype). Include a soft mention of the free tool.",
   };
@@ -228,9 +227,8 @@ export async function POST(req: NextRequest) {
       /** Acquisition layer only (optional traffic blast) — lighter than full urrthang */
       case "run_all":
       case "run_acquisition": {
-        const { runCustomerAcquisitionAutomation } = await import(
-          "@/lib/orbit/customer-acquisition-automation"
-        );
+        const { runCustomerAcquisitionAutomation } =
+          await import("@/lib/orbit/customer-acquisition-automation");
         const result = await runCustomerAcquisitionAutomation({
           skipTrafficBlast: !!body.skipTrafficBlast,
           includeTrafficBlast: !body.skipTrafficBlast,

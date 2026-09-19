@@ -194,9 +194,7 @@ async function pingSitemaps(): Promise<AcquisitionAutomationStep[]> {
         step(t.id, t.label, r.ok || r.status < 500 ? "done" : "failed", `HTTP ${r.status}`),
       );
     } catch (e) {
-      steps.push(
-        step(t.id, t.label, "failed", e instanceof Error ? e.message : "ping failed"),
-      );
+      steps.push(step(t.id, t.label, "failed", e instanceof Error ? e.message : "ping failed"));
     }
   }
 
@@ -345,13 +343,10 @@ export async function runCustomerAcquisitionAutomation(
         rewardAmount: 10,
       });
       steps.push(
-        step(
-          "acq-referral",
-          "Referral / viral link",
-          "done",
-          `Minted ${referral.referralCode}`,
-          { copyText: referral.referralLink, url: "/marketing-hub/referrals" },
-        ),
+        step("acq-referral", "Referral / viral link", "done", `Minted ${referral.referralCode}`, {
+          copyText: referral.referralLink,
+          url: "/marketing-hub/referrals",
+        }),
       );
     } catch (e) {
       steps.push(
@@ -514,7 +509,13 @@ export async function runCustomerAcquisitionAutomation(
     "",
     ...steps.map((s) => {
       const icon =
-        s.status === "done" ? "✓" : s.status === "failed" ? "✗" : s.status === "prepared" ? "◇" : "–";
+        s.status === "done"
+          ? "✓"
+          : s.status === "failed"
+            ? "✗"
+            : s.status === "prepared"
+              ? "◇"
+              : "–";
       return `${icon} ${s.label}: ${s.message}`;
     }),
   ].join("\n");

@@ -834,9 +834,8 @@ export async function runMarketingAutopilot(opts?: {
   // ── Customer Acquisition Do-It-All (UTMs, referrals, amplify, campaigns, intel) ──
   // Traffic blast already ran in Phase 1 — nest with skipTrafficBlast.
   try {
-    const { runCustomerAcquisitionAutomation } = await import(
-      "@/lib/orbit/customer-acquisition-automation"
-    );
+    const { runCustomerAcquisitionAutomation } =
+      await import("@/lib/orbit/customer-acquisition-automation");
     const acq = await runCustomerAcquisitionAutomation({
       skipTrafficBlast: true,
       includeSitemapPings: false,

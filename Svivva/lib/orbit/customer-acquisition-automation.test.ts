@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  ACQUISITION_PLAYBOOKS,
-  defaultAcquisitionUtmPresets,
-} from "./customer-acquisition";
+import { ACQUISITION_PLAYBOOKS, defaultAcquisitionUtmPresets } from "./customer-acquisition";
 
 describe("customer-acquisition-automation wiring", () => {
   it("has critical playbooks for do-it-all campaign seeding", () => {
