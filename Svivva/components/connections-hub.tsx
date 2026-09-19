@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/use-auth";
+import { authFetch, useAuth } from "@/hooks/use-auth";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -272,7 +272,8 @@ export function ConnectionsHub({ compact = false }: { compact?: boolean }) {
   const { data: creds, isLoading: credsLoading } = useQuery<CredsData>({
     queryKey: ["/api/seeds/credentials"],
     queryFn: async () => {
-      const r = await fetch("/api/seeds/credentials");
+      const r = await authFetch("/api/seeds/credentials");
+      if (r.status === 403) return null as unknown as CredsData;
       if (!r.ok) return null as unknown as CredsData;
       return r.json();
     },
@@ -289,7 +290,7 @@ export function ConnectionsHub({ compact = false }: { compact?: boolean }) {
 
   const saveMut = useMutation({
     mutationFn: async (payload: Record<string, string>) => {
-      const res = await fetch("/api/seeds/credentials", {
+      const res = await authFetch("/api/seeds/credentials", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

@@ -549,7 +549,7 @@ export function HomepageFlipStack({
         ref={scrollRef}
         data-homepage-flip-scroll=""
         aria-hidden="true"
-        className="fixed inset-x-0 bottom-0 top-16 z-[15] overflow-x-hidden overflow-y-auto bg-background will-change-[opacity] sm:top-20"
+        className="fixed inset-x-0 bottom-0 top-16 z-[15] overflow-x-hidden overflow-y-auto bg-background sm:top-20"
         style={{
           opacity: overlayOpacityForIndex(flipPanelIndex(initialPanel)),
           visibility: flipPanelIndex(initialPanel) > 0.02 ? "visible" : "hidden",
@@ -558,6 +558,7 @@ export function HomepageFlipStack({
             : "none",
           overscrollBehavior: "contain",
           WebkitOverflowScrolling: "touch",
+          transform: "translateZ(0)",
         }}
       >
         {begin}

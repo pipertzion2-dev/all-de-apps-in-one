@@ -1,13 +1,14 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { getAllSiteUrlsForIndexing } from "@/lib/indexing/site-urls";
 import { submitIndexNowBatched } from "@/lib/indexing/indexnow-submit";
 
 export const dynamic = "force-dynamic";
 
-export async function POST(req: Request) {
-  if (!(await isOrbitAdminAllowed()))
+export async function POST(req: NextRequest) {
+  if (!(await isOrbitAdminAllowed(req))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   const urls = await getAllSiteUrlsForIndexing();
   const result = await submitIndexNowBatched(urls);
