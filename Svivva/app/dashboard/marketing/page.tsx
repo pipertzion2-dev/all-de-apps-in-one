@@ -167,12 +167,18 @@ function ConnectionHub({ creds, onRefresh }: { creds: Creds | null; onRefresh: (
     try {
       // Real Webmasters v3 submission via /api/gsc/save (the legacy ?ping= endpoint
       // was retired June 2023; this hits the real GSC API using the saved service account).
-      const r = await fetch("/api/gsc/save", {
+      const r = await authFetch("/api/gsc/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "submit_sitemap" }),
       });
       const body = await r.json().catch(() => ({}));
+      if (r.status === 403) {
+        setGooglePingResult(
+          "Admin unlock required — open Launchpad or enter the admin passcode, then try again.",
+        );
+        return;
+      }
       if (body?.google?.ok) {
         setGooglePingResult(`✓ Submitted to Google Search Console: ${body.sitemapUrl}`);
       } else if (body?.google?.error?.includes("No service account")) {

@@ -20,7 +20,7 @@ const log = (message: string, source = "next") => {
 // ── SEO Automation Scheduler ─────────────────────────────────────────────────
 const SEO_BASE = getInternalAppOrigin();
 const SEO_INTERVAL_MS = (Number(process.env.SEO_AUTO_INTERVAL_HOURS) || 24) * 60 * 60 * 1000;
-const INTERNAL_SECRET = process.env.ORBIT_INTERNAL_SECRET || "";
+const INTERNAL_SECRET = process.env.ORBIT_INTERNAL_SECRET?.trim() || "";
 
 async function runSeoTasks() {
   const headers: Record<string, string> = {
@@ -59,6 +59,10 @@ async function runSeoTasks() {
 }
 
 function startSeoScheduler(readyDelayMs = 90_000) {
+  if (!INTERNAL_SECRET) {
+    log("[auto-seo] Skipped — set ORBIT_INTERNAL_SECRET for local SEO automation", "seo");
+    return;
+  }
   log(
     `[auto-seo] Scheduler armed — first run in ${readyDelayMs / 60_000} min, then every ${SEO_INTERVAL_MS / 3_600_000}h`,
     "seo",
@@ -104,6 +108,10 @@ async function runGrowthTasks() {
 }
 
 function startGrowthScheduler() {
+  if (!INTERNAL_SECRET) {
+    log("[auto-growth] Skipped — set ORBIT_INTERNAL_SECRET for local growth automation", "growth");
+    return;
+  }
   log(
     `[auto-growth] Growth scheduler armed — first run in ${GROWTH_INITIAL_DELAY_MS / 60_000} min, then weekly`,
     "growth",
@@ -145,6 +153,13 @@ async function runChannelIntelTasks() {
 }
 
 function startChannelIntelScheduler() {
+  if (!INTERNAL_SECRET) {
+    log(
+      "[channel-intel] Skipped — set ORBIT_INTERNAL_SECRET for local channel intel automation",
+      "growth",
+    );
+    return;
+  }
   log(
     `[channel-intel] Scheduler armed — first run in ${CHANNEL_INTEL_INITIAL_DELAY_MS / 60_000} min, then every 6h`,
     "growth",
