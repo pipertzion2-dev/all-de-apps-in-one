@@ -138,11 +138,11 @@ export function updateShoeDirtOverlay(
     mat.color.copy(patchColor(zoneData));
 
     const wet = zoneData.wetness > 18;
-    mat.opacity = Math.min(0.96, 0.22 + level * 0.1 + (wet ? 0.08 : 0));
+    mat.opacity = Math.min(0.98, 0.35 + level * 0.12 + (wet ? 0.1 : 0));
     if (wet) mat.color.lerp(new THREE.Color(0x3a7ca5), 0.22);
 
-    const grow = 0.88 + level * 0.07;
-    patch.scale.set(layout.rx * rearW * 0.5 * grow, layout.ry * rearH * 0.5 * grow, 1);
+    const grow = 0.95 + level * 0.1;
+    patch.scale.set(layout.rx * rearW * 0.55 * grow, layout.ry * rearH * 0.55 * grow, 1);
     patch.visible = true;
 
     // Stack extra micro-splats for high levels (visual increments)

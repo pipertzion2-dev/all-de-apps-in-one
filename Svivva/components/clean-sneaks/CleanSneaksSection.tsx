@@ -92,8 +92,9 @@ export function CleanSneaksSection() {
               stiehl den alten Manns Bündel
             </p>
             <p className="mt-5 max-w-md text-sm leading-relaxed text-white/70 sm:text-base lg:max-w-none">
-              Keep the Baloon8 clean while you chase the bundle — mud, puddles, crowds, and weather
-              land dirt on exact balloon zones. Pick your finish, protect the fit, steal the bag.
+              Keep the Baloon8 clean while you chase the casino. Street trash and grit dirty the
+              shoes for real — score becomes casino credits. Reach the destination or cash out
+              early, turn in your ticket, then play Steal the Old Man&apos;s Bundle.
             </p>
 
             <div className="mt-8 flex flex-col items-center gap-3 lg:items-start">
@@ -109,11 +110,14 @@ export function CleanSneaksSection() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="min-w-[220px] border-[#D94F9C]/50 text-[#E8D9A8]"
+                  className="min-w-[220px] border-[#d4af37]/50 text-[#ffd76a]"
                   asChild
                   data-testid="button-steal-bundle-home"
                 >
-                  <Link href="/clean-sneaks?mode=bundle">Steal the Old Man&apos;s Bundle</Link>
+                  <Link href="/clean-sneaks?mode=bundle">
+                    Steal the Old Man&apos;s Bundle
+                    {best > 0 ? ` · ${best.toLocaleString()} credits` : ""}
+                  </Link>
                 </Button>
               ) : (
                 <p className="max-w-sm text-xs text-white/50" data-testid="text-bundle-unlock-hint">
@@ -121,7 +125,7 @@ export function CleanSneaksSection() {
                 </p>
               )}
               <p className="text-[11px] uppercase tracking-[0.25em] text-white/45">
-                Steal the bundle · Full screen · Mobile &amp; desktop
+                Dodge street trash · Cash out credits to the table
               </p>
               {best > 0 && (
                 <p className="text-xs text-[#7EC8D9]/90" data-testid="text-clean-sneaks-best">

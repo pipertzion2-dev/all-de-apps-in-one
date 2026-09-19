@@ -7,7 +7,12 @@ import { Baloon8RunEnvironment } from "./Baloon8RunEnvironment";
 import * as THREE from "three";
 import { POWERUP_META } from "@/lib/clean-sneaks/constants";
 import { buildObstacle3D, buildPowerUp3D } from "@/lib/clean-sneaks/run-obstacles-3d";
-import { laneWorldX, stepRunEngine, type RunEngineState } from "@/lib/clean-sneaks/run-engine";
+import {
+  FINISH_DISTANCE,
+  laneWorldX,
+  stepRunEngine,
+  type RunEngineState,
+} from "@/lib/clean-sneaks/run-engine";
 import { VISION_HEX_THREE, visionForObstacle } from "@/lib/clean-sneaks/sneak-vision";
 import {
   asphaltMaterial,
@@ -33,6 +38,85 @@ import { VegasRunBackdrop } from "./VegasRunBackdrop";
 
 type QualityFlags = ReturnType<typeof runQualityFlags>;
 
+/** Neon casino façade that slides into view near the destination. */
+function CasinoDestinationLandmark({
+  stateRef,
+}: {
+  stateRef: React.MutableRefObject<RunEngineState>;
+}) {
+  const group = useRef<THREE.Group>(null);
+  const bulbs = useRef<THREE.Mesh[]>([]);
+
+  useFrame((_, dt) => {
+    const dist = stateRef.current.distance;
+    const remaining = FINISH_DISTANCE - dist;
+    // Place façade ahead; pull closer as finish approaches.
+    const z = THREE.MathUtils.clamp(-8 - remaining * 0.35, -28, -4.5);
+    if (group.current) {
+      group.current.position.z = THREE.MathUtils.lerp(
+        group.current.position.z,
+        z,
+        Math.min(1, dt * 2),
+      );
+      group.current.visible = dist > FINISH_DISTANCE * 0.45;
+    }
+    const t = performance.now() / 1000;
+    bulbs.current.forEach((m, i) => {
+      const mat = m.material as THREE.MeshStandardMaterial;
+      if (mat) mat.emissiveIntensity = 0.6 + Math.sin(t * 5 + i) * 0.5;
+    });
+  });
+
+  return (
+    <group ref={group} position={[0, 0, -22]} name="casino-destination">
+      <mesh position={[0, 3.2, 0]} castShadow>
+        <boxGeometry args={[10, 6.5, 2.2]} />
+        <meshStandardMaterial color="#1a0a12" metalness={0.35} roughness={0.5} />
+      </mesh>
+      <mesh position={[0, 5.9, 1.15]}>
+        <boxGeometry args={[8, 0.7, 0.2]} />
+        <meshStandardMaterial
+          color="#ff2d6a"
+          emissive="#ff2d6a"
+          emissiveIntensity={1.2}
+          toneMapped={false}
+        />
+      </mesh>
+      <mesh position={[0, 4.9, 1.15]}>
+        <boxGeometry args={[5.5, 0.45, 0.15]} />
+        <meshStandardMaterial
+          color="#ffd76a"
+          emissive="#ffd76a"
+          emissiveIntensity={1}
+          toneMapped={false}
+        />
+      </mesh>
+      {Array.from({ length: 12 }, (_, i) => (
+        <mesh
+          key={i}
+          position={[-3.3 + i * 0.6, 5.35, 1.25]}
+          ref={(el) => {
+            if (el) bulbs.current[i] = el;
+          }}
+        >
+          <sphereGeometry args={[0.07, 6, 6]} />
+          <meshStandardMaterial
+            color="#ffe08a"
+            emissive="#ffe08a"
+            emissiveIntensity={1}
+            toneMapped={false}
+          />
+        </mesh>
+      ))}
+      <mesh position={[0, 1.4, 1.05]}>
+        <boxGeometry args={[2.4, 2.8, 0.15]} />
+        <meshStandardMaterial color="#3a1020" metalness={0.4} roughness={0.4} />
+      </mesh>
+      <pointLight position={[0, 4, 2]} color="#ff4d7a" intensity={1.6} distance={14} />
+      <pointLight position={[0, 3, 2.2]} color="#ffd76a" intensity={0.9} distance={10} />
+    </group>
+  );
+}
 type SceneProps = {
   stateRef: React.MutableRefObject<RunEngineState>;
   running: boolean;
@@ -146,6 +230,67 @@ function FollowCamera({
   });
 
   return null;
+}
+
+function GroundLitter({
+  stateRef,
+  mobile,
+}: {
+  stateRef: React.MutableRefObject<RunEngineState>;
+  mobile: boolean;
+}) {
+  const group = useRef<THREE.Group>(null);
+  const pieces = useMemo(() => {
+    const count = mobile ? 28 : 48;
+    return Array.from({ length: count }, (_, i) => {
+      const lane = (i % 3) - 1;
+      return {
+        x: lane * 2.4 + Math.sin(i * 1.7) * 0.55,
+        z: -6 - (i % 16) * 4.2 - (i % 3) * 0.8,
+        rot: i * 0.37,
+        kind: i % 5,
+        scale: 0.7 + (i % 4) * 0.15,
+      };
+    });
+  }, [mobile]);
+
+  useFrame(() => {
+    const g = group.current;
+    if (!g) return;
+    const scroll = (stateRef.current.distance * 0.4) % 16.8;
+    g.position.z = scroll;
+  });
+
+  const colors = [0x6b7280, 0xb8c4a8, 0xc45c26, 0x8b7355, 0x88a0b0];
+
+  return (
+    <group ref={group} name="ground-litter">
+      {pieces.map((p, i) => (
+        <mesh
+          key={i}
+          position={[p.x, 0.035, p.z]}
+          rotation={[-Math.PI / 2, 0, p.rot]}
+          scale={p.scale}
+          receiveShadow
+        >
+          {p.kind === 0 || p.kind === 3 ? (
+            <planeGeometry args={[0.28, 0.18]} />
+          ) : p.kind === 1 ? (
+            <circleGeometry args={[0.11, 8]} />
+          ) : (
+            <planeGeometry args={[0.2, 0.12]} />
+          )}
+          <meshStandardMaterial
+            color={colors[p.kind]!}
+            roughness={0.92}
+            metalness={p.kind === 4 ? 0.45 : 0.05}
+            transparent
+            opacity={0.92}
+          />
+        </mesh>
+      ))}
+    </group>
+  );
 }
 
 function Road({
@@ -671,6 +816,7 @@ function World({
 
       <FollowCamera stateRef={stateRef} mobile={quality.mobile} portrait={quality.portrait} />
       <Road stateRef={stateRef} castShadows={quality.castShadows} />
+      <GroundLitter stateRef={stateRef} mobile={quality.mobile} />
       <CityBlock count={quality.cityBuildings} castShadows={quality.castShadows} />
       <StreetLights count={quality.streetLights} />
       {quality.speedStreaks ? <SpeedStreaks stateRef={stateRef} /> : null}
@@ -695,6 +841,7 @@ function World({
         />
       ) : null}
       <DynamicEntities stateRef={stateRef} />
+      <CasinoDestinationLandmark stateRef={stateRef} />
 
       {quality.contactShadows ? (
         <ContactShadows

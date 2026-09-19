@@ -39,7 +39,12 @@ function CleanSneaksPageContent() {
     playMode === "runner" && !introComplete && (gamePhase === "loading" || gamePhase === "start");
   const immersiveRun =
     playMode === "runner" &&
-    (gamePhase === "running" || gamePhase === "countdown" || gamePhase === "colorPick");
+    (gamePhase === "running" ||
+      gamePhase === "paused" ||
+      gamePhase === "countdown" ||
+      gamePhase === "colorPick" ||
+      gamePhase === "walkComplete" ||
+      gamePhase === "casino");
   const showGameShell = playMode === "bundle-card" || !preGame;
 
   const registerBegin = useCallback((begin: () => void) => {
@@ -84,14 +89,18 @@ function CleanSneaksPageContent() {
       }`}
       style={preGame ? undefined : shellStyle}
     >
-      {!introComplete && (gamePhase === "loading" || gamePhase === "start") && (
-        <GameStartScreen
-          preload={gamePhase === "loading"}
-          onStart={gamePhase === "start" ? handleStart : undefined}
-        />
-      )}
+      {!introComplete &&
+        playMode === "runner" &&
+        (gamePhase === "loading" || gamePhase === "start") && (
+          <GameStartScreen
+            preload={gamePhase === "loading"}
+            onStart={gamePhase === "start" ? handleStart : undefined}
+          />
+        )}
 
-      {gamePhase === "loading" && !introComplete && <GameLoadingWheels fullscreen />}
+      {gamePhase === "loading" && !introComplete && playMode === "runner" && (
+        <GameLoadingWheels fullscreen />
+      )}
 
       {!preGame && (
         <div
@@ -137,13 +146,13 @@ function CleanSneaksPageContent() {
                   size="sm"
                   className={
                     portrait
-                      ? "h-8 px-2.5 text-xs border-[#D94F9C]/40 text-[#E8D9A8]"
-                      : "border-[#D94F9C]/40 text-[#E8D9A8]"
+                      ? "h-8 px-2.5 text-xs border-[#d4af37]/40 text-[#ffd76a]"
+                      : "border-[#d4af37]/40 text-[#ffd76a]"
                   }
                   onClick={openBundleCard}
                   data-testid="button-header-steal-bundle"
                 >
-                  Steal Bundle
+                  Casino
                 </Button>
               )}
               <Button
@@ -197,7 +206,13 @@ function CleanSneaksPageContent() {
             }
           >
             {playMode === "bundle-card" && bundleUnlocked ? (
-              <StealTheBundleCardGame onBack={() => setPlayMode("runner")} />
+              <StealTheBundleCardGame
+                onBack={() => setPlayMode("runner")}
+                onNewWalk={() => {
+                  setPlayMode("runner");
+                  setSceneAttempt((n) => n + 1);
+                }}
+              />
             ) : (
               <CleanSneaksGame3D
                 key={sceneAttempt}

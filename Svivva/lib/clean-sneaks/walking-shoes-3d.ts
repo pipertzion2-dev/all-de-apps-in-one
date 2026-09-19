@@ -222,9 +222,10 @@ function tintShoe(
   for (const m of shoe.mats) {
     const base =
       (m.userData.baseTint as THREE.Color | undefined)?.clone() ?? new THREE.Color(0xffffff);
-    // Light global wash only — zone splats carry the real dirt.
-    if (dirt > 0.01) base.lerp(new THREE.Color(0x5a4030), 0.05 + dirt * 0.22);
-    if (freshGlow) base.lerp(new THREE.Color(0xffffff), 0.06);
+    // Stronger global wash so dirt reads clearly on Baloon8 materials.
+    if (dirt > 0.01) base.lerp(new THREE.Color(0x4a3428), 0.08 + dirt * 0.42);
+    if (dirt > 0.45) base.lerp(new THREE.Color(0x2a1c14), (dirt - 0.45) * 0.35);
+    if (freshGlow && dirt < 0.15) base.lerp(new THREE.Color(0xffffff), 0.06);
     m.color.copy(base);
     m.opacity = 1;
   }

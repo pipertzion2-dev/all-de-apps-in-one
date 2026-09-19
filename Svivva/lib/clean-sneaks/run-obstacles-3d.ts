@@ -90,7 +90,49 @@ export function buildObstacle3D(kind: ObstacleKind): THREE.Object3D {
     );
     tie.position.y = 0.5 * scaleH;
     tie.rotation.x = Math.PI / 2;
+    // Loose wrappers / cans around the bag so the street reads messy.
+    for (let i = 0; i < 3; i++) {
+      const scrap = new THREE.Mesh(
+        new THREE.BoxGeometry(0.12 + Math.random() * 0.1, 0.03, 0.16 + Math.random() * 0.1),
+        new THREE.MeshStandardMaterial({
+          color: i === 0 ? 0xb8c4a8 : i === 1 ? 0x6a7a88 : 0xc45c26,
+          roughness: 0.9,
+        }),
+      );
+      scrap.position.set((i - 1) * 0.28, 0.04, 0.2 + i * 0.05);
+      scrap.rotation.y = i * 0.7;
+      root.add(scrap);
+    }
     root.add(bag, tie);
+  } else if (kind === "debris") {
+    const pile = new THREE.Group();
+    const colors = [0x8b7355, 0x5c4033, 0x6b7280, 0x4a5568, 0xc4a35a];
+    for (let i = 0; i < 6; i++) {
+      const chunk = new THREE.Mesh(
+        new THREE.BoxGeometry(
+          0.18 + Math.random() * 0.2,
+          0.06 + Math.random() * 0.1,
+          0.14 + Math.random() * 0.16,
+        ),
+        new THREE.MeshStandardMaterial({ color: colors[i % colors.length], roughness: 0.95 }),
+      );
+      chunk.position.set(
+        (Math.random() - 0.5) * 0.7 * scaleW,
+        0.05 + Math.random() * 0.08,
+        (Math.random() - 0.5) * 0.5,
+      );
+      chunk.rotation.set(Math.random(), Math.random(), Math.random());
+      pile.add(chunk);
+    }
+    // Crushed can
+    const can = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.08, 0.09, 0.16, 10),
+      new THREE.MeshStandardMaterial({ color: 0x88a0b0, metalness: 0.55, roughness: 0.35 }),
+    );
+    can.position.set(0.22, 0.09, -0.1);
+    can.rotation.z = 1.2;
+    pile.add(can);
+    root.add(pile);
   } else if (kind === "gum") {
     const gum = new THREE.Mesh(
       new THREE.SphereGeometry(0.18, 12, 8),

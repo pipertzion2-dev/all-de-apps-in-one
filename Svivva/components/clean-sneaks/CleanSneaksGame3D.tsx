@@ -22,6 +22,13 @@ import {
   isBundleCardUnlocked,
   markBundleCardUnlocked,
 } from "@/lib/clean-sneaks/bundle-unlock";
+import {
+  playCue,
+  saveWalkingScoreToSession,
+  canAffordTable,
+  scoreToCredits,
+  CREDITS_MIN_ANTE,
+} from "@/lib/clean-sneaks/casino";
 import { readBestScore, shareScore, writeBestScore } from "@/lib/clean-sneaks/storage";
 import type {
   GameOverPayload,
@@ -42,10 +49,23 @@ import { ShoeCamHud } from "./ShoeCamHud";
 import { PostMissionReveal } from "./PostMissionReveal";
 import { CleanPathHud, OhNoOverlay } from "./OhNoOverlay";
 import { Baloon8ColorwayPicker } from "./Baloon8ColorwayPicker";
+import { CasinoEntryRules } from "./CasinoEntryRules";
 
 const CleanSneaksRunScene = dynamic(
   () => import("./CleanSneaksRunScene").then((m) => ({ default: m.CleanSneaksRunScene })),
   { ssr: false, loading: () => null },
+);
+
+const CasinoExperience = dynamic(
+  () => import("./casino/CasinoExperience").then((m) => ({ default: m.CasinoExperience })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex flex-1 items-center justify-center bg-[#07050a] text-[#d4af37]">
+        Opening casino…
+      </div>
+    ),
+  },
 );
 
 export type CleanSneaksGame3DProps = {
@@ -149,7 +169,9 @@ export function CleanSneaksGame3D({
   const [npcLine, setNpcLine] = useState<string | null>(null);
   const [ohNo, setOhNo] = useState(stateRef.current.ohNo);
   const [colorwayChosen, setColorwayChosen] = useState(false);
+  const [walkCompleteScore, setWalkCompleteScore] = useState(0);
   const countdownTimerRef = useRef<number | null>(null);
+  const destinationCelebratedRef = useRef(false);
 
   const emitStats = useCallback(() => {
     const s = stateRef.current;
@@ -169,6 +191,7 @@ export function CleanSneaksGame3D({
     (archetype?: Baloon8ColorwayId) => {
       const id = archetype ?? colorwayIdRef.current;
       stateRef.current = createRunEngineState(readBestScore(), id);
+      destinationCelebratedRef.current = false;
       setGameOver(null);
       setShareMsg(null);
       setSceneKey((k) => k + 1);
@@ -188,10 +211,8 @@ export function CleanSneaksGame3D({
     [phase],
   );
 
-  const endRun = useCallback(() => {
+  const finalizeScoreAndUnlock = useCallback(() => {
     const s = stateRef.current;
-    if (!s.running && phase === "over") return;
-    s.running = false;
     const previousBest = readBestScore();
     const best = writeBestScore(s.score);
     s.best = best;
@@ -202,14 +223,54 @@ export function CleanSneaksGame3D({
       distance: payload.distance,
       previousBest,
     });
-    if (unlockEval.newlyUnlocked) markBundleCardUnlocked();
+    if (unlockEval.unlocked) markBundleCardUnlocked();
     payload.bundleCardUnlocked = alreadyUnlocked || unlockEval.unlocked;
-    payload.bundleNewlyUnlocked = unlockEval.newlyUnlocked;
+    payload.bundleNewlyUnlocked = !alreadyUnlocked && unlockEval.unlocked;
     payload.bundleUnlockReason = payload.bundleCardUnlocked ? undefined : unlockEval.reason;
+    saveWalkingScoreToSession(payload.score, payload.distance, payload.bundleCardUnlocked);
+    return payload;
+  }, []);
+
+  const enterCasino = useCallback(() => {
+    const s = stateRef.current;
+    s.running = false;
+    const payload = finalizeScoreAndUnlock();
+    setWalkCompleteScore(payload.score);
     setGameOver(payload);
-    setPhase("over");
+    setPhase("casino");
+    playCue("walking_complete");
+  }, [finalizeScoreAndUnlock]);
+
+  /** Cash out whatever score you've earned so far and jump to Steal the Bundle. */
+  const cashOutToBundle = useCallback(() => {
+    const s = stateRef.current;
+    const credits = scoreToCredits(s.score);
+    if (!canAffordTable(credits)) return;
+    s.running = false;
+    const payload = finalizeScoreAndUnlock();
+    setWalkCompleteScore(payload.score);
+    setGameOver(payload);
+    saveWalkingScoreToSession(payload.score, payload.distance, true);
+    setPhase("casino");
+    playCue("walking_complete");
+  }, [finalizeScoreAndUnlock]);
+
+  const endRun = useCallback(() => {
+    const s = stateRef.current;
+    if (!s.running && (phase === "over" || phase === "casino" || phase === "walkComplete")) return;
+    s.running = false;
+    const payload = finalizeScoreAndUnlock();
+    setGameOver(payload);
+    setWalkCompleteScore(payload.score);
+    // Destination finish → casino reward path; cooked early → classic reveal.
+    if (s.destinationReached || payload.bundleCardUnlocked) {
+      setPhase("walkComplete");
+      playCue("walking_complete");
+    } else {
+      setPhase("over");
+    }
     emitStats();
-  }, [emitStats, phase]);
+  }, [emitStats, phase, finalizeScoreAndUnlock]);
 
   const handleStreakFlash = useCallback(() => {
     setFlashStreak(true);
@@ -282,7 +343,16 @@ export function CleanSneaksGame3D({
     if (loadingDoneRef.current) return;
     loadingDoneRef.current = true;
     setPhase((p) => {
-      if (p === "colorPick" || p === "countdown" || p === "running" || p === "over") return p;
+      if (
+        p === "colorPick" ||
+        p === "countdown" ||
+        p === "running" ||
+        p === "paused" ||
+        p === "over" ||
+        p === "walkComplete" ||
+        p === "casino"
+      )
+        return p;
       if (coverStartPassedRef.current) return "colorPick";
       return "start";
     });
@@ -349,11 +419,37 @@ export function CleanSneaksGame3D({
     };
   }, [active, phase, finishLoading]);
 
+  const pauseRun = useCallback(() => {
+    if (phase !== "running") return;
+    stateRef.current.running = false;
+    setPhase("paused");
+  }, [phase]);
+
+  const resumeRun = useCallback(() => {
+    if (phase !== "paused") return;
+    stateRef.current.running = true;
+    stateRef.current.lastTs = performance.now();
+    setPhase("running");
+  }, [phase]);
+
   useEffect(() => {
     if (!active) return;
     const onKey = (e: KeyboardEvent) => {
-      if (phase === "over" || phase === "loading") return;
+      if (phase === "over" || phase === "loading" || phase === "walkComplete" || phase === "casino")
+        return;
       const k = e.key.toLowerCase();
+      if (phase === "paused") {
+        if (k === "escape" || k === "p" || k === " " || k === "enter" || e.code === "Space") {
+          e.preventDefault();
+          resumeRun();
+        }
+        return;
+      }
+      if (phase === "running" && (k === "escape" || k === "p")) {
+        e.preventDefault();
+        pauseRun();
+        return;
+      }
       if (phase === "start") {
         if (k === " " || k === "enter" || e.code === "Space") {
           e.preventDefault();
@@ -406,7 +502,7 @@ export function CleanSneaksGame3D({
     };
     window.addEventListener("keydown", onKey, { passive: false });
     return () => window.removeEventListener("keydown", onKey);
-  }, [active, phase, beginGame, confirmColorwayAndCountdown, onOhNo]);
+  }, [active, phase, beginGame, confirmColorwayAndCountdown, onOhNo, pauseRun, resumeRun]);
 
   useEffect(() => {
     if (!active || phase !== "running") return;
@@ -465,15 +561,32 @@ export function CleanSneaksGame3D({
   }, [phase]);
 
   const runItBack = () => {
+    destinationCelebratedRef.current = false;
     resetRun();
     setColorwayChosen(false);
     setCountdown(3);
     setPhase("colorPick");
   };
 
+  const continueBonus = () => {
+    const s = stateRef.current;
+    s.running = true;
+    s.lastTs = performance.now();
+    setPhase("running");
+  };
+
   const onDestination = useCallback(() => {
     emitStats();
-  }, [emitStats]);
+    if (destinationCelebratedRef.current) return;
+    destinationCelebratedRef.current = true;
+    const s = stateRef.current;
+    s.running = false;
+    const payload = finalizeScoreAndUnlock();
+    setWalkCompleteScore(payload.score);
+    setGameOver(payload);
+    setPhase("walkComplete");
+    playCue("walking_complete");
+  }, [emitStats, finalizeScoreAndUnlock]);
 
   const onShare = async () => {
     if (!gameOver) return;
@@ -511,6 +624,24 @@ export function CleanSneaksGame3D({
     return null;
   }
 
+  if (phase === "casino") {
+    return (
+      <div
+        className={`flex min-h-0 flex-col ${fullscreen ? "h-full flex-1" : ""} ${className ?? ""}`}
+        style={style}
+        role="application"
+        aria-label={`${KLEAN_SNEAKS.title} casino`}
+      >
+        <CasinoExperience
+          walkingScore={walkCompleteScore || gameOver?.score || 0}
+          initialState="WALK_COMPLETE"
+          onNewWalk={runItBack}
+          onExit={onExit}
+        />
+      </div>
+    );
+  }
+
   return (
     <div
       ref={wrapRef}
@@ -524,19 +655,92 @@ export function CleanSneaksGame3D({
           fullscreen ? "rounded-lg border border-white/10" : "rounded-xl border border-white/10"
         }`}
       >
-        {phase === "running" && onExit && (
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            className={`pointer-events-auto absolute z-20 border-white/20 bg-black/55 text-[10px] uppercase tracking-wider ${
-              portrait ? "right-2 top-2 h-7 px-2" : "right-3 top-3"
+        {(phase === "running" || phase === "paused") && (
+          <div
+            className={`pointer-events-auto absolute z-20 flex gap-2 ${
+              portrait ? "right-2 top-2" : "right-3 top-3"
             }`}
-            onClick={onExit}
-            data-testid="button-run-exit"
           >
-            Exit
-          </Button>
+            {phase === "running" ? (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className={`border-white/20 bg-black/55 text-[10px] uppercase tracking-wider ${
+                  portrait ? "h-7 px-2" : ""
+                }`}
+                onClick={pauseRun}
+                data-testid="button-run-pause"
+              >
+                Pause
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                size="sm"
+                className={`bg-[#d4af37] text-[10px] uppercase tracking-wider text-[#1a1008] ${
+                  portrait ? "h-7 px-2" : ""
+                }`}
+                onClick={resumeRun}
+                data-testid="button-run-resume-top"
+              >
+                Resume
+              </Button>
+            )}
+            {onExit && (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className={`border-white/20 bg-black/55 text-[10px] uppercase tracking-wider ${
+                  portrait ? "h-7 px-2" : ""
+                }`}
+                onClick={onExit}
+                data-testid="button-run-exit"
+              >
+                Exit
+              </Button>
+            )}
+          </div>
+        )}
+
+        {phase === "paused" && (
+          <div
+            className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/75 px-4 text-center backdrop-blur-sm"
+            data-testid="pause-overlay"
+          >
+            <p className="text-[10px] uppercase tracking-[0.4em] text-[#d4af37]">Paused</p>
+            <h3 className="mt-2 font-serif text-3xl text-[#f7e7b0]">Walk on hold</h3>
+            <p className="mt-2 max-w-sm text-sm text-[#e8dcc0]/70">
+              Credits so far: {scoreToCredits(hud.score).toLocaleString()} · {hud.distance}m ·{" "}
+              {hud.cleanliness}% clean
+            </p>
+            <CasinoEntryRules compact className="mt-4" />
+            <div className="mt-6 flex flex-wrap justify-center gap-2">
+              <Button
+                size="lg"
+                className="bg-[#d4af37] text-[#1a1008] hover:bg-[#e0c15a]"
+                onClick={resumeRun}
+                data-testid="button-run-resume"
+              >
+                Resume
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-[#d4af37]/40 text-[#ffd76a] disabled:opacity-40"
+                disabled={!canAffordTable(scoreToCredits(hud.score))}
+                onClick={cashOutToBundle}
+                data-testid="button-pause-cashout"
+              >
+                Steal Bundle · {scoreToCredits(hud.score).toLocaleString()}
+              </Button>
+              <Button size="lg" variant="ghost" className="text-[#e8dcc0]/70" onClick={runItBack}>
+                New Walk
+              </Button>
+            </div>
+            <p className="mt-3 text-[11px] text-white/40">Esc / P to resume</p>
+          </div>
         )}
 
         <div
@@ -554,6 +758,9 @@ export function CleanSneaksGame3D({
               className={`font-bold tabular-nums text-foreground ${portrait ? "text-base" : "text-lg sm:text-xl"}`}
             >
               {hud.score.toLocaleString()}
+            </p>
+            <p className={`text-[#ffd76a]/90 ${portrait ? "text-[10px]" : "text-xs"}`}>
+              Credits {scoreToCredits(hud.score).toLocaleString()}
             </p>
             <p
               className={`text-muted-foreground ${portrait ? "text-[10px] tabular-nums" : "text-xs"}`}
@@ -651,10 +858,24 @@ export function CleanSneaksGame3D({
 
         {phase === "running" && (
           <div
-            className={`pointer-events-auto absolute z-20 flex gap-2 ${
-              portrait ? "bottom-2 left-2" : "bottom-3 right-3"
+            className={`pointer-events-auto absolute z-20 flex flex-wrap gap-2 ${
+              portrait ? "bottom-2 left-2 right-2 justify-between" : "bottom-3 right-3"
             }`}
           >
+            <Button
+              size="sm"
+              className="h-8 bg-[#d4af37] text-[10px] uppercase tracking-wider text-[#1a1008] hover:bg-[#e0c15a] disabled:opacity-40"
+              disabled={!canAffordTable(scoreToCredits(hud.score))}
+              onClick={cashOutToBundle}
+              data-testid="button-cashout-steal-bundle"
+              title={
+                canAffordTable(scoreToCredits(hud.score))
+                  ? "Cash out your walking credits into Steal the Bundle"
+                  : `Need ${CREDITS_MIN_ANTE} credits to cash out`
+              }
+            >
+              Steal Bundle · {scoreToCredits(hud.score).toLocaleString()}
+            </Button>
             <Button
               size="sm"
               variant="outline"
@@ -700,28 +921,65 @@ export function CleanSneaksGame3D({
         )}
 
         {phase === "countdown" && (
-          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center overflow-y-auto bg-black/70 px-4 py-6 backdrop-blur-sm">
             <p className="seeds-holo-text mb-2 text-xs uppercase tracking-[0.35em]">
               {KLEAN_SNEAKS.title}
             </p>
             <p className="mb-1 text-sm text-[#7EC8D9]">
               {sneaker.label ?? "BALOON8"} · Keep the fit clean
             </p>
-            <p className="mb-4 text-[11px] uppercase tracking-wider text-white/50">
+            <p className="mb-3 text-[11px] uppercase tracking-wider text-white/50">
               Color locked · get ready
             </p>
+            <CasinoEntryRules className="mb-4" />
             <p className="mb-2 max-w-xs text-center text-[11px] text-white/50">
               V = Sneak Vision · C = walk style · 1–6 = Oh No saves
-            </p>
-            <p className="mb-2 text-sm text-[#7EC8D9]/80">
-              Hit {FINISH_DISTANCE}m for the bundle · bonus zone after
-            </p>
-            <p className="mb-6 max-w-xs text-center text-[11px] text-white/45">
-              Stay clean for score multipliers · stack your clean chain
             </p>
             <p className="text-6xl font-bold tabular-nums text-foreground sm:text-7xl">
               {countdown > 0 ? countdown : "RUN."}
             </p>
+          </div>
+        )}
+
+        {phase === "walkComplete" && gameOver && (
+          <div
+            className="absolute inset-0 z-30 flex flex-col items-center justify-center overflow-y-auto bg-black/80 px-4 py-6 text-center backdrop-blur-md"
+            data-testid="walk-complete-overlay"
+          >
+            <p className="text-[10px] uppercase tracking-[0.45em] text-[#d4af37]">Walk Complete</p>
+            <h3 className="mt-2 font-serif text-3xl text-[#f7e7b0] sm:text-4xl">Final Score</h3>
+            <p className="mt-3 font-serif text-5xl tabular-nums text-[#ffd76a]">
+              {gameOver.score.toLocaleString()}
+            </p>
+            <p className="mt-2 text-sm text-[#e8dcc0]/80">
+              {gameOver.score.toLocaleString()} credits ready — turn them in at the casino door.
+            </p>
+            <p className="mt-3 max-w-sm text-sm text-[#e8dcc0]/65">
+              Your walking score is your admission ticket. Enter the casino, cash the ticket, then
+              sit down for Steal the Old Man&apos;s Bundle.
+            </p>
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <Button
+                size="lg"
+                className="bg-[#d4af37] text-[#1a1008] hover:bg-[#e0c15a]"
+                onClick={enterCasino}
+                data-testid="button-enter-casino"
+              >
+                Enter Casino
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-[#7EC8D9]/40 text-[#7EC8D9]"
+                onClick={continueBonus}
+                data-testid="button-continue-bonus"
+              >
+                Keep Running
+              </Button>
+              <Button size="lg" variant="ghost" onClick={runItBack}>
+                New Walk
+              </Button>
+            </div>
           </div>
         )}
 
@@ -731,7 +989,14 @@ export function CleanSneaksGame3D({
             onRetry={runItBack}
             onShare={onShare}
             onExit={onExit}
-            onPlayBundleCard={onPlayBundleCard}
+            onPlayBundleCard={
+              gameOver.bundleCardUnlocked
+                ? () => {
+                    setWalkCompleteScore(gameOver.score);
+                    setPhase("casino");
+                  }
+                : onPlayBundleCard
+            }
             shareMsg={shareMsg}
           />
         )}
