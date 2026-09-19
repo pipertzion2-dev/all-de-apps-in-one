@@ -86,7 +86,7 @@ function CleanSneaksPageContent() {
       }`}
       style={preGame ? undefined : shellStyle}
     >
-      {(gamePhase === "loading" || gamePhase === "start") && (
+      {!introComplete && (gamePhase === "loading" || gamePhase === "start") && (
         <GameStartScreen
           preload={gamePhase === "loading"}
           onStart={gamePhase === "start" ? handleStart : undefined}
