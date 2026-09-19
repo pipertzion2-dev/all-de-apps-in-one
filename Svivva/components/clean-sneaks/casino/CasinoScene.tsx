@@ -24,20 +24,37 @@ function NeonSign({
   position: [number, number, number];
   color: string;
 }) {
-  const mat = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
-        color,
-        emissive: color,
-        emissiveIntensity: 1.4,
-        toneMapped: false,
-      }),
-    [color],
-  );
+  const tex = useMemo(() => {
+    if (typeof document === "undefined") return null;
+    const canvas = document.createElement("canvas");
+    canvas.width = 1024;
+    canvas.height = 256;
+    const ctx = canvas.getContext("2d")!;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = color;
+    ctx.font = "bold 120px Georgia, serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 28;
+    ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+    const t = new THREE.CanvasTexture(canvas);
+    t.colorSpace = THREE.SRGBColorSpace;
+    t.needsUpdate = true;
+    return t;
+  }, [text, color]);
+
+  const w = Math.max(2.4, text.length * 0.32);
   return (
     <group position={position}>
-      <mesh material={mat}>
-        <boxGeometry args={[Math.max(2.4, text.length * 0.28), 0.55, 0.12]} />
+      <mesh>
+        <planeGeometry args={[w, 0.55]} />
+        <meshBasicMaterial
+          map={tex ?? undefined}
+          color={tex ? undefined : color}
+          transparent
+          toneMapped={false}
+        />
       </mesh>
       <pointLight color={color} intensity={2.2} distance={8} position={[0, 0, 0.6]} />
     </group>

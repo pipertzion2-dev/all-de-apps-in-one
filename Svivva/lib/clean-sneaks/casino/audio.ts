@@ -3,11 +3,15 @@ import type { AudioCue } from "./types";
 /**
  * Soft audio hooks — silent when assets or AudioContext are unavailable.
  * Wire real files under /public/clean-sneaks/audio/ later without changing callers.
+ *
+ * By default, cue URLs are NOT fetched (avoids 404 noise). Call
+ * `AudioManager.enableAssets(true)` once files are present.
  */
 type CueHandler = (cue: AudioCue) => void;
 
 let handler: CueHandler | null = null;
 let muted = false;
+let assetsEnabled = false;
 
 const ASSET_PATHS: Partial<Record<AudioCue, string>> = {
   walking_complete: "/clean-sneaks/audio/walking_complete.mp3",
@@ -24,20 +28,26 @@ const ASSET_PATHS: Partial<Record<AudioCue, string>> = {
 };
 
 const cache = new Map<string, HTMLAudioElement>();
+const missing = new Set<string>();
 
 function tryPlayUrl(url: string, volume = 0.55): void {
-  if (typeof window === "undefined" || muted) return;
+  if (typeof window === "undefined" || muted || !assetsEnabled) return;
+  if (missing.has(url)) return;
   try {
     let audio = cache.get(url);
     if (!audio) {
       audio = new Audio(url);
-      audio.preload = "auto";
+      audio.preload = "none";
+      audio.addEventListener("error", () => {
+        missing.add(url);
+        cache.delete(url);
+      });
       cache.set(url, audio);
     }
     audio.volume = volume;
     audio.currentTime = 0;
     void audio.play().catch(() => {
-      /* missing asset / autoplay — stay silent */
+      missing.add(url);
     });
   } catch {
     /* stay silent */
@@ -50,6 +60,9 @@ export const AudioManager = {
   },
   isMuted() {
     return muted;
+  },
+  enableAssets(value: boolean) {
+    assetsEnabled = value;
   },
   setHandler(next: CueHandler | null) {
     handler = next;

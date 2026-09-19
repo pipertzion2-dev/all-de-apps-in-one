@@ -88,14 +88,18 @@ function CleanSneaksPageContent() {
       }`}
       style={preGame ? undefined : shellStyle}
     >
-      {!introComplete && (gamePhase === "loading" || gamePhase === "start") && (
-        <GameStartScreen
-          preload={gamePhase === "loading"}
-          onStart={gamePhase === "start" ? handleStart : undefined}
-        />
-      )}
+      {!introComplete &&
+        playMode === "runner" &&
+        (gamePhase === "loading" || gamePhase === "start") && (
+          <GameStartScreen
+            preload={gamePhase === "loading"}
+            onStart={gamePhase === "start" ? handleStart : undefined}
+          />
+        )}
 
-      {gamePhase === "loading" && !introComplete && <GameLoadingWheels fullscreen />}
+      {gamePhase === "loading" && !introComplete && playMode === "runner" && (
+        <GameLoadingWheels fullscreen />
+      )}
 
       {!preGame && (
         <div
