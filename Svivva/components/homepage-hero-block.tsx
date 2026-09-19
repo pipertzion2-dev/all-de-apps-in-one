@@ -17,6 +17,8 @@ type HomepageHeroBlockProps = {
   mountCanvas?: boolean;
   /** Show stack navigation hint (disabled when parent wraps cube + pricing). */
   showFlipHint?: boolean;
+  /** Shorter hero when about/pricing sections follow below the cube. */
+  layout?: "fullscreen" | "stacked";
   className?: string;
 };
 
@@ -25,16 +27,27 @@ export function HomepageHeroBlock({
   interactive = true,
   mountCanvas = true,
   showFlipHint = true,
+  layout = "fullscreen",
   className = "",
 }: HomepageHeroBlockProps) {
+  const stacked = layout === "stacked";
+
   return (
     <div
       data-homepage-scroll-panel=""
-      className={`homepage-scroll-panel relative w-full min-h-[100svh] overflow-x-hidden bg-background ${className}`}
+      className={`homepage-scroll-panel relative w-full overflow-x-hidden bg-background ${
+        stacked ? "min-h-0 pb-2" : "min-h-[100svh]"
+      } ${className}`}
       style={{ pointerEvents: interactive ? "auto" : "none" }}
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 bottom-0 z-0" aria-hidden>
-        <div className="sticky top-0 h-[100svh] w-full overflow-hidden opacity-80 md:opacity-65">
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 z-0"
+        aria-hidden
+        style={stacked ? { bottom: 0 } : undefined}
+      >
+        <div
+          className={`w-full overflow-hidden opacity-80 md:opacity-65 ${stacked ? "h-full min-h-[520px]" : "sticky top-0 h-[100svh]"}`}
+        >
           <CamoThreeOverlay preset="oaas" eagerMount keepMounted className="h-full w-full" />
         </div>
       </div>
@@ -48,13 +61,15 @@ export function HomepageHeroBlock({
           onActivate={() => scrollToHomepagePanel("home-game")}
         />
       ) : null}
-      <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-28 sm:h-36 z-[1]"
-        style={{
-          background:
-            "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background) / 0.85) 35%, transparent 100%)",
-        }}
-      />
+      {stacked ? null : (
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-28 sm:h-36 z-[1]"
+          style={{
+            background:
+              "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background) / 0.85) 35%, transparent 100%)",
+          }}
+        />
+      )}
     </div>
   );
 }

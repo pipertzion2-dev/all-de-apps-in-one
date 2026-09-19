@@ -30,8 +30,14 @@ describe("homepage scroll panels", () => {
   it("lands on the game panel first, then homepage cube with pricing", () => {
     const stackSrc = readFileSync(resolve(__dirname, "../../lib/homepage-flip-stack.ts"), "utf8");
     const pageSrc = readFileSync(resolve(__dirname, "../../app/home-page-client.tsx"), "utf8");
+    const cubeSrc = readFileSync(
+      resolve(__dirname, "../../components/homepage-cube-panel.tsx"),
+      "utf8",
+    );
     expect(stackSrc).toMatch(/HOMEPAGE_FLIP_PANELS[\s\S]*"home-game"[\s\S]*"nav-cube"/);
     expect(pageSrc).toContain('useState<HomepageFlipPanelId>("home-game")');
     expect(pageSrc).toContain("HomepageCubePanel");
+    expect(cubeSrc).toContain("HomepageAboutSection");
+    expect(cubeSrc).toContain("HomepagePricingSection");
   });
 });
