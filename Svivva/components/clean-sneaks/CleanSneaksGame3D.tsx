@@ -165,14 +165,17 @@ export function CleanSneaksGame3D({
     onStats?.(stats);
   }, [onStats]);
 
-  const resetRun = useCallback((archetype?: Baloon8ColorwayId) => {
-    const id = archetype ?? colorwayIdRef.current;
-    stateRef.current = createRunEngineState(readBestScore(), id);
-    setGameOver(null);
-    setShareMsg(null);
-    setSceneKey((k) => k + 1);
-    emitStats();
-  }, [emitStats]);
+  const resetRun = useCallback(
+    (archetype?: Baloon8ColorwayId) => {
+      const id = archetype ?? colorwayIdRef.current;
+      stateRef.current = createRunEngineState(readBestScore(), id);
+      setGameOver(null);
+      setShareMsg(null);
+      setSceneKey((k) => k + 1);
+      emitStats();
+    },
+    [emitStats],
+  );
 
   const selectColorway = useCallback(
     (id: Baloon8ColorwayId) => {
@@ -635,9 +638,7 @@ export function CleanSneaksGame3D({
             </div>
           )}
 
-          {pathOpts && phase === "running" && (
-            <CleanPathHud paths={pathOpts} portrait={portrait} />
-          )}
+          {pathOpts && phase === "running" && <CleanPathHud paths={pathOpts} portrait={portrait} />}
 
           {npcLine && phase === "running" && (
             <div className="pointer-events-none absolute left-1/2 top-20 z-10 -translate-x-1/2 rounded border border-white/10 bg-black/60 px-3 py-1.5 text-xs text-[#e8e8ec]">

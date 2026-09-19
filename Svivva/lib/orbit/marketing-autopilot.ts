@@ -321,6 +321,11 @@ export async function runMarketingAutopilot(opts?: {
             : "skipped",
           health ? health.summary : "Index health check skipped (no URLs or check failed)",
         ),
+        task(
+          "acq-traffic-blast",
+          "done",
+          `SEO traffic blast via urrthang — ${traffic.marketing.counts.seoPages}+ SEO · ${traffic.marketing.counts.aeoPages} AEO · IndexNow ${idx.indexNow.ok ? "ok" : "check"}`,
+        ),
       );
 
       try {
@@ -826,6 +831,37 @@ export async function runMarketingAutopilot(opts?: {
     }
   }
 
+  // ── Customer Acquisition Do-It-All (UTMs, referrals, amplify, campaigns, intel) ──
+  // Traffic blast already ran in Phase 1 — nest with skipTrafficBlast.
+  try {
+    const { runCustomerAcquisitionAutomation } =
+      await import("@/lib/orbit/customer-acquisition-automation");
+    const acq = await runCustomerAcquisitionAutomation({
+      skipTrafficBlast: true,
+      includeSitemapPings: false,
+    });
+    for (const s of acq.steps) {
+      if (s.id === "acq-traffic-blast") continue; // already covered by Phase 1
+      const status: AutopilotTaskStatus =
+        s.status === "done"
+          ? "done"
+          : s.status === "prepared"
+            ? "prepared"
+            : s.status === "failed"
+              ? "failed"
+              : "skipped";
+      tasks.push(task(s.id, status, s.message, { url: s.url, copyText: s.copyText }));
+    }
+  } catch (e) {
+    tasks.push(
+      task(
+        "acq-utm-factory",
+        "failed",
+        e instanceof Error ? e.message.slice(0, 180) : "Acquisition automation failed",
+      ),
+    );
+  }
+
   // Ensure every defined task has a result
   for (const def of MARKETING_AUTOPILOT_TASKS) {
     if (!tasks.some((t) => t.id === def.id)) {
@@ -857,6 +893,7 @@ export async function runMarketingAutopilot(opts?: {
       : copyOnly
         ? "✓ Auto-post off — indexing + GPT copy fully automated; social/email copy saved"
         : "✓ All credential-backed tasks attempted",
+    "✓ Customer acquisition layer: UTMs · referrals · amplify · campaigns · Growth Intel · channel intel",
     "",
     ...tasks
       .filter((t) => t.status === "failed" || t.status === "needs_credentials")

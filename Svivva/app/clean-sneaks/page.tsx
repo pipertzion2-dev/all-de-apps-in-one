@@ -36,9 +36,7 @@ function CleanSneaksPageContent() {
   const [introComplete, setIntroComplete] = useState(false);
 
   const preGame =
-    playMode === "runner" &&
-    !introComplete &&
-    (gamePhase === "loading" || gamePhase === "start");
+    playMode === "runner" && !introComplete && (gamePhase === "loading" || gamePhase === "start");
   const immersiveRun =
     playMode === "runner" &&
     (gamePhase === "running" || gamePhase === "countdown" || gamePhase === "colorPick");
