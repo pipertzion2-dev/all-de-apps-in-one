@@ -58,7 +58,7 @@ export function HomepageGamePanel() {
       </div>
 
       <HomepageScrollHint
-        label="Home"
+        label="Swipe up · home"
         direction="down"
         prominent
         onActivate={() => scrollToHomepagePanel("nav-cube")}
