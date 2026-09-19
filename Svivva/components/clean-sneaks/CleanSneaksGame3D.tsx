@@ -143,6 +143,8 @@ export function CleanSneaksGame3D({
   const [pathOpts, setPathOpts] = useState(stateRef.current.paths);
   const [npcLine, setNpcLine] = useState<string | null>(null);
   const [ohNo, setOhNo] = useState(stateRef.current.ohNo);
+  const [colorwayChosen, setColorwayChosen] = useState(false);
+  const countdownTimerRef = useRef<number | null>(null);
 
   const emitStats = useCallback(() => {
     const s = stateRef.current;
@@ -171,6 +173,11 @@ export function CleanSneaksGame3D({
       if (phase === "running") return;
       setColorwayId(id);
       writeSavedColorway(id);
+      setColorwayChosen(true);
+      stateRef.current.archetypeId = id;
+      if (phase === "colorPick" || phase === "countdown") {
+        setSceneKey((k) => k + 1);
+      }
     },
     [phase],
   );
@@ -219,6 +226,12 @@ export function CleanSneaksGame3D({
   }, []);
 
   const startCountdown = useCallback(() => {
+    if (countdownTimerRef.current) {
+      window.clearInterval(countdownTimerRef.current);
+      countdownTimerRef.current = null;
+    }
+    stateRef.current = createRunEngineState(readBestScore(), colorwayId);
+    emitStats();
     setPhase("countdown");
     setCountdown(3);
     let n = 3;
@@ -230,6 +243,7 @@ export function CleanSneaksGame3D({
         else if (n === 0) setCountdown(0);
         else {
           window.clearInterval(id);
+          countdownTimerRef.current = null;
           setPhase("running");
           stateRef.current.running = true;
           stateRef.current.lastTs = performance.now();
@@ -237,8 +251,21 @@ export function CleanSneaksGame3D({
       },
       reduced ? 280 : 520,
     );
-    return id;
+    countdownTimerRef.current = id;
+  }, [colorwayId, emitStats]);
+
+  useEffect(() => {
+    return () => {
+      if (countdownTimerRef.current) {
+        window.clearInterval(countdownTimerRef.current);
+      }
+    };
   }, []);
+
+  const confirmColorwayAndCountdown = useCallback(() => {
+    if (!colorwayChosen) return;
+    startCountdown();
+  }, [colorwayChosen, startCountdown]);
 
   const finishLoading = useCallback(() => {
     if (loadingDoneRef.current) return;
@@ -247,8 +274,10 @@ export function CleanSneaksGame3D({
   }, []);
 
   const beginGame = useCallback(() => {
-    startCountdown();
-  }, [startCountdown]);
+    setColorwayChosen(false);
+    setCountdown(3);
+    setPhase("colorPick");
+  }, []);
 
   useEffect(() => {
     onRegisterBegin?.(beginGame);
@@ -308,6 +337,13 @@ export function CleanSneaksGame3D({
         }
         return;
       }
+      if (phase === "colorPick") {
+        if ((k === " " || k === "enter" || e.code === "Space") && colorwayChosen) {
+          e.preventDefault();
+          confirmColorwayAndCountdown();
+        }
+        return;
+      }
       const s = stateRef.current;
       const now = performance.now();
 
@@ -346,7 +382,7 @@ export function CleanSneaksGame3D({
     };
     window.addEventListener("keydown", onKey, { passive: false });
     return () => window.removeEventListener("keydown", onKey);
-  }, [active, phase, beginGame, onOhNo]);
+  }, [active, phase, beginGame, colorwayChosen, confirmColorwayAndCountdown, onOhNo]);
 
   useEffect(() => {
     if (!active || phase !== "running") return;
@@ -406,7 +442,9 @@ export function CleanSneaksGame3D({
 
   const runItBack = () => {
     resetRun();
-    startCountdown();
+    setColorwayChosen(false);
+    setCountdown(3);
+    setPhase("colorPick");
   };
 
   const onDestination = useCallback(() => {
@@ -616,6 +654,32 @@ export function CleanSneaksGame3D({
           </div>
         )}
 
+        {phase === "colorPick" && (
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/75 px-4 backdrop-blur-sm">
+            <p className="seeds-holo-text mb-2 text-xs uppercase tracking-[0.35em]">
+              {KLEAN_SNEAKS.title}
+            </p>
+            <p className="mb-3 text-center text-sm text-[#7EC8D9]">Pick your BALOON8 colorway</p>
+            <div className="mb-5 w-full max-w-md rounded-lg border border-white/10 bg-black/50 p-3">
+              <Baloon8ColorwayPicker value={colorwayId} onChange={selectColorway} compact />
+            </div>
+            <Button
+              type="button"
+              className="mb-3 bg-[#5B8DA8] text-white hover:bg-[#6a9cb8] disabled:opacity-40"
+              disabled={!colorwayChosen}
+              onClick={confirmColorwayAndCountdown}
+              data-testid="button-confirm-colorway"
+            >
+              Start countdown
+            </Button>
+            <p className="max-w-xs text-center text-[11px] text-white/45">
+              {colorwayChosen
+                ? "Tap Start countdown or press Enter"
+                : "Select a color above to continue"}
+            </p>
+          </div>
+        )}
+
         {phase === "countdown" && (
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
             <p className="seeds-holo-text mb-2 text-xs uppercase tracking-[0.35em]">
@@ -624,17 +688,17 @@ export function CleanSneaksGame3D({
             <p className="mb-1 text-sm text-[#7EC8D9]">
               {sneaker.label ?? "BALOON8"} · Keep the fit clean
             </p>
-            <div className="mb-4 w-full max-w-md rounded-lg border border-white/10 bg-black/50 p-3">
-              <Baloon8ColorwayPicker value={colorwayId} onChange={selectColorway} compact />
-            </div>
+            <p className="mb-4 text-[11px] uppercase tracking-wider text-white/50">
+              Color locked · get ready
+            </p>
             <p className="mb-2 max-w-xs text-center text-[11px] text-white/50">
-              Look at the ground. V = Sneak Vision · C = walk style · 1–6 = Oh No saves
+              V = Sneak Vision · C = walk style · 1–6 = Oh No saves
             </p>
             <p className="mb-2 text-sm text-[#7EC8D9]/80">
-              Hit {FINISH_DISTANCE}m for the bundle · keep running in bonus for huge scores
+              Hit {FINISH_DISTANCE}m for the bundle · bonus zone after
             </p>
             <p className="mb-6 max-w-xs text-center text-[11px] text-white/45">
-              Stay clean for score multipliers · close calls and Oh No saves stack your chain
+              Stay clean for score multipliers · stack your clean chain
             </p>
             <p className="text-6xl font-bold tabular-nums text-foreground sm:text-7xl">
               {countdown > 0 ? countdown : "RUN."}
