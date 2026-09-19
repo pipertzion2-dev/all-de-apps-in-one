@@ -118,6 +118,8 @@ export function CleanSneaksGame3D({
   const [colorwayId, setColorwayId] = useState<Baloon8ColorwayId>(() =>
     typeof window === "undefined" ? "oilSlick" : readSavedColorway(),
   );
+  const colorwayIdRef = useRef(colorwayId);
+  colorwayIdRef.current = colorwayId;
   const sneaker = resolvePlayerSneaker({
     ...sneakerOverride,
     archetype: sneakerOverride?.archetype ?? colorwayId,
@@ -125,6 +127,9 @@ export function CleanSneaksGame3D({
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const stateRef = useRef<RunEngineState>(createRunEngineState(0, sneaker.archetype ?? colorwayId));
   const loadingDoneRef = useRef(false);
+  /** Cover "Start" tapped — never return to loading/start splash this session. */
+  const coverStartPassedRef = useRef(false);
+  const sessionBootedRef = useRef(false);
 
   const [phase, setPhase] = useState<GamePhase>("loading");
   const [countdown, setCountdown] = useState(3);
@@ -160,13 +165,14 @@ export function CleanSneaksGame3D({
     onStats?.(stats);
   }, [onStats]);
 
-  const resetRun = useCallback(() => {
-    stateRef.current = createRunEngineState(readBestScore(), sneaker.archetype ?? colorwayId);
+  const resetRun = useCallback((archetype?: Baloon8ColorwayId) => {
+    const id = archetype ?? colorwayIdRef.current;
+    stateRef.current = createRunEngineState(readBestScore(), id);
     setGameOver(null);
     setShareMsg(null);
     setSceneKey((k) => k + 1);
     emitStats();
-  }, [emitStats, sneaker.archetype, colorwayId]);
+  }, [emitStats]);
 
   const selectColorway = useCallback(
     (id: Baloon8ColorwayId) => {
@@ -175,9 +181,6 @@ export function CleanSneaksGame3D({
       writeSavedColorway(id);
       setColorwayChosen(true);
       stateRef.current.archetypeId = id;
-      if (phase === "colorPick" || phase === "countdown") {
-        setSceneKey((k) => k + 1);
-      }
     },
     [phase],
   );
@@ -270,10 +273,15 @@ export function CleanSneaksGame3D({
   const finishLoading = useCallback(() => {
     if (loadingDoneRef.current) return;
     loadingDoneRef.current = true;
+    if (coverStartPassedRef.current) {
+      setPhase("colorPick");
+      return;
+    }
     setPhase("start");
   }, []);
 
   const beginGame = useCallback(() => {
+    coverStartPassedRef.current = true;
     setColorwayChosen(false);
     setCountdown(3);
     setPhase("colorPick");
@@ -284,8 +292,16 @@ export function CleanSneaksGame3D({
   }, [beginGame, onRegisterBegin]);
 
   useEffect(() => {
-    if (!active) return;
-    resetRun();
+    if (!active) {
+      sessionBootedRef.current = false;
+      coverStartPassedRef.current = false;
+      loadingDoneRef.current = false;
+      return;
+    }
+    if (sessionBootedRef.current) return;
+    sessionBootedRef.current = true;
+    const saved = readSavedColorway();
+    resetRun(saved);
     loadingDoneRef.current = false;
     setPhase("loading");
     setCountdown(3);
@@ -585,14 +601,14 @@ export function CleanSneaksGame3D({
           style={fullscreen && !portrait ? { minHeight: "min(60vh, 640px)" } : undefined}
         >
           <CleanSneaksRunScene
-            key={`${sceneKey}-${colorwayId}`}
+            key={sceneKey}
+            colorwayId={colorwayId}
             stateRef={stateRef}
             running={phase === "running"}
             onGameOver={endRun}
             onDestination={onDestination}
             onStreakFlash={handleStreakFlash}
             onStatsTick={emitStats}
-            colorwayId={colorwayId}
             className="absolute inset-0"
           />
 
