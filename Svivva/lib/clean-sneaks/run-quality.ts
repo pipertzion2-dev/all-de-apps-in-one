@@ -77,7 +77,7 @@ export function runQualityFlags(quality: RunQuality, portrait = isPortraitViewpo
     dpr: mobile || typeof window === "undefined" ? 1 : Math.min(window.devicePixelRatio || 1, 2),
     bubbleCount: mobile ? 100 : 180,
     bubbleCountReduced: mobile ? 60 : 120,
-    cityBuildings: mobile ? 10 : 20,
+    cityBuildings: mobile ? 8 : 12,
     streetLights: mobile ? 6 : 12,
   };
 }
