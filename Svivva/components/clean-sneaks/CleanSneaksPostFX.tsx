@@ -26,9 +26,9 @@ export function CleanSneaksPostFX({ mobile = false, enabled = true }: Props) {
   return (
     <EffectComposer multisampling={mobile ? 0 : 4}>
       <Bloom
-        intensity={mobile ? 0.45 : 0.65}
-        luminanceThreshold={0.72}
-        luminanceSmoothing={0.35}
+        intensity={mobile ? 0.52 : 0.78}
+        luminanceThreshold={0.58}
+        luminanceSmoothing={0.32}
         mipmapBlur
       />
       <Vignette eskil={false} offset={0.22} darkness={mobile ? 0.55 : 0.68} />
