@@ -32,6 +32,7 @@ export function HomepageFlipStack({
   const shellRef = useRef<HTMLDivElement>(null);
   const rotorRef = useRef<HTMLDivElement>(null);
   const faceRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const scrollRefs = useRef<(HTMLDivElement | null)[]>([]);
   const halfHRef = useRef(400);
   const virtualIndexRef = useRef(flipPanelIndex(initialPanel));
   const targetIndexRef = useRef(flipPanelIndex(initialPanel));
@@ -223,6 +224,14 @@ export function HomepageFlipStack({
     const settledPanelIndex = () =>
       Math.min(MAX_PANEL_INDEX, Math.max(0, Math.round(targetIndexRef.current)));
 
+    const scrollSurfaceFor = (index: number) => {
+      const panel = panels[index];
+      if (panel?.id === "nav-cube") {
+        return scrollRefs.current[index] ?? faceRefs.current[index];
+      }
+      return faceRefs.current[index];
+    };
+
     const faceScrollState = (face: HTMLDivElement | null) => {
       if (!face) {
         return {
@@ -282,7 +291,7 @@ export function HomepageFlipStack({
       const direction: 1 | -1 = deltaY > 0 ? 1 : -1;
       const current = settledPanelIndex();
       const panelId = panels[current]?.id ?? "home-game";
-      const face = faceRefs.current[current];
+      const face = scrollSurfaceFor(current);
       if (!canFlipFromFace(face, direction, panelId)) return false;
 
       const atMin = virtualIndexRef.current <= FLIP_SETTLE_EPSILON && direction < 0;
@@ -321,9 +330,11 @@ export function HomepageFlipStack({
 
       const current = settledPanelIndex();
       const panelId = panels[current]?.id ?? "home-game";
-      const face = faceRefs.current[current];
+      const face = scrollSurfaceFor(current);
 
       if (shouldDeferToNativeScroll(panelId, face, delta)) {
+        face?.scrollBy({ top: delta });
+        e.preventDefault();
         return;
       }
 
@@ -376,7 +387,7 @@ export function HomepageFlipStack({
       const direction: 1 | -1 = delta > 0 ? 1 : -1;
       const current = settledPanelIndex();
       const panelId = panels[current]?.id ?? "home-game";
-      const face = faceRefs.current[current];
+      const face = scrollSurfaceFor(current);
       if (!canFlipFromFace(face, direction, panelId)) return;
 
       if (reducedMotion) {
@@ -456,18 +467,31 @@ export function HomepageFlipStack({
             style={{
               position: "absolute",
               inset: 0,
-              overflowY: panel.id === "nav-cube" ? "auto" : "hidden",
-              overflowX: "hidden",
-              overscrollBehavior: panel.id === "nav-cube" ? "contain" : undefined,
-              WebkitOverflowScrolling: panel.id === "nav-cube" ? "touch" : undefined,
-              touchAction: panel.id === "nav-cube" ? "pan-y" : "none",
-              scrollBehavior: panel.id === "nav-cube" ? "smooth" : undefined,
+              overflow: "hidden",
+              touchAction: panel.id === "nav-cube" ? "none" : "none",
               backfaceVisibility: "hidden",
               WebkitBackfaceVisibility: "hidden",
               willChange: "transform",
             }}
           >
-            {panel.node}
+            {panel.id === "nav-cube" ? (
+              <div
+                ref={(el) => {
+                  scrollRefs.current[i] = el;
+                }}
+                data-homepage-flip-scroll=""
+                className="h-full w-full overflow-x-hidden overflow-y-auto bg-background"
+                style={{
+                  overscrollBehavior: "contain",
+                  WebkitOverflowScrolling: "touch",
+                  touchAction: "pan-y",
+                }}
+              >
+                {panel.node}
+              </div>
+            ) : (
+              panel.node
+            )}
           </div>
         ))}
       </div>

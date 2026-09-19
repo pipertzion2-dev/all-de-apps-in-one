@@ -36,7 +36,7 @@ export function HomepageHeroBlock({
     <div
       data-homepage-scroll-panel=""
       className={`homepage-scroll-panel relative w-full overflow-x-hidden bg-background ${
-        stacked ? "min-h-0 pb-2" : "min-h-[100svh]"
+        stacked ? "min-h-[min(100svh,920px)] pb-2" : "min-h-[100svh]"
       } ${className}`}
       style={{ pointerEvents: interactive ? "auto" : "none" }}
     >
