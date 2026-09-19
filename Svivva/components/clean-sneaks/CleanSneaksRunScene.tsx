@@ -36,6 +36,7 @@ type SceneProps = {
   stateRef: React.MutableRefObject<RunEngineState>;
   running: boolean;
   onGameOver: () => void;
+  onDestination?: () => void;
   onStreakFlash: () => void;
   onStatsTick: () => void;
   quality: QualityFlags;
@@ -570,6 +571,7 @@ function World({
   stateRef,
   running,
   onGameOver,
+  onDestination,
   onStreakFlash,
   onStatsTick,
   quality,
@@ -601,8 +603,8 @@ function World({
       const dt = Math.min(0.05, rawDt);
       stepRunEngine(s, dt, ts, {
         onGameOver,
+        onDestination,
         onStreakFlash,
-        onFinish: onGameOver,
       });
       tickRef.current += dt;
       if (tickRef.current >= 0.1) {
@@ -713,6 +715,7 @@ export function CleanSneaksRunScene({
   stateRef,
   running,
   onGameOver,
+  onDestination,
   onStreakFlash,
   onStatsTick,
   colorwayId,
@@ -769,6 +772,7 @@ export function CleanSneaksRunScene({
           stateRef={stateRef}
           running={running}
           onGameOver={onGameOver}
+          onDestination={onDestination}
           onStreakFlash={onStreakFlash}
           onStatsTick={onStatsTick}
           quality={quality}

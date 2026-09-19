@@ -50,7 +50,7 @@ function ShoeGlyph({ snap }: { snap: HudShoeSnapshot }) {
           height="8"
           rx="2"
           fill={snap.zones.outsole.color ?? "#1a1e24"}
-          opacity={0.35 + snap.zones.outsole.amount / 140}
+          opacity={0.45 + snap.zones.outsole.amount / 95}
         />
         {/* Midsole */}
         <rect

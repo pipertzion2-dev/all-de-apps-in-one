@@ -27,7 +27,7 @@ import {
 import {
   contactForObstacle,
   OH_NO_ACTIONS,
-  pickOhNoAction,
+  pickOhNoActionForObstacle,
   pickWeatherWeighted,
   WEATHER,
   WALK_STYLES,
@@ -51,7 +51,7 @@ export const FINISH_DISTANCE = 120;
 /** Meters gained per scroll unit — lower = longer real-time runs at the same speed. */
 export const DISTANCE_SCALE = 0.032;
 /** Reaction window for Oh No! quick-time saves (ms). */
-export const OH_NO_WINDOW_MS = 900;
+export const OH_NO_WINDOW_MS = 1250;
 
 export type RunObstacle = {
   id: number;
@@ -127,6 +127,10 @@ export type RunEngineState = {
   npcLine: string | null;
   npcLineUntil: number;
   gumSlowUntil: number;
+  /** Crossed the story destination — run continues in bonus zone. */
+  destinationReached: boolean;
+  /** One grace save when cleanliness would hit 0%. */
+  secondWindUsed: boolean;
 };
 
 function randItem<T>(arr: readonly T[]): T {
@@ -193,14 +197,16 @@ export function createRunEngineState(
     npcLine: null,
     npcLineUntil: 0,
     gumSlowUntil: 0,
+    destinationReached: false,
+    secondWindUsed: false,
   };
 }
 
 export type RunEngineCallbacks = {
   onGameOver: () => void;
   onStreakFlash?: () => void;
-  /** Clean finish at destination — still post-mission reveal */
-  onFinish?: () => void;
+  /** First time player hits destination distance — unlock messaging, keep running */
+  onDestination?: () => void;
 };
 
 function wetObstacles(): ObstacleKind[] {
@@ -398,7 +404,35 @@ function dirtyShoe(
     color: "#D94F9C",
   });
   maybeNpcLine(s, ts);
-  if (s.cleanliness <= 0) onGameOver();
+  maybeGameOverFromCleanliness(s, onGameOver);
+}
+
+function maybeGameOverFromCleanliness(s: RunEngineState, onGameOver: () => void): void {
+  if (s.cleanliness > 0) return;
+  if (!s.secondWindUsed) {
+    s.secondWindUsed = true;
+    for (const shoe of [s.left, s.right]) {
+      for (const z of DIRT_ZONES) {
+        shoe.dirt[z].amount = Math.min(shoe.dirt[z].amount, 72);
+        shoe.dirt[z].wetness = Math.max(0, shoe.dirt[z].wetness - 18);
+      }
+    }
+    syncPairClean(s);
+    if (s.cleanliness < 8) {
+      for (const shoe of [s.left, s.right]) {
+        for (const z of DIRT_ZONES) {
+          shoe.dirt[z].amount *= 0.5;
+        }
+      }
+      syncPairClean(s);
+    }
+    s.popups.push({ text: "SECOND WIND · KEEP GOING", life: 1.1, color: "#7EC8D9" });
+    s.shake = 6;
+    return;
+  }
+  s.cleanliness = 0;
+  s.running = false;
+  onGameOver();
 }
 
 function pickHitShoe(s: RunEngineState, prefer: ShoeSide | "both" | null): ShoeSide {
@@ -478,13 +512,18 @@ export function stepRunEngine(
   const scroll = s.speed * step;
   s.distance += scroll * DISTANCE_SCALE;
 
-  if (s.distance >= FINISH_DISTANCE) {
-    s.distance = FINISH_DISTANCE;
-    s.running = false;
-    s.popups.push({ text: "DESTINATION", life: 1.2, color: "#7EC8D9" });
-    (callbacks.onFinish ?? callbacks.onGameOver)();
-    return;
+  if (!s.destinationReached && s.distance >= FINISH_DISTANCE) {
+    s.destinationReached = true;
+    s.popups.push({
+      text: "DESTINATION · BONUS ZONE",
+      life: 1.4,
+      color: "#7EC8D9",
+    });
+    callbacks.onDestination?.();
   }
+
+  const inBonus = s.distance >= FINISH_DISTANCE;
+  const bonusScoreMul = inBonus ? 1.65 + Math.min(0.85, s.cleanliness / 120) : 1;
 
   s.score +=
     computeFrameScore({
@@ -492,7 +531,9 @@ export function stepRunEngine(
       cleanliness: s.cleanliness,
       streak: s.streak,
       freshKicksActive: ts < s.freshUntil,
-    }) * arch.styleMul;
+    }) *
+    arch.styleMul *
+    bonusScoreMul;
 
   // Style from expressive walking
   if (s.walkStyle !== "normal") {
@@ -581,6 +622,11 @@ export function stepRunEngine(
   if (s.ohNo && (s.ohNo.resolved || ts > s.ohNo.endsAt)) {
     if (!s.ohNo.resolved && ts > s.ohNo.endsAt) {
       s.ohNo.active = false;
+      const failed = s.obstacles.find((x) => x.id === s.ohNo!.obstacleId);
+      if (failed && !failed.hit) {
+        failed.hit = true;
+        applyDirtFromObstacle(s, failed, ts, callbacks.onGameOver);
+      }
     }
     if (s.ohNo.resolved || ts > s.ohNo.endsAt + 200) s.ohNo = null;
   }
@@ -597,10 +643,11 @@ export function stepRunEngine(
       s.ohNo = {
         active: true,
         obstacleId: o.id,
+        obstacleKind: o.kind,
         shoe,
         startedAt: ts,
         endsAt: ts + OH_NO_WINDOW_MS,
-        correctAction: pickOhNoAction(),
+        correctAction: pickOhNoActionForObstacle(o.kind),
         resolved: false,
       };
       s.popups.push({ text: "OH NO!", life: 0.5, color: "#ffcc66" });

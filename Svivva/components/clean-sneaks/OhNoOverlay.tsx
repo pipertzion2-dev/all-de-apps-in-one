@@ -1,6 +1,11 @@
 "use client";
 
-import { OH_NO_ACTIONS, type OhNoAction } from "@/lib/clean-sneaks/contact-map";
+import {
+  OH_NO_ACTIONS,
+  ohNoActionsForObstacle,
+  type OhNoAction,
+} from "@/lib/clean-sneaks/contact-map";
+import { OBSTACLE_META } from "@/lib/clean-sneaks/constants";
 import { OH_NO_WINDOW_MS } from "@/lib/clean-sneaks/run-engine";
 import type { OhNoWindow } from "@/lib/clean-sneaks/types";
 import type { CleanPathOption } from "@/lib/clean-sneaks/sneak-vision";
@@ -15,6 +20,8 @@ export function OhNoOverlay({ window, onAction }: OhNoProps) {
   if (!window.active || window.resolved) return null;
   const remaining = Math.max(0, window.endsAt - performance.now());
   const pct = Math.min(100, (remaining / OH_NO_WINDOW_MS) * 100);
+  const hazard = OBSTACLE_META[window.obstacleKind]?.label ?? "Hazard";
+  const goodMoves = new Set(ohNoActionsForObstacle(window.obstacleKind));
 
   return (
     <div
@@ -23,7 +30,7 @@ export function OhNoOverlay({ window, onAction }: OhNoProps) {
     >
       <p className="text-xs uppercase tracking-[0.4em] text-[#ffcc66]">Oh No</p>
       <p className="mt-1 text-lg font-bold text-foreground">
-        Protect the {window.shoe.toUpperCase()} shoe
+        {hazard} · save the {window.shoe.toUpperCase()} shoe
       </p>
       <div className="mt-3 h-1 w-40 overflow-hidden rounded-full bg-white/15">
         <div
@@ -37,7 +44,11 @@ export function OhNoOverlay({ window, onAction }: OhNoProps) {
             key={a.id}
             type="button"
             onClick={() => onAction(a.id)}
-            className="rounded border border-white/20 bg-black/50 px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-white hover:border-[#7EC8D9] hover:text-[#7EC8D9]"
+            className={`rounded border bg-black/50 px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-white hover:border-[#7EC8D9] hover:text-[#7EC8D9] ${
+              goodMoves.has(a.id)
+                ? "border-[#7EC8D9]/50 ring-1 ring-[#7EC8D9]/25"
+                : "border-white/20 opacity-80"
+            }`}
             data-testid={`oh-no-${a.id}`}
           >
             <span className="mr-1.5 text-[#5B8DA8]">{a.key}</span>
@@ -54,11 +65,13 @@ type PathProps = {
   paths: CleanPathOption[];
 };
 
-export function CleanPathHud({ paths }: PathProps) {
+export function CleanPathHud({ paths, portrait }: PathProps & { portrait?: boolean }) {
   if (!paths.length) return null;
   return (
     <div
-      className="pointer-events-none absolute bottom-20 left-1/2 z-10 flex -translate-x-1/2 gap-2"
+      className={`pointer-events-none absolute left-1/2 z-10 flex -translate-x-1/2 gap-2 ${
+        portrait ? "top-14 max-w-[96%] flex-wrap justify-center" : "bottom-20"
+      }`}
       data-testid="clean-path-hud"
     >
       {paths.map((p) => (

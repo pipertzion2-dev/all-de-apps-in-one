@@ -406,9 +406,12 @@ export function CleanSneaksGame3D({
 
   const runItBack = () => {
     resetRun();
-    loadingDoneRef.current = false;
-    setPhase("loading");
+    startCountdown();
   };
+
+  const onDestination = useCallback(() => {
+    emitStats();
+  }, [emitStats]);
 
   const onShare = async () => {
     if (!gameOver) return;
@@ -459,9 +462,24 @@ export function CleanSneaksGame3D({
           fullscreen ? "rounded-lg border border-white/10" : "rounded-xl border border-white/10"
         }`}
       >
+        {phase === "running" && onExit && (
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className={`pointer-events-auto absolute z-20 border-white/20 bg-black/55 text-[10px] uppercase tracking-wider ${
+              portrait ? "right-2 top-2 h-7 px-2" : "right-3 top-3"
+            }`}
+            onClick={onExit}
+            data-testid="button-run-exit"
+          >
+            Exit
+          </Button>
+        )}
+
         <div
           className={`pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-2 ${
-            portrait ? "px-2 py-1.5" : "p-3 sm:p-4"
+            portrait ? "px-2 py-1.5 pr-16" : "p-3 sm:p-4"
           }`}
         >
           <div className={portrait ? "space-y-0" : "space-y-1"}>
@@ -475,12 +493,14 @@ export function CleanSneaksGame3D({
             >
               {hud.score.toLocaleString()}
             </p>
-            {!portrait && (
-              <p className="text-xs text-muted-foreground">
-                {hud.distance}m · L {hud.leftClean}% · R {hud.rightClean}% · Best{" "}
-                {hud.bestScore.toLocaleString()}
-              </p>
-            )}
+            <p
+              className={`text-muted-foreground ${portrait ? "text-[10px] tabular-nums" : "text-xs"}`}
+            >
+              {hud.distance}m
+              {hud.distance >= FINISH_DISTANCE ? " · BONUS" : ` / ${FINISH_DISTANCE}m`} · L{" "}
+              {hud.leftClean}% · R {hud.rightClean}%
+              {!portrait && <> · Best {hud.bestScore.toLocaleString()}</>}
+            </p>
             {!portrait && (
               <p className="text-[10px] uppercase tracking-wider text-white/40">
                 {weatherLabel} · {hud.walkStyle} · chain x{hud.cleanChain}
@@ -515,7 +535,9 @@ export function CleanSneaksGame3D({
         </div>
 
         <div
-          className={`pointer-events-none absolute z-10 ${portrait ? "bottom-16 left-2" : "bottom-24 left-3"}`}
+          className={`pointer-events-none absolute z-10 ${
+            portrait ? "bottom-2 right-2" : "bottom-24 left-3"
+          }`}
         >
           <ShoeCamHud left={shoes.left} right={shoes.right} compact={portrait} />
         </div>
@@ -529,6 +551,7 @@ export function CleanSneaksGame3D({
             stateRef={stateRef}
             running={phase === "running"}
             onGameOver={endRun}
+            onDestination={onDestination}
             onStreakFlash={handleStreakFlash}
             onStatsTick={emitStats}
             colorwayId={colorwayId}
@@ -536,7 +559,11 @@ export function CleanSneaksGame3D({
           />
 
           {popups.length > 0 && (
-            <div className="pointer-events-none absolute bottom-28 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-1">
+            <div
+              className={`pointer-events-none absolute left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-1 ${
+                portrait ? "top-[42%]" : "bottom-28"
+              }`}
+            >
               {popups.slice(-3).map((p, i) => (
                 <span
                   key={`${p.text}-${i}`}
@@ -549,7 +576,9 @@ export function CleanSneaksGame3D({
             </div>
           )}
 
-          {pathOpts && phase === "running" && <CleanPathHud paths={pathOpts} />}
+          {pathOpts && phase === "running" && (
+            <CleanPathHud paths={pathOpts} portrait={portrait} />
+          )}
 
           {npcLine && phase === "running" && (
             <div className="pointer-events-none absolute left-1/2 top-20 z-10 -translate-x-1/2 rounded border border-white/10 bg-black/60 px-3 py-1.5 text-xs text-[#e8e8ec]">
@@ -561,7 +590,11 @@ export function CleanSneaksGame3D({
         </div>
 
         {phase === "running" && (
-          <div className="pointer-events-auto absolute bottom-3 right-3 z-20 flex gap-2">
+          <div
+            className={`pointer-events-auto absolute z-20 flex gap-2 ${
+              portrait ? "bottom-2 left-2" : "bottom-3 right-3"
+            }`}
+          >
             <Button
               size="sm"
               variant="outline"
@@ -598,10 +631,10 @@ export function CleanSneaksGame3D({
               Look at the ground. V = Sneak Vision · C = walk style · 1–6 = Oh No saves
             </p>
             <p className="mb-2 text-sm text-[#7EC8D9]/80">
-              100% CLEAN · TWO SHOES · {FINISH_DISTANCE}m destination
+              Hit {FINISH_DISTANCE}m for the bundle · keep running in bonus for huge scores
             </p>
             <p className="mb-6 max-w-xs text-center text-[11px] text-white/45">
-              Chase the bundle · beat your highest score on a full run to unlock Steal the Bundle
+              Stay clean for score multipliers · close calls and Oh No saves stack your chain
             </p>
             <p className="text-6xl font-bold tabular-nums text-foreground sm:text-7xl">
               {countdown > 0 ? countdown : "RUN."}

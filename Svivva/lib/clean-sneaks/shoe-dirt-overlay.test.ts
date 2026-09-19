@@ -5,14 +5,14 @@ import { dirtIncrementLevel, DIRT_INCREMENT_STEP } from "./shoe-dirt-overlay";
 describe("shoe dirt increments", () => {
   it("stays clean below the first splat threshold", () => {
     expect(dirtIncrementLevel(0)).toBe(0);
-    expect(dirtIncrementLevel(2)).toBe(0);
+    expect(dirtIncrementLevel(1)).toBe(0);
   });
 
   it("steps up in visible increments as zone fill increases", () => {
-    expect(dirtIncrementLevel(3)).toBe(1);
+    expect(dirtIncrementLevel(2)).toBe(1);
     expect(dirtIncrementLevel(DIRT_INCREMENT_STEP)).toBe(2);
     expect(dirtIncrementLevel(DIRT_INCREMENT_STEP * 4)).toBe(5);
-    expect(dirtIncrementLevel(100)).toBe(8);
+    expect(dirtIncrementLevel(100)).toBe(10);
   });
 
   it("tracks substance-specific stains on zones", () => {
