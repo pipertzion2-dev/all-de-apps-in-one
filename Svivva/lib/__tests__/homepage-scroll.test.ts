@@ -39,5 +39,7 @@ describe("homepage scroll panels", () => {
     expect(pageSrc).toContain("HomepageCubePanel");
     expect(cubeSrc).toContain("HomepageAboutSection");
     expect(cubeSrc).toContain("HomepagePricingSection");
+    expect(cubeSrc).toContain("HomepageCubeFaceHint");
+    expect(cubeSrc).not.toContain("Flip down · game");
   });
 });

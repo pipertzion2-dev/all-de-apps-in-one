@@ -33,6 +33,8 @@ describe("homepage flip stack", () => {
     expect(flipSrc).toContain("paintDirect");
     expect(flipSrc).toContain("shouldDeferToNativeScroll");
     expect(flipSrc).toContain('panelId === "home-game" && direction > 0');
+    expect(flipSrc).toContain('panelId === "nav-cube"');
+    expect(flipSrc).toMatch(/panelId === "nav-cube"[\s\S]*direction > 0[\s\S]*return false/);
     expect(flipSrc).toMatch(/const tick = \(now: number\) => \{[\s\S]*animRef\.current = 0/);
   });
 

@@ -252,6 +252,11 @@ export function HomepageFlipStack({
       panelId: HomepageFlipPanelId,
     ) => {
       if (panelId === "home-game" && direction > 0) return true;
+      if (panelId === "nav-cube") {
+        const { scrollable, atTop } = faceScrollState(face);
+        if (direction > 0) return false;
+        return scrollable ? atTop : true;
+      }
       const { scrollable, atTop, atBottom } = faceScrollState(face);
       if (!scrollable) return true;
       if (direction > 0) return atTop || atBottom;

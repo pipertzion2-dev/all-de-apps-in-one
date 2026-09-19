@@ -3,8 +3,7 @@
 import { HomepageAboutSection } from "@/components/homepage-about-section";
 import { HomepageHeroBlock } from "@/components/homepage-hero-block";
 import { HomepagePricingSection } from "@/components/homepage-pricing-section";
-import { HomepageScrollHint } from "@/components/homepage-scroll-hint";
-import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
+import { HomepageCubeFaceHint } from "@/components/homepage-cube-face-hint";
 
 type HomepageCubePanelProps = {
   mountCanvas?: boolean;
@@ -22,13 +21,7 @@ export function HomepageCubePanel({
 
   return (
     <div className="relative bg-background pb-8">
-      {interactive ? (
-        <HomepageScrollHint
-          label="Flip down · game"
-          direction="down"
-          onActivate={() => scrollToHomepagePanel("home-game")}
-        />
-      ) : null}
+      {interactive ? <HomepageCubeFaceHint /> : null}
 
       <HomepageHeroBlock
         mountCanvas={mountCanvas}
