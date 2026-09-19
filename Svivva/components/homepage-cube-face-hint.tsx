@@ -28,7 +28,7 @@ export function HomepageCubeFaceHint() {
     <button
       type="button"
       onClick={() => scrollToHomepagePanel("home-game")}
-      className="pointer-events-auto fixed left-1/2 top-[4.75rem] z-30 flex -translate-x-1/2 cursor-pointer flex-col items-center gap-1.5 active:scale-95 sm:top-[5.5rem]"
+      className="pointer-events-auto fixed left-1/2 top-[4.75rem] z-[25] flex -translate-x-1/2 cursor-pointer flex-col items-center gap-1.5 transition-opacity duration-200 active:scale-95 sm:top-[5.5rem]"
       aria-label="Swipe down for game"
     >
       <span className="rounded-full bg-background/85 px-4 py-1.5 text-[11px] font-medium tracking-wide text-muted-foreground shadow-md ring-1 ring-border/40 backdrop-blur-sm">
