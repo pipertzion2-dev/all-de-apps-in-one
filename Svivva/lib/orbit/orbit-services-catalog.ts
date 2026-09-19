@@ -335,6 +335,30 @@ export const ORBIT_PAID_SERVICES: OrbitServiceItem[] = [
 /** Free analytics & measurement — not required for autopilot but best for optimizing results. */
 export const ORBIT_ANALYTICS_SERVICES: OrbitServiceItem[] = [
   {
+    id: "adsense",
+    category: "analytics",
+    billing: "free-tier-paid-upgrade",
+    name: "Google AdSense",
+    priceLabel: "Free to join · paid by Google",
+    freeTier:
+      "No fee to join — Google pays you from ad impressions on zzaizzai.com / Klean Sneaks.",
+    bestPick: true,
+    purpose:
+      "Monetize Klean Sneaks and the site with real Google ads. Paste your ca-pub-… id in Orbit — payouts land in AdSense.",
+    steps: [
+      "Create/approve AdSense for zzaizzai.com",
+      "Turn on Auto ads; optionally create Display units",
+      "Orbit → AdSense tab → paste ca-pub-… (+ slots) → Save",
+      "Confirm /ads.txt lists your pub- id",
+    ],
+    payUrl: "https://www.google.com/adsense/start",
+    docsUrl: "https://support.google.com/adsense/answer/12187279",
+    setupHref: "/dashboard/orbit?tab=adsense",
+    setupLabel: "Orbit AdSense setup",
+    envKey: "NEXT_PUBLIC_ADSENSE_CLIENT",
+    priority: 0,
+  },
+  {
     id: "clarity",
     category: "analytics",
     billing: "free",

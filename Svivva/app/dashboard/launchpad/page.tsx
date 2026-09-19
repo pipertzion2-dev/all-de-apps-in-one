@@ -46,6 +46,7 @@ import {
   Radar,
   TrendingUp,
   CreditCard,
+  DollarSign,
   Megaphone,
 } from "lucide-react";
 import { ConnectionsHub } from "@/components/connections-hub";
@@ -56,6 +57,7 @@ import OrbitCausalAttribution from "@/components/orbit-causal-attribution";
 import { INDEX22_PHASE_COUNT, SEO_INDEX_PHASES } from "@/lib/orbit/seo-index-phases.client";
 import { buildIndex22OrbitSteps } from "@/lib/orbit/seo-index-steps-ui";
 import { OrbitStripeSetup } from "@/components/orbit-stripe-setup";
+import { OrbitAdsenseSetup } from "@/components/orbit-adsense-setup";
 import { OrbitInterimPaymentsSetup } from "@/components/orbit-interim-payments-setup";
 import { OrbitLemonSqueezySetup } from "@/components/orbit-lemon-squeezy-setup";
 import { OrbitEasyPeasySetup } from "@/components/orbit-easypeasy-setup";
@@ -2535,6 +2537,7 @@ export default function LaunchpadPage() {
     | "seo"
     | "causal"
     | "stripe"
+    | "adsense"
   >("checklist");
   useEffect(() => {
     const allowed = new Set([
@@ -2549,11 +2552,14 @@ export default function LaunchpadPage() {
       "seo",
       "causal",
       "stripe",
+      "adsense",
     ]);
     if (tabParam && allowed.has(tabParam)) {
       setTab(tabParam as typeof tab);
     } else if (typeof window !== "undefined" && window.location.hash === "#orbit-stripe-setup") {
       setTab("stripe");
+    } else if (typeof window !== "undefined" && window.location.hash === "#orbit-adsense-setup") {
+      setTab("adsense");
     }
   }, [tabParam]);
   const [statuses, setStatuses] = useState<Record<string, StepStatus>>({});
@@ -4551,6 +4557,33 @@ export default function LaunchpadPage() {
                 </button>
                 <button
                   onClick={() => {
+                    setTab("adsense");
+                    router.replace("/dashboard/orbit?tab=adsense", { scroll: false });
+                  }}
+                  className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "adsense" ? "border-[#d4af37] bg-[#d4af37]/10" : "border-border bg-card hover:bg-muted/30"}`}
+                  data-testid="orbit-tab-adsense"
+                >
+                  <div className="flex items-center gap-1.5 w-full">
+                    <DollarSign
+                      className="w-3.5 h-3.5 flex-shrink-0"
+                      style={{ color: tab === "adsense" ? "#d4af37" : undefined }}
+                    />
+                    <span
+                      className="text-xs font-bold truncate"
+                      style={{ color: tab === "adsense" ? "#b8860b" : undefined }}
+                    >
+                      AdSense
+                    </span>
+                    <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 bg-amber-500/15 text-amber-700">
+                      Ads
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-tight">
+                    Get paid from game ads
+                  </p>
+                </button>
+                <button
+                  onClick={() => {
                     setTab("acquire");
                     router.replace("/dashboard/orbit?tab=acquire", { scroll: false });
                   }}
@@ -4829,6 +4862,46 @@ export default function LaunchpadPage() {
               </div>
             )}
 
+            {tab === "adsense" && (
+              <div className="space-y-4" id="orbit-adsense-setup">
+                <OrbitAdsenseSetup />
+                <div className="rounded-xl border border-border bg-muted/20 px-3 py-3 text-xs text-muted-foreground space-y-2">
+                  <p className="font-semibold text-foreground">After AdSense is saved</p>
+                  <ul className="list-disc list-inside space-y-1">
+                    <li>
+                      Confirm{" "}
+                      <Link href="/ads.txt" className="underline text-foreground" target="_blank">
+                        /ads.txt
+                      </Link>{" "}
+                      lists your pub- id
+                    </li>
+                    <li>
+                      Play{" "}
+                      <Link
+                        href="/clean-sneaks"
+                        className="underline text-foreground"
+                        target="_blank"
+                      >
+                        Klean Sneaks
+                      </Link>{" "}
+                      — banner / interstitial / rewarded use Google ads
+                    </li>
+                    <li>
+                      Earnings appear in your{" "}
+                      <a
+                        href="https://www.google.com/adsense/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline text-foreground"
+                      >
+                        AdSense dashboard
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            )}
+
             {tab === "growth" && (
               <OrbitGrowthIntelligence
                 onReportReady={(summary) => {
@@ -4948,7 +5021,7 @@ export default function LaunchpadPage() {
               tab !== "index22" &&
               tab !== "growth" &&
               tab !== "acquire" &&
-              tab !== "stripe" && (
+              tab !== "stripe" && tab !== "adsense" && (
                 <LaunchStation
                   launchActive={launchActive}
                   launchDone={launchDone}
@@ -4969,7 +5042,7 @@ export default function LaunchpadPage() {
               tab !== "checklist" &&
               tab !== "growth" &&
               tab !== "acquire" &&
-              tab !== "stripe" &&
+              tab !== "stripe" && tab !== "adsense" &&
               steps.length > 0 && (
                 <div className="flex items-center gap-3">
                   <div className="flex-1 space-y-1">
@@ -5047,7 +5120,7 @@ export default function LaunchpadPage() {
               tab !== "checklist" &&
               tab !== "growth" &&
               tab !== "acquire" &&
-              tab !== "stripe" &&
+              tab !== "stripe" && tab !== "adsense" &&
               allTabDone && (
                 <div
                   className="rounded-2xl p-6 text-center space-y-2"
@@ -5088,7 +5161,7 @@ export default function LaunchpadPage() {
               )}
 
             {/* Google Indexing Panel — always visible once orbit has run */}
-            {tab !== "deploy" && tab !== "checklist" && tab !== "stripe" && (
+            {tab !== "deploy" && tab !== "checklist" && tab !== "stripe" && tab !== "adsense" && (
               <GoogleIndexPanel
                 coreUrls={orbitStatus?.coreUrls ?? []}
                 toolUrls={orbitStatus?.toolUrls ?? []}

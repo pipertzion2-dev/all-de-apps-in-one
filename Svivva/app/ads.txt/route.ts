@@ -2,13 +2,15 @@
  * AdSense publisher verification file.
  * https://support.google.com/adsense/answer/7532444
  *
- * Set NEXT_PUBLIC_ADSENSE_CLIENT=ca-pub-XXXXXXXX (or ADSENSE_PUB_ID=pub-XXXXXXXX).
+ * Set via Orbit admin → AdSense, or NEXT_PUBLIC_ADSENSE_CLIENT / ADSENSE_PUB_ID.
  */
+import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
+
 export const dynamic = "force-dynamic";
 
 function publisherId(): string | null {
   const client = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim() || "";
-  if (client.startsWith("ca-pub-")) return client.slice(3); // pub-XXXX
+  if (client.startsWith("ca-pub-")) return client.slice(3);
   if (client.startsWith("pub-")) return client;
   const pub = process.env.ADSENSE_PUB_ID?.trim() || "";
   if (pub.startsWith("pub-")) return pub;
@@ -17,16 +19,22 @@ function publisherId(): string | null {
 }
 
 export async function GET() {
+  try {
+    await hydratePlatformSecrets();
+  } catch {
+    /* ignore */
+  }
   const pub = publisherId();
   const lines = [
     "# ads.txt for zzaizzai.com — Google AdSense",
     "# https://support.google.com/adsense/answer/7532444",
   ];
   if (pub) {
-    // DIRECT + Google's certified seller ID
     lines.push(`google.com, ${pub}, DIRECT, f08c47fec0942fa0`);
   } else {
-    lines.push("# Set NEXT_PUBLIC_ADSENSE_CLIENT=ca-pub-… in Vercel, then redeploy.");
+    lines.push(
+      "# Set AdSense in Orbit admin (/dashboard/orbit?tab=adsense) or NEXT_PUBLIC_ADSENSE_CLIENT.",
+    );
   }
   lines.push("");
 
@@ -34,7 +42,7 @@ export async function GET() {
     status: 200,
     headers: {
       "Content-Type": "text/plain; charset=utf-8",
-      "Cache-Control": "public, max-age=300",
+      "Cache-Control": "public, max-age=60",
     },
   });
 }

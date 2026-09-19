@@ -1670,6 +1670,11 @@ export const platformRuntimeSecrets = pgTable("platform_runtime_secrets", {
   easypeasyTier: text("easypeasy_tier"),
   /** When set (e.g. word_limit), Orbit skips EasyPeasy and uses templates / other providers. */
   easypeasySkipReason: text("easypeasy_skip_reason"),
+  /** Google AdSense publisher client id (ca-pub-…). */
+  adsenseClientId: text("adsense_client_id"),
+  adsenseSlotBanner: text("adsense_slot_banner"),
+  adsenseSlotInterstitial: text("adsense_slot_interstitial"),
+  adsenseSlotRewarded: text("adsense_slot_rewarded"),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
