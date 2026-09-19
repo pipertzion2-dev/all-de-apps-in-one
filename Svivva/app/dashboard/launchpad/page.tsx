@@ -46,10 +46,12 @@ import {
   Radar,
   TrendingUp,
   CreditCard,
+  Megaphone,
 } from "lucide-react";
 import { ConnectionsHub } from "@/components/connections-hub";
 import { OrbitPaidServicesHub } from "@/components/orbit-paid-services-hub";
 import { OrbitGrowthIntelligence } from "@/components/orbit-growth-intelligence";
+import { OrbitCustomerAcquisition } from "@/components/orbit-customer-acquisition";
 import OrbitCausalAttribution from "@/components/orbit-causal-attribution";
 import { INDEX22_PHASE_COUNT, SEO_INDEX_PHASES } from "@/lib/orbit/seo-index-phases.client";
 import { buildIndex22OrbitSteps } from "@/lib/orbit/seo-index-steps-ui";
@@ -2528,6 +2530,7 @@ export default function LaunchpadPage() {
     | "deploy"
     | "checklist"
     | "growth"
+    | "acquire"
     | "autopilot"
     | "seo"
     | "causal"
@@ -2541,6 +2544,7 @@ export default function LaunchpadPage() {
       "deploy",
       "checklist",
       "growth",
+      "acquire",
       "autopilot",
       "seo",
       "causal",
@@ -4523,6 +4527,35 @@ export default function LaunchpadPage() {
                   </p>
                 </button>
                 <button
+                  onClick={() => {
+                    setTab("acquire");
+                    router.replace("/dashboard/orbit?tab=acquire", { scroll: false });
+                  }}
+                  className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "acquire" ? "border-emerald-500 bg-emerald-500/10" : "border-border bg-card hover:bg-muted/30"}`}
+                  data-testid="tab-customer-acquisition"
+                >
+                  <div className="flex items-center gap-1.5 w-full">
+                    <Megaphone
+                      className="w-3.5 h-3.5 flex-shrink-0"
+                      style={{ color: tab === "acquire" ? "#059669" : undefined }}
+                    />
+                    <span
+                      className="text-xs font-bold truncate"
+                      style={{ color: tab === "acquire" ? "#059669" : undefined }}
+                    >
+                      Acquire
+                    </span>
+                    <span
+                      className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ${tab === "acquire" ? "bg-emerald-500/20 text-emerald-700" : "bg-emerald-500/10 text-emerald-700"}`}
+                    >
+                      NEW
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-tight">
+                    Traffic + referrals + UTMs
+                  </p>
+                </button>
+                <button
                   onClick={() => setTab("growth")}
                   className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "growth" ? "border-violet-500 bg-violet-500/10" : "border-border bg-card hover:bg-muted/30"}`}
                   data-testid="tab-growth-intel"
@@ -4783,6 +4816,8 @@ export default function LaunchpadPage() {
               />
             )}
 
+            {tab === "acquire" && <OrbitCustomerAcquisition />}
+
             {tab === "causal" && <OrbitCausalAttribution />}
 
             {/* Marketing Autopilot tab */}
@@ -4889,6 +4924,7 @@ export default function LaunchpadPage() {
               tab !== "checklist" &&
               tab !== "index22" &&
               tab !== "growth" &&
+              tab !== "acquire" &&
               tab !== "stripe" && (
                 <LaunchStation
                   launchActive={launchActive}
@@ -4909,6 +4945,7 @@ export default function LaunchpadPage() {
             {tab !== "deploy" &&
               tab !== "checklist" &&
               tab !== "growth" &&
+              tab !== "acquire" &&
               tab !== "stripe" &&
               steps.length > 0 && (
                 <div className="flex items-center gap-3">
@@ -4986,6 +5023,7 @@ export default function LaunchpadPage() {
             {tab !== "deploy" &&
               tab !== "checklist" &&
               tab !== "growth" &&
+              tab !== "acquire" &&
               tab !== "stripe" &&
               allTabDone && (
                 <div
