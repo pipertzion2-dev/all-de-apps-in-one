@@ -3072,10 +3072,21 @@ export default function LaunchpadPage() {
       }
     }
 
-    // Finalise — IndexNow + fill any missing content
+    // Finalise — IndexNow + fill any missing content + acquisition layer
     setLaunchProgress("Submitting to all search engines…");
     try {
       await authFetch("/api/orbit/auto-complete", { method: "POST" });
+    } catch {
+      /* non-fatal */
+    }
+
+    setLaunchProgress("Customer acquisition: UTMs · referrals · amplify · intel…");
+    try {
+      await authFetch("/api/orbit/customer-acquisition", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "run_all", skipTrafficBlast: true }),
+      });
     } catch {
       /* non-fatal */
     }
@@ -3087,7 +3098,8 @@ export default function LaunchpadPage() {
     if (statusRes.data?.stepCompletion) applyDbStepCompletion(statusRes.data.stepCompletion);
     toast({
       title: "🚀 Orbit complete!",
-      description: "Copy your URLs below and paste them into Google Search Console.",
+      description:
+        "SEO steps + acquisition layer finished. Copy URLs into Search Console if needed.",
       duration: 8000,
     });
   };
@@ -3250,11 +3262,22 @@ export default function LaunchpadPage() {
           }
           if (u.t === "finish") {
             setFullAutopilotStep(
-              `Marketing ${phase + 1}/${GOLD_MARKETING_PHASES}: Fill gaps + IndexNow…`,
+              `Marketing ${phase + 1}/${GOLD_MARKETING_PHASES}: Fill gaps + IndexNow + acquisition…`,
             );
-            setLaunchProgress(`Marketing ${phase + 1}/${GOLD_MARKETING_PHASES}: IndexNow + Bing…`);
+            setLaunchProgress(
+              `Marketing ${phase + 1}/${GOLD_MARKETING_PHASES}: IndexNow + acquisition…`,
+            );
             try {
               await authFetch("/api/orbit/auto-complete", { method: "POST" });
+            } catch {
+              /* non-fatal */
+            }
+            try {
+              await authFetch("/api/orbit/customer-acquisition", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action: "run_all", skipTrafficBlast: true }),
+              });
             } catch {
               /* non-fatal */
             }

@@ -278,6 +278,7 @@ const PHASES = [
   { label: "Loading content engine (AI or built-in templates — no key required)" },
   { label: "Building SEO pages, blog, comparisons & tool pages" },
   { label: "Submitting URLs to Google (GSC + Indexing API), Bing & IndexNow" },
+  { label: "Customer acquisition: UTMs, referrals, amplify, campaigns & Growth Intel" },
   { label: "Generating launch copy & auto-posting where APIs allow" },
 ];
 
@@ -932,7 +933,7 @@ export function OrbitOneClickLaunch({
           disabled={running || quickStartRunning || !canRunUrrthang}
           data-testid="orbit-one-click-launch"
           data-urrthang="true"
-          aria-label={`${URRTHANG_LABEL} — run all Orbit marketing and indexing`}
+          aria-label={`${URRTHANG_LABEL} — run all Orbit SEO traffic, indexing, and customer acquisition`}
           className={`w-full flex items-center justify-center gap-2.5 py-5 sm:py-6 rounded-xl text-lg sm:text-xl min-h-[88px] ${PINK_CAMO_BUTTON_CLASS}`}
           style={running ? PINK_CAMO_BUTTON_ACTIVE_STYLE : PINK_CAMO_BUTTON_STYLE}
         >

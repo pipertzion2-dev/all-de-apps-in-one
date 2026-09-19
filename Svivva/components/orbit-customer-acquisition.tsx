@@ -34,6 +34,12 @@ import {
   acquisitionChannelLabel,
   CUSTOMER_ACQUISITION_VERSION,
 } from "@/lib/orbit/customer-acquisition";
+import {
+  PINK_CAMO_BUTTON_ACTIVE_STYLE,
+  PINK_CAMO_BUTTON_CLASS,
+  PINK_CAMO_BUTTON_STYLE,
+  URRTHANG_LABEL,
+} from "@/lib/ui-pink-camo-button";
 import { OrbitHybridGrowthPanel } from "@/components/orbit-hybrid-growth-panel";
 
 const TEAL = "#5B8DA8";
@@ -164,11 +170,13 @@ export function OrbitCustomerAcquisition() {
       if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`);
       const msg = typeof json.message === "string" ? json.message : `${action} complete`;
       setLastLog(
-        typeof json.result?.summary === "string"
-          ? json.result.summary
-          : json.steps
-            ? (json.steps as Array<{ message: string }>).map((s) => s.message).join("\n")
-            : msg,
+        typeof json.summary === "string"
+          ? json.summary
+          : typeof json.result?.summary === "string"
+            ? json.result.summary
+            : json.steps
+              ? (json.steps as Array<{ message: string }>).map((s) => s.message).join("\n")
+              : msg,
       );
       toast({ title: msg, duration: 8000 });
       if (action === "amplify" && json.job?.outputs) {
@@ -178,7 +186,9 @@ export function OrbitCustomerAcquisition() {
         action === "create_utm" ||
         action === "create_referral" ||
         action === "seed_campaign" ||
-        action === "run_playbook"
+        action === "run_playbook" ||
+        action === "do_it_all" ||
+        action === "run_all"
       ) {
         await load();
       }
@@ -294,6 +304,45 @@ export function OrbitCustomerAcquisition() {
             icon={MousePointerClick}
           />
           <KpiCard label="Playbooks" value={data.playbooks.length} icon={BarChart3} />
+        </div>
+
+        {/* Do it all — strongest automation */}
+        <div className="space-y-2 pt-1">
+          <button
+            type="button"
+            disabled={!!busy}
+            onClick={() => void runAction("do_it_all")}
+            className={`w-full flex items-center justify-center gap-2.5 py-4 rounded-xl text-base ${PINK_CAMO_BUTTON_CLASS}`}
+            style={busy === "do_it_all" ? PINK_CAMO_BUTTON_ACTIVE_STYLE : PINK_CAMO_BUTTON_STYLE}
+            data-testid="acquisition-do-it-all"
+          >
+            {busy === "do_it_all" ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Rocket className="w-5 h-5" />
+            )}
+            {busy === "do_it_all"
+              ? "Running full SEO + acquisition automation…"
+              : `Do it all — ${URRTHANG_LABEL} SEO traffic + acquisition`}
+          </button>
+          <p className="text-[11px] text-muted-foreground leading-snug text-center">
+            One button runs the full Orbit engine: SEO pages, IndexNow/Google/Bing, Growth Intel,
+            UTMs, referrals, content amplify, campaigns, channel intel, and social packs.
+          </p>
+          <button
+            type="button"
+            disabled={!!busy}
+            onClick={() => void runAction("run_all")}
+            className="w-full inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold border-2 border-border bg-card hover:bg-muted/40 disabled:opacity-60"
+            data-testid="acquisition-run-all-layer"
+          >
+            {busy === "run_all" ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Zap className="w-3.5 h-3.5" style={{ color: TEAL }} />
+            )}
+            Acquisition layer only (traffic blast + UTMs + referrals + amplify)
+          </button>
         </div>
       </div>
 

@@ -243,6 +243,48 @@ export const MARKETING_AUTOPILOT_TASKS: AutopilotTaskDef[] = [
     credentialKeys: ["n8nWebhookUrl"],
     automatable: "api",
   },
+  {
+    id: "acq-traffic-blast",
+    label: "SEO traffic blast",
+    group: "Customer Acquisition",
+    automatable: "onsite",
+  },
+  {
+    id: "acq-utm-factory",
+    label: "UTM link factory",
+    group: "Customer Acquisition",
+    automatable: "onsite",
+  },
+  {
+    id: "acq-referral",
+    label: "Referral / viral link",
+    group: "Customer Acquisition",
+    automatable: "onsite",
+  },
+  {
+    id: "acq-amplify",
+    label: "Multi-channel amplify",
+    group: "Customer Acquisition",
+    automatable: "full",
+  },
+  {
+    id: "acq-campaigns",
+    label: "Acquisition campaigns",
+    group: "Customer Acquisition",
+    automatable: "onsite",
+  },
+  {
+    id: "acq-growth-intel",
+    label: "Demand / Growth Intel scan",
+    group: "Customer Acquisition",
+    automatable: "onsite",
+  },
+  {
+    id: "acq-channel-intel",
+    label: "YouTube channel intel",
+    group: "Customer Acquisition",
+    automatable: "onsite",
+  },
 ];
 
 export function taskDefById(id: string): AutopilotTaskDef | undefined {

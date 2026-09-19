@@ -73,6 +73,7 @@ export async function GET(req: NextRequest) {
 type ActionBody = {
   action?: string;
   playbookId?: string;
+  skipTrafficBlast?: boolean;
   utm?: {
     name?: string;
     destinationUrl?: string;
@@ -205,6 +206,47 @@ export async function POST(req: NextRequest) {
     switch (action) {
       case "dashboard":
         return ok(await loadDashboard());
+
+      /** Strongest one-button: full urrthang marketing autopilot (SEO traffic + acquisition layer) */
+      case "do_it_all":
+      case "urrthang": {
+        const { ensureOrbitAiForRun } = await import("@/lib/orbit/ensure-orbit-ai");
+        await ensureOrbitAiForRun().catch(() => null);
+        const { runMarketingAutopilot } = await import("@/lib/orbit/marketing-autopilot");
+        const result = await runMarketingAutopilot({ skipOnSite: !!body.skipTrafficBlast });
+        return ok({
+          action: "do_it_all",
+          ok: result.ok,
+          result,
+          message: result.ok
+            ? `Do-it-all complete — ${result.stats.done} done · ${result.stats.prepared} prepared · acquisition + SEO traffic automated`
+            : `Do-it-all finished with issues — ${result.stats.failed} failed · check log`,
+          summary: result.summary,
+        });
+      }
+
+      /** Acquisition layer only (optional traffic blast) — lighter than full urrthang */
+      case "run_all":
+      case "run_acquisition": {
+        const { runCustomerAcquisitionAutomation } = await import(
+          "@/lib/orbit/customer-acquisition-automation"
+        );
+        const result = await runCustomerAcquisitionAutomation({
+          skipTrafficBlast: !!body.skipTrafficBlast,
+          includeTrafficBlast: !body.skipTrafficBlast,
+          referrerEmail: body.referral?.referrerEmail,
+          amplifySource: body.amplify?.sourceContent,
+        });
+        return ok({
+          action: "run_all",
+          ok: result.ok,
+          result,
+          message: result.ok
+            ? `Acquisition automation complete — ${result.stats.done} steps done`
+            : `Acquisition automation finished with ${result.stats.failed} failures`,
+          summary: result.summary,
+        });
+      }
 
       case "traffic_blast": {
         const result = await forwardInternal("/api/orbit/full-traffic-automation", {
