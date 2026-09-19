@@ -25,7 +25,7 @@ export {
   currentPlayer,
   buildPlayers,
 } from "./card-game";
-export { chooseAiMove, aiDelayMs } from "./ai-player";
+export { chooseAiMove, aiDelayMs, aiResolveDelayMs } from "./ai-player";
 export {
   readCasinoSession,
   writeCasinoSession,
