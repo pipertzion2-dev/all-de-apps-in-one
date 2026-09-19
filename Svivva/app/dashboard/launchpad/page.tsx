@@ -3571,6 +3571,23 @@ export default function LaunchpadPage() {
                       build {liveBuild}
                     </span>
                   ) : null}
+                  <button
+                    type="button"
+                    className="text-[11px] font-black uppercase tracking-wide bg-[#d4af37] text-[#1a1008] px-2.5 py-1 rounded-full shadow-sm hover:bg-[#e0c15a] transition-colors"
+                    data-testid="orbit-header-adsense"
+                    onClick={() => {
+                      setTab("adsense");
+                      router.replace("/dashboard/orbit?tab=adsense", { scroll: false });
+                      window.setTimeout(() => {
+                        document.getElementById("orbit-adsense-setup")?.scrollIntoView({
+                          behavior: "smooth",
+                          block: "start",
+                        });
+                      }, 40);
+                    }}
+                  >
+                    AdSense · Get paid
+                  </button>
                 </div>
                 <p className="text-white/50 text-xs">
                   ZZAI + your deployed apps — maximum real traffic
@@ -3681,6 +3698,50 @@ export default function LaunchpadPage() {
 
       {/* ── Content ── */}
       <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-4 pb-6 space-y-4 relative z-10">
+        {/* AdSense FIRST — gold box above everything else so it cannot be missed */}
+        <div
+          id="orbit-adsense-setup"
+          className="rounded-2xl border-4 border-[#d4af37] bg-gradient-to-br from-[#d4af37]/25 via-card to-[#1a1008]/40 p-3 sm:p-5 space-y-3 shadow-[0_0_24px_rgba(212,175,55,0.35)] ring-2 ring-[#d4af37]/30"
+          data-testid="orbit-adsense-hero"
+        >
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <div className="min-w-0 space-y-1">
+              <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[#d4af37]">
+                Earn money · Google ads · Look here first
+              </p>
+              <h2 className="text-base sm:text-lg font-black text-foreground flex items-center gap-2">
+                <DollarSign className="w-5 h-5 text-[#d4af37] shrink-0" />
+                AdSense — get paid from Klean Sneaks
+              </h2>
+              <p className="text-xs sm:text-sm text-muted-foreground max-w-xl">
+                Paste your Google <code className="text-[#d4af37]">ca-pub-…</code> publisher id
+                below. Real ads show in the game; Google pays your AdSense account.
+              </p>
+            </div>
+            <Button
+              type="button"
+              size="sm"
+              className="bg-[#d4af37] text-[#1a1008] hover:bg-[#e0c15a] font-bold shrink-0"
+              onClick={() => {
+                setTab("adsense");
+                router.replace("/dashboard/orbit?tab=adsense", { scroll: false });
+                window.setTimeout(() => {
+                  document.getElementById("orbit-adsense-form")?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                  });
+                }, 40);
+              }}
+              data-testid="orbit-jump-adsense-form"
+            >
+              Jump to form
+            </Button>
+          </div>
+          <div id="orbit-adsense-form">
+            <OrbitAdsenseSetup />
+          </div>
+        </div>
+
         {/* ── PRIMARY MISSION CONTROL ── */}
         <OrbitOneClickLaunch
           autoRun={autoRunMarketing}
@@ -4282,20 +4343,38 @@ export default function LaunchpadPage() {
               <ConnectionsHub />
             </div>
 
-            {/* Stripe setup lives above Advanced + in the Stripe tab */}
-            <div className="rounded-xl border border-border bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
-              Need payments? Use{" "}
-              <button
-                type="button"
-                className="underline font-semibold text-foreground"
-                onClick={() => {
-                  setTab("stripe");
-                  router.replace("/dashboard/orbit?tab=stripe", { scroll: false });
-                }}
-              >
-                Orbit → Stripe
-              </button>{" "}
-              (or the Stripe card above Advanced).
+            {/* Payments + ads pointers */}
+            <div className="rounded-xl border border-[#d4af37]/50 bg-[#d4af37]/10 px-3 py-2 text-xs text-foreground space-y-1">
+              <p>
+                <strong className="text-[#b8860b]">AdSense (get paid):</strong> gold box at the{" "}
+                <button
+                  type="button"
+                  className="underline font-semibold"
+                  onClick={() => {
+                    document.getElementById("orbit-adsense-setup")?.scrollIntoView({
+                      behavior: "smooth",
+                      block: "start",
+                    });
+                  }}
+                >
+                  top of this page
+                </button>
+                .
+              </p>
+              <p className="text-muted-foreground">
+                Need subscriptions? Use{" "}
+                <button
+                  type="button"
+                  className="underline font-semibold text-foreground"
+                  onClick={() => {
+                    setTab("stripe");
+                    router.replace("/dashboard/orbit?tab=stripe", { scroll: false });
+                  }}
+                >
+                  Orbit → Stripe
+                </button>
+                .
+              </p>
             </div>
 
             {/* ── Marketing Status (DB-verified) ── */}
@@ -4524,6 +4603,35 @@ export default function LaunchpadPage() {
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
                 <button
                   onClick={() => {
+                    setTab("adsense");
+                    router.replace("/dashboard/orbit?tab=adsense", { scroll: false });
+                    window.setTimeout(() => {
+                      document.getElementById("orbit-adsense-setup")?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                      });
+                    }, 40);
+                  }}
+                  className={`col-span-2 sm:col-span-3 lg:col-span-2 flex flex-col items-start gap-1 px-3 py-3.5 rounded-2xl border-4 text-left transition-all ${
+                    tab === "adsense"
+                      ? "border-[#d4af37] bg-[#d4af37]/20 ring-2 ring-[#d4af37]/40"
+                      : "border-[#d4af37]/70 bg-[#d4af37]/10 hover:bg-[#d4af37]/20"
+                  }`}
+                  data-testid="orbit-tab-adsense"
+                >
+                  <div className="flex items-center gap-1.5 w-full">
+                    <DollarSign className="w-4 h-4 flex-shrink-0 text-[#d4af37]" />
+                    <span className="text-sm font-black truncate text-[#b8860b]">AdSense</span>
+                    <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 bg-[#d4af37] text-[#1a1008]">
+                      GET PAID
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-foreground/80 leading-tight font-medium">
+                    Google ads for Klean Sneaks — paste ca-pub-… at the top of this page
+                  </p>
+                </button>
+                <button
+                  onClick={() => {
                     setTab("stripe");
                     router.replace("/dashboard/orbit?tab=stripe", { scroll: false });
                   }}
@@ -4553,33 +4661,6 @@ export default function LaunchpadPage() {
                   </div>
                   <p className="text-[11px] text-muted-foreground leading-tight">
                     Keys, webhook, checkout
-                  </p>
-                </button>
-                <button
-                  onClick={() => {
-                    setTab("adsense");
-                    router.replace("/dashboard/orbit?tab=adsense", { scroll: false });
-                  }}
-                  className={`flex flex-col items-start gap-1 px-3 py-3 rounded-2xl border-2 text-left transition-all ${tab === "adsense" ? "border-[#d4af37] bg-[#d4af37]/10" : "border-border bg-card hover:bg-muted/30"}`}
-                  data-testid="orbit-tab-adsense"
-                >
-                  <div className="flex items-center gap-1.5 w-full">
-                    <DollarSign
-                      className="w-3.5 h-3.5 flex-shrink-0"
-                      style={{ color: tab === "adsense" ? "#d4af37" : undefined }}
-                    />
-                    <span
-                      className="text-xs font-bold truncate"
-                      style={{ color: tab === "adsense" ? "#b8860b" : undefined }}
-                    >
-                      AdSense
-                    </span>
-                    <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 bg-amber-500/15 text-amber-700">
-                      Ads
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground leading-tight">
-                    Get paid from game ads
                   </p>
                 </button>
                 <button
@@ -4863,42 +4944,24 @@ export default function LaunchpadPage() {
             )}
 
             {tab === "adsense" && (
-              <div className="space-y-4" id="orbit-adsense-setup">
-                <OrbitAdsenseSetup />
-                <div className="rounded-xl border border-border bg-muted/20 px-3 py-3 text-xs text-muted-foreground space-y-2">
-                  <p className="font-semibold text-foreground">After AdSense is saved</p>
-                  <ul className="list-disc list-inside space-y-1">
-                    <li>
-                      Confirm{" "}
-                      <Link href="/ads.txt" className="underline text-foreground" target="_blank">
-                        /ads.txt
-                      </Link>{" "}
-                      lists your pub- id
-                    </li>
-                    <li>
-                      Play{" "}
-                      <Link
-                        href="/clean-sneaks"
-                        className="underline text-foreground"
-                        target="_blank"
-                      >
-                        Klean Sneaks
-                      </Link>{" "}
-                      — banner / interstitial / rewarded use Google ads
-                    </li>
-                    <li>
-                      Earnings appear in your{" "}
-                      <a
-                        href="https://www.google.com/adsense/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline text-foreground"
-                      >
-                        AdSense dashboard
-                      </a>
-                    </li>
-                  </ul>
-                </div>
+              <div className="space-y-4 rounded-xl border border-[#d4af37]/40 bg-[#d4af37]/5 px-4 py-4">
+                <p className="text-sm font-semibold text-foreground">
+                  AdSense setup is the gold box at the top of this page.
+                </p>
+                <Button
+                  type="button"
+                  className="bg-[#d4af37] text-[#1a1008] hover:bg-[#e0c15a] font-bold"
+                  onClick={() => {
+                    document.getElementById("orbit-adsense-setup")?.scrollIntoView({
+                      behavior: "smooth",
+                      block: "start",
+                    });
+                  }}
+                  data-testid="orbit-adsense-scroll-top"
+                >
+                  <DollarSign className="w-4 h-4 mr-1.5" />
+                  Scroll to AdSense form
+                </Button>
               </div>
             )}
 
