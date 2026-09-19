@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { ContactShadows, Sparkles } from "@react-three/drei";
 import { Baloon8RunEnvironment } from "./Baloon8RunEnvironment";
@@ -29,7 +29,7 @@ import {
   updateWalkingShoes3D,
 } from "@/lib/clean-sneaks/walking-shoes-3d";
 import { CleanSneaksPostFX } from "./CleanSneaksPostFX";
-import { VegasRunBackdrop } from "./VegasRunBackdrop";
+import { VegasStrip3D } from "./VegasStrip3D";
 
 type QualityFlags = ReturnType<typeof runQualityFlags>;
 
@@ -297,7 +297,7 @@ function CityBlock({ count, castShadows }: { count: number; castShadows: boolean
         x: (i % 2 === 0 ? -1 : 1) * (7.5 + (i % 3) * 0.8),
         z: -28 - i * 9 - (i % 4) * 2,
         w: 2 + (i % 5) * 0.6,
-        h: 4 + (i % 7) * 2.2,
+        h: 5.5 + (i % 7) * 2.8,
         d: 2.5 + (i % 3) * 0.5,
         seed,
         neon: neonColors[seed % neonColors.length]!,
@@ -637,9 +637,11 @@ function World({
     <>
       <fog attach="fog" args={["#140818", 20, 64]} />
 
-      <Suspense fallback={null}>
-        <VegasRunBackdrop segments={quality.mobile ? 3 : 5} mobile={quality.mobile} />
-      </Suspense>
+      <VegasStrip3D
+        segments={quality.mobile ? 4 : 6}
+        mobile={quality.mobile}
+        castShadows={quality.castShadows}
+      />
 
       <hemisphereLight args={["#ffb8e8", "#120818", 0.38]} />
       <ambientLight intensity={0.32} color="#ffffff" />
