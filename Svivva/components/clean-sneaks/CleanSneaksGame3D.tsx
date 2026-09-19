@@ -233,19 +233,21 @@ export function CleanSneaksGame3D({
       window.clearInterval(countdownTimerRef.current);
       countdownTimerRef.current = null;
     }
-    stateRef.current = createRunEngineState(readBestScore(), colorwayId);
+    const pickedColorway = colorwayIdRef.current;
+    writeSavedColorway(pickedColorway);
+    stateRef.current = createRunEngineState(readBestScore(), pickedColorway);
     emitStats();
     setPhase("countdown");
     setCountdown(3);
     let n = 3;
     const reduced = prefersReducedMotion();
-    const id = window.setInterval(
+    const timerId = window.setInterval(
       () => {
         n -= 1;
         if (n > 0) setCountdown(n);
         else if (n === 0) setCountdown(0);
         else {
-          window.clearInterval(id);
+          window.clearInterval(timerId);
           countdownTimerRef.current = null;
           setPhase("running");
           stateRef.current.running = true;
@@ -254,8 +256,8 @@ export function CleanSneaksGame3D({
       },
       reduced ? 280 : 520,
     );
-    countdownTimerRef.current = id;
-  }, [colorwayId, emitStats]);
+    countdownTimerRef.current = timerId;
+  }, [emitStats]);
 
   useEffect(() => {
     return () => {
@@ -266,18 +268,21 @@ export function CleanSneaksGame3D({
   }, []);
 
   const confirmColorwayAndCountdown = useCallback(() => {
-    if (!colorwayChosen) return;
+    const id = colorwayIdRef.current;
+    stateRef.current.archetypeId = id;
+    writeSavedColorway(id);
+    setColorwayChosen(true);
     startCountdown();
-  }, [colorwayChosen, startCountdown]);
+  }, [startCountdown]);
 
   const finishLoading = useCallback(() => {
     if (loadingDoneRef.current) return;
     loadingDoneRef.current = true;
-    if (coverStartPassedRef.current) {
-      setPhase("colorPick");
-      return;
-    }
-    setPhase("start");
+    setPhase((p) => {
+      if (p === "colorPick" || p === "countdown" || p === "running" || p === "over") return p;
+      if (coverStartPassedRef.current) return "colorPick";
+      return "start";
+    });
   }, []);
 
   const beginGame = useCallback(() => {
@@ -354,7 +359,7 @@ export function CleanSneaksGame3D({
         return;
       }
       if (phase === "colorPick") {
-        if ((k === " " || k === "enter" || e.code === "Space") && colorwayChosen) {
+        if (k === " " || k === "enter" || e.code === "Space") {
           e.preventDefault();
           confirmColorwayAndCountdown();
         }
@@ -398,7 +403,7 @@ export function CleanSneaksGame3D({
     };
     window.addEventListener("keydown", onKey, { passive: false });
     return () => window.removeEventListener("keydown", onKey);
-  }, [active, phase, beginGame, colorwayChosen, confirmColorwayAndCountdown, onOhNo]);
+  }, [active, phase, beginGame, confirmColorwayAndCountdown, onOhNo]);
 
   useEffect(() => {
     if (!active || phase !== "running") return;
@@ -681,17 +686,14 @@ export function CleanSneaksGame3D({
             </div>
             <Button
               type="button"
-              className="mb-3 bg-[#5B8DA8] text-white hover:bg-[#6a9cb8] disabled:opacity-40"
-              disabled={!colorwayChosen}
+              className="mb-3 bg-[#5B8DA8] text-white hover:bg-[#6a9cb8]"
               onClick={confirmColorwayAndCountdown}
               data-testid="button-confirm-colorway"
             >
               Start countdown
             </Button>
             <p className="max-w-xs text-center text-[11px] text-white/45">
-              {colorwayChosen
-                ? "Tap Start countdown or press Enter"
-                : "Select a color above to continue"}
+              Tap a color to change · then Start countdown (or Enter)
             </p>
           </div>
         )}
