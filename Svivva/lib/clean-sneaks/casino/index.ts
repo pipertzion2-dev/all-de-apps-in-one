@@ -34,8 +34,17 @@ export {
   recordCardGameResult,
   resetWalkSession,
   emptyCasinoSession,
+  setSessionCredits,
   CASINO_SESSION_KEY,
 } from "./session";
+export {
+  scoreToCredits,
+  computeAnte,
+  canAffordTable,
+  payoutWin,
+  describeCreditsGate,
+  CREDITS_MIN_ANTE,
+} from "./credits";
 export { AudioManager, playCue } from "./audio";
 export type {
   PlayingCard,

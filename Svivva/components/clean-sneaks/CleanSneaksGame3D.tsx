@@ -22,7 +22,13 @@ import {
   isBundleCardUnlocked,
   markBundleCardUnlocked,
 } from "@/lib/clean-sneaks/bundle-unlock";
-import { playCue, saveWalkingScoreToSession } from "@/lib/clean-sneaks/casino";
+import {
+  playCue,
+  saveWalkingScoreToSession,
+  canAffordTable,
+  scoreToCredits,
+  CREDITS_MIN_ANTE,
+} from "@/lib/clean-sneaks/casino";
 import { readBestScore, shareScore, writeBestScore } from "@/lib/clean-sneaks/storage";
 import type {
   GameOverPayload,
@@ -230,6 +236,20 @@ export function CleanSneaksGame3D({
     const payload = finalizeScoreAndUnlock();
     setWalkCompleteScore(payload.score);
     setGameOver(payload);
+    setPhase("casino");
+    playCue("walking_complete");
+  }, [finalizeScoreAndUnlock]);
+
+  /** Cash out whatever score you've earned so far and jump to Steal the Bundle. */
+  const cashOutToBundle = useCallback(() => {
+    const s = stateRef.current;
+    const credits = scoreToCredits(s.score);
+    if (!canAffordTable(credits)) return;
+    s.running = false;
+    const payload = finalizeScoreAndUnlock();
+    setWalkCompleteScore(payload.score);
+    setGameOver(payload);
+    saveWalkingScoreToSession(payload.score, payload.distance, true);
     setPhase("casino");
     playCue("walking_complete");
   }, [finalizeScoreAndUnlock]);
@@ -639,6 +659,9 @@ export function CleanSneaksGame3D({
             >
               {hud.score.toLocaleString()}
             </p>
+            <p className={`text-[#ffd76a]/90 ${portrait ? "text-[10px]" : "text-xs"}`}>
+              Credits {scoreToCredits(hud.score).toLocaleString()}
+            </p>
             <p
               className={`text-muted-foreground ${portrait ? "text-[10px] tabular-nums" : "text-xs"}`}
             >
@@ -735,10 +758,24 @@ export function CleanSneaksGame3D({
 
         {phase === "running" && (
           <div
-            className={`pointer-events-auto absolute z-20 flex gap-2 ${
-              portrait ? "bottom-2 left-2" : "bottom-3 right-3"
+            className={`pointer-events-auto absolute z-20 flex flex-wrap gap-2 ${
+              portrait ? "bottom-2 left-2 right-2 justify-between" : "bottom-3 right-3"
             }`}
           >
+            <Button
+              size="sm"
+              className="h-8 bg-[#d4af37] text-[10px] uppercase tracking-wider text-[#1a1008] hover:bg-[#e0c15a] disabled:opacity-40"
+              disabled={!canAffordTable(scoreToCredits(hud.score))}
+              onClick={cashOutToBundle}
+              data-testid="button-cashout-steal-bundle"
+              title={
+                canAffordTable(scoreToCredits(hud.score))
+                  ? "Cash out your walking credits into Steal the Bundle"
+                  : `Need ${CREDITS_MIN_ANTE} credits to cash out`
+              }
+            >
+              Steal Bundle · {scoreToCredits(hud.score).toLocaleString()}
+            </Button>
             <Button
               size="sm"
               variant="outline"

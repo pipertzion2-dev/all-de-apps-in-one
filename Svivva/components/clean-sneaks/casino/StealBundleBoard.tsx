@@ -8,9 +8,11 @@ import {
   chooseAiMove,
   currentPlayer,
   listLegalMoves,
+  payoutWin,
   playCue,
   recordCardGameResult,
   selectHandCard,
+  setSessionCredits,
   startCardGame,
   STEAL_BUNDLE_RULES,
   tryHumanPlay,
@@ -21,7 +23,10 @@ import { PlayingCardView } from "./PlayingCardView";
 
 type Props = {
   playerCount: 2 | 3;
+  ante: number;
+  startingCredits: number;
   showTutorialFirst?: boolean;
+  onCreditsChange?: (credits: number) => void;
   onRequestNewWalk: () => void;
   onReturnToCasino: () => void;
   onPlayAgain: () => void;
@@ -31,7 +36,10 @@ type UiFlash = { text: string; kind: "steal" | "match" | "info" } | null;
 
 export function StealBundleBoard({
   playerCount,
+  ante,
+  startingCredits,
   showTutorialFirst = true,
+  onCreditsChange,
   onRequestNewWalk,
   onReturnToCasino,
   onPlayAgain,
@@ -40,15 +48,23 @@ export function StealBundleBoard({
   const [state, setState] = useState<CardGameState | null>(null);
   const [flash, setFlash] = useState<UiFlash>(null);
   const [busy, setBusy] = useState(false);
+  const [credits, setCredits] = useState(startingCredits);
+  const [anteLocked, setAnteLocked] = useState(0);
   const recordedRef = useRef(false);
 
   const deal = useCallback(() => {
+    const paid = Math.min(ante, credits);
+    const afterAnte = Math.max(0, credits - paid);
+    setAnteLocked(paid);
+    setCredits(afterAnte);
+    setSessionCredits(afterAnte);
+    onCreditsChange?.(afterAnte);
     playCue("card_shuffle");
     const next = startCardGame(playerCount);
     setState(next);
     playCue("card_deal");
     recordedRef.current = false;
-  }, [playerCount]);
+  }, [playerCount, ante, credits, onCreditsChange]);
 
   useEffect(() => {
     if (tutorialDone && !state) deal();
@@ -58,9 +74,20 @@ export function StealBundleBoard({
     if (!state || state.phase !== "results" || recordedRef.current) return;
     recordedRef.current = true;
     const humanWon = state.winnerIds.includes("p1");
-    recordCardGameResult(humanWon);
+    const tie = state.winnerIds.length > 1 && humanWon;
+    // Ante was already deducted at deal time — settle the stack from remaining credits.
+    let nextCredits = credits;
+    if (humanWon && !tie) {
+      nextCredits = credits + payoutWin(anteLocked);
+    } else if (tie) {
+      nextCredits = credits + anteLocked;
+    }
+    setCredits(nextCredits);
+    setSessionCredits(nextCredits);
+    onCreditsChange?.(nextCredits);
+    recordCardGameResult(humanWon && !tie, 0);
     playCue("victory");
-  }, [state]);
+  }, [state, anteLocked, credits, onCreditsChange]);
 
   const legal = useMemo(() => {
     if (!state) return [] as PlayMove[];
@@ -215,6 +242,9 @@ export function StealBundleBoard({
             ? "TIE!"
             : `${state.players.find((p) => p.id === winners[0])?.name ?? "Player"} WINS!`}
         </h3>
+        <p className="mt-2 text-sm text-[#ffd76a]" data-testid="results-credits">
+          Chip stack: {credits.toLocaleString()} credits
+        </p>
         <div className="mt-8 flex flex-wrap justify-center gap-2">
           <Button
             className="bg-[#d4af37] text-[#1a1008]"
@@ -258,14 +288,19 @@ export function StealBundleBoard({
           </p>
           <p className="text-xs text-[#e8dcc0]/70">Build the biggest bundle.</p>
         </div>
-        <p
-          className={`text-xs font-semibold uppercase tracking-wider ${
-            yourTurn ? "text-[#ffd76a]" : "text-[#e8dcc0]/60"
-          }`}
-          data-testid="turn-indicator"
-        >
-          {cur?.isHuman ? "Player 1 — Your Turn" : `${cur?.name ?? ""} — Thinking…`}
-        </p>
+        <div className="text-right">
+          <p
+            className={`text-xs font-semibold uppercase tracking-wider ${
+              yourTurn ? "text-[#ffd76a]" : "text-[#e8dcc0]/60"
+            }`}
+            data-testid="turn-indicator"
+          >
+            {cur?.isHuman ? "Player 1 — Your Turn" : `${cur?.name ?? ""} — Thinking…`}
+          </p>
+          <p className="text-[10px] tabular-nums text-[#d4af37]/80" data-testid="table-credits">
+            Credits {credits.toLocaleString()} · Ante {anteLocked.toLocaleString()}
+          </p>
+        </div>
       </div>
 
       {flash && (

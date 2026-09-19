@@ -127,6 +127,8 @@ export type RunEngineState = {
   npcLine: string | null;
   npcLineUntil: number;
   gumSlowUntil: number;
+  /** Accrues street grit while grounded on messy asphalt. */
+  streetGritAcc: number;
   /** Crossed the story destination — run continues in bonus zone. */
   destinationReached: boolean;
   /** One grace save when cleanliness would hit 0%. */
@@ -197,6 +199,7 @@ export function createRunEngineState(
     npcLine: null,
     npcLineUntil: 0,
     gumSlowUntil: 0,
+    streetGritAcc: 0,
     destinationReached: false,
     secondWindUsed: false,
   };
@@ -216,6 +219,10 @@ function wetObstacles(): ObstacleKind[] {
 function spawnKind(weather: WeatherId): ObstacleKind {
   const wetBias = WEATHER[weather].wetBias;
   if (wetBias > 0 && Math.random() < wetBias) return randItem(wetObstacles());
+  // Klean Sneaks bias — street garbage shows up more often than crowds/bikes.
+  if (Math.random() < 0.55) {
+    return randItem(["trash", "debris", "gum", "street", "bag", "drink", "mud"] as ObstacleKind[]);
+  }
   return randItem(ALL_OBSTACLES);
 }
 
@@ -534,6 +541,36 @@ export function stepRunEngine(
     }) *
     arch.styleMul *
     bonusScoreMul;
+
+  // Street grit — walking dirty asphalt slowly soils the outsole/midsole.
+  if (s.grounded && ts >= s.shieldUntil && ts >= s.freshUntil) {
+    s.streetGritAcc += step * (0.55 + Math.min(1.2, s.speed / 500));
+    if (s.streetGritAcc >= 2.4) {
+      s.streetGritAcc = 0;
+      const foot: ShoeSide = Math.random() < 0.5 ? "left" : "right";
+      const shoe = foot === "left" ? s.left : s.right;
+      const grit = applySubstanceToShoe({
+        shoe,
+        substance: "dust",
+        material: arch.material,
+        intensity: 0.22 + Math.random() * 0.18,
+        splash: false,
+        zones: ["outsole", "midsole"],
+      });
+      if (foot === "left") s.left = grit.shoe;
+      else s.right = grit.shoe;
+      syncPairClean(s);
+      if (grit.amountApplied > 1.2 && Math.random() < 0.35) {
+        s.popups.push({
+          text: `Street grit · ${foot === "left" ? "L" : "R"} sole`,
+          life: 0.55,
+          color: "#c4a35a",
+        });
+      }
+    }
+  } else {
+    s.streetGritAcc = Math.max(0, s.streetGritAcc - step);
+  }
 
   // Style from expressive walking
   if (s.walkStyle !== "normal") {

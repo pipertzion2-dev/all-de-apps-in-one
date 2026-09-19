@@ -232,6 +232,67 @@ function FollowCamera({
   return null;
 }
 
+function GroundLitter({
+  stateRef,
+  mobile,
+}: {
+  stateRef: React.MutableRefObject<RunEngineState>;
+  mobile: boolean;
+}) {
+  const group = useRef<THREE.Group>(null);
+  const pieces = useMemo(() => {
+    const count = mobile ? 28 : 48;
+    return Array.from({ length: count }, (_, i) => {
+      const lane = (i % 3) - 1;
+      return {
+        x: lane * 2.4 + Math.sin(i * 1.7) * 0.55,
+        z: -6 - (i % 16) * 4.2 - (i % 3) * 0.8,
+        rot: i * 0.37,
+        kind: i % 5,
+        scale: 0.7 + (i % 4) * 0.15,
+      };
+    });
+  }, [mobile]);
+
+  useFrame(() => {
+    const g = group.current;
+    if (!g) return;
+    const scroll = (stateRef.current.distance * 0.4) % 16.8;
+    g.position.z = scroll;
+  });
+
+  const colors = [0x6b7280, 0xb8c4a8, 0xc45c26, 0x8b7355, 0x88a0b0];
+
+  return (
+    <group ref={group} name="ground-litter">
+      {pieces.map((p, i) => (
+        <mesh
+          key={i}
+          position={[p.x, 0.035, p.z]}
+          rotation={[-Math.PI / 2, 0, p.rot]}
+          scale={p.scale}
+          receiveShadow
+        >
+          {p.kind === 0 || p.kind === 3 ? (
+            <planeGeometry args={[0.28, 0.18]} />
+          ) : p.kind === 1 ? (
+            <circleGeometry args={[0.11, 8]} />
+          ) : (
+            <planeGeometry args={[0.2, 0.12]} />
+          )}
+          <meshStandardMaterial
+            color={colors[p.kind]!}
+            roughness={0.92}
+            metalness={p.kind === 4 ? 0.45 : 0.05}
+            transparent
+            opacity={0.92}
+          />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
 function Road({
   stateRef,
   castShadows,
@@ -755,6 +816,7 @@ function World({
 
       <FollowCamera stateRef={stateRef} mobile={quality.mobile} portrait={quality.portrait} />
       <Road stateRef={stateRef} castShadows={quality.castShadows} />
+      <GroundLitter stateRef={stateRef} mobile={quality.mobile} />
       <CityBlock count={quality.cityBuildings} castShadows={quality.castShadows} />
       <StreetLights count={quality.streetLights} />
       {quality.speedStreaks ? <SpeedStreaks stateRef={stateRef} /> : null}

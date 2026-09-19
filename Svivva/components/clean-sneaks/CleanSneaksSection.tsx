@@ -109,11 +109,14 @@ export function CleanSneaksSection() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="min-w-[220px] border-[#D94F9C]/50 text-[#E8D9A8]"
+                  className="min-w-[220px] border-[#d4af37]/50 text-[#ffd76a]"
                   asChild
                   data-testid="button-steal-bundle-home"
                 >
-                  <Link href="/clean-sneaks?mode=bundle">Steal the Old Man&apos;s Bundle</Link>
+                  <Link href="/clean-sneaks?mode=bundle">
+                    Steal the Old Man&apos;s Bundle
+                    {best > 0 ? ` · ${best.toLocaleString()} credits` : ""}
+                  </Link>
                 </Button>
               ) : (
                 <p className="max-w-sm text-xs text-white/50" data-testid="text-bundle-unlock-hint">
@@ -121,7 +124,7 @@ export function CleanSneaksSection() {
                 </p>
               )}
               <p className="text-[11px] uppercase tracking-[0.25em] text-white/45">
-                Steal the bundle · Full screen · Mobile &amp; desktop
+                Dodge street trash · Cash out credits to the table
               </p>
               {best > 0 && (
                 <p className="text-xs text-[#7EC8D9]/90" data-testid="text-clean-sneaks-best">

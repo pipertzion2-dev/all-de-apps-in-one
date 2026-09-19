@@ -1,12 +1,16 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
+  canAffordTable,
+  computeAnte,
+  describeCreditsGate,
   markScoreAccepted,
   playCue,
   readCasinoSession,
+  scoreToCredits,
   type ExperienceState,
 } from "@/lib/clean-sneaks/casino";
 import { StealBundleBoard } from "./StealBundleBoard";
@@ -35,8 +39,14 @@ export function CasinoExperience({
   const [gameKey, setGameKey] = useState(0);
   const [ticketSubmitted, setTicketSubmitted] = useState(false);
   const [cameraPunch, setCameraPunch] = useState(0);
-  const session = readCasinoSession();
-  const score = walkingScore || session.walkingScore;
+  const [credits, setCredits] = useState(() => {
+    const session = readCasinoSession();
+    return session.credits || scoreToCredits(walkingScore || session.walkingScore);
+  });
+
+  const ante = useMemo(() => computeAnte(credits), [credits]);
+  const canSit = canAffordTable(credits);
+  const score = walkingScore || readCasinoSession().walkingScore || credits;
 
   useEffect(() => {
     if (flow === "WALK_COMPLETE") playCue("walking_complete");
@@ -51,7 +61,6 @@ export function CasinoExperience({
     window.setTimeout(() => {
       setFlow("CASINO_ENTERING");
       playCue("casino_door");
-      // Animate doors
       const start = performance.now();
       const tick = (now: number) => {
         const t = Math.min(1, (now - start) / 1400);
@@ -101,7 +110,6 @@ export function CasinoExperience({
         className="absolute inset-0"
       />
 
-      {/* Atmospheric vignette */}
       <div
         className="pointer-events-none absolute inset-0 z-[1]"
         style={{
@@ -119,8 +127,8 @@ export function CasinoExperience({
           >
             {score.toLocaleString()}
           </p>
-          <p className="mt-4 max-w-sm text-sm text-[#e8dcc0]/75">
-            Turn in your score to enter the casino.
+          <p className="mt-2 text-sm text-[#e8dcc0]/75">
+            Cash out {credits.toLocaleString()} credits — that&apos;s all you can spend inside.
           </p>
           <button
             type="button"
@@ -131,7 +139,7 @@ export function CasinoExperience({
             className="mt-6 animate-pulse rounded-full border-2 border-[#d4af37] bg-[radial-gradient(circle_at_30%_30%,#ffd76a,#b8860b_60%,#5a3a08)] px-8 py-4 font-serif text-lg text-[#1a1008] shadow-[0_0_30px_rgba(212,175,55,0.45)] transition hover:scale-105 active:scale-95"
             data-testid="button-score-ticket"
           >
-            Score Ticket · {score.toLocaleString()}
+            Score Ticket · {credits.toLocaleString()} credits
           </button>
           <p className="mt-3 text-[11px] text-[#e8dcc0]/45">
             Tap the ticket or approach the podium
@@ -143,7 +151,9 @@ export function CasinoExperience({
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/50 px-4 text-center backdrop-blur-sm">
           <p className="text-[10px] uppercase tracking-[0.4em] text-[#7dffb2]">Score Accepted</p>
           <h2 className="mt-2 font-serif text-3xl text-[#f7e7b0]">Casino Entry Unlocked</h2>
-          <p className="mt-3 text-sm text-[#e8dcc0]/70">Doors opening…</p>
+          <p className="mt-3 text-sm text-[#e8dcc0]/70">
+            {credits.toLocaleString()} credits on your chip stack
+          </p>
         </div>
       )}
 
@@ -162,16 +172,31 @@ export function CasinoExperience({
             Steal the Old Man&apos;s Bundle
           </h2>
           <p className="mt-2 text-sm text-[#e8dcc0]/70">Build the biggest bundle.</p>
-          <p className="mt-1 text-[11px] text-[#d4af37]/80">
-            Admission score on file: {score.toLocaleString()}
+          <p className="mt-2 text-sm text-[#ffd76a]" data-testid="lobby-credits">
+            Credits: {credits.toLocaleString()}
+            {canSit ? ` · Ante: ${ante.toLocaleString()}` : ""}
+          </p>
+          <p className="mt-1 max-w-sm text-[11px] text-[#e8dcc0]/55">
+            {describeCreditsGate(credits)}
           </p>
           <Button
-            className="mt-8 bg-[#d4af37] text-[#1a1008] hover:bg-[#e0c15a]"
+            className="mt-8 bg-[#d4af37] text-[#1a1008] hover:bg-[#e0c15a] disabled:opacity-40"
+            disabled={!canSit}
             onClick={() => setFlow("CARD_GAME_SETUP")}
             data-testid="button-sit-at-table"
           >
-            Sit at the Table
+            {canSit ? "Sit at the Table" : "Need more credits"}
           </Button>
+          {!canSit && (
+            <Button
+              className="mt-3 border border-[#7EC8D9]/40 text-[#7EC8D9]"
+              variant="outline"
+              onClick={onNewWalk}
+              data-testid="button-earn-credits-walk"
+            >
+              New Walk — earn credits
+            </Button>
+          )}
           {onExit && (
             <Button variant="ghost" className="mt-2 text-[#e8dcc0]/60" onClick={onExit}>
               Exit
@@ -189,6 +214,9 @@ export function CasinoExperience({
             Steal the Old Man&apos;s Bundle
           </p>
           <h2 className="mt-2 font-serif text-2xl text-[#f7e7b0] sm:text-3xl">Choose Players</h2>
+          <p className="mt-3 text-sm text-[#ffd76a]">
+            Table ante: {ante.toLocaleString()} of {credits.toLocaleString()} credits
+          </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button
               className="min-w-[160px] bg-[#d4af37] text-[#1a1008]"
@@ -222,12 +250,23 @@ export function CasinoExperience({
           <StealBundleBoard
             key={gameKey}
             playerCount={playerCount}
+            ante={ante}
+            startingCredits={credits}
             showTutorialFirst={gameKey === 0}
+            onCreditsChange={setCredits}
             onPlayAgain={() => {
+              const latest = readCasinoSession().credits;
+              setCredits(latest);
+              if (!canAffordTable(latest)) {
+                setPlayerCount(null);
+                setFlow("CASINO_LOBBY");
+                return;
+              }
               setGameKey((k) => k + 1);
               setFlow("CARD_GAME_PLAYING");
             }}
             onReturnToCasino={() => {
+              setCredits(readCasinoSession().credits);
               setPlayerCount(null);
               setFlow("CASINO_LOBBY");
             }}

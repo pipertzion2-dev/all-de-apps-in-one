@@ -48,6 +48,8 @@ export type CardGameState = {
 export type SessionCasinoState = {
   walkingScore: number;
   walkingDistance: number;
+  /** Spendable casino chips — earned from walking score. */
+  credits: number;
   casinoUnlocked: boolean;
   scoreAccepted: boolean;
   cardGamesPlayed: number;
