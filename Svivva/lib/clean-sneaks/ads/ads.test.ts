@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   AD_COOLDOWN_KEY,
   AD_EARNINGS_KEY,
@@ -32,21 +32,29 @@ function installMemoryStorage() {
 describe("clean-sneaks advertising", () => {
   beforeEach(() => {
     installMemoryStorage();
+    vi.unstubAllEnvs();
   });
 
   afterEach(() => {
     delete (globalThis as { window?: unknown }).window;
+    vi.unstubAllEnvs();
   });
 
-  it("falls back to house network without AdSense env", () => {
-    expect(resolveAdNetwork("menu_banner")).toBe("house");
+  it("stays unconfigured without AdSense publisher id (no fake paid ads)", () => {
+    expect(resolveAdNetwork("menu_banner")).toBe("unconfigured");
+  });
+
+  it("uses AdSense when NEXT_PUBLIC_ADSENSE_CLIENT is set", () => {
+    vi.stubEnv("NEXT_PUBLIC_ADSENSE_CLIENT", "ca-pub-1234567890123456");
+    expect(resolveAdNetwork("menu_banner")).toBe("adsense");
+    expect(resolveAdNetwork("run_interstitial")).toBe("adsense");
   });
 
   it("records impressions into a local earnings estimate", () => {
     recordAdEvent({
       placement: "menu_banner",
       kind: "impression",
-      network: "house",
+      network: "adsense",
     });
     const snap = readAdEarnings();
     expect(snap.impressions).toBe(1);

@@ -112,6 +112,9 @@ export async function generateMetadata(): Promise<Metadata> {
 const gaId = process.env.NEXT_PUBLIC_GA_ID || "G-QL8EXZZMS6";
 const gadsId = process.env.NEXT_PUBLIC_GADS_ID;
 const clarityId = process.env.NEXT_PUBLIC_CLARITY_ID;
+const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim()?.startsWith("ca-pub-")
+  ? process.env.NEXT_PUBLIC_ADSENSE_CLIENT.trim()
+  : null;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -272,6 +275,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Script id="microsoft-clarity" strategy="afterInteractive">
             {`(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,"clarity","script","${clarityId}");`}
           </Script>
+        )}
+        {adsenseClient && (
+          <Script
+            id="adsense-sitewide"
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
+            crossOrigin="anonymous"
+            strategy="afterInteractive"
+          />
         )}
       </head>
       <body className="min-h-full w-full">

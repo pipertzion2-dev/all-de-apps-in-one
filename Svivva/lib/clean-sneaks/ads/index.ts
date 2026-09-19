@@ -10,7 +10,11 @@ export function pickHouseCreative(seed = Date.now()): HouseCreative {
 export {
   adsEnabled,
   adsenseClientId,
+  adsensePublisherId,
   adsenseSlot,
+  adsenseAnySlot,
+  adsenseConfigured,
+  houseAdsAllowed,
   resolveAdNetwork,
   REWARDED_CREDITS,
   REWARDED_COOLDOWN_MS,

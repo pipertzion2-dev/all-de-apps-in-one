@@ -19,13 +19,11 @@ import { AdSenseSlot } from "./AdSenseSlot";
 type Props = {
   open: boolean;
   onClose: () => void;
-  /** Called after credits are granted. */
   onRewarded?: (credits: number) => void;
 };
 
 /**
- * Rewarded placement — watch a short sponsor / AdSense unit, earn casino credits.
- * Real money lands in your AdSense account; players get soft currency.
+ * Rewarded placement — Google AdSense display unit (paid to you) + casino credits for the player.
  */
 export function GameRewardedAd({ open, onClose, onRewarded }: Props) {
   const [watching, setWatching] = useState(false);
@@ -49,7 +47,8 @@ export function GameRewardedAd({ open, onClose, onRewarded }: Props) {
   useEffect(() => {
     if (!watching || done) return;
     const started = Date.now();
-    const needMs = network === "adsense" ? 5000 : 3500;
+    // Real AdSense needs a bit longer for a fill; house is shorter.
+    const needMs = network === "adsense" ? 5500 : 3500;
     const tick = window.setInterval(() => {
       const p = Math.min(1, (Date.now() - started) / needMs);
       setProgress(p);
@@ -62,12 +61,13 @@ export function GameRewardedAd({ open, onClose, onRewarded }: Props) {
   }, [watching, done, network]);
 
   const startWatch = useCallback(() => {
-    if (!adsEnabled() || !canShowPlacement("rewarded_credits")) return;
+    if (!adsEnabled() || network === "unconfigured") return;
+    if (!canShowPlacement("rewarded_credits")) return;
     setWatching(true);
     recordAdEvent({
       placement: "rewarded_credits",
       kind: "impression",
-      network,
+      network: network === "adsense" ? "adsense" : "house",
     });
   }, [network]);
 
@@ -77,7 +77,7 @@ export function GameRewardedAd({ open, onClose, onRewarded }: Props) {
     recordAdEvent({
       placement: "rewarded_credits",
       kind: "reward_granted",
-      network,
+      network: network === "adsense" ? "adsense" : "house",
     });
     markAdCooldown("rewarded_credits");
     onRewarded?.(credits);
@@ -85,6 +85,44 @@ export function GameRewardedAd({ open, onClose, onRewarded }: Props) {
   }, [done, credits, network, onRewarded, onClose]);
 
   if (!open || !adsEnabled()) return null;
+
+  if (network === "unconfigured") {
+    return (
+      <div
+        className="fixed inset-0 z-[240] flex items-center justify-center bg-black/80 p-4 backdrop-blur-md"
+        role="dialog"
+        aria-modal="true"
+        data-testid="game-rewarded-ad-setup"
+      >
+        <div className="w-full max-w-md rounded-xl border border-[#d4af37]/35 bg-[#0e1016] p-5">
+          <p className="text-[10px] uppercase tracking-[0.35em] text-[#d4af37]">AdSense required</p>
+          <h3 className="mt-2 font-serif text-xl text-[#f7e7b0]">Connect Google ads to get paid</h3>
+          <ol className="mt-3 list-decimal space-y-1 pl-4 text-sm text-[#e8dcc0]/75">
+            <li>
+              Open{" "}
+              <a
+                className="text-[#7EC8D9] underline"
+                href="https://www.google.com/adsense/start"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Google AdSense
+              </a>{" "}
+              and add zzaizzai.com
+            </li>
+            <li>
+              Set <code className="text-[#ffd76a]">NEXT_PUBLIC_ADSENSE_CLIENT</code> in Vercel to
+              your ca-pub-… id
+            </li>
+            <li>Create a Display ad unit and set the slot env vars, then redeploy</li>
+          </ol>
+          <Button className="mt-5 w-full" variant="outline" onClick={onClose}>
+            Close
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const onCooldown = blockedMs > 0 && !watching;
 
@@ -97,10 +135,12 @@ export function GameRewardedAd({ open, onClose, onRewarded }: Props) {
       data-testid="game-rewarded-ad"
     >
       <div className="w-full max-w-md rounded-xl border border-[#d4af37]/35 bg-[#0e1016] p-5 shadow-2xl">
-        <p className="text-[10px] uppercase tracking-[0.35em] text-[#d4af37]">Sponsored · Earn</p>
+        <p className="text-[10px] uppercase tracking-[0.35em] text-[#d4af37]">
+          {network === "adsense" ? "Google Ad · Earn" : "Sponsored · Earn"}
+        </p>
         <h3 className="mt-2 font-serif text-2xl text-[#f7e7b0]">+{credits} casino credits</h3>
         <p className="mt-2 text-sm text-[#e8dcc0]/70">
-          Watch a short ad. You keep the chips; AdSense pays the game when live ads are connected.
+          Watch the ad. Players get chips; AdSense pays your publisher account.
         </p>
 
         {onCooldown ? (
@@ -135,7 +175,9 @@ export function GameRewardedAd({ open, onClose, onRewarded }: Props) {
           </div>
         ) : (
           <div className="mt-5 space-y-4">
-            {network === "house" && (
+            {network === "adsense" ? (
+              <AdSenseSlot placement="rewarded_credits" className="min-h-[140px] w-full" />
+            ) : (
               <Link
                 href={creative.href}
                 className="block rounded-lg border border-white/10 p-4 transition hover:border-white/25"
@@ -151,9 +193,6 @@ export function GameRewardedAd({ open, onClose, onRewarded }: Props) {
                   {creative.headline}
                 </p>
                 <p className="mt-1 text-xs text-white/55">{creative.body}</p>
-                <p className="mt-2 text-[11px] uppercase tracking-wider text-white/40">
-                  {creative.cta} →
-                </p>
               </Link>
             )}
             <div className="h-2 overflow-hidden rounded-full bg-white/10">

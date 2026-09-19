@@ -3,6 +3,13 @@ const GA_SCRIPT = "https://www.googletagmanager.com https://www.google-analytics
 const GA_CONNECT =
   "https://www.google-analytics.com https://*.google-analytics.com https://analytics.google.com https://www.googletagmanager.com";
 const CLARITY_SCRIPT = "https://www.clarity.ms";
+/** Google AdSense / Google Publisher Tag — required for paid display ads. */
+const ADSENSE_SCRIPT =
+  "https://pagead2.googlesyndication.com https://www.googletagservices.com https://www.google.com https://www.gstatic.com";
+const ADSENSE_FRAME =
+  "https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://pagead2.googlesyndication.com https://www.google.com https://ep2.adtrafficquality.google";
+const ADSENSE_CONNECT =
+  "https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://fundingchoicesmessages.google.com https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google";
 
 export const SECURITY_HEADERS = [
   { key: "X-DNS-Prefetch-Control", value: "on" },
@@ -22,13 +29,13 @@ export const SECURITY_HEADERS = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      `script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://js.stripe.com https://va.vercel-scripts.com ${GA_SCRIPT} ${CLARITY_SCRIPT}`,
+      `script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://js.stripe.com https://va.vercel-scripts.com ${GA_SCRIPT} ${CLARITY_SCRIPT} ${ADSENSE_SCRIPT}`,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https: https://www.google-analytics.com https://www.googletagmanager.com",
       "font-src 'self' data:",
       "worker-src 'self' blob:",
-      `connect-src 'self' https: wss: blob: ${GA_CONNECT}`,
-      "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
+      `connect-src 'self' https: wss: blob: ${GA_CONNECT} ${ADSENSE_CONNECT}`,
+      `frame-src 'self' https://js.stripe.com https://hooks.stripe.com ${ADSENSE_FRAME}`,
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",

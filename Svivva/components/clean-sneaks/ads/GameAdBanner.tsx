@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
   adsEnabled,
+  adsenseConfigured,
+  houseAdsAllowed,
   markAdCooldown,
   pickHouseCreative,
   recordAdEvent,
@@ -13,7 +15,6 @@ import { AdSenseSlot } from "./AdSenseSlot";
 
 type Props = {
   className?: string;
-  /** Compact strip under the start / results chrome. */
   compact?: boolean;
 };
 
@@ -33,18 +34,42 @@ export function GameAdBanner({ className, compact = false }: Props) {
 
   if (!show) return null;
 
+  if (network === "unconfigured") {
+    return (
+      <aside
+        className={`w-full rounded-lg border border-dashed border-[#d4af37]/35 bg-black/30 px-3 py-2 ${className ?? ""}`}
+        data-testid="game-ad-banner-setup"
+      >
+        <p className="text-[9px] uppercase tracking-[0.28em] text-[#d4af37]/80">AdSense</p>
+        <p className="mt-1 text-[11px] text-white/65">
+          Paid Google ads are off until you add{" "}
+          <code className="text-[#ffd76a]">NEXT_PUBLIC_ADSENSE_CLIENT</code> in Vercel (ca-pub-…).
+          {adsenseConfigured() ? null : null}
+        </p>
+        <a
+          className="mt-1 inline-block text-[11px] text-[#7EC8D9] underline-offset-2 hover:underline"
+          href="https://www.google.com/adsense/start"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Open AdSense →
+        </a>
+      </aside>
+    );
+  }
+
   return (
     <aside
       className={`w-full overflow-hidden rounded-lg border border-white/10 bg-black/40 backdrop-blur-sm ${
         compact ? "px-2 py-1.5" : "px-3 py-2.5"
       } ${className ?? ""}`}
-      aria-label="Sponsored"
+      aria-label="Advertisement"
       data-testid="game-ad-banner"
     >
-      <p className="mb-1 text-[9px] uppercase tracking-[0.28em] text-white/40">Sponsored</p>
+      <p className="mb-1 text-[9px] uppercase tracking-[0.28em] text-white/40">Advertisement</p>
       {network === "adsense" ? (
         <AdSenseSlot placement="menu_banner" className="min-h-[60px] w-full" />
-      ) : (
+      ) : houseAdsAllowed() ? (
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="min-w-0 flex-1">
             <p
@@ -69,7 +94,7 @@ export function GameAdBanner({ className, compact = false }: Props) {
             {creative.cta}
           </Link>
         </div>
-      )}
+      ) : null}
     </aside>
   );
 }
