@@ -10,6 +10,7 @@ import { GameLoadingWheels } from "@/components/clean-sneaks/GameLoadingWheels";
 import { GameStartScreen } from "@/components/clean-sneaks/GameStartScreen";
 import { SceneErrorBoundary } from "@/components/clean-sneaks/SceneErrorBoundary";
 import { StealTheBundleCardGame } from "@/components/clean-sneaks/StealTheBundleCardGame";
+import { GameAdBanner, GameAdsEarningsChip } from "@/components/clean-sneaks/ads";
 import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
 import { isBundleCardUnlocked } from "@/lib/clean-sneaks/bundle-unlock";
 import type { GamePhase } from "@/lib/clean-sneaks/types";
@@ -165,6 +166,13 @@ function CleanSneaksPageContent() {
                 <Link href="/#clean-sneaks">Exit</Link>
               </Button>
             </div>
+          </div>
+        )}
+
+        {showGameShell && !immersiveRun && (
+          <div className={`shrink-0 ${portrait ? "px-1.5 pb-1" : "px-3 pb-2 sm:px-6"}`}>
+            <GameAdBanner compact={portrait} />
+            <GameAdsEarningsChip className="mt-1 text-right" />
           </div>
         )}
 

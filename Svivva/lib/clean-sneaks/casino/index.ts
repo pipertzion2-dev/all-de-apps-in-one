@@ -35,6 +35,7 @@ export {
   resetWalkSession,
   emptyCasinoSession,
   setSessionCredits,
+  addSessionCredits,
   CASINO_SESSION_KEY,
 } from "./session";
 export {

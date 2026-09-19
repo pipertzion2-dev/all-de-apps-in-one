@@ -50,6 +50,7 @@ import { PostMissionReveal } from "./PostMissionReveal";
 import { CleanPathHud, OhNoOverlay } from "./OhNoOverlay";
 import { Baloon8ColorwayPicker } from "./Baloon8ColorwayPicker";
 import { CasinoEntryRules } from "./CasinoEntryRules";
+import { GameInterstitialAd, GameRewardedAd } from "./ads";
 
 const CleanSneaksRunScene = dynamic(
   () => import("./CleanSneaksRunScene").then((m) => ({ default: m.CleanSneaksRunScene })),
@@ -170,6 +171,9 @@ export function CleanSneaksGame3D({
   const [ohNo, setOhNo] = useState(stateRef.current.ohNo);
   const [colorwayChosen, setColorwayChosen] = useState(false);
   const [walkCompleteScore, setWalkCompleteScore] = useState(0);
+  const [rewardedOpen, setRewardedOpen] = useState(false);
+  const [interstitialOpen, setInterstitialOpen] = useState(false);
+  const interstitialResumeRef = useRef<(() => void) | null>(null);
   const countdownTimerRef = useRef<number | null>(null);
   const destinationCelebratedRef = useRef(false);
 
@@ -232,13 +236,17 @@ export function CleanSneaksGame3D({
   }, []);
 
   const enterCasino = useCallback(() => {
-    const s = stateRef.current;
-    s.running = false;
-    const payload = finalizeScoreAndUnlock();
-    setWalkCompleteScore(payload.score);
-    setGameOver(payload);
-    setPhase("casino");
-    playCue("walking_complete");
+    const go = () => {
+      const s = stateRef.current;
+      s.running = false;
+      const payload = finalizeScoreAndUnlock();
+      setWalkCompleteScore(payload.score);
+      setGameOver(payload);
+      setPhase("casino");
+      playCue("walking_complete");
+    };
+    interstitialResumeRef.current = go;
+    setInterstitialOpen(true);
   }, [finalizeScoreAndUnlock]);
 
   /** Cash out whatever score you've earned so far and jump to Steal the Bundle. */
@@ -246,13 +254,17 @@ export function CleanSneaksGame3D({
     const s = stateRef.current;
     const credits = scoreToCredits(s.score);
     if (!canAffordTable(credits)) return;
-    s.running = false;
-    const payload = finalizeScoreAndUnlock();
-    setWalkCompleteScore(payload.score);
-    setGameOver(payload);
-    saveWalkingScoreToSession(payload.score, payload.distance, true);
-    setPhase("casino");
-    playCue("walking_complete");
+    const go = () => {
+      s.running = false;
+      const payload = finalizeScoreAndUnlock();
+      setWalkCompleteScore(payload.score);
+      setGameOver(payload);
+      saveWalkingScoreToSession(payload.score, payload.distance, true);
+      setPhase("casino");
+      playCue("walking_complete");
+    };
+    interstitialResumeRef.current = go;
+    setInterstitialOpen(true);
   }, [finalizeScoreAndUnlock]);
 
   const endRun = useCallback(() => {
@@ -970,6 +982,15 @@ export function CleanSneaksGame3D({
               <Button
                 size="lg"
                 variant="outline"
+                className="border-[#ffd76a]/35 text-[#ffd76a]"
+                onClick={() => setRewardedOpen(true)}
+                data-testid="button-watch-ad-credits"
+              >
+                Watch ad · +credits
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
                 className="border-[#7EC8D9]/40 text-[#7EC8D9]"
                 onClick={continueBonus}
                 data-testid="button-continue-bonus"
@@ -982,6 +1003,17 @@ export function CleanSneaksGame3D({
             </div>
           </div>
         )}
+
+        <GameRewardedAd open={rewardedOpen} onClose={() => setRewardedOpen(false)} />
+        <GameInterstitialAd
+          requestOpen={interstitialOpen}
+          onComplete={() => {
+            setInterstitialOpen(false);
+            const resume = interstitialResumeRef.current;
+            interstitialResumeRef.current = null;
+            resume?.();
+          }}
+        />
 
         {phase === "over" && gameOver && (
           <PostMissionReveal
