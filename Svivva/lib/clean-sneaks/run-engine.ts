@@ -449,15 +449,17 @@ export function stepRunEngine(
 ): void {
   if (!s.running) return;
 
-  // Oh No cinematic — time crawls
-  const ohNoSlow = s.ohNo?.active && !s.ohNo.resolved && ts <= s.ohNo.endsAt ? 0.22 : 1;
+  // Oh No cinematic — time crawls (do not multiply with Perfect Step or the
+  // runner feels hard-frozen at ~0.1× for nearly a second).
+  const ohNoActive = Boolean(s.ohNo?.active && !s.ohNo.resolved && ts <= s.ohNo.endsAt);
+  const ohNoSlow = ohNoActive ? 0.22 : 1;
 
   const arch = getArchetype(s.archetypeId);
   const walk = WALK_STYLES[s.walkStyle];
   const weather = WEATHER[s.weather];
   const gumSlow = ts < s.gumSlowUntil ? 0.72 : 1;
-  const slow =
-    (ts < s.perfectUntil ? 0.45 : 1) * walk.speedMul * weather.speedMul * gumSlow * ohNoSlow;
+  const perfectSlow = !ohNoActive && ts < s.perfectUntil ? 0.45 : 1;
+  const slow = perfectSlow * walk.speedMul * weather.speedMul * gumSlow * ohNoSlow;
   const step = dt * slow;
 
   s.laneX += (s.targetLane - s.laneX) * Math.min(1, step * (12 - walk.balanceHard * 5));

@@ -44,12 +44,15 @@ function dominantSubstance(zone: ZoneDirt): SubstanceKind | null {
   return best;
 }
 
-function patchColor(zone: ZoneDirt): THREE.Color {
+const _patchColor = new THREE.Color(0x5c4033);
+const _wetTint = new THREE.Color(0x3a7ca5);
+
+function patchColorInto(zone: ZoneDirt, out: THREE.Color): THREE.Color {
   const hex = zoneStainColor(zone);
-  if (hex) return new THREE.Color(hex);
+  if (hex) return out.set(hex);
   const sub = dominantSubstance(zone);
-  if (sub) return new THREE.Color(SUBSTANCE_COLORS[sub]);
-  return new THREE.Color(0x5c4033);
+  if (sub) return out.set(SUBSTANCE_COLORS[sub]);
+  return out.set(0x5c4033);
 }
 
 function splatGeometry(level: number, zoneSeed = 0): THREE.BufferGeometry {
@@ -135,11 +138,11 @@ export function updateShoeDirtOverlay(
 
     const layout = ZONE_REAR_LAYOUT[zone];
     const mat = patch.material as THREE.MeshBasicMaterial;
-    mat.color.copy(patchColor(zoneData));
+    mat.color.copy(patchColorInto(zoneData, _patchColor));
 
     const wet = zoneData.wetness > 18;
     mat.opacity = Math.min(0.92, 0.14 + level * 0.09 + (wet ? 0.06 : 0));
-    if (wet) mat.color.lerp(new THREE.Color(0x3a7ca5), 0.22);
+    if (wet) mat.color.lerp(_wetTint, 0.22);
 
     const grow = 0.88 + level * 0.07;
     patch.scale.set(layout.rx * rearW * 0.5 * grow, layout.ry * rearH * 0.5 * grow, 1);

@@ -28,6 +28,11 @@ import {
   preloadBaloon8RunnerShoe,
   updateWalkingShoes3D,
 } from "@/lib/clean-sneaks/walking-shoes-3d";
+import {
+  createCleanPathFootprintPool,
+  disposeCleanPathFootprintPool,
+  syncCleanPathFootprints,
+} from "@/lib/clean-sneaks/clean-path-footprints";
 import { CleanSneaksPostFX } from "./CleanSneaksPostFX";
 
 type QualityFlags = ReturnType<typeof runQualityFlags>;
@@ -364,12 +369,35 @@ function SpeedStreaks({ stateRef }: { stateRef: React.MutableRefObject<RunEngine
   );
 }
 
+function disposeObject3D(obj: THREE.Object3D): void {
+  obj.traverse((c) => {
+    if (c instanceof THREE.Mesh) {
+      c.geometry?.dispose();
+      const mat = c.material;
+      if (Array.isArray(mat)) mat.forEach((m) => m.dispose());
+      else mat?.dispose();
+    }
+  });
+}
+
 function DynamicEntities({ stateRef }: { stateRef: React.MutableRefObject<RunEngineState> }) {
   const groupRef = useRef<THREE.Group>(null);
   const poolRef = useRef<Map<number, THREE.Object3D>>(new Map());
   const powerPoolRef = useRef<Map<number, THREE.Group>>(new Map());
   const heatPoolRef = useRef<Map<number, THREE.Mesh>>(new Map());
-  const pathGroupRef = useRef<THREE.Group>(null);
+  const pathPool = useMemo(() => createCleanPathFootprintPool(), []);
+
+  useEffect(() => {
+    return () => {
+      disposeCleanPathFootprintPool(pathPool);
+      for (const obj of poolRef.current.values()) disposeObject3D(obj);
+      for (const obj of powerPoolRef.current.values()) disposeObject3D(obj);
+      for (const heat of heatPoolRef.current.values()) disposeObject3D(heat);
+      poolRef.current.clear();
+      powerPoolRef.current.clear();
+      heatPoolRef.current.clear();
+    };
+  }, [pathPool]);
 
   useFrame(() => {
     const group = groupRef.current;
@@ -382,12 +410,14 @@ function DynamicEntities({ stateRef }: { stateRef: React.MutableRefObject<RunEng
     for (const [id, obj] of poolRef.current) {
       if (!activeObs.has(id)) {
         group.remove(obj);
+        disposeObject3D(obj);
         poolRef.current.delete(id);
       }
     }
     for (const [id, heat] of heatPoolRef.current) {
       if (!activeObs.has(id)) {
         group.remove(heat);
+        disposeObject3D(heat);
         heatPoolRef.current.delete(id);
       }
     }
@@ -433,39 +463,14 @@ function DynamicEntities({ stateRef }: { stateRef: React.MutableRefObject<RunEng
       (heat.material as THREE.MeshBasicMaterial).opacity = visionOn ? 0.42 : 0;
     }
 
-    // Clean Path footprint suggestions
-    const pathG = pathGroupRef.current;
-    if (pathG) {
-      pathG.clear();
-      if (s.paths && now < s.pathsUntil) {
-        for (const p of s.paths) {
-          const color = p.kind === "safe" ? 0x3d9b5f : p.kind === "fast" ? 0xd4782a : 0x7ec8d9;
-          for (let i = 0; i < 5; i++) {
-            const print = new THREE.Mesh(
-              new THREE.PlaneGeometry(0.22, 0.38),
-              new THREE.MeshBasicMaterial({
-                color,
-                transparent: true,
-                opacity: 0.35 - i * 0.05,
-                depthWrite: false,
-              }),
-            );
-            print.rotation.x = -Math.PI / 2;
-            print.position.set(
-              laneWorldX(p.lane) + (i % 2 === 0 ? -0.12 : 0.12),
-              0.05,
-              -4 - i * 2.2,
-            );
-            pathG.add(print);
-          }
-        }
-      }
-    }
+    // Reuse pooled footprints — never allocate PlaneGeometry every frame.
+    syncCleanPathFootprints(pathPool, s.paths, now, s.pathsUntil);
 
     const activePow = new Set(s.powerups.filter((p) => !p.taken).map((p) => p.id));
     for (const [id, obj] of powerPoolRef.current) {
       if (!activePow.has(id)) {
         group.remove(obj);
+        disposeObject3D(obj);
         powerPoolRef.current.delete(id);
       }
     }
@@ -486,7 +491,7 @@ function DynamicEntities({ stateRef }: { stateRef: React.MutableRefObject<RunEng
 
   return (
     <group ref={groupRef}>
-      <group ref={pathGroupRef} />
+      <primitive object={pathPool.group} />
     </group>
   );
 }

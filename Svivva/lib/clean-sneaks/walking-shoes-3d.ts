@@ -197,6 +197,14 @@ export function createWalkingShoes3D(
 }
 
 const dustPool: THREE.Mesh[] = [];
+const _dirtWash = new THREE.Color(0x6b5340);
+const _freshTint = new THREE.Color(0xffffff);
+const _emptyShoe = createEmptyShoeCondition();
+
+function disposeDustParticle(p: THREE.Mesh): void {
+  p.geometry.dispose();
+  (p.material as THREE.Material).dispose();
+}
 
 function spawnDust(shoes: WalkingShoes3D, xOffset: number): void {
   if (dustPool.length > 24) return;
@@ -220,18 +228,16 @@ function tintShoe(
 ): void {
   if (!shoe) return;
   for (const m of shoe.mats) {
-    const base =
-      (m.userData.baseTint as THREE.Color | undefined)?.clone() ?? new THREE.Color(0xffffff);
+    const baseTint = m.userData.baseTint as THREE.Color | undefined;
+    if (baseTint) m.color.copy(baseTint);
+    else m.color.set(0xffffff);
     // Light global wash only — zone splats carry the real dirt.
-    if (dirt > 0.02) base.lerp(new THREE.Color(0x6b5340), 0.02 + dirt * 0.08);
-    if (freshGlow) base.lerp(new THREE.Color(0xffffff), 0.06);
-    m.color.copy(base);
+    if (dirt > 0.02) m.color.lerp(_dirtWash, 0.02 + dirt * 0.08);
+    if (freshGlow) m.color.lerp(_freshTint, 0.06);
     m.opacity = 1;
   }
-  if (shoe.dirtOverlay && condition) {
-    updateShoeDirtOverlay(shoe.dirtOverlay, condition, shoe.rearW, shoe.rearH);
-  } else if (shoe.dirtOverlay) {
-    updateShoeDirtOverlay(shoe.dirtOverlay, createEmptyShoeCondition(), shoe.rearW, shoe.rearH);
+  if (shoe.dirtOverlay) {
+    updateShoeDirtOverlay(shoe.dirtOverlay, condition ?? _emptyShoe, shoe.rearW, shoe.rearH);
   }
 }
 
@@ -305,6 +311,7 @@ export function updateWalkingShoes3D(
     (p.material as THREE.MeshBasicMaterial).opacity = Math.max(0, p.userData.life * 0.5);
     if (p.userData.life <= 0) {
       shoes.dustEmitter.remove(p);
+      disposeDustParticle(p);
       dustPool.splice(i, 1);
     }
   }
