@@ -28,10 +28,7 @@ describe("Orbit admin AdSense visibility", () => {
   });
 
   it("AdSense setup UI saves to platform secrets", () => {
-    const ui = readFileSync(
-      resolve(__dirname, "../../components/orbit-adsense-setup.tsx"),
-      "utf8",
-    );
+    const ui = readFileSync(resolve(__dirname, "../../components/orbit-adsense-setup.tsx"), "utf8");
     expect(ui).toContain("/api/admin/platform-secrets");
     expect(ui).toContain("input-adsense-client");
     expect(ui).toContain("button-save-adsense");

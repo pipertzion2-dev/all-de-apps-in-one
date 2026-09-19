@@ -5084,7 +5084,8 @@ export default function LaunchpadPage() {
               tab !== "index22" &&
               tab !== "growth" &&
               tab !== "acquire" &&
-              tab !== "stripe" && tab !== "adsense" && (
+              tab !== "stripe" &&
+              tab !== "adsense" && (
                 <LaunchStation
                   launchActive={launchActive}
                   launchDone={launchDone}
@@ -5105,7 +5106,8 @@ export default function LaunchpadPage() {
               tab !== "checklist" &&
               tab !== "growth" &&
               tab !== "acquire" &&
-              tab !== "stripe" && tab !== "adsense" &&
+              tab !== "stripe" &&
+              tab !== "adsense" &&
               steps.length > 0 && (
                 <div className="flex items-center gap-3">
                   <div className="flex-1 space-y-1">
@@ -5183,7 +5185,8 @@ export default function LaunchpadPage() {
               tab !== "checklist" &&
               tab !== "growth" &&
               tab !== "acquire" &&
-              tab !== "stripe" && tab !== "adsense" &&
+              tab !== "stripe" &&
+              tab !== "adsense" &&
               allTabDone && (
                 <div
                   className="rounded-2xl p-6 text-center space-y-2"
