@@ -14,14 +14,12 @@ import {
 import { AdSenseSlot } from "./AdSenseSlot";
 
 type Props = {
-  /** When true, attempt to show if cooldown allows. */
   requestOpen: boolean;
   onComplete: () => void;
 };
 
 /**
- * Full-screen break between walk complete and casino / retry.
- * Skippable after a short beat so pacing stays fair.
+ * Full-screen Google AdSense break (paid) between walk complete and casino.
  */
 export function GameInterstitialAd({ requestOpen, onComplete }: Props) {
   const [visible, setVisible] = useState(false);
@@ -41,7 +39,8 @@ export function GameInterstitialAd({ requestOpen, onComplete }: Props) {
     if (handledRef.current) return;
     handledRef.current = true;
 
-    if (!adsEnabled() || !canShowPlacement("run_interstitial")) {
+    // Skip when ads off, cooldown, or AdSense not configured (don't block casino).
+    if (!adsEnabled() || network === "unconfigured" || !canShowPlacement("run_interstitial")) {
       onCompleteRef.current();
       return;
     }
@@ -51,18 +50,19 @@ export function GameInterstitialAd({ requestOpen, onComplete }: Props) {
     recordAdEvent({
       placement: "run_interstitial",
       kind: "impression",
-      network,
+      network: network === "adsense" ? "adsense" : "house",
     });
     markAdCooldown("run_interstitial");
-    const skipAt = window.setTimeout(() => setCanSkip(true), 1800);
+    const skipAt = window.setTimeout(() => setCanSkip(true), network === "adsense" ? 2200 : 1800);
     return () => window.clearTimeout(skipAt);
   }, [requestOpen, network]);
 
   const finish = (clicked: boolean) => {
+    const net = network === "adsense" ? "adsense" : "house";
     if (clicked) {
-      recordAdEvent({ placement: "run_interstitial", kind: "click", network });
+      recordAdEvent({ placement: "run_interstitial", kind: "click", network: net });
     } else {
-      recordAdEvent({ placement: "run_interstitial", kind: "dismiss", network });
+      recordAdEvent({ placement: "run_interstitial", kind: "dismiss", network: net });
     }
     setVisible(false);
     onCompleteRef.current();
@@ -80,7 +80,9 @@ export function GameInterstitialAd({ requestOpen, onComplete }: Props) {
     >
       <div className="w-full max-w-lg rounded-xl border border-white/15 bg-[#0c0e14] p-5">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-[10px] uppercase tracking-[0.35em] text-white/45">Advertisement</p>
+          <p className="text-[10px] uppercase tracking-[0.35em] text-white/45">
+            {network === "adsense" ? "Google Advertisement" : "Advertisement"}
+          </p>
           <Button
             size="sm"
             variant="ghost"
@@ -95,7 +97,11 @@ export function GameInterstitialAd({ requestOpen, onComplete }: Props) {
 
         {network === "adsense" ? (
           <div className="mt-4 min-h-[180px]">
-            <AdSenseSlot placement="run_interstitial" className="min-h-[180px] w-full" />
+            <AdSenseSlot
+              placement="run_interstitial"
+              className="min-h-[180px] w-full"
+              format="auto"
+            />
           </div>
         ) : (
           <div className="mt-4 rounded-lg border border-white/10 p-5 text-center">

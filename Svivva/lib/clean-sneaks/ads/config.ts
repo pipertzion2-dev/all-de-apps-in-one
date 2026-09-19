@@ -1,16 +1,31 @@
 import type { AdPlacementId, HouseCreative } from "./types";
 
 /**
- * Wire Google AdSense (or keep house ads until approved).
+ * Real paid ads = Google AdSense.
  *
- * 1. https://www.google.com/adsense/start → create account + site
- * 2. Add NEXT_PUBLIC_ADSENSE_CLIENT=ca-pub-XXXXXXXX
- * 3. Create display units → set slot ids below
- * 4. Redeploy — live ads replace house sponsors automatically
+ * 1. https://www.google.com/adsense/start — create/sign in
+ * 2. Add site zzaizzai.com, wait for approval
+ * 3. Sites → turn on Auto ads (recommended) OR create Display ad units
+ * 4. Vercel → Production env:
+ *      NEXT_PUBLIC_ADSENSE_CLIENT=ca-pub-XXXXXXXXXXXXXXXX
+ *      NEXT_PUBLIC_ADSENSE_SLOT_BANNER=…          (optional if Auto ads on)
+ *      NEXT_PUBLIC_ADSENSE_SLOT_INTERSTITIAL=…
+ *      NEXT_PUBLIC_ADSENSE_SLOT_REWARDED=…
+ * 5. Redeploy — live Google ads replace placeholders
  */
 export function adsenseClientId(): string | null {
   const raw = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim() || "";
   return raw.startsWith("ca-pub-") ? raw : null;
+}
+
+/** pub-XXXX form for ads.txt */
+export function adsensePublisherId(): string | null {
+  const client = adsenseClientId();
+  if (client) return client.replace(/^ca-/, "");
+  const pub = process.env.ADSENSE_PUB_ID?.trim() || "";
+  if (pub.startsWith("pub-")) return pub;
+  if (pub.startsWith("ca-pub-")) return pub.slice(3);
+  return null;
 }
 
 export function adsenseSlot(placement: AdPlacementId): string | null {
@@ -23,16 +38,40 @@ export function adsenseSlot(placement: AdPlacementId): string | null {
   return slot && /^\d+$/.test(slot) ? slot : null;
 }
 
+/** Any configured display slot — used when a placement-specific slot is missing. */
+export function adsenseAnySlot(): string | null {
+  return (
+    adsenseSlot("menu_banner") ||
+    adsenseSlot("run_interstitial") ||
+    adsenseSlot("rewarded_credits") ||
+    null
+  );
+}
+
 export function adsEnabled(): boolean {
   if (process.env.NEXT_PUBLIC_CLEAN_SNEAKS_ADS === "0") return false;
   return true;
 }
 
-/** Prefer AdSense when client + slot exist; otherwise house creatives. */
-export function resolveAdNetwork(placement: AdPlacementId): "adsense" | "house" {
-  if (!adsEnabled()) return "house";
-  if (adsenseClientId() && adsenseSlot(placement)) return "adsense";
-  return "house";
+/**
+ * House/sponsor creatives only when explicitly allowed — never the default
+ * path for “get paid” monetization.
+ */
+export function houseAdsAllowed(): boolean {
+  return process.env.NEXT_PUBLIC_CLEAN_SNEAKS_HOUSE_ADS === "1";
+}
+
+/** True when Google AdSense publisher id is configured (real paid network). */
+export function adsenseConfigured(): boolean {
+  return Boolean(adsenseClientId());
+}
+
+/** Prefer AdSense whenever the publisher id is set (Auto ads and/or unit slots). */
+export function resolveAdNetwork(placement: AdPlacementId): "adsense" | "house" | "unconfigured" {
+  if (!adsEnabled()) return "unconfigured";
+  if (adsenseClientId()) return "adsense";
+  if (houseAdsAllowed()) return "house";
+  return "unconfigured";
 }
 
 /** Conservative display CPM used only for local earnings estimates. */
@@ -44,7 +83,7 @@ export const REWARDED_CREDITS = 75;
 export const REWARDED_COOLDOWN_MS = 90_000;
 export const INTERSTITIAL_COOLDOWN_MS = 45_000;
 
-/** Direct / house sponsors shown until AdSense fills (or as fallback). */
+/** Direct / house sponsors — opt-in only via NEXT_PUBLIC_CLEAN_SNEAKS_HOUSE_ADS=1. */
 export const HOUSE_CREATIVES: readonly HouseCreative[] = [
   {
     id: "zzai-tools",
