@@ -223,7 +223,7 @@ function tintShoe(
     const base =
       (m.userData.baseTint as THREE.Color | undefined)?.clone() ?? new THREE.Color(0xffffff);
     // Light global wash only — zone splats carry the real dirt.
-    if (dirt > 0.02) base.lerp(new THREE.Color(0x6b5340), 0.02 + dirt * 0.08);
+    if (dirt > 0.01) base.lerp(new THREE.Color(0x5a4030), 0.05 + dirt * 0.22);
     if (freshGlow) base.lerp(new THREE.Color(0xffffff), 0.06);
     m.color.copy(base);
     m.opacity = 1;

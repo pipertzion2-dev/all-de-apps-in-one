@@ -9,12 +9,12 @@ import {
   type ZoneDirt,
 } from "./dirt-system";
 
-/** Visible dirt steps — new splat every ~12% zone fill. */
-export const DIRT_INCREMENT_STEP = 12;
+/** Visible dirt steps — new splat every ~7% zone fill. */
+export const DIRT_INCREMENT_STEP = 7;
 
 export function dirtIncrementLevel(amount: number): number {
-  if (amount < 3) return 0;
-  return Math.min(8, Math.floor(amount / DIRT_INCREMENT_STEP) + 1);
+  if (amount < 2) return 0;
+  return Math.min(10, Math.floor(amount / DIRT_INCREMENT_STEP) + 1);
 }
 
 /** Rear-view panel layout (normalized x/y on the heel-facing plane). */
@@ -138,7 +138,7 @@ export function updateShoeDirtOverlay(
     mat.color.copy(patchColor(zoneData));
 
     const wet = zoneData.wetness > 18;
-    mat.opacity = Math.min(0.92, 0.14 + level * 0.09 + (wet ? 0.06 : 0));
+    mat.opacity = Math.min(0.96, 0.22 + level * 0.1 + (wet ? 0.08 : 0));
     if (wet) mat.color.lerp(new THREE.Color(0x3a7ca5), 0.22);
 
     const grow = 0.88 + level * 0.07;

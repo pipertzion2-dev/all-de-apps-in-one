@@ -227,6 +227,7 @@ export const OH_NO_ACTIONS: { id: OhNoAction; label: string; key: string }[] = [
 export type OhNoWindow = {
   active: boolean;
   obstacleId: number;
+  obstacleKind: ObstacleKind;
   shoe: ShoeSide;
   startedAt: number;
   endsAt: number;
@@ -234,7 +235,33 @@ export type OhNoWindow = {
   resolved: boolean;
 };
 
+/** Sensible save for what you are about to step in — not a random key. */
+const OBSTACLE_OH_NO: Record<ObstacleKind, readonly OhNoAction[]> = {
+  mud: ["hop", "liftFoot"],
+  water: ["hop", "liftFoot"],
+  drink: ["liftFoot", "twist"],
+  trash: ["kickAway", "hop"],
+  gum: ["twist", "kickAway"],
+  paint: ["twist", "liftFoot"],
+  debris: ["block", "hop"],
+  grass: ["liftFoot", "hop"],
+  pothole: ["hop", "liftFoot"],
+  bag: ["kickAway", "block"],
+  street: ["twist", "liftFoot"],
+  pedestrian: ["block", "liftFoot"],
+  bike: ["hop", "block"],
+};
+
+export function pickOhNoActionForObstacle(kind: ObstacleKind): OhNoAction {
+  const options = OBSTACLE_OH_NO[kind] ?? (["hop", "liftFoot"] as const);
+  return options[Math.floor(Math.random() * options.length)]!;
+}
+
+/** @deprecated Use pickOhNoActionForObstacle */
 export function pickOhNoAction(): OhNoAction {
-  const list = OH_NO_ACTIONS;
-  return list[Math.floor(Math.random() * list.length)]!.id;
+  return pickOhNoActionForObstacle("mud");
+}
+
+export function ohNoActionsForObstacle(kind: ObstacleKind): readonly OhNoAction[] {
+  return OBSTACLE_OH_NO[kind] ?? ["hop", "liftFoot"];
 }

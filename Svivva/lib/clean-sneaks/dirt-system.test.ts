@@ -12,6 +12,7 @@ import { getColorway, BALOON8_COLORWAYS } from "@/lib/clean-sneaks/sneaker-catal
 import {
   activateSneakVision,
   createRunEngineState,
+  FINISH_DISTANCE,
   stepRunEngine,
   jumpRun,
   shiftLane,
@@ -178,5 +179,17 @@ describe("run engine systems", () => {
     expect(s.targetLane).toBe(2);
     jumpRun(s);
     expect(s.grounded).toBe(false);
+  });
+
+  it("keeps running past destination for bonus scoring", () => {
+    const s = createRunEngineState();
+    s.running = true;
+    s.distance = FINISH_DISTANCE - 0.05;
+    let finished = false;
+    stepRunEngine(s, 0.08, 500, { onGameOver: () => (finished = true) });
+    expect(s.destinationReached).toBe(true);
+    expect(s.running).toBe(true);
+    expect(finished).toBe(false);
+    expect(s.distance).toBeGreaterThan(FINISH_DISTANCE);
   });
 });

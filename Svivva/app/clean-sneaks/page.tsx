@@ -34,6 +34,8 @@ function CleanSneaksPageContent() {
   const [bundleUnlocked, setBundleUnlocked] = useState(false);
 
   const preGame = playMode === "runner" && (gamePhase === "loading" || gamePhase === "start");
+  const immersiveRun =
+    playMode === "runner" && (gamePhase === "running" || gamePhase === "countdown");
   const showGameShell = playMode === "bundle-card" || !preGame;
 
   const registerBegin = useCallback((begin: () => void) => {
@@ -105,7 +107,7 @@ function CleanSneaksPageContent() {
           preGame && playMode === "runner" ? "hidden" : "z-30"
         }`}
       >
-        {showGameShell && (
+        {showGameShell && !immersiveRun && (
           <div
             className={`flex shrink-0 items-center justify-between gap-2 sm:gap-3 sm:px-6 ${
               portrait ? "px-2 py-1.5" : "px-4 py-3"
