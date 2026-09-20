@@ -9,6 +9,7 @@ import {
   chooseAiMove,
   currentPlayer,
   listLegalMoves,
+  passStuckTurn,
   payoutWin,
   playCue,
   recordCardGameResult,
@@ -137,39 +138,66 @@ export function StealBundleBoard({
     [state, busy],
   );
 
-  // AI turns
+  // AI turns — never list `busy` in the dependency array. setBusy(true) would
+  // re-run this effect, cleanup would clearTimeout the think timer, and the
+  // computer player stays frozen on "Playing…" forever.
   useEffect(() => {
-    if (!state || state.phase !== "playing" || busy) return;
+    if (!state || state.phase !== "playing") return;
     const cur = currentPlayer(state);
-    if (!cur || cur.isHuman) return;
+    if (!cur || cur.isHuman) {
+      setBusy(false);
+      return;
+    }
 
+    let cancelled = false;
     setBusy(true);
     const afterHuman = aiPaceAfterHumanRef.current;
-    const think = window.setTimeout(() => {
-      const move = chooseAiMove(state, cur.id);
+    const stateSnapshot = state;
+    const playerId = cur.id;
+    const playerName = cur.name;
+
+    const thinkTimer = window.setTimeout(() => {
+      if (cancelled) return;
+
+      const move = chooseAiMove(stateSnapshot, playerId);
       if (!move) {
+        setState(passStuckTurn(stateSnapshot));
+        aiPaceAfterHumanRef.current = false;
         setBusy(false);
         return;
       }
-      const next = applyAiMove(state, move);
-      if (next) {
-        if (move.type === "stealBundle") {
-          playCue("bundle_steal");
-          showFlash(`${cur.name} STEALS!`, "steal");
-        } else if (move.type === "matchTable") {
-          playCue("card_match");
-          showFlash(`${cur.name} matches`, "match");
-        } else {
-          playCue("card_deal");
-        }
-        setState(next);
+
+      const next = applyAiMove(stateSnapshot, move);
+      if (!next) {
+        setState(passStuckTurn(stateSnapshot));
         aiPaceAfterHumanRef.current = false;
+        setBusy(false);
+        return;
       }
-      window.setTimeout(() => setBusy(false), aiResolveDelayMs(afterHuman));
+
+      if (move.type === "stealBundle") {
+        playCue("bundle_steal");
+        showFlash(`${playerName} STEALS!`, "steal");
+      } else if (move.type === "matchTable") {
+        playCue("card_match");
+        showFlash(`${playerName} matches`, "match");
+      } else {
+        playCue("card_deal");
+      }
+      setState(next);
+      aiPaceAfterHumanRef.current = false;
+      window.setTimeout(() => {
+        // Always unlock input after a committed AI move — clearing this timer in
+        // effect cleanup left busy=true when the next seat's effect started.
+        setBusy(false);
+      }, aiResolveDelayMs(afterHuman));
     }, aiDelayMs(afterHuman));
 
-    return () => window.clearTimeout(think);
-  }, [state, busy]);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(thinkTimer);
+    };
+  }, [state]);
 
   if (!tutorialDone) {
     return (

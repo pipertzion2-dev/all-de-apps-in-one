@@ -6,6 +6,7 @@ import {
   createDeck,
   determineWinners,
   listLegalMoves,
+  passStuckTurn,
   shouldEndGame,
   shuffleDeck,
   startCardGame,
@@ -13,6 +14,8 @@ import {
   tryHumanPlay,
 } from "@/lib/clean-sneaks/casino";
 import type { CardGameState, PlayingCard } from "@/lib/clean-sneaks/casino/types";
+import { readFileSync } from "fs";
+import { resolve } from "path";
 
 function card(rank: PlayingCard["rank"], suit: PlayingCard["suit"], id?: string): PlayingCard {
   return { id: id ?? `${rank}-${suit}`, rank, suit, faceUp: true };
@@ -231,6 +234,52 @@ describe("AI + winners", () => {
     };
     const move = chooseAiMove(state, "p1");
     expect(move?.type).toBe("stealBundle");
+  });
+
+  it("passes a stuck computer seat so the hand cannot freeze on Playing…", () => {
+    const state: CardGameState = {
+      deck: [],
+      tableCards: [card("Q", "hearts")],
+      players: [
+        {
+          id: "p1",
+          name: "Player 1",
+          isHuman: true,
+          hand: [card("2", "clubs")],
+          bundle: [],
+          bundleMatchRank: null,
+        },
+        {
+          id: "p2",
+          name: "Player 2",
+          isHuman: false,
+          hand: [],
+          bundle: [],
+          bundleMatchRank: null,
+        },
+      ],
+      currentPlayerIndex: 1,
+      selectedCardId: null,
+      phase: "playing",
+      winnerIds: [],
+      lastEvent: "Player 1 placed a 5 on the table.",
+      turnNumber: 4,
+    };
+    expect(chooseAiMove(state, "p2")).toBeNull();
+    const next = passStuckTurn(state);
+    expect(next.currentPlayerIndex).toBe(0);
+    expect(next.phase).toBe("playing");
+    expect(next.turnNumber).toBe(5);
+  });
+
+  it("does not cancel the AI think timer by depending on busy", () => {
+    const boardSrc = readFileSync(
+      resolve(__dirname, "../../../components/clean-sneaks/casino/StealBundleBoard.tsx"),
+      "utf8",
+    );
+    expect(boardSrc).toContain("passStuckTurn");
+    expect(boardSrc).toContain("never list `busy` in the dependency array");
+    expect(boardSrc).not.toMatch(/\}, \[state, busy\]\);/);
   });
 
   it("picks largest bundle as winner and handles ties", () => {
