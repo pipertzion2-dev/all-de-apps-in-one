@@ -31,13 +31,13 @@ export function HomepageCubePanel({
       />
 
       {interactive ? (
-        <div className="relative z-20 flex justify-center px-4 pb-6">
+        <div className="relative z-20 flex justify-center px-4 pb-4">
           <button
             type="button"
             onClick={() => scrollToSection("about")}
-            className="border-b border-[#5B8DA8]/50 bg-transparent px-1 pb-1 text-[11px] font-medium tracking-[0.18em] uppercase text-foreground/80 transition-colors hover:text-foreground active:scale-[0.98]"
+            className="rounded-full border border-[#5B8DA8]/40 bg-background/90 px-5 py-2 text-xs font-medium tracking-wide text-foreground shadow-sm backdrop-blur-sm transition-transform active:scale-95"
           >
-            App info & pricing
+            Scroll for app info & pricing ↓
           </button>
         </div>
       ) : null}
