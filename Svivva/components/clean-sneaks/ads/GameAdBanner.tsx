@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
   adsEnabled,
-  adsenseConfigured,
   houseAdsAllowed,
   markAdCooldown,
   pickHouseCreative,
@@ -34,29 +33,9 @@ export function GameAdBanner({ className, compact = false }: Props) {
 
   if (!show) return null;
 
-  if (network === "unconfigured") {
-    return (
-      <aside
-        className={`w-full rounded-lg border border-dashed border-[#d4af37]/35 bg-black/30 px-3 py-2 ${className ?? ""}`}
-        data-testid="game-ad-banner-setup"
-      >
-        <p className="text-[9px] uppercase tracking-[0.28em] text-[#d4af37]/80">AdSense</p>
-        <p className="mt-1 text-[11px] text-white/65">
-          Paid Google ads are off until you add{" "}
-          <code className="text-[#ffd76a]">NEXT_PUBLIC_ADSENSE_CLIENT</code> in Vercel (ca-pub-…).
-          {adsenseConfigured() ? null : null}
-        </p>
-        <a
-          className="mt-1 inline-block text-[11px] text-[#7EC8D9] underline-offset-2 hover:underline"
-          href="https://www.google.com/adsense/start"
-          target="_blank"
-          rel="noreferrer"
-        >
-          Open AdSense →
-        </a>
-      </aside>
-    );
-  }
+  // No slot / house creative — stay quiet. Auto ads still run from the layout script.
+  // Setup instructions live in Orbit → AdSense, not in the game shell.
+  if (network === "unconfigured") return null;
 
   return (
     <aside

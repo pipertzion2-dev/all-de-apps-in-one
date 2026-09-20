@@ -39,7 +39,8 @@ export function GameInterstitialAd({ requestOpen, onComplete }: Props) {
     if (handledRef.current) return;
     handledRef.current = true;
 
-    // Skip when ads off, cooldown, or AdSense not configured (don't block casino).
+    // Skip when ads off, cooldown, or no fillable unit (don't block casino with empty UI).
+    // Publisher id without slot ids → Auto ads only; never show env setup copy to players.
     if (!adsEnabled() || network === "unconfigured" || !canShowPlacement("run_interstitial")) {
       onCompleteRef.current();
       return;

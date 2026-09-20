@@ -84,45 +84,14 @@ export function GameRewardedAd({ open, onClose, onRewarded }: Props) {
     onClose();
   }, [done, credits, network, onRewarded, onClose]);
 
-  if (!open || !adsEnabled()) return null;
+  useEffect(() => {
+    if (!open) return;
+    if (!adsEnabled() || network === "unconfigured") {
+      onClose();
+    }
+  }, [open, network, onClose]);
 
-  if (network === "unconfigured") {
-    return (
-      <div
-        className="fixed inset-0 z-[240] flex items-center justify-center bg-black/80 p-4 backdrop-blur-md"
-        role="dialog"
-        aria-modal="true"
-        data-testid="game-rewarded-ad-setup"
-      >
-        <div className="w-full max-w-md rounded-xl border border-[#d4af37]/35 bg-[#0e1016] p-5">
-          <p className="text-[10px] uppercase tracking-[0.35em] text-[#d4af37]">AdSense required</p>
-          <h3 className="mt-2 font-serif text-xl text-[#f7e7b0]">Connect Google ads to get paid</h3>
-          <ol className="mt-3 list-decimal space-y-1 pl-4 text-sm text-[#e8dcc0]/75">
-            <li>
-              Open{" "}
-              <a
-                className="text-[#7EC8D9] underline"
-                href="https://www.google.com/adsense/start"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Google AdSense
-              </a>{" "}
-              and add zzaizzai.com
-            </li>
-            <li>
-              Set <code className="text-[#ffd76a]">NEXT_PUBLIC_ADSENSE_CLIENT</code> in Vercel to
-              your ca-pub-… id
-            </li>
-            <li>Create a Display ad unit and set the slot env vars, then redeploy</li>
-          </ol>
-          <Button className="mt-5 w-full" variant="outline" onClick={onClose}>
-            Close
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  if (!open || !adsEnabled() || network === "unconfigured") return null;
 
   const onCooldown = blockedMs > 0 && !watching;
 

@@ -27,8 +27,9 @@ function resolveSlot(placement: AdPlacementId): string | null {
 }
 
 /**
- * Live Google AdSense unit. Requires NEXT_PUBLIC_ADSENSE_CLIENT and at least
- * one slot id (placement-specific or shared).
+ * Live Google AdSense unit. Requires publisher client + at least one slot id.
+ * Missing config renders nothing — never show setup / env instructions to players.
+ * Configure slots in Orbit → AdSense (or Vercel NEXT_PUBLIC_ADSENSE_SLOT_*).
  */
 export function AdSenseSlot({ placement, className, format = "auto" }: Props) {
   const client = adsenseClientId();
@@ -68,22 +69,8 @@ export function AdSenseSlot({ placement, className, format = "auto" }: Props) {
     return () => window.clearInterval(id);
   }, [client, slot, placement]);
 
-  if (!client) {
-    return (
-      <p className="text-xs text-white/45" data-testid="adsense-missing-client">
-        Add NEXT_PUBLIC_ADSENSE_CLIENT in Vercel to show paid ads.
-      </p>
-    );
-  }
-
-  if (!slot) {
-    return (
-      <p className="text-xs text-white/45" data-testid="adsense-missing-slot">
-        Create a Display ad unit in AdSense and set NEXT_PUBLIC_ADSENSE_SLOT_BANNER (or enable Auto
-        ads in the AdSense console).
-      </p>
-    );
-  }
+  // Silent no-op for visitors when Orbit/Vercel slots are not set yet.
+  if (!client || !slot) return null;
 
   return (
     <div className={className} data-ad-status={status}>

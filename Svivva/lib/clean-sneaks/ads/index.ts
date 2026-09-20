@@ -14,6 +14,7 @@ export {
   adsenseSlot,
   adsenseAnySlot,
   adsenseConfigured,
+  adsenseUnitReady,
   houseAdsAllowed,
   resolveAdNetwork,
   REWARDED_CREDITS,
