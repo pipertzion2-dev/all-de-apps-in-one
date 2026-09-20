@@ -364,6 +364,9 @@ async function insertSeoPage(
   toolUrl?: string,
 ): Promise<boolean> {
   try {
+    const { nativeToolPathForSlug } = await import("@/lib/orbit/mini-app-curation");
+    if (nativeToolPathForSlug(page.slug)) return false;
+
     const { scorePageContent } = await import("@/lib/seo/content-quality/score");
     let content = page.content;
     let quality = scorePageContent({

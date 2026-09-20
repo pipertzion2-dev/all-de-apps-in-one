@@ -6,6 +6,7 @@ import { healOrphanInternalLinks } from "@/lib/seo/internal-links/graph";
 import { runSeoIndexStep } from "@/lib/orbit/seo-index-actions";
 import { SEO_INDEX_PHASES } from "@/lib/orbit/seo-index-phases";
 import { runTrafficQualityRepair } from "@/lib/orbit/traffic-quality-repair";
+import { unpublishNativeToolDuplicateSeoSlugs } from "@/lib/seo/unpublish-legacy-slugs";
 
 export type FullTrafficAutomationResult = {
   summaryLines: string[];
@@ -52,6 +53,14 @@ export async function runFullTrafficAutomation(): Promise<FullTrafficAutomationR
 
   const marketing = await fillMarketingGaps(userId);
   summaryLines.push(...marketing.steps);
+
+  summaryLines.push("", "▸ Phase 1b — Drop /{slug} dupes of native /tools/* (canonical URLs only)");
+  const postFillNativeDupes = await unpublishNativeToolDuplicateSeoSlugs();
+  summaryLines.push(
+    postFillNativeDupes.length
+      ? `✓ Unpublished ${postFillNativeDupes.length} native tool duplicate root slug(s): ${postFillNativeDupes.map((r) => r.slug).join(", ")}`
+      : "✓ No native tool duplicate root slugs after content fill",
+  );
 
   summaryLines.push("", "▸ Phase 2 — Submit every URL to search engines");
   const indexing = await runAutomatableManualActions({ googleMaxBatches: 5 });

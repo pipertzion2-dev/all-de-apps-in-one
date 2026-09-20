@@ -10,6 +10,7 @@ import { scorePageContent } from "@/lib/seo/content-quality/score";
 import { isDuplicateSeoVariantSlug } from "@/lib/seo/duplicate-variants";
 import { buildExpandedSeoBody } from "@/lib/seo/page-body";
 import { healOrphanInternalLinks } from "@/lib/seo/internal-links/graph";
+import { unpublishNativeToolDuplicateSeoSlugs } from "@/lib/seo/unpublish-legacy-slugs";
 
 const BASE = getSiteUrl().replace(/\/$/, "");
 const FILLER_PREFIX = "svivva-seo-tool-fill-";
@@ -29,6 +30,7 @@ export { buildExpandedSeoBody } from "@/lib/seo/page-body";
 
 export type TrafficQualityRepairResult = {
   summaryLines: string[];
+  unpublishedNativeToolDupes: number;
   unpublishedFiller: number;
   unpublishedVariants: number;
   unpublishedDuplicateBlogs: number;
@@ -227,6 +229,14 @@ export async function countSitemapEligiblePages(): Promise<number> {
 export async function runTrafficQualityRepair(): Promise<TrafficQualityRepairResult> {
   const summaryLines: string[] = ["═══ Traffic quality repair ═══"];
 
+  const nativeDupeRows = await unpublishNativeToolDuplicateSeoSlugs();
+  const unpublishedNativeToolDupes = nativeDupeRows.length;
+  summaryLines.push(
+    unpublishedNativeToolDupes
+      ? `✓ Unpublished ${unpublishedNativeToolDupes} root SEO page(s) that duplicate native /tools URLs (${nativeDupeRows.map((r) => r.slug).join(", ")})`
+      : "✓ No native /tools duplicate root SEO pages",
+  );
+
   const unpublishedFiller = await unpublishFillerPages();
   summaryLines.push(
     unpublishedFiller
@@ -275,6 +285,7 @@ export async function runTrafficQualityRepair(): Promise<TrafficQualityRepairRes
 
   return {
     summaryLines,
+    unpublishedNativeToolDupes,
     unpublishedFiller,
     unpublishedVariants,
     unpublishedDuplicateBlogs,
