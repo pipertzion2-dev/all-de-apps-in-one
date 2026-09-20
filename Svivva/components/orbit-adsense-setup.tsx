@@ -291,6 +291,61 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
         </li>
       </ol>
 
+      {ready && !status?.effective.adsenseSlotBanner ? (
+        <div
+          className="rounded-xl border-2 border-[#d4af37] bg-[#d4af37]/15 p-3 sm:p-4 space-y-3"
+          data-testid="orbit-adsense-display-unit-cta"
+        >
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#b8860b]">
+            Continue · Display ad unit (in-game banner)
+          </p>
+          <p className="text-sm font-bold text-foreground leading-snug">
+            Auto ads can monetize the site without a slot. For Klean Sneaks in-game banners, create
+            a <span className="text-[#b8860b]">Display</span> ad unit and paste the slot number
+            below.
+          </p>
+          <ol className="list-decimal list-inside space-y-1 text-[11px] text-foreground/80">
+            <li>
+              Open AdSense → <strong>Ads</strong> → <strong>By ad unit</strong> →{" "}
+              <strong>Display ads</strong>
+            </li>
+            <li>
+              Name it e.g. <code className="font-mono text-[10px]">zzai-banner</code>, create, copy
+              the <code className="font-mono text-[10px]">data-ad-slot</code> number
+            </li>
+            <li>
+              Paste into <strong>Banner slot</strong> below → <strong>Save AdSense</strong>
+            </li>
+          </ol>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              asChild
+              className="bg-[#d4af37] text-[#1a1008] hover:bg-[#e0c15a] font-black"
+              data-testid="orbit-open-adsense-ad-units"
+            >
+              <a
+                href="https://adsense.google.com/adsense/new/myads/units"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Open AdSense → By ad unit
+                <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
+              </a>
+            </Button>
+            <Button asChild variant="outline" size="sm" data-testid="orbit-open-adsense-auto-ads">
+              <a
+                href="https://adsense.google.com/adsense/new/myads/auto-ads"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Or enable Auto ads only
+                <ExternalLink className="h-3 w-3 ml-1" />
+              </a>
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="sm:col-span-2 space-y-1.5">
           <Label htmlFor="adsense-client">Publisher client ID</Label>

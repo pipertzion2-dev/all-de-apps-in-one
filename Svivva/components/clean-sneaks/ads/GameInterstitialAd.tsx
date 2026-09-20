@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   adsEnabled,
+  adsenseUnitReady,
   canShowPlacement,
   markAdCooldown,
   pickHouseCreative,
@@ -26,6 +27,7 @@ export function GameInterstitialAd({ requestOpen, onComplete }: Props) {
   const [canSkip, setCanSkip] = useState(false);
   const creative = useMemo(() => pickHouseCreative(Date.now() + 3), [requestOpen]);
   const network = resolveAdNetwork("run_interstitial");
+  const unitReady = adsenseUnitReady("run_interstitial");
   const onCompleteRef = useRef(onComplete);
   onCompleteRef.current = onComplete;
   const handledRef = useRef(false);
@@ -40,7 +42,13 @@ export function GameInterstitialAd({ requestOpen, onComplete }: Props) {
     handledRef.current = true;
 
     // Skip when ads off, cooldown, or AdSense not configured (don't block casino).
-    if (!adsEnabled() || network === "unconfigured" || !canShowPlacement("run_interstitial")) {
+    // Publisher-only (Auto ads) has no Display slot yet — skip the empty unit dialog.
+    if (
+      !adsEnabled() ||
+      network === "unconfigured" ||
+      !canShowPlacement("run_interstitial") ||
+      (network === "adsense" && !unitReady)
+    ) {
       onCompleteRef.current();
       return;
     }
@@ -55,7 +63,7 @@ export function GameInterstitialAd({ requestOpen, onComplete }: Props) {
     markAdCooldown("run_interstitial");
     const skipAt = window.setTimeout(() => setCanSkip(true), network === "adsense" ? 2200 : 1800);
     return () => window.clearTimeout(skipAt);
-  }, [requestOpen, network]);
+  }, [requestOpen, network, unitReady]);
 
   const finish = (clicked: boolean) => {
     const net = network === "adsense" ? "adsense" : "house";

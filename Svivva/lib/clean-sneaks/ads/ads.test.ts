@@ -50,6 +50,15 @@ describe("clean-sneaks advertising", () => {
     expect(resolveAdNetwork("run_interstitial")).toBe("adsense");
   });
 
+  it("requires a Display slot id before in-game AdSense units are ready", async () => {
+    const { adsenseUnitReady } = await import("@/lib/clean-sneaks/ads/config");
+    vi.stubEnv("NEXT_PUBLIC_ADSENSE_CLIENT", "ca-pub-1234567890123456");
+    expect(adsenseUnitReady("menu_banner")).toBe(false);
+    vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT_BANNER", "1234567890");
+    expect(adsenseUnitReady("menu_banner")).toBe(true);
+    expect(adsenseUnitReady("run_interstitial")).toBe(true);
+  });
+
   it("records impressions into a local earnings estimate", () => {
     recordAdEvent({
       placement: "menu_banner",

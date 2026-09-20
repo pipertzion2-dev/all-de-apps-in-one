@@ -34,4 +34,21 @@ describe("AdSense Google CMP readiness", () => {
     expect(ui).toContain("https://zzaizzai.com/zzai-logo.png");
     expect(ui).toContain("orbit-adsense-fix-urls");
   });
+
+  it("Orbit continues with Display ad unit creation when banner slot is missing", () => {
+    const ui = readFileSync(resolve(__dirname, "../../components/orbit-adsense-setup.tsx"), "utf8");
+    expect(ui).toContain("orbit-adsense-display-unit-cta");
+    expect(ui).toContain("orbit-open-adsense-ad-units");
+    expect(ui).toContain("myads/units");
+    expect(ui).toContain("Display");
+  });
+
+  it("skips empty Google Advertisement interstitial until a Display slot exists", () => {
+    const interstitial = readFileSync(
+      resolve(__dirname, "../../components/clean-sneaks/ads/GameInterstitialAd.tsx"),
+      "utf8",
+    );
+    expect(interstitial).toContain("adsenseUnitReady");
+    expect(interstitial).toContain('network === "adsense" && !unitReady');
+  });
 });

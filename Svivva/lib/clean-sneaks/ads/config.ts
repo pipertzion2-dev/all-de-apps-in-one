@@ -74,6 +74,15 @@ export function adsenseAnySlot(): string | null {
   );
 }
 
+/**
+ * True when a custom `<ins data-ad-slot>` unit can render.
+ * Publisher id alone is enough for Auto ads site-wide; in-game units need a slot id.
+ */
+export function adsenseUnitReady(placement: AdPlacementId): boolean {
+  if (!adsenseClientId()) return false;
+  return Boolean(adsenseSlot(placement) || adsenseAnySlot());
+}
+
 export function adsEnabled(): boolean {
   if (process.env.NEXT_PUBLIC_CLEAN_SNEAKS_ADS === "0") return false;
   return true;
