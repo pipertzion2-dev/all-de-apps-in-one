@@ -1,22 +1,31 @@
 import { listLegalMoves } from "./card-game-rules";
-import { STEAL_BUNDLE_RULES } from "./rules";
+import { STEAL_BUNDLE_RULES, type StealBundleRules } from "./rules";
 import type { CardGameState, PlayMove } from "./types";
 
+function pickRandom<T>(items: T[], rng: () => number): T {
+  return items[Math.floor(rng() * items.length)]!;
+}
+
 /**
- * Computer opponent — prefers steals, then table matches, else a legal drop.
- * Architecture is isolated so a future network player can supply moves instead.
+ * Computer opponent — imperfect on purpose.
+ * It often steals / matches when it sees them, but sometimes drops instead so
+ * play feels like a person, not a perfect matcher.
  */
 export function chooseAiMove(
   state: CardGameState,
   playerId: string,
   rng: () => number = Math.random,
+  rules: StealBundleRules = STEAL_BUNDLE_RULES,
 ): PlayMove | null {
-  const moves = listLegalMoves(state, playerId, STEAL_BUNDLE_RULES);
+  const moves = listLegalMoves(state, playerId, rules);
   if (moves.length === 0) return null;
 
   const steals = moves.filter((m) => m.type === "stealBundle");
-  if (steals.length > 0) {
-    // Prefer stealing the largest opposing bundle.
+  const matches = moves.filter((m) => m.type === "matchTable");
+  const drops = moves.filter((m) => m.type === "dropToTable");
+
+  if (steals.length > 0 && rng() < rules.aiStealNoticeRate) {
+    // Prefer stealing the largest opposing bundle when it notices.
     const ranked = steals.slice().sort((a, b) => {
       if (a.type !== "stealBundle" || b.type !== "stealBundle") return 0;
       const sizeA = state.players.find((p) => p.id === a.targetPlayerId)?.bundle.length ?? 0;
@@ -26,16 +35,18 @@ export function chooseAiMove(
     return ranked[0]!;
   }
 
-  const matches = moves.filter((m) => m.type === "matchTable");
-  if (matches.length > 0) {
-    return matches[Math.floor(rng() * matches.length)]!;
+  if (matches.length > 0 && rng() < rules.aiMatchNoticeRate) {
+    return pickRandom(matches, rng);
   }
 
-  const drops = moves.filter((m) => m.type === "dropToTable");
+  // Missed (or had no) steal/match — place a card if the rules allow a drop.
   if (drops.length > 0) {
-    return drops[Math.floor(rng() * drops.length)]!;
+    return pickRandom(drops, rng);
   }
 
+  // Every hand card is locked into a match/steal — must take one.
+  if (steals.length > 0) return steals[0]!;
+  if (matches.length > 0) return pickRandom(matches, rng);
   return moves[0] ?? null;
 }
 

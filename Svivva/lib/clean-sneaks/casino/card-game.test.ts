@@ -203,7 +203,7 @@ describe("deal + match rules", () => {
 });
 
 describe("AI + winners", () => {
-  it("prefers steal over match", () => {
+  it("prefers steal over match when it notices the steal", () => {
     const state: CardGameState = {
       deck: [],
       tableCards: [card("5", "hearts")],
@@ -232,8 +232,82 @@ describe("AI + winners", () => {
       lastEvent: null,
       turnNumber: 1,
     };
-    const move = chooseAiMove(state, "p1");
+    // rng() < notice rates → always "sees" the steal first.
+    const move = chooseAiMove(state, "p1", () => 0);
     expect(move?.type).toBe("stealBundle");
+  });
+
+  it("sometimes drops instead of matching so play feels human", () => {
+    const state: CardGameState = {
+      deck: [],
+      tableCards: [card("5", "hearts")],
+      players: [
+        {
+          id: "p1",
+          name: "Player 1",
+          isHuman: false,
+          hand: [card("5", "spades"), card("9", "clubs")],
+          bundle: [],
+          bundleMatchRank: null,
+        },
+        {
+          id: "p2",
+          name: "Player 2",
+          isHuman: true,
+          hand: [],
+          bundle: [],
+          bundleMatchRank: null,
+        },
+      ],
+      currentPlayerIndex: 0,
+      selectedCardId: null,
+      phase: "playing",
+      winnerIds: [],
+      lastEvent: null,
+      turnNumber: 1,
+    };
+    // First rng: steal notice (n/a). Second: match notice fails (0.99 >= 0.55).
+    // Later rng picks among drops.
+    let calls = 0;
+    const rng = () => {
+      calls += 1;
+      return calls === 1 ? 0.99 : 0.1;
+    };
+    const move = chooseAiMove(state, "p1", rng);
+    expect(move).toEqual({ type: "dropToTable", handCardId: "9-clubs" });
+  });
+
+  it("must match when every hand card is locked into a match", () => {
+    const state: CardGameState = {
+      deck: [],
+      tableCards: [card("5", "hearts")],
+      players: [
+        {
+          id: "p1",
+          name: "Player 1",
+          isHuman: false,
+          hand: [card("5", "spades")],
+          bundle: [],
+          bundleMatchRank: null,
+        },
+        {
+          id: "p2",
+          name: "Player 2",
+          isHuman: true,
+          hand: [],
+          bundle: [],
+          bundleMatchRank: null,
+        },
+      ],
+      currentPlayerIndex: 0,
+      selectedCardId: null,
+      phase: "playing",
+      winnerIds: [],
+      lastEvent: null,
+      turnNumber: 1,
+    };
+    const move = chooseAiMove(state, "p1", () => 0.99);
+    expect(move?.type).toBe("matchTable");
   });
 
   it("passes a stuck computer seat so the hand cannot freeze on Playing…", () => {

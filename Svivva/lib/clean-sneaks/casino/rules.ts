@@ -27,12 +27,22 @@ export const STEAL_BUNDLE_RULES = {
     "K",
   ] as const satisfies readonly Rank[],
   /** Delay before AI acts after a human move (brief beat to read the table). */
-  aiThinkMs: 320,
+  aiThinkMs: 520,
   /** Extra delay after AI commits a move before the next actor. */
-  aiResolveMs: 180,
+  aiResolveMs: 280,
   /** Faster timing when several AI players act in a row. */
-  aiChainThinkMs: 90,
-  aiChainResolveMs: 70,
+  aiChainThinkMs: 160,
+  aiChainResolveMs: 120,
+  /**
+   * How often the computer “notices” a legal steal (0–1).
+   * Below 1 so it sometimes overlooks an exposed bundle like a person would.
+   */
+  aiStealNoticeRate: 0.72,
+  /**
+   * How often the computer takes a table match when one exists (0–1).
+   * Lower than steals — casual players miss rank matches more often.
+   */
+  aiMatchNoticeRate: 0.55,
   minPlayers: 2,
   maxPlayers: 3,
 } as const;
