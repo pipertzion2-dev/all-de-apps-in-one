@@ -40,7 +40,8 @@ describe("AdSense Google CMP readiness", () => {
     expect(ui).toContain("orbit-adsense-display-unit-cta");
     expect(ui).toContain("orbit-open-adsense-ad-units");
     expect(ui).toContain("myads/units");
-    expect(ui).toContain("Display");
+    expect(ui).toContain("paste the slot number");
+    expect(ui).toContain("Banner slot");
   });
 
   it("skips empty Google Advertisement interstitial until a Display slot exists", () => {

@@ -297,24 +297,25 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
           data-testid="orbit-adsense-display-unit-cta"
         >
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#b8860b]">
-            Continue · Display ad unit (in-game banner)
+            You created Display ads · paste the slot number
           </p>
           <p className="text-sm font-bold text-foreground leading-snug">
-            Auto ads can monetize the site without a slot. For Klean Sneaks in-game banners, create
-            a <span className="text-[#b8860b]">Display</span> ad unit and paste the slot number
-            below.
+            Open the unit in AdSense, copy the{" "}
+            <code className="font-mono text-[11px] text-[#b8860b]">data-ad-slot</code> digits (or
+            the Slot ID shown on the unit page), paste into <strong>Banner slot</strong> below, then
+            hit <strong>Save AdSense</strong>. No Vercel redeploy needed.
           </p>
           <ol className="list-decimal list-inside space-y-1 text-[11px] text-foreground/80">
             <li>
-              Open AdSense → <strong>Ads</strong> → <strong>By ad unit</strong> →{" "}
-              <strong>Display ads</strong>
+              AdSense → <strong>Ads</strong> → <strong>By ad unit</strong> → open your Display unit
             </li>
             <li>
-              Name it e.g. <code className="font-mono text-[10px]">zzai-banner</code>, create, copy
-              the <code className="font-mono text-[10px]">data-ad-slot</code> number
+              Copy the slot id (digits only, e.g.{" "}
+              <code className="font-mono text-[10px]">1234567890</code>)
             </li>
             <li>
-              Paste into <strong>Banner slot</strong> below → <strong>Save AdSense</strong>
+              Paste into <strong>Banner slot</strong> → <strong>Save AdSense</strong> → reload the
+              game
             </li>
           </ol>
           <div className="flex flex-wrap gap-2">
@@ -328,7 +329,7 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Open AdSense → By ad unit
+                Open your AdSense ad units
                 <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
               </a>
             </Button>
@@ -338,7 +339,7 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Or enable Auto ads only
+                Auto ads settings
                 <ExternalLink className="h-3 w-3 ml-1" />
               </a>
             </Button>
