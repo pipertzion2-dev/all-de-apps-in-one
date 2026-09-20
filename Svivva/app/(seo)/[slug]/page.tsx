@@ -17,6 +17,7 @@ import { isLegacyBrandSlug } from "@/lib/seo/legacy-paths";
 import { isDuplicateSeoVariantSlug, canonicalSlugFromVariant } from "@/lib/seo/duplicate-variants";
 import { getSiteUrl } from "@/lib/site-url";
 import { canonicalPathForFeatureSlug } from "@/lib/tools/catalogs/hub-feature-pages";
+import { nativeToolPathForSlug } from "@/lib/orbit/mini-app-curation";
 
 export const revalidate = 3600;
 
@@ -94,6 +95,14 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
+  const nativeToolPath = nativeToolPathForSlug(slug);
+  if (nativeToolPath) {
+    return buildSeoMetadata({
+      title: "Redirecting…",
+      description: "This tool lives at its canonical /tools URL.",
+      path: nativeToolPath,
+    });
+  }
   const featurePath = canonicalPathForFeatureSlug(slug);
   if (featurePath) {
     return buildSeoMetadata({
@@ -130,6 +139,10 @@ export async function generateMetadata({
 
 export default async function SeoLandingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  const nativeToolPath = nativeToolPathForSlug(slug);
+  if (nativeToolPath) {
+    permanentRedirect(nativeToolPath);
+  }
   const featurePath = canonicalPathForFeatureSlug(slug);
   if (featurePath) {
     permanentRedirect(featurePath);

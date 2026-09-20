@@ -3,6 +3,7 @@
  * Pyracrypt is a ZZAI feature — canonical hub is /cyber-security-mini-apps.
  */
 import { isDuplicateSeoVariantSlug } from "@/lib/seo/duplicate-variants";
+import { nativeToolPathForSlug } from "@/lib/orbit/mini-app-curation";
 
 /** Canonical hubs — served via (seo)/[slug] and listed in static sitemap; skip duplicate DB rows only. */
 export const HUB_SLUGS = new Set(["ai-tools-hub", "cyber-security-mini-apps", "seo-pack"]);
@@ -38,6 +39,7 @@ export function isNonIndexableSlug(slug: string): boolean {
   if (!s || RESERVED_PATH_SLUGS.has(s)) return true;
   if (HUB_SLUGS.has(s)) return true;
   if (isDuplicateSeoVariantSlug(s)) return true;
+  if (nativeToolPathForSlug(s)) return true;
   return isLegacyBrandSlug(s);
 }
 

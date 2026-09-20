@@ -91,12 +91,12 @@ export function burnsExecutors(): Record<string, Executor> {
     },
 
     "legacy-cleanup": async () => {
-      const { unpublishLegacySeoSlugs } = await import("@/lib/seo/unpublish-legacy-slugs");
-      const removed = await unpublishLegacySeoSlugs();
+      const { unpublishSeoSlugHygiene } = await import("@/lib/seo/unpublish-legacy-slugs");
+      const removed = await unpublishSeoSlugHygiene();
       return {
         message: removed.length
-          ? `Unpublished ${removed.length} legacy slugs`
-          : "No legacy slugs to unpublish",
+          ? `Unpublished ${removed.length} SEO hygiene slug(s)`
+          : "No SEO hygiene slugs to unpublish",
         detail: { count: removed.length },
       };
     },
