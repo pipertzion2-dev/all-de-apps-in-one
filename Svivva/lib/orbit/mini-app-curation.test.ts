@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   filterToolsForTrafficDiscovery,
+  nativeToolPathForSlug,
   nativeToolsAsDiscoverable,
   nativeToolSitemapPaths,
   NATIVE_SVIVVA_TOOLS,
@@ -22,6 +23,12 @@ describe("mini-app-curation", () => {
         true,
       );
     }
+  });
+
+  it("maps root slugs to canonical /tools paths", () => {
+    expect(nativeToolPathForSlug("ai-api-cost-calculator")).toBe("/tools/ai-api-cost-calculator");
+    expect(nativeToolPathForSlug("prompt-forge")).toBe("/tools/prompt-forge");
+    expect(nativeToolPathForSlug("not-a-native-tool")).toBeNull();
   });
 
   it("blocks full-product style names", () => {

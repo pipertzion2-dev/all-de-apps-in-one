@@ -54,6 +54,21 @@ export function nativeToolSitemapPaths(): string[] {
   return NATIVE_SVIVVA_TOOLS.map((t) => t.path);
 }
 
+/** Root slug (e.g. ai-api-cost-calculator) → canonical /tools/* path when a native tool exists. */
+export function nativeToolPathForSlug(slug: string): string | null {
+  const s = slug.trim().toLowerCase();
+  if (!s) return null;
+  const tool = NATIVE_SVIVVA_TOOLS.find((t) => t.path === `/tools/${s}`);
+  return tool?.path ?? null;
+}
+
+/** Root slugs that must 308 to /tools/* — never duplicate in sitemap as /{slug}. */
+export function nativeToolRootSlugs(): Set<string> {
+  return new Set(
+    NATIVE_SVIVVA_TOOLS.map((t) => t.path.replace(/^\/tools\//, "").toLowerCase()).filter(Boolean),
+  );
+}
+
 /** Hub + native /tools/* + per-feature keyword pages — prioritize for IndexNow / Google. */
 export function getMiniAppPathsForIndexing(): string[] {
   return [
