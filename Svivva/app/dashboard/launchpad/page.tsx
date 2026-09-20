@@ -3707,15 +3707,16 @@ export default function LaunchpadPage() {
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div className="min-w-0 space-y-1">
               <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[#d4af37]">
-                Earn money · Google ads · Look here first
+                Next step · Google AdSense CMP
               </p>
               <h2 className="text-base sm:text-lg font-black text-foreground flex items-center gap-2">
                 <DollarSign className="w-5 h-5 text-[#d4af37] shrink-0" />
-                AdSense — get paid from Klean Sneaks
+                AdSense — pick Three-Choice in Google
               </h2>
               <p className="text-xs sm:text-sm text-muted-foreground max-w-xl">
-                Paste your Google <code className="text-[#d4af37]">ca-pub-…</code> publisher id
-                below. Real ads show in the game; Google pays your AdSense account.
+                Publisher <code className="text-[#d4af37]">ca-pub-3958850022852446</code> is already
+                on the site. Use the gold button below to open AdSense Privacy &amp; messaging and
+                select <strong className="text-foreground">Three-Choice Message</strong>.
               </p>
             </div>
             <Button

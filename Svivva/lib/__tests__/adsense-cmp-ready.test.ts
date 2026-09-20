@@ -26,7 +26,9 @@ describe("AdSense Google CMP readiness", () => {
   it("Orbit links to AdSense Privacy & messaging for Three-Choice CMP", () => {
     const ui = readFileSync(resolve(__dirname, "../../components/orbit-adsense-setup.tsx"), "utf8");
     expect(ui).toContain("privacymessaging");
-    expect(ui).toContain("Three-Choice Message");
+    expect(ui).toContain("Three-Choice");
     expect(ui).toContain("orbit-adsense-cmp-link");
+    expect(ui).toContain("orbit-adsense-cmp-cta");
+    expect(ui).toContain("orbit-open-adsense-cmp");
   });
 });

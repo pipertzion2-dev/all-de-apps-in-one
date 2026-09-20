@@ -180,13 +180,62 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
         </p>
       )}
 
+      <div
+        className="rounded-xl border-2 border-[#d4af37] bg-[#d4af37]/15 p-3 sm:p-4 space-y-3"
+        data-testid="orbit-adsense-cmp-cta"
+      >
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#b8860b]">
+          Do this now · Google AdSense (1 click)
+        </p>
+        <p className="text-sm font-bold text-foreground leading-snug">
+          Site code is already live. Open AdSense and pick{" "}
+          <span className="text-[#b8860b]">Three-Choice Message</span> (Consent / Do not consent /
+          Manage options).
+        </p>
+        <ul className="text-[11px] text-foreground/80 space-y-1">
+          <li>✓ Publisher script on zzaizzai.com ({SITE_ADSENSE_CLIENT})</li>
+          <li>✓ ads.txt + Consent Mode ready</li>
+          <li>
+            → You will <strong>not</strong> see the consent popup on a US phone until you publish
+            Three-Choice in AdSense (it only shows for EEA/UK/CH visitors).
+          </li>
+        </ul>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            asChild
+            className="bg-[#d4af37] text-[#1a1008] hover:bg-[#e0c15a] font-black"
+            data-testid="orbit-open-adsense-cmp"
+          >
+            <a
+              href="https://adsense.google.com/adsense/new/privacymessaging"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Open Privacy &amp; messaging → pick Three-Choice
+              <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
+            </a>
+          </Button>
+          <Button asChild variant="outline" size="sm" data-testid="orbit-open-adsense-sites">
+            <a
+              href="https://adsense.google.com/adsense/new/sites"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Sites · Verify zzaizzai.com
+              <ExternalLink className="h-3 w-3 ml-1" />
+            </a>
+          </Button>
+        </div>
+        <p className="text-[10px] text-muted-foreground leading-relaxed">
+          Path in AdSense: left menu <strong>Privacy &amp; messaging</strong> →{" "}
+          <strong>European regulations</strong> → choose the card with 3 buttons → Create → Publish
+          for zzaizzai.com.
+        </p>
+      </div>
+
       <ol className="list-decimal list-inside space-y-1 text-[11px] text-muted-foreground">
         <li>
-          Site code is live: publisher{" "}
-          <code className="text-foreground">{SITE_ADSENSE_CLIENT}</code> + Consent Mode + ads.txt
-        </li>
-        <li>
-          In AdSense →{" "}
+          Tap the gold button above (or{" "}
           <a
             href="https://adsense.google.com/adsense/new/privacymessaging"
             target="_blank"
@@ -195,14 +244,15 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
             data-testid="orbit-adsense-cmp-link"
           >
             Privacy &amp; messaging <ExternalLink className="h-2.5 w-2.5" />
-          </a>{" "}
-          → European regulations → pick <strong>Three-Choice Message</strong> → Create / Publish for
-          zzaizzai.com (Google serves the banner; no extra site code)
+          </a>
+          )
         </li>
         <li>
-          Sites → turn on <strong>Auto ads</strong> · optional: Ads → By ad unit → paste slots below
+          Select <strong>Three-Choice Message</strong> → Create / Publish for zzaizzai.com
         </li>
-        <li>Paste slots below → Save (publisher id already on the site)</li>
+        <li>
+          Sites → turn on <strong>Auto ads</strong> · optional: paste ad unit slots below
+        </li>
       </ol>
 
       <div className="grid gap-3 sm:grid-cols-2">
