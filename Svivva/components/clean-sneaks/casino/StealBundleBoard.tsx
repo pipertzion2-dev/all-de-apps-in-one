@@ -25,6 +25,7 @@ import {
   type PlayingCard,
 } from "@/lib/clean-sneaks/casino";
 import { PlayingCardView } from "./PlayingCardView";
+import { StealBundleHowToPlay } from "./StealBundleHowToPlay";
 
 type Props = {
   playerCount: 2 | 3;
@@ -236,35 +237,7 @@ export function StealBundleBoard({
   }, [state]);
 
   if (!tutorialDone) {
-    return (
-      <div
-        className="flex h-full min-h-0 flex-1 flex-col items-center justify-center overflow-y-auto px-4 py-6 text-center"
-        data-testid="steal-bundle-tutorial"
-        style={{
-          background:
-            "radial-gradient(ellipse at 50% 20%, rgba(212,175,55,0.12), transparent 50%), #0a0c10",
-        }}
-      >
-        <p className="text-[10px] uppercase tracking-[0.4em] text-[#d4af37]">Casino Table</p>
-        <h2 className="mt-2 font-serif text-2xl text-[#f7e7b0] sm:text-3xl">
-          Steal the Old Man&apos;s Bundle
-        </h2>
-        <ul className="mt-6 max-w-md space-y-2 text-left text-sm text-[#e8dcc0]/85">
-          <li>Match cards by rank.</li>
-          <li>Match a card on the table to add cards to your bundle.</li>
-          <li>Watch your opponents&apos; bundles.</li>
-          <li>Match a bundle&apos;s exposed rank to STEAL it.</li>
-          <li className="font-semibold text-[#ffd76a]">Biggest bundle wins.</li>
-        </ul>
-        <Button
-          className="mt-8 bg-[#d4af37] text-[#1a1008] hover:bg-[#e0c15a]"
-          onClick={() => setTutorialDone(true)}
-          data-testid="button-deal-cards"
-        >
-          Deal the Cards
-        </Button>
-      </div>
-    );
+    return <StealBundleHowToPlay onStart={() => setTutorialDone(true)} />;
   }
 
   if (!state) {
