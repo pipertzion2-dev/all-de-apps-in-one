@@ -5,9 +5,9 @@ const GA_CONNECT =
 const CLARITY_SCRIPT = "https://www.clarity.ms";
 /** Google AdSense / Google Publisher Tag — required for paid display ads. */
 const ADSENSE_SCRIPT =
-  "https://pagead2.googlesyndication.com https://www.googletagservices.com https://www.google.com https://www.gstatic.com";
+  "https://pagead2.googlesyndication.com https://www.googletagservices.com https://www.google.com https://www.gstatic.com https://fundingchoicesmessages.google.com";
 const ADSENSE_FRAME =
-  "https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://pagead2.googlesyndication.com https://www.google.com https://ep2.adtrafficquality.google";
+  "https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://pagead2.googlesyndication.com https://www.google.com https://ep2.adtrafficquality.google https://fundingchoicesmessages.google.com";
 const ADSENSE_CONNECT =
   "https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://fundingchoicesmessages.google.com https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google";
 

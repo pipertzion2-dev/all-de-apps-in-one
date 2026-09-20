@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ExternalLink, Loader2, DollarSign, RefreshCw, Check } from "lucide-react";
+import { SITE_ADSENSE_CLIENT } from "@/lib/adsense-credentials";
 
 type StatusPayload = {
   stored: {
@@ -81,6 +82,7 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
       const next = (await res.json()) as StatusPayload;
       setStatus(next);
       if (next.adsense?.clientId) setClientId(next.adsense.clientId);
+      else setClientId(SITE_ADSENSE_CLIENT);
       if (next.adsense?.slotBanner) setSlotBanner(next.adsense.slotBanner);
       if (next.adsense?.slotInterstitial) setSlotInterstitial(next.adsense.slotInterstitial);
       if (next.adsense?.slotRewarded) setSlotRewarded(next.adsense.slotRewarded);
@@ -180,24 +182,27 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
 
       <ol className="list-decimal list-inside space-y-1 text-[11px] text-muted-foreground">
         <li>
-          Open{" "}
+          Site code is live: publisher{" "}
+          <code className="text-foreground">{SITE_ADSENSE_CLIENT}</code> + Consent Mode + ads.txt
+        </li>
+        <li>
+          In AdSense →{" "}
           <a
-            href="https://www.google.com/adsense/start"
+            href="https://adsense.google.com/adsense/new/privacymessaging"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-primary underline inline-flex items-center gap-0.5"
+            className="text-primary underline inline-flex items-center gap-0.5 font-semibold"
+            data-testid="orbit-adsense-cmp-link"
           >
-            Google AdSense <ExternalLink className="h-2.5 w-2.5" />
+            Privacy &amp; messaging <ExternalLink className="h-2.5 w-2.5" />
           </a>{" "}
-          → add site <strong>zzaizzai.com</strong> → wait for approval
+          → European regulations → pick <strong>Three-Choice Message</strong> → Create / Publish for
+          zzaizzai.com (Google serves the banner; no extra site code)
         </li>
         <li>
-          Sites → turn on <strong>Auto ads</strong>
+          Sites → turn on <strong>Auto ads</strong> · optional: Ads → By ad unit → paste slots below
         </li>
-        <li>
-          Ads → By ad unit → Display → create units → copy slot numbers (optional but recommended)
-        </li>
-        <li>Paste below → Save — ads go live without a Vercel redeploy</li>
+        <li>Paste slots below → Save (publisher id already on the site)</li>
       </ol>
 
       <div className="grid gap-3 sm:grid-cols-2">
