@@ -6,6 +6,12 @@
  */
 export const SITE_ADSENSE_CLIENT = "ca-pub-3958850022852446";
 
+/**
+ * Default Display ad unit slot for zzaizzai.com (ZZAI ADS).
+ * Env / Orbit Platform Secrets override this when set.
+ */
+export const SITE_ADSENSE_SLOT_BANNER = "9914022148";
+
 export function isValidAdsenseClientId(raw: string | null | undefined): boolean {
   const v = raw?.trim() || "";
   return /^ca-pub-\d{10,20}$/.test(v);
@@ -23,6 +29,15 @@ export function resolveSiteAdsenseClient(
 export function isValidAdsenseSlotId(raw: string | null | undefined): boolean {
   const v = raw?.trim() || "";
   return /^\d{6,20}$/.test(v);
+}
+
+/** Effective banner slot: env / Orbit wins, else site Display unit. */
+export function resolveSiteAdsenseSlotBanner(
+  raw: string | null | undefined = process.env.NEXT_PUBLIC_ADSENSE_SLOT_BANNER,
+): string {
+  const fromEnv = raw?.trim() || "";
+  if (isValidAdsenseSlotId(fromEnv)) return fromEnv;
+  return SITE_ADSENSE_SLOT_BANNER;
 }
 
 /** Normalize pasted values (trim, strip accidental "ca-" on pub-only paste). */

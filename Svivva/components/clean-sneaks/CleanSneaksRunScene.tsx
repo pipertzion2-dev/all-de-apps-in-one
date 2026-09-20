@@ -6,7 +6,11 @@ import { ContactShadows, Sparkles } from "@react-three/drei";
 import { Baloon8RunEnvironment } from "./Baloon8RunEnvironment";
 import * as THREE from "three";
 import { POWERUP_META } from "@/lib/clean-sneaks/constants";
-import { buildObstacle3D, buildPowerUp3D } from "@/lib/clean-sneaks/run-obstacles-3d";
+import {
+  buildObstacle3D,
+  buildPowerUp3D,
+  buildStreetLitterPiece3D,
+} from "@/lib/clean-sneaks/run-obstacles-3d";
 import {
   FINISH_DISTANCE,
   laneWorldX,
@@ -247,12 +251,22 @@ function GroundLitter({
       return {
         x: lane * 2.4 + Math.sin(i * 1.7) * 0.55,
         z: -6 - (i % 16) * 4.2 - (i % 3) * 0.8,
-        rot: i * 0.37,
         kind: i % 5,
-        scale: 0.7 + (i % 4) * 0.15,
+        seed: i * 17 + 3,
+        scale: 0.75 + (i % 4) * 0.12,
       };
     });
   }, [mobile]);
+
+  const meshes = useMemo(
+    () =>
+      pieces.map((p) => {
+        const obj = buildStreetLitterPiece3D(p.kind, p.seed);
+        obj.scale.multiplyScalar(p.scale);
+        return obj;
+      }),
+    [pieces],
+  );
 
   useFrame(() => {
     const g = group.current;
@@ -261,33 +275,10 @@ function GroundLitter({
     g.position.z = scroll;
   });
 
-  const colors = [0x6b7280, 0xb8c4a8, 0xc45c26, 0x8b7355, 0x88a0b0];
-
   return (
     <group ref={group} name="ground-litter">
       {pieces.map((p, i) => (
-        <mesh
-          key={i}
-          position={[p.x, 0.035, p.z]}
-          rotation={[-Math.PI / 2, 0, p.rot]}
-          scale={p.scale}
-          receiveShadow
-        >
-          {p.kind === 0 || p.kind === 3 ? (
-            <planeGeometry args={[0.28, 0.18]} />
-          ) : p.kind === 1 ? (
-            <circleGeometry args={[0.11, 8]} />
-          ) : (
-            <planeGeometry args={[0.2, 0.12]} />
-          )}
-          <meshStandardMaterial
-            color={colors[p.kind]!}
-            roughness={0.92}
-            metalness={p.kind === 4 ? 0.45 : 0.05}
-            transparent
-            opacity={0.92}
-          />
-        </mesh>
+        <primitive key={i} object={meshes[i]!} position={[p.x, 0, p.z]} />
       ))}
     </group>
   );

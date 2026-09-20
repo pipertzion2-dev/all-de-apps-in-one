@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import {
   adsenseAnySlot,
   adsenseClientId,
@@ -71,17 +72,38 @@ export function AdSenseSlot({ placement, className, format = "auto" }: Props) {
   if (!client) {
     return (
       <p className="text-xs text-white/45" data-testid="adsense-missing-client">
-        Add NEXT_PUBLIC_ADSENSE_CLIENT in Vercel to show paid ads.
+        Add your AdSense publisher id in Orbit → AdSense (or NEXT_PUBLIC_ADSENSE_CLIENT).
       </p>
     );
   }
 
   if (!slot) {
     return (
-      <p className="text-xs text-white/45" data-testid="adsense-missing-slot">
-        Create a Display ad unit in AdSense and set NEXT_PUBLIC_ADSENSE_SLOT_BANNER (or enable Auto
-        ads in the AdSense console).
-      </p>
+      <div className="space-y-2 text-xs text-white/55" data-testid="adsense-missing-slot">
+        <p>
+          Create a <strong className="text-white/80">Display</strong> ad unit in AdSense, then paste
+          the slot number in Orbit → AdSense (Banner). Auto ads can still run site-wide without
+          this.
+        </p>
+        <div className="flex flex-wrap gap-x-3 gap-y-1">
+          <a
+            href="https://adsense.google.com/adsense/new/myads/units"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#7EC8D9] underline-offset-2 hover:underline"
+            data-testid="adsense-open-create-unit"
+          >
+            AdSense → By ad unit
+          </a>
+          <Link
+            href="/dashboard/launchpad"
+            className="text-[#ffd76a] underline-offset-2 hover:underline"
+            data-testid="adsense-open-orbit"
+          >
+            Paste slot in Orbit
+          </Link>
+        </div>
+      </div>
     );
   }
 

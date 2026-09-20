@@ -5,7 +5,9 @@ import {
   normalizeAdsenseClientId,
   normalizeAdsenseSlotId,
   resolveSiteAdsenseClient,
+  resolveSiteAdsenseSlotBanner,
   SITE_ADSENSE_CLIENT,
+  SITE_ADSENSE_SLOT_BANNER,
 } from "@/lib/adsense-credentials";
 
 describe("adsense credentials", () => {
@@ -25,5 +27,11 @@ describe("adsense credentials", () => {
     expect(SITE_ADSENSE_CLIENT).toBe("ca-pub-3958850022852446");
     expect(resolveSiteAdsenseClient("")).toBe(SITE_ADSENSE_CLIENT);
     expect(resolveSiteAdsenseClient("ca-pub-1111111111111111")).toBe("ca-pub-1111111111111111");
+  });
+
+  it("resolves ZZAI ADS Display slot as site banner default", () => {
+    expect(SITE_ADSENSE_SLOT_BANNER).toBe("9914022148");
+    expect(resolveSiteAdsenseSlotBanner("")).toBe(SITE_ADSENSE_SLOT_BANNER);
+    expect(resolveSiteAdsenseSlotBanner("5555555555")).toBe("5555555555");
   });
 });
