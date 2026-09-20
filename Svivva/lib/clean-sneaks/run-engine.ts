@@ -1,4 +1,11 @@
-import { ALL_OBSTACLES, ALL_POWERUPS, LANES, OBSTACLE_META, POWERUP_META } from "./constants";
+import {
+  ALL_OBSTACLES,
+  ALL_POWERUPS,
+  LANES,
+  OBSTACLE_META,
+  POWERUP_META,
+  STICKY_STREET_OBSTACLES,
+} from "./constants";
 import { computeFrameScore } from "./storage";
 import type { ObstacleKind, PowerUpKind } from "./types";
 import {
@@ -37,6 +44,13 @@ import {
   type WeatherId,
 } from "./contact-map";
 import type { HudShoeSnapshot } from "./types";
+import {
+  isStickyHazardKind,
+  pruneStickyAttachments,
+  strongestStickyMul,
+  STICKY_STUCK_MS,
+  type StickyAttachment,
+} from "./sticky-hazards";
 
 export const LANE_X = [-2.4, 0, 2.4] as const;
 export const PLAYER_Z = 0;
@@ -127,6 +141,10 @@ export type RunEngineState = {
   npcLine: string | null;
   npcLineUntil: number;
   gumSlowUntil: number;
+  /** Sticky cling-ons currently stuck to a shoe sole. */
+  stickyAttachments: StickyAttachment[];
+  /** Hard stall until — strongest sticky hazard wins. */
+  stuckUntil: number;
   /** Accrues street grit while grounded on messy asphalt. */
   streetGritAcc: number;
   /** Crossed the story destination — run continues in bonus zone. */
@@ -199,6 +217,8 @@ export function createRunEngineState(
     npcLine: null,
     npcLineUntil: 0,
     gumSlowUntil: 0,
+    stickyAttachments: [],
+    stuckUntil: 0,
     streetGritAcc: 0,
     destinationReached: false,
     secondWindUsed: false,
@@ -219,9 +239,12 @@ function wetObstacles(): ObstacleKind[] {
 function spawnKind(weather: WeatherId): ObstacleKind {
   const wetBias = WEATHER[weather].wetBias;
   if (wetBias > 0 && Math.random() < wetBias) return randItem(wetObstacles());
-  // Klean Sneaks bias — street garbage shows up more often than crowds/bikes.
+  // Sticky street trash (dirt / poop / banana / gum) shows up often.
   if (Math.random() < 0.55) {
-    return randItem(["trash", "debris", "gum", "street", "bag", "drink", "mud"] as ObstacleKind[]);
+    if (Math.random() < 0.62) {
+      return randItem(STICKY_STREET_OBSTACLES);
+    }
+    return randItem(["trash", "debris", "street", "bag", "drink", "mud"] as ObstacleKind[]);
   }
   return randItem(ALL_OBSTACLES);
 }
@@ -396,7 +419,22 @@ function dirtyShoe(
   };
   s.contaminations.push(evt);
 
-  if (contact.substance === "gum") s.gumSlowUntil = ts + 2800;
+  if (isStickyHazardKind(o.kind)) {
+    const stuckMs = STICKY_STUCK_MS[o.kind];
+    s.stuckUntil = Math.max(s.stuckUntil, ts + stuckMs);
+    s.gumSlowUntil = Math.max(s.gumSlowUntil, ts + stuckMs);
+    s.stickyAttachments.push({
+      id: s.nextId++,
+      kind: o.kind,
+      shoe: shoeSide,
+      until: ts + stuckMs + 800,
+    });
+    s.popups.push({
+      text: `${SUBSTANCE_LABELS[contact.substance]} STUCK!`,
+      life: 1.05,
+      color: "#ffd76a",
+    });
+  }
 
   syncPairClean(s);
   s.streak = 0;
@@ -496,9 +534,16 @@ export function stepRunEngine(
   const arch = getArchetype(s.archetypeId);
   const walk = WALK_STYLES[s.walkStyle];
   const weather = WEATHER[s.weather];
-  const gumSlow = ts < s.gumSlowUntil ? 0.72 : 1;
+  s.stickyAttachments = pruneStickyAttachments(s.stickyAttachments, ts);
+  const stickySlow = strongestStickyMul(s.stickyAttachments, ts);
+  const stuckHard = ts < s.stuckUntil ? stickySlow : 1;
+  const gumSlow = ts < s.gumSlowUntil && stuckHard >= 1 ? 0.72 : 1;
   const slow =
-    (ts < s.perfectUntil ? 0.45 : 1) * walk.speedMul * weather.speedMul * gumSlow * ohNoSlow;
+    (ts < s.perfectUntil ? 0.45 : 1) *
+    walk.speedMul *
+    weather.speedMul *
+    Math.min(gumSlow, stuckHard) *
+    ohNoSlow;
   const step = dt * slow;
 
   s.laneX += (s.targetLane - s.laneX) * Math.min(1, step * (12 - walk.balanceHard * 5));

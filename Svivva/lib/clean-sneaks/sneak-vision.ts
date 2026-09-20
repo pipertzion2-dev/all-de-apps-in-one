@@ -28,6 +28,8 @@ export const VISION_HEX_THREE: Record<VisionLevel, number> = {
 
 const OBSTACLE_VISION: Record<ObstacleKind, VisionLevel> = {
   gum: "caution",
+  banana: "caution",
+  dirt: "caution",
   water: "wet",
   drink: "danger",
   trash: "caution",
@@ -35,6 +37,7 @@ const OBSTACLE_VISION: Record<ObstacleKind, VisionLevel> = {
   grass: "caution",
   bag: "danger",
   debris: "danger",
+  poop: "disaster",
   paint: "disaster",
   pothole: "disaster",
   mud: "disaster",
@@ -53,6 +56,8 @@ export function visionForSubstance(kind: SubstanceKind): VisionLevel {
       return "wet";
     case "dust":
     case "gum":
+    case "dirt":
+    case "banana":
       return "caution";
     case "grass":
     case "oil":
@@ -61,6 +66,7 @@ export function visionForSubstance(kind: SubstanceKind): VisionLevel {
       return "danger";
     case "mud":
     case "paint":
+    case "poop":
       return "disaster";
     default:
       return "unknown";

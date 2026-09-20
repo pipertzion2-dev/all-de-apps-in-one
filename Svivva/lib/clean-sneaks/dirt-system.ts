@@ -36,6 +36,9 @@ export type SubstanceKind =
   | "dust"
   | "paint"
   | "gum"
+  | "dirt"
+  | "poop"
+  | "banana"
   | "oil"
   | "snow"
   | "food"
@@ -107,6 +110,9 @@ export const SUBSTANCE_ZONES: Record<SubstanceKind, DirtZone[]> = {
   dust: ["toeBox", "tongue", "laces"],
   paint: ["outsole", "midsole", "toeBox"],
   gum: ["outsole"],
+  dirt: ["outsole", "midsole"],
+  poop: ["outsole", "midsole", "heel"],
+  banana: ["outsole"],
   oil: ["outsole", "midsole"],
   snow: ["outsole", "midsole", "heel"],
   food: ["toeBox", "laces", "tongue"],
@@ -123,6 +129,9 @@ export const SUBSTANCE_BASE_DIRT: Record<SubstanceKind, number> = {
   dust: 5,
   paint: 26,
   gum: 9,
+  dirt: 14,
+  poop: 18,
+  banana: 8,
   oil: 14,
   snow: 8,
   food: 16,
@@ -136,6 +145,9 @@ export const SUBSTANCE_LABELS: Record<SubstanceKind, string> = {
   dust: "DUST",
   paint: "PAINT",
   gum: "GUM",
+  dirt: "DIRT",
+  poop: "POOP",
+  banana: "BANANA",
   oil: "OIL",
   snow: "SNOW",
   food: "FOOD",
@@ -149,6 +161,9 @@ export const SUBSTANCE_COLORS: Record<SubstanceKind, string> = {
   dust: "#a89878",
   paint: "#5b8da8",
   gum: "#d94f9c",
+  dirt: "#6b4a32",
+  poop: "#4a2c14",
+  banana: "#f0c830",
   oil: "#2a2a2a",
   snow: "#c8d8e8",
   food: "#c45c26",

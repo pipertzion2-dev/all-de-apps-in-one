@@ -13,6 +13,7 @@ import {
   updateShoeDirtOverlay,
   type ShoeDirtOverlay,
 } from "./shoe-dirt-overlay";
+import { buildStickyCling3D, type StickyAttachment } from "./sticky-hazards";
 
 /**
  * YOUR Baloon8 sneakers from the orthographic blueprint (rear view toward the
@@ -34,6 +35,8 @@ export type WalkingShoes3D = {
   rightPivot: THREE.Group;
   leftShoe: Baloon8OrthoShoe | null;
   rightShoe: Baloon8OrthoShoe | null;
+  stickyLeft: THREE.Group;
+  stickyRight: THREE.Group;
   shieldRing: THREE.Mesh;
   shieldGlow: THREE.PointLight;
   dustEmitter: THREE.Group;
@@ -157,6 +160,13 @@ export function createWalkingShoes3D(
 
   shoePivot.add(leftPivot, rightPivot);
 
+  const stickyLeft = new THREE.Group();
+  const stickyRight = new THREE.Group();
+  stickyLeft.position.set(0, 0.01, 0.05);
+  stickyRight.position.set(0, 0.01, 0.05);
+  leftPivot.add(stickyLeft);
+  rightPivot.add(stickyRight);
+
   const shieldRing = new THREE.Mesh(
     new THREE.TorusGeometry(0.8, 0.022, 16, 64),
     new THREE.MeshPhysicalMaterial({
@@ -190,6 +200,8 @@ export function createWalkingShoes3D(
     rightPivot,
     leftShoe,
     rightShoe,
+    stickyLeft,
+    stickyRight,
     shieldRing,
     shieldGlow,
     dustEmitter,
@@ -252,6 +264,8 @@ export function updateWalkingShoes3D(
     portrait?: boolean;
     leftShoe?: ShoeCondition;
     rightShoe?: ShoeCondition;
+    stickyAttachments?: StickyAttachment[];
+    now?: number;
   },
 ): void {
   const phase = args.walkPhase * Math.PI * 2;
@@ -259,11 +273,14 @@ export function updateWalkingShoes3D(
   const stride = args.airborne ? 0 : Math.sin(phase);
   const lateral = args.portrait ? 0.28 : 0.4;
   const toeIn = 0.06;
+  const now = args.now ?? performance.now();
 
   const bob = args.airborne ? 0.14 : Math.max(0, Math.sin(phase * 2)) * 0.07;
-  shoes.shoePivot.rotation.x = Math.sin(phase) * (args.airborne ? 0.06 : 0.12);
-  shoes.shoePivot.rotation.z = Math.sin(phase * 0.5) * 0.04;
-  shoes.shoePivot.position.y = bob;
+  // Stuck shoe — plant harder / less lift
+  const stuck = (args.stickyAttachments ?? []).some((a) => a.until > now);
+  shoes.shoePivot.rotation.x = Math.sin(phase) * (args.airborne ? 0.06 : stuck ? 0.05 : 0.12);
+  shoes.shoePivot.rotation.z = Math.sin(phase * 0.5) * (stuck ? 0.02 : 0.04);
+  shoes.shoePivot.position.y = stuck ? bob * 0.35 : bob;
 
   if (args.airborne) {
     shoes.leftPivot.position.set(-lateral * 0.85, 0.1, 0.06);
@@ -273,16 +290,16 @@ export function updateWalkingShoes3D(
     shoes.leftPivot.rotation.y = toeIn;
     shoes.rightPivot.rotation.y = -toeIn;
   } else {
-    // +stride → left lead, −stride → right lead
-    const leftLift = Math.max(0, stride) * 0.18;
-    const rightLift = Math.max(0, -stride) * 0.18;
+    const liftMul = stuck ? 0.35 : 1;
+    const leftLift = Math.max(0, stride) * 0.18 * liftMul;
+    const rightLift = Math.max(0, -stride) * 0.18 * liftMul;
     const leftZ = -stride * 0.18;
     const rightZ = stride * 0.18;
 
     shoes.leftPivot.position.set(-lateral, leftLift, leftZ);
     shoes.rightPivot.position.set(lateral, rightLift, rightZ);
-    shoes.leftPivot.rotation.x = -stride * 0.22;
-    shoes.rightPivot.rotation.x = stride * 0.22;
+    shoes.leftPivot.rotation.x = -stride * 0.22 * liftMul;
+    shoes.rightPivot.rotation.x = stride * 0.22 * liftMul;
     shoes.leftPivot.rotation.y = toeIn;
     shoes.rightPivot.rotation.y = -toeIn;
   }
@@ -293,6 +310,8 @@ export function updateWalkingShoes3D(
 
   tintShoe(shoes.leftShoe, args.dirt, args.freshGlow, args.leftShoe);
   tintShoe(shoes.rightShoe, args.dirt, args.freshGlow, args.rightShoe);
+
+  syncStickyClings(shoes, args.stickyAttachments ?? [], now);
 
   shoes.shieldRing.visible = args.shieldActive;
   shoes.shieldGlow.intensity = args.shieldActive ? 1.2 : 0;
@@ -309,4 +328,29 @@ export function updateWalkingShoes3D(
       dustPool.splice(i, 1);
     }
   }
+}
+
+function syncStickyClings(
+  shoes: WalkingShoes3D,
+  attachments: StickyAttachment[],
+  now: number,
+): void {
+  const active = attachments.filter((a) => a.until > now);
+  const syncSide = (group: THREE.Group, shoe: "left" | "right") => {
+    const sideHits = active.filter((a) => a.shoe === shoe);
+    const want = new Set(sideHits.map((a) => a.id));
+    for (let i = group.children.length - 1; i >= 0; i--) {
+      const child = group.children[i]!;
+      const id = child.userData.stickyId as number | undefined;
+      if (id == null || !want.has(id)) group.remove(child);
+    }
+    for (const hit of sideHits) {
+      if (group.children.some((c) => c.userData.stickyId === hit.id)) continue;
+      const cling = buildStickyCling3D(hit.kind);
+      cling.userData.stickyId = hit.id;
+      group.add(cling);
+    }
+  };
+  syncSide(shoes.stickyLeft, "left");
+  syncSide(shoes.stickyRight, "right");
 }

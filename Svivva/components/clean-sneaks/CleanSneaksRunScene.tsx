@@ -696,6 +696,8 @@ function PlayerShoes({
       portrait,
       leftShoe: s.left,
       rightShoe: s.right,
+      stickyAttachments: s.stickyAttachments,
+      now,
     });
   });
 
