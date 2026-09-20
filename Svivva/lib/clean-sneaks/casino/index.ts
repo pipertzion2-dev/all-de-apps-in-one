@@ -22,6 +22,7 @@ export {
   selectHandCard,
   tryHumanPlay,
   applyAiMove,
+  passStuckTurn,
   currentPlayer,
   buildPlayers,
 } from "./card-game";
