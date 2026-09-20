@@ -10,6 +10,7 @@
   "billingCheckout": "cashapp",
   "databaseEnvVar": "DATABASE_URL",
   "dashboardUrl": "https://vercel.com/zzai-zzai/all-de-apps-in-one",
+  "lastRequestedRedeployAt": "2026-09-20T15:37:00Z",
   "deprecatedProjects": [
     {
       "name": "svivva-main-app",
