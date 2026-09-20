@@ -91,6 +91,32 @@ export function applyAiMove(state: CardGameState, move: PlayMove): CardGameState
   return finalizeAfterMove(next);
 }
 
+/**
+ * Recover when the computer seat has no legal move (empty hand / soft-lock).
+ * Refills from the deck when possible; otherwise advances to the next seat.
+ */
+export function passStuckTurn(state: CardGameState): CardGameState {
+  if (state.phase !== "playing") return state;
+  const current = state.players[state.currentPlayerIndex];
+  if (!current) return state;
+
+  let next = refillHandFromDeck(state, current.id);
+  if (listLegalMoves(next, current.id).length > 0) {
+    return {
+      ...next,
+      lastEvent: `${current.name} drew up to continue.`,
+    };
+  }
+
+  return settleAfterAdvance(
+    advanceTurn({
+      ...next,
+      selectedCardId: null,
+      lastEvent: `${current.name} had no move — turn passed.`,
+    }),
+  );
+}
+
 function finalizeAfterMove(state: CardGameState): CardGameState {
   let next: CardGameState = { ...state, selectedCardId: null };
 
@@ -110,13 +136,17 @@ function finalizeAfterMove(state: CardGameState): CardGameState {
     };
   }
 
-  next = advanceTurn(next);
+  return settleAfterAdvance(advanceTurn(next));
+}
+
+/** Refill the upcoming seat and skip seats that still cannot act. */
+function settleAfterAdvance(state: CardGameState): CardGameState {
+  let next = state;
   const upcoming = next.players[next.currentPlayerIndex];
   if (upcoming) {
     next = refillHandFromDeck(next, upcoming.id);
   }
 
-  // Skip players with no moves and empty deck/hand loops.
   let guard = 0;
   while (guard++ < next.players.length + 2) {
     if (shouldEndGame(next)) {
