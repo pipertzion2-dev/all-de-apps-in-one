@@ -36,6 +36,8 @@ import {
   isValidAdsenseSlotId,
   normalizeAdsenseClientId,
   normalizeAdsenseSlotId,
+  resolveSiteAdsenseClient,
+  resolveSiteAdsenseSlotBanner,
 } from "@/lib/adsense-credentials";
 const patchSchema = z
   .object({
@@ -162,16 +164,16 @@ export async function GET() {
         ),
         stripeWebhook: !!process.env.STRIPE_WEBHOOK_SECRET?.trim(),
         siteUrl: !!process.env.NEXT_PUBLIC_SITE_URL?.trim(),
-        adsenseClient: isValidAdsenseClientId(process.env.NEXT_PUBLIC_ADSENSE_CLIENT),
-        adsenseSlotBanner: isValidAdsenseSlotId(process.env.NEXT_PUBLIC_ADSENSE_SLOT_BANNER),
+        adsenseClient: Boolean(resolveSiteAdsenseClient()),
+        adsenseSlotBanner: Boolean(resolveSiteAdsenseSlotBanner()),
         adsenseSlotInterstitial: isValidAdsenseSlotId(
           process.env.NEXT_PUBLIC_ADSENSE_SLOT_INTERSTITIAL,
         ),
         adsenseSlotRewarded: isValidAdsenseSlotId(process.env.NEXT_PUBLIC_ADSENSE_SLOT_REWARDED),
       },
       adsense: {
-        clientId: process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim() || null,
-        slotBanner: process.env.NEXT_PUBLIC_ADSENSE_SLOT_BANNER?.trim() || null,
+        clientId: resolveSiteAdsenseClient(),
+        slotBanner: resolveSiteAdsenseSlotBanner(),
         slotInterstitial: process.env.NEXT_PUBLIC_ADSENSE_SLOT_INTERSTITIAL?.trim() || null,
         slotRewarded: process.env.NEXT_PUBLIC_ADSENSE_SLOT_REWARDED?.trim() || null,
         adsTxtUrl: "/ads.txt",

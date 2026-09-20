@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ExternalLink, Loader2, DollarSign, RefreshCw, Check } from "lucide-react";
-import { SITE_ADSENSE_CLIENT } from "@/lib/adsense-credentials";
+import { SITE_ADSENSE_CLIENT, SITE_ADSENSE_SLOT_BANNER } from "@/lib/adsense-credentials";
 
 type StatusPayload = {
   stored: {
@@ -84,6 +84,7 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
       if (next.adsense?.clientId) setClientId(next.adsense.clientId);
       else setClientId(SITE_ADSENSE_CLIENT);
       if (next.adsense?.slotBanner) setSlotBanner(next.adsense.slotBanner);
+      else setSlotBanner(SITE_ADSENSE_SLOT_BANNER);
       if (next.adsense?.slotInterstitial) setSlotInterstitial(next.adsense.slotInterstitial);
       if (next.adsense?.slotRewarded) setSlotRewarded(next.adsense.slotRewarded);
       onConfiguredChange?.(Boolean(next.effective.adsenseClient));
@@ -290,6 +291,62 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
           Sites → turn on <strong>Auto ads</strong> · optional: paste ad unit slots below
         </li>
       </ol>
+
+      {ready && !status?.effective.adsenseSlotBanner ? (
+        <div
+          className="rounded-xl border-2 border-[#d4af37] bg-[#d4af37]/15 p-3 sm:p-4 space-y-3"
+          data-testid="orbit-adsense-display-unit-cta"
+        >
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#b8860b]">
+            You created Display ads · paste the slot number
+          </p>
+          <p className="text-sm font-bold text-foreground leading-snug">
+            Open the unit in AdSense, copy the{" "}
+            <code className="font-mono text-[11px] text-[#b8860b]">data-ad-slot</code> digits (or
+            the Slot ID shown on the unit page), paste into <strong>Banner slot</strong> below, then
+            hit <strong>Save AdSense</strong>. No Vercel redeploy needed.
+          </p>
+          <ol className="list-decimal list-inside space-y-1 text-[11px] text-foreground/80">
+            <li>
+              AdSense → <strong>Ads</strong> → <strong>By ad unit</strong> → open your Display unit
+            </li>
+            <li>
+              Copy the slot id (digits only, e.g.{" "}
+              <code className="font-mono text-[10px]">1234567890</code>)
+            </li>
+            <li>
+              Paste into <strong>Banner slot</strong> → <strong>Save AdSense</strong> → reload the
+              game
+            </li>
+          </ol>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              asChild
+              className="bg-[#d4af37] text-[#1a1008] hover:bg-[#e0c15a] font-black"
+              data-testid="orbit-open-adsense-ad-units"
+            >
+              <a
+                href="https://adsense.google.com/adsense/new/myads/units"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Open your AdSense ad units
+                <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
+              </a>
+            </Button>
+            <Button asChild variant="outline" size="sm" data-testid="orbit-open-adsense-auto-ads">
+              <a
+                href="https://adsense.google.com/adsense/new/myads/auto-ads"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Auto ads settings
+                <ExternalLink className="h-3 w-3 ml-1" />
+              </a>
+            </Button>
+          </div>
+        </div>
+      ) : null}
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="sm:col-span-2 space-y-1.5">

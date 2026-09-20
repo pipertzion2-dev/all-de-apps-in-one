@@ -11,6 +11,7 @@ import {
   pickHouseCreative,
   recordAdEvent,
   resolveAdNetwork,
+  adsenseUnitReady,
   rewardedCreditsAmount,
 } from "@/lib/clean-sneaks/ads";
 import { addSessionCredits } from "@/lib/clean-sneaks/casino";
@@ -32,6 +33,7 @@ export function GameRewardedAd({ open, onClose, onRewarded }: Props) {
   const [blockedMs, setBlockedMs] = useState(0);
   const creative = useMemo(() => pickHouseCreative(Date.now() + 7), [open]);
   const network = resolveAdNetwork("rewarded_credits");
+  const unitReady = adsenseUnitReady("rewarded_credits");
   const credits = rewardedCreditsAmount();
 
   useEffect(() => {
@@ -111,14 +113,66 @@ export function GameRewardedAd({ open, onClose, onRewarded }: Props) {
               and add zzaizzai.com
             </li>
             <li>
-              Set <code className="text-[#ffd76a]">NEXT_PUBLIC_ADSENSE_CLIENT</code> in Vercel to
-              your ca-pub-… id
+              Paste your ca-pub-… id in{" "}
+              <Link href="/dashboard/launchpad" className="text-[#ffd76a] underline">
+                Orbit → AdSense
+              </Link>
             </li>
-            <li>Create a Display ad unit and set the slot env vars, then redeploy</li>
+            <li>
+              Create a Display ad unit (
+              <a
+                className="text-[#7EC8D9] underline"
+                href="https://adsense.google.com/adsense/new/myads/units"
+                target="_blank"
+                rel="noreferrer"
+              >
+                By ad unit
+              </a>
+              ) and paste the slot in Orbit
+            </li>
           </ol>
           <Button className="mt-5 w-full" variant="outline" onClick={onClose}>
             Close
           </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (network === "adsense" && !unitReady) {
+    return (
+      <div
+        className="fixed inset-0 z-[240] flex items-center justify-center bg-black/80 p-4 backdrop-blur-md"
+        role="dialog"
+        aria-modal="true"
+        data-testid="game-rewarded-ad-need-slot"
+      >
+        <div className="w-full max-w-md rounded-xl border border-[#d4af37]/35 bg-[#0e1016] p-5">
+          <p className="text-[10px] uppercase tracking-[0.35em] text-[#d4af37]">
+            Continue · Display ad unit
+          </p>
+          <h3 className="mt-2 font-serif text-xl text-[#f7e7b0]">One more step for rewarded ads</h3>
+          <p className="mt-2 text-sm text-[#e8dcc0]/75">
+            Publisher id is live. Create a Display unit, paste the slot in Orbit → AdSense
+            (Rewarded), then come back.
+          </p>
+          <div className="mt-5 flex flex-col gap-2">
+            <Button className="w-full bg-[#d4af37] text-[#1a1008] hover:bg-[#e0c15a]" asChild>
+              <a
+                href="https://adsense.google.com/adsense/new/myads/units"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Create Display unit in AdSense
+              </a>
+            </Button>
+            <Button className="w-full" variant="outline" asChild>
+              <Link href="/dashboard/launchpad">Paste slot in Orbit</Link>
+            </Button>
+            <Button variant="ghost" className="w-full text-white/50" onClick={onClose}>
+              Close
+            </Button>
+          </div>
         </div>
       </div>
     );

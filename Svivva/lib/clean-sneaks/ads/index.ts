@@ -13,6 +13,7 @@ export {
   adsensePublisherId,
   adsenseSlot,
   adsenseAnySlot,
+  adsenseUnitReady,
   adsenseConfigured,
   houseAdsAllowed,
   resolveAdNetwork,

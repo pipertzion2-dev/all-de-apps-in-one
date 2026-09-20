@@ -3,6 +3,7 @@ import {
   isValidAdsenseClientId,
   isValidAdsenseSlotId,
   resolveSiteAdsenseClient,
+  resolveSiteAdsenseSlotBanner,
 } from "@/lib/adsense-credentials";
 
 declare global {
@@ -33,8 +34,10 @@ function readRuntimeSlot(placement: AdPlacementId): string | null {
     const w = window[winKey]?.trim();
     if (isValidAdsenseSlotId(w)) return w!;
   }
-  const map: Record<AdPlacementId, string | undefined> = {
-    menu_banner: process.env.NEXT_PUBLIC_ADSENSE_SLOT_BANNER?.trim(),
+  if (placement === "menu_banner") {
+    return resolveSiteAdsenseSlotBanner();
+  }
+  const map: Record<"run_interstitial" | "rewarded_credits", string | undefined> = {
     run_interstitial: process.env.NEXT_PUBLIC_ADSENSE_SLOT_INTERSTITIAL?.trim(),
     rewarded_credits: process.env.NEXT_PUBLIC_ADSENSE_SLOT_REWARDED?.trim(),
   };
@@ -72,6 +75,15 @@ export function adsenseAnySlot(): string | null {
     adsenseSlot("rewarded_credits") ||
     null
   );
+}
+
+/**
+ * True when a custom `<ins data-ad-slot>` unit can render.
+ * Publisher id alone is enough for Auto ads site-wide; in-game units need a slot id.
+ */
+export function adsenseUnitReady(placement: AdPlacementId): boolean {
+  if (!adsenseClientId()) return false;
+  return Boolean(adsenseSlot(placement) || adsenseAnySlot());
 }
 
 export function adsEnabled(): boolean {

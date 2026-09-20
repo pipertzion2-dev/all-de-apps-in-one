@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   adsEnabled,
   adsenseConfigured,
+  adsenseUnitReady,
   houseAdsAllowed,
   markAdCooldown,
   pickHouseCreative,
@@ -22,6 +23,7 @@ export function GameAdBanner({ className, compact = false }: Props) {
   const [mounted, setMounted] = useState(false);
   const creative = useMemo(() => pickHouseCreative(Date.now()), []);
   const network = resolveAdNetwork("menu_banner");
+  const unitReady = adsenseUnitReady("menu_banner");
   const show = adsEnabled() && mounted;
 
   useEffect(() => setMounted(true), []);
@@ -42,8 +44,7 @@ export function GameAdBanner({ className, compact = false }: Props) {
       >
         <p className="text-[9px] uppercase tracking-[0.28em] text-[#d4af37]/80">AdSense</p>
         <p className="mt-1 text-[11px] text-white/65">
-          Paid Google ads are off until you add{" "}
-          <code className="text-[#ffd76a]">NEXT_PUBLIC_ADSENSE_CLIENT</code> in Vercel (ca-pub-…).
+          Paid Google ads are off until you add your publisher id in Orbit → AdSense (ca-pub-…).
           {adsenseConfigured() ? null : null}
         </p>
         <a
@@ -54,6 +55,40 @@ export function GameAdBanner({ className, compact = false }: Props) {
         >
           Open AdSense →
         </a>
+      </aside>
+    );
+  }
+
+  // Publisher live + Auto ads OK, but no Display slot for the in-game banner yet.
+  if (network === "adsense" && !unitReady) {
+    return (
+      <aside
+        className={`w-full rounded-lg border border-dashed border-[#d4af37]/35 bg-black/30 px-3 py-2 ${className ?? ""}`}
+        data-testid="game-ad-banner-need-slot"
+      >
+        <p className="text-[9px] uppercase tracking-[0.28em] text-[#d4af37]/80">
+          Next · Display ad unit
+        </p>
+        <p className="mt-1 text-[11px] text-white/65">
+          Auto ads can run site-wide. For this banner, create a Display unit and paste the slot in
+          Orbit.
+        </p>
+        <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px]">
+          <a
+            className="text-[#7EC8D9] underline-offset-2 hover:underline"
+            href="https://adsense.google.com/adsense/new/myads/units"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Create Display unit →
+          </a>
+          <Link
+            href="/dashboard/launchpad"
+            className="text-[#ffd76a] underline-offset-2 hover:underline"
+          >
+            Paste in Orbit
+          </Link>
+        </div>
       </aside>
     );
   }
