@@ -92,6 +92,19 @@ These settings stop deploy spam and duplicate checks once merged:
 | **`Svivva/scripts/vercel-should-build.mjs`**     | Ignored Build Step: skip when not `main`, no `Svivva/` diff, or `[skip vercel]` in commit |
 | **`.github/workflows/vercel-deploy-latest.yml`** | Deploy latest on `main` push or manual run; hook or token; clears queue when token set    |
 | **`Svivva/scripts/clear-vercel-queue.mjs`**      | Cancels queued/building deploys before manual or CI redeploy                              |
+| **`Svivva/scripts/prune-old-deployments.mjs`**   | Deletes old deployments to reclaim free-tier **Deployment / Functions Storage**           |
+
+### Free-tier storage overages
+
+Vercel free limits (**10 GB** deployment storage, **10 GB** functions storage) fill up from **kept old deployments**, not just the live build. To reclaim space:
+
+```bash
+cd Svivva
+DRY_RUN=1 npm run vercel:prune   # preview
+npm run vercel:prune             # keep latest production + ~7 recent; delete the rest
+```
+
+Requires `VERCEL_TOKEN` (and optional `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID`). Or delete old rows in **Vercel → Deployments**.
 
 ### Choose one deploy path (not both)
 

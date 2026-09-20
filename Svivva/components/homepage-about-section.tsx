@@ -34,37 +34,34 @@ export function HomepageAboutSection() {
   return (
     <section
       id="about"
-      className="relative border-t border-border/40 bg-background px-4 py-12 sm:px-6 sm:py-16"
+      className="relative border-t border-border/30 bg-gradient-to-b from-background via-background to-background/95 px-4 py-14 sm:px-6 sm:py-20"
     >
-      <div className="mx-auto max-w-3xl space-y-8 text-center">
-        <div className="space-y-3">
+      <div className="mx-auto max-w-3xl space-y-10 text-center">
+        <div className="space-y-4">
           <Badge variant="secondary" className="px-4 py-1.5">
             What is {BRAND.name}?
           </Badge>
-          <h2 className="text-2xl font-bold sm:text-3xl">
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
             One workspace to <span className="solid-accent">ship AI products</span>
           </h2>
-          <p className="mx-auto max-w-2xl text-base text-muted-foreground sm:text-lg">
+          <p className="mx-auto max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
             {BRAND.shortDescription}
           </p>
         </div>
 
-        <div className="grid gap-4 text-left sm:grid-cols-2">
+        <ul className="grid gap-x-8 gap-y-7 text-left sm:grid-cols-2">
           {HIGHLIGHTS.map(({ icon: Icon, title, description }) => (
-            <div
-              key={title}
-              className="rounded-xl border border-border/50 bg-card/80 p-4 backdrop-blur-sm"
-            >
-              <div className="mb-2 flex items-center gap-2">
-                <Icon className="h-4 w-4 text-[#5B8DA8]" aria-hidden />
-                <h3 className="text-sm font-semibold">{title}</h3>
+            <li key={title} className="space-y-2 border-t border-border/40 pt-5">
+              <div className="flex items-center gap-2">
+                <Icon className="h-4 w-4 shrink-0 text-[#5B8DA8]" aria-hidden />
+                <h3 className="text-sm font-semibold tracking-tight">{title}</h3>
               </div>
-              <p className="text-sm text-muted-foreground">{description}</p>
-            </div>
+              <p className="text-sm leading-relaxed text-muted-foreground">{description}</p>
+            </li>
           ))}
-        </div>
+        </ul>
 
-        <div className="flex flex-wrap items-center justify-center gap-3">
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
           <Link href="/signup">
             <Button className="bg-[#5B8DA8] text-white">Start free</Button>
           </Link>

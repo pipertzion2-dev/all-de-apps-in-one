@@ -17,6 +17,16 @@ tmp
 *.mp4
 *.webm
 *.zip
+*.wav
+*.mp3
+
+# Local/dev HTML fixtures — not part of the product surface
+public/api-test.html
+public/setup-guide.html
+public/test-runner.html
+public/vivva-test-plan.html
+public/svivva-marketing-guide.pdf
+public/svivva-marketing-strategy.pdf
 
 # attached_assets: only the PNGs committed to git are imported via @/attached_assets/…
 attached_assets/**

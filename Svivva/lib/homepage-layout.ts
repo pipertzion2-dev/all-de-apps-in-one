@@ -1,4 +1,6 @@
-/** Which below-the-fold homepage sections render. Cube + nav + footer always show. */
+/** Which below-the-fold homepage sections render.
+ * Product cube path (`scrollSnap`) owns about + pricing inside HomepageCubePanel.
+ * Remaining flags stay off — legacy marketing blocks were removed from the page. */
 export const HOMEPAGE_SECTIONS = {
   /** Full-viewport Dune-style cube flip: game → product cube homepage (with pricing). */
   scrollSnap: true,

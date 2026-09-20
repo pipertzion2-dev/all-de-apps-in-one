@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { CamoThreeOverlay } from "@/components/camo-three-overlay";
 import { HOMEPAGE_PRICING_TIERS } from "@/lib/homepage-pricing";
 import seedsLogo from "@/attached_assets/Svivva_Seeds_6_1771888740460.png";
@@ -13,8 +12,8 @@ import seedsLogo from "@/attached_assets/Svivva_Seeds_6_1771888740460.png";
 /** Pricing block on the product-cube homepage (below the nav cube). */
 export function HomepagePricingSection() {
   return (
-    <section id="pricing" className="relative overflow-hidden pb-16 pt-4 sm:pb-24 sm:pt-8">
-      <div className="pointer-events-none absolute inset-0 opacity-50" aria-hidden>
+    <section id="pricing" className="relative overflow-hidden pb-16 pt-6 sm:pb-24 sm:pt-10">
+      <div className="pointer-events-none absolute inset-0 opacity-40" aria-hidden>
         <CamoThreeOverlay preset="pricing" eagerMount keepMounted className="h-full w-full" />
       </div>
       <div
@@ -22,91 +21,81 @@ export function HomepagePricingSection() {
         aria-hidden
       />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="mx-auto mb-10 max-w-3xl space-y-4 rounded-2xl bg-background/85 p-5 text-center backdrop-blur-lg sm:mb-12 sm:p-8">
+      <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6">
+        <div className="mx-auto mb-12 max-w-2xl space-y-3 text-center sm:mb-14">
           <Badge variant="secondary" className="px-4 py-1.5">
             Pricing
           </Badge>
-          <h2 className="text-3xl font-bold sm:text-4xl">
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
             Simple, transparent <span className="solid-accent">pricing</span>
           </h2>
-          <p className="mx-auto max-w-2xl text-base text-muted-foreground sm:text-lg">
+          <p className="mx-auto max-w-xl text-base text-muted-foreground sm:text-lg">
             Start free, scale as you grow. No hidden fees.
           </p>
         </div>
 
-        <div className="mx-auto grid max-w-3xl gap-6 md:grid-cols-2 md:gap-8">
+        <div className="mx-auto grid max-w-3xl gap-8 md:grid-cols-2">
           {HOMEPAGE_PRICING_TIERS.map((tier) => (
             <div
               key={tier.name}
-              className={tier.popular ? "rounded-2xl p-[3px]" : undefined}
-              style={
-                tier.popular
-                  ? {
-                      background:
-                        "linear-gradient(135deg, #3F2A2C 0%, #7A4F3A 14%, #6B3A67 28%, #425884 42%, #D782B2 56%, #F3AFC4 70%, #6B7B59 85%, #4A5A3D 100%)",
-                    }
-                  : undefined
-              }
+              className={`flex h-full flex-col border-t-2 bg-background/80 px-1 pb-2 pt-6 backdrop-blur-md ${
+                tier.popular ? "border-[#5B8DA8]" : "border-border/60"
+              }`}
+              data-testid={`card-pricing-${tier.name.toLowerCase()}`}
             >
-              <Card
-                className={`relative h-full rounded-2xl bg-card p-6 backdrop-blur-xl ${tier.popular ? "border-0" : "border-border/50"}`}
-                data-testid={`card-pricing-${tier.name.toLowerCase()}`}
-              >
+              <div className="mb-1 flex items-center gap-2">
+                <h3 className="text-xl font-semibold tracking-tight">{tier.name}</h3>
                 {tier.popular ? (
-                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#5B8DA8] text-white">
-                    Most Popular
-                  </Badge>
+                  <Badge className="bg-[#5B8DA8] text-white">Most Popular</Badge>
                 ) : null}
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-xl font-semibold">{tier.name}</h3>
-                    <p className="text-sm text-muted-foreground">{tier.description}</p>
+              </div>
+              <p className="text-sm text-muted-foreground">{tier.description}</p>
+
+              {tier.hasSeeds ? (
+                <div className="mt-4 flex items-center gap-2">
+                  <div className="relative h-7 w-7 flex-shrink-0 overflow-hidden rounded-md">
+                    <Image
+                      src={seedsLogo}
+                      alt="ZZAI Seeds"
+                      fill
+                      sizes="28px"
+                      className="object-cover"
+                    />
                   </div>
-                  {tier.hasSeeds ? (
-                    <div className="flex items-center gap-2">
-                      <div className="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-lg">
-                        <Image
-                          src={seedsLogo}
-                          alt="ZZAI Seeds"
-                          fill
-                          sizes="32px"
-                          className="object-cover"
-                        />
-                      </div>
-                      <span className="seeds-holo-text text-[10px] font-bold uppercase tracking-widest">
-                        Includes Seeds
-                      </span>
-                    </div>
-                  ) : null}
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold">{tier.price}</span>
-                    <span className="text-muted-foreground">{tier.period}</span>
-                  </div>
-                  <ul className="space-y-3">
-                    {tier.features.map((feature) => (
-                      <li key={feature} className="flex items-center gap-2 text-sm">
-                        <Check className="h-4 w-4 flex-shrink-0 text-green-500" />
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Link href={tier.href} className="block">
-                    <Button
-                      className={`w-full ${tier.popular ? "bg-[#5B8DA8] text-white" : ""}`}
-                      variant={tier.popular ? "default" : "outline"}
-                      data-testid={`button-pricing-${tier.name.toLowerCase()}`}
-                    >
-                      {tier.cta}
-                    </Button>
-                  </Link>
+                  <span className="seeds-holo-text text-[10px] font-bold uppercase tracking-widest">
+                    Includes Seeds
+                  </span>
                 </div>
-              </Card>
+              ) : null}
+
+              <div className="mt-5 flex items-baseline gap-1">
+                <span className="text-4xl font-bold tracking-tight">{tier.price}</span>
+                <span className="text-muted-foreground">{tier.period}</span>
+              </div>
+
+              <ul className="mt-6 flex-1 space-y-2.5">
+                {tier.features.map((feature) => (
+                  <li key={feature} className="flex items-start gap-2 text-sm leading-snug">
+                    <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#5B8DA8]" />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <Link href={tier.href} className="mt-8 block">
+                <Button
+                  className={`w-full ${tier.popular ? "bg-[#5B8DA8] text-white" : ""}`}
+                  variant={tier.popular ? "default" : "outline"}
+                  data-testid={`button-pricing-${tier.name.toLowerCase()}`}
+                >
+                  {tier.cta}
+                </Button>
+              </Link>
             </div>
           ))}
         </div>
 
-        <p className="mt-8 text-center text-sm text-muted-foreground">
+        <p className="mt-10 text-center text-sm text-muted-foreground">
           Want to explore first?{" "}
           <Link href="/signup" className="underline transition-colors hover:text-foreground">
             Start free
