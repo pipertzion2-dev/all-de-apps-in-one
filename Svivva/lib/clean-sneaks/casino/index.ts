@@ -4,9 +4,12 @@ export {
   shuffleDeck,
   assertStandardDeck,
   dealOpeningLayout,
+  planOpeningDeal,
+  drawCards,
   suitSymbol,
   isRedSuit,
 } from "./deck";
+export type { DealStep } from "./deck";
 export {
   listLegalMoves,
   applyMove,
@@ -19,6 +22,9 @@ export {
 export {
   createEmptyCardGameState,
   startCardGame,
+  beginCardGameDeal,
+  applyDealStep,
+  finishDealing,
   selectHandCard,
   tryHumanPlay,
   applyAiMove,
