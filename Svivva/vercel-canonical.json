@@ -10,16 +10,16 @@
   "billingCheckout": "cashapp",
   "databaseEnvVar": "DATABASE_URL",
   "dashboardUrl": "https://vercel.com/zzai-zzai/all-de-apps-in-one",
-  "lastRequestedRedeployAt": "2026-09-20T15:37:00Z",
+  "lastRequestedRedeployAt": "2026-09-20T21:17:37Z",
   "deprecatedProjects": [
     {
       "name": "svivva-main-app",
-      "reason": "Deprecated ghost project on an old blocked Vercel login — disconnected from GitHub. Ignore any stale status on old commits."
+      "reason": "Deprecated ghost project on an old blocked Vercel login \u2014 disconnected from GitHub. Ignore any stale status on old commits."
     }
   ],
   "githubStatusCheck": {
-    "required": "Vercel – all-de-apps-in-one",
-    "ignore": "Vercel – svivva-main-app",
-    "note": "GitHub may show stale \"Account is blocked\" while Git deploy succeeds — CI verifies production HTTP as fallback."
+    "required": "Vercel \u2013 all-de-apps-in-one",
+    "ignore": "Vercel \u2013 svivva-main-app",
+    "note": "GitHub may show stale \"Account is blocked\" while Git deploy succeeds \u2014 CI verifies production HTTP as fallback."
   }
 }
