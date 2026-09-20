@@ -6,9 +6,18 @@ import {
   refillHandFromDeck,
   shouldEndGame,
 } from "./card-game-rules";
-import { assertStandardDeck, createDeck, dealOpeningLayout, shuffleDeck } from "./deck";
+import {
+  assertStandardDeck,
+  createDeck,
+  dealOpeningLayout,
+  planOpeningDeal,
+  shuffleDeck,
+  type DealStep,
+} from "./deck";
 import { STEAL_BUNDLE_RULES } from "./rules";
-import type { CardGameState, CardPlayer, PlayMove } from "./types";
+import type { CardGameState, CardPlayer, PlayMove, PlayingCard } from "./types";
+
+export type { DealStep };
 
 export function createEmptyCardGameState(): CardGameState {
   return {
@@ -36,7 +45,85 @@ export function buildPlayers(count: 2 | 3): CardPlayer[] {
   }));
 }
 
-/** Pure setup — source of truth lives in returned state, never DOM. */
+/**
+ * Shuffle a fresh 52-card deck and return the dealing phase with an empty table/hands.
+ * Cards are still in `deck` (top = index 0); apply `DealStep`s one at a time like a real dealer.
+ */
+export function beginCardGameDeal(
+  playerCount: 2 | 3,
+  rng: () => number = Math.random,
+): { state: CardGameState; steps: DealStep[] } {
+  const raw = createDeck();
+  assertStandardDeck(raw);
+  const shuffled = shuffleDeck(raw, rng);
+  const { steps } = planOpeningDeal(shuffled, playerCount, STEAL_BUNDLE_RULES);
+
+  return {
+    state: {
+      deck: shuffled.map((c) => ({ ...c, faceUp: false })),
+      tableCards: [],
+      players: buildPlayers(playerCount),
+      currentPlayerIndex: 0,
+      selectedCardId: null,
+      phase: "dealing",
+      winnerIds: [],
+      lastEvent: "Shuffling a fresh deck…",
+      turnNumber: 0,
+    },
+    steps,
+  };
+}
+
+/** Peel one planned card from the top of the stock into a hand or the table. */
+export function applyDealStep(state: CardGameState, step: DealStep): CardGameState {
+  if (state.phase !== "dealing" && state.phase !== "setup") return state;
+  if (state.deck.length === 0) return state;
+
+  const [top, ...rest] = state.deck;
+  if (!top || top.id !== step.card.id) {
+    // Still apply by id if the stock was reordered — find the planned card.
+    const idx = state.deck.findIndex((c) => c.id === step.card.id);
+    if (idx < 0) return state;
+    const card = state.deck[idx]!;
+    const deck = [...state.deck.slice(0, idx), ...state.deck.slice(idx + 1)];
+    return placeDealtCard({ ...state, deck }, step, { ...card, faceUp: true });
+  }
+
+  return placeDealtCard({ ...state, deck: rest }, step, { ...top, faceUp: true });
+}
+
+function placeDealtCard(state: CardGameState, step: DealStep, card: PlayingCard): CardGameState {
+  if (step.kind === "table") {
+    return {
+      ...state,
+      tableCards: [...state.tableCards, card],
+      lastEvent: `Flipped ${card.rank} onto the table.`,
+    };
+  }
+
+  const players = state.players.map((p, i) => {
+    if (i !== step.playerIndex) return p;
+    return { ...p, hand: [...p.hand, card] };
+  });
+  const seat = players[step.playerIndex];
+  return {
+    ...state,
+    players,
+    lastEvent: `Dealt to ${seat?.name ?? `seat ${step.playerIndex + 1}`}.`,
+  };
+}
+
+export function finishDealing(state: CardGameState): CardGameState {
+  return {
+    ...state,
+    phase: "playing",
+    turnNumber: 1,
+    selectedCardId: null,
+    lastEvent: "Cards dealt. Match by rank — biggest bundle wins.",
+  };
+}
+
+/** Pure setup — instantly dealt end state (tests / skip animation). */
 export function startCardGame(playerCount: 2 | 3, rng: () => number = Math.random): CardGameState {
   const raw = createDeck();
   assertStandardDeck(raw);
@@ -48,7 +135,7 @@ export function startCardGame(playerCount: 2 | 3, rng: () => number = Math.rando
   }));
 
   return {
-    deck: dealt.deck,
+    deck: dealt.deck.map((c) => ({ ...c, faceUp: false })),
     tableCards: dealt.tableCards,
     players,
     currentPlayerIndex: 0,

@@ -1,10 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { chooseAiMove } from "@/lib/clean-sneaks/casino/ai-player";
 import {
+  applyDealStep,
   applyMove,
+  beginCardGameDeal,
   canStealBundle,
   createDeck,
+  dealOpeningLayout,
   determineWinners,
+  finishDealing,
   listLegalMoves,
   passStuckTurn,
   shouldEndGame,
@@ -45,6 +49,65 @@ describe("deal + match rules", () => {
       expect(p.hand).toHaveLength(STEAL_BUNDLE_RULES.startingHandSize);
     }
     expect(state.deck.length).toBe(52 - 5 - 5 * 2);
+  });
+
+  it("deals round-robin from the top of a shuffled stock", () => {
+    const deck = createDeck();
+    // Identity-ish shuffle: keep createDeck order so top cards are predictable.
+    const shuffled = shuffleDeck(deck, () => 0);
+    const { steps, hands, tableCards, deck: remaining } = dealOpeningLayout(shuffled, 2);
+
+    // Hand rounds first: P1, P2, P1, P2… then table flips.
+    expect(steps.slice(0, 4).map((s) => s.kind)).toEqual(["hand", "hand", "hand", "hand"]);
+    expect(steps[0]).toMatchObject({ kind: "hand", playerIndex: 0 });
+    expect(steps[1]).toMatchObject({ kind: "hand", playerIndex: 1 });
+    expect(steps[2]).toMatchObject({ kind: "hand", playerIndex: 0 });
+    expect(steps[3]).toMatchObject({ kind: "hand", playerIndex: 1 });
+
+    const handSteps = steps.filter((s) => s.kind === "hand");
+    const tableSteps = steps.filter((s) => s.kind === "table");
+    expect(handSteps).toHaveLength(10);
+    expect(tableSteps).toHaveLength(5);
+
+    // First ten stock cards went to hands in seat order; next five to the table.
+    const top = shuffled.slice(0, 15).map((c) => c.id);
+    const dealtIds = [...handSteps, ...tableSteps].map((s) => s.card.id);
+    expect(dealtIds).toEqual(top);
+    expect(hands[0]!.map((c) => c.id)).toEqual([
+      shuffled[0]!.id,
+      shuffled[2]!.id,
+      shuffled[4]!.id,
+      shuffled[6]!.id,
+      shuffled[8]!.id,
+    ]);
+    expect(hands[1]!.map((c) => c.id)).toEqual([
+      shuffled[1]!.id,
+      shuffled[3]!.id,
+      shuffled[5]!.id,
+      shuffled[7]!.id,
+      shuffled[9]!.id,
+    ]);
+    expect(tableCards.map((c) => c.id)).toEqual(shuffled.slice(10, 15).map((c) => c.id));
+    expect(remaining.map((c) => c.id)).toEqual(shuffled.slice(15).map((c) => c.id));
+  });
+
+  it("animates dealing by peeling the planned top card each step", () => {
+    const { state, steps } = beginCardGameDeal(2, () => 0);
+    expect(state.phase).toBe("dealing");
+    expect(state.deck).toHaveLength(52);
+    expect(state.players.every((p) => p.hand.length === 0)).toBe(true);
+
+    let next = state;
+    for (const step of steps) {
+      next = applyDealStep(next, step);
+    }
+    next = finishDealing(next);
+    expect(next.phase).toBe("playing");
+    expect(next.players[0]!.hand).toHaveLength(5);
+    expect(next.players[1]!.hand).toHaveLength(5);
+    expect(next.tableCards).toHaveLength(5);
+    expect(next.deck).toHaveLength(52 - 15);
+    expect(next.deck.every((c) => !c.faceUp)).toBe(true);
   });
 
   it("matches by rank ignoring suit", () => {

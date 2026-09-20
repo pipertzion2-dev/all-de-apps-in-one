@@ -167,7 +167,7 @@ export function refillHandFromDeck(
   if (need === 0 || state.deck.length === 0) return state;
   const take = Math.min(need, state.deck.length);
   const drawn = state.deck.slice(0, take).map((c) => ({ ...c, faceUp: true }));
-  const deck = state.deck.slice(take);
+  const deck = state.deck.slice(take).map((c) => ({ ...c, faceUp: false }));
   player.hand = [...player.hand, ...drawn];
   return { ...state, players, deck };
 }

@@ -6,8 +6,11 @@ import {
   aiDelayMs,
   aiResolveDelayMs,
   applyAiMove,
+  applyDealStep,
+  beginCardGameDeal,
   chooseAiMove,
   currentPlayer,
+  finishDealing,
   listLegalMoves,
   passStuckTurn,
   payoutWin,
@@ -15,10 +18,11 @@ import {
   recordCardGameResult,
   selectHandCard,
   setSessionCredits,
-  startCardGame,
   tryHumanPlay,
   type CardGameState,
+  type DealStep,
   type PlayMove,
+  type PlayingCard,
 } from "@/lib/clean-sneaks/casino";
 import { PlayingCardView } from "./PlayingCardView";
 
@@ -54,6 +58,7 @@ export function StealBundleBoard({
   const recordedRef = useRef(false);
   /** After a human move, use full AI pacing; chain AI→AI turns stay snappy. */
   const aiPaceAfterHumanRef = useRef(true);
+  const [dealQueue, setDealQueue] = useState<DealStep[] | null>(null);
 
   const deal = useCallback(() => {
     const paid = Math.min(ante, credits);
@@ -63,9 +68,10 @@ export function StealBundleBoard({
     setSessionCredits(afterAnte);
     onCreditsChange?.(afterAnte);
     playCue("card_shuffle");
-    const next = startCardGame(playerCount);
-    setState(next);
-    playCue("card_deal");
+    const { state: dealing, steps } = beginCardGameDeal(playerCount);
+    setDealQueue(steps);
+    setBusy(true);
+    setState(dealing);
     recordedRef.current = false;
     aiPaceAfterHumanRef.current = true;
   }, [playerCount, ante, credits, onCreditsChange]);
@@ -73,6 +79,36 @@ export function StealBundleBoard({
   useEffect(() => {
     if (tutorialDone && !state) deal();
   }, [tutorialDone, state, deal]);
+
+  // Peel cards one-by-one from the top of the shuffled stock (real dealer order).
+  useEffect(() => {
+    if (!state || state.phase !== "dealing" || !dealQueue?.length) return;
+    const steps = dealQueue;
+    let cancelled = false;
+    let i = 0;
+    let timer = 0;
+
+    const run = () => {
+      if (cancelled) return;
+      if (i >= steps.length) {
+        setDealQueue(null);
+        setState((s) => (s ? finishDealing(s) : s));
+        setBusy(false);
+        return;
+      }
+      const step = steps[i]!;
+      i += 1;
+      playCue("card_deal");
+      setState((s) => (s ? applyDealStep(s, step) : s));
+      timer = window.setTimeout(run, step.kind === "table" ? 120 : 78);
+    };
+
+    timer = window.setTimeout(run, 420);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [state?.phase, dealQueue]);
 
   useEffect(() => {
     if (!state || state.phase !== "results" || recordedRef.current) return;
@@ -304,12 +340,15 @@ export function StealBundleBoard({
 
   const human = state.players[0]!;
   const cur = currentPlayer(state);
-  const yourTurn = Boolean(cur?.isHuman);
+  const yourTurn = Boolean(cur?.isHuman) && state.phase === "playing";
+  const dealing = state.phase === "dealing";
+  const deckTop: PlayingCard | null = state.deck[0] ?? null;
 
   return (
     <div
       className="relative flex h-full min-h-0 flex-1 flex-col overflow-hidden"
       data-testid="steal-bundle-board"
+      data-phase={state.phase}
       style={{
         background:
           "radial-gradient(ellipse at 50% 40%, rgba(13,74,47,0.55), #0a120e 60%), #060a08",
@@ -325,11 +364,15 @@ export function StealBundleBoard({
         <div className="text-right">
           <p
             className={`text-xs font-semibold uppercase tracking-wider ${
-              yourTurn ? "text-[#ffd76a]" : "text-[#e8dcc0]/60"
+              dealing ? "text-[#7dffb2]" : yourTurn ? "text-[#ffd76a]" : "text-[#e8dcc0]/60"
             }`}
             data-testid="turn-indicator"
           >
-            {cur?.isHuman ? "Player 1 — Your Turn" : `${cur?.name ?? ""} — Playing…`}
+            {dealing
+              ? "Dealing from the deck…"
+              : cur?.isHuman
+                ? "Player 1 — Your Turn"
+                : `${cur?.name ?? ""} — Playing…`}
           </p>
           <p className="text-[10px] tabular-nums text-[#d4af37]/80" data-testid="table-credits">
             Credits {credits.toLocaleString()} · Ante {anteLocked.toLocaleString()}
@@ -380,43 +423,77 @@ export function StealBundleBoard({
         ))}
       </div>
 
-      {/* Table */}
+      {/* Table + stock */}
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-2 py-3">
-        <p className="text-[10px] uppercase tracking-[0.3em] text-[#d4af37]/70">Table</p>
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          {state.tableCards.length === 0 && (
-            <p className="text-xs text-[#e8dcc0]/40">No cards on the felt</p>
-          )}
-          {state.tableCards.map((c) => {
-            const canMatch =
-              yourTurn &&
-              Boolean(
-                state.selectedCardId &&
-                selectedMoves.some((m) => m.type === "matchTable" && m.tableCardId === c.id),
-              );
-            return (
-              <PlayingCardView
-                key={c.id}
-                card={c}
-                highlight={canMatch}
-                onClick={
-                  canMatch && state.selectedCardId
-                    ? () =>
-                        commitMove({
-                          type: "matchTable",
-                          handCardId: state.selectedCardId!,
-                          tableCardId: c.id,
-                        })
-                    : undefined
-                }
-              />
-            );
-          })}
+        <div className="flex w-full max-w-3xl flex-wrap items-start justify-center gap-4 sm:gap-6">
+          <div className="flex flex-col items-center gap-1" data-testid="deck-stock">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-[#d4af37]/70">Deck</p>
+            <div className="relative h-[4.5rem] w-[3.15rem] sm:h-20 sm:w-14">
+              {state.deck.length > 2 && (
+                <div
+                  aria-hidden
+                  className="absolute inset-0 translate-x-1 translate-y-1 rounded-md border border-[#d4af37]/25 bg-[#1a0810]"
+                />
+              )}
+              {state.deck.length > 1 && (
+                <div
+                  aria-hidden
+                  className="absolute inset-0 translate-x-0.5 translate-y-0.5 rounded-md border border-[#d4af37]/35 bg-[#2a1018]"
+                />
+              )}
+              {deckTop ? (
+                <PlayingCardView
+                  card={deckTop}
+                  faceDown
+                  className="absolute inset-0"
+                  data-testid="deck-top-card"
+                />
+              ) : (
+                <div className="absolute inset-0 rounded-md border border-dashed border-white/15" />
+              )}
+            </div>
+            <p className="text-[10px] tabular-nums text-[#e8dcc0]/55" data-testid="deck-count">
+              {state.deck.length} left
+            </p>
+          </div>
+
+          <div className="flex min-w-0 flex-1 flex-col items-center gap-2">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-[#d4af37]/70">Table</p>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {state.tableCards.length === 0 && (
+                <p className="text-xs text-[#e8dcc0]/40">
+                  {dealing ? "Flipping table cards…" : "No cards on the felt"}
+                </p>
+              )}
+              {state.tableCards.map((c) => {
+                const canMatch =
+                  yourTurn &&
+                  Boolean(
+                    state.selectedCardId &&
+                    selectedMoves.some((m) => m.type === "matchTable" && m.tableCardId === c.id),
+                  );
+                return (
+                  <PlayingCardView
+                    key={c.id}
+                    card={c}
+                    highlight={canMatch}
+                    onClick={
+                      canMatch && state.selectedCardId
+                        ? () =>
+                            commitMove({
+                              type: "matchTable",
+                              handCardId: state.selectedCardId!,
+                              tableCardId: c.id,
+                            })
+                        : undefined
+                    }
+                  />
+                );
+              })}
+            </div>
+          </div>
         </div>
-        <p className="text-[10px] text-[#e8dcc0]/45">
-          Deck: {state.deck.length}
-          {state.lastEvent ? ` · ${state.lastEvent}` : ""}
-        </p>
+        <p className="text-[10px] text-[#e8dcc0]/45">{state.lastEvent ?? ""}</p>
       </div>
 
       {/* Human hand + bundle */}
