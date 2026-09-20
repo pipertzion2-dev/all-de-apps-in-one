@@ -200,6 +200,42 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
             Three-Choice in AdSense (it only shows for EEA/UK/CH visitors).
           </li>
         </ul>
+        <div
+          className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2.5 space-y-2"
+          data-testid="orbit-adsense-fix-urls"
+        >
+          <p className="text-[11px] font-bold text-red-700 dark:text-red-300">
+            AdSense “Fix” error — paste these in Sites / message settings:
+          </p>
+          <div className="space-y-1.5 text-[11px]">
+            <p>
+              <span className="text-muted-foreground">Privacy policy URL: </span>
+              <a
+                href="https://zzaizzai.com/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-mono font-semibold text-foreground underline break-all"
+              >
+                https://zzaizzai.com/privacy
+              </a>
+            </p>
+            <p>
+              <span className="text-muted-foreground">Logo URL: </span>
+              <a
+                href="https://zzaizzai.com/zzai-logo.png"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-mono font-semibold text-foreground underline break-all"
+              >
+                https://zzaizzai.com/zzai-logo.png
+              </a>
+            </p>
+            <p className="text-muted-foreground leading-relaxed">
+              Also under <strong className="text-foreground">User choices</strong> turn{" "}
+              <strong className="text-foreground">Do not consent</strong> On (that’s Three-Choice).
+            </p>
+          </div>
+        </div>
         <div className="flex flex-wrap gap-2">
           <Button
             asChild

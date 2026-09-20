@@ -30,5 +30,8 @@ describe("AdSense Google CMP readiness", () => {
     expect(ui).toContain("orbit-adsense-cmp-link");
     expect(ui).toContain("orbit-adsense-cmp-cta");
     expect(ui).toContain("orbit-open-adsense-cmp");
+    expect(ui).toContain("https://zzaizzai.com/privacy");
+    expect(ui).toContain("https://zzaizzai.com/zzai-logo.png");
+    expect(ui).toContain("orbit-adsense-fix-urls");
   });
 });
