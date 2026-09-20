@@ -13,7 +13,7 @@ import { getPrimaryAdminUserId } from "@/lib/auth/admin";
 import { getSiteUrl } from "@/lib/site-url";
 import { BRAND } from "@/lib/brand";
 import { MEDIA } from "@/lib/media-assets";
-import { resolveSiteAdsenseClient } from "@/lib/adsense-credentials";
+import { resolveSiteAdsenseClient, resolveSiteAdsenseSlotBanner } from "@/lib/adsense-credentials";
 
 const zcFont = localFont({
   src: "../media/fonts/Zc-Regular.ttf",
@@ -120,7 +120,7 @@ function resolveAdsenseClient(): string | null {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const adsenseClient = resolveAdsenseClient();
-  const adsenseBanner = process.env.NEXT_PUBLIC_ADSENSE_SLOT_BANNER?.trim() || "";
+  const adsenseBanner = resolveSiteAdsenseSlotBanner();
   const adsenseInterstitial = process.env.NEXT_PUBLIC_ADSENSE_SLOT_INTERSTITIAL?.trim() || "";
   const adsenseRewarded = process.env.NEXT_PUBLIC_ADSENSE_SLOT_REWARDED?.trim() || "";
   const adsenseRuntimeJs = adsenseClient

@@ -40,8 +40,14 @@ describe("AdSense Google CMP readiness", () => {
     expect(ui).toContain("orbit-adsense-display-unit-cta");
     expect(ui).toContain("orbit-open-adsense-ad-units");
     expect(ui).toContain("myads/units");
-    expect(ui).toContain("paste the slot number");
-    expect(ui).toContain("Banner slot");
+    expect(ui).toContain("SITE_ADSENSE_SLOT_BANNER");
+  });
+
+  it("ships ZZAI ADS Display slot 9914022148 as the site banner default", () => {
+    const creds = readFileSync(resolve(__dirname, "../adsense-credentials.ts"), "utf8");
+    expect(creds).toContain('SITE_ADSENSE_SLOT_BANNER = "9914022148"');
+    const layout = readFileSync(resolve(__dirname, "../../app/layout.tsx"), "utf8");
+    expect(layout).toContain("resolveSiteAdsenseSlotBanner");
   });
 
   it("skips empty Google Advertisement interstitial until a Display slot exists", () => {

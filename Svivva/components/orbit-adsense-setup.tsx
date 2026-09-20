@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ExternalLink, Loader2, DollarSign, RefreshCw, Check } from "lucide-react";
-import { SITE_ADSENSE_CLIENT } from "@/lib/adsense-credentials";
+import { SITE_ADSENSE_CLIENT, SITE_ADSENSE_SLOT_BANNER } from "@/lib/adsense-credentials";
 
 type StatusPayload = {
   stored: {
@@ -84,6 +84,7 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
       if (next.adsense?.clientId) setClientId(next.adsense.clientId);
       else setClientId(SITE_ADSENSE_CLIENT);
       if (next.adsense?.slotBanner) setSlotBanner(next.adsense.slotBanner);
+      else setSlotBanner(SITE_ADSENSE_SLOT_BANNER);
       if (next.adsense?.slotInterstitial) setSlotInterstitial(next.adsense.slotInterstitial);
       if (next.adsense?.slotRewarded) setSlotRewarded(next.adsense.slotRewarded);
       onConfiguredChange?.(Boolean(next.effective.adsenseClient));
