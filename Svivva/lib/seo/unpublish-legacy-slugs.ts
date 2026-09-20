@@ -6,8 +6,7 @@ import { nativeToolPathForSlug } from "@/lib/orbit/mini-app-curation";
 
 export type UnpublishedLegacyPage = { slug: string; reason: string };
 
-const LEGACY_REASON =
-  "Legacy brand or reserved slug — canonical hub is /cyber-security-mini-apps";
+const LEGACY_REASON = "Legacy brand or reserved slug — canonical hub is /cyber-security-mini-apps";
 
 const NATIVE_TOOL_DUPE_REASON =
   "Root slug duplicates native /tools URL — use canonical /tools path only";
