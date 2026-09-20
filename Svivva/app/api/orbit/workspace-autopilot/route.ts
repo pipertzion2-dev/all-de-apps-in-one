@@ -7,7 +7,7 @@ import { getAllWorkspaceProjects } from "@/lib/workspace-external-apps";
 import { hasStripeConfigured, hasStripeWebhookConfigured } from "@/lib/env";
 import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
 import { ensureOrbitHubPages } from "@/lib/orbit/ensure-hub-pages";
-import { unpublishLegacySeoSlugs } from "@/lib/seo/unpublish-legacy-slugs";
+import { unpublishSeoSlugHygiene } from "@/lib/seo/unpublish-legacy-slugs";
 import { isDuplicateSeoVariantSlug } from "@/lib/seo/duplicate-variants";
 import { eq } from "drizzle-orm";
 
@@ -127,7 +127,7 @@ export async function POST() {
       .where(eq(seoLandingPages.published, true))
       .limit(400);
 
-    const unpublished = await unpublishLegacySeoSlugs(400);
+    const unpublished = await unpublishSeoSlugHygiene(400);
 
     for (const page of publishedPages) {
       if (!page.slug || !isDuplicateSeoVariantSlug(page.slug)) continue;

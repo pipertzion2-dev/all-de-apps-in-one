@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   filterToolsForTrafficDiscovery,
   nativeToolPathForSlug,
+  nativeToolRootSlugs,
   nativeToolsAsDiscoverable,
   nativeToolSitemapPaths,
   NATIVE_SVIVVA_TOOLS,
