@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
+import { BRAND } from "@/lib/brand";
 import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
 import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
 import { HomepageScrollHint } from "@/components/homepage-scroll-hint";
@@ -35,10 +36,13 @@ export function HomepageGamePanel() {
       />
 
       <div className="relative z-10 flex min-h-0 flex-1 flex-col items-center justify-center px-4 pb-24 pt-24 sm:px-6 sm:pt-28">
-        <p className="mb-3 text-[10px] uppercase tracking-[0.42em] text-[#A8BA48]/90">ZZAI Play</p>
-        <h1 className="seeds-holo-text text-center text-3xl font-bold tracking-[0.08em] sm:text-4xl">
-          {KLEAN_SNEAKS.display}
+        <h1 className="text-center text-4xl font-bold lowercase tracking-[0.16em] text-white sm:text-5xl">
+          {BRAND.name}
         </h1>
+        <p className="mt-3 text-[10px] uppercase tracking-[0.42em] text-[#A8BA48]/90">Play</p>
+        <p className="seeds-holo-text mt-2 text-center text-xl font-bold tracking-[0.08em] sm:text-2xl">
+          {KLEAN_SNEAKS.display}
+        </p>
         <p
           className="mt-4 max-w-md text-center text-sm font-medium leading-relaxed text-[#E8D9A8]/95 sm:text-base"
           data-testid="text-clean-sneaks-goal"

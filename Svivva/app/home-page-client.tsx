@@ -432,7 +432,7 @@ export default function LandingPage() {
                 >
                   <Image
                     src={introImage}
-                    alt="ZZAI"
+                    alt="zzai zzai"
                     width={1024}
                     height={1024}
                     sizes="100vw"

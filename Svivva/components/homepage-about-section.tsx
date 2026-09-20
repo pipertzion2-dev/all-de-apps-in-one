@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BRAND } from "@/lib/brand";
 import { BarChart3, GitBranch, Shield, Zap } from "lucide-react";
@@ -38,12 +37,12 @@ export function HomepageAboutSection() {
     >
       <div className="mx-auto max-w-3xl space-y-10 text-center">
         <div className="space-y-4">
-          <Badge variant="secondary" className="px-4 py-1.5">
-            What is {BRAND.name}?
-          </Badge>
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            One workspace to <span className="solid-accent">ship AI products</span>
+          <h2 className="text-4xl font-bold lowercase tracking-[0.14em] sm:text-5xl">
+            {BRAND.name}
           </h2>
+          <p className="text-lg font-medium tracking-tight text-foreground/90 sm:text-xl">
+            One workspace to <span className="solid-accent">ship AI products</span>
+          </p>
           <p className="mx-auto max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
             {BRAND.shortDescription}
           </p>

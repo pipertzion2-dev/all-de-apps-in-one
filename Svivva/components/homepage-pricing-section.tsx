@@ -23,9 +23,9 @@ export function HomepagePricingSection() {
 
       <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6">
         <div className="mx-auto mb-12 max-w-2xl space-y-3 text-center sm:mb-14">
-          <Badge variant="secondary" className="px-4 py-1.5">
-            Pricing
-          </Badge>
+          <p className="text-sm font-bold lowercase tracking-[0.22em] text-foreground/90">
+            zzai zzai
+          </p>
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
             Simple, transparent <span className="solid-accent">pricing</span>
           </h2>
