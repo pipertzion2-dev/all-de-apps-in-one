@@ -92,10 +92,21 @@ export function adsenseConfigured(): boolean {
   return Boolean(adsenseClientId());
 }
 
-/** Prefer AdSense whenever the publisher id is set (Auto ads and/or unit slots). */
+/**
+ * True when a Display unit slot is available for this placement (or any shared slot).
+ * Publisher id alone is enough for Auto ads; unit placements need a slot id.
+ */
+export function adsenseUnitReady(placement: AdPlacementId): boolean {
+  return Boolean(adsenseClientId() && (adsenseSlot(placement) || adsenseAnySlot()));
+}
+
+/**
+ * Prefer AdSense for in-game units only when a slot id exists.
+ * Publisher id without slots still loads Auto ads via layout — do not open empty unit UI.
+ */
 export function resolveAdNetwork(placement: AdPlacementId): "adsense" | "house" | "unconfigured" {
   if (!adsEnabled()) return "unconfigured";
-  if (adsenseClientId()) return "adsense";
+  if (adsenseUnitReady(placement)) return "adsense";
   if (houseAdsAllowed()) return "house";
   return "unconfigured";
 }

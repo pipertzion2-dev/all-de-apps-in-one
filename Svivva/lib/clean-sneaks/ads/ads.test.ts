@@ -40,14 +40,42 @@ describe("clean-sneaks advertising", () => {
     vi.unstubAllEnvs();
   });
 
-  it("uses site AdSense publisher by default (verification + Auto ads)", () => {
-    expect(resolveAdNetwork("menu_banner")).toBe("adsense");
+  it("uses AdSense only when a display slot id is configured", () => {
+    // Publisher id alone (site default) is for Auto ads — unit UI stays quiet.
+    expect(resolveAdNetwork("menu_banner")).toBe("unconfigured");
+    expect(resolveAdNetwork("run_interstitial")).toBe("unconfigured");
   });
 
-  it("uses AdSense when NEXT_PUBLIC_ADSENSE_CLIENT is set", () => {
+  it("uses AdSense when client + slot env are set", () => {
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_CLIENT", "ca-pub-1234567890123456");
+    vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT_BANNER", "1234567890");
     expect(resolveAdNetwork("menu_banner")).toBe("adsense");
+    // Shared banner slot can fill interstitial when placement-specific is missing.
     expect(resolveAdNetwork("run_interstitial")).toBe("adsense");
+  });
+
+  it("falls back to house ads when slots are missing but house is enabled", () => {
+    vi.stubEnv("NEXT_PUBLIC_CLEAN_SNEAKS_HOUSE_ADS", "1");
+    expect(resolveAdNetwork("menu_banner")).toBe("house");
+  });
+
+  it("never ships AdSense setup copy into player-facing ad components", () => {
+    const { readFileSync } = require("fs") as typeof import("fs");
+    const { resolve } = require("path") as typeof import("path");
+    const root = resolve(__dirname, "../../../components/clean-sneaks/ads");
+    for (const file of [
+      "AdSenseSlot.tsx",
+      "GameAdBanner.tsx",
+      "GameRewardedAd.tsx",
+      "GameInterstitialAd.tsx",
+    ]) {
+      const src = readFileSync(resolve(root, file), "utf8");
+      expect(src).not.toMatch(/NEXT_PUBLIC_ADSENSE_SLOT_BANNER/);
+      expect(src).not.toMatch(/Create a Display ad unit/);
+      expect(src).not.toMatch(/adsense-missing-slot/);
+      expect(src).not.toMatch(/game-ad-banner-setup/);
+      expect(src).not.toMatch(/game-rewarded-ad-setup/);
+    }
   });
 
   it("records impressions into a local earnings estimate", () => {
