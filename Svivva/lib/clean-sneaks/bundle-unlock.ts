@@ -1,9 +1,6 @@
 import { FINISH_DISTANCE } from "./run-engine";
 import { CREDITS_MIN_ANTE } from "./casino/credits";
 
-/** Soft guidance score — casino admission uses any finishing score. */
-export const BUNDLE_CARD_MIN_SCORE = 800;
-
 export const BUNDLE_CARD_UNLOCK_KEY = "zzai.clean-sneaks.bundleCardUnlocked";
 export const BUNDLE_CARD_WINS_KEY = "zzai.clean-sneaks.bundleCardWins";
 
@@ -19,23 +16,15 @@ export type BundleUnlockResult = {
   reason?: string;
 };
 
-/**
- * Casino + Steal the Bundle unlock when the player reaches the destination.
- * The walking score becomes casino admission — no high-score gate.
- */
-export function evaluateBundleUnlock({ score, distance }: BundleUnlockAttempt): BundleUnlockResult {
-  const floored = Math.max(0, Math.floor(score));
-  const reachedDestination = distance >= FINISH_DISTANCE;
-
-  if (!reachedDestination) {
+/** Unlock casino entry when the runner reaches the finish. */
+export function evaluateBundleUnlock({ distance }: BundleUnlockAttempt): BundleUnlockResult {
+  if (distance < FINISH_DISTANCE) {
     return {
       unlocked: false,
       newlyUnlocked: false,
       reason: `Reach ${FINISH_DISTANCE}m to turn in your score at the casino.`,
     };
   }
-
-  void floored;
   return { unlocked: true, newlyUnlocked: true };
 }
 
@@ -77,11 +66,9 @@ export function writeBundleCardWin(): number {
   return next;
 }
 
-/** Progress hint for homepage / HUD — how close the player is to unlocking. */
-export function bundleUnlockHint(bestScore: number): string {
+export function bundleUnlockHint(_bestScore: number): string {
   if (isBundleCardUnlocked()) {
-    return "Casino unlocked — cash out credits, turn in your score ticket, then Steal the Bundle.";
+    return "Casino unlocked — cash out credits, turn in your ticket, then Steal the Bundle.";
   }
-  void bestScore;
-  return `How to get in: walk ${FINISH_DISTANCE}m (or cash out with ${CREDITS_MIN_ANTE}+ credits), turn in your ticket at the door.`;
+  return `Walk ${FINISH_DISTANCE}m (or cash out with ${CREDITS_MIN_ANTE}+ credits), then turn in your ticket.`;
 }

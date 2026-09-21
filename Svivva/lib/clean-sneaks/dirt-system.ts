@@ -353,8 +353,3 @@ export function zoneStainColor(zone: ZoneDirt): string | null {
   if (!best || zone.amount < 2) return null;
   return SUBSTANCE_COLORS[best];
 }
-
-export function worstContamination(events: ContaminationEvent[]): ContaminationEvent | null {
-  if (!events.length) return null;
-  return events.reduce((a, b) => (b.amount > a.amount ? b : a));
-}

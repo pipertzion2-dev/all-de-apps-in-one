@@ -290,11 +290,6 @@ export function pickOhNoActionForObstacle(kind: ObstacleKind): OhNoAction {
   return options[Math.floor(Math.random() * options.length)]!;
 }
 
-/** @deprecated Use pickOhNoActionForObstacle */
-export function pickOhNoAction(): OhNoAction {
-  return pickOhNoActionForObstacle("mud");
-}
-
 export function ohNoActionsForObstacle(kind: ObstacleKind): readonly OhNoAction[] {
   return OBSTACLE_OH_NO[kind] ?? ["hop", "liftFoot"];
 }

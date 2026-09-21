@@ -2,25 +2,6 @@ import type { ObstacleKind, PowerUpKind } from "./types";
 
 export const LANES = 3;
 
-export const DIRT_BY_KIND: Record<ObstacleKind, number> = {
-  gum: 5,
-  banana: 6,
-  dirt: 10,
-  water: 5,
-  drink: 8,
-  trash: 10,
-  street: 10,
-  grass: 12,
-  bag: 12,
-  poop: 16,
-  debris: 15,
-  paint: 15,
-  pothole: 18,
-  mud: 20,
-  pedestrian: 8,
-  bike: 10,
-};
-
 export const OBSTACLE_META: Record<
   ObstacleKind,
   { label: string; color: string; w: number; h: number; jumpable: boolean }

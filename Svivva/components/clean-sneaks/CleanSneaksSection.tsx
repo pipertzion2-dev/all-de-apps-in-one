@@ -35,8 +35,7 @@ export function CleanSneaksSection() {
         aria-hidden
         style={{
           background: `
-            radial-gradient(ellipse 70% 55% at 28% 40%, rgba(74,47,92,0.42), transparent 58%),
-            radial-gradient(ellipse 55% 45% at 78% 65%, rgba(168,186,72,0.10), transparent 52%),
+            radial-gradient(ellipse 55% 45% at 78% 65%, rgba(168,186,72,0.08), transparent 52%),
             linear-gradient(180deg, transparent, rgba(10,12,16,0.9))
           `,
         }}
@@ -45,14 +44,7 @@ export function CleanSneaksSection() {
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
         <div className="grid items-stretch gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-10">
           <div
-            className="group relative flex min-h-[280px] items-center justify-center overflow-hidden rounded-2xl border border-white/10 sm:min-h-[340px]"
-            style={{
-              background: `
-                radial-gradient(ellipse 60% 55% at 50% 48%, rgba(58,32,72,0.55), rgba(8,6,12,0.92) 70%),
-                linear-gradient(160deg, #1a1022 0%, #0a080e 100%)
-              `,
-              boxShadow: "0 0 60px rgba(74,47,92,0.22)",
-            }}
+            className="group relative flex min-h-[280px] items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-[#0a080e] sm:min-h-[340px]"
             data-testid="clean-sneaks-home-hero"
           >
             <div
@@ -92,15 +84,14 @@ export function CleanSneaksSection() {
               stiehl den alten Manns Bündel
             </p>
             <p className="mt-5 max-w-md text-sm leading-relaxed text-white/70 sm:text-base lg:max-w-none">
-              Keep the Baloon8 clean while you chase the casino. Street trash and grit dirty the
-              shoes for real — score becomes casino credits. Reach the destination or cash out
-              early, turn in your ticket, then play Steal the Old Man&apos;s Bundle.
+              Keep the Baloon8 clean on the strip. Score becomes casino credits — cash out and Steal
+              the Old Man&apos;s Bundle.
             </p>
 
             <div className="mt-8 flex flex-col items-center gap-3 lg:items-start">
               <Button
                 size="lg"
-                className="min-w-[220px] bg-[#5B8DA8] text-base text-white shadow-[0_0_28px_rgba(91,141,168,0.35)]"
+                className="min-w-[220px] bg-[#5B8DA8] text-base text-white"
                 asChild
                 data-testid="button-play-clean-sneaks"
               >

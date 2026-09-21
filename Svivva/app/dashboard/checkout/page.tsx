@@ -32,7 +32,6 @@ const plans: Record<
     icon: typeof Sparkles;
     features: string[];
     color: string;
-    glow: string;
     badge: string;
   }
 > = {
@@ -49,7 +48,6 @@ const plans: Record<
       "Orbit marketing copy",
     ],
     color: "#6B8DA8",
-    glow: "rgba(107, 141, 168,0.25)",
     badge: "Great start",
   },
   pro: {
@@ -66,7 +64,6 @@ const plans: Record<
       "Version history",
     ],
     color: "#5B8DA8",
-    glow: "rgba(91, 141, 168,0.25)",
     badge: "Most Popular",
   },
   enterprise: {
@@ -76,7 +73,6 @@ const plans: Record<
     icon: Building2,
     features: ["10 projects", "10,000 API calls/month", "Priority support", "Custom integrations"],
     color: "#6B2C4E",
-    glow: "rgba(107, 44, 78,0.3)",
     badge: "Legacy",
   },
 };
@@ -161,14 +157,10 @@ function CheckoutForm({ tier, onSuccess }: { tier: string; onSuccess: () => void
       <Button
         type="submit"
         disabled={!stripe || !elements || processing || !ready}
-        className="w-full h-13 text-base font-bold gap-2 rounded-2xl relative overflow-hidden"
-        style={{
-          background: `linear-gradient(135deg, ${plan.color}, ${plan.color}cc)`,
-          boxShadow: `0 4px 24px ${plan.glow}`,
-        }}
+        className="w-full h-13 text-base font-bold gap-2 rounded-xl"
+        style={{ background: plan.color }}
         data-testid="button-confirm-payment"
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0" />
         {processing ? (
           <>
             <Loader2 className="w-5 h-5 animate-spin" />
@@ -243,45 +235,7 @@ function CheckoutPageContent() {
   const showDemoMode = !priceIdParam;
 
   return (
-    <div
-      className="min-h-screen relative overflow-hidden"
-      style={{
-        background:
-          "radial-gradient(ellipse at 20% 50%, rgba(91, 141, 168,0.08) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(107, 44, 78,0.1) 0%, transparent 60%), hsl(var(--background))",
-      }}
-    >
-      {/* Ambient glow orbs */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div
-          className="absolute -top-32 -left-32 w-96 h-96 rounded-full opacity-20 blur-3xl"
-          style={{ background: `radial-gradient(circle, ${plan.color}, transparent 70%)` }}
-        />
-        <div
-          className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full opacity-15 blur-3xl"
-          style={{ background: `radial-gradient(circle, ${plan.color}, transparent 70%)` }}
-        />
-        <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-5 blur-3xl"
-          style={{ background: `radial-gradient(circle, ${plan.color}, transparent 70%)` }}
-        />
-        {/* Floating particles */}
-        {[...Array(6)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full opacity-20"
-            style={{
-              width: 4 + (i % 3) * 3,
-              height: 4 + (i % 3) * 3,
-              background: plan.color,
-              left: `${15 + i * 14}%`,
-              top: `${20 + (i % 3) * 20}%`,
-              animation: `floatY ${3 + i * 0.5}s ease-in-out infinite`,
-              animationDelay: `${i * 0.4}s`,
-            }}
-          />
-        ))}
-      </div>
-
+    <div className="min-h-screen bg-background relative overflow-hidden">
       <div className="relative z-10 max-w-5xl mx-auto px-4 py-8" data-testid="page-checkout">
         {/* Header */}
         <div className="flex items-center justify-between mb-10">
@@ -308,12 +262,9 @@ function CheckoutPageContent() {
           {/* Left — Payment form */}
           <div className="order-2 lg:order-1">
             <div
-              className="rounded-3xl overflow-hidden"
+              className="rounded-2xl overflow-hidden border border-border bg-card"
               style={{
-                border: `1px solid ${plan.color}20`,
-                background: "rgba(0,0,0,0.4)",
-                backdropFilter: "blur(20px)",
-                boxShadow: `0 0 60px ${plan.glow}, 0 20px 60px rgba(0,0,0,0.4)`,
+                borderColor: `${plan.color}30`,
               }}
             >
               {/* Card header bar */}
@@ -504,29 +455,11 @@ function CheckoutPageContent() {
             <div className="lg:sticky lg:top-8 space-y-4">
               {/* Main plan card */}
               <div
-                className="rounded-3xl overflow-hidden relative"
-                style={{
-                  border: `1px solid ${plan.color}30`,
-                  background: "rgba(0,0,0,0.5)",
-                  backdropFilter: "blur(20px)",
-                  boxShadow: `0 0 40px ${plan.glow}`,
-                }}
+                className="rounded-2xl overflow-hidden relative border bg-card"
+                style={{ borderColor: `${plan.color}30` }}
               >
-                <div
-                  className="h-px w-full"
-                  style={{
-                    background: `linear-gradient(to right, transparent, ${plan.color}, transparent)`,
-                  }}
-                />
-
                 {/* Plan hero */}
                 <div className="p-6 relative">
-                  <div
-                    className="absolute inset-0 opacity-30"
-                    style={{
-                      background: `radial-gradient(ellipse at top right, ${plan.color}30, transparent 70%)`,
-                    }}
-                  />
                   <div className="relative">
                     <div className="flex items-start justify-between mb-4">
                       <div

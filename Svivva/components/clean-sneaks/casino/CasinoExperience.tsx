@@ -128,11 +128,7 @@ export function CasinoExperience({
             {score.toLocaleString()}
           </p>
           <p className="mt-4 max-w-sm text-sm text-[#e8dcc0]/75">
-            Cash out {credits.toLocaleString()} credits — that&apos;s all you can spend inside.
-          </p>
-          <p className="mt-2 max-w-md text-[11px] leading-relaxed text-[#e8dcc0]/55">
-            Rule: your walking score is the ticket. Hand it in here to unlock the doors, then use
-            those same credits as your chip stack at Steal the Old Man&apos;s Bundle.
+            Cash out {credits.toLocaleString()} credits — that&apos;s your chip stack inside.
           </p>
           <button
             type="button"
@@ -140,7 +136,7 @@ export function CasinoExperience({
               setFlow("CASINO_APPROACH");
               submitTicket();
             }}
-            className="mt-6 animate-pulse rounded-full border-2 border-[#d4af37] bg-[radial-gradient(circle_at_30%_30%,#ffd76a,#b8860b_60%,#5a3a08)] px-8 py-4 font-serif text-lg text-[#1a1008] shadow-[0_0_30px_rgba(212,175,55,0.45)] transition hover:scale-105 active:scale-95"
+            className="mt-6 rounded-md border-2 border-[#d4af37] bg-[#d4af37] px-8 py-4 font-serif text-lg text-[#1a1008] transition hover:bg-[#e0c15a] active:scale-[0.98]"
             data-testid="button-score-ticket"
           >
             Score Ticket · {credits.toLocaleString()} credits

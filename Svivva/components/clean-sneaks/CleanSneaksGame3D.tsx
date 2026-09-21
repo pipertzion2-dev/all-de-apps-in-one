@@ -964,11 +964,7 @@ export function CleanSneaksGame3D({
               {gameOver.score.toLocaleString()}
             </p>
             <p className="mt-2 text-sm text-[#e8dcc0]/80">
-              {gameOver.score.toLocaleString()} credits ready — turn them in at the casino door.
-            </p>
-            <p className="mt-3 max-w-sm text-sm text-[#e8dcc0]/65">
-              Your walking score is your admission ticket. Enter the casino, cash the ticket, then
-              sit down for Steal the Old Man&apos;s Bundle.
+              {gameOver.score.toLocaleString()} credits — turn them in at the casino door.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Button

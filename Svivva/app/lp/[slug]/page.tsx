@@ -32,140 +32,126 @@ const pages: Record<string, LandingPageData> = {
     title: "Ship production backends",
     metaTitle: "Ship production backends from plain English | ZZAI",
     metaDescription:
-      "From seed to symphony — describe what you need, deploy a guarded endpoint with schema validation and rollback, and grow without babysitting infrastructure. Start free.",
+      "From seed to symphony — describe what you need, deploy a guarded endpoint with schema validation and rollback. Start free.",
     heroHeadline: "From seed to symphony — ship what you describe",
     heroSubheadline:
-      "Plain English in, a production-ready endpoint out — with validation, monitoring, and rollback so quality does not drift. No DevOps assembly line required.",
+      "Plain English in, a guarded endpoint out — schema validation, monitoring, and rollback. No ops theater.",
     ctaText: "Start free",
     benefits: [
       {
         icon: "code",
-        title: "Describe, Don't Code",
+        title: "Describe the API",
         description:
-          "Tell ZZAI what your API should do in natural language. Our AI architect designs the schema, validation, and business logic automatically.",
+          "Say what the endpoint should return. ZZAI drafts the schema, validation, and handlers.",
       },
       {
         icon: "shield",
-        title: "Enterprise Security Built In",
+        title: "Guards included",
         description:
-          "Every API ships with OAuth2, API key management, rate limiting, and DDoS protection. SOC2-ready from day one.",
+          "API keys, rate limits, and schema checks on every response — not bolted on later.",
       },
       {
         icon: "layers",
-        title: "Auto-Scaling Infrastructure",
+        title: "Scales with traffic",
         description:
-          "Handle 10 requests or 10 million. Our elastic infrastructure scales seamlessly — you only pay for what you use.",
+          "Pay for what you use. The endpoint grows with demand without a redeploy ritual.",
       },
     ],
     faqs: [
       {
         question: "How long does it take to create an API?",
-        answer:
-          "Most users have a working API endpoint in under 5 minutes. Describe your requirements, review the generated specification, and deploy with one click.",
+        answer: "Most people have a working endpoint in a few minutes: describe, review, deploy.",
       },
       {
-        question: "Do I need backend development experience?",
-        answer:
-          "No. ZZAI handles all the infrastructure, authentication, and deployment. If you can describe what you need, you can build an API.",
+        question: "Do I need backend experience?",
+        answer: "No. If you can describe the contract, ZZAI handles the rest.",
       },
       {
-        question: "What happens if my API gets high traffic?",
-        answer:
-          "ZZAI auto-scales your endpoints based on demand. Our infrastructure handles traffic spikes automatically with zero downtime.",
+        question: "What happens under high traffic?",
+        answer: "Endpoints auto-scale with demand. You pay for usage, not idle capacity.",
       },
     ],
   },
   "prompt-to-api": {
     title: "Prompt to API",
-    metaTitle: "Prompt to API - Turn Any AI Prompt Into a Scalable Endpoint | ZZAI",
+    metaTitle: "Prompt to API | ZZAI",
     metaDescription:
-      "Transform your AI prompts into production-ready API endpoints instantly. Version control, A/B testing, and analytics included. Try free.",
-    heroHeadline: "Turn Any AI Prompt Into a Live API Endpoint",
+      "Wrap a prompt in a versioned endpoint with evals, rollback, and usage metrics. Try free.",
+    heroHeadline: "Turn a prompt into a live endpoint",
     heroSubheadline:
-      "Stop copy-pasting prompts between tools. ZZAI wraps your best prompts in production-grade endpoints with versioning, analytics, and team collaboration — so your AI workflows scale beyond a single user.",
-    ctaText: "Create Your API Now",
+      "Stop copy-pasting the same prompt. Version it, eval it, and call it like any other API.",
+    ctaText: "Create an API",
     benefits: [
       {
         icon: "sparkles",
-        title: "Prompt Versioning & A/B Testing",
-        description:
-          "Track every prompt iteration. Run A/B tests across versions to find the highest-performing prompts with real usage data.",
+        title: "Versions & A/B tests",
+        description: "Every edit is a version. Split traffic and keep what wins.",
       },
       {
         icon: "zap",
-        title: "Sub-50ms Response Caching",
-        description:
-          "Intelligent semantic caching serves repeated queries instantly. Cut your AI costs by up to 70% while improving response times.",
+        title: "Response caching",
+        description: "Repeated queries hit cache when safe — lower cost, faster replies.",
       },
       {
         icon: "globe",
-        title: "Multi-Model Routing",
-        description:
-          "Route requests to GPT-4, Claude, Gemini, or open-source models. Automatic fallback ensures your API never goes down.",
+        title: "Multi-model routing",
+        description: "Route across providers with fallbacks so one outage doesn’t take you down.",
       },
     ],
     faqs: [
       {
-        question: "Can I use my own OpenAI or Anthropic API keys?",
-        answer:
-          "Yes. Bring your own keys for any supported model provider, or use ZZAI's shared pool with pay-per-use pricing. Switch between them anytime.",
+        question: "Can I use my own API keys?",
+        answer: "Yes — bring your own keys, or use ZZAI’s pool. Switch anytime.",
       },
       {
         question: "How does prompt versioning work?",
         answer:
-          "Every change creates an immutable version. You can roll back instantly, compare outputs across versions, and run traffic splits between prompt variants.",
+          "Each change is immutable. Roll back, compare outputs, or split traffic between variants.",
       },
       {
-        question: "Is there a limit on API calls?",
-        answer:
-          "The free tier includes 1,000 API calls per month. Paid plans start at $29/month with unlimited calls and priority support.",
+        question: "Is there a call limit?",
+        answer: "Free tier includes a monthly allotment. Paid plans raise the cap.",
       },
     ],
   },
   "ai-app-generator": {
     title: "AI App Generator",
-    metaTitle: "AI App Generator - Full-Stack AI Applications From a Description | ZZAI",
+    metaTitle: "AI App Generator | ZZAI",
     metaDescription:
-      "Generate complete AI-powered applications with APIs, databases, and frontends from a single description. Ship your MVP in hours, not weeks.",
-    heroHeadline: "Ship Your AI-Powered App Before Lunch",
+      "Scaffold APIs, schemas, and SDKs from a description. Ship a working backend without the ceremony.",
+    heroHeadline: "Scaffold the backend from a description",
     heroSubheadline:
-      "Describe your application idea. ZZAI generates the complete stack — API endpoints, database schemas, authentication flows, and SDK packages — ready to integrate into any frontend or mobile app.",
+      "Endpoints, schemas, auth, and SDKs — generated from what you describe, ready to wire into your UI.",
     ctaText: "Start building",
     benefits: [
       {
         icon: "bot",
-        title: "Complete Application Scaffolding",
-        description:
-          "Get a fully structured project with API routes, data models, auth middleware, and documentation generated from your description.",
+        title: "Full scaffold",
+        description: "Routes, models, auth middleware, and docs from one description.",
       },
       {
         icon: "rocket",
-        title: "One-Click SDK Generation",
-        description:
-          "Automatically generate TypeScript, Python, and cURL SDKs for your API. Share a single npm install command with your team.",
+        title: "SDK generation",
+        description: "TypeScript and Python clients so your team can call the API immediately.",
       },
       {
         icon: "clock",
-        title: "Built-In Observability",
-        description:
-          "Monitor latency, error rates, and usage patterns from a real-time dashboard. Set alerts for anomalies before your users notice.",
+        title: "Built-in metrics",
+        description: "Latency, errors, and usage on a dashboard — no separate ops stack required.",
       },
     ],
     faqs: [
       {
-        question: "What kind of apps can I generate?",
-        answer:
-          "Any application that needs AI-powered API endpoints — SaaS tools, chatbots, content generators, data pipelines, recommendation engines, and more.",
+        question: "What can I generate?",
+        answer: "Anything that needs AI-backed endpoints — tools, bots, pipelines, recommenders.",
       },
       {
-        question: "Can I customize the generated code?",
-        answer:
-          "Absolutely. Export the full OpenAPI specification and generated code. Modify endpoints, add custom logic, or extend the schema as needed.",
+        question: "Can I edit the output?",
+        answer: "Yes. Export the OpenAPI spec and code, then extend it.",
       },
       {
-        question: "How do I integrate with my existing app?",
-        answer:
-          "Use the auto-generated SDK or call the REST endpoints directly. ZZAI APIs work with any language, framework, or platform that supports HTTP.",
+        question: "How do I integrate?",
+        answer: "Use the generated SDK or hit the REST endpoints from any HTTP client.",
       },
     ],
   },

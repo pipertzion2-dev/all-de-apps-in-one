@@ -22,32 +22,32 @@ const APP_ANCHOR = "#app";
 const features = [
   {
     icon: Shield,
-    title: "Military-Grade Encryption",
-    desc: "AES-256 and ChaCha20 algorithms lock your files before they ever leave your device.",
+    title: "AES-256 & ChaCha20",
+    desc: "Files are encrypted on your device before anything leaves the browser.",
   },
   {
     icon: Eye,
-    title: "Zero-Knowledge Architecture",
-    desc: "Nothing is uploaded. All processing happens locally in your browser — your keys stay yours alone.",
+    title: "Zero-knowledge",
+    desc: "Nothing uploads. Processing stays local — your keys stay yours.",
   },
   {
     icon: Zap,
-    title: "Instant, No Account Needed",
-    desc: "Open the tool and start protecting files in seconds. No sign-up. No waiting.",
+    title: "No account needed",
+    desc: "Open the tool and encrypt. No sign-up.",
   },
   {
     icon: FileText,
-    title: "Any File Type",
-    desc: "Documents, images, archives, executables — Clutety handles all of them without limits.",
+    title: "Any file type",
+    desc: "Documents, images, archives, executables — no special format required.",
   },
   {
     icon: Key,
-    title: "Brute-Force Resistant Keys",
-    desc: "PBKDF2 with 600,000 iterations makes automated attack attempts computationally infeasible.",
+    title: "Hard keys",
+    desc: "PBKDF2 with 600,000 iterations slows brute-force attempts.",
   },
   {
     icon: ShieldCheck,
-    title: "Open & Auditable",
+    title: "Open & auditable",
     desc: "Client-side code you can inspect yourself. No black boxes. No tracking. No surprises.",
   },
 ];
@@ -193,18 +193,9 @@ export default function ClutetyLandingPage() {
         {/* Live App Window */}
         <div id="app" className="relative mx-auto max-w-4xl scroll-mt-24">
           <div
-            className="absolute -inset-8 rounded-3xl opacity-30 blur-3xl pointer-events-none"
+            className="relative rounded-2xl overflow-hidden border border-white/10 bg-black/40"
             style={{
-              background: `radial-gradient(ellipse at center, ${TEAL}40 0%, ${BURG}20 60%, transparent 100%)`,
-            }}
-          />
-          <div
-            className="relative rounded-2xl overflow-hidden"
-            style={{
-              background: "rgba(255,255,255,0.03)",
-              backdropFilter: "blur(24px)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              boxShadow: `0 0 0 1px rgba(91, 141, 168,0.2), 0 32px 64px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)`,
+              boxShadow: "0 24px 48px rgba(0,0,0,0.45)",
             }}
           >
             {/* Title bar */}

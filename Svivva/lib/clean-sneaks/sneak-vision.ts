@@ -4,7 +4,6 @@
  */
 
 import type { ObstacleKind } from "./types";
-import type { SubstanceKind } from "./dirt-system";
 
 export type VisionLevel = "safe" | "caution" | "danger" | "disaster" | "wet" | "unknown";
 
@@ -47,30 +46,6 @@ const OBSTACLE_VISION: Record<ObstacleKind, VisionLevel> = {
 
 export function visionForObstacle(kind: ObstacleKind): VisionLevel {
   return OBSTACLE_VISION[kind] ?? "unknown";
-}
-
-export function visionForSubstance(kind: SubstanceKind): VisionLevel {
-  switch (kind) {
-    case "water":
-    case "snow":
-      return "wet";
-    case "dust":
-    case "gum":
-    case "dirt":
-    case "banana":
-      return "caution";
-    case "grass":
-    case "oil":
-    case "food":
-    case "drink":
-      return "danger";
-    case "mud":
-    case "paint":
-    case "poop":
-      return "disaster";
-    default:
-      return "unknown";
-  }
 }
 
 export const SNEAK_VISION_DURATION_MS = 2800;

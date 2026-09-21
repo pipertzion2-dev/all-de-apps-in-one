@@ -39,7 +39,7 @@ export function StealBundleHowToPlay({ onStart }: Props) {
         <HowToStep
           step={1}
           title="Match the table"
-          body="Tap a hand card, then tap a table card of the same rank. Both go into your bundle."
+          body="Same rank as a table card → both go in your bundle."
         >
           <div className="flex items-center justify-center gap-2">
             <LabeledCard label="Your hand" card={demo("h7", "7", "hearts")} highlight />
@@ -56,7 +56,7 @@ export function StealBundleHowToPlay({ onStart }: Props) {
         <HowToStep
           step={2}
           title="Steal a bundle"
-          body="If your card matches an opponent’s exposed top rank, tap their panel to steal the whole stack."
+          body="Match an opponent’s top rank → take their whole stack."
         >
           <div className="flex flex-wrap items-center justify-center gap-3">
             <LabeledCard label="Your hand" card={demo("hq", "Q", "diamonds")} highlight />
@@ -78,11 +78,7 @@ export function StealBundleHowToPlay({ onStart }: Props) {
           </div>
         </HowToStep>
 
-        <HowToStep
-          step={3}
-          title="No match? Place it"
-          body="If nothing matches, place your card on the table for someone else to grab later."
-        >
+        <HowToStep step={3} title="No match? Place it" body="No match → leave it on the table.">
           <div className="flex items-center justify-center gap-2">
             <LabeledCard label="Your hand" card={demo("h3", "3", "clubs")} selected />
             <Arrow />
@@ -93,7 +89,7 @@ export function StealBundleHowToPlay({ onStart }: Props) {
         <HowToStep
           step={4}
           title="Biggest bundle wins"
-          body="When the round ends, the player with the most cards in their bundle takes the pot."
+          body="Most cards in the bundle takes the pot."
         >
           <div className="flex items-end justify-center gap-4">
             <div className="text-center">

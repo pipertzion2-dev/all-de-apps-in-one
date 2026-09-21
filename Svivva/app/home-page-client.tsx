@@ -63,49 +63,47 @@ const CleanSneaksLazyMount = dynamic(
 const features = [
   {
     icon: Shield,
-    title: "Your AI Lies. We Catch It.",
+    title: "Schema validation",
     description:
-      "JSON Schema validation with automatic repair. When the model hallucinates a field or returns a string where you wanted a number, ZZAI fixes it — or retries until it doesn't. Zero negotiation.",
+      "JSON Schema on every response. Bad shapes get repaired or retried — you don’t negotiate with the model.",
     code: "outputSchema: { type: 'object' }",
     highlight: "0 malformed outputs",
   },
   {
     icon: Sparkles,
-    title: "100 QA Engineers. No Salaries.",
+    title: "Auto-generated evals",
     description:
-      "The moment you save a prompt, ZZAI writes up to 200 test cases for it — edge cases, adversarial inputs, multilingual chaos, boundary conditions. It finds what your users would have found first.",
+      "Saving a prompt can write up to 200 tests — edge cases, adversarial inputs, boundaries — before users find them.",
     code: "generateEvals({ count: 100 })",
-    highlight: "Up to 200 evals, free",
+    highlight: "Up to 200 evals",
   },
   {
     icon: GitBranch,
-    title: "Time Travel for Prompts.",
-    description:
-      "Every edit is an immutable version. When evals fail at 3am, ZZAI rolls back before you wake up — and files a report. Full history. One click. No incidents.",
+    title: "Prompt versions",
+    description: "Every edit is immutable. Roll back when evals fail. Full history, one click.",
     code: "rollback({ version: 'v2' })",
-    highlight: "Rolls back at 3am",
+    highlight: "Instant rollback",
   },
   {
     icon: BarChart3,
-    title: "Know Before Your Users Complain.",
+    title: "Live metrics",
     description:
-      "Live latency, success rates, and token spend — all visible before the support tickets arrive. Custom alerts fire the moment something drifts. Your users never see the chaos.",
+      "Latency, success rate, and token spend before support tickets pile up. Alerts when something drifts.",
     code: "metrics.avgLatency: 230ms",
     highlight: "Pre-complaint alerts",
   },
   {
     icon: Zap,
-    title: "Zero to Endpoint. Seriously.",
-    description:
-      "Write the prompt. Deploy the API. That's it. Auto-scaling handles everything from 10 beta users to the Hacker News front page. Zero YAML. Zero ops. Zero regrets.",
+    title: "Prompt → endpoint",
+    description: "Write the prompt, deploy the API. Scaling and routing stay out of your YAML.",
     code: "status: 'deployed'",
-    highlight: "HN-proof scaling",
+    highlight: "No ops ceremony",
   },
   {
     icon: Code2,
-    title: "Looks Like a Real API. Is a Real API.",
+    title: "Real SDKs",
     description:
-      "TypeScript-first SDK, full type safety, auto-generated OpenAPI spec, Python and Node clients. Your users integrate in minutes and never suspect the backend is mostly words.",
+      "TypeScript-first client, OpenAPI spec, Python and Node packages — integrate like any other API.",
     code: "import { PromptAPI } from 'zzai'",
     highlight: "TypeScript-first",
   },
@@ -1068,40 +1066,18 @@ export default function LandingPage() {
                   <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">
                     {mode === "digital" ? (
                       <>
-                        Everything you need for{" "}
-                        <span
-                          style={{
-                            backgroundImage:
-                              "linear-gradient(to right, #D94F9C, #5B7BA8, #8B6B9B, #5A6B4A, #D4A5B8, #8B6B5A)",
-                            WebkitBackgroundClip: "text",
-                            WebkitTextFillColor: "transparent",
-                            backgroundClip: "text",
-                          }}
-                        >
-                          production
-                        </span>
+                        Built for shipping <span className="text-[#5B8DA8]">production APIs</span>
                       </>
                     ) : (
                       <>
-                        Everything you need to{" "}
-                        <span
-                          style={{
-                            backgroundImage:
-                              "linear-gradient(to right, #C4B8D6, #F5C6D6, #F5F0B8, #8DB87D)",
-                            WebkitBackgroundClip: "text",
-                            WebkitTextFillColor: "transparent",
-                            backgroundClip: "text",
-                          }}
-                        >
-                          manufacture
-                        </span>
+                        Built for shipping <span className="text-[#8DB87D]">real products</span>
                       </>
                     )}
                   </h2>
                   <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto">
                     {mode === "digital"
-                      ? "From prompt to production in minutes. Built-in evaluation, versioning, and rollback."
-                      : "From concept to production-ready. AI-powered schematics, materials, and budgets."}
+                      ? "Prompt to endpoint with evals, versioning, and rollback."
+                      : "Concept to production with schematics, materials, and budgets."}
                   </p>
                 </div>
 
@@ -1253,22 +1229,12 @@ export default function LandingPage() {
 
                   {/* Text */}
                   <div className="order-1 lg:order-2 space-y-6">
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#5B8DA8]/30 bg-[#5B8DA8]/5 text-xs font-medium text-[#5B8DA8]">
-                      <span>🌸</span> Founder Story
+                    <div className="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.2em] text-[#5B8DA8]">
+                      Founder story
                     </div>
 
                     <h2 className="text-3xl sm:text-4xl font-bold leading-tight">
-                      Built by a father and son,{" "}
-                      <span
-                        style={{
-                          backgroundImage: "linear-gradient(to right, #D94F9C, #5B8DA8)",
-                          WebkitBackgroundClip: "text",
-                          WebkitTextFillColor: "transparent",
-                          backgroundClip: "text",
-                        }}
-                      >
-                        one petal at a time
-                      </span>
+                      Built by a father and son, one petal at a time
                     </h2>
 
                     <div className="space-y-4 text-muted-foreground leading-relaxed">
@@ -1599,55 +1565,37 @@ export default function LandingPage() {
                         Evaluation Engine
                       </Badge>
                       <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">
-                        We break it{" "}
-                        <span
-                          style={{
-                            backgroundImage:
-                              "linear-gradient(to right, #D94F9C, #5B7BA8, #8B6B9B, #5A6B4A, #D4A5B8, #8B6B5A)",
-                            WebkitBackgroundClip: "text",
-                            WebkitTextFillColor: "transparent",
-                            backgroundClip: "text",
-                          }}
-                        >
-                          so you don't
-                        </span>
+                        We break it so you don&apos;t
                       </h2>
                       <p className="text-base sm:text-xl text-muted-foreground">
-                        Every endpoint gets 50+ AI-generated test cases—edge cases, adversarial
-                        inputs, malformed data. When pass rates drop, we roll back automatically.
-                        You sleep soundly.
+                        Every endpoint gets automated evals — edge cases, adversarial inputs,
+                        malformed data. Pass rates drop → rollback.
                       </p>
                       <div className="space-y-4">
                         <div className="flex gap-4">
-                          <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
-                            <Check className="w-5 h-5 text-green-400" />
-                          </div>
+                          <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
                           <div>
                             <h3 className="font-semibold">Edge case detection</h3>
                             <p className="text-muted-foreground text-sm">
-                              AI identifies boundary conditions your tests would miss
+                              Boundary conditions your hand-written tests miss
                             </p>
                           </div>
                         </div>
                         <div className="flex gap-4">
-                          <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
-                            <Check className="w-5 h-5 text-green-400" />
-                          </div>
+                          <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
                           <div>
                             <h3 className="font-semibold">Adversarial testing</h3>
                             <p className="text-muted-foreground text-sm">
-                              Tests malicious inputs and injection attempts
+                              Malicious inputs and injection attempts
                             </p>
                           </div>
                         </div>
                         <div className="flex gap-4">
-                          <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
-                            <Check className="w-5 h-5 text-green-400" />
-                          </div>
+                          <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
                           <div>
                             <h3 className="font-semibold">Instant rollback</h3>
                             <p className="text-muted-foreground text-sm">
-                              Automatically reverts to last passing version on failures
+                              Reverts to the last passing version on failures
                             </p>
                           </div>
                         </div>
