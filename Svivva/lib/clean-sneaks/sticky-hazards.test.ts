@@ -21,7 +21,18 @@ describe("sticky hazards", () => {
       const g = buildStickyHazard3D(kind);
       expect(g.children.length).toBeGreaterThan(0);
       expect(g.userData.stickyKind).toBe(kind);
+      expect(g.children.some((c) => c.userData.floorMarker)).toBe(true);
     }
+  });
+
+  it("floor hazards are larger than cling-ons", async () => {
+    const { buildStickyFloorHazard3D, buildStickyCling3D, STICKY_FLOOR_SCALE } = await import(
+      "./sticky-hazards"
+    );
+    expect(STICKY_FLOOR_SCALE.gum).toBeGreaterThan(2);
+    const floor = buildStickyFloorHazard3D("banana");
+    const cling = buildStickyCling3D("banana");
+    expect(floor.children.length).toBeGreaterThan(cling.children.length);
   });
 
   it("slows the runner while attachments are active", () => {

@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { OBSTACLE_META } from "./constants";
 import type { ObstacleKind } from "./types";
 import { wetAsphaltMaterial } from "./run-textures";
-import { buildStickyHazard3D } from "./sticky-hazards";
+import { buildStickyFloorHazard3D } from "./sticky-hazards";
 
 function puddleMaterial(color: string): THREE.MeshPhysicalMaterial {
   const mat = wetAsphaltMaterial().clone();
@@ -135,7 +135,7 @@ export function buildObstacle3D(kind: ObstacleKind): THREE.Object3D {
     pile.add(can);
     root.add(pile);
   } else if (kind === "gum" || kind === "dirt" || kind === "poop" || kind === "banana") {
-    root.add(buildStickyHazard3D(kind, scaleW > 0.5 ? scaleW : 1));
+    root.add(buildStickyFloorHazard3D(kind));
   } else {
     const mesh = new THREE.Mesh(
       new THREE.BoxGeometry(0.75 * scaleW, 0.55 * scaleH, 0.65 * scaleW),

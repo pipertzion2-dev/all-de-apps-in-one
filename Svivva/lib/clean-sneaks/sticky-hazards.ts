@@ -10,6 +10,14 @@ export const STICKY_HAZARD_KINDS: readonly StickyHazardKind[] = [
   "gum",
 ] as const;
 
+/** Extra world scale when these sit on the pavement (vs cling-ons on the sole). */
+export const STICKY_FLOOR_SCALE: Record<StickyHazardKind, number> = {
+  dirt: 2.35,
+  poop: 2.2,
+  banana: 2.5,
+  gum: 2.6,
+};
+
 export function isStickyHazardKind(kind: string): kind is StickyHazardKind {
   return (STICKY_HAZARD_KINDS as readonly string[]).includes(kind);
 }
@@ -46,107 +54,166 @@ function setShadows(obj: THREE.Object3D) {
   });
 }
 
+const STAIN_COLOR: Record<StickyHazardKind, number> = {
+  dirt: 0x8b5a2b,
+  poop: 0x6b3a18,
+  banana: 0xf5d45a,
+  gum: 0xff6ab5,
+};
+
+/** High-contrast pavement blotch so the hazard reads from down the road. */
+function addFloorStain(root: THREE.Group, kind: StickyHazardKind, radius: number) {
+  const stain = new THREE.Mesh(
+    new THREE.CircleGeometry(radius, 28),
+    new THREE.MeshBasicMaterial({
+      color: STAIN_COLOR[kind],
+      transparent: true,
+      opacity: 0.72,
+      depthWrite: false,
+    }),
+  );
+  stain.rotation.x = -Math.PI / 2;
+  stain.position.y = 0.025;
+  stain.renderOrder = 2;
+  stain.userData.floorMarker = true;
+
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(radius * 0.82, radius * 1.12, 28),
+    new THREE.MeshBasicMaterial({
+      color: 0xfff6d0,
+      transparent: true,
+      opacity: 0.45,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    }),
+  );
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.y = 0.03;
+  ring.renderOrder = 3;
+  ring.userData.floorMarker = true;
+
+  root.add(stain, ring);
+}
+
 /** Procedural Three.js meshes for sticky street trash. */
 export function buildStickyHazard3D(kind: StickyHazardKind, scale = 1): THREE.Group {
   const root = new THREE.Group();
   root.userData.stickyKind = kind;
 
   if (kind === "dirt") {
+    addFloorStain(root, kind, 0.42 * scale);
     const dirtMat = new THREE.MeshStandardMaterial({
-      color: 0x5a4030,
-      roughness: 1,
+      color: 0x8a5a32,
+      roughness: 0.95,
       metalness: 0,
+      emissive: 0x3a2010,
+      emissiveIntensity: 0.18,
     });
-    const clump = new THREE.Mesh(new THREE.DodecahedronGeometry(0.16 * scale, 0), dirtMat);
-    clump.scale.set(1.2, 0.45, 1.0);
-    clump.position.y = 0.05 * scale;
+    const clump = new THREE.Mesh(new THREE.DodecahedronGeometry(0.28 * scale, 0), dirtMat);
+    clump.scale.set(1.35, 0.55, 1.15);
+    clump.position.y = 0.1 * scale;
     root.add(clump);
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 7; i++) {
       const speck = new THREE.Mesh(
-        new THREE.SphereGeometry(0.04 + Math.random() * 0.04, 6, 6),
+        new THREE.SphereGeometry(0.07 + Math.random() * 0.06, 6, 6),
         new THREE.MeshStandardMaterial({
-          color: i % 2 ? 0x3d2a1c : 0x7a5a3a,
+          color: i % 2 ? 0x5c3a22 : 0xb07a48,
           roughness: 1,
+          emissive: 0x2a180c,
+          emissiveIntensity: 0.12,
         }),
       );
       speck.position.set(
-        (Math.random() - 0.5) * 0.35 * scale,
-        0.03 * scale,
-        (Math.random() - 0.5) * 0.28 * scale,
+        (Math.random() - 0.5) * 0.55 * scale,
+        0.06 * scale,
+        (Math.random() - 0.5) * 0.45 * scale,
       );
       root.add(speck);
     }
   } else if (kind === "poop") {
+    addFloorStain(root, kind, 0.38 * scale);
     const brown = new THREE.MeshStandardMaterial({
-      color: 0x4a2c14,
-      roughness: 0.92,
+      color: 0x6b3a18,
+      roughness: 0.88,
       metalness: 0.02,
+      emissive: 0x2a1408,
+      emissiveIntensity: 0.22,
     });
-    const dark = new THREE.MeshStandardMaterial({ color: 0x2a180c, roughness: 0.95 });
+    const dark = new THREE.MeshStandardMaterial({
+      color: 0x3a200c,
+      roughness: 0.92,
+      emissive: 0x1a1008,
+      emissiveIntensity: 0.15,
+    });
     for (let i = 0; i < 3; i++) {
-      const scoop = new THREE.Mesh(new THREE.SphereGeometry(0.14 - i * 0.02, 12, 10), brown);
-      scoop.scale.set(1.15, 0.55, 1.05);
-      scoop.position.y = (0.06 + i * 0.09) * scale;
+      const scoop = new THREE.Mesh(new THREE.SphereGeometry(0.22 - i * 0.03, 12, 10), brown);
+      scoop.scale.set(1.25 * scale, 0.62 * scale, 1.15 * scale);
+      scoop.position.y = (0.1 + i * 0.14) * scale;
       scoop.rotation.y = i * 0.7;
-      scoop.scale.multiplyScalar(scale);
       root.add(scoop);
     }
-    const tip = new THREE.Mesh(new THREE.ConeGeometry(0.06 * scale, 0.1 * scale, 8), dark);
-    tip.position.y = 0.34 * scale;
+    const tip = new THREE.Mesh(new THREE.ConeGeometry(0.09 * scale, 0.16 * scale, 8), dark);
+    tip.position.y = 0.52 * scale;
     root.add(tip);
   } else if (kind === "banana") {
+    addFloorStain(root, kind, 0.48 * scale);
     const peelMat = new THREE.MeshPhysicalMaterial({
-      color: 0xf0c830,
-      roughness: 0.55,
-      metalness: 0.05,
-      clearcoat: 0.35,
+      color: 0xffd84a,
+      roughness: 0.4,
+      metalness: 0.08,
+      clearcoat: 0.55,
+      emissive: 0xb8860b,
+      emissiveIntensity: 0.35,
     });
     const innerMat = new THREE.MeshStandardMaterial({
-      color: 0xfff2a8,
-      roughness: 0.7,
+      color: 0xfff6b0,
+      roughness: 0.55,
+      emissive: 0xffe066,
+      emissiveIntensity: 0.2,
     });
-    // Three peel flaps from a center
     for (let i = 0; i < 3; i++) {
       const flap = new THREE.Mesh(
-        new THREE.CapsuleGeometry(0.05 * scale, 0.28 * scale, 4, 8),
+        new THREE.CapsuleGeometry(0.08 * scale, 0.42 * scale, 4, 8),
         peelMat,
       );
       const angle = (i / 3) * Math.PI * 2;
       flap.position.set(
-        Math.cos(angle) * 0.12 * scale,
-        0.06 * scale,
-        Math.sin(angle) * 0.12 * scale,
+        Math.cos(angle) * 0.18 * scale,
+        0.1 * scale,
+        Math.sin(angle) * 0.18 * scale,
       );
-      flap.rotation.z = Math.cos(angle) * 0.9;
-      flap.rotation.x = Math.sin(angle) * 0.9;
+      flap.rotation.z = Math.cos(angle) * 0.95;
+      flap.rotation.x = Math.sin(angle) * 0.95;
       root.add(flap);
     }
-    const core = new THREE.Mesh(new THREE.SphereGeometry(0.07 * scale, 10, 8), innerMat);
-    core.position.y = 0.05 * scale;
+    const core = new THREE.Mesh(new THREE.SphereGeometry(0.11 * scale, 10, 8), innerMat);
+    core.position.y = 0.08 * scale;
     root.add(core);
   } else {
-    // gum — flattened sticky blob with stretch tendrils
+    addFloorStain(root, kind, 0.44 * scale);
     const gumMat = new THREE.MeshPhysicalMaterial({
-      color: 0xd94f9c,
-      roughness: 0.18,
+      color: 0xff5aaa,
+      roughness: 0.15,
       metalness: 0,
-      clearcoat: 0.85,
-      clearcoatRoughness: 0.2,
-      sheen: 0.4,
-      sheenColor: new THREE.Color(0xffb0d8),
+      clearcoat: 0.95,
+      clearcoatRoughness: 0.15,
+      sheen: 0.55,
+      sheenColor: new THREE.Color(0xffc0e0),
+      emissive: 0xc2185b,
+      emissiveIntensity: 0.4,
     });
-    const blob = new THREE.Mesh(new THREE.SphereGeometry(0.16 * scale, 14, 10), gumMat);
-    blob.scale.set(1.35, 0.28, 1.15);
-    blob.position.y = 0.04 * scale;
+    const blob = new THREE.Mesh(new THREE.SphereGeometry(0.28 * scale, 16, 12), gumMat);
+    blob.scale.set(1.55, 0.32, 1.35);
+    blob.position.y = 0.07 * scale;
     root.add(blob);
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 4; i++) {
       const strand = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.012 * scale, 0.008 * scale, 0.14 * scale, 6),
+        new THREE.CylinderGeometry(0.02 * scale, 0.012 * scale, 0.22 * scale, 6),
         gumMat,
       );
-      strand.position.set((i - 1) * 0.1 * scale, 0.08 * scale, 0.08 * scale);
-      strand.rotation.z = (i - 1) * 0.45;
-      strand.rotation.x = 0.5;
+      strand.position.set((i - 1.5) * 0.12 * scale, 0.12 * scale, 0.12 * scale);
+      strand.rotation.z = (i - 1.5) * 0.4;
+      strand.rotation.x = 0.55;
       root.add(strand);
     }
   }
@@ -155,9 +222,18 @@ export function buildStickyHazard3D(kind: StickyHazardKind, scale = 1): THREE.Gr
   return root;
 }
 
-/** Tiny cling-on copy for the sole of a shoe. */
+/** Floor-sized sticky hazard with high-visibility stain. */
+export function buildStickyFloorHazard3D(kind: StickyHazardKind): THREE.Group {
+  return buildStickyHazard3D(kind, STICKY_FLOOR_SCALE[kind]);
+}
+
+/** Tiny cling-on copy for the sole of a shoe (no big floor stain). */
 export function buildStickyCling3D(kind: StickyHazardKind): THREE.Group {
-  const g = buildStickyHazard3D(kind, 0.45);
+  const g = buildStickyHazard3D(kind, 0.4);
+  for (let i = g.children.length - 1; i >= 0; i--) {
+    const child = g.children[i]!;
+    if (child.userData.floorMarker) g.remove(child);
+  }
   g.position.set((Math.random() - 0.5) * 0.12, 0.02, 0.04 + Math.random() * 0.06);
   g.rotation.y = Math.random() * Math.PI;
   return g;
