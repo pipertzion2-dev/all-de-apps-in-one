@@ -123,7 +123,7 @@ async function researchKeywordsFromGsc(gsc: GscSearchAnalyticsReport): Promise<K
   }
 
   try {
-    const prompt = `ZZAI is an AI API builder + free tools platform at zzaizzai.com.
+    const prompt = `zzai zzai (ZZAI / zzaizzai.com) is a product workspace: prompt-to-API, Seeds, Hardware, Play, Orbit growth, Poor Man Protection, plus free AI & cyber tools. Tagline: From seed to symphony.
 Given these GSC queries with ranking opportunity, propose 8 NEW long-tail keywords we should target next.
 Do NOT repeat these seeds: ${seeds.join(", ")}
 

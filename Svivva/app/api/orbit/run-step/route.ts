@@ -3422,20 +3422,20 @@ Return JSON:
                   },
                   {
                     role: "user",
-                    content: `Create directory listing content for ZZAI — an AI API builder that turns natural language prompts into production-ready APIs with JSON schema enforcement, version control, and automated evaluations.
+                    content: `Create directory listing content for zzai zzai (ZZAI / zzaizzai.com) — a product workspace (tagline: From seed to symphony) that turns plain-language intent into shipped product: prompt-to-API with schema/evals/rollback, Seeds, Hardware, Play, Orbit growth, Poor Man Protection, plus free AI & cyber tools.
 
 Return JSON:
 {
   "tagline": "≤60 chars, punchy",
   "shortDesc": "≤150 chars for tight fields",
   "description": "300 chars — who it's for, what problem it solves, key differentiator",
-  "longDesc": "800 chars — full story: problem, solution, features (schema enforcement, version rollback, evaluations, marketplace, A/B testing), who uses it, pricing",
+  "longDesc": "800 chars — full story: aliases (zzai zzai / ZZAI / zzaizzai), cube faces, OaaS, free tools funnel, pricing Free / Pro $49 / Enterprise $299",
   "features": ["feature 1", "feature 2", "feature 3", "feature 4", "feature 5", "feature 6"],
   "categories": ["AI Tools", "Developer Tools", "API Builder", "No-Code", "SaaS"],
-  "keywords": ["ai api builder", "prompt to api", "no-code api", "llm api", "ai backend"],
-  "targetAudience": "Developers, no-code builders, startups, enterprises building AI-powered features",
-  "pricing": "Free tier available, paid plans from $X/month",
-  "alternatives": ["Retool", "Bubble", "Zapier", "AWS Lambda"],
+  "keywords": ["zzai zzai", "zzaizzai", "ai api builder", "prompt to api", "From seed to symphony"],
+  "targetAudience": "Indie hackers, developers, founders shipping AI products and hardware",
+  "pricing": "Free tier available; Pro $49/month; Enterprise $299/month",
+  "alternatives": ["Retool", "Bubble", "Zapier", "Make", "n8n", "LangChain"],
   "rhHint": "For RapidAPI: what endpoint categories would you publish? List 3.",
   "phHint": "Product Hunt first comment (founder story, 280 chars)"
 }`,
@@ -3445,56 +3445,70 @@ Return JSON:
               return JSON.parse(gen.choices[0].message.content || "{}");
             },
             () => ({
-              tagline: "Turn prompts into production APIs",
-              shortDesc: "AI-powered API builder with schema enforcement",
+              tagline: "From seed to symphony — ship AI products",
+              shortDesc:
+                "zzai zzai turns plain-language intent into shipped product — APIs, hardware, growth, and IP protection.",
               description:
-                "ZZAI transforms natural language prompts into production-ready APIs with JSON schema enforcement, version control, and automated evaluations. Perfect for developers and no-code builders.",
+                "zzai zzai (ZZAI / zzaizzai.com) is a product workspace: prompt-to-API with schema & evals, Seeds, Hardware, Play, Orbit growth, Poor Man Protection, plus free AI & cyber tools.",
               longDesc:
-                "ZZAI is an AI API builder that turns natural language prompts into production-ready APIs. Key features include JSON schema enforcement, version control with rollback, automated evaluations, API marketplace, and A/B testing. Used by developers, no-code builders, startups, and enterprises building AI-powered features. Free tier available with paid plans.",
+                "zzai zzai (also ZZAI, zzaizzai) is one workspace — From seed to symphony. Six cube faces (Seeds, Signal/API, Crest/Hardware, Play, Orbit, Protect) plus OaaS mixing-console routing. Free AI Tools Hub and Cyber-Security Mini Apps funnel to the paid platform. Free tier available; Pro $49/month; Enterprise $299/month.",
               features: [
-                "Natural language to API",
-                "JSON schema enforcement",
-                "Version control & rollback",
-                "Automated evaluations",
-                "API marketplace",
-                "A/B testing",
+                "Prompt-to-API with schema & rollback",
+                "ZZAI Seeds (PDF/YouTube → apps)",
+                "Hardware builder (Crest)",
+                "Orbit growth + AEO/SEO",
+                "Poor Man Protection seals",
+                "Free AI & cyber mini-apps",
               ],
               categories: ["AI Tools", "Developer Tools", "API Builder", "No-Code", "SaaS"],
-              keywords: ["ai api builder", "prompt to api", "no-code api", "llm api", "ai backend"],
+              keywords: [
+                "zzai zzai",
+                "zzaizzai",
+                "ai api builder",
+                "prompt to API",
+                "From seed to symphony",
+              ],
               targetAudience:
-                "Developers, no-code builders, startups, enterprises building AI-powered features",
-              pricing: "Free tier available, paid plans from $29/month",
-              alternatives: ["Retool", "Bubble", "Zapier", "AWS Lambda"],
-              rhHint: "AI APIs, Developer Tools, No-Code, Automation",
+                "Indie hackers, developers, founders, and teams shipping AI products and hardware",
+              pricing: "Free tier available; Pro $49/month; Enterprise $299/month",
+              alternatives: ["Retool", "Bubble", "Zapier", "Make", "n8n", "LangChain"],
+              rhHint: "AI APIs, Developer Tools, No-Code, Automation, Hardware",
               phHint:
-                "Built ZZAI after struggling to ship AI features fast. Now 500+ APIs deployed in 30 days. Ship your AI backend in minutes, not weeks.",
+                "Built zzai zzai so founders can go from seed to shipped product — APIs, hardware, growth, and protection — on one desk. Free tools at zzaizzai.com/ai-tools-hub.",
             }),
             "directory",
           )
         : {
-            tagline: "Turn prompts into production APIs",
-            shortDesc: "AI-powered API builder with schema enforcement",
+            tagline: "From seed to symphony — ship AI products",
+            shortDesc:
+              "zzai zzai turns plain-language intent into shipped product — APIs, hardware, growth, and IP protection.",
             description:
-              "ZZAI transforms natural language prompts into production-ready APIs with JSON schema enforcement, version control, and automated evaluations. Perfect for developers and no-code builders.",
+              "zzai zzai (ZZAI / zzaizzai.com) is a product workspace: prompt-to-API with schema & evals, Seeds, Hardware, Play, Orbit growth, Poor Man Protection, plus free AI & cyber tools.",
             longDesc:
-              "ZZAI is an AI API builder that turns natural language prompts into production-ready APIs. Key features include JSON schema enforcement, version control with rollback, automated evaluations, API marketplace, and A/B testing. Used by developers, no-code builders, startups, and enterprises building AI-powered features. Free tier available with paid plans.",
+              "zzai zzai (also ZZAI, zzaizzai) is one workspace — From seed to symphony. Six cube faces (Seeds, Signal/API, Crest/Hardware, Play, Orbit, Protect) plus OaaS mixing-console routing. Free AI Tools Hub and Cyber-Security Mini Apps funnel to the paid platform. Free tier available; Pro $49/month; Enterprise $299/month.",
             features: [
-              "Natural language to API",
-              "JSON schema enforcement",
-              "Version control & rollback",
-              "Automated evaluations",
-              "API marketplace",
-              "A/B testing",
+              "Prompt-to-API with schema & rollback",
+              "ZZAI Seeds (PDF/YouTube → apps)",
+              "Hardware builder (Crest)",
+              "Orbit growth + AEO/SEO",
+              "Poor Man Protection seals",
+              "Free AI & cyber mini-apps",
             ],
             categories: ["AI Tools", "Developer Tools", "API Builder", "No-Code", "SaaS"],
-            keywords: ["ai api builder", "prompt to api", "no-code api", "llm api", "ai backend"],
+            keywords: [
+              "zzai zzai",
+              "zzaizzai",
+              "ai api builder",
+              "prompt to API",
+              "From seed to symphony",
+            ],
             targetAudience:
-              "Developers, no-code builders, startups, enterprises building AI-powered features",
-            pricing: "Free tier available, paid plans from $29/month",
-            alternatives: ["Retool", "Bubble", "Zapier", "AWS Lambda"],
-            rhHint: "AI APIs, Developer Tools, No-Code, Automation",
+              "Indie hackers, developers, founders, and teams shipping AI products and hardware",
+            pricing: "Free tier available; Pro $49/month; Enterprise $299/month",
+            alternatives: ["Retool", "Bubble", "Zapier", "Make", "n8n", "LangChain"],
+            rhHint: "AI APIs, Developer Tools, No-Code, Automation, Hardware",
             phHint:
-              "Built ZZAI after struggling to ship AI features fast. Now 500+ APIs deployed in 30 days. Ship your AI backend in minutes, not weeks.",
+              "Built zzai zzai so founders can go from seed to shipped product — APIs, hardware, growth, and protection — on one desk. Free tools at zzaizzai.com/ai-tools-hub.",
           };
 
       // Save as a reference page in the DB for easy access

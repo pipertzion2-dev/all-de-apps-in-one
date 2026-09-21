@@ -12,6 +12,22 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
         disallow: [...ROBOTS_DISALLOW_PATHS],
       },
+      // Answer-engine / SearchDock crawlers — explicit allow for GEO manifests
+      {
+        userAgent: "GPTBot",
+        allow: ["/", "/llms.txt", "/llms-full.txt", "/brand.json"],
+        disallow: [...ROBOTS_DISALLOW_PATHS],
+      },
+      {
+        userAgent: "ClaudeBot",
+        allow: ["/", "/llms.txt", "/llms-full.txt", "/brand.json"],
+        disallow: [...ROBOTS_DISALLOW_PATHS],
+      },
+      {
+        userAgent: "PerplexityBot",
+        allow: ["/", "/llms.txt", "/llms-full.txt", "/brand.json"],
+        disallow: [...ROBOTS_DISALLOW_PATHS],
+      },
     ],
     sitemap: [getSitemapUrl(), getSecuritySitemapUrl()],
     host: baseUrl,

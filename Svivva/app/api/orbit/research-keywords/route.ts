@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { isOrbitAdminAllowed } from "@/lib/orbit/admin-access";
 import { generateJson, getMarketingModel } from "@/lib/orbit/ai-client";
 import { isOrbitAiConfigured } from "@/lib/llm/providers";
+import { getBrandProfileSummary } from "@/lib/brand-knowledge";
 import { db } from "@/lib/db";
 import { blogPosts, seoLandingPages } from "@/lib/schema";
 import { eq } from "drizzle-orm";
@@ -19,10 +20,17 @@ type KeywordIdea = {
   outline: string[];
 };
 
-const PRODUCT_CONTEXT = `ZZAI is a platform offering free AI tools and cyber-security mini-apps that
-funnel traffic to a main SaaS (AI API builder / prompt-to-API). Audience: indie hackers,
-developers, founders, and security-curious builders. Mini-apps are standalone tools that
-drive traffic to the main product.`;
+function productContext(): string {
+  const p = getBrandProfileSummary();
+  return `${p.definition}
+
+Aliases: ${p.aliases.join(", ")}.
+Audience: ${p.audience}
+Category: ${p.category}
+Cube faces: ${p.cubeFaces.join(" | ")}
+Free tools hub: ${p.toolsHubUrl}
+Pricing: ${p.pricing}`;
+}
 
 /**
  * POST — research new keyword + blog/landing opportunities.
@@ -62,7 +70,7 @@ export async function POST(req: NextRequest) {
     /* db optional */
   }
 
-  const prompt = `${PRODUCT_CONTEXT}
+  const prompt = `${productContext()}
 
 ${body.focus ? `Focus area for this batch: ${body.focus}\n` : ""}
 Existing content (do NOT repeat these — find fresh, non-overlapping opportunities):
