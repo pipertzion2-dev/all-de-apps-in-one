@@ -26,9 +26,8 @@ describe("sticky hazards", () => {
   });
 
   it("floor hazards are larger than cling-ons", async () => {
-    const { buildStickyFloorHazard3D, buildStickyCling3D, STICKY_FLOOR_SCALE } = await import(
-      "./sticky-hazards"
-    );
+    const { buildStickyFloorHazard3D, buildStickyCling3D, STICKY_FLOOR_SCALE } =
+      await import("./sticky-hazards");
     expect(STICKY_FLOOR_SCALE.gum).toBeGreaterThan(2);
     const floor = buildStickyFloorHazard3D("banana");
     const cling = buildStickyCling3D("banana");
