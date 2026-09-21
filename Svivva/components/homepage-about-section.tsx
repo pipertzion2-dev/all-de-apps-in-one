@@ -41,9 +41,9 @@ export function HomepageAboutSection() {
           <Badge variant="secondary" className="px-4 py-1.5">
             What is {BRAND.name}?
           </Badge>
-          <h2 className="text-2xl font-bold sm:text-3xl">
-            One workspace to <span className="solid-accent">ship AI products</span>
-          </h2>
+          <h1 className="text-2xl font-bold sm:text-3xl">
+            {BRAND.name} — one workspace to <span className="solid-accent">ship AI products</span>
+          </h1>
           <p className="mx-auto max-w-2xl text-base text-muted-foreground sm:text-lg">
             {BRAND.shortDescription}
           </p>
