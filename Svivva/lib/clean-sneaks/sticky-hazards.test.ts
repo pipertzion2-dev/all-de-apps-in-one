@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildStickyCling3D,
   buildStickyHazard3D,
   isStickyHazardKind,
   pruneStickyAttachments,
@@ -25,13 +26,9 @@ describe("sticky hazards", () => {
     }
   });
 
-  it("floor hazards are larger than cling-ons", async () => {
-    const { buildStickyFloorHazard3D, buildStickyCling3D, STICKY_FLOOR_SCALE } =
-      await import("./sticky-hazards");
-    expect(STICKY_FLOOR_SCALE.gum).toBeGreaterThan(2);
-    const floor = buildStickyFloorHazard3D("banana");
+  it("cling-ons omit the floor stain", () => {
     const cling = buildStickyCling3D("banana");
-    expect(floor.children.length).toBeGreaterThan(cling.children.length);
+    expect(cling.children.some((c) => c.userData.floorMarker)).toBe(false);
   });
 
   it("slows the runner while attachments are active", () => {
