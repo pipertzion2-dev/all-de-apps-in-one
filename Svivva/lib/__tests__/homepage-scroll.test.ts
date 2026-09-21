@@ -40,6 +40,24 @@ describe("homepage scroll panels", () => {
     expect(cubeSrc).toContain("HomepageAboutSection");
     expect(cubeSrc).toContain("HomepagePricingSection");
     expect(cubeSrc).toContain("HomepageCubeFaceHint");
+    expect(cubeSrc).toContain("PlatformFeatureHub");
+    expect(cubeSrc).toContain('id="oaas"');
     expect(cubeSrc).not.toContain("Flip down · game");
+  });
+
+  it("mounts the OaaS mixing console on the scrollSnap cube face", () => {
+    const cubeSrc = readFileSync(
+      resolve(__dirname, "../../components/homepage-cube-panel.tsx"),
+      "utf8",
+    );
+    const hubSrc = readFileSync(
+      resolve(__dirname, "../../components/platform-feature-hub.tsx"),
+      "utf8",
+    );
+    expect(cubeSrc).toContain("hideBackground");
+    expect(cubeSrc).toContain("hideChannelStrips");
+    expect(hubSrc).toContain("BusOverviewFilter");
+    expect(hubSrc).toContain("onSubmit");
+    expect(hubSrc).toContain("Patch route");
   });
 });

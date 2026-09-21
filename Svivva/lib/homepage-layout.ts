@@ -4,6 +4,7 @@ export const HOMEPAGE_SECTIONS = {
   scrollSnap: true,
   oaasIntro: false,
   eventTracker: false,
+  /** Legacy non-scrollSnap path only — OaaS mounts in HomepageCubePanel when scrollSnap is on. */
   oaasHub: false,
   buildSystem: false,
   tractionBar: false,

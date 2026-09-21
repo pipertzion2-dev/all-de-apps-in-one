@@ -3,6 +3,7 @@ import { HOMEPAGE_SECTIONS, showHomepageSection } from "@/lib/homepage-layout";
 
 describe("homepage-layout", () => {
   it("keeps the homepage compact by default", () => {
+    // OaaS hub mounts inside HomepageCubePanel (scrollSnap), not the legacy branch.
     expect(HOMEPAGE_SECTIONS.oaasHub).toBe(false);
     expect(HOMEPAGE_SECTIONS.features).toBe(false);
     expect(HOMEPAGE_SECTIONS.pricing).toBe(false);

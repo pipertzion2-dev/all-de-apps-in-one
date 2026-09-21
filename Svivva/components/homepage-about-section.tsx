@@ -68,6 +68,11 @@ export function HomepageAboutSection() {
           <Link href="/signup">
             <Button className="bg-[#5B8DA8] text-white">Start free</Button>
           </Link>
+          <a href="#oaas">
+            <Button variant="outline" className="border-[#5B8DA8]/40">
+              Open mixing console
+            </Button>
+          </a>
           <Link href="/dashboard">
             <Button variant="outline">Open dashboard</Button>
           </Link>

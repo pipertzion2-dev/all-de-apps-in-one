@@ -1,6 +1,16 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+} from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -27,9 +37,14 @@ import {
   OAAS_TECHNICAL_BLURB,
   PATCH_BAY,
   SIGNAL_BUS,
+  type MixingBusId,
 } from "@/lib/platform/feature-graph";
-import { CamoThreeOverlay } from "@/components/camo-three-overlay";
 import type { FeatureSuggestionResult } from "@/lib/platform/feature-suggestions";
+
+const CamoThreeOverlay = dynamic(
+  () => import("@/components/camo-three-overlay").then((m) => m.CamoThreeOverlay),
+  { ssr: false },
+);
 
 const PRESET_SCENES = [
   "Turn my PDF into multiple apps and launch them",
@@ -40,7 +55,9 @@ const PRESET_SCENES = [
   "Watch Starter Story and apply their tactics",
   "Protect my education and document a school rights issue",
   "I need help now with a crisis and verified resources",
-];
+] as const;
+
+const SCENE_PREVIEW_COUNT = 4;
 
 type PlatformFeatureHubProps = {
   variant?: "home" | "compact";
@@ -55,52 +72,9 @@ type BusChannelGroup = {
   channels: ReturnType<typeof getFeaturesByBus>;
 };
 
-function ChannelStripGrid({ busChannels }: { busChannels: BusChannelGroup[] }) {
-  return (
-    <div className="space-y-6">
-      {busChannels.map(({ bus, channels }) => (
-        <div key={bus.id} className="space-y-2">
-          <div className="flex flex-wrap items-baseline gap-2 px-1">
-            <span className="text-xs font-bold text-[#5B8DA8]">{bus.consoleName}</span>
-            <span className="text-[10px] text-muted-foreground">{bus.description}</span>
-          </div>
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
-            {channels.map((f) => (
-              <ChannelStrip
-                key={f.id}
-                channelLabel={f.channelLabel}
-                shortTitle={f.shortTitle}
-                href={f.href}
-                mainBus={f.mainBus}
-                isSeeds={f.id === "seeds"}
-              />
-            ))}
-          </div>
-        </div>
-      ))}
+type BusFilter = "all" | MixingBusId;
 
-      <div className="rounded-xl border-2 border-amber-500/40 bg-gradient-to-r from-amber-500/5 via-card/35 to-amber-500/5 backdrop-blur-sm p-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <p className="text-sm font-bold text-amber-600 dark:text-amber-400">
-              {MASTER_BUS.consoleName} — {MASTER_BUS.label}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">{MASTER_BUS.description}</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {MASTER_BUS.outputs.map((out) => (
-              <Badge key={out} variant="outline" className="text-[10px] border-amber-500/40">
-                {out}
-              </Badge>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ChannelStrip({
+const ChannelStrip = memo(function ChannelStrip({
   channelLabel,
   shortTitle,
   href,
@@ -120,23 +94,140 @@ function ChannelStrip({
         ? "border-[#5B8DA8]/50"
         : "border-[#5B8DA8]/30";
 
+  const busName = mainBus === "both" ? "L/R" : mainBus === "crest" ? "Crest" : "Signal";
+
   return (
     <Link
       href={href}
-      className={`group flex flex-col items-center gap-1 rounded-lg border bg-card/35 backdrop-blur-sm px-2 py-3 min-w-[4.5rem] hover:bg-muted/50 transition-colors ${busTint}`}
+      aria-label={`${channelLabel} ${shortTitle}, ${busName} bus`}
+      className={`group flex flex-col items-center gap-1 rounded-lg border bg-card/35 backdrop-blur-sm px-2 py-3 min-w-[4.5rem] hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B8DA8] transition-colors ${busTint}`}
     >
-      <span className="text-[9px] font-mono text-muted-foreground tracking-wider">
-        {channelLabel}
-      </span>
-      <div className="w-1.5 h-10 rounded-full bg-gradient-to-t from-[#5B8DA8]/20 to-[#5B8DA8]/70 group-hover:from-[#5B8DA8]/40 group-hover:to-[#5B8DA8]" />
+      <span className="text-[9px] font-mono text-muted-foreground tracking-wider">{channelLabel}</span>
+      <div
+        className="w-1.5 h-10 rounded-full bg-gradient-to-t from-[#5B8DA8]/20 to-[#5B8DA8]/70 group-hover:from-[#5B8DA8]/40 group-hover:to-[#5B8DA8]"
+        aria-hidden
+      />
       <span className="text-[10px] font-semibold text-center leading-tight flex items-center gap-0.5">
-        {isSeeds && <Sprout className="w-3 h-3 text-[#5B8DA8]" />}
+        {isSeeds && <Sprout className="w-3 h-3 text-[#5B8DA8]" aria-hidden />}
         {shortTitle}
       </span>
-      <span className="text-[8px] uppercase tracking-widest text-muted-foreground">
-        {mainBus === "both" ? "L/R" : mainBus === "crest" ? "Crest" : "Signal"}
-      </span>
+      <span className="text-[8px] uppercase tracking-widest text-muted-foreground">{busName}</span>
     </Link>
+  );
+});
+
+const ChannelStripGrid = memo(function ChannelStripGrid({
+  busChannels,
+  filter,
+}: {
+  busChannels: BusChannelGroup[];
+  filter: BusFilter;
+}) {
+  const visible = useMemo(
+    () => (filter === "all" ? busChannels : busChannels.filter((g) => g.bus.id === filter)),
+    [busChannels, filter],
+  );
+
+  return (
+    <div className="space-y-6">
+      {visible.map(({ bus, channels }) => (
+        <div key={bus.id} className="space-y-2">
+          <div className="flex flex-wrap items-baseline gap-2 px-1">
+            <span className="text-xs font-bold text-[#5B8DA8]">{bus.consoleName}</span>
+            <span className="text-[10px] text-muted-foreground">{bus.description}</span>
+          </div>
+          <div
+            className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin"
+            role="list"
+            aria-label={`${bus.label} channel strips`}
+          >
+            {channels.map((f) => (
+              <div key={f.id} role="listitem">
+                <ChannelStrip
+                  channelLabel={f.channelLabel}
+                  shortTitle={f.shortTitle}
+                  href={f.href}
+                  mainBus={f.mainBus}
+                  isSeeds={f.id === "seeds"}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      {filter === "all" && (
+        <div className="rounded-xl border-2 border-amber-500/40 bg-gradient-to-r from-amber-500/5 via-card/35 to-amber-500/5 backdrop-blur-sm p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <p className="text-sm font-bold text-amber-600 dark:text-amber-400">
+                {MASTER_BUS.consoleName} — {MASTER_BUS.label}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">{MASTER_BUS.description}</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {MASTER_BUS.outputs.map((out) => (
+                <Badge key={out} variant="outline" className="text-[10px] border-amber-500/40">
+                  {out}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+});
+
+function BusOverviewFilter({
+  value,
+  onChange,
+  busChannels,
+}: {
+  value: BusFilter;
+  onChange: (next: BusFilter) => void;
+  busChannels: BusChannelGroup[];
+}) {
+  const groupId = useId();
+  return (
+    <div
+      role="tablist"
+      aria-label="Filter channel strips by bus"
+      className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-thin"
+    >
+      <button
+        type="button"
+        role="tab"
+        id={`${groupId}-all`}
+        aria-selected={value === "all"}
+        onClick={() => onChange("all")}
+        className={`shrink-0 rounded-md border px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wide transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B8DA8] ${
+          value === "all"
+            ? "border-[#5B8DA8] bg-[#5B8DA8]/15 text-[#5B8DA8]"
+            : "border-border/60 bg-card/30 text-muted-foreground hover:bg-muted/40"
+        }`}
+      >
+        Mix overview
+      </button>
+      {busChannels.map(({ bus, channels }) => (
+        <button
+          key={bus.id}
+          type="button"
+          role="tab"
+          id={`${groupId}-${bus.id}`}
+          aria-selected={value === bus.id}
+          onClick={() => onChange(bus.id)}
+          className={`shrink-0 rounded-md border px-2.5 py-1.5 text-[10px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B8DA8] ${
+            value === bus.id
+              ? "border-[#5B8DA8] bg-[#5B8DA8]/15 text-[#5B8DA8]"
+              : "border-border/60 bg-card/30 text-muted-foreground hover:bg-muted/40"
+          }`}
+        >
+          {bus.label.replace(" Bus", "")}
+          <span className="ml-1 font-mono opacity-70">{channels.length}</span>
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -145,10 +236,14 @@ export function PlatformFeatureHub({
   hideBackground = false,
   hideChannelStrips = false,
 }: PlatformFeatureHubProps) {
-  const [goal, setGoal] = useState(PRESET_SCENES[0]);
+  const [goal, setGoal] = useState<string>(PRESET_SCENES[0]);
   const [result, setResult] = useState<FeatureSuggestionResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showAllScenes, setShowAllScenes] = useState(false);
+  const [busFilter, setBusFilter] = useState<BusFilter>("all");
+  const [stripsOpen, setStripsOpen] = useState(!hideChannelStrips);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const busChannels = useMemo(
     () =>
@@ -158,6 +253,8 @@ export function PlatformFeatureHub({
       })).filter((g) => g.channels.length > 0),
     [],
   );
+
+  const visibleScenes = showAllScenes ? PRESET_SCENES : PRESET_SCENES.slice(0, SCENE_PREVIEW_COUNT);
 
   const suggest = useCallback(async () => {
     const trimmed = goal.trim();
@@ -181,11 +278,26 @@ export function PlatformFeatureHub({
     }
   }, [goal]);
 
+  useEffect(() => {
+    if (!result) return;
+    resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    resultsRef.current?.focus();
+  }, [result]);
+
+  const onSubmit = useCallback(
+    (e: FormEvent) => {
+      e.preventDefault();
+      void suggest();
+    },
+    [suggest],
+  );
+
   const isCompact = variant === "compact";
 
   return (
     <section
       id="oaas"
+      aria-labelledby={isCompact ? undefined : "oaas-heading"}
       className={
         isCompact
           ? "space-y-4"
@@ -219,11 +331,12 @@ export function PlatformFeatureHub({
       <div className={isCompact ? "" : "max-w-6xl mx-auto px-4 sm:px-6 space-y-10 relative z-10"}>
         {!isCompact && (
           <div className="text-center space-y-3 max-w-3xl mx-auto bg-background/35 backdrop-blur-sm rounded-2xl p-5 sm:p-8 border border-[#5B8DA8]/15">
-            <Badge className="bg-[#5B8DA8]/15 text-[#5B8DA8] border-[#5B8DA8]/30">
-              {OAAS_NAME}
-            </Badge>
-            <h2 className="text-2xl sm:text-4xl font-bold tracking-tight flex items-center justify-center gap-2">
-              <SlidersHorizontal className="w-8 h-8 text-[#5B8DA8]" />
+            <Badge className="bg-[#5B8DA8]/15 text-[#5B8DA8] border-[#5B8DA8]/30">{OAAS_NAME}</Badge>
+            <h2
+              id="oaas-heading"
+              className="text-2xl sm:text-4xl font-bold tracking-tight flex items-center justify-center gap-2"
+            >
+              <SlidersHorizontal className="w-8 h-8 text-[#5B8DA8]" aria-hidden />
               The mixing board for your stack.
             </h2>
             <p className="text-muted-foreground text-sm sm:text-base">{OAAS_TAGLINE}</p>
@@ -232,7 +345,7 @@ export function PlatformFeatureHub({
         )}
 
         {!isCompact && (
-          <div className="grid sm:grid-cols-3 gap-3 text-center text-xs">
+          <div className="grid sm:grid-cols-3 gap-3 text-center text-xs" aria-label="Main buses">
             <div className="rounded-lg border border-[#5B8DA8]/30 bg-card/35 backdrop-blur-sm p-3">
               <p className="font-bold text-[#5B8DA8]">{SIGNAL_BUS.consoleName}</p>
               <p className="text-muted-foreground mt-1">{SIGNAL_BUS.description}</p>
@@ -242,9 +355,7 @@ export function PlatformFeatureHub({
               <p className="text-muted-foreground mt-1">{CREST_BUS.description}</p>
             </div>
             <div className="rounded-lg border border-amber-500/40 bg-card/35 backdrop-blur-sm p-3">
-              <p className="font-bold text-amber-600 dark:text-amber-400">
-                {MASTER_BUS.consoleName}
-              </p>
+              <p className="font-bold text-amber-600 dark:text-amber-400">{MASTER_BUS.consoleName}</p>
               <p className="text-muted-foreground mt-1">{MASTER_BUS.description}</p>
               <p className="text-[10px] text-muted-foreground mt-2">
                 Out: {MASTER_BUS.outputs.join(" · ")}
@@ -256,7 +367,7 @@ export function PlatformFeatureHub({
         <Card className="border-[#5B8DA8]/30 bg-card/40 backdrop-blur-sm">
           <CardContent className="p-4 sm:p-6 space-y-4">
             <div className="flex items-center gap-2 text-sm font-semibold">
-              <Radio className="w-4 h-4 text-[#5B8DA8]" />
+              <Radio className="w-4 h-4 text-[#5B8DA8]" aria-hidden />
               {PATCH_BAY.label} — AI patch routing
             </div>
             <p className="text-xs text-muted-foreground">
@@ -264,58 +375,93 @@ export function PlatformFeatureHub({
               unmutes <strong>CH 01 · Seeds</strong> when you need many apps from one document, then
               sends to <strong>Master</strong> via Launch.
             </p>
-            <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
-              Scene recall
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {PRESET_SCENES.map((g) => (
+
+            <form onSubmit={onSubmit} className="space-y-4" aria-label="Patch bay scene recall">
+              <div className="space-y-2">
+                <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
+                  Scene recall
+                </p>
+                <div className="flex flex-wrap gap-2" role="group" aria-label="Preset scenes">
+                  {visibleScenes.map((g) => (
+                    <Button
+                      key={g}
+                      type="button"
+                      size="sm"
+                      variant={goal === g ? "default" : "outline"}
+                      className="text-xs h-auto py-1.5 whitespace-normal text-left max-w-full"
+                      aria-pressed={goal === g}
+                      onClick={() => setGoal(g)}
+                    >
+                      {g}
+                    </Button>
+                  ))}
+                  {PRESET_SCENES.length > SCENE_PREVIEW_COUNT && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      className="text-xs h-auto py-1.5 text-muted-foreground"
+                      onClick={() => setShowAllScenes((v) => !v)}
+                      aria-expanded={showAllScenes}
+                    >
+                      {showAllScenes
+                        ? "Fewer scenes"
+                        : `+${PRESET_SCENES.length - SCENE_PREVIEW_COUNT} more`}
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Input
+                  value={goal}
+                  onChange={(e) => setGoal(e.target.value)}
+                  placeholder="What channels should be in the mix?"
+                  className="flex-1 font-mono text-sm"
+                  aria-label="Mix goal"
+                  autoComplete="off"
+                />
                 <Button
-                  key={g}
-                  type="button"
-                  size="sm"
-                  variant={goal === g ? "default" : "outline"}
-                  className="text-xs h-auto py-1.5 whitespace-normal text-left max-w-full"
-                  onClick={() => setGoal(g)}
+                  type="submit"
+                  disabled={loading || goal.trim().length < 3}
+                  className="gap-2 bg-[#5B8DA8] shrink-0"
+                  data-testid="button-patch-route"
                 >
-                  {g}
+                  {loading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
+                  ) : (
+                    <Sparkles className="w-4 h-4" aria-hidden />
+                  )}
+                  Patch route
                 </Button>
-              ))}
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Input
-                value={goal}
-                onChange={(e) => setGoal(e.target.value)}
-                placeholder="What channels should be in the mix?"
-                className="flex-1 font-mono text-sm"
-              />
-              <Button
-                onClick={() => void suggest()}
-                disabled={loading || goal.trim().length < 3}
-                className="gap-2 bg-[#5B8DA8] shrink-0"
-              >
-                {loading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Sparkles className="w-4 h-4" />
-                )}
-                Patch route
-              </Button>
-            </div>
-            {error && <p className="text-xs text-destructive">{error}</p>}
+              </div>
+            </form>
+
+            {error && (
+              <p className="text-xs text-destructive" role="alert">
+                {error}
+              </p>
+            )}
             {result && (
-              <div className="space-y-3 pt-2 border-t border-border/60">
+              <div
+                ref={resultsRef}
+                tabIndex={-1}
+                className="space-y-3 pt-2 border-t border-border/60 outline-none"
+                aria-live="polite"
+                data-testid="patch-route-result"
+              >
                 <p className="text-sm">{result.summary}</p>
                 {result.workflow.length > 0 && (
                   <p className="text-xs font-mono text-muted-foreground">
                     Patch: {formatPatchRoute(result.workflow)}
                   </p>
                 )}
-                <ul className="space-y-2">
+                <ol className="space-y-2 list-none">
                   {result.suggestions.map((s, i) => (
                     <li key={s.featureId}>
                       <Link
                         href={s.href}
-                        className="flex flex-wrap items-start justify-between gap-2 rounded-lg border border-border/60 p-3 hover:bg-muted/40 transition-colors group"
+                        className="flex flex-wrap items-start justify-between gap-2 rounded-lg border border-border/60 p-3 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B8DA8] transition-colors group"
                       >
                         <div className="min-w-0">
                           <p className="font-medium text-sm group-hover:text-[#5B8DA8]">
@@ -326,11 +472,14 @@ export function PlatformFeatureHub({
                           </p>
                           <p className="text-xs text-muted-foreground mt-0.5">{s.reason}</p>
                         </div>
-                        <ArrowRight className="w-4 h-4 shrink-0 text-muted-foreground group-hover:text-[#5B8DA8]" />
+                        <ArrowRight
+                          className="w-4 h-4 shrink-0 text-muted-foreground group-hover:text-[#5B8DA8]"
+                          aria-hidden
+                        />
                       </Link>
                     </li>
                   ))}
-                </ul>
+                </ol>
                 {result.aiUsed && (
                   <p className="text-[10px] text-muted-foreground font-mono">AI patch matrix</p>
                 )}
@@ -342,13 +491,14 @@ export function PlatformFeatureHub({
         {!isCompact &&
           (hideChannelStrips ? (
             <Collapsible
-              defaultOpen={false}
+              open={stripsOpen}
+              onOpenChange={setStripsOpen}
               className="group rounded-xl border border-border/60 bg-card/20"
             >
               <CollapsibleTrigger asChild>
                 <button
                   type="button"
-                  className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-muted/30 transition-colors rounded-xl"
+                  className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-muted/30 transition-colors rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B8DA8]"
                   data-testid="toggle-channel-strips"
                 >
                   <span className="text-[10px] font-bold uppercase tracking-[0.35em] text-muted-foreground">
@@ -358,15 +508,25 @@ export function PlatformFeatureHub({
                 </button>
               </CollapsibleTrigger>
               <CollapsibleContent className="px-4 pb-4 pt-1 space-y-4">
-                <ChannelStripGrid busChannels={busChannels} />
+                <BusOverviewFilter
+                  value={busFilter}
+                  onChange={setBusFilter}
+                  busChannels={busChannels}
+                />
+                <ChannelStripGrid busChannels={busChannels} filter={busFilter} />
               </CollapsibleContent>
             </Collapsible>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-4">
               <p className="text-center text-[10px] font-bold uppercase tracking-[0.35em] text-muted-foreground">
                 Channel strips · subgroup buses
               </p>
-              <ChannelStripGrid busChannels={busChannels} />
+              <BusOverviewFilter
+                value={busFilter}
+                onChange={setBusFilter}
+                busChannels={busChannels}
+              />
+              <ChannelStripGrid busChannels={busChannels} filter={busFilter} />
             </div>
           ))}
       </div>
