@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BRAND } from "@/lib/brand";
 import { getSiteUrl } from "@/lib/site-url";
 
 export function absoluteUrl(path: string): string {
@@ -26,7 +27,7 @@ export function buildSeoMetadata({
   title,
   description,
   path,
-  imagePath = "/zzai-logo.png",
+  imagePath = BRAND.ogImagePath,
   noindex = false,
   type = "website",
   publishedTime,
@@ -52,7 +53,7 @@ export function buildSeoMetadata({
       title,
       description,
       url: canonical,
-      siteName: "zzai zzai",
+      siteName: BRAND.name,
       locale,
       images: [{ url: image, width: 1200, height: 630, alt: title }],
       ...(publishedTime ? { publishedTime } : {}),

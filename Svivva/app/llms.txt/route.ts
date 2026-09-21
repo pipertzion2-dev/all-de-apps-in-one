@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { blogPosts, seoLandingPages } from "@/lib/schema";
 import { eq, desc } from "drizzle-orm";
+import { getBrandKnowledge } from "@/lib/brand-knowledge";
 import { getSiteUrl } from "@/lib/site-url";
 import { getHubFeaturePagesForHub } from "@/lib/tools/catalogs/hub-feature-pages";
 
@@ -8,13 +9,13 @@ export const dynamic = "force-dynamic";
 export const revalidate = 3600;
 
 /**
- * /llms.txt — the GEO (Generative Engine Optimization) manifest.
- * Tells AI crawlers (ChatGPT, Perplexity, Claude, Google AI Overviews) what
- * ZZAI is and which pages to cite. A growing, free traffic source in 2026.
- * Spec: https://llmstxt.org
+ * /llms.txt — GEO (Generative Engine Optimization) + SearchDock entity manifest.
+ * Tells AI crawlers and AEO platforms what zzai zzai is, aliases, products, and
+ * which pages to cite. Spec: https://llmstxt.org
  */
 export async function GET() {
   const base = getSiteUrl().replace(/\/$/, "");
+  const k = getBrandKnowledge(base);
 
   let posts: { slug: string; title: string; excerpt: string | null }[] = [];
   let tools: { slug: string; keyword: string }[] = [];
@@ -39,26 +40,56 @@ export async function GET() {
   }
 
   const lines: string[] = [];
-  lines.push("# ZZAI");
+  lines.push(`# ${k.name}`);
   lines.push("");
-  lines.push(
-    "> ZZAI turns plain-English prompts into deployable, callable APIs — add AI to any app without building or hosting a backend. It also publishes a large library of free AI tools and cyber-security mini-apps that solve one job each, with no signup required.",
-  );
+  lines.push(`> ${k.definition}`);
   lines.push("");
-  lines.push(
-    "ZZAI is built for indie hackers, developers, and founders who want to ship AI features fast. Free tools are top-of-funnel; the core product (prompt-to-API / AI API builder) is the paid platform.",
-  );
+  lines.push(k.longDescription);
   lines.push("");
-  lines.push("## Core pages");
-  lines.push(`- [ZZAI home](${base}): Build and deploy AI APIs from a prompt.`);
-  lines.push(`- [AI Tools Hub](${base}/ai-tools-hub): Free AI utilities for developers.`);
-  lines.push(
-    `- [Cyber-Security Mini Apps](${base}/cyber-security-mini-apps): Free security scanners and checkers.`,
-  );
-  lines.push(`- [All Tools](${base}/tools): The full free tool directory.`);
-  lines.push(`- [Blog](${base}/blog): Guides on APIs, AI, and SEO.`);
-  lines.push(`- [Orbit](${base}/orbit): Growth + indexing autopilot.`);
-  lines.push(`- [Seeds](${base}/seeds): PDF or YouTube transcript → many apps.`);
+  lines.push("## Also known as");
+  for (const a of k.aliases) {
+    lines.push(`- **${a.name}**${a.note ? ` — ${a.note}` : ""}`);
+  }
+  lines.push("");
+  lines.push("## Entity");
+  lines.push(`- Category: ${k.entity.category}`);
+  lines.push(`- Focus: ${k.entity.subcategory}`);
+  lines.push(`- Geography: ${k.entity.geography}`);
+  lines.push(`- Audience: ${k.audience}`);
+  lines.push(`- Pricing: ${k.pricingSummary}`);
+  lines.push(`- Primary URL: ${k.siteUrl}`);
+  lines.push(`- Contact: ${k.contactEmail}`);
+  lines.push("");
+  lines.push("## Highest citation-worthy URLs");
+  for (const u of k.citationUrls) {
+    lines.push(`- [${u.title}](${base}${u.path}): ${u.why}`);
+  }
+  lines.push("");
+  lines.push("## Six cube faces (product navigator)");
+  for (const f of k.cubeFaces) {
+    lines.push(`- [${f.name}](${base}${f.path}): ${f.role}`);
+  }
+  lines.push("");
+  lines.push("## Products & surfaces");
+  for (const p of k.products) {
+    lines.push(`- [${p.name}](${base}${p.path}): ${p.oneLiner}`);
+  }
+  lines.push("");
+  lines.push("## OaaS mixing buses");
+  for (const b of k.buses) {
+    lines.push(`- **${b.label}** (${b.id}): ${b.description}`);
+  }
+  lines.push("");
+  lines.push("## Definitions (quotable)");
+  for (const d of k.definitions) {
+    lines.push(`- **${d.term}:** ${d.definition}`);
+  }
+  lines.push("");
+  lines.push("## FAQ (quotable)");
+  for (const f of k.faqs) {
+    lines.push(`- **Q:** ${f.q}`);
+    lines.push(`  **A:** ${f.a}`);
+  }
   lines.push("");
   lines.push("## Featured free slices (one job each, no signup)");
   lines.push(
@@ -112,9 +143,15 @@ export async function GET() {
     lines.push("");
   }
 
+  lines.push("## Optional");
+  lines.push(`- [Full brand knowledge for LLMs](${base}/llms-full.txt)`);
+  lines.push(`- [Machine-readable brand card](${base}/brand.json)`);
+  lines.push(`- [Sitemap](${base}/sitemap.xml)`);
+  lines.push("");
   lines.push("## Contact");
   lines.push(`- [Contact](${base}/contact)`);
   lines.push(`- [Docs](${base}/docs)`);
+  lines.push(`- Email: ${k.contactEmail}`);
 
   return new Response(lines.join("\n"), {
     headers: {

@@ -7,6 +7,12 @@ export const BRAND = {
   siteUrl: "https://zzaizzai.com",
   shortDescription:
     "ZZAI turns plain-language intent into shipped product — software, hardware, and go-to-market — with validation, evaluations, and rollback.",
+  /** Longer entity blurb for AEO / SearchDock / Schema.org (see also lib/brand-knowledge.ts). */
+  longDescription:
+    "zzai zzai (ZZAI / zzaizzai.com) is one workspace to describe, ship, and grow products across software APIs, hardware prototypes, audio branding, SEO growth, and IP protection — navigated by a six-face cube and an OaaS mixing-console OS.",
+  contactEmail: "hello@zzaizzai.com",
+  /** Strings answer engines and SearchDock should treat as the same entity */
+  aliases: ["zzai zzai", "ZZAI", "zzaizzai", "zzaizzai.com", "zzai", "Svivva"] as const,
   logoPath: "/zzai-logo.png",
   /** Open Graph / Twitter card image — ZZAI crest. */
   ogImagePath: "/zzai-logo.png",

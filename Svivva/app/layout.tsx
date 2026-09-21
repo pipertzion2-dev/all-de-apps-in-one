@@ -14,6 +14,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { BRAND } from "@/lib/brand";
 import { MEDIA } from "@/lib/media-assets";
 import { resolveSiteAdsenseClient } from "@/lib/adsense-credentials";
+import { homepageJsonLdGraph } from "@/lib/seo/schema/builders";
 
 const zcFont = localFont({
   src: "../media/fonts/Zc-Regular.ttf",
@@ -58,7 +59,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   const title = "zzai zzai — From seed to symphony";
   const description =
-    "zzai zzai — From seed to symphony. One workspace to describe what you want, ship it with guardrails, and grow it without babysitting infrastructure.";
+    "zzai zzai (ZZAI / zzaizzai.com) — From seed to symphony. One workspace to describe what you want, ship it with guardrails across software, hardware, growth, and IP protection — without babysitting infrastructure.";
 
   return {
     title: {
@@ -67,7 +68,15 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description,
     metadataBase: new URL(siteUrl),
-    keywords: ["zzai zzai", "zzai", "zzaizzai", "From seed to symphony"],
+    keywords: [
+      ...BRAND.aliases,
+      BRAND.tagline,
+      "AI API builder",
+      "prompt to API",
+      "OaaS",
+      "ZZAI Seeds",
+      "Poor Man Protection",
+    ],
     openGraph: {
       type: "website",
       siteName: "zzai zzai",
@@ -113,6 +122,16 @@ export async function generateMetadata(): Promise<Metadata> {
 const gaId = process.env.NEXT_PUBLIC_GA_ID || "G-QL8EXZZMS6";
 const gadsId = process.env.NEXT_PUBLIC_GADS_ID;
 const clarityId = process.env.NEXT_PUBLIC_CLARITY_ID;
+/** SearchDock site-agent — reads brand manifests + heartbeats for AEO. Empty env disables. */
+const SEARCHDOCK_TOKEN =
+  process.env.NEXT_PUBLIC_SEARCHDOCK_TOKEN?.trim() || "sd-ab55f04b597744436666877149dd1b56";
+const SEARCHDOCK_ENDPOINT =
+  process.env.NEXT_PUBLIC_SEARCHDOCK_ENDPOINT?.trim() ||
+  "https://app.searchdock.io/api/v1/site-agent/heartbeat";
+const SEARCHDOCK_SDK =
+  process.env.NEXT_PUBLIC_SEARCHDOCK_SDK?.trim() ||
+  "https://app.searchdock.io/api/v1/site-agent/sdk";
+const searchdockEnabled = SEARCHDOCK_TOKEN.length > 0 && SEARCHDOCK_TOKEN !== "off";
 
 function resolveAdsenseClient(): string | null {
   return resolveSiteAdsenseClient();
@@ -150,138 +169,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify([
-              {
-                "@context": "https://schema.org",
-                "@type": "Organization",
-                name: "zzai zzai",
-                url: siteUrl,
-                logo: new URL(MEDIA.logo, siteUrl).toString(),
-                description:
-                  "From seed to symphony — zzai zzai is one workspace to describe, ship, and grow products across software, hardware, audio, and go-to-market.",
-                sameAs: [],
-              },
-              {
-                "@context": "https://schema.org",
-                "@type": "WebSite",
-                name: "zzai zzai",
-                url: siteUrl,
-                potentialAction: {
-                  "@type": "SearchAction",
-                  target: {
-                    "@type": "EntryPoint",
-                    urlTemplate: `${siteUrl}/blog?q={search_term_string}`,
-                  },
-                  "query-input": "required name=search_term_string",
-                },
-              },
-              {
-                "@context": "https://schema.org",
-                "@type": "SoftwareApplication",
-                name: "zzai zzai",
-                operatingSystem: "Web",
-                applicationCategory: "DeveloperApplication",
-                offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-                description:
-                  "From seed to symphony — ship with schema validation, automated checks, versioning, and rollback from one workspace.",
-                url: siteUrl,
-              },
-              {
-                "@context": "https://schema.org",
-                "@type": "FAQPage",
-                mainEntity: [
-                  {
-                    "@type": "Question",
-                    name: "What is ZZAI?",
-                    acceptedAnswer: {
-                      "@type": "Answer",
-                      text: "From seed to symphony: ZZAI turns plain-language intent into shipped product — with validation, evaluations, versioning, and rollback so quality does not drift.",
-                    },
-                  },
-                  {
-                    "@type": "Question",
-                    name: "How long does it take to ship with ZZAI?",
-                    acceptedAnswer: {
-                      "@type": "Answer",
-                      text: "Most teams get a working, tested endpoint live quickly. Describe what you need, define the output schema, deploy — ZZAI handles validation, rollback, and ops.",
-                    },
-                  },
-                  {
-                    "@type": "Question",
-                    name: "Does ZZAI work with OpenAI and other AI models?",
-                    acceptedAnswer: {
-                      "@type": "Answer",
-                      text: "Yes. ZZAI supports OpenAI (GPT-4o, GPT-4, GPT-3.5), Anthropic Claude, Google Gemini, and other LLMs. You can route between models automatically based on cost or quality thresholds.",
-                    },
-                  },
-                  {
-                    "@type": "Question",
-                    name: "Do I need to write code to use ZZAI?",
-                    acceptedAnswer: {
-                      "@type": "Answer",
-                      text: "No. ZZAI's core workflow is entirely no-code — describe your API in plain English, set your output schema, and deploy. A TypeScript SDK is available for developers who want programmatic access.",
-                    },
-                  },
-                  {
-                    "@type": "Question",
-                    name: "Is ZZAI free to start?",
-                    acceptedAnswer: {
-                      "@type": "Answer",
-                      text: "Yes. ZZAI has a free tier with no credit card required. Paid plans start at $49/month and unlock unlimited endpoints, higher request volumes, and team features.",
-                    },
-                  },
-                  {
-                    "@type": "Question",
-                    name: "What happens if my endpoint returns bad data?",
-                    acceptedAnswer: {
-                      "@type": "Answer",
-                      text: "ZZAI validates every response against your JSON schema and automatically retries or repairs malformed outputs. If quality drops below your threshold, auto-rollback reverts to the last good version.",
-                    },
-                  },
-                ],
-              },
-              {
-                "@context": "https://schema.org",
-                "@type": "HowTo",
-                name: "How to ship with ZZAI",
-                description:
-                  "Build a production-ready endpoint from a plain-language prompt with ZZAI — schema validation, evaluations, and rollback included.",
-                step: [
-                  {
-                    "@type": "HowToStep",
-                    position: 1,
-                    name: "Describe your API",
-                    text: "Write what you want your API to do in plain English — no code required.",
-                  },
-                  {
-                    "@type": "HowToStep",
-                    position: 2,
-                    name: "Define your output schema",
-                    text: "Set the JSON structure you expect back. ZZAI will enforce and validate it on every call.",
-                  },
-                  {
-                    "@type": "HowToStep",
-                    position: 3,
-                    name: "Auto-generate evaluations",
-                    text: "ZZAI writes up to 200 test cases automatically — edge cases, adversarial inputs, and boundary conditions.",
-                  },
-                  {
-                    "@type": "HowToStep",
-                    position: 4,
-                    name: "Deploy your endpoint",
-                    text: "One click publishes a live, auto-scaling API endpoint with full OpenAPI documentation.",
-                  },
-                  {
-                    "@type": "HowToStep",
-                    position: 5,
-                    name: "Monitor and rollback",
-                    text: "Watch latency, success rate, and token costs in real time. Enable auto-rollback for hands-free quality control.",
-                  },
-                ],
-              },
-            ]),
+            __html: JSON.stringify(homepageJsonLdGraph()),
           }}
         />
+        <link rel="alternate" type="text/plain" href="/llms.txt" title="llms.txt" />
+        <link rel="alternate" type="text/plain" href="/llms-full.txt" title="llms-full.txt" />
+        <link rel="alternate" type="application/json" href="/brand.json" title="brand.json" />
         {/* Consent Mode v2 defaults BEFORE GA / AdSense — required for Google CMP (Funding Choices) */}
         <script
           id="google-consent-mode-defaults"
@@ -333,6 +226,16 @@ gtag('consent','default',{
             async
             src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
             crossOrigin="anonymous"
+          />
+        )}
+        {searchdockEnabled && (
+          // Native <script> — SearchDock site-agent SDK reads data-token / data-endpoint
+          // from this element (same snippet SearchDock provides for zzaizzai.com).
+          <script
+            async
+            src={SEARCHDOCK_SDK}
+            data-token={SEARCHDOCK_TOKEN}
+            data-endpoint={SEARCHDOCK_ENDPOINT}
           />
         )}
       </head>
