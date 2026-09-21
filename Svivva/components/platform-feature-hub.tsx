@@ -102,7 +102,9 @@ const ChannelStrip = memo(function ChannelStrip({
       aria-label={`${channelLabel} ${shortTitle}, ${busName} bus`}
       className={`group flex flex-col items-center gap-1 rounded-lg border bg-card/35 backdrop-blur-sm px-2 py-3 min-w-[4.5rem] hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B8DA8] transition-colors ${busTint}`}
     >
-      <span className="text-[9px] font-mono text-muted-foreground tracking-wider">{channelLabel}</span>
+      <span className="text-[9px] font-mono text-muted-foreground tracking-wider">
+        {channelLabel}
+      </span>
       <div
         className="w-1.5 h-10 rounded-full bg-gradient-to-t from-[#5B8DA8]/20 to-[#5B8DA8]/70 group-hover:from-[#5B8DA8]/40 group-hover:to-[#5B8DA8]"
         aria-hidden
@@ -331,7 +333,9 @@ export function PlatformFeatureHub({
       <div className={isCompact ? "" : "max-w-6xl mx-auto px-4 sm:px-6 space-y-10 relative z-10"}>
         {!isCompact && (
           <div className="text-center space-y-3 max-w-3xl mx-auto bg-background/35 backdrop-blur-sm rounded-2xl p-5 sm:p-8 border border-[#5B8DA8]/15">
-            <Badge className="bg-[#5B8DA8]/15 text-[#5B8DA8] border-[#5B8DA8]/30">{OAAS_NAME}</Badge>
+            <Badge className="bg-[#5B8DA8]/15 text-[#5B8DA8] border-[#5B8DA8]/30">
+              {OAAS_NAME}
+            </Badge>
             <h2
               id="oaas-heading"
               className="text-2xl sm:text-4xl font-bold tracking-tight flex items-center justify-center gap-2"
@@ -355,7 +359,9 @@ export function PlatformFeatureHub({
               <p className="text-muted-foreground mt-1">{CREST_BUS.description}</p>
             </div>
             <div className="rounded-lg border border-amber-500/40 bg-card/35 backdrop-blur-sm p-3">
-              <p className="font-bold text-amber-600 dark:text-amber-400">{MASTER_BUS.consoleName}</p>
+              <p className="font-bold text-amber-600 dark:text-amber-400">
+                {MASTER_BUS.consoleName}
+              </p>
               <p className="text-muted-foreground mt-1">{MASTER_BUS.description}</p>
               <p className="text-[10px] text-muted-foreground mt-2">
                 Out: {MASTER_BUS.outputs.join(" · ")}
