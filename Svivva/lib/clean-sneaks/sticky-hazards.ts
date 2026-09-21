@@ -12,10 +12,10 @@ export const STICKY_HAZARD_KINDS: readonly StickyHazardKind[] = [
 
 /** Extra world scale when these sit on the pavement (vs cling-ons on the sole). */
 export const STICKY_FLOOR_SCALE: Record<StickyHazardKind, number> = {
-  dirt: 2.35,
-  poop: 2.2,
-  banana: 2.5,
-  gum: 2.6,
+  dirt: 2.55,
+  poop: 2.4,
+  banana: 2.7,
+  gum: 2.85,
 };
 
 export function isStickyHazardKind(kind: string): kind is StickyHazardKind {
@@ -55,20 +55,20 @@ function setShadows(obj: THREE.Object3D) {
 }
 
 const STAIN_COLOR: Record<StickyHazardKind, number> = {
-  dirt: 0x8b5a2b,
-  poop: 0x6b3a18,
-  banana: 0xf5d45a,
-  gum: 0xff6ab5,
+  dirt: 0xc48a4a,
+  poop: 0x8b4a20,
+  banana: 0xffe566,
+  gum: 0xff7ec4,
 };
 
 /** High-contrast pavement blotch so the hazard reads from down the road. */
 function addFloorStain(root: THREE.Group, kind: StickyHazardKind, radius: number) {
   const stain = new THREE.Mesh(
-    new THREE.CircleGeometry(radius, 28),
+    new THREE.CircleGeometry(radius * 1.15, 28),
     new THREE.MeshBasicMaterial({
       color: STAIN_COLOR[kind],
       transparent: true,
-      opacity: 0.72,
+      opacity: 0.92,
       depthWrite: false,
     }),
   );
@@ -78,11 +78,11 @@ function addFloorStain(root: THREE.Group, kind: StickyHazardKind, radius: number
   stain.userData.floorMarker = true;
 
   const ring = new THREE.Mesh(
-    new THREE.RingGeometry(radius * 0.82, radius * 1.12, 28),
+    new THREE.RingGeometry(radius * 0.95, radius * 1.28, 28),
     new THREE.MeshBasicMaterial({
-      color: 0xfff6d0,
+      color: 0xfff8e0,
       transparent: true,
-      opacity: 0.45,
+      opacity: 0.7,
       depthWrite: false,
       side: THREE.DoubleSide,
     }),
