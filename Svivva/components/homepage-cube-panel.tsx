@@ -54,7 +54,7 @@ export function HomepageCubePanel({
             onClick={() => scrollToSection("about")}
             className="rounded-full border border-[#5B8DA8]/40 bg-background/90 px-5 py-2 text-xs font-medium tracking-wide text-foreground shadow-sm backdrop-blur-sm transition-transform active:scale-95"
           >
-            Scroll for app info, mixing console & pricing ↓
+            Scroll ↓
           </button>
         </div>
       ) : null}

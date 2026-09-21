@@ -12,31 +12,16 @@ import {
 } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import {
-  ArrowRight,
-  ChevronDown,
-  Loader2,
-  Radio,
-  SlidersHorizontal,
-  Sparkles,
-  Sprout,
-} from "lucide-react";
+import { ArrowRight, ChevronDown, Loader2 } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import {
-  CREST_BUS,
   formatPatchRoute,
   getFeaturesByBus,
-  MASTER_BUS,
   MIXING_BUSES,
   OAAS_NAME,
   OAAS_TAGLINE,
-  OAAS_TECHNICAL_BLURB,
-  PATCH_BAY,
-  SIGNAL_BUS,
   type MixingBusId,
 } from "@/lib/platform/feature-graph";
 import type { FeatureSuggestionResult } from "@/lib/platform/feature-suggestions";
@@ -57,8 +42,6 @@ const PRESET_SCENES = [
   "I need help now with a crisis and verified resources",
 ] as const;
 
-const SCENE_PREVIEW_COUNT = 4;
-
 type PlatformFeatureHubProps = {
   variant?: "home" | "compact";
   /** When true, flower/camo background is rendered by a parent wrapper (homepage). */
@@ -74,49 +57,74 @@ type BusChannelGroup = {
 
 type BusFilter = "all" | MixingBusId;
 
-const ChannelStrip = memo(function ChannelStrip({
+const ChannelLink = memo(function ChannelLink({
   channelLabel,
   shortTitle,
   href,
-  mainBus,
-  isSeeds,
 }: {
   channelLabel: string;
   shortTitle: string;
   href: string;
-  mainBus: "signal" | "crest" | "both";
-  isSeeds?: boolean;
 }) {
-  const busTint =
-    mainBus === "crest"
-      ? "border-[#D94F9C]/40"
-      : mainBus === "both"
-        ? "border-[#5B8DA8]/50"
-        : "border-[#5B8DA8]/30";
-
-  const busName = mainBus === "both" ? "L/R" : mainBus === "crest" ? "Crest" : "Signal";
-
   return (
     <Link
       href={href}
-      aria-label={`${channelLabel} ${shortTitle}, ${busName} bus`}
-      className={`group flex flex-col items-center gap-1 rounded-lg border bg-card/35 backdrop-blur-sm px-2 py-3 min-w-[4.5rem] hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B8DA8] transition-colors ${busTint}`}
+      className="inline-flex items-baseline gap-2 py-1 text-sm text-foreground/90 hover:text-[#5B8DA8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B8DA8] rounded-sm"
     >
-      <span className="text-[9px] font-mono text-muted-foreground tracking-wider">
+      <span className="font-mono text-[10px] text-muted-foreground tabular-nums">
         {channelLabel}
       </span>
-      <div
-        className="w-1.5 h-10 rounded-full bg-gradient-to-t from-[#5B8DA8]/20 to-[#5B8DA8]/70 group-hover:from-[#5B8DA8]/40 group-hover:to-[#5B8DA8]"
-        aria-hidden
-      />
-      <span className="text-[10px] font-semibold text-center leading-tight flex items-center gap-0.5">
-        {isSeeds && <Sprout className="w-3 h-3 text-[#5B8DA8]" aria-hidden />}
-        {shortTitle}
-      </span>
-      <span className="text-[8px] uppercase tracking-widest text-muted-foreground">{busName}</span>
+      <span>{shortTitle}</span>
     </Link>
   );
 });
+
+function BusOverviewFilter({
+  value,
+  onChange,
+  busChannels,
+}: {
+  value: BusFilter;
+  onChange: (next: BusFilter) => void;
+  busChannels: BusChannelGroup[];
+}) {
+  const groupId = useId();
+  return (
+    <div
+      role="tablist"
+      aria-label="Filter channels by bus"
+      className="flex flex-wrap gap-x-3 gap-y-1 border-b border-border/40 pb-2"
+    >
+      <button
+        type="button"
+        role="tab"
+        id={`${groupId}-all`}
+        aria-selected={value === "all"}
+        onClick={() => onChange("all")}
+        className={`text-xs tracking-wide transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B8DA8] ${
+          value === "all" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+        }`}
+      >
+        All
+      </button>
+      {busChannels.map(({ bus }) => (
+        <button
+          key={bus.id}
+          type="button"
+          role="tab"
+          id={`${groupId}-${bus.id}`}
+          aria-selected={value === bus.id}
+          onClick={() => onChange(bus.id)}
+          className={`text-xs tracking-wide transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B8DA8] ${
+            value === bus.id ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          {bus.label.replace(" Bus", "")}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 const ChannelStripGrid = memo(function ChannelStripGrid({
   busChannels,
@@ -134,115 +142,35 @@ const ChannelStripGrid = memo(function ChannelStripGrid({
     <div className="space-y-6">
       {visible.map(({ bus, channels }) => (
         <div key={bus.id} className="space-y-2">
-          <div className="flex flex-wrap items-baseline gap-2 px-1">
-            <span className="text-xs font-bold text-[#5B8DA8]">{bus.consoleName}</span>
-            <span className="text-[10px] text-muted-foreground">{bus.description}</span>
-          </div>
-          <div
-            className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin"
-            role="list"
-            aria-label={`${bus.label} channel strips`}
-          >
+          <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+            {bus.label}
+          </p>
+          <ul className="grid gap-1 sm:grid-cols-2" role="list">
             {channels.map((f) => (
-              <div key={f.id} role="listitem">
-                <ChannelStrip
+              <li key={f.id} role="listitem">
+                <ChannelLink
                   channelLabel={f.channelLabel}
                   shortTitle={f.shortTitle}
                   href={f.href}
-                  mainBus={f.mainBus}
-                  isSeeds={f.id === "seeds"}
                 />
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       ))}
-
-      {filter === "all" && (
-        <div className="rounded-xl border-2 border-amber-500/40 bg-gradient-to-r from-amber-500/5 via-card/35 to-amber-500/5 backdrop-blur-sm p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div>
-              <p className="text-sm font-bold text-amber-600 dark:text-amber-400">
-                {MASTER_BUS.consoleName} — {MASTER_BUS.label}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">{MASTER_BUS.description}</p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {MASTER_BUS.outputs.map((out) => (
-                <Badge key={out} variant="outline" className="text-[10px] border-amber-500/40">
-                  {out}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 });
-
-function BusOverviewFilter({
-  value,
-  onChange,
-  busChannels,
-}: {
-  value: BusFilter;
-  onChange: (next: BusFilter) => void;
-  busChannels: BusChannelGroup[];
-}) {
-  const groupId = useId();
-  return (
-    <div
-      role="tablist"
-      aria-label="Filter channel strips by bus"
-      className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-thin"
-    >
-      <button
-        type="button"
-        role="tab"
-        id={`${groupId}-all`}
-        aria-selected={value === "all"}
-        onClick={() => onChange("all")}
-        className={`shrink-0 rounded-md border px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wide transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B8DA8] ${
-          value === "all"
-            ? "border-[#5B8DA8] bg-[#5B8DA8]/15 text-[#5B8DA8]"
-            : "border-border/60 bg-card/30 text-muted-foreground hover:bg-muted/40"
-        }`}
-      >
-        Mix overview
-      </button>
-      {busChannels.map(({ bus, channels }) => (
-        <button
-          key={bus.id}
-          type="button"
-          role="tab"
-          id={`${groupId}-${bus.id}`}
-          aria-selected={value === bus.id}
-          onClick={() => onChange(bus.id)}
-          className={`shrink-0 rounded-md border px-2.5 py-1.5 text-[10px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B8DA8] ${
-            value === bus.id
-              ? "border-[#5B8DA8] bg-[#5B8DA8]/15 text-[#5B8DA8]"
-              : "border-border/60 bg-card/30 text-muted-foreground hover:bg-muted/40"
-          }`}
-        >
-          {bus.label.replace(" Bus", "")}
-          <span className="ml-1 font-mono opacity-70">{channels.length}</span>
-        </button>
-      ))}
-    </div>
-  );
-}
 
 export function PlatformFeatureHub({
   variant = "home",
   hideBackground = false,
   hideChannelStrips = false,
 }: PlatformFeatureHubProps) {
-  const [goal, setGoal] = useState<string>(PRESET_SCENES[0]);
+  const [goal, setGoal] = useState<string>("");
   const [result, setResult] = useState<FeatureSuggestionResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showAllScenes, setShowAllScenes] = useState(false);
   const [busFilter, setBusFilter] = useState<BusFilter>("all");
   const [stripsOpen, setStripsOpen] = useState(!hideChannelStrips);
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -255,8 +183,6 @@ export function PlatformFeatureHub({
       })).filter((g) => g.channels.length > 0),
     [],
   );
-
-  const visibleScenes = showAllScenes ? PRESET_SCENES : PRESET_SCENES.slice(0, SCENE_PREVIEW_COUNT);
 
   const suggest = useCallback(async () => {
     const trimmed = goal.trim();
@@ -296,243 +222,158 @@ export function PlatformFeatureHub({
 
   const isCompact = variant === "compact";
 
+  const channelsBlock = (
+    <div className="space-y-4">
+      <BusOverviewFilter value={busFilter} onChange={setBusFilter} busChannels={busChannels} />
+      <ChannelStripGrid busChannels={busChannels} filter={busFilter} />
+    </div>
+  );
+
   return (
     <section
       id="oaas"
       aria-labelledby={isCompact ? undefined : "oaas-heading"}
       className={
         isCompact
-          ? "space-y-4"
+          ? "space-y-6"
           : hideBackground
-            ? "py-14 sm:py-20 relative"
-            : "py-14 sm:py-20 relative overflow-hidden min-h-[600px]"
+            ? "py-16 sm:py-24 relative"
+            : "py-16 sm:py-24 relative overflow-hidden min-h-[480px]"
       }
     >
       {!isCompact && !hideBackground && (
-        <>
-          <div
-            className="absolute inset-x-0 top-0 h-[100svh] md:inset-0 md:h-full pointer-events-none z-0 overflow-hidden select-none"
-            aria-hidden
-          >
-            <CamoThreeOverlay preset="oaas" eagerMount keepMounted />
-          </div>
-          <div
-            className="absolute inset-x-0 top-0 h-24 sm:h-32 z-[1] pointer-events-none"
-            style={{
-              background: "linear-gradient(to bottom, hsl(var(--background)) 0%, transparent 100%)",
-            }}
-          />
-          <div
-            className="absolute inset-x-0 bottom-0 h-24 sm:h-32 z-[1] pointer-events-none"
-            style={{
-              background: "linear-gradient(to top, hsl(var(--background)) 0%, transparent 100%)",
-            }}
-          />
-        </>
+        <div
+          className="absolute inset-x-0 top-0 h-[100svh] md:inset-0 md:h-full pointer-events-none z-0 overflow-hidden select-none opacity-40"
+          aria-hidden
+        >
+          <CamoThreeOverlay preset="oaas" eagerMount keepMounted />
+        </div>
       )}
-      <div className={isCompact ? "" : "max-w-6xl mx-auto px-4 sm:px-6 space-y-10 relative z-10"}>
+
+      <div
+        className={
+          isCompact ? "space-y-8" : "max-w-2xl mx-auto px-4 sm:px-6 space-y-10 relative z-10"
+        }
+      >
         {!isCompact && (
-          <div className="text-center space-y-3 max-w-3xl mx-auto bg-background/35 backdrop-blur-sm rounded-2xl p-5 sm:p-8 border border-[#5B8DA8]/15">
-            <Badge className="bg-[#5B8DA8]/15 text-[#5B8DA8] border-[#5B8DA8]/30">
-              {OAAS_NAME}
-            </Badge>
-            <h2
-              id="oaas-heading"
-              className="text-2xl sm:text-4xl font-bold tracking-tight flex items-center justify-center gap-2"
-            >
-              <SlidersHorizontal className="w-8 h-8 text-[#5B8DA8]" aria-hidden />
-              The mixing board for your stack.
+          <header className="space-y-3 text-center sm:text-left">
+            <p className="text-[11px] uppercase tracking-[0.28em] text-[#5B8DA8]">{OAAS_NAME}</p>
+            <h2 id="oaas-heading" className="text-3xl sm:text-4xl font-semibold tracking-tight">
+              Mixing console
             </h2>
-            <p className="text-muted-foreground text-sm sm:text-base">{OAAS_TAGLINE}</p>
-            <p className="text-xs sm:text-sm text-[#5B8DA8] font-medium">{OAAS_TECHNICAL_BLURB}</p>
-          </div>
+            <p className="text-sm sm:text-base text-muted-foreground max-w-xl">{OAAS_TAGLINE}</p>
+          </header>
         )}
 
-        {!isCompact && (
-          <div className="grid sm:grid-cols-3 gap-3 text-center text-xs" aria-label="Main buses">
-            <div className="rounded-lg border border-[#5B8DA8]/30 bg-card/35 backdrop-blur-sm p-3">
-              <p className="font-bold text-[#5B8DA8]">{SIGNAL_BUS.consoleName}</p>
-              <p className="text-muted-foreground mt-1">{SIGNAL_BUS.description}</p>
-            </div>
-            <div className="rounded-lg border border-[#D94F9C]/30 bg-card/35 backdrop-blur-sm p-3">
-              <p className="font-bold text-[#D94F9C]">{CREST_BUS.consoleName}</p>
-              <p className="text-muted-foreground mt-1">{CREST_BUS.description}</p>
-            </div>
-            <div className="rounded-lg border border-amber-500/40 bg-card/35 backdrop-blur-sm p-3">
-              <p className="font-bold text-amber-600 dark:text-amber-400">
-                {MASTER_BUS.consoleName}
-              </p>
-              <p className="text-muted-foreground mt-1">{MASTER_BUS.description}</p>
-              <p className="text-[10px] text-muted-foreground mt-2">
-                Out: {MASTER_BUS.outputs.join(" · ")}
-              </p>
-            </div>
+        <form onSubmit={onSubmit} className="space-y-4" aria-label="Patch bay">
+          <label htmlFor="oaas-goal" className="sr-only">
+            Describe your mix
+          </label>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
+            <Input
+              id="oaas-goal"
+              value={goal}
+              onChange={(e) => setGoal(e.target.value)}
+              placeholder="Describe what you want to ship…"
+              className="flex-1 h-11 border-0 border-b border-border/70 rounded-none bg-transparent px-0 shadow-none focus-visible:ring-0 focus-visible:border-[#5B8DA8]"
+              autoComplete="off"
+            />
+            <Button
+              type="submit"
+              disabled={loading || goal.trim().length < 3}
+              className="h-11 shrink-0 bg-[#5B8DA8] px-6"
+              data-testid="button-patch-route"
+            >
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden /> : null}
+              Patch route
+            </Button>
           </div>
-        )}
 
-        <Card className="border-[#5B8DA8]/30 bg-card/40 backdrop-blur-sm">
-          <CardContent className="p-4 sm:p-6 space-y-4">
-            <div className="flex items-center gap-2 text-sm font-semibold">
-              <Radio className="w-4 h-4 text-[#5B8DA8]" aria-hidden />
-              {PATCH_BAY.label} — AI patch routing
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Describe your mix — <strong>OaaS</strong> patches channel order and bus sends. Often
-              unmutes <strong>CH 01 · Seeds</strong> when you need many apps from one document, then
-              sends to <strong>Master</strong> via Launch.
-            </p>
-
-            <form onSubmit={onSubmit} className="space-y-4" aria-label="Patch bay scene recall">
-              <div className="space-y-2">
-                <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
-                  Scene recall
-                </p>
-                <div className="flex flex-wrap gap-2" role="group" aria-label="Preset scenes">
-                  {visibleScenes.map((g) => (
-                    <Button
-                      key={g}
-                      type="button"
-                      size="sm"
-                      variant={goal === g ? "default" : "outline"}
-                      className="text-xs h-auto py-1.5 whitespace-normal text-left max-w-full"
-                      aria-pressed={goal === g}
-                      onClick={() => setGoal(g)}
-                    >
-                      {g}
-                    </Button>
-                  ))}
-                  {PRESET_SCENES.length > SCENE_PREVIEW_COUNT && (
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      className="text-xs h-auto py-1.5 text-muted-foreground"
-                      onClick={() => setShowAllScenes((v) => !v)}
-                      aria-expanded={showAllScenes}
-                    >
-                      {showAllScenes
-                        ? "Fewer scenes"
-                        : `+${PRESET_SCENES.length - SCENE_PREVIEW_COUNT} more`}
-                    </Button>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-2">
-                <Input
-                  value={goal}
-                  onChange={(e) => setGoal(e.target.value)}
-                  placeholder="What channels should be in the mix?"
-                  className="flex-1 font-mono text-sm"
-                  aria-label="Mix goal"
-                  autoComplete="off"
-                />
-                <Button
-                  type="submit"
-                  disabled={loading || goal.trim().length < 3}
-                  className="gap-2 bg-[#5B8DA8] shrink-0"
-                  data-testid="button-patch-route"
-                >
-                  {loading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
-                  ) : (
-                    <Sparkles className="w-4 h-4" aria-hidden />
-                  )}
-                  Patch route
-                </Button>
-              </div>
-            </form>
-
-            {error && (
-              <p className="text-xs text-destructive" role="alert">
-                {error}
-              </p>
-            )}
-            {result && (
-              <div
-                ref={resultsRef}
-                tabIndex={-1}
-                className="space-y-3 pt-2 border-t border-border/60 outline-none"
-                aria-live="polite"
-                data-testid="patch-route-result"
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span className="text-[11px] text-muted-foreground">Try</span>
+            {PRESET_SCENES.slice(0, 3).map((scene) => (
+              <button
+                key={scene}
+                type="button"
+                onClick={() => setGoal(scene)}
+                className="text-[11px] text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B8DA8]"
               >
-                <p className="text-sm">{result.summary}</p>
-                {result.workflow.length > 0 && (
-                  <p className="text-xs font-mono text-muted-foreground">
-                    Patch: {formatPatchRoute(result.workflow)}
-                  </p>
-                )}
-                <ol className="space-y-2 list-none">
-                  {result.suggestions.map((s, i) => (
-                    <li key={s.featureId}>
-                      <Link
-                        href={s.href}
-                        className="flex flex-wrap items-start justify-between gap-2 rounded-lg border border-border/60 p-3 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B8DA8] transition-colors group"
-                      >
-                        <div className="min-w-0">
-                          <p className="font-medium text-sm group-hover:text-[#5B8DA8]">
-                            <span className="font-mono text-[10px] text-muted-foreground mr-2">
-                              Step {i + 1}
-                            </span>
-                            {s.title}
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-0.5">{s.reason}</p>
-                        </div>
-                        <ArrowRight
-                          className="w-4 h-4 shrink-0 text-muted-foreground group-hover:text-[#5B8DA8]"
-                          aria-hidden
-                        />
-                      </Link>
-                    </li>
-                  ))}
-                </ol>
-                {result.aiUsed && (
-                  <p className="text-[10px] text-muted-foreground font-mono">AI patch matrix</p>
-                )}
-              </div>
+                {scene.length > 36 ? `${scene.slice(0, 34)}…` : scene}
+              </button>
+            ))}
+          </div>
+        </form>
+
+        {error && (
+          <p className="text-sm text-destructive" role="alert">
+            {error}
+          </p>
+        )}
+
+        {result && (
+          <div
+            ref={resultsRef}
+            tabIndex={-1}
+            className="space-y-4 outline-none"
+            aria-live="polite"
+            data-testid="patch-route-result"
+          >
+            <p className="text-sm text-muted-foreground">{result.summary}</p>
+            {result.workflow.length > 0 && (
+              <p className="text-xs font-mono text-foreground/80">
+                {formatPatchRoute(result.workflow)}
+              </p>
             )}
-          </CardContent>
-        </Card>
+            <ol className="space-y-0 divide-y divide-border/40">
+              {result.suggestions.map((s, i) => (
+                <li key={s.featureId}>
+                  <Link
+                    href={s.href}
+                    className="flex items-start justify-between gap-3 py-3 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B8DA8]"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium group-hover:text-[#5B8DA8]">
+                        <span className="font-mono text-[10px] text-muted-foreground mr-2">
+                          {String(i + 1).padStart(2, "0")}
+                        </span>
+                        {s.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5 pl-7">{s.reason}</p>
+                    </div>
+                    <ArrowRight
+                      className="w-4 h-4 shrink-0 mt-0.5 text-muted-foreground group-hover:text-[#5B8DA8]"
+                      aria-hidden
+                    />
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
 
         {!isCompact &&
           (hideChannelStrips ? (
-            <Collapsible
-              open={stripsOpen}
-              onOpenChange={setStripsOpen}
-              className="group rounded-xl border border-border/60 bg-card/20"
-            >
+            <Collapsible open={stripsOpen} onOpenChange={setStripsOpen} className="group">
               <CollapsibleTrigger asChild>
                 <button
                   type="button"
-                  className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-muted/30 transition-colors rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B8DA8]"
+                  className="flex w-full items-center justify-between gap-3 py-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B8DA8]"
                   data-testid="toggle-channel-strips"
                 >
-                  <span className="text-[10px] font-bold uppercase tracking-[0.35em] text-muted-foreground">
-                    Channel strips · subgroup buses
+                  <span className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground">
+                    Channels
                   </span>
                   <ChevronDown className="w-4 h-4 shrink-0 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
                 </button>
               </CollapsibleTrigger>
-              <CollapsibleContent className="px-4 pb-4 pt-1 space-y-4">
-                <BusOverviewFilter
-                  value={busFilter}
-                  onChange={setBusFilter}
-                  busChannels={busChannels}
-                />
-                <ChannelStripGrid busChannels={busChannels} filter={busFilter} />
-              </CollapsibleContent>
+              <CollapsibleContent className="pt-3 pb-1">{channelsBlock}</CollapsibleContent>
             </Collapsible>
           ) : (
             <div className="space-y-4">
-              <p className="text-center text-[10px] font-bold uppercase tracking-[0.35em] text-muted-foreground">
-                Channel strips · subgroup buses
+              <p className="text-[11px] uppercase tracking-[0.28em] text-muted-foreground">
+                Channels
               </p>
-              <BusOverviewFilter
-                value={busFilter}
-                onChange={setBusFilter}
-                busChannels={busChannels}
-              />
-              <ChannelStripGrid busChannels={busChannels} filter={busFilter} />
+              {channelsBlock}
             </div>
           ))}
       </div>
