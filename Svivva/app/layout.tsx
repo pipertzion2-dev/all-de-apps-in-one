@@ -122,6 +122,16 @@ export async function generateMetadata(): Promise<Metadata> {
 const gaId = process.env.NEXT_PUBLIC_GA_ID || "G-QL8EXZZMS6";
 const gadsId = process.env.NEXT_PUBLIC_GADS_ID;
 const clarityId = process.env.NEXT_PUBLIC_CLARITY_ID;
+/** SearchDock site-agent — reads brand manifests + heartbeats for AEO. Empty env disables. */
+const SEARCHDOCK_TOKEN =
+  process.env.NEXT_PUBLIC_SEARCHDOCK_TOKEN?.trim() || "sd-ab55f04b597744436666877149dd1b56";
+const SEARCHDOCK_ENDPOINT =
+  process.env.NEXT_PUBLIC_SEARCHDOCK_ENDPOINT?.trim() ||
+  "https://app.searchdock.io/api/v1/site-agent/heartbeat";
+const SEARCHDOCK_SDK =
+  process.env.NEXT_PUBLIC_SEARCHDOCK_SDK?.trim() ||
+  "https://app.searchdock.io/api/v1/site-agent/sdk";
+const searchdockEnabled = SEARCHDOCK_TOKEN.length > 0 && SEARCHDOCK_TOKEN !== "off";
 
 function resolveAdsenseClient(): string | null {
   return resolveSiteAdsenseClient();
@@ -216,6 +226,16 @@ gtag('consent','default',{
             async
             src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
             crossOrigin="anonymous"
+          />
+        )}
+        {searchdockEnabled && (
+          // Native <script> — SearchDock site-agent SDK reads data-token / data-endpoint
+          // from this element (same snippet SearchDock provides for zzaizzai.com).
+          <script
+            async
+            src={SEARCHDOCK_SDK}
+            data-token={SEARCHDOCK_TOKEN}
+            data-endpoint={SEARCHDOCK_ENDPOINT}
           />
         )}
       </head>

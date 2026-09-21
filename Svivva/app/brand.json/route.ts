@@ -45,6 +45,7 @@ export async function GET() {
         llmsFullTxt: `${base}/llms-full.txt`,
         brandJson: `${base}/brand.json`,
         sitemap: `${base}/sitemap.xml`,
+        searchdockSdk: "https://app.searchdock.io/api/v1/site-agent/sdk",
       },
     },
     schemaOrg: org,
