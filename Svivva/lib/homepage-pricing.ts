@@ -17,7 +17,9 @@ export const HOMEPAGE_PRICING_TIERS: readonly HomepagePricingTier[] = [
     period: "/month",
     description: "Suite Pass — all six cube mini apps",
     features: [
+      "One mixing-console brain — not six disconnected SaaS subscriptions",
       "Suite Pass — Play, Seeds, Orbit, Protect, Digital & Hardware mini apps",
+      "Hybrid flows when your idea starts two ways (seed + sketch, API + audio, …)",
       "Play mini app — full studio + 16-channel mixing console",
       "Seeds mini app — PDF/YouTube → multi-app factory",
       "Digital mini app — unlimited APIs, evals, rollback (100k requests/mo)",

@@ -75,6 +75,9 @@ export function SvivvaArtifact({ mountCanvas = true }: SvivvaArtifactProps) {
         >
           {CUBE_SUITE.launcherSubhead}
         </p>
+        <p className="mt-3 text-xs leading-relaxed text-muted-foreground/90 pointer-events-auto">
+          {CUBE_SUITE.launcherBrainHint}
+        </p>
       </div>
 
       <div

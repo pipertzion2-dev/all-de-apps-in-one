@@ -59,7 +59,9 @@ export const BILLING_PLANS: BillingPlanDefinition[] = [
     period: "per month",
     description: "Full Suite Pass — all six cube mini apps",
     features: [
+      "One OaaS brain on the master bus — not six separate SaaS bills",
       "Suite Pass — Play, Seeds, Orbit, Protect, Digital & Hardware",
+      "Blend two creation paths (e.g. Seeds + Hardware) on one desk",
       "Digital mini app — 10 projects, 10k API calls/mo, rollback",
       "Play, Seeds, Hardware & Protect — full mini app access",
       "Auto-rollback eval suite",

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { BRAND } from "@/lib/brand";
 import { CUBE_SUITE } from "@/lib/cube/mini-app-suite";
 import { CubeSuiteMiniAppsGrid } from "@/components/cube-suite-mini-apps-grid";
+import { CubeSuiteSharedBrainCallout } from "@/components/cube-suite-shared-brain-callout";
 
 /** Brief suite overview below the nav cube on the homepage. */
 export function HomepageAboutSection() {
@@ -24,9 +25,11 @@ export function HomepageAboutSection() {
           </h1>
           <p className="mx-auto max-w-2xl text-base text-muted-foreground sm:text-lg">
             {BRAND.name} is organized like the cube: six focused mini apps you open when you need
-            them. The mixing console ties them together when you ship one product end-to-end.
+            them. {CUBE_SUITE.unifiedValueHeadline}
           </p>
         </div>
+
+        <CubeSuiteSharedBrainCallout className="mx-auto max-w-2xl text-left" />
 
         <CubeSuiteMiniAppsGrid />
 

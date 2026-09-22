@@ -10,6 +10,7 @@ import { CamoThreeOverlay } from "@/components/camo-three-overlay";
 import { HOMEPAGE_PRICING_TIERS } from "@/lib/homepage-pricing";
 import { CUBE_SUITE } from "@/lib/cube/mini-app-suite";
 import { CubeSuiteMiniAppsGrid } from "@/components/cube-suite-mini-apps-grid";
+import { CubeSuiteSharedBrainCallout } from "@/components/cube-suite-shared-brain-callout";
 import seedsLogo from "@/attached_assets/Svivva_Seeds_6_1771888740460.png";
 
 /** Pricing block on the product-cube homepage (below the nav cube). */
@@ -36,6 +37,8 @@ export function HomepagePricingSection() {
             {CUBE_SUITE.subscriptionSubhead}
           </p>
         </div>
+
+        <CubeSuiteSharedBrainCallout className="mx-auto mb-10 max-w-3xl sm:mb-12" compact />
 
         <div className="mx-auto mb-10 max-w-3xl space-y-3 sm:mb-12">
           <p className="text-center text-xs font-mono uppercase tracking-widest text-muted-foreground">

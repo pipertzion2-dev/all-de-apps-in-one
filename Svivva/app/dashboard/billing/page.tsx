@@ -13,6 +13,7 @@ import { AdminCodeForm } from "@/components/admin-code-form";
 import { usePlan, type Plan } from "@/hooks/use-plan";
 import type { ResolvedBillingPlan } from "@/lib/billing/resolve-plan-offers";
 import { CubeSuiteMiniAppsGrid } from "@/components/cube-suite-mini-apps-grid";
+import { CubeSuiteSharedBrainCallout } from "@/components/cube-suite-shared-brain-callout";
 import { CUBE_SUITE } from "@/lib/cube/mini-app-suite";
 
 type PlansResponse = {
@@ -79,6 +80,7 @@ function BillingPageContent() {
           </p>
         </div>
         <CubeSuiteMiniAppsGrid showBlurb={false} className="max-w-3xl" />
+        <CubeSuiteSharedBrainCallout className="max-w-3xl" compact />
       </div>
 
       {!isMembershipAccess && !isPro && (

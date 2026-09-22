@@ -17,4 +17,10 @@ describe("mini-app suite", () => {
     expect(CUBE_SUITE.passName).toBe("Suite Pass");
     expect(CUBE_SUITE.launcherHeadline).toMatch(/mini apps/i);
   });
+
+  it("contrasts Suite Pass with many SaaS tools and dual creation", () => {
+    expect(CUBE_SUITE.vsManySaasTitle).toMatch(/SaaS/i);
+    expect(CUBE_SUITE.sharedBrainBody).toMatch(/mixing-console|OaaS/i);
+    expect(CUBE_SUITE.dualCreationBody).toMatch(/two|both|Hybrid/i);
+  });
 });

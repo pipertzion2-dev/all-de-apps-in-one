@@ -23,6 +23,7 @@ import {
 import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
 import { CUBE_SUITE, cubeSuiteMiniAppNamesLine } from "@/lib/cube/mini-app-suite";
+import { CubeSuiteSharedBrainCallout } from "@/components/cube-suite-shared-brain-callout";
 
 const plans: Record<
   string,
@@ -563,6 +564,8 @@ function CheckoutPageContent() {
                   </div>
                 ))}
               </div>
+
+              <CubeSuiteSharedBrainCallout compact />
             </div>
           </div>
         </div>

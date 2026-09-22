@@ -10,6 +10,20 @@ export const CUBE_SUITE = {
   subscriptionHeadline: "One Suite Pass. Six mini apps.",
   subscriptionSubhead:
     "Subscribe once — unlock the cube mini apps below. No single bloated dashboard; each app keeps its own job.",
+  unifiedValueHeadline:
+    "Separate mini apps, one connected brain — easier than paying for six SaaS tools that never talk.",
+  vsManySaasTitle: "Not six SaaS subscriptions",
+  vsManySaasBody:
+    "Stacking Play, API, SEO, and hardware tools means six logins, six bills, and copy-paste between products. Suite Pass is one payment; the suite stays separate on the cube but shares context on the master bus.",
+  sharedBrainTitle: "One mixing-console brain",
+  sharedBrainBody:
+    "Orchestration-as-a-Service (OaaS) is the shared brain: Signal, Crest, Aux, Grow, and Protect route like channels on one desk — not brittle Zapier chains between vendors.",
+  dualCreationTitle: "Ideas from two ways of creating",
+  dualCreationBody:
+    "Many builds start twice — a Seeds brief and a Hardware sketch, Digital API logic and Play audio, Orbit launch plus Protect seals. Hybrid flows blend both parents on the same bus instead of choosing one SaaS stack.",
+  /** One line under the cube hero */
+  launcherBrainHint:
+    "One mixing-console brain links every face — including ideas that start two ways (seed + sketch, API + audio).",
 } as const;
 
 export type CubeSuiteMiniApp = {
