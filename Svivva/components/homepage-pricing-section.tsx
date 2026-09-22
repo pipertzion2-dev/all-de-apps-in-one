@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CamoThreeOverlay } from "@/components/camo-three-overlay";
 import { HOMEPAGE_PRICING_TIERS } from "@/lib/homepage-pricing";
+import { CUBE_SUITE } from "@/lib/cube/mini-app-suite";
+import { CubeSuiteMiniAppsGrid } from "@/components/cube-suite-mini-apps-grid";
 import seedsLogo from "@/attached_assets/Svivva_Seeds_6_1771888740460.png";
 
 /** Pricing block on the product-cube homepage (below the nav cube). */
@@ -25,14 +27,21 @@ export function HomepagePricingSection() {
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
         <div className="mx-auto mb-10 max-w-3xl space-y-4 rounded-2xl bg-background/85 p-5 text-center backdrop-blur-lg sm:mb-12 sm:p-8">
           <Badge variant="secondary" className="px-4 py-1.5">
-            Pricing
+            {CUBE_SUITE.passName}
           </Badge>
           <h2 className="text-3xl font-bold sm:text-4xl">
-            Simple, transparent <span className="solid-accent">pricing</span>
+            One <span className="solid-accent">Suite Pass</span>. Six mini apps.
           </h2>
           <p className="mx-auto max-w-2xl text-base text-muted-foreground sm:text-lg">
-            Start free, scale as you grow. No hidden fees.
+            {CUBE_SUITE.subscriptionSubhead}
           </p>
+        </div>
+
+        <div className="mx-auto mb-10 max-w-3xl space-y-3 sm:mb-12">
+          <p className="text-center text-xs font-mono uppercase tracking-widest text-muted-foreground">
+            What&apos;s in the suite
+          </p>
+          <CubeSuiteMiniAppsGrid showBlurb={false} />
         </div>
 
         <div className="mx-auto grid max-w-3xl gap-6 md:grid-cols-2 md:gap-8">
@@ -60,6 +69,9 @@ export function HomepagePricingSection() {
                 ) : null}
                 <div className="space-y-6">
                   <div>
+                    <p className="text-[10px] font-mono uppercase tracking-widest text-[#5B8DA8]">
+                      {CUBE_SUITE.passName}
+                    </p>
                     <h3 className="text-xl font-semibold">{tier.name}</h3>
                     <p className="text-sm text-muted-foreground">{tier.description}</p>
                   </div>

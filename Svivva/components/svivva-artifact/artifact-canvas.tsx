@@ -117,7 +117,8 @@ function paintLabeledFace(feature: FeatureDef, image?: HTMLImageElement): THREE.
   ctx.textBaseline = "middle";
   ctx.fillStyle = "#ffffff";
   ctx.font = `36px ${ZC_FACE_FONT}`;
-  ctx.fillText("TAP TO OPEN", size / 2, size * 0.92);
+  ctx.font = `28px ${ZC_FACE_FONT}`;
+  ctx.fillText("MINI APP · OPEN", size / 2, size * 0.92);
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;

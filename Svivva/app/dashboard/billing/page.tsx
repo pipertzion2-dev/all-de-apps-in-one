@@ -12,6 +12,8 @@ import { trackUpgrade } from "@/lib/analytics";
 import { AdminCodeForm } from "@/components/admin-code-form";
 import { usePlan, type Plan } from "@/hooks/use-plan";
 import type { ResolvedBillingPlan } from "@/lib/billing/resolve-plan-offers";
+import { CubeSuiteMiniAppsGrid } from "@/components/cube-suite-mini-apps-grid";
+import { CUBE_SUITE } from "@/lib/cube/mini-app-suite";
 
 type PlansResponse = {
   plans: ResolvedBillingPlan[];
@@ -68,11 +70,15 @@ function BillingPageContent() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Plans</h1>
-        <p className="text-muted-foreground">
-          Subscribe with Cash App — ${cashAppTag} · Starter $20/mo · Pro $50/mo
-        </p>
+      <div className="space-y-4">
+        <div>
+          <h1 className="text-3xl font-bold">{CUBE_SUITE.passName} plans</h1>
+          <p className="text-muted-foreground max-w-2xl">
+            {CUBE_SUITE.subscriptionSubhead} Pay with Cash App — ${cashAppTag} · Starter $20/mo ·
+            Pro $50/mo.
+          </p>
+        </div>
+        <CubeSuiteMiniAppsGrid showBlurb={false} className="max-w-3xl" />
       </div>
 
       {!isMembershipAccess && !isPro && (
@@ -127,7 +133,7 @@ function BillingPageContent() {
       </Card>
 
       <div>
-        <h2 className="text-xl font-semibold mb-6">Choose a Cash App plan</h2>
+        <h2 className="text-xl font-semibold mb-6">Choose your Suite Pass</h2>
         {plansLoading ? (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Loader2 className="w-4 h-4 animate-spin" />
