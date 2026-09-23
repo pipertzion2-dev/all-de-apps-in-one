@@ -12,10 +12,13 @@ const WHEEL_SPINS = [
 
 export type GameLoadingWheelsProps = {
   fullscreen?: boolean;
+  /** Escape hatch when the main thread is busy — advances past the splash. */
+  onSkip?: () => void;
 };
 
-export function GameLoadingWheels({ fullscreen = false }: GameLoadingWheelsProps) {
+export function GameLoadingWheels({ fullscreen = false, onSkip }: GameLoadingWheelsProps) {
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [showSkip, setShowSkip] = useState(false);
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -24,6 +27,12 @@ export function GameLoadingWheels({ fullscreen = false }: GameLoadingWheelsProps
     media.addEventListener("change", sync);
     return () => media.removeEventListener("change", sync);
   }, []);
+
+  useEffect(() => {
+    if (!onSkip) return;
+    const id = window.setTimeout(() => setShowSkip(true), 3500);
+    return () => window.clearTimeout(id);
+  }, [onSkip]);
 
   return (
     <div
@@ -40,14 +49,14 @@ export function GameLoadingWheels({ fullscreen = false }: GameLoadingWheelsProps
       aria-label="Loading game"
       aria-live="polite"
     >
-      <div className="relative mb-8 h-[min(28vh,160px)] w-[min(85vw,360px)] shrink-0">
+      <div className="relative mb-6 h-[min(22vh,140px)] w-[min(72vw,300px)] shrink-0">
         <Image
           src={KAREN_THE_MUSCLE_LOGO_URL}
           alt="Karen the Muscle"
           fill
           priority
           className="object-contain object-center"
-          sizes="(max-width: 768px) 85vw, 360px"
+          sizes="(max-width: 768px) 72vw, 300px"
           data-testid="img-karen-the-muscle-logo"
         />
       </div>
@@ -57,7 +66,7 @@ export function GameLoadingWheels({ fullscreen = false }: GameLoadingWheelsProps
         {LOADING_WHEEL_URLS.map((src, index) => (
           <div
             key={src}
-            className="size-[min(24vw,96px)] shrink-0 overflow-hidden rounded-full sm:size-[min(22vw,112px)]"
+            className="size-[min(22vw,88px)] shrink-0 overflow-hidden rounded-full sm:size-[min(20vw,104px)]"
             data-testid={`loading-wheel-${index}`}
           >
             <div className={`h-full w-full ${reducedMotion ? "" : WHEEL_SPINS[index]}`} aria-hidden>
@@ -72,6 +81,17 @@ export function GameLoadingWheels({ fullscreen = false }: GameLoadingWheelsProps
           </div>
         ))}
       </div>
+
+      {showSkip && onSkip && (
+        <button
+          type="button"
+          className="mt-8 text-[11px] uppercase tracking-[0.35em] text-black/45 underline-offset-4 hover:text-black/70 hover:underline"
+          onClick={onSkip}
+          data-testid="button-skip-loading"
+        >
+          Tap to continue
+        </button>
+      )}
 
       <p className="sr-only">Loading</p>
     </div>

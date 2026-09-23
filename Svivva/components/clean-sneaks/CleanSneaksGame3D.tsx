@@ -88,6 +88,12 @@ export type CleanSneaksGame3DProps = {
   fullscreen?: boolean;
   className?: string;
   style?: CSSProperties;
+  /**
+   * When the page already advanced past the Karen splash, skip the internal
+   * loading timer so we do not fight the page-owned intro and never pull the
+   * RunScene chunk until the player taps Start.
+   */
+  skipIntroLoading?: boolean;
 };
 
 function prefersReducedMotion(): boolean {
@@ -143,6 +149,7 @@ export function CleanSneaksGame3D({
   fullscreen = false,
   className,
   style,
+  skipIntroLoading = false,
 }: CleanSneaksGame3DProps) {
   const [colorwayId, setColorwayId] = useState<Baloon8ColorwayId>(() =>
     typeof window === "undefined" ? "oilSlick" : readSavedColorway(),
@@ -155,12 +162,12 @@ export function CleanSneaksGame3D({
   });
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const stateRef = useRef<RunEngineState>(createRunEngineState(0, sneaker.archetype ?? colorwayId));
-  const loadingDoneRef = useRef(false);
+  const loadingDoneRef = useRef(skipIntroLoading);
   /** Cover "Start" tapped — never return to loading/start splash this session. */
   const coverStartPassedRef = useRef(false);
   const sessionBootedRef = useRef(false);
 
-  const [phase, setPhase] = useState<GamePhase>("loading");
+  const [phase, setPhase] = useState<GamePhase>(() => (skipIntroLoading ? "start" : "loading"));
   const [countdown, setCountdown] = useState(3);
   const [hud, setHud] = useState<RunStats>(() => statsFromState(stateRef.current));
   const [shoes, setShoes] = useState(() => ({
@@ -419,9 +426,14 @@ export function CleanSneaksGame3D({
     const saved = readSavedColorway();
     resetRun(saved);
     loadingDoneRef.current = false;
-    setPhase("loading");
+    if (skipIntroLoading || coverStartPassedRef.current) {
+      loadingDoneRef.current = true;
+      setPhase(coverStartPassedRef.current ? "colorPick" : "start");
+    } else {
+      setPhase("loading");
+    }
     setCountdown(3);
-  }, [active, resetRun]);
+  }, [active, resetRun, skipIntroLoading]);
 
   const onOhNo = useCallback(
     (action: OhNoAction) => {
@@ -433,14 +445,15 @@ export function CleanSneaksGame3D({
 
   useEffect(() => {
     if (!active || phase !== "loading") return;
-    void import("./CleanSneaksRunScene");
+    // Do NOT preload CleanSneaksRunScene here — parsing that chunk on mobile
+    // Safari freezes the Karen splash (CSS spins stop, UI unresponsive).
 
     let cancelled = false;
     let delayId = 0;
     const reduced = prefersReducedMotion();
-    const minMs = reduced ? 1400 : 2800;
+    const minMs = reduced ? 1200 : 2400;
     const started = performance.now();
-    const maxId = window.setTimeout(finishLoading, minMs + 6000);
+    const maxId = window.setTimeout(finishLoading, minMs + 4000);
 
     const finishWhenReady = () => {
       if (cancelled || loadingDoneRef.current) return;
