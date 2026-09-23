@@ -68,7 +68,7 @@ export default function AdminAccessPage() {
             <AdminCodeForm
               scope="admin"
               title="Owner passcode"
-              description="Six-digit admin passcode."
+              description="Owner admin passcode."
               onSuccess={() => {
                 window.location.href = redirectTo;
               }}

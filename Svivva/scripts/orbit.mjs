@@ -5,12 +5,12 @@
  *
  * Auth (first match wins):
  *   1. ORBIT_INTERNAL_SECRET in .env.orbit (x-internal-secret header)
- *   2. Admin passcode cookie via POST /api/auth/admin-code (default 272727)
+ *   2. Admin passcode cookie via POST /api/auth/admin-code (default 2424)
  *
  * Config (env or .env.orbit — see scripts/orbit.env.example):
  *   SVIVVA_URL=https://zzaizzai.com
  *   ORBIT_INTERNAL_SECRET=...     (optional if admin code works)
- *   ORBIT_ADMIN_CODE=272727       (optional override)
+ *   ORBIT_ADMIN_CODE=2424       (optional override)
  */
 import { readFileSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";

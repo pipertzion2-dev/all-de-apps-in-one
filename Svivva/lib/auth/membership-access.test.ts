@@ -8,7 +8,7 @@ describe("membership access code", () => {
   });
 
   it("rejects other codes", () => {
-    expect(verifyMembershipAccessCode("272727")).toBe(false);
+    expect(verifyMembershipAccessCode("2424")).toBe(false);
     expect(verifyMembershipAccessCode("")).toBe(false);
     expect(verifyMembershipAccessCode("334")).toBe(false);
   });

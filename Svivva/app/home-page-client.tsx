@@ -19,6 +19,7 @@ import { HOMEPAGE_PRICING_TIERS } from "@/lib/homepage-pricing";
 import type { HomepageFlipPanelId } from "@/lib/homepage-flip-stack";
 import { usePlatform } from "@/lib/platform-context";
 import { ZzaiModeToggle } from "@/components/zzai-mode-toggle";
+import { OrbitAdminAccessButton } from "@/components/orbit-admin-access-button";
 import Link from "next/link";
 import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
 import Image from "next/image";
@@ -599,15 +600,21 @@ export default function LandingPage() {
               </svg>
             </div>
           </div>
-          <button
-            type="button"
-            className="absolute top-4 right-4 z-20 pointer-events-auto rounded-lg border border-border/60 bg-background/80 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground backdrop-blur-sm"
-            onClick={() => {
-              skipIntroRef.current?.();
-            }}
-          >
-            Skip intro
-          </button>
+          <div className="absolute top-4 left-4 right-4 z-20 flex items-start justify-between gap-2 pointer-events-none">
+            <OrbitAdminAccessButton
+              data-testid="button-home-intro-admin-orbit"
+              className="pointer-events-auto border-[#5B8DA8]/50 bg-background/85 backdrop-blur-sm"
+            />
+            <button
+              type="button"
+              className="pointer-events-auto rounded-lg border border-border/60 bg-background/80 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground backdrop-blur-sm shrink-0"
+              onClick={() => {
+                skipIntroRef.current?.();
+              }}
+            >
+              Skip intro
+            </button>
+          </div>
         </div>
       )}
 
@@ -668,6 +675,7 @@ export default function LandingPage() {
                   <Mic2 className="w-3.5 h-3.5 text-[#5B8DA8]" />
                   <span className="text-xs font-bold tracking-wide text-foreground/90">Events</span>
                 </Link>
+                <OrbitAdminAccessButton data-testid="button-home-nav-admin-orbit" />
                 <Link href="/dashboard">
                   <Button
                     variant="outline"

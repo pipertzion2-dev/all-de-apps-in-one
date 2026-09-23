@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Fire every server-side indexing action against production.
- * Auth: admin passcode (272727) or ORBIT_INTERNAL_SECRET in .env.orbit
+ * Auth: admin passcode (2424) or ORBIT_INTERNAL_SECRET in .env.orbit
  */
 import { ensureOrbitAuth, loadOrbitEnv, orbitFetch } from "./orbit-api-auth.mjs";
 

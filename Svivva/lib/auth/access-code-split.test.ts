@@ -4,7 +4,7 @@ import { verifyMembershipAccessCode } from "./membership-access";
 
 describe("split admin vs membership codes", () => {
   it("admin code does not unlock membership verifier", () => {
-    expect(verifyMembershipAccessCode("272727")).toBe(false);
+    expect(verifyMembershipAccessCode("2424")).toBe(false);
   });
 
   it("membership code does not unlock admin verifier", () => {

@@ -20,36 +20,36 @@ afterEach(() => {
 });
 
 describe("orbit admin access code", () => {
-  it("accepts 272727", () => {
-    expect(verifyAdminAccessCode("272727")).toBe(true);
-    expect(verifyAdminAccessCode(" 272727 ")).toBe(true);
+  it("accepts 2424", () => {
+    expect(verifyAdminAccessCode("2424")).toBe(true);
+    expect(verifyAdminAccessCode(" 2424 ")).toBe(true);
   });
 
-  it("accepts 272727 in production", () => {
+  it("accepts 2424 in production", () => {
     // Regression: production returned an empty expected code, so every attempt
     // failed with "Incorrect code" and the Orbit gate could not be opened even
     // UI must not print passcodes; verification stays server-side.
     setNodeEnv("production");
     delete process.env.ADMIN_ACCESS_CODE;
-    expect(verifyAdminAccessCode("272727")).toBe(true);
+    expect(verifyAdminAccessCode("2424")).toBe(true);
   });
 
   it("rejects anything else", () => {
     expect(verifyAdminAccessCode("")).toBe(false);
     expect(verifyAdminAccessCode("   ")).toBe(false);
-    expect(verifyAdminAccessCode("272728")).toBe(false);
+    expect(verifyAdminAccessCode("2425")).toBe(false);
     expect(verifyAdminAccessCode("333")).toBe(false);
   });
 
   it("lets ADMIN_ACCESS_CODE override the default", () => {
     process.env.ADMIN_ACCESS_CODE = "s3cret-code";
     expect(verifyAdminAccessCode("s3cret-code")).toBe(true);
-    expect(verifyAdminAccessCode("272727")).toBe(false);
+    expect(verifyAdminAccessCode("2424")).toBe(false);
   });
 
   it("falls back to the default when the override is blank", () => {
     process.env.ADMIN_ACCESS_CODE = "   ";
-    expect(verifyAdminAccessCode("272727")).toBe(true);
+    expect(verifyAdminAccessCode("2424")).toBe(true);
   });
 });
 
@@ -61,7 +61,7 @@ describe("pro membership access code", () => {
   });
 
   it("stays distinct from the admin code", () => {
-    expect(verifyMembershipAccessCode("272727")).toBe(false);
+    expect(verifyMembershipAccessCode("2424")).toBe(false);
     expect(verifyAdminAccessCode("333")).toBe(false);
   });
 

@@ -8,7 +8,7 @@ const ADMIN_COOKIE = "svivva_admin";
  * Owner Orbit admin passcode. Set ADMIN_ACCESS_CODE in production (Vercel env).
  * Never shown in public UI — unlock at /admin only.
  */
-const DEFAULT_ADMIN_CODE = "272727";
+const DEFAULT_ADMIN_CODE = "2424";
 
 function configuredAdminCode(): string {
   return process.env.ADMIN_ACCESS_CODE?.trim() || DEFAULT_ADMIN_CODE;
