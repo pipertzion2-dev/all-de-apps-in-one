@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { OrbitAdminAccessButton } from "@/components/orbit-admin-access-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -120,16 +121,10 @@ export default function OrbitPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
       {/* Admin nav — discrete */}
       <div className="fixed top-4 right-4 z-50">
-        <Link href="/dashboard/orbit">
-          <Button
-            variant="outline"
-            className="bg-slate-800/50 backdrop-blur-sm border-slate-700 text-white hover:bg-slate-700"
-            size="sm"
-          >
-            <Rocket className="w-4 h-4 mr-2" />
-            Admin
-          </Button>
-        </Link>
+        <OrbitAdminAccessButton
+          data-testid="button-orbit-page-admin-orbit"
+          className="bg-slate-800/50 backdrop-blur-sm border-slate-700 text-white hover:bg-slate-700 hover:text-white"
+        />
       </div>
 
       <div className="container mx-auto px-4 py-12 max-w-3xl">

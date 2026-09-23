@@ -6,7 +6,7 @@ const UI_ROOT = resolve(__dirname, "../..");
 const UI_DIRS = ["app", "components"].map((d) => join(UI_ROOT, d));
 
 /** Literal passcodes must not appear in user-facing UI source. */
-const FORBIDDEN_IN_UI = ["272727", "Enter code 333", "access code 333", "code 272727"];
+const FORBIDDEN_IN_UI = ["2424", "272727", "Enter code 333", "access code 333", "code 272727"];
 
 function collectSourceFiles(dir: string, out: string[] = []): string[] {
   for (const name of readdirSync(dir)) {
@@ -37,6 +37,7 @@ describe("/admin owner entry", () => {
   it("exists and uses AdminCodeForm without printing passcodes", () => {
     const src = readFileSync(resolve(UI_ROOT, "app/admin/page.tsx"), "utf8");
     expect(src).toContain("AdminCodeForm");
+    expect(src).not.toContain("2424");
     expect(src).not.toContain("272727");
     expect(src).not.toContain("333");
   });

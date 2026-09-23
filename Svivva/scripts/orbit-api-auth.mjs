@@ -1,6 +1,6 @@
 /**
  * Orbit API auth for CLI / AI agents.
- * Tries ORBIT_INTERNAL_SECRET first, then admin passcode cookie (272727).
+ * Tries ORBIT_INTERNAL_SECRET first, then admin passcode cookie (2424).
  */
 import { readFileSync, existsSync, writeFileSync, unlinkSync } from "node:fs";
 import { resolve, dirname } from "node:path";
@@ -65,7 +65,7 @@ export async function ensureOrbitAuth(site) {
     if (probe.ok) return { mode: "admin-cookie", jar, site };
   }
 
-  const code = process.env.ORBIT_ADMIN_CODE?.trim() || "272727";
+  const code = process.env.ORBIT_ADMIN_CODE?.trim() || "2424";
   const res = await fetch(`${site}/api/auth/admin-code`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
