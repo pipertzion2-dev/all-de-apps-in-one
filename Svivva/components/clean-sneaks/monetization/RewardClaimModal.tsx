@@ -1,0 +1,251 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  canShowPlacement,
+  markAdCooldown,
+  pickHouseCreative,
+  recordAdEvent,
+  resolveAdNetwork,
+} from "@/lib/clean-sneaks/ads";
+import {
+  claimAdBonus,
+  claimBaseReward,
+  describeLines,
+  makeClaimId,
+  trackMonetization,
+  type RewardedOffer,
+} from "@/lib/clean-sneaks/monetization";
+import { AdSenseSlot } from "@/components/clean-sneaks/ads/AdSenseSlot";
+
+type Props = {
+  open: boolean;
+  title: string;
+  subtitle?: string;
+  offer: RewardedOffer | null;
+  /** When no ad offer, still allow claiming base. */
+  baseOnlyClaimId?: string;
+  onClose: () => void;
+  onClaimed?: () => void;
+};
+
+/**
+ * JOB/MISSION style dual CTA:
+ * [CLAIM base] always available
+ * [WATCH AD — CLAIM bonus] opt-in; grants only after completion.
+ */
+export function RewardClaimModal({
+  open,
+  title,
+  subtitle,
+  offer,
+  baseOnlyClaimId,
+  onClose,
+  onClaimed,
+}: Props) {
+  const [watching, setWatching] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [done, setDone] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const network = resolveAdNetwork("rewarded_credits");
+  const creative = useMemo(() => pickHouseCreative(Date.now() + 3), [open]);
+
+  useEffect(() => {
+    if (!open) {
+      setWatching(false);
+      setProgress(0);
+      setDone(false);
+      setMessage(null);
+    } else if (offer) {
+      trackMonetization("rewarded_ad_offered", { context: offer.context, offerId: offer.offerId });
+    }
+  }, [open, offer]);
+
+  useEffect(() => {
+    if (!watching || done) return;
+    const started = Date.now();
+    const needMs = network === "adsense" ? 5500 : 3500;
+    trackMonetization("rewarded_ad_started", { context: offer?.context || "unknown" });
+    const tick = window.setInterval(() => {
+      const p = Math.min(1, (Date.now() - started) / needMs);
+      setProgress(p);
+      if (p >= 1) {
+        window.clearInterval(tick);
+        setDone(true);
+      }
+    }, 80);
+    return () => window.clearInterval(tick);
+  }, [watching, done, network, offer?.context]);
+
+  const claimBase = useCallback(() => {
+    if (!offer && !baseOnlyClaimId) {
+      onClose();
+      return;
+    }
+    if (offer) {
+      // Mission/walk credits are already in the wallet — acknowledging must not double-pay.
+      if (offer.context === "mission_complete") {
+        trackMonetization("mission_completed", {
+          amount: offer.baseLines[0]?.amount ?? 0,
+        });
+        onClaimed?.();
+        onClose();
+        return;
+      }
+      if (offer.baseLines.length) {
+        const claimId = makeClaimId(["base", offer.offerId]);
+        const result = claimBaseReward({
+          claimId,
+          source: offer.context === "offline_boost" ? "offline" : "mission",
+          lines: offer.baseLines,
+        });
+        if (!result.ok) {
+          setMessage(result.reason);
+          return;
+        }
+      }
+    }
+    onClaimed?.();
+    onClose();
+  }, [offer, baseOnlyClaimId, onClose, onClaimed]);
+
+  const startAd = () => {
+    if (!offer) return;
+    if (network === "unconfigured") {
+      setMessage("Ads unavailable right now — claim your normal reward.");
+      trackMonetization("rewarded_ad_failed", { reason: "unconfigured" });
+      return;
+    }
+    if (!canShowPlacement("rewarded_credits")) {
+      setMessage("Ad bonus cooling down — claim your normal reward.");
+      return;
+    }
+    setWatching(true);
+    recordAdEvent({
+      placement: "rewarded_credits",
+      kind: "impression",
+      network: network === "adsense" ? "adsense" : "house",
+    });
+  };
+
+  const claimAd = () => {
+    if (!offer || !done) return;
+    const result = claimAdBonus({ offer, token: offer.token, adCompleted: true });
+    if (!result.ok) {
+      setMessage(result.reason);
+      trackMonetization("rewarded_ad_failed", { reason: result.reason });
+      return;
+    }
+    trackMonetization("rewarded_ad_completed", { offerId: offer.offerId });
+    trackMonetization("ad_bonus_claimed", {
+      offerId: offer.offerId,
+      preview: describeLines(offer.previewLines),
+    });
+    recordAdEvent({
+      placement: "rewarded_credits",
+      kind: "reward_granted",
+      network: network === "adsense" ? "adsense" : "house",
+    });
+    markAdCooldown("rewarded_credits");
+    onClaimed?.();
+    onClose();
+  };
+
+  if (!open) return null;
+
+  const baseText = offer?.baseLabel || "CLAIM";
+  const adText = offer?.adLabel || "WATCH AD";
+
+  return (
+    <div
+      className="fixed inset-0 z-[250] flex items-center justify-center bg-black/85 p-4 backdrop-blur-md"
+      role="dialog"
+      aria-modal="true"
+      data-testid="reward-claim-modal"
+    >
+      <div className="w-full max-w-md rounded-xl border border-[#d4af37]/40 bg-[#0c0a08] p-5 shadow-2xl">
+        <p className="text-[10px] uppercase tracking-[0.4em] text-[#d4af37]">{title}</p>
+        {subtitle && <p className="mt-2 text-sm text-[#e8dcc0]/70">{subtitle}</p>}
+
+        {offer && offer.baseLines.length > 0 && (
+          <p className="mt-4 font-serif text-2xl text-[#ffd76a]" data-testid="reward-base-amount">
+            Normal Reward: {describeLines(offer.baseLines)}
+          </p>
+        )}
+
+        {!watching ? (
+          <div className="mt-6 flex flex-col gap-3">
+            <Button
+              className="bg-[#d4af37] text-[#1a1008] hover:bg-[#e0c15a]"
+              onClick={claimBase}
+              data-testid="button-claim-base-reward"
+            >
+              {baseText}
+            </Button>
+            {offer && (
+              <Button
+                variant="outline"
+                className="border-[#ffd76a]/45 text-[#ffd76a]"
+                onClick={startAd}
+                data-testid="button-watch-ad-bonus"
+              >
+                {adText}
+              </Button>
+            )}
+            <Button variant="ghost" className="text-[#e8dcc0]/50" onClick={onClose}>
+              Close
+            </Button>
+          </div>
+        ) : (
+          <div className="mt-5 space-y-4">
+            <p className="text-xs text-[#e8dcc0]/65">
+              Bonus if completed: {offer ? describeLines(offer.previewLines) : ""}
+            </p>
+            {network === "adsense" ? (
+              <AdSenseSlot placement="rewarded_credits" className="min-h-[120px] w-full" />
+            ) : (
+              <div
+                className="rounded-lg border border-white/10 p-4"
+                style={{ borderColor: `${creative.accent}55` }}
+              >
+                <p className="text-sm font-medium" style={{ color: creative.accent }}>
+                  {creative.headline}
+                </p>
+                <p className="mt-1 text-xs text-white/55">{creative.body}</p>
+              </div>
+            )}
+            <div className="h-2 overflow-hidden rounded-full bg-white/10">
+              <div
+                className="h-full rounded-full bg-[#d4af37]"
+                style={{ width: `${Math.round(progress * 100)}%` }}
+              />
+            </div>
+            <Button
+              className="w-full bg-[#d4af37] text-[#1a1008]"
+              disabled={!done}
+              onClick={claimAd}
+              data-testid="button-claim-ad-bonus"
+            >
+              {done ? "Claim bonus" : "Watching…"}
+            </Button>
+            <Button
+              variant="ghost"
+              className="w-full text-[#e8dcc0]/55"
+              onClick={() => {
+                setWatching(false);
+                setProgress(0);
+                setDone(false);
+                trackMonetization("rewarded_ad_failed", { reason: "closed_early" });
+              }}
+            >
+              Cancel ad — keep normal reward
+            </Button>
+          </div>
+        )}
+
+        {message && <p className="mt-3 text-center text-xs text-[#ff6b8a]">{message}</p>}
+      </div>
+    </div>
+  );
+}
