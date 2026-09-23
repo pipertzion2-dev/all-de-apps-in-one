@@ -13,7 +13,7 @@ const bodySchema = z
 
 export const maxDuration = 60;
 
-/** Wire a working Orbit AI provider (Gemini → OpenAI → EasyPeasy) before one-click runs. */
+/** Wire a working Orbit AI provider (OpenAI → Gemini → EasyPeasy) before one-click runs. */
 export async function POST(request: Request) {
   try {
     if (!(await isOrbitAdminAllowed())) {

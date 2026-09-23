@@ -6,6 +6,7 @@ import {
   getOrbitActiveAiProvider,
   getOrbitAiProviderLabel,
   getOrbitDefaultModelForProvider,
+  getOrbitModelFallbackChain,
   type AiProvider,
 } from "@/lib/llm/providers";
 import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
@@ -56,21 +57,28 @@ type ProviderProbe = {
 
 async function testAiConnection(
   client: OpenAI,
-  model: string,
-): Promise<{ ok: true; reply: string } | { ok: false; error: string }> {
-  try {
-    const completion = await client.chat.completions.create({
-      model,
-      messages: [{ role: "user", content: "Reply with exactly the word OK." }],
-      max_tokens: 16,
-      temperature: 0,
-    });
-    const reply = completion.choices[0]?.message?.content?.trim() || "";
-    if (!reply) return { ok: false, error: "Empty response from AI provider" };
-    return { ok: true, reply };
-  } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  models: string[],
+): Promise<{ ok: true; reply: string; model: string } | { ok: false; error: string }> {
+  let lastError = "No models to try";
+  for (const model of models) {
+    try {
+      const completion = await client.chat.completions.create({
+        model,
+        messages: [{ role: "user", content: "Reply with exactly the word OK." }],
+        max_tokens: 16,
+        temperature: 0,
+      });
+      const reply = completion.choices[0]?.message?.content?.trim() || "";
+      if (!reply) {
+        lastError = `Empty response from ${model}`;
+        continue;
+      }
+      return { ok: true, reply, model };
+    } catch (e) {
+      lastError = e instanceof Error ? e.message : String(e);
+    }
   }
+  return { ok: false, error: lastError };
 }
 
 function buildGeminiClient(): OpenAI | null {
@@ -96,18 +104,19 @@ function buildDirectOpenAiClient(): OpenAI | null {
 
 async function orderedProbes(): Promise<ProviderProbe[]> {
   const skipEasyPeasy = await isEasyPeasySkippedForOrbit();
+  // Probe OpenAI first (SaaS default), then free Gemini, then EasyPeasy gateway.
   const probes: ProviderProbe[] = [
-    {
-      id: "gemini",
-      label: "Google Gemini",
-      model: getOrbitDefaultModelForProvider("gemini"),
-      canTry: !!buildGeminiClient(),
-    },
     {
       id: "openai",
       label: "OpenAI",
       model: getOrbitDefaultModelForProvider("openai"),
       canTry: !!buildDirectOpenAiClient(),
+    },
+    {
+      id: "gemini",
+      label: "Google Gemini",
+      model: getOrbitDefaultModelForProvider("gemini"),
+      canTry: !!buildGeminiClient(),
     },
     {
       id: "easypeasy",
@@ -131,7 +140,7 @@ async function orderedProbes(): Promise<ProviderProbe[]> {
 async function probeProvider(
   probe: ProviderProbe,
   testConnection: boolean,
-): Promise<{ ok: boolean; testReply?: string; error?: string }> {
+): Promise<{ ok: boolean; testReply?: string; model?: string; error?: string }> {
   if (probe.id === "easypeasy") {
     const ep = await ensureEasyPeasyForOrbit({
       testConnection,
@@ -140,7 +149,7 @@ async function probeProvider(
     });
     if (ep.ok) {
       resetOpenAIClientCache();
-      return { ok: true, testReply: ep.testReply };
+      return { ok: true, testReply: ep.testReply, model: probe.model };
     }
     return { ok: false, error: ep.error ?? "EasyPeasy connection failed" };
   }
@@ -150,13 +159,17 @@ async function probeProvider(
 
   if (!testConnection) {
     resetOpenAIClientCache();
-    return { ok: true };
+    return { ok: true, model: probe.model };
   }
 
-  const test = await testAiConnection(client, probe.model);
+  const models =
+    probe.id === "openai" || probe.id === "gemini"
+      ? [...new Set([probe.model, ...getOrbitModelFallbackChain(probe.id)])]
+      : [probe.model];
+  const test = await testAiConnection(client, models);
   if (test.ok) {
     resetOpenAIClientCache();
-    return { ok: true, testReply: test.reply };
+    return { ok: true, testReply: test.reply, model: test.model };
   }
   return { ok: false, error: test.error };
 }
@@ -179,7 +192,7 @@ async function succeedWithTemplates(warning?: string): Promise<EnsureOrbitAiResu
 
 /**
  * Wire a working Orbit AI provider before autopilot runs.
- * Prefers Gemini → direct OpenAI → EasyPeasy → built-in templates (no key).
+ * Prefers OpenAI (SaaS default) → Gemini → EasyPeasy → built-in templates (no key).
  */
 export async function ensureOrbitAiForRun(opts?: {
   testConnection?: boolean;
@@ -235,6 +248,7 @@ export async function ensureOrbitAiForRun(opts?: {
         process.env.ORBIT_AI_PROVIDER = "gemini";
       } else if (probe.id === "openai") {
         process.env.ORBIT_AI_PROVIDER = "openai";
+        if (result.model) process.env.ORBIT_AI_MODEL = result.model;
       }
       resetOpenAIClientCache();
 
@@ -243,7 +257,7 @@ export async function ensureOrbitAiForRun(opts?: {
         ok: true,
         provider: probe.id,
         providerLabel: getOrbitAiProviderLabel(activeProvider),
-        model: probe.model,
+        model: result.model || probe.model,
         tested: testConnection,
         testReply: result.testReply,
         alternatives: getOrbitAiAlternatives([probe.id]),

@@ -20,9 +20,14 @@ describe("Orbit AI provider priority", () => {
     expect(getOrbitActiveAiProvider()).toBe("gemini");
   });
 
-  it("prefers Gemini over direct OpenAI when both are configured", () => {
+  it("prefers direct OpenAI over Gemini when both are configured (SaaS default)", () => {
     process.env.GEMINI_API_KEY = "gemini-test-key-12345";
     process.env.OPENAI_API_KEY = "sk-test-openai-key";
+    expect(getOrbitActiveAiProvider()).toBe("openai");
+  });
+
+  it("uses Gemini when only Gemini is set", () => {
+    process.env.GEMINI_API_KEY = "gemini-test-key-12345";
     expect(getOrbitActiveAiProvider()).toBe("gemini");
   });
 

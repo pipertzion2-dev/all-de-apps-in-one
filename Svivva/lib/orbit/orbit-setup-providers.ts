@@ -35,13 +35,13 @@ export const ORBIT_SETUP_PROVIDERS: OrbitSetupProvider[] = [
   },
   {
     id: "openai",
-    name: "OpenAI gpt-5",
+    name: "OpenAI gpt-4o",
     purpose: "Best AI for Orbit marketing — SEO pages, launch copy, outreach, and autopilot",
     priceLabel: "~$10–30 prepaid credits",
     payUrl: "https://platform.openai.com/settings/organization/billing/overview",
     docsUrl: "https://platform.openai.com/api-keys",
     payNote:
-      "Orbit defaults to gpt-5 (falls back to gpt-4o) for marketing quality. Paste sk- key in Platform Secrets or Vercel. Gemini's free tier covers the same jobs at $0.",
+      "Orbit defaults to gpt-4o (falls back to gpt-4o-mini) like other SaaS AI products. Paste sk- key on /dashboard/orbit/connect or in Platform Secrets. Gemini's free tier covers the same jobs at $0.",
     envKey: "OPENAI_API_KEY",
     priority: 10,
   },

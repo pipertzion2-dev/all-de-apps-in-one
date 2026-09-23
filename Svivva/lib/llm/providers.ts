@@ -12,7 +12,7 @@ import {
 } from "@/lib/orbit/orbit-template-mode";
 
 /** Paid OpenAI default for Orbit marketing — override with ORBIT_AI_MODEL in env. */
-export const ORBIT_DEFAULT_OPENAI_MODEL = "gpt-5";
+export const ORBIT_DEFAULT_OPENAI_MODEL = "gpt-4o";
 
 export type AiProvider = "gemini" | "openai" | "replit" | "ollama" | "none";
 
@@ -44,6 +44,9 @@ export function hasReplitAiIntegration(): boolean {
 }
 
 export function getActiveAiProvider(): AiProvider {
+  // SaaS default: prefer a direct OpenAI billing key when present (same as most AI products).
+  if (isDirectOpenAiConfigured()) return "openai";
+
   if (getGeminiApiKey()?.trim()) return "gemini";
 
   const openaiKey = getOpenAIApiKey()?.trim();
@@ -92,8 +95,9 @@ export function getOrbitActiveAiProvider(): AiProvider {
   }
 
   // Default stack: free Gemini → direct OpenAI → EasyPeasy gateway (last resort)
-  if (geminiKey) return "gemini";
+  // SaaS default: direct OpenAI → free Gemini → EasyPeasy gateway (last resort)
   if (isDirectOpenAiConfigured()) return "openai";
+  if (geminiKey) return "gemini";
   if (easyPeasyRoute && openaiKey) return "openai";
 
   if (!isOnVercelRuntime()) {
@@ -173,7 +177,7 @@ export function getOrbitDefaultModelForProvider(
     case "replit":
     case "openai":
       if (isEasyPeasyOpenAiRoute()) return getEasyPeasyModel();
-      return ORBIT_DEFAULT_OPENAI_MODEL;
+      return process.env.ORBIT_AI_MODEL?.trim() || ORBIT_DEFAULT_OPENAI_MODEL;
     case "ollama":
       return "llama3.2";
     default:

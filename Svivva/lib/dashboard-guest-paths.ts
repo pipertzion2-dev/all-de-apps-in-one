@@ -4,7 +4,11 @@
  */
 
 /** Admin surfaces that show AdminCodeForm first — not the sign-in wall. */
-export const ADMIN_CODE_FIRST_PREFIXES = ["/dashboard/burns", "/dashboard/gsc-connect"] as const;
+export const ADMIN_CODE_FIRST_PREFIXES = [
+  "/dashboard/burns",
+  "/dashboard/gsc-connect",
+  "/dashboard/orbit/connect",
+] as const;
 
 /** Public product / Orbit routes (homepage cube + launchpad). */
 export const DASHBOARD_PUBLIC_PREFIXES = [

@@ -10,7 +10,7 @@ type Props = {
   "data-testid"?: string;
 };
 
-/** Owner-only shortcut to Orbit Admin — hidden until admin passcode is set. */
+/** Owner-only shortcut to Orbit SEO + AI connect desk — hidden until admin passcode is set. */
 export function OrbitAdminAccessButton({
   className,
   "data-testid": testId = "button-orbit-admin-access",
@@ -35,12 +35,12 @@ export function OrbitAdminAccessButton({
         className ??
         "h-8 gap-1 border-[#5B8DA8]/45 bg-background/30 px-2 text-[10px] font-bold text-foreground shadow-sm backdrop-blur-sm hover:bg-[#5B8DA8]/10 sm:gap-1.5 sm:px-3 sm:text-xs"
       }
-      onClick={() => router.push("/dashboard/orbit")}
+      onClick={() => router.push("/dashboard/orbit/connect")}
       data-testid={testId}
-      aria-label="Orbit Admin"
+      aria-label="Orbit SEO connect"
     >
       <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-[#5B8DA8] sm:h-4 sm:w-4" />
-      <span className="hidden min-[400px]:inline">Admin</span>
+      <span className="hidden min-[400px]:inline">SEO Connect</span>
     </Button>
   );
 }
