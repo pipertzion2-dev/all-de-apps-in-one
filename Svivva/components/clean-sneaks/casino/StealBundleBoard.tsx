@@ -13,8 +13,10 @@ import {
   finishDealing,
   listLegalMoves,
   passStuckTurn,
+  listUnlockedUpgrades,
   payoutWin,
   playCue,
+  readCasinoSession,
   recordCardGameResult,
   selectHandCard,
   setSessionCredits,
@@ -138,7 +140,8 @@ export function StealBundleBoard({
     // Ante was already deducted at deal time — settle the stack from remaining credits.
     let nextCredits = credits;
     if (humanWon && !tie) {
-      nextCredits = credits + payoutWin(anteLocked);
+      nextCredits =
+        credits + payoutWin(anteLocked, listUnlockedUpgrades(readCasinoSession()));
     } else if (tie) {
       nextCredits = credits + anteLocked;
     }
