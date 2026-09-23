@@ -1,17 +1,14 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { isPortraitViewport } from "@/lib/clean-sneaks/run-quality";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { CleanSneaksGame3D } from "@/components/clean-sneaks/CleanSneaksGame3D";
 import { GameLoadingWheels } from "@/components/clean-sneaks/GameLoadingWheels";
-import { GameStartScreen } from "@/components/clean-sneaks/GameStartScreen";
+import { GameStartScreen, preloadMainGameCover } from "@/components/clean-sneaks/GameStartScreen";
 import { SceneErrorBoundary } from "@/components/clean-sneaks/SceneErrorBoundary";
-import { StealTheBundleCardGame } from "@/components/clean-sneaks/StealTheBundleCardGame";
-import { GameAdBanner, GameAdsEarningsChip } from "@/components/clean-sneaks/ads";
-import { KleanShop, OfflineEarningsHost } from "@/components/clean-sneaks/monetization";
 import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
 import { isBundleCardUnlocked } from "@/lib/clean-sneaks/bundle-unlock";
 import type { GamePhase } from "@/lib/clean-sneaks/types";
@@ -25,10 +22,57 @@ const shellStyle = {
   paddingLeft: "env(safe-area-inset-left)",
 } as const;
 
+/** Heavy game / shop / ads stay out of the first paint so the Karen loading screen can animate. */
+const CleanSneaksGame3D = dynamic(
+  () =>
+    import("@/components/clean-sneaks/CleanSneaksGame3D").then((m) => ({
+      default: m.CleanSneaksGame3D,
+    })),
+  { ssr: false, loading: () => null },
+);
+
+const StealTheBundleCardGame = dynamic(
+  () =>
+    import("@/components/clean-sneaks/StealTheBundleCardGame").then((m) => ({
+      default: m.StealTheBundleCardGame,
+    })),
+  { ssr: false, loading: () => null },
+);
+
+const KleanShop = dynamic(
+  () => import("@/components/clean-sneaks/monetization").then((m) => ({ default: m.KleanShop })),
+  { ssr: false, loading: () => null },
+);
+
+const OfflineEarningsHost = dynamic(
+  () =>
+    import("@/components/clean-sneaks/monetization").then((m) => ({
+      default: m.OfflineEarningsHost,
+    })),
+  { ssr: false, loading: () => null },
+);
+
+const GameAdBanner = dynamic(
+  () => import("@/components/clean-sneaks/ads").then((m) => ({ default: m.GameAdBanner })),
+  { ssr: false, loading: () => null },
+);
+
+const GameAdsEarningsChip = dynamic(
+  () => import("@/components/clean-sneaks/ads").then((m) => ({ default: m.GameAdsEarningsChip })),
+  { ssr: false, loading: () => null },
+);
+
+function prefersReducedMotion(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
 function CleanSneaksPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const beginGameRef = useRef<(() => void) | null>(null);
+  /** Start tapped before the game chunk finished loading — flush when begin registers. */
+  const pendingStartRef = useRef(false);
   const [sceneAttempt, setSceneAttempt] = useState(0);
   const [gamePhase, setGamePhase] = useState<GamePhase>("loading");
   const [portrait, setPortrait] = useState(false);
@@ -52,11 +96,31 @@ function CleanSneaksPageContent() {
 
   const registerBegin = useCallback((begin: () => void) => {
     beginGameRef.current = begin;
+    if (pendingStartRef.current) {
+      pendingStartRef.current = false;
+      begin();
+    }
+  }, []);
+
+  const handlePhaseChange = useCallback((next: GamePhase) => {
+    setGamePhase((prev) => {
+      // Game3D mounts after the page splash — never regress back to Karen loading.
+      if (next === "loading" && prev !== "loading") return prev;
+      return next;
+    });
   }, []);
 
   const handleStart = useCallback(() => {
     setIntroComplete(true);
-    beginGameRef.current?.();
+    if (beginGameRef.current) {
+      beginGameRef.current();
+    } else {
+      pendingStartRef.current = true;
+    }
+  }, []);
+
+  const advancePastLoading = useCallback(() => {
+    setGamePhase((p) => (p === "loading" ? "start" : p));
   }, []);
 
   useEffect(() => {
@@ -77,6 +141,35 @@ function CleanSneaksPageContent() {
       setPlayMode("bundle-card");
     }
   }, [gamePhase, playMode, searchParams]);
+
+  /**
+   * Page-owned loading → start. Do not wait on the heavy Game3D / RunScene chunks —
+   * those were freezing mobile Safari on the Karen splash while the main thread parsed JS.
+   */
+  useEffect(() => {
+    if (playMode !== "runner" || introComplete || gamePhase !== "loading") return;
+
+    let cancelled = false;
+    let delayId = 0;
+    const reduced = prefersReducedMotion();
+    const minMs = reduced ? 1200 : 2400;
+    const started = performance.now();
+    const maxId = window.setTimeout(advancePastLoading, minMs + 4000);
+
+    const finishWhenReady = () => {
+      if (cancelled) return;
+      const wait = Math.max(0, minMs - (performance.now() - started));
+      delayId = window.setTimeout(advancePastLoading, wait);
+    };
+
+    void preloadMainGameCover().then(finishWhenReady);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(maxId);
+      window.clearTimeout(delayId);
+    };
+  }, [playMode, introComplete, gamePhase, advancePastLoading]);
 
   const openBundleCard = useCallback(() => {
     if (!isBundleCardUnlocked()) return;
@@ -102,7 +195,7 @@ function CleanSneaksPageContent() {
         )}
 
       {gamePhase === "loading" && !introComplete && playMode === "runner" && (
-        <GameLoadingWheels fullscreen />
+        <GameLoadingWheels fullscreen onSkip={advancePastLoading} />
       )}
 
       {!preGame && (
@@ -236,13 +329,14 @@ function CleanSneaksPageContent() {
                   setSceneAttempt((n) => n + 1);
                 }}
               />
-            ) : (
+            ) : gamePhase === "loading" && !introComplete ? null : (
               <CleanSneaksGame3D
                 key={sceneAttempt}
                 active
                 fullscreen
                 style={shellStyle}
-                onPhaseChange={setGamePhase}
+                skipIntroLoading
+                onPhaseChange={handlePhaseChange}
                 onRegisterBegin={registerBegin}
                 onPlayBundleCard={openBundleCard}
                 onExit={() => router.push("/#clean-sneaks")}
@@ -252,7 +346,7 @@ function CleanSneaksPageContent() {
         </div>
       </div>
 
-      <OfflineEarningsHost />
+      {introComplete && <OfflineEarningsHost />}
       <KleanShop open={shopOpen} onClose={() => setShopOpen(false)} />
     </div>
   );
