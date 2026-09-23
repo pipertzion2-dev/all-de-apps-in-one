@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
+  addSessionCredits,
   canAffordTable,
   computeAnte,
   describeCreditsGate,
@@ -11,14 +12,22 @@ import {
   playCue,
   readCasinoSession,
   scoreToCredits,
+  setSessionCredits,
   type ExperienceState,
 } from "@/lib/clean-sneaks/casino";
-import { StealBundleBoard } from "./StealBundleBoard";
+import { settleParlay, type ParlayTicket } from "@/lib/clean-sneaks/casino/parlay";
+import type { RoomPublic } from "@/lib/clean-sneaks/casino/multiplayer/types";
+import { StealBundleBoard, type HandCompleteStats } from "./StealBundleBoard";
+import { ParlayDesk } from "./ParlayDesk";
+import { CreditPayPanel } from "./CreditPayPanel";
+import { MultiplayerLobby } from "./MultiplayerLobby";
 
 const CasinoScene = dynamic(
   () => import("./CasinoScene").then((m) => ({ default: m.CasinoScene })),
   { ssr: false, loading: () => <div className="absolute inset-0 bg-[#07050a]" /> },
 );
+
+type LobbyPanel = "main" | "parlay" | "pay" | "multiplayer";
 
 type Props = {
   walkingScore: number;
@@ -39,6 +48,10 @@ export function CasinoExperience({
   const [gameKey, setGameKey] = useState(0);
   const [ticketSubmitted, setTicketSubmitted] = useState(false);
   const [cameraPunch, setCameraPunch] = useState(0);
+  const [lobbyPanel, setLobbyPanel] = useState<LobbyPanel>("main");
+  const [parlayTicket, setParlayTicket] = useState<ParlayTicket | null>(null);
+  const [parlayFlash, setParlayFlash] = useState<string | null>(null);
+  const [liveRoom, setLiveRoom] = useState<RoomPublic | null>(null);
   const [credits, setCredits] = useState(() => {
     const session = readCasinoSession();
     return session.credits || scoreToCredits(walkingScore || session.walkingScore);
@@ -77,6 +90,23 @@ export function CasinoExperience({
       requestAnimationFrame(tick);
     }, 900);
   }, [ticketSubmitted]);
+
+  const handleHandComplete = useCallback(
+    (stats: HandCompleteStats) => {
+      if (!parlayTicket) return;
+      const result = settleParlay(parlayTicket, stats);
+      if (result.won && result.payout > 0) {
+        const next = addSessionCredits(result.payout);
+        setCredits(next.credits);
+        setParlayFlash(`Parlay hit! +${result.payout.toLocaleString()} credits`);
+      } else {
+        setParlayFlash("Parlay missed — stake stays with the house.");
+      }
+      setParlayTicket(null);
+      window.setTimeout(() => setParlayFlash(null), 4500);
+    },
+    [parlayTicket],
+  );
 
   const sceneMode =
     flow === "CASINO_LOBBY" ||
@@ -165,13 +195,15 @@ export function CasinoExperience({
         </div>
       )}
 
-      {flow === "CASINO_LOBBY" && (
+      {flow === "CASINO_LOBBY" && lobbyPanel === "main" && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-4 text-center">
           <p className="text-[10px] uppercase tracking-[0.4em] text-[#ff4d7a]">Main Floor</p>
           <h2 className="mt-2 font-serif text-3xl text-[#f7e7b0] sm:text-4xl">
             Steal the Old Man&apos;s Bundle
           </h2>
-          <p className="mt-2 text-sm text-[#e8dcc0]/70">Build the biggest bundle.</p>
+          <p className="mt-2 text-sm text-[#e8dcc0]/70">
+            Build the biggest bundle — solo, online, or nearby over Bluetooth.
+          </p>
           <p className="mt-2 text-sm text-[#ffd76a]" data-testid="lobby-credits">
             Credits: {credits.toLocaleString()}
             {canSit ? ` · Ante: ${ante.toLocaleString()}` : ""}
@@ -179,14 +211,60 @@ export function CasinoExperience({
           <p className="mt-1 max-w-sm text-[11px] text-[#e8dcc0]/55">
             {describeCreditsGate(credits)}
           </p>
+          {parlayTicket && (
+            <p className="mt-2 text-[11px] text-[#7dffb2]" data-testid="lobby-parlay-active">
+              Parlay live · {parlayTicket.legIds.length} legs · stake{" "}
+              {parlayTicket.stake.toLocaleString()}
+            </p>
+          )}
+          {parlayFlash && (
+            <p className="mt-2 text-xs text-[#ffd76a]" data-testid="parlay-settle-flash">
+              {parlayFlash}
+            </p>
+          )}
+          {liveRoom && (
+            <p className="mt-1 text-[11px] text-[#7EC8D9]" data-testid="lobby-live-room">
+              Live table {liveRoom.code} · {liveRoom.mode}
+            </p>
+          )}
           <Button
-            className="mt-8 bg-[#d4af37] text-[#1a1008] hover:bg-[#e0c15a] disabled:opacity-40"
+            className="mt-6 bg-[#d4af37] text-[#1a1008] hover:bg-[#e0c15a] disabled:opacity-40"
             disabled={!canSit}
-            onClick={() => setFlow("CARD_GAME_SETUP")}
+            onClick={() => {
+              setLobbyPanel("main");
+              setFlow("CARD_GAME_SETUP");
+            }}
             data-testid="button-sit-at-table"
           >
-            {canSit ? "Sit at the Table" : "Need more credits"}
+            {canSit ? "Sit at the Table (vs dealers)" : "Need more credits"}
           </Button>
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-center">
+            <Button
+              variant="outline"
+              className="border-[#d4af37]/45 text-[#ffd76a]"
+              disabled={!canSit}
+              onClick={() => setLobbyPanel("parlay")}
+              data-testid="button-open-parlay"
+            >
+              Parlay desk
+            </Button>
+            <Button
+              variant="outline"
+              className="border-[#7EC8D9]/45 text-[#7EC8D9]"
+              onClick={() => setLobbyPanel("multiplayer")}
+              data-testid="button-open-multiplayer"
+            >
+              Online / Bluetooth
+            </Button>
+            <Button
+              variant="outline"
+              className="border-[#00D632]/45 text-[#00D632]"
+              onClick={() => setLobbyPanel("pay")}
+              data-testid="button-buy-credits"
+            >
+              Apple Pay / Cash App
+            </Button>
+          </div>
           {!canSit && (
             <Button
               className="mt-3 border border-[#7EC8D9]/40 text-[#7EC8D9]"
@@ -205,6 +283,45 @@ export function CasinoExperience({
         </div>
       )}
 
+      {flow === "CASINO_LOBBY" && lobbyPanel === "parlay" && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#07050a]/92">
+          <ParlayDesk
+            credits={credits}
+            onPlaced={(ticket, creditsAfter) => {
+              setParlayTicket(ticket);
+              setCredits(creditsAfter);
+              setSessionCredits(creditsAfter);
+              setLobbyPanel("main");
+            }}
+            onSkip={() => setLobbyPanel("main")}
+          />
+        </div>
+      )}
+
+      {flow === "CASINO_LOBBY" && lobbyPanel === "pay" && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#07050a]/92">
+          <CreditPayPanel
+            onCreditsGranted={(_granted, balance) => setCredits(balance)}
+            onClose={() => setLobbyPanel("main")}
+          />
+        </div>
+      )}
+
+      {flow === "CASINO_LOBBY" && lobbyPanel === "multiplayer" && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#07050a]/92">
+          <MultiplayerLobby
+            ante={ante || 50}
+            onReadyToPlay={(room) => {
+              setLiveRoom(room);
+              setLobbyPanel("main");
+              setPlayerCount(2);
+              setFlow("CARD_GAME_PLAYING");
+            }}
+            onBack={() => setLobbyPanel("main")}
+          />
+        </div>
+      )}
+
       {flow === "CARD_GAME_SETUP" && playerCount == null && (
         <div
           className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#07050a]/92 px-4 text-center"
@@ -217,6 +334,11 @@ export function CasinoExperience({
           <p className="mt-3 text-sm text-[#ffd76a]">
             Table ante: {ante.toLocaleString()} of {credits.toLocaleString()} credits
           </p>
+          {parlayTicket && (
+            <p className="mt-1 text-[11px] text-[#7dffb2]">
+              Active parlay · potential {parlayTicket.potentialPayout.toLocaleString()}
+            </p>
+          )}
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button
               className="min-w-[160px] bg-[#d4af37] text-[#1a1008]"
@@ -242,23 +364,38 @@ export function CasinoExperience({
           <p className="mt-4 text-[11px] text-[#e8dcc0]/50">
             Player 1 is you · others are dealers&apos; opponents
           </p>
+          <Button
+            variant="ghost"
+            className="mt-3 text-[#e8dcc0]/55"
+            onClick={() => setFlow("CASINO_LOBBY")}
+          >
+            Back to lobby
+          </Button>
         </div>
       )}
 
       {showCardGame && playerCount != null && (
         <div className="absolute inset-0 z-20 flex min-h-0 flex-col bg-[#07050a]/88">
+          {liveRoom && (
+            <p className="shrink-0 bg-black/50 px-3 py-1 text-center text-[10px] uppercase tracking-[0.3em] text-[#7EC8D9]">
+              Live · {liveRoom.code} · {liveRoom.mode}
+              {liveRoom.mode === "nearby" ? " · Bluetooth / nearby" : " · online"}
+            </p>
+          )}
           <StealBundleBoard
             key={gameKey}
             playerCount={playerCount}
             ante={ante}
             startingCredits={credits}
-            showTutorialFirst={gameKey === 0}
+            showTutorialFirst={gameKey === 0 && !liveRoom}
             onCreditsChange={setCredits}
+            onHandComplete={handleHandComplete}
             onPlayAgain={() => {
               const latest = readCasinoSession().credits;
               setCredits(latest);
               if (!canAffordTable(latest)) {
                 setPlayerCount(null);
+                setLiveRoom(null);
                 setFlow("CASINO_LOBBY");
                 return;
               }
@@ -268,6 +405,8 @@ export function CasinoExperience({
             onReturnToCasino={() => {
               setCredits(readCasinoSession().credits);
               setPlayerCount(null);
+              setLiveRoom(null);
+              setLobbyPanel("main");
               setFlow("CASINO_LOBBY");
             }}
             onRequestNewWalk={onNewWalk}
