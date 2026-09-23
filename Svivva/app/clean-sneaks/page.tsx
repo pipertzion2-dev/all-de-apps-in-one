@@ -11,6 +11,7 @@ import { GameStartScreen } from "@/components/clean-sneaks/GameStartScreen";
 import { SceneErrorBoundary } from "@/components/clean-sneaks/SceneErrorBoundary";
 import { StealTheBundleCardGame } from "@/components/clean-sneaks/StealTheBundleCardGame";
 import { GameAdBanner, GameAdsEarningsChip } from "@/components/clean-sneaks/ads";
+import { KleanShop, OfflineEarningsHost } from "@/components/clean-sneaks/monetization";
 import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
 import { isBundleCardUnlocked } from "@/lib/clean-sneaks/bundle-unlock";
 import type { GamePhase } from "@/lib/clean-sneaks/types";
@@ -35,6 +36,7 @@ function CleanSneaksPageContent() {
   const [bundleUnlocked, setBundleUnlocked] = useState(false);
   /** Cover "Start" was tapped — do not show the start splash again this visit. */
   const [introComplete, setIntroComplete] = useState(false);
+  const [shopOpen, setShopOpen] = useState(false);
 
   const preGame =
     playMode === "runner" && !introComplete && (gamePhase === "loading" || gamePhase === "start");
@@ -141,6 +143,19 @@ function CleanSneaksPageContent() {
               </h1>
             </div>
             <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className={
+                  portrait
+                    ? "h-8 px-2.5 text-xs border-[#f7e7b0]/35 text-[#f7e7b0]"
+                    : "border-[#f7e7b0]/35 text-[#f7e7b0]"
+                }
+                onClick={() => setShopOpen(true)}
+                data-testid="button-header-klean-shop"
+              >
+                Shop
+              </Button>
               {bundleUnlocked && playMode === "runner" && (
                 <Button
                   variant="outline"
@@ -236,6 +251,9 @@ function CleanSneaksPageContent() {
           </SceneErrorBoundary>
         </div>
       </div>
+
+      <OfflineEarningsHost />
+      <KleanShop open={shopOpen} onClose={() => setShopOpen(false)} />
     </div>
   );
 }

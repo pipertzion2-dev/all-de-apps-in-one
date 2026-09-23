@@ -21,13 +21,15 @@ import { StealBundleBoard, type HandCompleteStats } from "./StealBundleBoard";
 import { ParlayDesk } from "./ParlayDesk";
 import { CreditPayPanel } from "./CreditPayPanel";
 import { MultiplayerLobby } from "./MultiplayerLobby";
+import { KleanShop } from "@/components/clean-sneaks/monetization";
+import { syncCreditsFromCasino } from "@/lib/clean-sneaks/monetization";
 
 const CasinoScene = dynamic(
   () => import("./CasinoScene").then((m) => ({ default: m.CasinoScene })),
   { ssr: false, loading: () => <div className="absolute inset-0 bg-[#07050a]" /> },
 );
 
-type LobbyPanel = "main" | "parlay" | "pay" | "multiplayer";
+type LobbyPanel = "main" | "parlay" | "pay" | "multiplayer" | "shop";
 
 type Props = {
   walkingScore: number;
@@ -64,6 +66,10 @@ export function CasinoExperience({
   useEffect(() => {
     if (flow === "WALK_COMPLETE") playCue("walking_complete");
     if (flow === "CASINO_APPROACH" || flow === "CASINO_LOBBY") playCue("casino_ambience");
+    if (flow === "CASINO_LOBBY") {
+      const synced = syncCreditsFromCasino();
+      setCredits(synced.credits);
+    }
   }, [flow]);
 
   const submitTicket = useCallback(() => {
@@ -264,6 +270,14 @@ export function CasinoExperience({
             >
               Apple Pay / Cash App
             </Button>
+            <Button
+              variant="outline"
+              className="border-[#f7e7b0]/45 text-[#f7e7b0]"
+              onClick={() => setLobbyPanel("shop")}
+              data-testid="button-open-klean-shop"
+            >
+              Corner Store
+            </Button>
           </div>
           {!canSit && (
             <Button
@@ -320,6 +334,10 @@ export function CasinoExperience({
             onBack={() => setLobbyPanel("main")}
           />
         </div>
+      )}
+
+      {flow === "CASINO_LOBBY" && lobbyPanel === "shop" && (
+        <KleanShop open onClose={() => setLobbyPanel("main")} />
       )}
 
       {flow === "CARD_GAME_SETUP" && playerCount == null && (

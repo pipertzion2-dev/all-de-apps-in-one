@@ -51,6 +51,14 @@ import { CleanPathHud, OhNoOverlay } from "./OhNoOverlay";
 import { Baloon8ColorwayPicker } from "./Baloon8ColorwayPicker";
 import { CasinoEntryRules } from "./CasinoEntryRules";
 import { GameInterstitialAd, GameRewardedAd } from "./ads";
+import { RewardClaimModal } from "./monetization/RewardClaimModal";
+import {
+  addPassXpForWalk,
+  buildRewardedOffer,
+  readWallet,
+  writeWallet,
+  type RewardedOffer,
+} from "@/lib/clean-sneaks/monetization";
 
 const CleanSneaksRunScene = dynamic(
   () => import("./CleanSneaksRunScene").then((m) => ({ default: m.CleanSneaksRunScene })),
@@ -172,6 +180,8 @@ export function CleanSneaksGame3D({
   const [colorwayChosen, setColorwayChosen] = useState(false);
   const [walkCompleteScore, setWalkCompleteScore] = useState(0);
   const [rewardedOpen, setRewardedOpen] = useState(false);
+  const [missionOffer, setMissionOffer] = useState<RewardedOffer | null>(null);
+  const [missionRewardOpen, setMissionRewardOpen] = useState(false);
   const [interstitialOpen, setInterstitialOpen] = useState(false);
   const interstitialResumeRef = useRef<(() => void) | null>(null);
   const countdownTimerRef = useRef<number | null>(null);
@@ -232,6 +242,22 @@ export function CleanSneaksGame3D({
     payload.bundleNewlyUnlocked = !alreadyUnlocked && unlockEval.unlocked;
     payload.bundleUnlockReason = payload.bundleCardUnlocked ? undefined : unlockEval.reason;
     saveWalkingScoreToSession(payload.score, payload.distance, payload.bundleCardUnlocked);
+    const wallet = readWallet();
+    writeWallet({
+      ...wallet,
+      credits: Math.max(wallet.credits, Math.floor(payload.score)),
+      walksCompleted: wallet.walksCompleted + 1,
+    });
+    addPassXpForWalk();
+    const offer = buildRewardedOffer({
+      context: "mission_complete",
+      baseCredits: Math.floor(payload.score),
+      walkId: `walk-${Date.now()}`,
+    });
+    if (offer) {
+      setMissionOffer(offer);
+      setMissionRewardOpen(true);
+    }
     return payload;
   }, []);
 
@@ -979,10 +1005,22 @@ export function CleanSneaksGame3D({
                 size="lg"
                 variant="outline"
                 className="border-[#ffd76a]/35 text-[#ffd76a]"
-                onClick={() => setRewardedOpen(true)}
+                onClick={() => {
+                  const offer = buildRewardedOffer({
+                    context: "mission_complete",
+                    baseCredits: gameOver.score,
+                    walkId: `walk-bonus-${Date.now()}`,
+                  });
+                  if (offer) {
+                    setMissionOffer(offer);
+                    setMissionRewardOpen(true);
+                  } else {
+                    setRewardedOpen(true);
+                  }
+                }}
                 data-testid="button-watch-ad-credits"
               >
-                Watch ad · +credits
+                Watch ad · bonus credits
               </Button>
               <Button
                 size="lg"
@@ -999,6 +1037,14 @@ export function CleanSneaksGame3D({
             </div>
           </div>
         )}
+
+        <RewardClaimModal
+          open={missionRewardOpen}
+          title="JOB COMPLETE"
+          subtitle="Normal reward is already on your chip stack. Ads are optional."
+          offer={missionOffer}
+          onClose={() => setMissionRewardOpen(false)}
+        />
 
         <GameRewardedAd open={rewardedOpen} onClose={() => setRewardedOpen(false)} />
         <GameInterstitialAd
