@@ -27,6 +27,14 @@ import {
 import { PlayingCardView } from "./PlayingCardView";
 import { StealBundleHowToPlay } from "./StealBundleHowToPlay";
 
+export type HandCompleteStats = {
+  humanWonSolo: boolean;
+  steals: number;
+  bundleSize: number;
+  dropsToTable: number;
+  clearedTable: boolean;
+};
+
 type Props = {
   playerCount: 2 | 3;
   ante: number;
@@ -36,6 +44,8 @@ type Props = {
   onRequestNewWalk: () => void;
   onReturnToCasino: () => void;
   onPlayAgain: () => void;
+  /** Fired once when the hand reaches results — used for parlays. */
+  onHandComplete?: (stats: HandCompleteStats) => void;
 };
 
 type UiFlash = { text: string; kind: "steal" | "match" | "info" } | null;
@@ -49,6 +59,7 @@ export function StealBundleBoard({
   onRequestNewWalk,
   onReturnToCasino,
   onPlayAgain,
+  onHandComplete,
 }: Props) {
   const [tutorialDone, setTutorialDone] = useState(!showTutorialFirst);
   const [state, setState] = useState<CardGameState | null>(null);
@@ -60,6 +71,12 @@ export function StealBundleBoard({
   /** After a human move, use full AI pacing; chain AI→AI turns stay snappy. */
   const aiPaceAfterHumanRef = useRef(true);
   const [dealQueue, setDealQueue] = useState<DealStep[] | null>(null);
+  const handStatsRef = useRef({
+    steals: 0,
+    dropsToTable: 0,
+    clearedTable: false,
+  });
+  const handCompleteFiredRef = useRef(false);
 
   const deal = useCallback(() => {
     const paid = Math.min(ante, credits);
@@ -74,6 +91,8 @@ export function StealBundleBoard({
     setBusy(true);
     setState(dealing);
     recordedRef.current = false;
+    handCompleteFiredRef.current = false;
+    handStatsRef.current = { steals: 0, dropsToTable: 0, clearedTable: false };
     aiPaceAfterHumanRef.current = true;
   }, [playerCount, ante, credits, onCreditsChange]);
 
@@ -128,7 +147,18 @@ export function StealBundleBoard({
     onCreditsChange?.(nextCredits);
     recordCardGameResult(humanWon && !tie, 0);
     playCue("victory");
-  }, [state, anteLocked, credits, onCreditsChange]);
+    if (!handCompleteFiredRef.current) {
+      handCompleteFiredRef.current = true;
+      const human = state.players.find((p) => p.id === "p1");
+      onHandComplete?.({
+        humanWonSolo: humanWon && !tie,
+        steals: handStatsRef.current.steals,
+        bundleSize: human?.bundle.length ?? 0,
+        dropsToTable: handStatsRef.current.dropsToTable,
+        clearedTable: handStatsRef.current.clearedTable,
+      });
+    }
+  }, [state, anteLocked, credits, onCreditsChange, onHandComplete]);
 
   const legal = useMemo(() => {
     if (!state) return [] as PlayMove[];
@@ -153,6 +183,7 @@ export function StealBundleBoard({
   const commitMove = useCallback(
     (move: PlayMove) => {
       if (!state || busy) return;
+      const tableBefore = state.tableCards.length;
       const result = tryHumanPlay(state, move);
       if (!result.ok) {
         playCue("invalid_move");
@@ -161,12 +192,19 @@ export function StealBundleBoard({
       }
       aiPaceAfterHumanRef.current = true;
       if (move.type === "stealBundle") {
+        handStatsRef.current.steals += 1;
         playCue("bundle_steal");
         showFlash("BUNDLE STOLEN!", "steal");
       } else if (move.type === "matchTable") {
         playCue("card_match");
         playCue("bundle_collect");
         showFlash("MATCH!", "match");
+        if (tableBefore <= 1 || result.state.tableCards.length === 0) {
+          handStatsRef.current.clearedTable = true;
+        }
+      } else if (move.type === "dropToTable") {
+        handStatsRef.current.dropsToTable += 1;
+        playCue("card_flip");
       } else {
         playCue("card_flip");
       }

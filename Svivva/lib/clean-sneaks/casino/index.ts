@@ -54,6 +54,23 @@ export {
   CREDITS_MIN_ANTE,
 } from "./credits";
 export { AudioManager, playCue } from "./audio";
+export {
+  PARLAY_LEGS,
+  PARLAY_MIN_STAKE,
+  combineOdds,
+  potentialPayout,
+  canPlaceParlay,
+  placeParlay,
+  settleParlay,
+} from "./parlay";
+export type { ParlayTicket, ParlayLegId, HandStats } from "./parlay";
+export {
+  CREDIT_PACKS,
+  ENTERTAINMENT_DISCLAIMER,
+  getCreditPack,
+  cashAppPackUrl,
+  parseLocalRedeemCode,
+} from "./credit-packs";
 export type {
   PlayingCard,
   CardPlayer,
