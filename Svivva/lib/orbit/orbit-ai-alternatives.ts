@@ -38,7 +38,7 @@ export const ORBIT_AI_ALTERNATIVES: OrbitAiAlternative[] = [
   {
     id: "openai",
     name: "OpenAI (direct)",
-    why: "Best marketing copy quality — gpt-5 with gpt-4o fallback.",
+    why: "Best marketing copy quality — gpt-4o with gpt-4o-mini fallback.",
     priceLabel: "~$10–30 prepaid credits",
     setupHref: "/dashboard/settings/runtime-keys",
     payUrl: "https://platform.openai.com/api-keys",

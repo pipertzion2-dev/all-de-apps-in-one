@@ -187,6 +187,14 @@ const digitalMenuGroups: MenuGroup[] = [
         highlight: true,
       },
       {
+        title: "SEO Connect",
+        desc: "AI + Search Console",
+        href: "/dashboard/orbit/connect",
+        icon: Sparkles,
+        adminOnly: true,
+        highlight: true,
+      },
+      {
         title: "Google Search",
         desc: "GSC connection",
         href: "/dashboard/gsc-connect",

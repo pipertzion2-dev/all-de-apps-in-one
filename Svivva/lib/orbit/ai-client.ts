@@ -74,8 +74,8 @@ function getOrbitProviderFallbackChain(active: AiProvider): AiProvider[] {
 }
 
 /**
- * Model used for marketing + research work. Defaults to gpt-5 for paid OpenAI;
- * override with ORBIT_AI_MODEL in Vercel / Platform Secrets.
+ * Model used for marketing + research work. Defaults to gpt-4o for paid OpenAI
+ * (same class of model other SaaS products ship); override with ORBIT_AI_MODEL.
  */
 export function getMarketingModel(): string {
   const provider = getOrbitActiveAiProvider();
