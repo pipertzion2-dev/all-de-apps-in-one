@@ -45,7 +45,9 @@ export function MultiplayerLobby({ ante, onReadyToPlay, onBack }: Props) {
   const launchedRef = useRef(false);
 
   const poll = useCallback(async (code: string) => {
-    const res = await fetch(`/api/clean-sneaks/steal-bundle/rooms?code=${encodeURIComponent(code)}`);
+    const res = await fetch(
+      `/api/clean-sneaks/steal-bundle/rooms?code=${encodeURIComponent(code)}`,
+    );
     if (!res.ok) return null;
     const data = await res.json();
     return data.room as RoomPublic;
@@ -157,9 +159,7 @@ export function MultiplayerLobby({ ante, onReadyToPlay, onBack }: Props) {
       await join(fromName[1].toUpperCase(), peer.deviceId);
       return;
     }
-    setError(
-      `Found ${peer.name}. Enter their room code to connect (Bluetooth paired the device).`,
-    );
+    setError(`Found ${peer.name}. Enter their room code to connect (Bluetooth paired the device).`);
   };
 
   return (
@@ -171,8 +171,8 @@ export function MultiplayerLobby({ ante, onReadyToPlay, onBack }: Props) {
         <p className="text-[10px] uppercase tracking-[0.4em] text-[#7EC8D9]">Live table</p>
         <h2 className="mt-1 font-serif text-2xl text-[#f7e7b0]">Online · Nearby Bluetooth</h2>
         <p className="mt-2 text-xs text-[#e8dcc0]/65">
-          Host a table on the internet, or sit next to a friend — Bluetooth finds their device,
-          then the room code syncs the deal.
+          Host a table on the internet, or sit next to a friend — Bluetooth finds their device, then
+          the room code syncs the deal.
         </p>
       </div>
 
@@ -297,11 +297,7 @@ export function MultiplayerLobby({ ante, onReadyToPlay, onBack }: Props) {
             >
               {room.players.find((p) => p.id === playerId)?.ready ? "Unready" : "Ready up"}
             </Button>
-            <Button
-              variant="ghost"
-              className="text-[#e8dcc0]/55"
-              onClick={() => setRoom(null)}
-            >
+            <Button variant="ghost" className="text-[#e8dcc0]/55" onClick={() => setRoom(null)}>
               Leave lobby
             </Button>
           </div>

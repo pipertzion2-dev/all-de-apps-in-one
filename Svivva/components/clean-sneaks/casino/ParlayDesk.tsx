@@ -26,7 +26,10 @@ export function ParlayDesk({ credits, disabled, onPlaced, onSkip }: Props) {
   const [stake, setStake] = useState(Math.min(credits, Math.max(PARLAY_MIN_STAKE, 50)));
   const [error, setError] = useState<string | null>(null);
 
-  const odds = useMemo(() => potentialPayout(stake, selected) / Math.max(1, stake), [stake, selected]);
+  const odds = useMemo(
+    () => potentialPayout(stake, selected) / Math.max(1, stake),
+    [stake, selected],
+  );
   const payout = useMemo(() => potentialPayout(stake, selected), [stake, selected]);
 
   const toggle = (id: ParlayLegId) => {
@@ -84,7 +87,9 @@ export function ParlayDesk({ credits, disabled, onPlaced, onSkip }: Props) {
             >
               <div className="flex items-baseline justify-between gap-2">
                 <span className="text-sm font-medium">{leg.label}</span>
-                <span className="text-[11px] tabular-nums text-[#d4af37]">{leg.odds.toFixed(2)}×</span>
+                <span className="text-[11px] tabular-nums text-[#d4af37]">
+                  {leg.odds.toFixed(2)}×
+                </span>
               </div>
               <p className="mt-0.5 text-[11px] text-[#e8dcc0]/50">{leg.hint}</p>
             </button>

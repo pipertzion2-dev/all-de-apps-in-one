@@ -45,9 +45,7 @@ export function parseLocalRedeemCode(code: string): CreditPack | null {
   if (!match) return null;
   const dollars = Number(match[1]);
   const credits = Number(match[2]);
-  return (
-    CREDIT_PACKS.find((p) => p.cashAppDollars === dollars && p.credits === credits) ?? null
-  );
+  return CREDIT_PACKS.find((p) => p.cashAppDollars === dollars && p.credits === credits) ?? null;
 }
 
 export function formatPackPrice(pack: CreditPack): string {

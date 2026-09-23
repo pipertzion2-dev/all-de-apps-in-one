@@ -18,13 +18,7 @@ export type RoomPlayer = {
   lastSeenAt: number;
 };
 
-export type RoomPhase =
-  | "lobby"
-  | "parlay"
-  | "dealing"
-  | "playing"
-  | "results"
-  | "closed";
+export type RoomPhase = "lobby" | "parlay" | "dealing" | "playing" | "results" | "closed";
 
 export type StealBundleRoom = {
   code: string;
@@ -63,7 +57,11 @@ export function generateRoomCode(length = 6): string {
 }
 
 export function normalizeRoomCode(raw: string): string {
-  return raw.trim().toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8);
+  return raw
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "")
+    .slice(0, 8);
 }
 
 export function toPublicRoom(room: StealBundleRoom): RoomPublic {

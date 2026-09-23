@@ -14,9 +14,7 @@ export type PeerHandlers = {
   onClose?: () => void;
 };
 
-export async function createHostPeer(
-  handlers: PeerHandlers,
-): Promise<{
+export async function createHostPeer(handlers: PeerHandlers): Promise<{
   pc: RTCPeerConnection;
   channel: RTCDataChannel;
   createOffer: () => Promise<SignalPayload>;
