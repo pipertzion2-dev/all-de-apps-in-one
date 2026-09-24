@@ -52,13 +52,19 @@ export function HomepageGamePanel() {
           <CleanSneaksLogoCube className="h-full w-full" onActivate={enterGame} />
         </div>
 
-        <p className="mt-6 text-center text-[11px] uppercase tracking-[0.32em] text-white/50">
-          Swipe up for home · Drag cube to spin
+        <p
+          className="mt-6 max-w-sm text-center text-sm font-semibold leading-snug tracking-wide text-[#E8D9A8] sm:text-base"
+          data-testid="text-swipe-cube-twice-home"
+        >
+          Swipe the cube twice to go to the main homepage
+        </p>
+        <p className="mt-2 text-center text-[11px] uppercase tracking-[0.32em] text-white/45">
+          Drag cube to spin · Tap to play
         </p>
       </div>
 
       <HomepageScrollHint
-        label="Swipe up · home"
+        label="Swipe the cube twice to go to the main homepage"
         direction="down"
         prominent
         onActivate={() => scrollToHomepagePanel("nav-cube")}
