@@ -15,7 +15,11 @@ import {
   submitSitemapWithAccessToken,
   submitUrlsWithAccessToken,
 } from "@/lib/google-indexing";
-import { getGoogleOAuthAccessTokenForUser, ensureGscOAuthColumns } from "@/lib/google-gsc-oauth";
+import {
+  getGoogleOAuthAccessTokenForUser,
+  ensureGscOAuthColumns,
+  resolveGscPropertySiteUrl,
+} from "@/lib/google-gsc-oauth";
 import { submitIndexNowBatched } from "@/lib/indexing/indexnow-submit";
 import { getAllSiteUrlsForIndexing } from "@/lib/indexing/site-urls";
 import { getSitemapUrl, getSecuritySitemapUrl } from "@/lib/site-url";
@@ -207,15 +211,20 @@ export async function runAutomatableManualActions(opts?: {
   };
 
   if (gsc) {
+    let gscSite = gsc.site;
+    if (gsc.mode === "oauth" && gsc.accessToken) {
+      gscSite =
+        (await resolveGscPropertySiteUrl(gsc.accessToken, gsc.site)) || gsc.site;
+    }
     googleSitemap.attempted = true;
     const sm =
       gsc.mode === "oauth" && gsc.accessToken
-        ? await submitSitemapWithAccessToken(gsc.accessToken, gsc.site, sitemapUrl)
-        : await submitSitemapToGSC(gsc.sa!, gsc.site, sitemapUrl);
+        ? await submitSitemapWithAccessToken(gsc.accessToken, gscSite, sitemapUrl)
+        : await submitSitemapToGSC(gsc.sa!, gscSite, sitemapUrl);
     const smSecurity =
       gsc.mode === "oauth" && gsc.accessToken
-        ? await submitSitemapWithAccessToken(gsc.accessToken, gsc.site, securitySitemapUrl)
-        : await submitSitemapToGSC(gsc.sa!, gsc.site, securitySitemapUrl);
+        ? await submitSitemapWithAccessToken(gsc.accessToken, gscSite, securitySitemapUrl)
+        : await submitSitemapToGSC(gsc.sa!, gscSite, securitySitemapUrl);
     googleSitemap = {
       attempted: true,
       ok: sm.ok,

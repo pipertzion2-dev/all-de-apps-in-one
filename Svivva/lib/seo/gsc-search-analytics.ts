@@ -7,8 +7,7 @@ import { seedCredentials } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import {
   getGoogleOAuthAccessTokenForUser,
-  listGscSites,
-  matchGscSiteToCanonical,
+  resolveGscPropertySiteUrl,
 } from "@/lib/google-gsc-oauth";
 import {
   getGoogleServiceAccountAccessToken,
@@ -84,10 +83,7 @@ async function resolveGscSiteUrl(accessToken: string, userId: string): Promise<s
     .from(seedCredentials)
     .where(eq(seedCredentials.userId, userId))
     .limit(1);
-  if (row?.site?.trim()) return row.site.trim();
-
-  const sites = await listGscSites(accessToken);
-  return matchGscSiteToCanonical(sites, getSiteUrl());
+  return resolveGscPropertySiteUrl(accessToken, row?.site, getSiteUrl());
 }
 
 async function fetchSearchAnalytics(

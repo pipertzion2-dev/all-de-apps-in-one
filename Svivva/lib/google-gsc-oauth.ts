@@ -424,3 +424,24 @@ export function findMatchedGscSite(
   if (!matchedUrl) return null;
   return sites.find((s) => s.siteUrl === matchedUrl) ?? null;
 }
+
+/**
+ * Prefer the GSC property that matches this deployment (zzaizzai.com), not a stale
+ * saved URL (e.g. legacy svivva.com) — wrong property = zero Performance data in Orbit.
+ */
+export async function resolveGscPropertySiteUrl(
+  accessToken: string,
+  storedSiteUrl: string | null | undefined,
+  canonicalUrl?: string,
+): Promise<string | null> {
+  const canonical = canonicalUrl?.trim() || getSiteUrl();
+  try {
+    const sites = await listGscSites(accessToken);
+    const matched = matchGscSiteToCanonical(sites, canonical);
+    if (matched) return matched;
+  } catch {
+    /* fall through to stored */
+  }
+  const stored = storedSiteUrl?.trim();
+  return stored || null;
+}
