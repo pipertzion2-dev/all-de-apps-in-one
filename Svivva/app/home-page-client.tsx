@@ -604,14 +604,14 @@ export default function LandingPage() {
               </svg>
             </div>
           </div>
-          <div className="absolute top-4 left-4 right-4 z-20 flex items-start justify-between gap-2 pointer-events-none">
+          <div className="absolute top-4 left-3 right-3 z-20 flex items-start justify-between gap-2 pointer-events-none sm:left-4 sm:right-4">
             <OrbitAdminAccessButton
               data-testid="button-home-intro-admin-orbit"
-              className="pointer-events-auto border-[#5B8DA8]/50 bg-background/85 backdrop-blur-sm"
+              className="pointer-events-auto h-8 max-w-[46vw] shrink border-[#5B8DA8]/50 bg-background/85 px-2 text-[10px] backdrop-blur-sm sm:max-w-none sm:px-3 sm:text-xs"
             />
             <button
               type="button"
-              className="pointer-events-auto rounded-lg border border-border/60 bg-background/80 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground backdrop-blur-sm shrink-0"
+              className="pointer-events-auto shrink-0 rounded-lg border border-border/60 bg-background/80 px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground hover:text-foreground backdrop-blur-sm sm:px-3 sm:text-xs"
               onClick={() => {
                 skipIntroRef.current?.();
               }}
@@ -650,41 +650,52 @@ export default function LandingPage() {
           }
         >
           <nav
-            className="fixed top-0 left-0 right-0 z-[60] h-16 sm:h-20 border-b border-white/10 backdrop-blur-xl bg-background/80"
+            className="fixed top-0 left-0 right-0 z-[60] border-b border-white/10 backdrop-blur-xl bg-background/80 pt-[env(safe-area-inset-top)]"
             style={{ opacity: flipComplete ? 1 : 0, pointerEvents: flipComplete ? "auto" : "none" }}
+            data-testid="homepage-main-nav"
           >
-            <div className="max-w-7xl mx-auto px-3 sm:px-6 h-full flex items-center justify-between gap-2">
-              <div className="flex flex-col items-center gap-0.5 flex-shrink-0">
-                <ZzaiModeToggle size="sm" />
-                <span className="text-[9px] sm:text-[10px] font-bold tracking-[0.2em] text-foreground/90 leading-none">
+            <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-2 px-3 sm:h-16 sm:gap-3 sm:px-6">
+              <div className="flex min-w-0 shrink-0 items-center gap-2">
+                <ZzaiModeToggle size="xs" />
+                <Link
+                  href="/"
+                  className="min-w-0 truncate text-[10px] font-bold tracking-[0.18em] text-foreground/90 sm:text-xs sm:tracking-[0.2em]"
+                  data-testid="link-home-brand"
+                >
                   zzai zzai
-                </span>
+                </Link>
               </div>
 
-              <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+              <div className="flex min-w-0 items-center justify-end gap-1 sm:gap-2">
                 <Link
                   href="/play"
-                  className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-muted/50 transition-colors"
+                  className="flex h-8 items-center gap-1 rounded-md px-1.5 hover:bg-muted/50 transition-colors sm:px-2"
                   data-testid="link-svivva-play-mobile"
+                  aria-label="Play"
                 >
                   <span className="seeds-holo-text text-base leading-none">&#9835;</span>
-                  <span className="seeds-holo-text text-xs font-bold tracking-wide">Play</span>
+                  <span className="seeds-holo-text hidden text-xs font-bold tracking-wide min-[420px]:inline">
+                    Play
+                  </span>
                 </Link>
                 <Link
                   href="/events"
-                  className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-muted/50 transition-colors"
+                  className="flex h-8 items-center gap-1 rounded-md px-1.5 hover:bg-muted/50 transition-colors sm:px-2"
                   data-testid="link-nav-events"
                   title="ZZAI Show events"
+                  aria-label="Events"
                 >
-                  <Mic2 className="w-3.5 h-3.5 text-[#5B8DA8]" />
-                  <span className="text-xs font-bold tracking-wide text-foreground/90">Events</span>
+                  <Mic2 className="h-3.5 w-3.5 shrink-0 text-[#5B8DA8]" />
+                  <span className="hidden text-xs font-bold tracking-wide text-foreground/90 min-[420px]:inline">
+                    Events
+                  </span>
                 </Link>
                 <OrbitAdminAccessButton data-testid="button-home-nav-admin-orbit" />
-                <Link href="/dashboard">
+                <Link href="/dashboard" className="hidden sm:block">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="px-2.5 text-xs border-[#5B8DA8]/50"
+                    className="h-8 px-2.5 text-xs border-[#5B8DA8]/50"
                     data-testid="button-nav-dashboard"
                   >
                     Dashboard
@@ -694,7 +705,7 @@ export default function LandingPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="px-2 text-xs"
+                    className="h-8 px-2 text-xs"
                     data-testid="button-signin"
                   >
                     Sign In
@@ -703,7 +714,7 @@ export default function LandingPage() {
                 <a href="/signup">
                   <Button
                     size="sm"
-                    className="bg-[#5B8DA8] text-xs px-2.5 sm:px-3 whitespace-nowrap"
+                    className="h-8 bg-[#5B8DA8] px-2.5 text-xs whitespace-nowrap sm:px-3"
                     data-testid="button-start-free"
                   >
                     Start Free
