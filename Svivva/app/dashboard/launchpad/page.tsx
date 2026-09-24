@@ -58,6 +58,7 @@ import { INDEX22_PHASE_COUNT, SEO_INDEX_PHASES } from "@/lib/orbit/seo-index-pha
 import { buildIndex22OrbitSteps } from "@/lib/orbit/seo-index-steps-ui";
 import { OrbitStripeSetup } from "@/components/orbit-stripe-setup";
 import { OrbitAdsenseSetup } from "@/components/orbit-adsense-setup";
+import { OrbitTimingControl } from "@/components/orbit-timing-control";
 import { OrbitInterimPaymentsSetup } from "@/components/orbit-interim-payments-setup";
 import { OrbitLemonSqueezySetup } from "@/components/orbit-lemon-squeezy-setup";
 import { OrbitEasyPeasySetup } from "@/components/orbit-easypeasy-setup";
@@ -2146,11 +2147,11 @@ function OrbitTrafficAutomation({
         ) : (
           <Rocket className="w-4 h-4" />
         )}
-        Start traffic now — automate everything possible
+        Start traffic now — automate everything possible (legacy)
       </button>
       <p className="text-[10px] text-pink-950/90 dark:text-pink-50/90 leading-snug font-medium">
-        Publishes <strong>blog posts, SEO pages, comparisons, 300 tool pages</strong> on{" "}
-        <strong>zzaizzai.com</strong>, then IndexNow + Bing + Google API. Auto-checks this list.
+        <strong>Use Timing above instead</strong> for indexing and GSC. This button still publishes
+        content + notifies search engines in one shot — it can overwhelm Google if misused.
       </p>
       <button
         type="button"
@@ -3698,7 +3699,9 @@ export default function LaunchpadPage() {
 
       {/* ── Content ── */}
       <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-4 pb-6 space-y-4 relative z-10">
-        {/* AdSense FIRST — gold box above everything else so it cannot be missed */}
+        <OrbitTimingControl />
+
+        {/* AdSense — after Timing plan (paid ads are step 7, not a bulk run) */}
         <div
           id="orbit-adsense-setup"
           className="rounded-2xl border-4 border-[#d4af37] bg-gradient-to-br from-[#d4af37]/25 via-card to-[#1a1008]/40 p-3 sm:p-5 space-y-3 shadow-[0_0_24px_rgba(212,175,55,0.35)] ring-2 ring-[#d4af37]/30"

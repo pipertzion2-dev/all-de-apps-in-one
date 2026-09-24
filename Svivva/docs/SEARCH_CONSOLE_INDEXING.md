@@ -16,6 +16,10 @@ Google discovers most pages via **one sitemap submission** + normal crawl. The I
 
 Env override: `INDEXNOW_MAX_URLS_PER_RUN=200` (max 5000).
 
+## Orbit Timing (recommended)
+
+On **Launchpad / Orbit**, use the gold **Timing** swirl button at the top. It runs **one step at a time** with enforced waits (24h–7d) between indexing pushes. Do not use **Start traffic now** or **Run Everything** in the same week unless you intentionally reset Timing.
+
 ## What you should do in Search Console
 
 1. **Submit `sitemap.xml` once** (Pages → Sitemaps). Do not re-submit daily unless the sitemap structure changed.
