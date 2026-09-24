@@ -51,6 +51,19 @@ type Props = {
   onConfiguredChange?: (ready: boolean) => void;
 };
 
+function autoAdsReadyFromStatus(status: StatusPayload | null): boolean {
+  if (!status) return false;
+  if (status.effective.adsenseClient) return true;
+  if (status.adsense?.clientId) return true;
+  return Boolean(SITE_ADSENSE_CLIENT);
+}
+
+function inGameSlotsReadyFromStatus(status: StatusPayload | null): boolean {
+  if (!status) return false;
+  const e = status.effective;
+  return Boolean(e.adsenseSlotBanner || e.adsenseSlotInterstitial || e.adsenseSlotRewarded);
+}
+
 /**
  * Orbit admin — paste Google AdSense publisher id + slots to earn from Klean Sneaks ads.
  * Saves to Platform Secrets (DB) and hydrates at runtime — no Vercel redeploy required for client id.
@@ -86,7 +99,7 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
       if (next.adsense?.slotBanner) setSlotBanner(next.adsense.slotBanner);
       if (next.adsense?.slotInterstitial) setSlotInterstitial(next.adsense.slotInterstitial);
       if (next.adsense?.slotRewarded) setSlotRewarded(next.adsense.slotRewarded);
-      onConfiguredChange?.(Boolean(next.effective.adsenseClient));
+      onConfiguredChange?.(autoAdsReadyFromStatus(next));
     } catch (e) {
       setLoadError(e instanceof Error ? e.message : String(e));
     }
@@ -136,7 +149,8 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
     }
   };
 
-  const ready = Boolean(status?.effective.adsenseClient);
+  const autoAdsReady = autoAdsReadyFromStatus(status);
+  const inGameReady = inGameSlotsReadyFromStatus(status);
 
   return (
     <div
@@ -158,9 +172,9 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
           </div>
         </div>
         <div className="flex items-center gap-2 text-[11px]">
-          <Dot ok={ready} />
-          <span className={ready ? "text-emerald-600 font-semibold" : "text-muted-foreground"}>
-            {ready ? "Live" : "Not connected"}
+          <Dot ok={autoAdsReady} />
+          <span className={autoAdsReady ? "text-emerald-600 font-semibold" : "text-muted-foreground"}>
+            {autoAdsReady ? "Site ads live" : "Not connected"}
           </span>
           <Button
             type="button"
@@ -179,6 +193,41 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
           {loadError}
         </p>
       )}
+
+      <div
+        className="grid gap-2 sm:grid-cols-3 text-[11px]"
+        data-testid="orbit-adsense-dual-status"
+      >
+        <div className="rounded-lg border border-border bg-muted/30 px-3 py-2">
+          <p className="font-semibold text-foreground flex items-center gap-1.5">
+            <Dot ok={autoAdsReady} /> Site-wide Auto ads
+          </p>
+          <p className="text-muted-foreground mt-0.5 leading-snug">
+            {autoAdsReady
+              ? "Publisher script + Auto ads in AdSense = placements on blog, tools, and game page."
+              : "Add publisher client id first."}
+          </p>
+        </div>
+        <div className="rounded-lg border border-border bg-muted/30 px-3 py-2">
+          <p className="font-semibold text-foreground flex items-center gap-1.5">
+            <Dot ok={inGameReady} /> Klean Sneaks units
+          </p>
+          <p className="text-muted-foreground mt-0.5 leading-snug">
+            {inGameReady
+              ? "Banner / interstitial / rewarded slots saved — reload the game to test."
+              : "Paste at least one display slot below (Auto ads does not replace in-game units)."}
+          </p>
+        </div>
+        <div className="rounded-lg border border-border bg-muted/30 px-3 py-2">
+          <p className="font-semibold text-foreground flex items-center gap-1.5">
+            <Dot ok={autoAdsReady} /> Privacy &amp; messaging
+          </p>
+          <p className="text-muted-foreground mt-0.5 leading-snug">
+            Consent Mode is on-site. Publish <strong className="text-foreground">Three-Choice</strong>{" "}
+            in AdSense for EEA/UK (see gold box).
+          </p>
+        </div>
+      </div>
 
       <div
         className="rounded-xl border-2 border-[#d4af37] bg-[#d4af37]/15 p-3 sm:p-4 space-y-3"
@@ -257,7 +306,17 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
               target="_blank"
               rel="noopener noreferrer"
             >
-              Sites · Verify zzaizzai.com
+              Sites · Auto ads
+              <ExternalLink className="h-3 w-3 ml-1" />
+            </a>
+          </Button>
+          <Button asChild variant="outline" size="sm" data-testid="orbit-open-adsense-adunits">
+            <a
+              href="https://adsense.google.com/adsense/new/adunits"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Create display units (slots)
               <ExternalLink className="h-3 w-3 ml-1" />
             </a>
           </Button>
@@ -287,7 +346,11 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
           Select <strong>Three-Choice Message</strong> → Create / Publish for zzaizzai.com
         </li>
         <li>
-          Sites → turn on <strong>Auto ads</strong> · optional: paste ad unit slots below
+          Sites → <strong>Auto ads ON</strong> (site-wide) — you did this ✓
+        </li>
+        <li>
+          <strong>By ad unit</strong> → create Display units → paste numeric slot ids below for
+          Klean Sneaks
         </li>
       </ol>
 
@@ -395,10 +458,19 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
         </p>
       )}
 
-      {ready && status?.adsense?.clientId && (
+      {autoAdsReady && (
         <p className="text-[11px] text-emerald-700 dark:text-emerald-400">
           Active publisher:{" "}
-          <code className="font-mono font-semibold">{status.adsense.clientId}</code>. Earnings
+          <code className="font-mono font-semibold">
+            {status?.adsense?.clientId || SITE_ADSENSE_CLIENT}
+          </code>
+          {!inGameReady ? (
+            <>
+              {" "}
+              — Auto ads only until you save slot ids for in-game units.
+            </>
+          ) : null}
+          . Earnings
           appear in your{" "}
           <a
             href="https://www.google.com/adsense/"
