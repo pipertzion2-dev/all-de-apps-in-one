@@ -17,6 +17,24 @@ export async function GET() {
 
     const [dbUser] = await db.select().from(users).where(eq(users.id, user.id));
 
+    if (
+      dbUser?.proAccessUntil &&
+      dbUser.proAccessUntil instanceof Date &&
+      dbUser.proAccessUntil.getTime() > Date.now()
+    ) {
+      return NextResponse.json({
+        subscription: {
+          id: `grant:${dbUser.proAccessSource || "pro_access"}`,
+          status: "active",
+          provider: "grant",
+          currentPeriodEnd: dbUser.proAccessUntil.toISOString(),
+        },
+        plan: "pro",
+        source: dbUser.proAccessSource || "pro_access_until",
+        proAccessUntil: dbUser.proAccessUntil.toISOString(),
+      });
+    }
+
     if (dbUser?.lemonSqueezySubscriptionId) {
       return NextResponse.json({
         subscription: {

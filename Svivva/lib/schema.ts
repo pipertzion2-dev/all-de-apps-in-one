@@ -26,9 +26,27 @@ export const users = pgTable("users", {
   lemonSqueezyCustomerId: text("lemon_squeezy_customer_id"),
   lemonSqueezySubscriptionId: text("lemon_squeezy_subscription_id"),
   paymentProvider: text("payment_provider"),
+  /** Complimentary Pro from Klean Sneaks free-year prize (and future grants). */
+  proAccessUntil: timestamp("pro_access_until"),
+  proAccessSource: text("pro_access_source"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
+
+/** Pending / claimed “win 1 year free Pro” prizes from Klean Sneaks. */
+export const kleanYearSubPrizes = pgTable("klean_year_sub_prizes", {
+  id: text("id").primaryKey(),
+  entryId: text("entry_id").notNull().unique(),
+  deviceId: text("device_id").notNull(),
+  userId: text("user_id"),
+  status: text("status").notNull().default("pending"),
+  claimToken: text("claim_token").notNull().unique(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  claimedAt: timestamp("claimed_at"),
+  expiresAt: timestamp("expires_at").notNull(),
+});
+
+export type KleanYearSubPrize = typeof kleanYearSubPrizes.$inferSelect;
 
 // ============================================================================
 // SESSIONS (for token-based auth when cookies are blocked)

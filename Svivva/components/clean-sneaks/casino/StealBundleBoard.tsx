@@ -26,6 +26,7 @@ import {
 } from "@/lib/clean-sneaks/casino";
 import { PlayingCardView } from "./PlayingCardView";
 import { StealBundleHowToPlay } from "./StealBundleHowToPlay";
+import { FreeYearPrizeModal } from "@/components/clean-sneaks/prizes/FreeYearPrizeModal";
 
 export type HandCompleteStats = {
   humanWonSolo: boolean;
@@ -77,6 +78,8 @@ export function StealBundleBoard({
     clearedTable: false,
   });
   const handCompleteFiredRef = useRef(false);
+  const [prizeEntryId, setPrizeEntryId] = useState<string | null>(null);
+  const [prizeSoloWin, setPrizeSoloWin] = useState(false);
 
   const deal = useCallback(() => {
     const paid = Math.min(ante, credits);
@@ -150,13 +153,22 @@ export function StealBundleBoard({
     if (!handCompleteFiredRef.current) {
       handCompleteFiredRef.current = true;
       const human = state.players.find((p) => p.id === "p1");
+      const solo = humanWon && !tie;
       onHandComplete?.({
-        humanWonSolo: humanWon && !tie,
+        humanWonSolo: solo,
         steals: handStatsRef.current.steals,
         bundleSize: human?.bundle.length ?? 0,
         dropsToTable: handStatsRef.current.dropsToTable,
         clearedTable: handStatsRef.current.clearedTable,
       });
+      if (solo) {
+        const entry =
+          typeof crypto !== "undefined" && "randomUUID" in crypto
+            ? `sb-${crypto.randomUUID()}`
+            : `sb-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+        setPrizeEntryId(entry);
+        setPrizeSoloWin(true);
+      }
     }
   }, [state, anteLocked, credits, onCreditsChange, onHandComplete]);
 
@@ -326,6 +338,14 @@ export function StealBundleBoard({
         <p className="mt-2 text-sm text-[#ffd76a]" data-testid="results-credits">
           Chip stack: {credits.toLocaleString()} credits
         </p>
+        {winners.includes("p1") && winners.length === 1 && (
+          <p
+            className="mt-3 max-w-sm text-[11px] leading-relaxed text-[#e8dcc0]/70"
+            data-testid="year-sub-odds-teaser"
+          >
+            Solo wins roll for a free year of ZZAI Pro (~5% chance). Winners sign in to claim.
+          </p>
+        )}
         <div className="mt-8 flex flex-wrap justify-center gap-2">
           <Button
             className="bg-[#d4af37] text-[#1a1008]"
@@ -345,6 +365,7 @@ export function StealBundleBoard({
             New Walk
           </Button>
         </div>
+        <FreeYearPrizeModal entryId={prizeEntryId} humanWonSolo={prizeSoloWin} />
       </div>
     );
   }
