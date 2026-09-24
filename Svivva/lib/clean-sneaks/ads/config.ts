@@ -93,11 +93,23 @@ export function adsenseConfigured(): boolean {
 }
 
 /**
- * True when a Display unit slot is available for this placement (or any shared slot).
+ * True when a Display unit slot is available for this placement.
+ * Interstitial / rewarded need their own unit id — copying the banner slot produces
+ * blank white ads. Banner may fall back to any configured display slot.
  * Publisher id alone is enough for Auto ads; unit placements need a slot id.
  */
 export function adsenseUnitReady(placement: AdPlacementId): boolean {
-  return Boolean(adsenseClientId() && (adsenseSlot(placement) || adsenseAnySlot()));
+  if (!adsenseClientId()) return false;
+  const own = adsenseSlot(placement);
+  if (!own) {
+    return placement === "menu_banner" ? Boolean(adsenseAnySlot()) : false;
+  }
+  // Same Display unit pasted into interstitial/rewarded → Google often serves a blank.
+  if (placement !== "menu_banner") {
+    const banner = adsenseSlot("menu_banner");
+    if (banner && banner === own) return false;
+  }
+  return true;
 }
 
 /**

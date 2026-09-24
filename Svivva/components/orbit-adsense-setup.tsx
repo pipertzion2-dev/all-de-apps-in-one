@@ -320,8 +320,9 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
           </Button>
         </div>
         <p className="text-[10px] text-muted-foreground leading-relaxed">
-          Blank US ads are usually Google inventory (no fill), not this CMP panel. Prefer separate
-          Display unit IDs for banner / interstitial / rewarded when you create them in AdSense.
+          Blank ads mean Google returned no creative (or the same Display unit was pasted into
+          banner + interstitial + rewarded). Create <strong>three separate</strong> Display units in
+          AdSense and paste distinct slot IDs below — never reuse one ID.
         </p>
       </div>
 
@@ -343,10 +344,23 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
           Sites → <strong>Auto ads ON</strong> (site-wide) — you did this ✓
         </li>
         <li>
-          Optional: create separate Display units in AdSense and paste slot ids below for Klean
-          Sneaks
+          Optional: create <strong>three separate</strong> Display units in AdSense (banner,
+          interstitial, rewarded) and paste distinct slot ids below — never the same ID three times
         </li>
       </ol>
+
+      {(slotBanner &&
+        ((slotInterstitial && slotBanner.trim() === slotInterstitial.trim()) ||
+          (slotRewarded && slotBanner.trim() === slotRewarded.trim()))) ||
+      (slotInterstitial && slotRewarded && slotInterstitial.trim() === slotRewarded.trim()) ? (
+        <p
+          className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-[11px] text-amber-900 dark:text-amber-100"
+          data-testid="adsense-duplicate-slot-warning"
+        >
+          These slot IDs match each other. Reusing one Display unit causes blank white ads — create
+          unique units in AdSense Ad units, then paste each ID here.
+        </p>
+      ) : null}
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="sm:col-span-2 space-y-1.5">
