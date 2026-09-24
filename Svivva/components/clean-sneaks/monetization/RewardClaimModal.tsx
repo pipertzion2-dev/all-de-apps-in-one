@@ -19,6 +19,7 @@ import {
   type RewardedOffer,
 } from "@/lib/clean-sneaks/monetization";
 import { AdSenseSlot } from "@/components/clean-sneaks/ads/AdSenseSlot";
+import { HouseAdCreative } from "@/components/clean-sneaks/ads/HouseAdCreative";
 
 type Props = {
   open: boolean;
@@ -248,19 +249,11 @@ export function RewardClaimModal({
               Bonus if completed: {offer ? describeLines(offer.previewLines) : ""}
             </p>
             {showHouse ? (
-              <div
-                className="rounded-lg border border-white/10 p-4"
-                style={{ borderColor: `${creative.accent}55` }}
+              <HouseAdCreative
+                creative={creative}
+                variant="featured"
                 data-testid="reward-house-ad"
-              >
-                <p className="text-[9px] uppercase tracking-[0.28em] text-white/40">
-                  Advertisement
-                </p>
-                <p className="mt-2 text-sm font-medium" style={{ color: creative.accent }}>
-                  {creative.headline}
-                </p>
-                <p className="mt-1 text-xs text-white/55">{creative.body}</p>
-              </div>
+              />
             ) : (
               <>
                 {adsenseFilled !== false && (

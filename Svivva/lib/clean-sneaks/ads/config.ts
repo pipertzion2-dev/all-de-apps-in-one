@@ -144,6 +144,7 @@ export const HOUSE_CREATIVES: readonly HouseCreative[] = [
     cta: "Open hub",
     href: "/ai-tools-hub",
     accent: "#5B8DA8",
+    imageUrl: "/zzai-logo-signal.png",
   },
   {
     id: "clutety",
@@ -152,6 +153,7 @@ export const HOUSE_CREATIVES: readonly HouseCreative[] = [
     cta: "Try Clutety",
     href: "/clutety",
     accent: "#7EC8D9",
+    imageUrl: "/clutety-logo.png",
   },
   {
     id: "baloon8",
@@ -160,5 +162,6 @@ export const HOUSE_CREATIVES: readonly HouseCreative[] = [
     cta: "See kicks",
     href: "/clean-sneaks",
     accent: "#D94F9C",
+    imageUrl: "/assets/clean-sneaks/baloon8-hero-reference.jpg",
   },
 ] as const;

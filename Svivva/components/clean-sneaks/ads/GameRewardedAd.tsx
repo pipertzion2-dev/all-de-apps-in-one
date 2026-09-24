@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +14,7 @@ import {
 } from "@/lib/clean-sneaks/ads";
 import { addSessionCredits } from "@/lib/clean-sneaks/casino";
 import { AdSenseSlot } from "./AdSenseSlot";
+import { HouseAdCreative } from "./HouseAdCreative";
 
 type Props = {
   open: boolean;
@@ -130,15 +130,11 @@ export function GameRewardedAd({ open, onClose, onRewarded }: Props) {
                 />
               )
             ) : (
-              <div
-                className="rounded-lg border border-white/10 p-4"
-                style={{ borderColor: `${creative.accent}55` }}
-              >
-                <p className="text-sm font-medium" style={{ color: creative.accent }}>
-                  {creative.headline}
-                </p>
-                <p className="mt-1 text-xs text-white/55">{creative.body}</p>
-              </div>
+              <HouseAdCreative
+                creative={creative}
+                variant="featured"
+                data-testid="rewarded-house-ad"
+              />
             )}
             <Button
               className="w-full bg-[#d4af37] text-[#1a1008] hover:bg-[#e0c15a]"
@@ -162,22 +158,18 @@ export function GameRewardedAd({ open, onClose, onRewarded }: Props) {
                 />
               )
             ) : (
-              <Link
-                href={creative.href}
-                className="block rounded-lg border border-white/10 p-4 transition hover:border-white/25"
-                onClick={() =>
+              <HouseAdCreative
+                creative={creative}
+                variant="featured"
+                onCtaClick={() =>
                   recordAdEvent({
                     placement: "rewarded_credits",
                     kind: "click",
                     network: "house",
                   })
                 }
-              >
-                <p className="text-sm font-medium" style={{ color: creative.accent }}>
-                  {creative.headline}
-                </p>
-                <p className="mt-1 text-xs text-white/55">{creative.body}</p>
-              </Link>
+                data-testid="rewarded-house-ad-watching"
+              />
             )}
             <div className="h-2 overflow-hidden rounded-full bg-white/10">
               <div
