@@ -59,7 +59,8 @@ describe("clean-sneaks advertising", () => {
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_CLIENT", "ca-pub-1234567890123456");
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT_INTERSTITIAL", "9876543210");
     expect(resolveAdNetwork("run_interstitial")).toBe("house");
-    expect(resolveAdNetwork("menu_banner")).toBe("house");
+    // Banner may use any configured display slot via adsenseAnySlot.
+    expect(resolveAdNetwork("menu_banner")).toBe("adsense");
   });
 
   it("refuses interstitial AdSense when it reuses the banner slot id", () => {
