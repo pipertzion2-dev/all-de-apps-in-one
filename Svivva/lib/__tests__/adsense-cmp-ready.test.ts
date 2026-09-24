@@ -24,7 +24,7 @@ describe("AdSense Google CMP readiness", () => {
     expect(consentIdx).toBeLessThan(adsenseIdx);
   });
 
-  it("Orbit links to AdSense Privacy & messaging for European regulations CMP", () => {
+  it("Orbit links to AdSense Privacy & messaging without a fake Fix error banner", () => {
     const ui = readFileSync(resolve(__dirname, "../../components/orbit-adsense-setup.tsx"), "utf8");
     expect(ui).toContain("privacymessaging");
     expect(ui).toContain("European regulations");
@@ -35,5 +35,9 @@ describe("AdSense Google CMP readiness", () => {
     expect(ui).toContain("https://zzaizzai.com/privacy");
     expect(ui).toContain("https://zzaizzai.com/zzai-logo-adsense.png");
     expect(ui).toContain("orbit-adsense-fix-urls");
+    expect(ui).not.toContain("AdSense “Fix” error");
+    expect(ui).not.toContain('AdSense "Fix" error');
+    expect(ui).not.toContain("border-red-500");
+    expect(ui).toContain("no site error");
   });
 });

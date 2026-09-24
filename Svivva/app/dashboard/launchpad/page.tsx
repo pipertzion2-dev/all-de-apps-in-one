@@ -3706,21 +3706,17 @@ export default function LaunchpadPage() {
         >
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div className="min-w-0 space-y-1">
-              <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[#d4af37]">
-                Next step · Google AdSense CMP
+              <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-emerald-600">
+                AdSense · site ready
               </p>
               <h2 className="text-base sm:text-lg font-black text-foreground flex items-center gap-2">
                 <DollarSign className="w-5 h-5 text-[#d4af37] shrink-0" />
-                AdSense — European regulations → Manage
+                Publisher live — CMP is not a site error
               </h2>
               <p className="text-xs sm:text-sm text-muted-foreground max-w-xl">
-                Publisher <code className="text-[#d4af37]">ca-pub-3958850022852446</code> is already
-                on the site. In AdSense open{" "}
-                <strong className="text-foreground">
-                  Privacy &amp; messaging → European regulations → Manage
-                </strong>
-                , then enable <strong className="text-foreground">Do not consent</strong> under User
-                choices (there is no menu labeled “Three-Choice”).
+                Publisher <code className="text-[#d4af37]">ca-pub-3958850022852446</code> is on the
+                site. European regulations + Do not consent are configured in Google AdSense. The
+                old red “Fix” box was instructional only — hard-refresh Orbit after this deploy.
               </p>
             </div>
             <Button
