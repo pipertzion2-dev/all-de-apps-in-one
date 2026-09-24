@@ -33,7 +33,7 @@ type Props = {
 /**
  * JOB/MISSION style dual CTA:
  * [CLAIM base] always available
- * [WATCH AD — CLAIM bonus] opt-in; grants only after completion.
+ * [WATCH AD — CLAIM bonus] opt-in; grants only after a real filled ad completes.
  */
 export function RewardClaimModal({
   open,
@@ -48,6 +48,8 @@ export function RewardClaimModal({
   const [progress, setProgress] = useState(0);
   const [done, setDone] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  /** null = waiting; true = Google filled; false = blank / unfilled */
+  const [adsenseFilled, setAdsenseFilled] = useState<boolean | null>(null);
   const network = resolveAdNetwork("rewarded_credits");
   const creative = useMemo(() => pickHouseCreative(Date.now() + 3), [open]);
 
@@ -57,13 +59,29 @@ export function RewardClaimModal({
       setProgress(0);
       setDone(false);
       setMessage(null);
+      setAdsenseFilled(null);
     } else if (offer) {
       trackMonetization("rewarded_ad_offered", { context: offer.context, offerId: offer.offerId });
     }
   }, [open, offer]);
 
+  // Blank AdSense → abort watch (never leave a white box or grant bonus for nothing).
+  useEffect(() => {
+    if (!watching || network !== "adsense") return;
+    if (adsenseFilled !== false) return;
+    setWatching(false);
+    setProgress(0);
+    setDone(false);
+    setAdsenseFilled(null);
+    setMessage("Ad didn’t load — claim your normal reward.");
+    trackMonetization("rewarded_ad_failed", { reason: "adsense_unfilled" });
+  }, [watching, network, adsenseFilled]);
+
   useEffect(() => {
     if (!watching || done) return;
+    // AdSense: only run the watch timer after a real fill (no bonus for blank white).
+    if (network === "adsense" && adsenseFilled !== true) return;
+
     const started = Date.now();
     const needMs = network === "adsense" ? 5500 : 3500;
     trackMonetization("rewarded_ad_started", { context: offer?.context || "unknown" });
@@ -76,7 +94,7 @@ export function RewardClaimModal({
       }
     }, 80);
     return () => window.clearInterval(tick);
-  }, [watching, done, network, offer?.context]);
+  }, [watching, done, network, adsenseFilled, offer?.context]);
 
   const claimBase = useCallback(() => {
     if (!offer && !baseOnlyClaimId) {
@@ -121,6 +139,9 @@ export function RewardClaimModal({
       setMessage("Ad bonus cooling down — claim your normal reward.");
       return;
     }
+    setAdsenseFilled(null);
+    setProgress(0);
+    setDone(false);
     setWatching(true);
     recordAdEvent({
       placement: "rewarded_credits",
@@ -131,6 +152,10 @@ export function RewardClaimModal({
 
   const claimAd = () => {
     if (!offer || !done) return;
+    if (network === "adsense" && adsenseFilled !== true) {
+      setMessage("Ad didn’t load — claim your normal reward.");
+      return;
+    }
     const result = claimAdBonus({ offer, token: offer.token, adCompleted: true });
     if (!result.ok) {
       setMessage(result.reason);
@@ -156,6 +181,8 @@ export function RewardClaimModal({
 
   const baseText = offer?.baseLabel || "CLAIM";
   const adText = offer?.adLabel || "WATCH AD";
+  const showAdsenseChrome = network === "adsense" && adsenseFilled === true;
+  const waitingForFill = network === "adsense" && watching && adsenseFilled !== true;
 
   return (
     <div
@@ -203,7 +230,24 @@ export function RewardClaimModal({
               Bonus if completed: {offer ? describeLines(offer.previewLines) : ""}
             </p>
             {network === "adsense" ? (
-              <AdSenseSlot placement="rewarded_credits" className="min-h-[120px] w-full" />
+              <>
+                {/* Probe loads off-screen until filled; never reserve a white box here. */}
+                {adsenseFilled !== false && (
+                  <AdSenseSlot
+                    placement="rewarded_credits"
+                    className={showAdsenseChrome ? "min-h-[120px] w-full" : undefined}
+                    onFillChange={setAdsenseFilled}
+                  />
+                )}
+                {waitingForFill && (
+                  <p
+                    className="text-center text-xs text-[#e8dcc0]/50"
+                    data-testid="reward-ad-loading"
+                  >
+                    Loading ad…
+                  </p>
+                )}
+              </>
             ) : (
               <div
                 className="rounded-lg border border-white/10 p-4"
@@ -223,11 +267,11 @@ export function RewardClaimModal({
             </div>
             <Button
               className="w-full bg-[#d4af37] text-[#1a1008]"
-              disabled={!done}
+              disabled={!done || (network === "adsense" && adsenseFilled !== true)}
               onClick={claimAd}
               data-testid="button-claim-ad-bonus"
             >
-              {done ? "Claim bonus" : "Watching…"}
+              {done ? "Claim bonus" : waitingForFill ? "Waiting for ad…" : "Watching…"}
             </Button>
             <Button
               variant="ghost"
@@ -236,6 +280,7 @@ export function RewardClaimModal({
                 setWatching(false);
                 setProgress(0);
                 setDone(false);
+                setAdsenseFilled(null);
                 trackMonetization("rewarded_ad_failed", { reason: "closed_early" });
               }}
             >
