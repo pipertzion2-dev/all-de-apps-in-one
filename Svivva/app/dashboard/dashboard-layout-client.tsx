@@ -496,17 +496,14 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
       <div className="flex h-screen w-full bg-background">
         <Sidebar>
           <SidebarHeader className="p-4">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0">
               <ZzaiModeToggle size="sm" />
-              <Link href="/" className="flex items-center gap-2 min-w-0">
-                <Image
-                  src={zzaiLogo}
-                  alt="zzai zzai"
-                  width={36}
-                  height={36}
-                  className="h-9 w-9 object-contain"
-                />
-                <span className="text-xs font-bold tracking-[0.2em] truncate">zzai zzai</span>
+              <Link
+                href="/"
+                className="min-w-0 text-xs font-bold tracking-[0.2em] truncate hover:text-foreground/90"
+                data-testid="link-sidebar-brand"
+              >
+                zzai zzai
               </Link>
             </div>
           </SidebarHeader>
