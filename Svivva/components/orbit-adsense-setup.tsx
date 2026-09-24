@@ -225,46 +225,40 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
             <Dot ok={autoAdsReady} /> Privacy &amp; messaging
           </p>
           <p className="text-muted-foreground mt-0.5 leading-snug">
-            Consent Mode is on-site. In AdSense open{" "}
-            <strong className="text-foreground">European regulations → Manage</strong>, then turn{" "}
-            <strong className="text-foreground">Do not consent</strong> On under User choices.
+            Consent Mode is on-site. European regulations message for zzaizzai.com is managed in
+            AdSense (EEA/UK/CH only — not shown on US phones).
           </p>
         </div>
       </div>
 
       <div
-        className="rounded-xl border-2 border-[#d4af37] bg-[#d4af37]/15 p-3 sm:p-4 space-y-3"
+        className="rounded-xl border border-emerald-500/35 bg-emerald-500/10 p-3 sm:p-4 space-y-3"
         data-testid="orbit-adsense-cmp-cta"
       >
-        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#b8860b]">
-          Do this now · Google AdSense (1 click)
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
+          <Check className="h-3.5 w-3.5" />
+          AdSense CMP · no site error
         </p>
         <p className="text-sm font-bold text-foreground leading-snug">
-          There is no menu item named “Three-Choice.” On the screen you have open, tap{" "}
-          <span className="text-[#b8860b]">European regulations → Manage</span>. That message is
-          your GDPR consent banner. Under <span className="text-[#b8860b]">User choices</span>, turn{" "}
-          <span className="text-[#b8860b]">Do not consent</span> On so visitors get Consent / Do not
-          consent / Manage options.
+          Publisher script, ads.txt, and Consent Mode are live. Your European regulations message
+          with <span className="text-emerald-700 dark:text-emerald-400">Do not consent</span> On is
+          configured in Google AdSense — this panel is not a Fix failure.
         </p>
         <ul className="text-[11px] text-foreground/80 space-y-1">
           <li>✓ Publisher script on zzaizzai.com ({SITE_ADSENSE_CLIENT})</li>
           <li>✓ ads.txt + Consent Mode ready</li>
-          <li>
-            → You already show <strong>1 active European regulations</strong> — use{" "}
-            <strong>Manage</strong> (not Create). The consent popup only appears for EEA/UK/CH
-            visitors, not on a US phone.
-          </li>
+          <li>✓ EU consent banner only shows for EEA/UK/CH visitors (0 US views is normal)</li>
         </ul>
-        <div
-          className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2.5 space-y-2"
+        <details
+          className="rounded-lg border border-border/60 bg-background/50 px-3 py-2 text-[11px]"
           data-testid="orbit-adsense-fix-urls"
         >
-          <p className="text-[11px] font-bold text-red-700 dark:text-red-300">
-            If AdSense shows a “Fix” error on that message — paste these:
-          </p>
-          <div className="space-y-1.5 text-[11px]">
+          <summary className="cursor-pointer font-semibold text-foreground">
+            If Google ever asks for privacy / logo URLs (optional)
+          </summary>
+          <div className="mt-2 space-y-1.5 text-muted-foreground">
             <p>
-              <span className="text-muted-foreground">Privacy policy URL: </span>
+              Privacy:{" "}
               <a
                 href="https://zzaizzai.com/privacy"
                 target="_blank"
@@ -275,7 +269,7 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
               </a>
             </p>
             <p>
-              <span className="text-muted-foreground">Logo URL: </span>
+              Logo:{" "}
               <a
                 href="https://zzaizzai.com/zzai-logo-adsense.png"
                 target="_blank"
@@ -284,22 +278,15 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
               >
                 https://zzaizzai.com/zzai-logo-adsense.png
               </a>
-              <span className="text-muted-foreground">
-                {" "}
-                (256×256, small file — AdSense accepts this)
-              </span>
-            </p>
-            <p className="text-muted-foreground leading-relaxed">
-              Also under <strong className="text-foreground">User choices</strong> turn{" "}
-              <strong className="text-foreground">Do not consent</strong> On (Consent + Manage + Do
-              not consent = the three buttons).
             </p>
           </div>
-        </div>
+        </details>
         <div className="flex flex-wrap gap-2">
           <Button
             asChild
-            className="bg-[#d4af37] text-[#1a1008] hover:bg-[#e0c15a] font-black"
+            variant="outline"
+            size="sm"
+            className="font-semibold"
             data-testid="orbit-open-adsense-cmp"
           >
             <a
@@ -307,7 +294,7 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
               target="_blank"
               rel="noopener noreferrer"
             >
-              Open Privacy &amp; messaging → European regulations
+              Open Privacy &amp; messaging
               <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
             </a>
           </Button>
@@ -327,22 +314,20 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
               target="_blank"
               rel="noopener noreferrer"
             >
-              Create display units (slots)
+              Display units (slots)
               <ExternalLink className="h-3 w-3 ml-1" />
             </a>
           </Button>
         </div>
         <p className="text-[10px] text-muted-foreground leading-relaxed">
-          Exact path: <strong>Privacy &amp; messaging</strong> →{" "}
-          <strong>European regulations</strong> → <strong>Manage</strong> → open your active message
-          → <strong>User choices</strong> → enable <strong>Do not consent</strong> → save / publish
-          for zzaizzai.com.
+          Blank US ads are usually Google inventory (no fill), not this CMP panel. Prefer separate
+          Display unit IDs for banner / interstitial / rewarded when you create them in AdSense.
         </p>
       </div>
 
       <ol className="list-decimal list-inside space-y-1 text-[11px] text-muted-foreground">
         <li>
-          Tap the gold button above (or{" "}
+          European regulations →{" "}
           <a
             href="https://adsense.google.com/adsense/new/privacymessaging"
             target="_blank"
@@ -351,20 +336,15 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
             data-testid="orbit-adsense-cmp-link"
           >
             Privacy &amp; messaging <ExternalLink className="h-2.5 w-2.5" />
-          </a>
-          )
-        </li>
-        <li>
-          <strong>European regulations → Manage</strong> (you already have 1 active) → edit the
-          message → enable <strong>Do not consent</strong> under User choices → Save / Publish for
-          zzaizzai.com
+          </a>{" "}
+          — published with Do not consent On ✓
         </li>
         <li>
           Sites → <strong>Auto ads ON</strong> (site-wide) — you did this ✓
         </li>
         <li>
-          <strong>By ad unit</strong> → create Display units → paste numeric slot ids below for
-          Klean Sneaks
+          Optional: create separate Display units in AdSense and paste slot ids below for Klean
+          Sneaks
         </li>
       </ol>
 
