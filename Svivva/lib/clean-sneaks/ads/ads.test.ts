@@ -41,27 +41,26 @@ describe("clean-sneaks advertising", () => {
   });
 
   it("uses AdSense only when a display slot id is configured", () => {
-    // No slot → house fallback (players still see an ad).
+    // No slot → house for all in-game placements.
     expect(resolveAdNetwork("menu_banner")).toBe("house");
     expect(resolveAdNetwork("run_interstitial")).toBe("house");
   });
 
-  it("uses AdSense when client + slot env are set", () => {
+  it("uses AdSense for banner when client + slot env are set", () => {
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_CLIENT", "ca-pub-1234567890123456");
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT_BANNER", "1234567890");
     expect(resolveAdNetwork("menu_banner")).toBe("adsense");
-    // Banner slot must not drive interstitial/rewarded — house fills those instead.
+    // Rewarded/interstitial stay on house so players always see a creative.
     expect(resolveAdNetwork("run_interstitial")).toBe("house");
     expect(resolveAdNetwork("rewarded_credits")).toBe("house");
   });
 
-  it("uses AdSense interstitial only with its own slot id", () => {
+  it("keeps interstitial on house even with its own AdSense slot", () => {
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_CLIENT", "ca-pub-1234567890123456");
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT_INTERSTITIAL", "9876543210");
-    expect(resolveAdNetwork("run_interstitial")).toBe("adsense");
-    // Banner may use any configured display slot as fallback.
+    expect(resolveAdNetwork("run_interstitial")).toBe("house");
+    // Banner may use any configured display slot via adsenseAnySlot.
     expect(resolveAdNetwork("menu_banner")).toBe("adsense");
-    expect(resolveAdNetwork("rewarded_credits")).toBe("house");
   });
 
   it("refuses interstitial AdSense when it reuses the banner slot id", () => {
