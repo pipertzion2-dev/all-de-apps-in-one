@@ -50,8 +50,26 @@ describe("clean-sneaks advertising", () => {
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_CLIENT", "ca-pub-1234567890123456");
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT_BANNER", "1234567890");
     expect(resolveAdNetwork("menu_banner")).toBe("adsense");
-    // Shared banner slot can fill interstitial when placement-specific is missing.
+    // Banner slot must not drive interstitial/rewarded — that produced blank white units.
+    expect(resolveAdNetwork("run_interstitial")).toBe("unconfigured");
+    expect(resolveAdNetwork("rewarded_credits")).toBe("unconfigured");
+  });
+
+  it("uses AdSense interstitial only with its own slot id", () => {
+    vi.stubEnv("NEXT_PUBLIC_ADSENSE_CLIENT", "ca-pub-1234567890123456");
+    vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT_INTERSTITIAL", "9876543210");
     expect(resolveAdNetwork("run_interstitial")).toBe("adsense");
+    // Banner may use any configured display slot as fallback.
+    expect(resolveAdNetwork("menu_banner")).toBe("adsense");
+    expect(resolveAdNetwork("rewarded_credits")).toBe("unconfigured");
+  });
+
+  it("refuses interstitial when it reuses the banner slot id", () => {
+    vi.stubEnv("NEXT_PUBLIC_ADSENSE_CLIENT", "ca-pub-1234567890123456");
+    vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT_BANNER", "1234567890");
+    vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT_INTERSTITIAL", "1234567890");
+    expect(resolveAdNetwork("menu_banner")).toBe("adsense");
+    expect(resolveAdNetwork("run_interstitial")).toBe("unconfigured");
   });
 
   it("falls back to house ads when slots are missing but house is enabled", () => {

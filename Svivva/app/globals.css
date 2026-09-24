@@ -550,13 +550,24 @@ html.homepage-scroll-snap {
 }
 
 /* Google AdSense: never leave white blank units on the page */
-ins.adsbygoogle[data-ad-status="unfilled"] {
+ins.adsbygoogle[data-ad-status="unfilled"],
+ins.adsbygoogle-noablate[data-ad-status="unfilled"],
+.google-auto-placed[data-ad-status="unfilled"] {
   display: none !important;
   height: 0 !important;
   max-height: 0 !important;
+  min-height: 0 !important;
   overflow: hidden !important;
   margin: 0 !important;
   padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+/* Auto ads sometimes leave an empty white wrapper before status is set */
+.google-auto-placed:empty,
+aside[data-anchor-status="displayed"]:has(ins.adsbygoogle[data-ad-status="unfilled"]) {
+  display: none !important;
 }
 
 ins.adsbygoogle {

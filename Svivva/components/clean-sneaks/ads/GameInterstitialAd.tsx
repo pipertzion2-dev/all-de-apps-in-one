@@ -86,7 +86,8 @@ export function GameInterstitialAd({ requestOpen, onComplete }: Props) {
       return;
     }
     if (adsenseFilled === true) return;
-    const t = window.setTimeout(() => finish(false), 3000);
+    // AdSenseSlot times out ~2.2s; dismiss slightly after so we never linger on chrome.
+    const t = window.setTimeout(() => finish(false), 2600);
     return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- finish is stable via refs
   }, [visible, network, adsenseFilled]);

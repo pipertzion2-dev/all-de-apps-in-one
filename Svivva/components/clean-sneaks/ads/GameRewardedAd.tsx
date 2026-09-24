@@ -30,6 +30,7 @@ export function GameRewardedAd({ open, onClose, onRewarded }: Props) {
   const [progress, setProgress] = useState(0);
   const [done, setDone] = useState(false);
   const [blockedMs, setBlockedMs] = useState(0);
+  const [adsenseFilled, setAdsenseFilled] = useState<boolean | null>(null);
   const creative = useMemo(() => pickHouseCreative(Date.now() + 7), [open]);
   const network = resolveAdNetwork("rewarded_credits");
   const credits = rewardedCreditsAmount();
@@ -39,9 +40,11 @@ export function GameRewardedAd({ open, onClose, onRewarded }: Props) {
       setWatching(false);
       setProgress(0);
       setDone(false);
+      setAdsenseFilled(null);
       return;
     }
     setBlockedMs(cooldownRemainingMs("rewarded_credits"));
+    setAdsenseFilled(null);
   }, [open]);
 
   useEffect(() => {
@@ -119,7 +122,13 @@ export function GameRewardedAd({ open, onClose, onRewarded }: Props) {
         ) : !watching ? (
           <div className="mt-5 space-y-3">
             {network === "adsense" ? (
-              <AdSenseSlot placement="rewarded_credits" className="min-h-[120px] w-full" />
+              adsenseFilled === false ? null : (
+                <AdSenseSlot
+                  placement="rewarded_credits"
+                  className="min-h-[120px] w-full"
+                  onFillChange={setAdsenseFilled}
+                />
+              )
             ) : (
               <div
                 className="rounded-lg border border-white/10 p-4"
@@ -145,7 +154,13 @@ export function GameRewardedAd({ open, onClose, onRewarded }: Props) {
         ) : (
           <div className="mt-5 space-y-4">
             {network === "adsense" ? (
-              <AdSenseSlot placement="rewarded_credits" className="min-h-[140px] w-full" />
+              adsenseFilled === false ? null : (
+                <AdSenseSlot
+                  placement="rewarded_credits"
+                  className="min-h-[140px] w-full"
+                  onFillChange={setAdsenseFilled}
+                />
+              )
             ) : (
               <Link
                 href={creative.href}

@@ -25,28 +25,21 @@ type Props = {
 };
 
 function resolveSlot(placement: AdPlacementId): string | null {
-  return adsenseSlot(placement) || adsenseAnySlot();
+  // Prefer a placement-specific unit. Shared fallback is only for banner — using a
+  // banner slot inside interstitial/rewarded chrome is a common source of blank ads.
+  return adsenseSlot(placement) || (placement === "menu_banner" ? adsenseAnySlot() : null);
 }
 
+/**
+ * Only trust Google's explicit fill signal. iframe size alone is a false positive —
+ * AdSense often injects a large white empty iframe without data-ad-status="filled".
+ */
 function looksFilled(el: HTMLElement): boolean {
-  if (el.getAttribute("data-ad-status") === "filled") return true;
-  // Some fills never set the attribute but inject a non-empty iframe.
-  const iframe = el.querySelector("iframe");
-  if (!iframe) return false;
-  const h = iframe.clientHeight || Number(iframe.getAttribute("height")) || 0;
-  const w = iframe.clientWidth || Number(iframe.getAttribute("width")) || 0;
-  return h >= 40 && w >= 40;
+  return el.getAttribute("data-ad-status") === "filled";
 }
 
 function looksUnfilled(el: HTMLElement): boolean {
-  const status = el.getAttribute("data-ad-status");
-  if (status === "unfilled") return true;
-  // White blank: iframe present but tiny / zero-size after Google ran.
-  if (status === "filled") return false;
-  const iframe = el.querySelector("iframe");
-  if (!iframe) return false;
-  const h = iframe.clientHeight || Number(iframe.getAttribute("height")) || 0;
-  return h > 0 && h < 20;
+  return el.getAttribute("data-ad-status") === "unfilled";
 }
 
 /**
@@ -118,7 +111,7 @@ export function AdSenseSlot({ placement, className, format = "auto", onFillChang
         markFilled();
         return;
       }
-      if (el.getAttribute("data-ad-status") === "unfilled" || looksUnfilled(el)) {
+      if (looksUnfilled(el)) {
         markEmpty();
       }
     };
@@ -135,7 +128,7 @@ export function AdSenseSlot({ placement, className, format = "auto", onFillChang
     const timeout = window.setTimeout(() => {
       if (looksFilled(el)) markFilled();
       else markEmpty();
-    }, 2800);
+    }, 2200);
 
     return () => {
       observer.disconnect();
@@ -143,10 +136,27 @@ export function AdSenseSlot({ placement, className, format = "auto", onFillChang
     };
   }, [status, placement]);
 
+  // If Google later flips a "filled" unit to unfilled, tear it down (no lingering blank).
+  useEffect(() => {
+    const el = insRef.current;
+    if (!el || status !== "ready") return;
+    const observer = new MutationObserver(() => {
+      if (looksUnfilled(el)) {
+        setStatus("empty");
+        onFillChangeRef.current?.(false);
+        recordAdEvent({ placement, kind: "fill_fail", network: "adsense" });
+      }
+    });
+    observer.observe(el, {
+      attributes: true,
+      attributeFilter: ["data-ad-status"],
+    });
+    return () => observer.disconnect();
+  }, [status, placement]);
+
   if (!client || !slot || status === "empty") return null;
 
-  // While loading, reserve a real-size off-flow probe (Google needs layout) so players
-  // never see a white blank card in the document flow.
+  // While loading, keep the probe completely off-screen — never a white card in flow.
   const probeOnly = status === "loading";
 
   return (
@@ -157,14 +167,14 @@ export function AdSenseSlot({ placement, className, format = "auto", onFillChang
         probeOnly
           ? {
               position: "fixed",
-              left: 0,
-              bottom: 0,
-              width: "min(100vw, 336px)",
+              left: "-10000px",
+              top: 0,
+              width: 336,
               height: 90,
               overflow: "hidden",
               opacity: 0,
               pointerEvents: "none",
-              zIndex: -1,
+              visibility: "hidden",
             }
           : undefined
       }
