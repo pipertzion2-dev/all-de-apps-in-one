@@ -548,3 +548,17 @@ html.homepage-scroll-snap {
     scroll-behavior: auto;
   }
 }
+
+/* Google AdSense: never leave white blank units on the page */
+ins.adsbygoogle[data-ad-status="unfilled"] {
+  display: none !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+ins.adsbygoogle {
+  background: transparent !important;
+}

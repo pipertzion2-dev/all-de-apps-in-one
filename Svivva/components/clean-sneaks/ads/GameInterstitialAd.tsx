@@ -86,7 +86,7 @@ export function GameInterstitialAd({ requestOpen, onComplete }: Props) {
       return;
     }
     if (adsenseFilled === true) return;
-    const t = window.setTimeout(() => finish(false), 4500);
+    const t = window.setTimeout(() => finish(false), 3000);
     return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- finish is stable via refs
   }, [visible, network, adsenseFilled]);
