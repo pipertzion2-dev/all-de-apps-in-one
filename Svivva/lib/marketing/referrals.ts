@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { ensureMarketingContentTables } from "@/lib/ensure-core-db-tables";
 import { marketingReferrals, marketingReferralEvents } from "@/lib/marketing/schema";
 import { eq, desc } from "drizzle-orm";
 
@@ -19,6 +20,7 @@ export async function createReferral(data: {
   rewardType?: string;
   rewardAmount?: number;
 }) {
+  await ensureMarketingContentTables();
   const code = generateCode(data.referrerEmail);
   const referralLink = `${data.siteUrl}?ref=${code}`;
   const [referral] = await db
@@ -36,6 +38,7 @@ export async function createReferral(data: {
 }
 
 export async function getReferrals() {
+  await ensureMarketingContentTables();
   return db.select().from(marketingReferrals).orderBy(desc(marketingReferrals.createdAt));
 }
 
@@ -72,6 +75,7 @@ export async function trackReferralEvent(
 }
 
 export async function getReferralStats() {
+  await ensureMarketingContentTables();
   const all = await db.select().from(marketingReferrals);
   return {
     total: all.length,

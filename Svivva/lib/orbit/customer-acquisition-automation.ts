@@ -3,6 +3,7 @@
  * Called from urrthang (marketing autopilot), Acquire tab, and Orbit launch finish.
  */
 import { db } from "@/lib/db";
+import { ensureOrbitDbReady } from "@/lib/ensure-core-db-tables";
 import { growthTasks } from "@/lib/schema";
 import { marketingAmplifyJobs } from "@/lib/marketing/schema";
 import { createCampaign } from "@/lib/marketing/campaigns";
@@ -255,6 +256,9 @@ export async function runCustomerAcquisitionAutomation(
   const includeReferral = opts.includeReferral !== false;
   const includeCampaigns = opts.includeCampaigns !== false;
   const includeSitemapPings = opts.includeSitemapPings !== false;
+
+  // UTM / referrals / campaigns need marketing_* tables (CREATE IF NOT EXISTS on Neon).
+  await ensureOrbitDbReady();
 
   // ── 1. Traffic blast (SEO pages + indexing) ───────────────────────────────
   if (includeTraffic) {

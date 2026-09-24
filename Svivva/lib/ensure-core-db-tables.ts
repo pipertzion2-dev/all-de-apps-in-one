@@ -130,7 +130,129 @@ const GROWTH_TASKS_DDL = `
   )
 `;
 
-/** SEO/blog/growth tables Orbit Run All needs when drizzle push did not run on deploy. */
+/** Marketing hub tables (UTM / referrals / campaigns) — Orbit Acquire needs these. */
+const MARKETING_CAMPAIGNS_DDL = `
+  CREATE TABLE IF NOT EXISTS marketing_campaigns (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    channel TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'draft',
+    budget REAL,
+    spent REAL DEFAULT 0,
+    target_audience TEXT,
+    start_date TIMESTAMPTZ,
+    end_date TIMESTAMPTZ,
+    goals JSONB,
+    metrics JSONB DEFAULT '{"clicks":0,"impressions":0,"conversions":0,"leads":0,"revenue":0}'::jsonb,
+    tags TEXT[] DEFAULT '{}',
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+  )
+`;
+
+const MARKETING_LEADS_DDL = `
+  CREATE TABLE IF NOT EXISTS marketing_leads (
+    id TEXT PRIMARY KEY,
+    email TEXT NOT NULL UNIQUE,
+    first_name TEXT,
+    last_name TEXT,
+    company TEXT,
+    phone TEXT,
+    source TEXT,
+    campaign_id TEXT,
+    score INTEGER DEFAULT 0,
+    status TEXT DEFAULT 'new',
+    tags TEXT[] DEFAULT '{}',
+    notes TEXT,
+    utm_source TEXT,
+    utm_medium TEXT,
+    utm_campaign TEXT,
+    metadata JSONB,
+    last_activity_at TIMESTAMPTZ DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT NOW()
+  )
+`;
+
+const MARKETING_REFERRALS_DDL = `
+  CREATE TABLE IF NOT EXISTS marketing_referrals (
+    id TEXT PRIMARY KEY,
+    referrer_id TEXT NOT NULL,
+    referrer_email TEXT NOT NULL,
+    referral_code TEXT NOT NULL UNIQUE,
+    referral_link TEXT NOT NULL,
+    clicks INTEGER DEFAULT 0,
+    signups INTEGER DEFAULT 0,
+    conversions INTEGER DEFAULT 0,
+    reward_type TEXT DEFAULT 'credit',
+    reward_amount REAL DEFAULT 0,
+    reward_paid BOOLEAN DEFAULT false,
+    status TEXT DEFAULT 'active',
+    expires_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+  )
+`;
+
+const MARKETING_REFERRAL_EVENTS_DDL = `
+  CREATE TABLE IF NOT EXISTS marketing_referral_events (
+    id TEXT PRIMARY KEY,
+    referral_id TEXT NOT NULL,
+    event_type TEXT NOT NULL,
+    referred_email TEXT,
+    ip TEXT,
+    user_agent TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+  )
+`;
+
+const MARKETING_UTM_LINKS_DDL = `
+  CREATE TABLE IF NOT EXISTS marketing_utm_links (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    destination_url TEXT NOT NULL,
+    utm_source TEXT NOT NULL,
+    utm_medium TEXT NOT NULL,
+    utm_campaign TEXT NOT NULL,
+    utm_term TEXT,
+    utm_content TEXT,
+    short_code TEXT UNIQUE,
+    clicks INTEGER DEFAULT 0,
+    campaign_id TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+  )
+`;
+
+const MARKETING_AB_TESTS_DDL = `
+  CREATE TABLE IF NOT EXISTS marketing_ab_tests (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    hypothesis TEXT,
+    status TEXT DEFAULT 'draft',
+    winner_variant TEXT,
+    target_metric TEXT NOT NULL DEFAULT 'conversion_rate',
+    variants JSONB DEFAULT '[]'::jsonb,
+    start_date TIMESTAMPTZ,
+    end_date TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+  )
+`;
+
+const MARKETING_AMPLIFY_JOBS_DDL = `
+  CREATE TABLE IF NOT EXISTS marketing_amplify_jobs (
+    id TEXT PRIMARY KEY,
+    source_type TEXT NOT NULL,
+    source_id TEXT,
+    source_content TEXT,
+    outputs JSONB DEFAULT '[]'::jsonb,
+    channels TEXT[] DEFAULT '{}',
+    status TEXT DEFAULT 'pending',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+  )
+`;
+
+/** SEO/blog/growth + marketing hub tables Orbit Run All needs when drizzle push did not run on deploy. */
 export async function ensureMarketingContentTables(): Promise<void> {
   if (marketingTablesEnsured) return;
   await executeDatabaseDdl(SEO_LANDING_PAGES_DDL);
@@ -138,6 +260,13 @@ export async function ensureMarketingContentTables(): Promise<void> {
   await executeDatabaseDdl(GROWTH_SUBMISSIONS_DDL);
   await executeDatabaseDdl(GROWTH_CONTENT_DDL);
   await executeDatabaseDdl(GROWTH_TASKS_DDL);
+  await executeDatabaseDdl(MARKETING_CAMPAIGNS_DDL);
+  await executeDatabaseDdl(MARKETING_LEADS_DDL);
+  await executeDatabaseDdl(MARKETING_REFERRALS_DDL);
+  await executeDatabaseDdl(MARKETING_REFERRAL_EVENTS_DDL);
+  await executeDatabaseDdl(MARKETING_UTM_LINKS_DDL);
+  await executeDatabaseDdl(MARKETING_AB_TESTS_DDL);
+  await executeDatabaseDdl(MARKETING_AMPLIFY_JOBS_DDL);
   marketingTablesEnsured = true;
 }
 
