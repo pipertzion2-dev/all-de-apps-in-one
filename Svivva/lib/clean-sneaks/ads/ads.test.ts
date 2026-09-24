@@ -54,9 +54,15 @@ describe("clean-sneaks advertising", () => {
     expect(resolveAdNetwork("run_interstitial")).toBe("adsense");
   });
 
-  it("falls back to house ads when slots are missing but house is enabled", () => {
+  it("uses a single NEXT_PUBLIC_ADSENSE_SLOT for all placements", () => {
+    vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT", "9876543210");
+    expect(resolveAdNetwork("menu_banner")).toBe("adsense");
+    expect(resolveAdNetwork("hub_display")).toBe("adsense");
+  });
+
+  it("does not show house promos when AdSense publisher is configured", () => {
     vi.stubEnv("NEXT_PUBLIC_CLEAN_SNEAKS_HOUSE_ADS", "1");
-    expect(resolveAdNetwork("menu_banner")).toBe("house");
+    expect(resolveAdNetwork("menu_banner")).toBe("unconfigured");
   });
 
   it("never ships AdSense setup copy into player-facing ad components", () => {

@@ -4,6 +4,7 @@ import {
   isValidAdsenseSlotId,
   resolveSiteAdsenseClient,
 } from "@/lib/adsense-credentials";
+import { readDefaultAdsenseSlot } from "@/lib/adsense-slot-resolve";
 
 declare global {
   interface Window {
@@ -11,6 +12,7 @@ declare global {
     __ADSENSE_SLOT_BANNER__?: string;
     __ADSENSE_SLOT_INTERSTITIAL__?: string;
     __ADSENSE_SLOT_REWARDED__?: string;
+    __ADSENSE_SLOT_DEFAULT__?: string;
   }
 }
 
@@ -24,7 +26,7 @@ function readRuntimeClient(): string | null {
 
 function readRuntimeSlot(placement: AdPlacementId): string | null {
   const winKey =
-    placement === "menu_banner"
+    placement === "menu_banner" || placement === "hub_display"
       ? "__ADSENSE_SLOT_BANNER__"
       : placement === "run_interstitial"
         ? "__ADSENSE_SLOT_INTERSTITIAL__"
@@ -37,9 +39,15 @@ function readRuntimeSlot(placement: AdPlacementId): string | null {
     menu_banner: process.env.NEXT_PUBLIC_ADSENSE_SLOT_BANNER?.trim(),
     run_interstitial: process.env.NEXT_PUBLIC_ADSENSE_SLOT_INTERSTITIAL?.trim(),
     rewarded_credits: process.env.NEXT_PUBLIC_ADSENSE_SLOT_REWARDED?.trim(),
+    hub_display: process.env.NEXT_PUBLIC_ADSENSE_SLOT_BANNER?.trim(),
   };
   const slot = map[placement];
-  return isValidAdsenseSlotId(slot) ? slot! : null;
+  if (isValidAdsenseSlotId(slot)) return slot!;
+  if (typeof window !== "undefined") {
+    const fallback = window.__ADSENSE_SLOT_DEFAULT__?.trim();
+    if (isValidAdsenseSlotId(fallback)) return fallback!;
+  }
+  return readDefaultAdsenseSlot();
 }
 
 /**
@@ -107,7 +115,8 @@ export function adsenseUnitReady(placement: AdPlacementId): boolean {
 export function resolveAdNetwork(placement: AdPlacementId): "adsense" | "house" | "unconfigured" {
   if (!adsEnabled()) return "unconfigured";
   if (adsenseUnitReady(placement)) return "adsense";
-  if (houseAdsAllowed()) return "house";
+  /** Paid-first: house promos only when no AdSense publisher is configured. */
+  if (houseAdsAllowed() && !adsenseConfigured()) return "house";
   return "unconfigured";
 }
 
@@ -122,14 +131,6 @@ export const INTERSTITIAL_COOLDOWN_MS = 45_000;
 
 /** Direct / house sponsors — opt-in only via NEXT_PUBLIC_CLEAN_SNEAKS_HOUSE_ADS=1. */
 export const HOUSE_CREATIVES: readonly HouseCreative[] = [
-  {
-    id: "zzai-tools",
-    headline: "ZZAI Tools Hub",
-    body: "Ship prompts as live APIs — free tools that grow with you.",
-    cta: "Open hub",
-    href: "/ai-tools-hub",
-    accent: "#5B8DA8",
-  },
   {
     id: "clutety",
     headline: "Clutety Shield",

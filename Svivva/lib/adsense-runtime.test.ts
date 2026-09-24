@@ -21,9 +21,11 @@ describe("adsense runtime", () => {
       slotBanner: "1234567890",
       slotInterstitial: null,
       slotRewarded: null,
+      slotDefault: "1234567890",
     });
     expect(js).toContain("__ADSENSE_CLIENT__");
     expect(js).toContain("__ADSENSE_SLOT_BANNER__");
+    expect(js).toContain("__ADSENSE_SLOT_DEFAULT__");
     expect(js).not.toContain("INTERSTITIAL");
   });
 });

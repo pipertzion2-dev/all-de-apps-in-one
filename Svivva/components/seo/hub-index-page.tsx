@@ -9,6 +9,7 @@ import {
   type HubFeatureHub,
 } from "@/lib/tools/catalogs/hub-feature-pages";
 import { hubFeatureDisplayTitle } from "@/lib/tools/hub-feature-seo";
+import { PaidDisplayAd } from "@/components/ads/paid-display-ad";
 
 const BASE = getSiteUrl().replace(/\/$/, "");
 
@@ -94,6 +95,10 @@ export function HubIndexPage({ hub }: { hub: HubFeatureHub }) {
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">{copy.h1}</h1>
           <p className="mt-5 text-lg text-white/60 leading-relaxed">{copy.lead}</p>
         </section>
+
+        <div className="max-w-2xl mx-auto px-6 pb-8">
+          <PaidDisplayAd placement="hub_display" />
+        </div>
 
         <section className="max-w-5xl mx-auto px-6 pb-20">
           <h2 className="text-xl font-semibold mb-6">{pages.length} indexed feature pages</h2>

@@ -3,6 +3,7 @@ import {
   isValidAdsenseSlotId,
   resolveSiteAdsenseClient,
 } from "@/lib/adsense-credentials";
+import { readDefaultAdsenseSlot } from "@/lib/adsense-slot-resolve";
 import { hydratePlatformSecrets } from "@/lib/platform-runtime-secrets";
 
 export type AdsenseRuntimeConfig = {
@@ -10,6 +11,7 @@ export type AdsenseRuntimeConfig = {
   slotBanner: string | null;
   slotInterstitial: string | null;
   slotRewarded: string | null;
+  slotDefault: string | null;
 };
 
 function readSlot(envKey: string): string | null {
@@ -39,6 +41,7 @@ export async function getAdsenseRuntimeConfig(options?: {
     slotBanner: readSlot("NEXT_PUBLIC_ADSENSE_SLOT_BANNER"),
     slotInterstitial: readSlot("NEXT_PUBLIC_ADSENSE_SLOT_INTERSTITIAL"),
     slotRewarded: readSlot("NEXT_PUBLIC_ADSENSE_SLOT_REWARDED"),
+    slotDefault: readDefaultAdsenseSlot(),
   };
 }
 
@@ -54,6 +57,9 @@ export function adsenseRuntimeInlineScript(config: AdsenseRuntimeConfig): string
   }
   if (config.slotRewarded) {
     js += `window.__ADSENSE_SLOT_REWARDED__=${JSON.stringify(config.slotRewarded)};`;
+  }
+  if (config.slotDefault) {
+    js += `window.__ADSENSE_SLOT_DEFAULT__=${JSON.stringify(config.slotDefault)};`;
   }
   return js;
 }

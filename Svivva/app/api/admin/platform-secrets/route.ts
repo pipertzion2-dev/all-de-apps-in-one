@@ -68,6 +68,8 @@ const patchSchema = z
     adsenseSlotBanner: z.string().optional(),
     adsenseSlotInterstitial: z.string().optional(),
     adsenseSlotRewarded: z.string().optional(),
+    /** When "1", copy banner slot to interstitial + rewarded on save. */
+    adsenseApplyBannerToAll: z.string().optional(),
   })
   .strict();
 
@@ -316,6 +318,15 @@ export async function POST(request: Request) {
           }
           patch[patchKey] = norm;
         }
+      }
+    }
+
+    if (body.adsenseApplyBannerToAll === "1" && patch.adsenseSlotBanner) {
+      if (!("adsenseSlotInterstitial" in body)) {
+        patch.adsenseSlotInterstitial = patch.adsenseSlotBanner;
+      }
+      if (!("adsenseSlotRewarded" in body)) {
+        patch.adsenseSlotRewarded = patch.adsenseSlotBanner;
       }
     }
 

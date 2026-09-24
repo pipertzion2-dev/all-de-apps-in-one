@@ -1,6 +1,10 @@
 /** Placement + creative types for Klean Sneaks advertising. */
 
-export type AdPlacementId = "menu_banner" | "run_interstitial" | "rewarded_credits";
+export type AdPlacementId =
+  | "menu_banner"
+  | "run_interstitial"
+  | "rewarded_credits"
+  | "hub_display";
 
 export type AdNetwork = "adsense" | "house";
 

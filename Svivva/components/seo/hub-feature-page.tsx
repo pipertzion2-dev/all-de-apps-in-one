@@ -18,6 +18,7 @@ import {
   hubFeatureFaqs,
 } from "@/lib/tools/hub-feature-seo";
 import FaqSection from "@/app/(seo)/[slug]/faq-section";
+import { PaidDisplayAd } from "@/components/ads/paid-display-ad";
 
 export const revalidate = 3600;
 
@@ -176,6 +177,10 @@ export function HubFeaturePageView({ hub, slug }: { hub: HubFeatureHub; slug: st
             </div>
           </div>
         </section>
+
+        <div className="max-w-2xl mx-auto px-6 pb-4">
+          <PaidDisplayAd placement="hub_display" />
+        </div>
 
         <section className="max-w-3xl mx-auto px-6 py-10">
           <div

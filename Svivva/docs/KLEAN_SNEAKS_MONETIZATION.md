@@ -57,11 +57,12 @@ No new Drizzle tables in this pass. Claim anti-dupe uses:
 ```bash
 # AdSense (existing)
 NEXT_PUBLIC_ADSENSE_CLIENT=
+NEXT_PUBLIC_ADSENSE_SLOT=              # optional — one display unit for all placements
 NEXT_PUBLIC_ADSENSE_SLOT_BANNER=
 NEXT_PUBLIC_ADSENSE_SLOT_INTERSTITIAL=
 NEXT_PUBLIC_ADSENSE_SLOT_REWARDED=
 NEXT_PUBLIC_CLEAN_SNEAKS_ADS=1
-NEXT_PUBLIC_CLEAN_SNEAKS_HOUSE_ADS=0   # house creatives only if 1
+NEXT_PUBLIC_CLEAN_SNEAKS_HOUSE_ADS=0   # unpaid promos only if 1 and no AdSense publisher
 
 # Stripe (existing) — Apple Pay / card for bundles & lace packs
 STRIPE_SECRET_KEY=

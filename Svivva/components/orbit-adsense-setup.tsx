@@ -83,6 +83,7 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
   const [clearBanner, setClearBanner] = useState(false);
   const [clearInterstitial, setClearInterstitial] = useState(false);
   const [clearRewarded, setClearRewarded] = useState(false);
+  const [applyBannerToAll, setApplyBannerToAll] = useState(true);
 
   const load = useCallback(async () => {
     setLoadError(null);
@@ -122,6 +123,10 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
       else if (slotInterstitial.trim()) body.adsenseSlotInterstitial = slotInterstitial.trim();
       if (clearRewarded) body.adsenseSlotRewarded = "";
       else if (slotRewarded.trim()) body.adsenseSlotRewarded = slotRewarded.trim();
+
+      if (applyBannerToAll && slotBanner.trim() && !clearBanner) {
+        body.adsenseApplyBannerToAll = "1";
+      }
 
       if (Object.keys(body).length === 0) {
         setSaveMessage("Enter a ca-pub-… client id (and optional slot numbers), then save.");
@@ -371,7 +376,7 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
           )}
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="adsense-banner">Banner slot</Label>
+          <Label htmlFor="adsense-banner">Banner slot (one unit covers game + Tools Hub)</Label>
           <Input
             id="adsense-banner"
             placeholder="1234567890"
@@ -383,6 +388,13 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
           <label className="flex items-center gap-2 text-[10px] text-muted-foreground">
             <Checkbox checked={clearBanner} onCheckedChange={(v) => setClearBanner(v === true)} />
             Clear
+          </label>
+          <label className="flex items-center gap-2 text-[10px] text-muted-foreground">
+            <Checkbox
+              checked={applyBannerToAll}
+              onCheckedChange={(v) => setApplyBannerToAll(v === true)}
+            />
+            Use banner slot for interstitial + rewarded too
           </label>
         </div>
         <div className="space-y-1.5">
