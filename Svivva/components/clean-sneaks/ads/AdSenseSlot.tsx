@@ -20,6 +20,8 @@ type Props = {
   className?: string;
   /** AdSense format hint — auto is fine for responsive banners. */
   format?: string;
+  /** Called when Google reports fill vs unfilled (so parent chrome can hide). */
+  onFillChange?: (filled: boolean) => void;
 };
 
 function resolveSlot(placement: AdPlacementId): string | null {
@@ -28,13 +30,14 @@ function resolveSlot(placement: AdPlacementId): string | null {
 
 /**
  * Live Google AdSense unit. Requires publisher client + at least one slot id.
- * Missing config renders nothing — never show setup / env instructions to players.
+ * Missing config or unfilled inventory renders nothing — never leave a blank box.
  * Configure slots in Orbit → AdSense (or Vercel NEXT_PUBLIC_ADSENSE_SLOT_*).
  */
-export function AdSenseSlot({ placement, className, format = "auto" }: Props) {
+export function AdSenseSlot({ placement, className, format = "auto", onFillChange }: Props) {
   const client = adsenseClientId();
   const slot = resolveSlot(placement);
   const pushed = useRef(false);
+  const insRef = useRef<HTMLModElement | null>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "ready" | "empty">("idle");
 
   useEffect(() => {
@@ -49,6 +52,7 @@ export function AdSenseSlot({ placement, className, format = "auto" }: Props) {
         recordAdEvent({ placement, kind: "impression", network: "adsense" });
       } catch {
         setStatus("empty");
+        onFillChange?.(false);
         recordAdEvent({ placement, kind: "fill_fail", network: "adsense" });
       }
     };
@@ -67,16 +71,46 @@ export function AdSenseSlot({ placement, className, format = "auto" }: Props) {
       }
     }, 100);
     return () => window.clearInterval(id);
-  }, [client, slot, placement]);
+  }, [client, slot, placement, onFillChange]);
 
-  // Silent no-op for visitors when Orbit/Vercel slots are not set yet.
-  if (!client || !slot) return null;
+  // Google sets data-ad-status="unfilled" when there is no creative — collapse the blank unit.
+  useEffect(() => {
+    const el = insRef.current;
+    if (!el || status === "idle" || status === "empty") return;
+
+    const applyStatus = () => {
+      const adStatus = el.getAttribute("data-ad-status");
+      if (adStatus === "unfilled") {
+        setStatus("empty");
+        onFillChange?.(false);
+        recordAdEvent({ placement, kind: "fill_fail", network: "adsense" });
+        return;
+      }
+      if (adStatus === "filled") {
+        setStatus("ready");
+        onFillChange?.(true);
+      }
+    };
+
+    applyStatus();
+    const observer = new MutationObserver(applyStatus);
+    observer.observe(el, { attributes: true, attributeFilter: ["data-ad-status"] });
+    const timeout = window.setTimeout(applyStatus, 4000);
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(timeout);
+    };
+  }, [status, placement, onFillChange]);
+
+  // Silent no-op for visitors when Orbit/Vercel slots are not set yet, or Google returned no fill.
+  if (!client || !slot || status === "empty") return null;
 
   return (
     <div className={className} data-ad-status={status}>
       <ins
+        ref={insRef}
         className="adsbygoogle block w-full"
-        style={{ display: "block", minHeight: 60 }}
+        style={{ display: "block", minHeight: status === "loading" ? 60 : undefined }}
         data-ad-client={client}
         data-ad-slot={slot}
         data-ad-format={format}

@@ -274,13 +274,17 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
             <p>
               <span className="text-muted-foreground">Logo URL: </span>
               <a
-                href="https://zzaizzai.com/zzai-logo.png"
+                href="https://zzaizzai.com/zzai-logo-adsense.png"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-mono font-semibold text-foreground underline break-all"
               >
-                https://zzaizzai.com/zzai-logo.png
+                https://zzaizzai.com/zzai-logo-adsense.png
               </a>
+              <span className="text-muted-foreground">
+                {" "}
+                (256×256, small file — AdSense accepts this)
+              </span>
             </p>
             <p className="text-muted-foreground leading-relaxed">
               Also under <strong className="text-foreground">User choices</strong> turn{" "}
