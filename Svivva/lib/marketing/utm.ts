@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { ensureMarketingContentTables } from "@/lib/ensure-core-db-tables";
 import { marketingUtmLinks } from "@/lib/marketing/schema";
 import { eq, desc } from "drizzle-orm";
 
@@ -29,6 +30,7 @@ export async function createUtmLink(data: {
   utmContent?: string;
   campaignId?: string;
 }) {
+  await ensureMarketingContentTables();
   const shortCode = Math.random().toString(36).slice(2, 8);
   const [link] = await db
     .insert(marketingUtmLinks)
@@ -38,6 +40,7 @@ export async function createUtmLink(data: {
 }
 
 export async function getUtmLinks() {
+  await ensureMarketingContentTables();
   return db.select().from(marketingUtmLinks).orderBy(desc(marketingUtmLinks.createdAt));
 }
 

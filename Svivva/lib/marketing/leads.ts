@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { ensureMarketingContentTables } from "@/lib/ensure-core-db-tables";
 import { marketingLeads } from "@/lib/marketing/schema";
 import { eq, desc, ilike, or } from "drizzle-orm";
 
@@ -81,6 +82,7 @@ export async function updateLeadStatus(id: string, status: string) {
 }
 
 export async function getLeadStats() {
+  await ensureMarketingContentTables();
   const all = await db.select().from(marketingLeads);
   return {
     total: all.length,

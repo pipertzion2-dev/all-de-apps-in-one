@@ -1,8 +1,10 @@
 import { db } from "@/lib/db";
+import { ensureMarketingContentTables } from "@/lib/ensure-core-db-tables";
 import { marketingCampaigns } from "@/lib/marketing/schema";
 import { eq, desc, sql } from "drizzle-orm";
 
 export async function getCampaigns() {
+  await ensureMarketingContentTables();
   return db.select().from(marketingCampaigns).orderBy(desc(marketingCampaigns.createdAt));
 }
 
@@ -25,6 +27,7 @@ export async function createCampaign(data: {
   goals?: { clicks?: number; conversions?: number; leads?: number; revenue?: number };
   tags?: string[];
 }) {
+  await ensureMarketingContentTables();
   const [campaign] = await db
     .insert(marketingCampaigns)
     .values({
@@ -64,6 +67,7 @@ export async function updateCampaignMetrics(
 }
 
 export async function getCampaignSummary() {
+  await ensureMarketingContentTables();
   const all = await db.select().from(marketingCampaigns);
   return {
     total: all.length,
