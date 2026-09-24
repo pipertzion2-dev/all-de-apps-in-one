@@ -9,7 +9,7 @@ import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import { usePlatform } from "@/lib/platform-context";
 
 type Props = {
-  size?: "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg";
   className?: string;
   showLabels?: boolean;
   /**
@@ -20,7 +20,7 @@ type Props = {
   variant?: "flip" | "cube";
 };
 
-const SIZE_PX = { sm: 56, md: 110, lg: 220 } as const;
+const SIZE_PX = { xs: 36, sm: 48, md: 110, lg: 220 } as const;
 
 /**
  * Clear Three.js dual-logo toggle.
@@ -324,11 +324,11 @@ export function ZzaiModeToggle({
 
   const px = SIZE_PX[size];
   const isSignal = mode === "digital";
-  // The "sm" size lives in tight nav/sidebar bars — flanking Signal/Crest
+  // xs/sm live in tight nav/sidebar bars — flanking Signal/Crest
   // text plus a caption wrapped onto multiple lines there and read as
   // clutter. Render just the icon in that spot; the mode is still fully
   // explained via title/aria-label for accessibility.
-  const compact = size === "sm";
+  const compact = size === "xs" || size === "sm";
 
   const iconButton = (
     <button
@@ -339,10 +339,11 @@ export function ZzaiModeToggle({
           : "ZZAI mode: Crest. Click to flip to Signal."
       }
       onClick={() => toggleMode()}
-      className="relative rounded-2xl overflow-hidden border bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5B8DA8]"
+      className="relative overflow-hidden border bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5B8DA8]"
       style={{
         width: px,
         height: px,
+        borderRadius: size === "xs" ? 10 : 16,
         borderColor: colors.primaryBorder,
         boxShadow: `0 0 0 1px ${colors.primaryBorder}, 0 0 ${compact ? 14 : 28}px ${colors.primaryBg}`,
         background: "transparent",
