@@ -36,6 +36,21 @@ export async function ensureBillingColumns(): Promise<void> {
     await db.execute(
       sql`ALTER TABLE platform_runtime_secrets ADD COLUMN IF NOT EXISTS lemon_squeezy_checkout_url_enterprise TEXT`,
     );
+    await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS pro_access_until TIMESTAMPTZ`);
+    await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS pro_access_source TEXT`);
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS klean_year_sub_prizes (
+        id TEXT PRIMARY KEY,
+        entry_id TEXT NOT NULL UNIQUE,
+        device_id TEXT NOT NULL,
+        user_id TEXT,
+        status TEXT NOT NULL DEFAULT 'pending',
+        claim_token TEXT NOT NULL UNIQUE,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        claimed_at TIMESTAMPTZ,
+        expires_at TIMESTAMPTZ NOT NULL
+      )
+    `);
     billingColumnsEnsured = true;
   } catch {
     /* test env */

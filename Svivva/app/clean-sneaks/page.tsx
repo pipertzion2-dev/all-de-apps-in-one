@@ -18,6 +18,10 @@ const GAME_FAQS = [
     q: "Do I need an account to play?",
     a: "You can start the runner in the browser without a paid plan. Some shop and casino unlocks may require progress or a free zzai zzai account.",
   },
+  {
+    q: "Can I win a free year of ZZAI Pro?",
+    a: "Yes. Solo wins in Steal Bundle casino have about a 5% chance to win 1 year of ZZAI Pro. Sign in to claim — the prize attaches to your account for 365 days.",
+  },
 ] as const;
 
 export const metadata: Metadata = buildSeoMetadata({

@@ -14,6 +14,7 @@ import { SceneErrorBoundary } from "@/components/clean-sneaks/SceneErrorBoundary
 import { StealTheBundleCardGame } from "@/components/clean-sneaks/StealTheBundleCardGame";
 import { GameAdBanner, GameAdsEarningsChip } from "@/components/clean-sneaks/ads";
 import { KleanShop, OfflineEarningsHost } from "@/components/clean-sneaks/monetization";
+import { PendingYearSubClaimHost } from "@/components/clean-sneaks/prizes/PendingYearSubClaimHost";
 import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
 import { isBundleCardUnlocked } from "@/lib/clean-sneaks/bundle-unlock";
 import type { GamePhase } from "@/lib/clean-sneaks/types";
@@ -255,6 +256,7 @@ function CleanSneaksPageContent() {
       </div>
 
       <OfflineEarningsHost />
+      <PendingYearSubClaimHost />
       <KleanShop open={shopOpen} onClose={() => setShopOpen(false)} />
     </div>
   );
