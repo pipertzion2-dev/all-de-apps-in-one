@@ -31,6 +31,14 @@ describe("sitemap native mini-apps", () => {
   });
 });
 
+describe("sitemap pages chunk", () => {
+  it("indexes clean-sneaks and events entertainment surfaces", () => {
+    const urls = getStaticSitemapFallback().map((e) => e.url);
+    expect(urls.some((u) => u.endsWith("/clean-sneaks"))).toBe(true);
+    expect(urls.some((u) => u.endsWith("/events"))).toBe(true);
+  });
+});
+
 describe("sitemap blog posts", () => {
   it("includes published blog posts regardless of landing-page quality thresholds", () => {
     const entries = blogPostsToSitemapEntries(

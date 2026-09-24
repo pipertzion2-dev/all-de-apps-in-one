@@ -1,14 +1,20 @@
 import LandingPage from "./home-page-client";
+import { JsonLd } from "@/components/seo/json-ld";
 import { buildSeoMetadata } from "@/lib/seo/metadata";
-import { BRAND } from "@/lib/brand";
+import { homepageJsonLdGraph } from "@/lib/seo/schema/builders";
 
 export const metadata = buildSeoMetadata({
-  title: `${BRAND.name} — ${BRAND.tagline}`,
+  title: "zzai zzai — AI API builder, Seeds, Orbit SEO & Klean Sneaks",
   description:
-    "zzai zzai (ZZAI / zzaizzai.com) — From seed to symphony. One workspace to describe what you want, ship it with guardrails across software, hardware, growth, and IP protection — without babysitting infrastructure.",
+    "zzai zzai (ZZAI / zzaizzai.com) is an AI product workspace: prompt-to-API builder with schema validation and rollback, ZZAI Seeds, Orbit SEO/AEO, Poor Man Protection, ZZAI Show events, and Klean Sneaks on ZZAI Play. Start free.",
   path: "/",
 });
 
 export default function HomePage() {
-  return <LandingPage />;
+  return (
+    <>
+      <JsonLd data={homepageJsonLdGraph()} />
+      <LandingPage />
+    </>
+  );
 }

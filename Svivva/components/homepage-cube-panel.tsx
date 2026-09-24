@@ -2,7 +2,10 @@
 
 import dynamic from "next/dynamic";
 import { HomepageAboutSection } from "@/components/homepage-about-section";
+import { HomepageExploreLinks } from "@/components/homepage-explore-links";
+import { HomepageFaqSection } from "@/components/homepage-faq-section";
 import { HomepageHeroBlock } from "@/components/homepage-hero-block";
+import { HomepageHowToSection } from "@/components/homepage-howto-section";
 import { HomepagePricingSection } from "@/components/homepage-pricing-section";
 import { HomepageCubeFaceHint } from "@/components/homepage-cube-face-hint";
 
@@ -60,6 +63,8 @@ export function HomepageCubePanel({
       ) : null}
 
       <HomepageAboutSection />
+      <HomepageHowToSection />
+      <HomepageExploreLinks />
 
       {/* OaaS lives on the scrollSnap face so /#oaas works with the flip stack. */}
       <div className="relative z-10 border-t border-border/40">
@@ -67,6 +72,7 @@ export function HomepageCubePanel({
       </div>
 
       <HomepagePricingSection />
+      <HomepageFaqSection />
     </div>
   );
 }

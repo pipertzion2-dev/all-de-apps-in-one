@@ -257,9 +257,9 @@ export default function OrbitPage() {
                 being built. SEO pages, blog posts, and social content are generating now.
               </p>
               <div className="flex flex-col sm:flex-row gap-2 justify-center pt-2">
-                <Link href="/marketing-hub">
+                <Link href="/orbit">
                   <Button className="font-bold" style={{ background: TEAL }}>
-                    <BarChart3 className="w-4 h-4 mr-2" /> View Marketing Hub
+                    <BarChart3 className="w-4 h-4 mr-2" /> Back to Orbit
                   </Button>
                 </Link>
                 <Button
@@ -403,7 +403,7 @@ export default function OrbitPage() {
                 )}
                 {copied ? "Copied!" : "Copy Referral Link"}
               </Button>
-              <Link href="/marketing-hub/referrals">
+              <Link href="/referrals">
                 <Button
                   size="sm"
                   variant="outline"
@@ -420,11 +420,12 @@ export default function OrbitPage() {
         <div className="text-center space-y-3">
           <div className="flex flex-wrap justify-center gap-2">
             {[
-              { label: "Marketing Hub", href: "/marketing-hub" },
+              { label: "Referrals", href: "/referrals" },
               { label: "Blog", href: "/blog" },
               { label: "Tools", href: "/tools" },
               { label: "Docs", href: "/docs" },
               { label: "Seeds", href: "/seeds" },
+              { label: "Events", href: "/events" },
             ].map((l) => (
               <Link
                 key={l.label}

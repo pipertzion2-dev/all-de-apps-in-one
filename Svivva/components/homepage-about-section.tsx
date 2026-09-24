@@ -42,10 +42,12 @@ export function HomepageAboutSection() {
             What is {BRAND.name}?
           </Badge>
           <h1 className="text-2xl font-bold sm:text-3xl">
-            {BRAND.name} — one workspace to <span className="solid-accent">ship AI products</span>
+            {BRAND.name} — AI API builder, Seeds, Orbit SEO &amp; Play
           </h1>
           <p className="mx-auto max-w-2xl text-base text-muted-foreground sm:text-lg">
-            {BRAND.shortDescription}
+            {BRAND.shortDescription} Prompt-to-API shipping with schema validation, versioning, and
+            rollback — plus ZZAI Seeds, Orbit growth automation, Poor Man Protection, and Klean
+            Sneaks on ZZAI Play.
           </p>
         </div>
 
@@ -75,6 +77,12 @@ export function HomepageAboutSection() {
           </a>
           <Link href="/dashboard">
             <Button variant="outline">Open dashboard</Button>
+          </Link>
+          <Link href="/events">
+            <Button variant="outline">ZZAI Show events</Button>
+          </Link>
+          <Link href="/clean-sneaks">
+            <Button variant="outline">Play Klean Sneaks</Button>
           </Link>
         </div>
       </div>

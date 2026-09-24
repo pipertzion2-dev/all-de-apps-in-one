@@ -39,6 +39,9 @@ describe("homepage scroll panels", () => {
     expect(pageSrc).toContain("HomepageCubePanel");
     expect(cubeSrc).toContain("HomepageAboutSection");
     expect(cubeSrc).toContain("HomepagePricingSection");
+    expect(cubeSrc).toContain("HomepageFaqSection");
+    expect(cubeSrc).toContain("HomepageHowToSection");
+    expect(cubeSrc).toContain("HomepageExploreLinks");
     expect(cubeSrc).toContain("HomepageCubeFaceHint");
     expect(cubeSrc).toContain("PlatformFeatureHub");
     expect(cubeSrc).toContain('id="oaas"');

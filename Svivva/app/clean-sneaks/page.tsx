@@ -1,273 +1,85 @@
-"use client";
-
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { isPortraitViewport } from "@/lib/clean-sneaks/run-quality";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { CleanSneaksGame3D } from "@/components/clean-sneaks/CleanSneaksGame3D";
-import { GameLoadingWheels } from "@/components/clean-sneaks/GameLoadingWheels";
-import { GameStartScreen } from "@/components/clean-sneaks/GameStartScreen";
-import { SceneErrorBoundary } from "@/components/clean-sneaks/SceneErrorBoundary";
-import { StealTheBundleCardGame } from "@/components/clean-sneaks/StealTheBundleCardGame";
-import { GameAdBanner, GameAdsEarningsChip } from "@/components/clean-sneaks/ads";
-import { KleanShop, OfflineEarningsHost } from "@/components/clean-sneaks/monetization";
+import type { Metadata } from "next";
 import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
-import { isBundleCardUnlocked } from "@/lib/clean-sneaks/bundle-unlock";
-import type { GamePhase } from "@/lib/clean-sneaks/types";
+import { buildSeoMetadata } from "@/lib/seo/metadata";
+import { JsonLd } from "@/components/seo/json-ld";
+import { faqPageSchema, videoGameSchema } from "@/lib/seo/schema/builders";
+import CleanSneaksGameClient from "./game-client";
 
-type PlayMode = "runner" | "bundle-card";
+const GAME_FAQS = [
+  {
+    q: "What is Klean Sneaks?",
+    a: "Klean Sneaks is a free browser endless runner from ZZAI Play on zzaizzai.com. Keep your kicks clean, chase the old man’s bundle, and unlock Steal Bundle casino mode.",
+  },
+  {
+    q: "Is Klean Sneaks part of zzai zzai?",
+    a: "Yes. It is the entertainment / Play face of the zzai zzai workspace — the same brand as the AI API builder, Seeds, Orbit SEO, and ZZAI Show events.",
+  },
+  {
+    q: "Do I need an account to play?",
+    a: "You can start the runner in the browser without a paid plan. Some shop and casino unlocks may require progress or a free zzai zzai account.",
+  },
+] as const;
 
-const shellStyle = {
-  paddingTop: "env(safe-area-inset-top)",
-  paddingRight: "env(safe-area-inset-right)",
-  paddingBottom: "env(safe-area-inset-bottom)",
-  paddingLeft: "env(safe-area-inset-left)",
-} as const;
+export const metadata: Metadata = buildSeoMetadata({
+  title: `${KLEAN_SNEAKS.title} — free ZZAI Play endless runner game`,
+  description:
+    "Play Klean Sneaks (KLEAN SNEAKS) free in your browser — ZZAI Play endless runner on zzaizzai.com. Keep your kicks clean, steal the old man’s bundle, and unlock Steal Bundle casino mode.",
+  path: "/clean-sneaks",
+  imagePath: "/assets/clean-sneaks/baloon8-sneaker-thumbnail.png",
+});
 
-function CleanSneaksPageContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const beginGameRef = useRef<(() => void) | null>(null);
-  const [sceneAttempt, setSceneAttempt] = useState(0);
-  const [gamePhase, setGamePhase] = useState<GamePhase>("loading");
-  const [portrait, setPortrait] = useState(false);
-  const [playMode, setPlayMode] = useState<PlayMode>("runner");
-  const [bundleUnlocked, setBundleUnlocked] = useState(false);
-  /** Cover "Start" was tapped — do not show the start splash again this visit. */
-  const [introComplete, setIntroComplete] = useState(false);
-  const [shopOpen, setShopOpen] = useState(false);
-
-  const preGame =
-    playMode === "runner" && !introComplete && (gamePhase === "loading" || gamePhase === "start");
-  const immersiveRun =
-    playMode === "runner" &&
-    (gamePhase === "running" ||
-      gamePhase === "paused" ||
-      gamePhase === "countdown" ||
-      gamePhase === "colorPick" ||
-      gamePhase === "walkComplete" ||
-      gamePhase === "casino");
-  const showGameShell = playMode === "bundle-card" || !preGame;
-
-  const registerBegin = useCallback((begin: () => void) => {
-    beginGameRef.current = begin;
-  }, []);
-
-  const handleStart = useCallback(() => {
-    setIntroComplete(true);
-    beginGameRef.current?.();
-  }, []);
-
-  useEffect(() => {
-    const syncViewport = () => setPortrait(isPortraitViewport());
-    syncViewport();
-    window.addEventListener("resize", syncViewport);
-    window.addEventListener("orientationchange", syncViewport);
-    return () => {
-      window.removeEventListener("resize", syncViewport);
-      window.removeEventListener("orientationchange", syncViewport);
-    };
-  }, []);
-
-  useEffect(() => {
-    const unlocked = isBundleCardUnlocked();
-    setBundleUnlocked(unlocked);
-    if (unlocked && searchParams.get("mode") === "bundle") {
-      setPlayMode("bundle-card");
-    }
-  }, [gamePhase, playMode, searchParams]);
-
-  const openBundleCard = useCallback(() => {
-    if (!isBundleCardUnlocked()) return;
-    setPlayMode("bundle-card");
-  }, []);
-
-  return (
-    <div
-      data-svivva-app-shell=""
-      data-clean-sneaks-fullscreen=""
-      className={`fixed inset-0 z-[200] flex h-[100dvh] min-h-[100dvh] w-full flex-col overflow-hidden ${
-        gamePhase === "loading" ? "bg-white" : preGame ? "bg-black" : "bg-[#0a0c10]"
-      }`}
-      style={preGame ? undefined : shellStyle}
-    >
-      {!introComplete &&
-        playMode === "runner" &&
-        (gamePhase === "loading" || gamePhase === "start") && (
-          <GameStartScreen
-            preload={gamePhase === "loading"}
-            onStart={gamePhase === "start" ? handleStart : undefined}
-          />
-        )}
-
-      {gamePhase === "loading" && !introComplete && playMode === "runner" && (
-        <GameLoadingWheels fullscreen />
-      )}
-
-      {!preGame && (
-        <div
-          className="pointer-events-none absolute inset-0 opacity-40"
-          aria-hidden
-          style={{
-            background: `
-              radial-gradient(ellipse 70% 50% at 20% 20%, rgba(91,141,168,0.25), transparent 55%),
-              radial-gradient(ellipse 60% 45% at 85% 75%, rgba(217,79,156,0.18), transparent 50%),
-              linear-gradient(180deg, #0a0c10, #06080c)
-            `,
-          }}
-        />
-      )}
-
-      <div
-        className={`relative flex min-h-0 flex-1 flex-col ${
-          preGame && playMode === "runner" ? "hidden" : "z-30"
-        }`}
-      >
-        {showGameShell && !immersiveRun && (
-          <div
-            className={`flex shrink-0 items-center justify-between gap-2 sm:gap-3 sm:px-6 ${
-              portrait ? "px-2 py-1.5" : "px-4 py-3"
-            }`}
-          >
-            <div>
-              {!portrait && (
-                <p className="text-[10px] uppercase tracking-[0.35em] text-[#5B8DA8]">
-                  ZZAI Play Presents
-                </p>
-              )}
-              <h1
-                className={`seeds-holo-text font-bold ${portrait ? "text-base" : "text-xl sm:text-2xl"}`}
-              >
-                {KLEAN_SNEAKS.display}
-              </h1>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className={
-                  portrait
-                    ? "h-8 px-2.5 text-xs border-[#f7e7b0]/35 text-[#f7e7b0]"
-                    : "border-[#f7e7b0]/35 text-[#f7e7b0]"
-                }
-                onClick={() => setShopOpen(true)}
-                data-testid="button-header-klean-shop"
-              >
-                Shop
-              </Button>
-              {bundleUnlocked && playMode === "runner" && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className={
-                    portrait
-                      ? "h-8 px-2.5 text-xs border-[#d4af37]/40 text-[#ffd76a]"
-                      : "border-[#d4af37]/40 text-[#ffd76a]"
-                  }
-                  onClick={openBundleCard}
-                  data-testid="button-header-steal-bundle"
-                >
-                  Casino
-                </Button>
-              )}
-              <Button
-                variant="outline"
-                size={portrait ? "sm" : "sm"}
-                className={portrait ? "h-8 px-2.5 text-xs" : undefined}
-                asChild
-                data-testid="button-clean-sneaks-back"
-              >
-                <Link href="/#clean-sneaks">Exit</Link>
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {showGameShell && !immersiveRun && (
-          <div className={`shrink-0 ${portrait ? "px-1.5 pb-1" : "px-3 pb-2 sm:px-6"}`}>
-            <GameAdBanner compact={portrait} />
-            <GameAdsEarningsChip className="mt-1 text-right" />
-          </div>
-        )}
-
-        <div
-          className={`flex min-h-0 flex-1 flex-col ${
-            preGame && playMode === "runner"
-              ? ""
-              : portrait
-                ? "px-1.5 pb-1.5"
-                : "px-3 pb-3 sm:px-6 sm:pb-6"
-          }`}
-        >
-          <SceneErrorBoundary
-            key={sceneAttempt}
-            fallback={
-              <div className="fixed inset-0 z-[300] flex flex-col items-center justify-center bg-white px-6 text-center">
-                <div className="max-w-md space-y-4">
-                  <p className="text-[10px] uppercase tracking-[0.35em] text-[#5B8DA8]">
-                    {KLEAN_SNEAKS.title}
-                  </p>
-                  <h1 className="text-xl font-bold text-[#1a3040]">Game couldn&apos;t load</h1>
-                  <p className="text-sm leading-relaxed text-[#1a3040]/70">
-                    Tap retry to reload the game engine.
-                  </p>
-                  <div className="flex flex-col gap-2">
-                    <Button
-                      type="button"
-                      className="bg-[#5B8DA8] text-white"
-                      onClick={() => setSceneAttempt((n) => n + 1)}
-                    >
-                      Try again
-                    </Button>
-                    <Button type="button" variant="ghost" className="text-[#1a3040]/80" asChild>
-                      <Link href="/#clean-sneaks">Back to homepage</Link>
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            }
-          >
-            {playMode === "bundle-card" && bundleUnlocked ? (
-              <StealTheBundleCardGame
-                onBack={() => setPlayMode("runner")}
-                onNewWalk={() => {
-                  setPlayMode("runner");
-                  setSceneAttempt((n) => n + 1);
-                }}
-              />
-            ) : (
-              <CleanSneaksGame3D
-                key={sceneAttempt}
-                active
-                fullscreen
-                style={shellStyle}
-                onPhaseChange={setGamePhase}
-                onRegisterBegin={registerBegin}
-                onPlayBundleCard={openBundleCard}
-                onExit={() => router.push("/#clean-sneaks")}
-              />
-            )}
-          </SceneErrorBoundary>
-        </div>
-      </div>
-
-      <OfflineEarningsHost />
-      <KleanShop open={shopOpen} onClose={() => setShopOpen(false)} />
-    </div>
-  );
-}
-
+/** AdSense script loads sitewide from root layout when NEXT_PUBLIC_ADSENSE_CLIENT is set. */
 export default function CleanSneaksPage() {
+  const faq = faqPageSchema([...GAME_FAQS]);
+
   return (
-    <Suspense
-      fallback={
-        <div className="fixed inset-0 z-[200] flex h-[100dvh] items-center justify-center bg-white">
-          <GameLoadingWheels fullscreen />
-        </div>
-      }
-    >
-      <CleanSneaksPageContent />
-    </Suspense>
+    <>
+      <JsonLd data={[videoGameSchema(), ...(faq ? [faq] : [])]} />
+      {/* Crawlable product copy for indexing — game UI mounts above as a fixed shell. */}
+      <article className="mx-auto max-w-3xl px-4 py-10 text-foreground">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#5B8DA8]">
+          ZZAI Play · Entertainment
+        </p>
+        <h1 className="mt-2 text-3xl font-bold">{KLEAN_SNEAKS.title} — free endless runner</h1>
+        <p className="mt-3 text-base leading-relaxed text-muted-foreground">
+          {KLEAN_SNEAKS.display} is the browser game from zzai zzai’s Play face: run the streets,
+          keep your sneakers clean, and chase the old man’s bundle. Part of the same product
+          workspace as the AI API builder, Seeds, Orbit SEO, and{" "}
+          <a href="/events" className="text-[#5B8DA8] underline-offset-2 hover:underline">
+            ZZAI Show events
+          </a>
+          .
+        </p>
+        <ul className="mt-4 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+          <li>
+            <a href="/" className="text-[#5B8DA8] hover:underline">
+              zzai zzai home
+            </a>
+          </li>
+          <li>
+            <a href="/events" className="text-[#5B8DA8] hover:underline">
+              ZZAI Show events
+            </a>
+          </li>
+          <li>
+            <a href="/tools" className="text-[#5B8DA8] hover:underline">
+              Free tools directory
+            </a>
+          </li>
+        </ul>
+        <section className="mt-8 space-y-3" aria-labelledby="klean-faq">
+          <h2 id="klean-faq" className="text-xl font-semibold">
+            Klean Sneaks FAQ
+          </h2>
+          {GAME_FAQS.map((item) => (
+            <details key={item.q} className="rounded-lg border border-border/50 p-3">
+              <summary className="cursor-pointer text-sm font-medium">{item.q}</summary>
+              <p className="mt-2 text-sm text-muted-foreground">{item.a}</p>
+            </details>
+          ))}
+        </section>
+      </article>
+      <CleanSneaksGameClient />
+    </>
   );
 }

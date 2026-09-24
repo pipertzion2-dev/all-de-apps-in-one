@@ -184,6 +184,19 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
         oneLiner: "Brand audio, stems, and sonic identity.",
       },
       {
+        id: "klean-sneaks",
+        name: "Klean Sneaks",
+        path: "/clean-sneaks",
+        oneLiner: "Free ZZAI Play endless runner — keep your kicks clean in the browser.",
+        audience: "players and entertainment visitors",
+      },
+      {
+        id: "events",
+        name: "ZZAI Show events",
+        path: "/events",
+        oneLiner: "Live and on-demand product drops, Play sessions, and community showcases.",
+      },
+      {
         id: "orbit",
         name: "Orbit",
         path: "/orbit",
@@ -334,6 +347,16 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
         why: "Growth + AEO/SEO autopilot",
       },
       {
+        title: "Klean Sneaks",
+        path: "/clean-sneaks",
+        why: "ZZAI Play entertainment — indexable game URL",
+      },
+      {
+        title: "ZZAI Show events",
+        path: "/events",
+        why: "Public events / entertainment hub",
+      },
+      {
         title: "ZZAI Play",
         path: "/play",
         why: "Audio / sonic branding face",
@@ -404,6 +427,14 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       {
         q: "What happens if my endpoint returns bad data?",
         a: "ZZAI validates every response against your JSON schema and automatically retries or repairs malformed outputs. If quality drops below your threshold, auto-rollback reverts to the last good version.",
+      },
+      {
+        q: "What is Klean Sneaks?",
+        a: "Klean Sneaks is a free browser endless runner from ZZAI Play at /clean-sneaks on zzaizzai.com — the entertainment face of the same zzai zzai workspace as the AI API builder and Orbit SEO.",
+      },
+      {
+        q: "What is ZZAI Show / events?",
+        a: "ZZAI Show is the public events hub at /events — live and on-demand product drops, Play sessions, and community showcases. Creators can open the Show console after signing in.",
       },
     ],
   };

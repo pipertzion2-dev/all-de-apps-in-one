@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { buildSeoMetadata } from "@/lib/seo/metadata";
+import { JsonLd } from "@/components/seo/json-ld";
+import { faqPageSchema, webPageSchema } from "@/lib/seo/schema/builders";
 import {
   Zap,
   Shield,
@@ -203,8 +205,20 @@ export default async function LandingPage({ params }: { params: Promise<{ slug: 
     );
   }
 
+  const faqLd = faqPageSchema(page.faqs.map((f) => ({ q: f.question, a: f.answer })));
+
   return (
     <div className="min-h-screen bg-[#0a0f14] text-white">
+      <JsonLd
+        data={[
+          webPageSchema({
+            name: page.metaTitle,
+            description: page.metaDescription,
+            path: `/lp/${slug}`,
+          }),
+          ...(faqLd ? [faqLd] : []),
+        ]}
+      />
       <nav className="w-full border-b border-white/10 bg-[#0a0f14]/90 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-4 px-6 py-4">
           <Link href="/" data-testid="link-home-logo">
