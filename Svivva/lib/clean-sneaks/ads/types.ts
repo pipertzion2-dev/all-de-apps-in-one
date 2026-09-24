@@ -13,6 +13,8 @@ export type HouseCreative = {
   cta: string;
   href: string;
   accent: string;
+  /** Full-bleed creative image so house ads never look like an empty box. */
+  imageUrl: string;
 };
 
 export type AdEarningsSnapshot = {

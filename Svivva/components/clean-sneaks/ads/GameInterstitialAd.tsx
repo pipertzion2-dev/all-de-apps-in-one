@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +12,7 @@ import {
   resolveAdNetwork,
 } from "@/lib/clean-sneaks/ads";
 import { AdSenseSlot } from "./AdSenseSlot";
+import { HouseAdCreative } from "./HouseAdCreative";
 
 type Props = {
   requestOpen: boolean;
@@ -157,24 +157,13 @@ export function GameInterstitialAd({ requestOpen, onComplete }: Props) {
         )}
 
         {showHouse ? (
-          <div className="mt-4 rounded-lg border border-white/10 p-5 text-center">
-            <p className="text-lg font-medium" style={{ color: creative.accent }}>
-              {creative.headline}
-            </p>
-            <p className="mt-2 text-sm text-white/60">{creative.body}</p>
-            <Button
-              className="mt-5"
-              style={{ background: creative.accent, color: "#0a0c10" }}
-              asChild
-            >
-              <Link
-                href={creative.href}
-                onClick={() => finish(true)}
-                data-testid="interstitial-cta"
-              >
-                {creative.cta}
-              </Link>
-            </Button>
+          <div className="mt-4">
+            <HouseAdCreative
+              creative={creative}
+              variant="featured"
+              onCtaClick={() => finish(true)}
+              data-testid="interstitial-house-ad"
+            />
           </div>
         ) : (
           <div className={showChrome ? "mt-4 min-h-[180px]" : "min-h-[180px]"}>
