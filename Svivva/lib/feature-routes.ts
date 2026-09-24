@@ -27,7 +27,11 @@ export function isPublicFeaturePath(pathname: string): boolean {
 export function featureTitleFromPath(pathname: string): string {
   if (pathname.startsWith("/play")) return "ZZAI Play";
   if (pathname.startsWith("/seeds")) return "ZZAI Seeds";
-  if (pathname.startsWith("/dashboard/orbit") || pathname.startsWith("/orbit") || pathname.startsWith("/dashboard/launchpad")) {
+  if (
+    pathname.startsWith("/dashboard/orbit") ||
+    pathname.startsWith("/orbit") ||
+    pathname.startsWith("/dashboard/launchpad")
+  ) {
     return "Marketing Orbit";
   }
   if (pathname.startsWith("/dashboard/billing")) return "Plans & Billing";
