@@ -578,13 +578,17 @@ export default function LandingPage() {
           >
             <div
               ref={scrollHintBounceRef}
-              className="flex flex-col items-center gap-1 rounded-full bg-white/85 px-5 py-2.5 shadow-sm ring-1 ring-black/5 backdrop-blur-sm"
+              className="flex flex-col items-center gap-1 rounded-full bg-white/85 px-5 py-2.5 shadow-sm ring-1 ring-black/5 backdrop-blur-sm max-w-[min(92vw,22rem)]"
               style={{ animation: "scrollBounce 1.5s ease-in-out 0s infinite" }}
+              data-testid="text-intro-swipe-cube-twice"
             >
               <span
-                className="text-sm font-medium text-gray-700"
+                className="text-center text-sm font-medium leading-snug text-gray-700"
                 style={{ fontFamily: "'Zc', sans-serif" }}
               >
+                Swipe the cube twice to go to the main homepage
+              </span>
+              <span className="text-[10px] uppercase tracking-[0.2em] text-gray-500">
                 Scroll to enter
               </span>
               <svg
