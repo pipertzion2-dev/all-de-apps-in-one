@@ -180,8 +180,21 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       {
         id: "play",
         name: "ZZAI Play",
-        path: "/play",
-        oneLiner: "Brand audio, stems, and sonic identity.",
+        path: "/clean-sneaks",
+        oneLiner: "Klean Sneaks endless runner + sonic branding on the Play face.",
+      },
+      {
+        id: "klean-sneaks",
+        name: "Klean Sneaks",
+        path: "/clean-sneaks",
+        oneLiner: "Free ZZAI Play endless runner — keep your kicks clean in the browser.",
+        audience: "players and entertainment visitors",
+      },
+      {
+        id: "events",
+        name: "ZZAI Show events",
+        path: "/events",
+        oneLiner: "Live and on-demand product drops, Play sessions, and community showcases.",
       },
       {
         id: "orbit",
@@ -238,23 +251,38 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
         oneLiner: "Guides on APIs, AI, SEO, and shipping with ZZAI.",
       },
     ],
-    cubeFaces: faces.map((f) => ({
-      id: f.id,
-      name: f.name,
-      path: f.href,
-      role:
+    cubeFaces: faces.map((f) => {
+      /** Indexable public URLs for AEO/llms — never cite noindex dashboard or /play. */
+      const citationPath =
         f.id === "seeds"
-          ? "Seed the product — brief becomes an app suite"
+          ? "/seeds"
           : f.id === "api"
-            ? "Signal — production API with schema and evals"
+            ? "/lp/ai-api-builder"
             : f.id === "hardware"
-              ? "Crest — schematics, BOM, manufacturing"
+              ? "/lp/ai-app-generator"
               : f.id === "play"
-                ? "Aux — sonic branding"
+                ? "/clean-sneaks"
                 : f.id === "orbit"
-                  ? "Grow — SEO, indexing, launch automation"
-                  : "Protect — seals and court packs",
-    })),
+                  ? "/orbit"
+                  : "/events";
+      return {
+        id: f.id,
+        name: f.name,
+        path: citationPath,
+        role:
+          f.id === "seeds"
+            ? "Seed the product — brief becomes an app suite"
+            : f.id === "api"
+              ? "Signal — production API with schema and evals"
+              : f.id === "hardware"
+                ? "Crest — schematics, BOM, manufacturing"
+                : f.id === "play"
+                  ? "Aux — Play entertainment (Klean Sneaks) + sonic branding"
+                  : f.id === "orbit"
+                    ? "Grow — SEO, indexing, launch automation"
+                    : "Protect — seals and court packs",
+      };
+    }),
     buses: MIXING_BUSES.map((b) => ({
       id: b.id,
       label: b.label,
@@ -334,9 +362,14 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
         why: "Growth + AEO/SEO autopilot",
       },
       {
-        title: "ZZAI Play",
-        path: "/play",
-        why: "Audio / sonic branding face",
+        title: "Klean Sneaks / ZZAI Play",
+        path: "/clean-sneaks",
+        why: "Indexable Play / entertainment URL (browser game)",
+      },
+      {
+        title: "ZZAI Show events",
+        path: "/events",
+        why: "Public events / entertainment hub",
       },
       {
         title: "Blog",
@@ -404,6 +437,14 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       {
         q: "What happens if my endpoint returns bad data?",
         a: "ZZAI validates every response against your JSON schema and automatically retries or repairs malformed outputs. If quality drops below your threshold, auto-rollback reverts to the last good version.",
+      },
+      {
+        q: "What is Klean Sneaks?",
+        a: "Klean Sneaks is a free browser endless runner from ZZAI Play at /clean-sneaks on zzaizzai.com — the entertainment face of the same zzai zzai workspace as the AI API builder and Orbit SEO.",
+      },
+      {
+        q: "What is ZZAI Show / events?",
+        a: "ZZAI Show is the public events hub at /events — live and on-demand product drops, Play sessions, and community showcases. Creators can open the Show console after signing in.",
       },
     ],
   };

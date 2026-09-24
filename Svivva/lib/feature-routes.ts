@@ -7,11 +7,11 @@ import {
 
 export { isAdminCodeFirstPath, isDashboardGuestPath };
 
-/** Public landing routes for each cube face — no account required to browse. */
+/** Public landing routes for each cube face — prefer indexable URLs when a public page exists. */
 export const FEATURE_PUBLIC_PATHS: Record<FeatureId, string> = {
   play: "/play",
   seeds: "/seeds",
-  orbit: "/dashboard/orbit",
+  orbit: "/orbit",
   security: "/dashboard/poor-man-protection",
   api: "/dashboard/api-builder",
   hardware: "/dashboard/hardware-builder",
@@ -27,7 +27,11 @@ export function isPublicFeaturePath(pathname: string): boolean {
 export function featureTitleFromPath(pathname: string): string {
   if (pathname.startsWith("/play")) return "ZZAI Play";
   if (pathname.startsWith("/seeds")) return "ZZAI Seeds";
-  if (pathname.startsWith("/dashboard/orbit") || pathname.startsWith("/dashboard/launchpad")) {
+  if (
+    pathname.startsWith("/dashboard/orbit") ||
+    pathname.startsWith("/orbit") ||
+    pathname.startsWith("/dashboard/launchpad")
+  ) {
     return "Marketing Orbit";
   }
   if (pathname.startsWith("/dashboard/billing")) return "Plans & Billing";

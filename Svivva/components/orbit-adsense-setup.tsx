@@ -173,7 +173,9 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
         </div>
         <div className="flex items-center gap-2 text-[11px]">
           <Dot ok={autoAdsReady} />
-          <span className={autoAdsReady ? "text-emerald-600 font-semibold" : "text-muted-foreground"}>
+          <span
+            className={autoAdsReady ? "text-emerald-600 font-semibold" : "text-muted-foreground"}
+          >
             {autoAdsReady ? "Site ads live" : "Not connected"}
           </span>
           <Button
@@ -223,8 +225,9 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
             <Dot ok={autoAdsReady} /> Privacy &amp; messaging
           </p>
           <p className="text-muted-foreground mt-0.5 leading-snug">
-            Consent Mode is on-site. Publish <strong className="text-foreground">Three-Choice</strong>{" "}
-            in AdSense for EEA/UK (see gold box).
+            Consent Mode is on-site. Publish{" "}
+            <strong className="text-foreground">Three-Choice</strong> in AdSense for EEA/UK (see
+            gold box).
           </p>
         </div>
       </div>
@@ -464,14 +467,8 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
           <code className="font-mono font-semibold">
             {status?.adsense?.clientId || SITE_ADSENSE_CLIENT}
           </code>
-          {!inGameReady ? (
-            <>
-              {" "}
-              — Auto ads only until you save slot ids for in-game units.
-            </>
-          ) : null}
-          . Earnings
-          appear in your{" "}
+          {!inGameReady ? <> — Auto ads only until you save slot ids for in-game units.</> : null}.
+          Earnings appear in your{" "}
           <a
             href="https://www.google.com/adsense/"
             target="_blank"

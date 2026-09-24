@@ -14,7 +14,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { BRAND } from "@/lib/brand";
 import { MEDIA } from "@/lib/media-assets";
 import { adsenseRuntimeInlineScript, getAdsenseRuntimeConfig } from "@/lib/adsense-runtime";
-import { homepageJsonLdGraph } from "@/lib/seo/schema/builders";
+import { siteWideJsonLdGraph } from "@/lib/seo/schema/builders";
 
 const zcFont = localFont({
   src: "../media/fonts/Zc-Regular.ttf",
@@ -57,9 +57,9 @@ export async function generateMetadata(): Promise<Metadata> {
     } catch {}
   }
 
-  const title = "zzai zzai — From seed to symphony";
+  const title = "zzai zzai — AI API builder, Seeds, Orbit SEO & Klean Sneaks";
   const description =
-    "zzai zzai (ZZAI / zzaizzai.com) — From seed to symphony. One workspace to describe what you want, ship it with guardrails across software, hardware, growth, and IP protection — without babysitting infrastructure.";
+    "zzai zzai (ZZAI / zzaizzai.com) — From seed to symphony. AI API builder with schema validation, ZZAI Seeds, Orbit SEO/AEO, ZZAI Show events, and Klean Sneaks on ZZAI Play.";
 
   return {
     title: {
@@ -75,7 +75,11 @@ export async function generateMetadata(): Promise<Metadata> {
       "prompt to API",
       "OaaS",
       "ZZAI Seeds",
+      "Orbit SEO",
       "Poor Man Protection",
+      "Klean Sneaks",
+      "ZZAI Show",
+      "ZZAI Play",
     ],
     openGraph: {
       type: "website",
@@ -146,7 +150,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(homepageJsonLdGraph()),
+            __html: JSON.stringify(siteWideJsonLdGraph()),
           }}
         />
         <link rel="alternate" type="text/plain" href="/llms.txt" title="llms.txt" />

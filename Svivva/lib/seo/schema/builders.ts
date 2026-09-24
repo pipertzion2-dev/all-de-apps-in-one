@@ -158,7 +158,88 @@ export function webPageSchema(input: { name: string; description: string; path: 
   };
 }
 
-/** Full homepage JSON-LD graph — Organization + WebSite + SoftwareApplication + FAQ. */
+/** Klean Sneaks / ZZAI Play entertainment surface. */
+export function videoGameSchema(input?: {
+  name?: string;
+  description?: string;
+  path?: string;
+  imagePath?: string;
+}) {
+  const name = input?.name ?? "Klean Sneaks";
+  const path = input?.path ?? "/clean-sneaks";
+  return {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    name,
+    alternateName: ["KLEAN SNEAKS", "Clean Sneaks"],
+    description:
+      input?.description ??
+      "ZZAI Play endless runner — keep your kicks clean, steal the old man's bundle, and unlock Steal Bundle casino mode.",
+    url: absoluteUrl(path),
+    image: absoluteUrl(input?.imagePath ?? "/assets/clean-sneaks/baloon8-sneaker-thumbnail.png"),
+    applicationCategory: "GameApplication",
+    genre: ["Endless runner", "Arcade", "Casual"],
+    gamePlatform: "Web browser",
+    operatingSystem: "Web",
+    playMode: "SinglePlayer",
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+    publisher: { "@id": ORG_ID() },
+    isPartOf: { "@type": "WebSite", url: getSiteUrl(), name: "zzai zzai" },
+  };
+}
+
+/** Public ZZAI Show / events entertainment page. */
+export function eventSeriesSchema(input?: { name?: string; description?: string; path?: string }) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "EventSeries",
+    name: input?.name ?? "ZZAI Show",
+    description:
+      input?.description ??
+      "Live and on-demand zzai zzai events — product drops, Play sessions, and community showcases on zzaizzai.com.",
+    url: absoluteUrl(input?.path ?? "/events"),
+    organizer: { "@id": ORG_ID() },
+    eventAttendanceMode: "https://schema.org/OnlineEventAttendanceMode",
+    location: {
+      "@type": "VirtualLocation",
+      url: absoluteUrl(input?.path ?? "/events"),
+    },
+  };
+}
+
+/** Shared HowTo steps — keep in sync with homepage HowTo HTML. */
+export const HOMEPAGE_HOWTO_STEPS = [
+  {
+    name: "Describe your API",
+    text: "Write what you want your API to do in plain English — no code required.",
+  },
+  {
+    name: "Define your output schema",
+    text: "Set the JSON structure you expect back. ZZAI will enforce and validate it on every call.",
+  },
+  {
+    name: "Auto-generate evaluations",
+    text: "ZZAI writes up to 200 test cases automatically — edge cases, adversarial inputs, and boundary conditions.",
+  },
+  {
+    name: "Deploy your endpoint",
+    text: "One click publishes a live, auto-scaling API endpoint with full OpenAPI documentation.",
+  },
+  {
+    name: "Monitor and rollback",
+    text: "Watch latency, success rate, and token costs in real time. Enable auto-rollback for hands-free quality control.",
+  },
+] as const;
+
+/**
+ * Site-wide graph for the root layout — Organization + WebSite only.
+ * FAQ / HowTo / SoftwareApplication belong on `/` so they match visible content.
+ */
+export function siteWideJsonLdGraph() {
+  return [organizationSchema(), websiteSchema()];
+}
+
+/** Full homepage JSON-LD graph — Organization + WebSite + SoftwareApplication + FAQ + HowTo. */
 export function homepageJsonLdGraph() {
   const k = getBrandKnowledge();
   const faq = faqPageSchema(k.faqs);
@@ -176,28 +257,7 @@ export function homepageJsonLdGraph() {
       name: "How to ship with ZZAI",
       description:
         "Build a production-ready endpoint from a plain-language prompt with ZZAI — schema validation, evaluations, and rollback included.",
-      steps: [
-        {
-          name: "Describe your API",
-          text: "Write what you want your API to do in plain English — no code required.",
-        },
-        {
-          name: "Define your output schema",
-          text: "Set the JSON structure you expect back. ZZAI will enforce and validate it on every call.",
-        },
-        {
-          name: "Auto-generate evaluations",
-          text: "ZZAI writes up to 200 test cases automatically — edge cases, adversarial inputs, and boundary conditions.",
-        },
-        {
-          name: "Deploy your endpoint",
-          text: "One click publishes a live, auto-scaling API endpoint with full OpenAPI documentation.",
-        },
-        {
-          name: "Monitor and rollback",
-          text: "Watch latency, success rate, and token costs in real time. Enable auto-rollback for hands-free quality control.",
-        },
-      ],
+      steps: [...HOMEPAGE_HOWTO_STEPS],
     }),
   ];
 }

@@ -4,7 +4,10 @@ import { resolve } from "path";
 
 describe("Orbit mission control GSC sitemap sync", () => {
   it("marks tech-gsc-sitemap done when GSC reports sitemap registered", () => {
-    const ui = readFileSync(resolve(__dirname, "../../components/orbit-mission-control.tsx"), "utf8");
+    const ui = readFileSync(
+      resolve(__dirname, "../../components/orbit-mission-control.tsx"),
+      "utf8",
+    );
     expect(ui).toContain('case "tech-gsc-sitemap"');
     expect(ui).toContain("gscSitemapRegistered");
   });

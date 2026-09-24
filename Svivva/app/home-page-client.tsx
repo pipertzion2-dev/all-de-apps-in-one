@@ -667,10 +667,10 @@ export default function LandingPage() {
                   <span className="seeds-holo-text text-xs font-bold tracking-wide">Play</span>
                 </Link>
                 <Link
-                  href="/dashboard/zzai-show"
+                  href="/events"
                   className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-muted/50 transition-colors"
                   data-testid="link-nav-events"
-                  title="ZZAI Show event tracker"
+                  title="ZZAI Show events"
                 >
                   <Mic2 className="w-3.5 h-3.5 text-[#5B8DA8]" />
                   <span className="text-xs font-bold tracking-wide text-foreground/90">Events</span>
@@ -861,7 +861,7 @@ export default function LandingPage() {
               {showHomepageSection("eventTracker") && (
                 <section id="event-tracker" className="pb-6 sm:pb-8 relative z-10">
                   <div className="max-w-5xl mx-auto px-4 sm:px-6">
-                    <Link href="/dashboard/zzai-show">
+                    <Link href="/events">
                       <div
                         className="rounded-2xl border-2 p-5 sm:p-6 cursor-pointer hover:opacity-90 active:scale-[0.99] transition-all shadow-lg shadow-[#5B8DA8]/10"
                         style={{
@@ -2044,11 +2044,8 @@ export default function LandingPage() {
                         </Link>
                       </li>
                       <li>
-                        <Link
-                          href="/dashboard/zzai-show"
-                          className="hover:text-foreground transition-colors"
-                        >
-                          Event tracker (ZZAI Show)
+                        <Link href="/events" className="hover:text-foreground transition-colors">
+                          Events (ZZAI Show)
                         </Link>
                       </li>
                       <li>

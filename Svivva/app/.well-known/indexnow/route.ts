@@ -1,18 +1,18 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { seedCredentials } from "@/lib/schema";
-import { sql } from "drizzle-orm";
+import { getActiveIndexNowKey } from "@/lib/indexing/indexnow-key";
 
+/**
+ * IndexNow discovery endpoint — some engines probe `/.well-known/indexnow`.
+ * Must return the same active key as `/{key}.txt` (env or seed_credentials).
+ */
 export async function GET() {
   try {
-    const rows = await db.execute(sql`SELECT indexnow_key FROM seed_credentials LIMIT 1`);
-    const row = (rows as unknown as any[])[0];
-    const key = row?.indexnow_key;
+    const key = await getActiveIndexNowKey();
     if (!key) return new NextResponse("Not configured", { status: 404 });
     return new NextResponse(key, {
       headers: {
         "Content-Type": "text/plain; charset=utf-8",
-        "Cache-Control": "public, max-age=86400",
+        "Cache-Control": "public, max-age=3600",
       },
     });
   } catch {
