@@ -320,9 +320,10 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
           </Button>
         </div>
         <p className="text-[10px] text-muted-foreground leading-relaxed">
-          Blank ads mean Google returned no creative (or the same Display unit was pasted into
-          banner + interstitial + rewarded). Create <strong>three separate</strong> Display units in
-          AdSense and paste distinct slot IDs below — never reuse one ID.
+          Google pays when AdSense has inventory. Until then (and whenever a unit is blank), Klean
+          Sneaks shows ZZAI house ads so players always see a creative. Create{" "}
+          <strong>three separate</strong> Display units in AdSense and paste distinct slot IDs below
+          — never reuse one ID — to unlock paid fills for banner / interstitial / rewarded.
         </p>
       </div>
 
