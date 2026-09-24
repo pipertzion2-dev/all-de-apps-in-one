@@ -80,11 +80,11 @@ export function adsEnabled(): boolean {
 }
 
 /**
- * House/sponsor creatives only when explicitly allowed — never the default
- * path for “get paid” monetization.
+ * House/sponsor creatives — on by default so players always see an ad when
+ * Google has no fill. Set NEXT_PUBLIC_CLEAN_SNEAKS_HOUSE_ADS=0 to disable.
  */
 export function houseAdsAllowed(): boolean {
-  return process.env.NEXT_PUBLIC_CLEAN_SNEAKS_HOUSE_ADS === "1";
+  return process.env.NEXT_PUBLIC_CLEAN_SNEAKS_HOUSE_ADS !== "0";
 }
 
 /** True when Google AdSense publisher id is configured (real paid network). */
@@ -113,8 +113,8 @@ export function adsenseUnitReady(placement: AdPlacementId): boolean {
 }
 
 /**
- * Prefer AdSense for in-game units only when a slot id exists.
- * Publisher id without slots still loads Auto ads via layout — do not open empty unit UI.
+ * Prefer paid AdSense when a valid unit is ready; otherwise show house creatives
+ * so the player always sees an ad (Google inventory is often empty on new sites).
  */
 export function resolveAdNetwork(placement: AdPlacementId): "adsense" | "house" | "unconfigured" {
   if (!adsEnabled()) return "unconfigured";
@@ -132,7 +132,7 @@ export const REWARDED_CREDITS = 75;
 export const REWARDED_COOLDOWN_MS = 90_000;
 export const INTERSTITIAL_COOLDOWN_MS = 45_000;
 
-/** Direct / house sponsors — opt-in only via NEXT_PUBLIC_CLEAN_SNEAKS_HOUSE_ADS=1. */
+/** Direct / house sponsors — shown when Google has no fill (default on). */
 export const HOUSE_CREATIVES: readonly HouseCreative[] = [
   {
     id: "zzai-tools",

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   canShowPlacement,
+  houseAdsAllowed,
   markAdCooldown,
   pickHouseCreative,
   recordAdEvent,
@@ -33,7 +34,8 @@ type Props = {
 /**
  * JOB/MISSION style dual CTA:
  * [CLAIM base] always available
- * [WATCH AD — CLAIM bonus] opt-in; grants only after a real filled ad completes.
+ * [WATCH AD — CLAIM bonus] opt-in; shows Google when it fills, otherwise a ZZAI house ad
+ * so players always see a real creative (never a blank white box).
  */
 export function RewardClaimModal({
   open,
@@ -48,9 +50,15 @@ export function RewardClaimModal({
   const [progress, setProgress] = useState(0);
   const [done, setDone] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  /** null = waiting; true = Google filled; false = blank / unfilled */
+  /** null = waiting; true = Google filled; false = unfilled */
   const [adsenseFilled, setAdsenseFilled] = useState<boolean | null>(null);
-  const network = resolveAdNetwork("rewarded_credits");
+  const [forceHouse, setForceHouse] = useState(false);
+  const preferred = resolveAdNetwork("rewarded_credits");
+  const network: "adsense" | "house" | "unconfigured" = forceHouse
+    ? "house"
+    : preferred === "unconfigured" && houseAdsAllowed()
+      ? "house"
+      : preferred;
   const creative = useMemo(() => pickHouseCreative(Date.now() + 3), [open]);
 
   useEffect(() => {
@@ -60,26 +68,34 @@ export function RewardClaimModal({
       setDone(false);
       setMessage(null);
       setAdsenseFilled(null);
+      setForceHouse(false);
     } else if (offer) {
       trackMonetization("rewarded_ad_offered", { context: offer.context, offerId: offer.offerId });
     }
   }, [open, offer]);
 
-  // Blank AdSense → abort watch (never leave a white box or grant bonus for nothing).
+  // Blank AdSense → house creative (player still sees an ad and can earn the bonus).
   useEffect(() => {
-    if (!watching || network !== "adsense") return;
+    if (!watching || preferred !== "adsense" || forceHouse) return;
     if (adsenseFilled !== false) return;
+    if (houseAdsAllowed()) {
+      setForceHouse(true);
+      setAdsenseFilled(null);
+      recordAdEvent({ placement: "rewarded_credits", kind: "impression", network: "house" });
+      trackMonetization("rewarded_ad_failed", { reason: "adsense_unfilled_house_fallback" });
+      return;
+    }
     setWatching(false);
     setProgress(0);
     setDone(false);
     setAdsenseFilled(null);
     setMessage("Ad didn’t load — claim your normal reward.");
     trackMonetization("rewarded_ad_failed", { reason: "adsense_unfilled" });
-  }, [watching, network, adsenseFilled]);
+  }, [watching, preferred, adsenseFilled, forceHouse]);
 
   useEffect(() => {
     if (!watching || done) return;
-    // AdSense: only run the watch timer after a real fill (no bonus for blank white).
+    // AdSense path: wait for fill (or house fallback) before starting the watch timer.
     if (network === "adsense" && adsenseFilled !== true) return;
 
     const started = Date.now();
@@ -140,6 +156,7 @@ export function RewardClaimModal({
       return;
     }
     setAdsenseFilled(null);
+    setForceHouse(network === "house");
     setProgress(0);
     setDone(false);
     setWatching(true);
@@ -181,6 +198,7 @@ export function RewardClaimModal({
 
   const baseText = offer?.baseLabel || "CLAIM";
   const adText = offer?.adLabel || "WATCH AD";
+  const showHouse = network === "house";
   const showAdsenseChrome = network === "adsense" && adsenseFilled === true;
   const waitingForFill = network === "adsense" && watching && adsenseFilled !== true;
 
@@ -229,9 +247,22 @@ export function RewardClaimModal({
             <p className="text-xs text-[#e8dcc0]/65">
               Bonus if completed: {offer ? describeLines(offer.previewLines) : ""}
             </p>
-            {network === "adsense" ? (
+            {showHouse ? (
+              <div
+                className="rounded-lg border border-white/10 p-4"
+                style={{ borderColor: `${creative.accent}55` }}
+                data-testid="reward-house-ad"
+              >
+                <p className="text-[9px] uppercase tracking-[0.28em] text-white/40">
+                  Advertisement
+                </p>
+                <p className="mt-2 text-sm font-medium" style={{ color: creative.accent }}>
+                  {creative.headline}
+                </p>
+                <p className="mt-1 text-xs text-white/55">{creative.body}</p>
+              </div>
+            ) : (
               <>
-                {/* Probe loads off-screen until filled; never reserve a white box here. */}
                 {adsenseFilled !== false && (
                   <AdSenseSlot
                     placement="rewarded_credits"
@@ -248,16 +279,6 @@ export function RewardClaimModal({
                   </p>
                 )}
               </>
-            ) : (
-              <div
-                className="rounded-lg border border-white/10 p-4"
-                style={{ borderColor: `${creative.accent}55` }}
-              >
-                <p className="text-sm font-medium" style={{ color: creative.accent }}>
-                  {creative.headline}
-                </p>
-                <p className="mt-1 text-xs text-white/55">{creative.body}</p>
-              </div>
             )}
             <div className="h-2 overflow-hidden rounded-full bg-white/10">
               <div
@@ -281,6 +302,7 @@ export function RewardClaimModal({
                 setProgress(0);
                 setDone(false);
                 setAdsenseFilled(null);
+                setForceHouse(false);
                 trackMonetization("rewarded_ad_failed", { reason: "closed_early" });
               }}
             >

@@ -41,18 +41,18 @@ describe("clean-sneaks advertising", () => {
   });
 
   it("uses AdSense only when a display slot id is configured", () => {
-    // Publisher id alone (site default) is for Auto ads — unit UI stays quiet.
-    expect(resolveAdNetwork("menu_banner")).toBe("unconfigured");
-    expect(resolveAdNetwork("run_interstitial")).toBe("unconfigured");
+    // No slot → house fallback (players still see an ad).
+    expect(resolveAdNetwork("menu_banner")).toBe("house");
+    expect(resolveAdNetwork("run_interstitial")).toBe("house");
   });
 
   it("uses AdSense when client + slot env are set", () => {
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_CLIENT", "ca-pub-1234567890123456");
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT_BANNER", "1234567890");
     expect(resolveAdNetwork("menu_banner")).toBe("adsense");
-    // Banner slot must not drive interstitial/rewarded — that produced blank white units.
-    expect(resolveAdNetwork("run_interstitial")).toBe("unconfigured");
-    expect(resolveAdNetwork("rewarded_credits")).toBe("unconfigured");
+    // Banner slot must not drive interstitial/rewarded — house fills those instead.
+    expect(resolveAdNetwork("run_interstitial")).toBe("house");
+    expect(resolveAdNetwork("rewarded_credits")).toBe("house");
   });
 
   it("uses AdSense interstitial only with its own slot id", () => {
@@ -61,20 +61,24 @@ describe("clean-sneaks advertising", () => {
     expect(resolveAdNetwork("run_interstitial")).toBe("adsense");
     // Banner may use any configured display slot as fallback.
     expect(resolveAdNetwork("menu_banner")).toBe("adsense");
-    expect(resolveAdNetwork("rewarded_credits")).toBe("unconfigured");
+    expect(resolveAdNetwork("rewarded_credits")).toBe("house");
   });
 
-  it("refuses interstitial when it reuses the banner slot id", () => {
+  it("refuses interstitial AdSense when it reuses the banner slot id", () => {
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_CLIENT", "ca-pub-1234567890123456");
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT_BANNER", "1234567890");
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT_INTERSTITIAL", "1234567890");
     expect(resolveAdNetwork("menu_banner")).toBe("adsense");
-    expect(resolveAdNetwork("run_interstitial")).toBe("unconfigured");
+    expect(resolveAdNetwork("run_interstitial")).toBe("house");
   });
 
-  it("falls back to house ads when slots are missing but house is enabled", () => {
-    vi.stubEnv("NEXT_PUBLIC_CLEAN_SNEAKS_HOUSE_ADS", "1");
+  it("falls back to house ads by default when slots are missing", () => {
     expect(resolveAdNetwork("menu_banner")).toBe("house");
+  });
+
+  it("can disable house ads with CLEAN_SNEAKS_HOUSE_ADS=0", () => {
+    vi.stubEnv("NEXT_PUBLIC_CLEAN_SNEAKS_HOUSE_ADS", "0");
+    expect(resolveAdNetwork("menu_banner")).toBe("unconfigured");
   });
 
   it("never ships AdSense setup copy into player-facing ad components", () => {

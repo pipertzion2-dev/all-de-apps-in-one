@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import {
   adsEnabled,
   canShowPlacement,
+  houseAdsAllowed,
   markAdCooldown,
   pickHouseCreative,
   recordAdEvent,
@@ -19,16 +20,26 @@ type Props = {
 };
 
 /**
- * Full-screen Google AdSense break (paid) between walk complete and casino.
- * Never leave a blank “Google Advertisement” overlay when inventory does not fill.
+ * Full-screen ad break between walk complete and casino.
+ * Prefer Google AdSense; if Google has no fill, show a ZZAI house creative
+ * so players always see an ad (never a blank white box).
  */
 export function GameInterstitialAd({ requestOpen, onComplete }: Props) {
   const [visible, setVisible] = useState(false);
   const [canSkip, setCanSkip] = useState(false);
-  /** null = waiting; true = filled; false = unfilled / skip */
+  /** null = waiting; true = filled; false = unfilled → house fallback */
   const [adsenseFilled, setAdsenseFilled] = useState<boolean | null>(null);
+  const [forceHouse, setForceHouse] = useState(false);
   const creative = useMemo(() => pickHouseCreative(Date.now() + 3), [requestOpen]);
-  const network = resolveAdNetwork("run_interstitial");
+  const preferred = resolveAdNetwork("run_interstitial");
+  const network =
+    forceHouse || preferred === "house"
+      ? "house"
+      : preferred === "adsense"
+        ? "adsense"
+        : houseAdsAllowed()
+          ? "house"
+          : "unconfigured";
   const onCompleteRef = useRef(onComplete);
   onCompleteRef.current = onComplete;
   const handledRef = useRef(false);
@@ -53,15 +64,17 @@ export function GameInterstitialAd({ requestOpen, onComplete }: Props) {
       finishedRef.current = false;
       setVisible(false);
       setAdsenseFilled(null);
+      setForceHouse(false);
       return;
     }
     if (handledRef.current) return;
     handledRef.current = true;
     finishedRef.current = false;
     setAdsenseFilled(null);
+    setForceHouse(false);
 
-    // Skip when ads off, cooldown, or no fillable unit (don't block casino with empty UI).
-    if (!adsEnabled() || network === "unconfigured" || !canShowPlacement("run_interstitial")) {
+    const initial = preferred === "unconfigured" && houseAdsAllowed() ? "house" : preferred;
+    if (!adsEnabled() || initial === "unconfigured" || !canShowPlacement("run_interstitial")) {
       onCompleteRef.current();
       return;
     }
@@ -71,30 +84,43 @@ export function GameInterstitialAd({ requestOpen, onComplete }: Props) {
     recordAdEvent({
       placement: "run_interstitial",
       kind: "impression",
-      network: network === "adsense" ? "adsense" : "house",
+      network: initial === "adsense" ? "adsense" : "house",
     });
     markAdCooldown("run_interstitial");
-    const skipAt = window.setTimeout(() => setCanSkip(true), network === "adsense" ? 2200 : 1800);
+    const skipAt = window.setTimeout(() => setCanSkip(true), initial === "adsense" ? 2200 : 1800);
     return () => window.clearTimeout(skipAt);
-  }, [requestOpen, network]);
+  }, [requestOpen, preferred]);
 
-  // No AdSense creative → close immediately / after short wait (no blank modal).
+  // AdSense no-fill → house creative (player still sees an ad).
   useEffect(() => {
-    if (!visible || network !== "adsense") return;
-    if (adsenseFilled === false) {
-      finish(false);
+    if (!visible || preferred !== "adsense" || forceHouse) return;
+    if (adsenseFilled === false && houseAdsAllowed()) {
+      setForceHouse(true);
+      setCanSkip(true);
+      recordAdEvent({ placement: "run_interstitial", kind: "impression", network: "house" });
       return;
     }
     if (adsenseFilled === true) return;
-    // AdSenseSlot times out ~2.2s; dismiss slightly after so we never linger on chrome.
-    const t = window.setTimeout(() => finish(false), 2600);
+    if (adsenseFilled === false && !houseAdsAllowed()) {
+      finish(false);
+      return;
+    }
+    const t = window.setTimeout(() => {
+      if (houseAdsAllowed()) {
+        setForceHouse(true);
+        setCanSkip(true);
+      } else {
+        finish(false);
+      }
+    }, 2600);
     return () => window.clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- finish is stable via refs
-  }, [visible, network, adsenseFilled]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- finish via refs
+  }, [visible, preferred, adsenseFilled, forceHouse]);
 
   if (!visible) return null;
 
-  const showChrome = network !== "adsense" || adsenseFilled === true;
+  const showHouse = network === "house";
+  const showChrome = showHouse || adsenseFilled === true;
 
   return (
     <div
@@ -115,7 +141,7 @@ export function GameInterstitialAd({ requestOpen, onComplete }: Props) {
         {showChrome && (
           <div className="flex items-center justify-between gap-2">
             <p className="text-[10px] uppercase tracking-[0.35em] text-white/45">
-              {network === "adsense" ? "Google Advertisement" : "Advertisement"}
+              {showHouse ? "Advertisement" : "Google Advertisement"}
             </p>
             <Button
               size="sm"
@@ -130,16 +156,7 @@ export function GameInterstitialAd({ requestOpen, onComplete }: Props) {
           </div>
         )}
 
-        {network === "adsense" ? (
-          <div className={showChrome ? "mt-4 min-h-[180px]" : "min-h-[180px]"}>
-            <AdSenseSlot
-              placement="run_interstitial"
-              className="min-h-[180px] w-full"
-              format="auto"
-              onFillChange={setAdsenseFilled}
-            />
-          </div>
-        ) : (
+        {showHouse ? (
           <div className="mt-4 rounded-lg border border-white/10 p-5 text-center">
             <p className="text-lg font-medium" style={{ color: creative.accent }}>
               {creative.headline}
@@ -158,6 +175,15 @@ export function GameInterstitialAd({ requestOpen, onComplete }: Props) {
                 {creative.cta}
               </Link>
             </Button>
+          </div>
+        ) : (
+          <div className={showChrome ? "mt-4 min-h-[180px]" : "min-h-[180px]"}>
+            <AdSenseSlot
+              placement="run_interstitial"
+              className="min-h-[180px] w-full"
+              format="auto"
+              onFillChange={setAdsenseFilled}
+            />
           </div>
         )}
       </div>
