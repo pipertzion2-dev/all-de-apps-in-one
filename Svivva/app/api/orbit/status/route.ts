@@ -22,6 +22,7 @@ import {
   computeIndexHealthScore,
 } from "@/lib/orbit/marketing-targets";
 import { getGscConnectionStatus } from "@/lib/orbit/gsc-connection-status";
+import { isMainGscSitemapRegistered } from "@/lib/orbit/gsc-sitemap-registered";
 import { fetchGscSearchAnalytics } from "@/lib/seo/gsc-search-analytics";
 
 export async function GET() {
@@ -137,6 +138,14 @@ export async function GET() {
       toolSeoComplete,
     });
     const gscStatus = await getGscConnectionStatus();
+    let gscSitemapRegistered = false;
+    if (gscStatus.canUseGoogleApis) {
+      try {
+        gscSitemapRegistered = await isMainGscSitemapRegistered();
+      } catch {
+        gscSitemapRegistered = false;
+      }
+    }
     let gscClicks28d = 0;
     if (gscStatus.oauthConnected || gscStatus.serviceAccount) {
       try {
@@ -252,6 +261,7 @@ export async function GET() {
         indexHealthScore,
         gscConnected: gscStatus.canUseGoogleApis,
         gscSiteConfigured: gscStatus.siteConfigured,
+        gscSitemapRegistered,
         gscClicks28d,
         warnings,
       },
