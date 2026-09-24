@@ -24,10 +24,11 @@ describe("AdSense Google CMP readiness", () => {
     expect(consentIdx).toBeLessThan(adsenseIdx);
   });
 
-  it("Orbit links to AdSense Privacy & messaging for Three-Choice CMP", () => {
+  it("Orbit links to AdSense Privacy & messaging for European regulations CMP", () => {
     const ui = readFileSync(resolve(__dirname, "../../components/orbit-adsense-setup.tsx"), "utf8");
     expect(ui).toContain("privacymessaging");
-    expect(ui).toContain("Three-Choice");
+    expect(ui).toContain("European regulations");
+    expect(ui).toContain("Do not consent");
     expect(ui).toContain("orbit-adsense-cmp-link");
     expect(ui).toContain("orbit-adsense-cmp-cta");
     expect(ui).toContain("orbit-open-adsense-cmp");

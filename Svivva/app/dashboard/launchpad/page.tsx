@@ -3711,12 +3711,16 @@ export default function LaunchpadPage() {
               </p>
               <h2 className="text-base sm:text-lg font-black text-foreground flex items-center gap-2">
                 <DollarSign className="w-5 h-5 text-[#d4af37] shrink-0" />
-                AdSense — pick Three-Choice in Google
+                AdSense — European regulations → Manage
               </h2>
               <p className="text-xs sm:text-sm text-muted-foreground max-w-xl">
                 Publisher <code className="text-[#d4af37]">ca-pub-3958850022852446</code> is already
-                on the site. Use the gold button below to open AdSense Privacy &amp; messaging and
-                select <strong className="text-foreground">Three-Choice Message</strong>.
+                on the site. In AdSense open{" "}
+                <strong className="text-foreground">
+                  Privacy &amp; messaging → European regulations → Manage
+                </strong>
+                , then enable <strong className="text-foreground">Do not consent</strong> under User
+                choices (there is no menu labeled “Three-Choice”).
               </p>
             </div>
             <Button

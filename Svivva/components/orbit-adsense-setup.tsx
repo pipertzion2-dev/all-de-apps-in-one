@@ -225,9 +225,9 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
             <Dot ok={autoAdsReady} /> Privacy &amp; messaging
           </p>
           <p className="text-muted-foreground mt-0.5 leading-snug">
-            Consent Mode is on-site. Publish{" "}
-            <strong className="text-foreground">Three-Choice</strong> in AdSense for EEA/UK (see
-            gold box).
+            Consent Mode is on-site. In AdSense open{" "}
+            <strong className="text-foreground">European regulations → Manage</strong>, then turn{" "}
+            <strong className="text-foreground">Do not consent</strong> On under User choices.
           </p>
         </div>
       </div>
@@ -240,16 +240,19 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
           Do this now · Google AdSense (1 click)
         </p>
         <p className="text-sm font-bold text-foreground leading-snug">
-          Site code is already live. Open AdSense and pick{" "}
-          <span className="text-[#b8860b]">Three-Choice Message</span> (Consent / Do not consent /
-          Manage options).
+          There is no menu item named “Three-Choice.” On the screen you have open, tap{" "}
+          <span className="text-[#b8860b]">European regulations → Manage</span>. That message is
+          your GDPR consent banner. Under <span className="text-[#b8860b]">User choices</span>, turn{" "}
+          <span className="text-[#b8860b]">Do not consent</span> On so visitors get Consent / Do not
+          consent / Manage options.
         </p>
         <ul className="text-[11px] text-foreground/80 space-y-1">
           <li>✓ Publisher script on zzaizzai.com ({SITE_ADSENSE_CLIENT})</li>
           <li>✓ ads.txt + Consent Mode ready</li>
           <li>
-            → You will <strong>not</strong> see the consent popup on a US phone until you publish
-            Three-Choice in AdSense (it only shows for EEA/UK/CH visitors).
+            → You already show <strong>1 active European regulations</strong> — use{" "}
+            <strong>Manage</strong> (not Create). The consent popup only appears for EEA/UK/CH
+            visitors, not on a US phone.
           </li>
         </ul>
         <div
@@ -257,7 +260,7 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
           data-testid="orbit-adsense-fix-urls"
         >
           <p className="text-[11px] font-bold text-red-700 dark:text-red-300">
-            AdSense “Fix” error — paste these in Sites / message settings:
+            If AdSense shows a “Fix” error on that message — paste these:
           </p>
           <div className="space-y-1.5 text-[11px]">
             <p>
@@ -288,7 +291,8 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
             </p>
             <p className="text-muted-foreground leading-relaxed">
               Also under <strong className="text-foreground">User choices</strong> turn{" "}
-              <strong className="text-foreground">Do not consent</strong> On (that’s Three-Choice).
+              <strong className="text-foreground">Do not consent</strong> On (Consent + Manage + Do
+              not consent = the three buttons).
             </p>
           </div>
         </div>
@@ -303,7 +307,7 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
               target="_blank"
               rel="noopener noreferrer"
             >
-              Open Privacy &amp; messaging → pick Three-Choice
+              Open Privacy &amp; messaging → European regulations
               <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
             </a>
           </Button>
@@ -329,8 +333,9 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
           </Button>
         </div>
         <p className="text-[10px] text-muted-foreground leading-relaxed">
-          Path in AdSense: left menu <strong>Privacy &amp; messaging</strong> →{" "}
-          <strong>European regulations</strong> → choose the card with 3 buttons → Create → Publish
+          Exact path: <strong>Privacy &amp; messaging</strong> →{" "}
+          <strong>European regulations</strong> → <strong>Manage</strong> → open your active message
+          → <strong>User choices</strong> → enable <strong>Do not consent</strong> → save / publish
           for zzaizzai.com.
         </p>
       </div>
@@ -350,7 +355,9 @@ export function OrbitAdsenseSetup({ onConfiguredChange }: Props) {
           )
         </li>
         <li>
-          Select <strong>Three-Choice Message</strong> → Create / Publish for zzaizzai.com
+          <strong>European regulations → Manage</strong> (you already have 1 active) → edit the
+          message → enable <strong>Do not consent</strong> under User choices → Save / Publish for
+          zzaizzai.com
         </li>
         <li>
           Sites → <strong>Auto ads ON</strong> (site-wide) — you did this ✓
