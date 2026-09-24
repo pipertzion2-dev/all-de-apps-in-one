@@ -8,6 +8,7 @@ import type { FeatureId } from "./feature-defs";
 import { FEATURES } from "./feature-defs";
 import { CubeDownloadPanel } from "./cube-download-panel";
 import { ProductTypePicker } from "@/components/product-type-picker";
+import { CUBE_SUITE } from "@/lib/cube/mini-app-suite";
 
 export { FEATURES as ARTIFACT_FEATURES } from "./feature-defs";
 export { FeatureSection } from "./feature-section";
@@ -60,25 +61,22 @@ export function SvivvaArtifact({ mountCanvas = true }: SvivvaArtifactProps) {
           className="text-[10px] uppercase tracking-[0.35em] mb-3 font-mono font-semibold"
           style={{ color: "#5B8DA8", letterSpacing: "0.28em" }}
         >
-          Main navigation · 6 faces
+          {CUBE_SUITE.name} · 6 mini apps
         </p>
         <h1
           className="text-3xl md:text-4xl font-light tracking-tight text-foreground"
           style={{ letterSpacing: "-0.01em" }}
         >
-          Six products. One cube.
+          {CUBE_SUITE.launcherHeadline}
         </h1>
         <p
           className="mt-3 text-sm font-light text-muted-foreground"
           style={{ letterSpacing: "0.04em" }}
         >
-          Each face is a product. Drag to rotate. Tap a face — or a name below — to open it.
+          {CUBE_SUITE.launcherSubhead}
         </p>
-        <p
-          className="mt-3 text-muted-foreground/80 text-sm"
-          style={{ fontFamily: '"Zc", sans-serif' }}
-        >
-          Play · Seeds · Hardware · Digital · Orbit · Protect
+        <p className="mt-3 text-xs leading-relaxed text-muted-foreground/90 pointer-events-auto">
+          {CUBE_SUITE.launcherBrainHint}
         </p>
       </div>
 
@@ -133,7 +131,7 @@ export function SvivvaArtifact({ mountCanvas = true }: SvivvaArtifactProps) {
               className="text-[10px] font-mono uppercase tracking-widest"
               style={{ color: f.accentColor }}
             >
-              Face
+              Mini app
             </span>
             <span
               className="text-sm font-normal text-foreground group-hover:text-[#5B8DA8]"

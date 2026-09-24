@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
+import { CUBE_SUITE, cubeSuiteMiniAppNamesLine } from "@/lib/cube/mini-app-suite";
+import { CubeSuiteSharedBrainCallout } from "@/components/cube-suite-shared-brain-callout";
 
 const plans: Record<
   string,
@@ -56,15 +58,14 @@ const plans: Record<
     period: "/month",
     icon: Zap,
     features: [
-      "10 projects",
-      "10,000 API calls/month",
-      "Full eval suite with auto-rollback",
+      `Full ${CUBE_SUITE.passName} — ${cubeSuiteMiniAppNamesLine()}`,
+      "Digital mini app — 10 projects, 10k API calls/mo",
+      "Play, Seeds, Hardware, Orbit & Protect — full access",
+      "Auto-rollback eval suite",
       "Priority support",
-      "Custom training data",
-      "Version history",
     ],
     color: "#5B8DA8",
-    badge: "Most Popular",
+    badge: "Suite Pass",
   },
   enterprise: {
     name: "Pro",
@@ -279,11 +280,11 @@ function CheckoutPageContent() {
                 <div className="mb-6">
                   <h1 className="text-xl font-bold">Complete your order</h1>
                   <p className="text-sm text-muted-foreground mt-1">
-                    You're upgrading to{" "}
+                    You&apos;re getting the{" "}
                     <span style={{ color: plan.color }} className="font-medium">
-                      {plan.name}
+                      {plan.name} {CUBE_SUITE.passName}
                     </span>{" "}
-                    — cancel anytime.
+                    for all cube mini apps — cancel anytime.
                   </p>
                 </div>
 
@@ -563,6 +564,8 @@ function CheckoutPageContent() {
                   </div>
                 ))}
               </div>
+
+              <CubeSuiteSharedBrainCallout compact />
             </div>
           </div>
         </div>
