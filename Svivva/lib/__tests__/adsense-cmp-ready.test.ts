@@ -6,6 +6,7 @@ describe("AdSense Google CMP readiness", () => {
   it("allows Funding Choices scripts in CSP", () => {
     const headers = readFileSync(resolve(__dirname, "../security-headers.mjs"), "utf8");
     expect(headers).toContain("fundingchoicesmessages.google.com");
+    expect(headers).toContain("app.searchdock.io");
     // ADSENSE_SCRIPT string (used in script-src) must include Funding Choices host
     const scriptConst = headers.match(/const ADSENSE_SCRIPT\s*=\s*\n?\s*"([^"]+)"/);
     expect(scriptConst?.[1]).toContain("fundingchoicesmessages.google.com");

@@ -37,6 +37,7 @@ import {
   normalizeAdsenseClientId,
   normalizeAdsenseSlotId,
 } from "@/lib/adsense-credentials";
+import { getAdsenseRuntimeConfig } from "@/lib/adsense-runtime";
 const patchSchema = z
   .object({
     openaiApiKey: z.string().optional(),
@@ -118,6 +119,8 @@ export async function GET() {
         : null,
     );
 
+    const adsenseEffective = await getAdsenseRuntimeConfig();
+
     return NextResponse.json({
       stored: {
         openai: !!row?.openaiApiKey?.trim(),
@@ -162,18 +165,16 @@ export async function GET() {
         ),
         stripeWebhook: !!process.env.STRIPE_WEBHOOK_SECRET?.trim(),
         siteUrl: !!process.env.NEXT_PUBLIC_SITE_URL?.trim(),
-        adsenseClient: isValidAdsenseClientId(process.env.NEXT_PUBLIC_ADSENSE_CLIENT),
-        adsenseSlotBanner: isValidAdsenseSlotId(process.env.NEXT_PUBLIC_ADSENSE_SLOT_BANNER),
-        adsenseSlotInterstitial: isValidAdsenseSlotId(
-          process.env.NEXT_PUBLIC_ADSENSE_SLOT_INTERSTITIAL,
-        ),
-        adsenseSlotRewarded: isValidAdsenseSlotId(process.env.NEXT_PUBLIC_ADSENSE_SLOT_REWARDED),
+        adsenseClient: Boolean(adsenseEffective.client),
+        adsenseSlotBanner: Boolean(adsenseEffective.slotBanner),
+        adsenseSlotInterstitial: Boolean(adsenseEffective.slotInterstitial),
+        adsenseSlotRewarded: Boolean(adsenseEffective.slotRewarded),
       },
       adsense: {
-        clientId: process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim() || null,
-        slotBanner: process.env.NEXT_PUBLIC_ADSENSE_SLOT_BANNER?.trim() || null,
-        slotInterstitial: process.env.NEXT_PUBLIC_ADSENSE_SLOT_INTERSTITIAL?.trim() || null,
-        slotRewarded: process.env.NEXT_PUBLIC_ADSENSE_SLOT_REWARDED?.trim() || null,
+        clientId: adsenseEffective.client,
+        slotBanner: adsenseEffective.slotBanner,
+        slotInterstitial: adsenseEffective.slotInterstitial,
+        slotRewarded: adsenseEffective.slotRewarded,
         adsTxtUrl: "/ads.txt",
         gameUrl: "/clean-sneaks",
       },

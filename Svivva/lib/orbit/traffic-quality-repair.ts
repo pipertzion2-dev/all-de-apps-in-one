@@ -11,6 +11,7 @@ import { isDuplicateSeoVariantSlug } from "@/lib/seo/duplicate-variants";
 import { buildExpandedSeoBody } from "@/lib/seo/page-body";
 import { healOrphanInternalLinks } from "@/lib/seo/internal-links/graph";
 import { unpublishNativeToolDuplicateSeoSlugs } from "@/lib/seo/unpublish-legacy-slugs";
+import { unpublishNearDuplicateSeoPages } from "@/lib/seo/near-duplicate-unpublish";
 
 const BASE = getSiteUrl().replace(/\/$/, "");
 const FILLER_PREFIX = "svivva-seo-tool-fill-";
@@ -34,6 +35,7 @@ export type TrafficQualityRepairResult = {
   unpublishedFiller: number;
   unpublishedVariants: number;
   unpublishedDuplicateBlogs: number;
+  unpublishedNearDuplicates: number;
   expandedThin: number;
   duplicateTitlesFixed: number;
   orphansHealed: number;
@@ -258,6 +260,14 @@ export async function runTrafficQualityRepair(): Promise<TrafficQualityRepairRes
       : "✓ No duplicate blog posts",
   );
 
+  const nearDupRows = await unpublishNearDuplicateSeoPages();
+  const unpublishedNearDuplicates = nearDupRows.length;
+  summaryLines.push(
+    unpublishedNearDuplicates
+      ? `✓ Unpublished ${unpublishedNearDuplicates} near-duplicate SEO page(s) (kept stronger canonical in each cluster)`
+      : "✓ No near-duplicate SEO clusters",
+  );
+
   const { expanded: expandedThin, stillThin } = await expandThinPublishedPages();
   summaryLines.push(
     `✓ Expanded ${expandedThin} thin pages to 280+ words with FAQ`,
@@ -289,6 +299,7 @@ export async function runTrafficQualityRepair(): Promise<TrafficQualityRepairRes
     unpublishedFiller,
     unpublishedVariants,
     unpublishedDuplicateBlogs,
+    unpublishedNearDuplicates,
     expandedThin,
     duplicateTitlesFixed,
     orphansHealed,

@@ -10,6 +10,10 @@ const ADSENSE_FRAME =
   "https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://pagead2.googlesyndication.com https://www.google.com https://ep2.adtrafficquality.google https://fundingchoicesmessages.google.com";
 const ADSENSE_CONNECT =
   "https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://fundingchoicesmessages.google.com https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google";
+const ADSENSE_IMG =
+  "https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://www.gstatic.com https://www.google.com https://www.googletagmanager.com";
+/** SearchDock site-agent SDK (AEO heartbeat) */
+const SEARCHDOCK_SCRIPT = "https://app.searchdock.io";
 
 export const SECURITY_HEADERS = [
   { key: "X-DNS-Prefetch-Control", value: "on" },
@@ -29,12 +33,12 @@ export const SECURITY_HEADERS = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      `script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://js.stripe.com https://va.vercel-scripts.com ${GA_SCRIPT} ${CLARITY_SCRIPT} ${ADSENSE_SCRIPT}`,
+      `script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://js.stripe.com https://va.vercel-scripts.com ${GA_SCRIPT} ${CLARITY_SCRIPT} ${ADSENSE_SCRIPT} ${SEARCHDOCK_SCRIPT}`,
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https: https://www.google-analytics.com https://www.googletagmanager.com",
+      `img-src 'self' data: blob: https: ${ADSENSE_IMG} https://www.google-analytics.com https://www.googletagmanager.com`,
       "font-src 'self' data:",
       "worker-src 'self' blob:",
-      `connect-src 'self' https: wss: blob: ${GA_CONNECT} ${ADSENSE_CONNECT}`,
+      `connect-src 'self' https: wss: blob: ${GA_CONNECT} ${ADSENSE_CONNECT} ${SEARCHDOCK_SCRIPT}`,
       `frame-src 'self' https://js.stripe.com https://hooks.stripe.com ${ADSENSE_FRAME}`,
       "object-src 'none'",
       "base-uri 'self'",

@@ -6,6 +6,7 @@ import { eq, isNotNull } from "drizzle-orm";
 import { isDuplicateSeoVariantSlug } from "@/lib/seo/duplicate-variants";
 import { fetchGscSearchAnalytics } from "@/lib/seo/gsc-search-analytics";
 import { getCanonicalUrlsForIndexing } from "@/lib/seo/sitemap/registry";
+import { SITE_ADSENSE_CLIENT } from "@/lib/adsense-credentials";
 
 export const dynamic = "force-dynamic";
 
@@ -96,7 +97,52 @@ export async function GET() {
       status: canonical ? "ok" : "warn",
       detail: canonical || "Not set — Google may treat duplicates separately.",
     });
+
+    const adsScript = /pagead2\.googlesyndication\.com\/pagead\/js\/adsbygoogle\.js/i.test(
+      home.text,
+    );
+    const adsClientOnPage =
+      home.text.match(/adsbygoogle\.js\?client=(ca-pub-\d+)/i)?.[1] ||
+      home.text.match(/__ADSENSE_CLIENT__[^"]*(ca-pub-\d+)/i)?.[1] ||
+      "";
+    checks.push({
+      id: "adsense-script",
+      label: "AdSense verification script",
+      status: adsScript && adsClientOnPage ? "ok" : adsScript ? "warn" : "fail",
+      detail: adsScript
+        ? `Loaded for ${adsClientOnPage || "unknown client"} — site ownership + Auto ads.`
+        : "Missing adsbygoogle.js in <head> — AdSense cannot verify or serve ads.",
+    });
+    checks.push({
+      id: "adsense-consent",
+      label: "Consent Mode (CMP)",
+      status: /google-consent-mode-defaults|gtag\('consent','default'/i.test(home.text)
+        ? "ok"
+        : "warn",
+      detail: /gtag\('consent','default'/i.test(home.text)
+        ? "Consent Mode v2 defaults load before Google tags (Funding Choices ready)."
+        : "Consent defaults not detected — EU/EEA ad serving may be limited.",
+    });
   }
+
+  const adsTxt = await fetchText(`${SITE}/ads.txt`);
+  const pubId = SITE_ADSENSE_CLIENT.replace(/^ca-/, "");
+  checks.push({
+    id: "adsense-adstxt",
+    label: "ads.txt (AdSense)",
+    status:
+      adsTxt.ok && adsTxt.text.includes(pubId) && adsTxt.text.includes("DIRECT")
+        ? "ok"
+        : adsTxt.ok
+          ? "warn"
+          : "fail",
+    detail: adsTxt.ok
+      ? adsTxt.text.includes(pubId)
+        ? `Publisher ${pubId} authorized for zzaizzai.com.`
+        : "ads.txt reachable but missing your pub id — fix before paid impressions."
+      : `Unreachable (${adsTxt.status})`,
+    link: { label: "View ads.txt", href: `${SITE}/ads.txt` },
+  });
 
   // 2. robots.txt
   const robots = await fetchText(`${SITE}/robots.txt`);

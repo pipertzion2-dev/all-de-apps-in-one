@@ -13,7 +13,7 @@ import { getPrimaryAdminUserId } from "@/lib/auth/admin";
 import { getSiteUrl } from "@/lib/site-url";
 import { BRAND } from "@/lib/brand";
 import { MEDIA } from "@/lib/media-assets";
-import { resolveSiteAdsenseClient } from "@/lib/adsense-credentials";
+import { adsenseRuntimeInlineScript, getAdsenseRuntimeConfig } from "@/lib/adsense-runtime";
 import { homepageJsonLdGraph } from "@/lib/seo/schema/builders";
 
 const zcFont = localFont({
@@ -98,9 +98,6 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       images: [MEDIA.logo],
     },
-    alternates: {
-      canonical: siteUrl,
-    },
     icons: {
       icon: [{ url: BRAND.logoPath, type: "image/png" }],
       apple: [{ url: BRAND.logoPath, type: "image/png" }],
@@ -133,30 +130,10 @@ const SEARCHDOCK_SDK =
   "https://app.searchdock.io/api/v1/site-agent/sdk";
 const searchdockEnabled = SEARCHDOCK_TOKEN.length > 0 && SEARCHDOCK_TOKEN !== "off";
 
-function resolveAdsenseClient(): string | null {
-  return resolveSiteAdsenseClient();
-}
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const adsenseClient = resolveAdsenseClient();
-  const adsenseBanner = process.env.NEXT_PUBLIC_ADSENSE_SLOT_BANNER?.trim() || "";
-  const adsenseInterstitial = process.env.NEXT_PUBLIC_ADSENSE_SLOT_INTERSTITIAL?.trim() || "";
-  const adsenseRewarded = process.env.NEXT_PUBLIC_ADSENSE_SLOT_REWARDED?.trim() || "";
-  const adsenseRuntimeJs = adsenseClient
-    ? `window.__ADSENSE_CLIENT__=${JSON.stringify(adsenseClient)};${
-        /^\d+$/.test(adsenseBanner)
-          ? `window.__ADSENSE_SLOT_BANNER__=${JSON.stringify(adsenseBanner)};`
-          : ""
-      }${
-        /^\d+$/.test(adsenseInterstitial)
-          ? `window.__ADSENSE_SLOT_INTERSTITIAL__=${JSON.stringify(adsenseInterstitial)};`
-          : ""
-      }${
-        /^\d+$/.test(adsenseRewarded)
-          ? `window.__ADSENSE_SLOT_REWARDED__=${JSON.stringify(adsenseRewarded)};`
-          : ""
-      }`
-    : null;
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const adsense = await getAdsenseRuntimeConfig();
+  const adsenseClient = adsense.client;
+  const adsenseRuntimeJs = adsenseRuntimeInlineScript(adsense);
 
   return (
     <html lang="en" suppressHydrationWarning className={`min-h-full w-full ${zcFont.variable}`}>
