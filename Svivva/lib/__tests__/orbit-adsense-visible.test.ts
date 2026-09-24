@@ -32,5 +32,7 @@ describe("Orbit admin AdSense visibility", () => {
     expect(ui).toContain("/api/admin/platform-secrets");
     expect(ui).toContain("input-adsense-client");
     expect(ui).toContain("button-save-adsense");
+    expect(ui).toContain('data-testid="orbit-adsense-dual-status"');
+    expect(ui).toContain("orbit-open-adsense-adunits");
   });
 });

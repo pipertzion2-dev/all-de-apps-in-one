@@ -1,0 +1,18 @@
+{
+  "blogPosts": [
+    {
+      "slug": "google-adsense-zzaizzai-setup-checklist",
+      "title": "AdSense on zzaizzai.com: verification, ads.txt, and Consent Mode",
+      "tags": ["adsense", "monetization", "consent mode", "zzaizzai"],
+      "metaDescription": "How zzai zzai wires Google AdSense: ca-pub verification script, ads.txt, Consent Mode v2, and when you still need display slot IDs for Klean Sneaks.",
+      "content": "<h1>AdSense on zzaizzai.com</h1><p>Google AdSense on <strong>zzaizzai.com</strong> is set up for <em>site verification</em> and <em>Auto ads</em> via the standard <code>adsbygoogle.js</code> snippet in the site layout, plus a matching <code>/ads.txt</code> line for publisher <code>pub-3958850022852446</code>.</p><h2>What already works without extra keys</h2><ul><li><strong>Site ownership</strong> — the async AdSense script in <code>&lt;head&gt;</code> satisfies Google's verification crawler.</li><li><strong>Auto ads</strong> — once your account is approved and Auto ads are enabled in AdSense, Google can place ads without you pasting slot numbers on every page.</li><li><strong>Consent Mode v2</strong> — default consent loads before Analytics and AdSense so Funding Choices (Three-Choice CMP) can unlock EEA traffic.</li></ul><h2>When you need slot IDs</h2><p>In-game placements in <a href=\"/clean-sneaks\">Klean Sneaks</a> use explicit display units. Paste banner, interstitial, and rewarded slot numbers in Orbit → AdSense (Platform Secrets) or set <code>NEXT_PUBLIC_ADSENSE_SLOT_*</code> in Vercel. Until slots exist, the game silently skips empty ad units — visitors are not shown broken placeholders.</p><h2>Checklist</h2><ol><li>Confirm <a href=\"/ads.txt\">/ads.txt</a> lists your pub id.</li><li>Enable Auto ads in AdSense → Sites → zzaizzai.com.</li><li>Finish Privacy &amp; messaging (CMP) in AdSense and link your privacy policy.</li><li>Add display slot IDs for Klean Sneaks if you want guaranteed in-game units.</li></ol><p><a href=\"/dashboard/orbit?tab=adsense\">Open Orbit AdSense tab</a> · <a href=\"/tools\">Free AI tools hub</a></p>"
+    },
+    {
+      "slug": "seo-health-score-technical-checklist-2026",
+      "title": "Technical SEO checklist for zzai zzai (sitemap, canonicals, IndexNow)",
+      "tags": ["seo", "google search console", "sitemap", "canonical"],
+      "metaDescription": "A practical technical SEO checklist for zzaizzai.com: robots, sitemap.xml, per-page canonicals, IndexNow, and fixing near-duplicate landing pages.",
+      "content": "<h1>Technical SEO checklist</h1><p>Search engines reward <strong>clear URLs</strong>, not raw page count. This is how zzai zzai keeps <a href=\"https://zzaizzai.com/sitemap.xml\">sitemap.xml</a> honest while still shipping many tool and marketing surfaces.</p><h2>Crawl basics</h2><ul><li><strong>robots.txt</strong> allows public hubs and blocks dashboards, APIs, and play-test routes.</li><li><strong>Sitemap</strong> lists quality-filtered URLs — thin or duplicate SEO rows are dropped or unpublished.</li><li><strong>Canonical tags</strong> are set per route via <code>buildSeoMetadata</code>, not one global homepage canonical on every URL.</li></ul><h2>Indexing beyond Google</h2><p>IndexNow pings Bing and partners when Orbit publishes or repairs content. Pair that with Google Search Console sitemap submission for coverage you can measure.</p><h2>Quality over doorways</h2><p>Near-duplicate SEO landing pages trigger monitor alerts and waste crawl budget. Orbit's traffic-quality repair expands thin copy, heals internal links, and unpublishes redundant clusters so one strong URL ranks.</p><p><a href=\"/blog\">More on the blog</a> · <a href=\"/seo-pack\">SEO pack overview</a></p>"
+    }
+  ]
+}
