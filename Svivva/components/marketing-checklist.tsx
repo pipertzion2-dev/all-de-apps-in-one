@@ -131,6 +131,13 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
 
   const isManualDone = (id: string): boolean => {
     if (manualDone[id]) return true;
+    if (
+      id === "tech-gsc-sitemap" &&
+      (orbitStatus as { preflight?: { gscSitemapRegistered?: boolean } } | null)?.preflight
+        ?.gscSitemapRegistered
+    ) {
+      return true;
+    }
     return (workbenchData?.items ?? []).some(
       (row: { item: { checklistId: string }; status: string }) =>
         row.item.checklistId === id && (row.status === "submitted" || row.status === "live"),
@@ -182,8 +189,8 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
           id: "tech-gsc-sitemap",
           label: "Sitemap submitted in Google Search Console",
           detail: isManualDone("tech-gsc-sitemap")
-            ? "Done ✓"
-            : `GSC → Sitemaps → paste ${ORBIT_SITEMAP} → Submit. Without this, Google will not crawl your site.`,
+            ? "Registered on sc-domain:zzaizzai.com via Orbit / GSC API ✓"
+            : `GSC → Sitemaps → paste ${ORBIT_SITEMAP} → Submit, or run Orbit indexing with Google connected.`,
           status: isManualDone("tech-gsc-sitemap") ? "done" : "missing",
           link: "https://search.google.com/search-console",
           linkLabel: "Open GSC →",

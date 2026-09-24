@@ -59,8 +59,9 @@ function buildTasks(siteUrl: string): TaskDef[] {
     {
       id: "tech-gsc-sitemap",
       label: "Sitemap submitted in Google Search Console",
-      hint: "One-click: GSC → Sitemaps → paste URL → Submit",
-      type: "manual",
+      hint: "Orbit submits via GSC API when connected — or paste sitemap URL in GSC manually",
+      type: "auto",
+      runStep: "svivva-submit",
       category: "Technical",
       link: `${gsc}/u/0/sitemaps`,
       generateType: "gsc-sitemap",
@@ -335,7 +336,11 @@ type OrbitStatusSnapshot = {
   indexNowKey?: boolean;
   indexNowSubmitted?: boolean;
   stepCompletion?: Record<string, boolean>;
-  preflight?: { indexHealthScore?: number };
+  preflight?: {
+    indexHealthScore?: number;
+    gscConnected?: boolean;
+    gscSitemapRegistered?: boolean;
+  };
 };
 
 /** Live completion from DB counts / indexing — avoids showing 0/31 when work is already done. */
@@ -347,6 +352,8 @@ function orbitAutoDone(taskId: string, os?: OrbitStatusSnapshot): boolean {
     case "tech-sitemap":
     case "tech-schema-jsonld":
       return true;
+    case "tech-gsc-sitemap":
+      return !!os.preflight?.gscSitemapRegistered;
     case "tech-gsc-indexing":
       return (os.preflight?.indexHealthScore ?? 0) >= 80 || !!os.indexNowSubmitted;
     case "content-seo-pages":
