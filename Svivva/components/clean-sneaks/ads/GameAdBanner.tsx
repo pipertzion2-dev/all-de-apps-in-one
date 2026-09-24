@@ -19,6 +19,8 @@ type Props = {
 
 export function GameAdBanner({ className, compact = false }: Props) {
   const [mounted, setMounted] = useState(false);
+  /** null = waiting on Google fill; false = unfilled (hide); true = show chrome */
+  const [adsenseFilled, setAdsenseFilled] = useState<boolean | null>(null);
   const creative = useMemo(() => pickHouseCreative(Date.now()), []);
   const network = resolveAdNetwork("menu_banner");
   const show = adsEnabled() && mounted;
@@ -37,17 +39,31 @@ export function GameAdBanner({ className, compact = false }: Props) {
   // Setup instructions live in Orbit → AdSense, not in the game shell.
   if (network === "unconfigured") return null;
 
+  // Hide the whole “Advertisement” chrome when Google returns no fill (blank unit).
+  if (network === "adsense" && adsenseFilled === false) return null;
+
+  const waitingOnFill = network === "adsense" && adsenseFilled !== true;
+
   return (
     <aside
-      className={`w-full overflow-hidden rounded-lg border border-white/10 bg-black/40 backdrop-blur-sm ${
-        compact ? "px-2 py-1.5" : "px-3 py-2.5"
+      className={`w-full overflow-hidden rounded-lg border backdrop-blur-sm ${
+        waitingOnFill
+          ? "border-transparent bg-transparent px-0 py-0"
+          : `border-white/10 bg-black/40 ${compact ? "px-2 py-1.5" : "px-3 py-2.5"}`
       } ${className ?? ""}`}
       aria-label="Advertisement"
+      aria-hidden={waitingOnFill ? true : undefined}
       data-testid="game-ad-banner"
     >
-      <p className="mb-1 text-[9px] uppercase tracking-[0.28em] text-white/40">Advertisement</p>
+      {!waitingOnFill && (
+        <p className="mb-1 text-[9px] uppercase tracking-[0.28em] text-white/40">Advertisement</p>
+      )}
       {network === "adsense" ? (
-        <AdSenseSlot placement="menu_banner" className="min-h-[60px] w-full" />
+        <AdSenseSlot
+          placement="menu_banner"
+          className="min-h-[60px] w-full"
+          onFillChange={setAdsenseFilled}
+        />
       ) : houseAdsAllowed() ? (
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="min-w-0 flex-1">
