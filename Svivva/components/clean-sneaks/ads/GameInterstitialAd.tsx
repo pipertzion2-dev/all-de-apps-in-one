@@ -20,27 +20,47 @@ type Props = {
 
 /**
  * Full-screen Google AdSense break (paid) between walk complete and casino.
+ * Never leave a blank “Google Advertisement” overlay when inventory does not fill.
  */
 export function GameInterstitialAd({ requestOpen, onComplete }: Props) {
   const [visible, setVisible] = useState(false);
   const [canSkip, setCanSkip] = useState(false);
+  /** null = waiting; true = filled; false = unfilled / skip */
+  const [adsenseFilled, setAdsenseFilled] = useState<boolean | null>(null);
   const creative = useMemo(() => pickHouseCreative(Date.now() + 3), [requestOpen]);
   const network = resolveAdNetwork("run_interstitial");
   const onCompleteRef = useRef(onComplete);
   onCompleteRef.current = onComplete;
   const handledRef = useRef(false);
+  const finishedRef = useRef(false);
+
+  const finish = (clicked: boolean) => {
+    if (finishedRef.current) return;
+    finishedRef.current = true;
+    const net = network === "adsense" ? "adsense" : "house";
+    if (clicked) {
+      recordAdEvent({ placement: "run_interstitial", kind: "click", network: net });
+    } else {
+      recordAdEvent({ placement: "run_interstitial", kind: "dismiss", network: net });
+    }
+    setVisible(false);
+    onCompleteRef.current();
+  };
 
   useEffect(() => {
     if (!requestOpen) {
       handledRef.current = false;
+      finishedRef.current = false;
       setVisible(false);
+      setAdsenseFilled(null);
       return;
     }
     if (handledRef.current) return;
     handledRef.current = true;
+    finishedRef.current = false;
+    setAdsenseFilled(null);
 
     // Skip when ads off, cooldown, or no fillable unit (don't block casino with empty UI).
-    // Publisher id without slot ids → Auto ads only; never show env setup copy to players.
     if (!adsEnabled() || network === "unconfigured" || !canShowPlacement("run_interstitial")) {
       onCompleteRef.current();
       return;
@@ -58,50 +78,64 @@ export function GameInterstitialAd({ requestOpen, onComplete }: Props) {
     return () => window.clearTimeout(skipAt);
   }, [requestOpen, network]);
 
-  const finish = (clicked: boolean) => {
-    const net = network === "adsense" ? "adsense" : "house";
-    if (clicked) {
-      recordAdEvent({ placement: "run_interstitial", kind: "click", network: net });
-    } else {
-      recordAdEvent({ placement: "run_interstitial", kind: "dismiss", network: net });
+  // No AdSense creative → close immediately / after short wait (no blank modal).
+  useEffect(() => {
+    if (!visible || network !== "adsense") return;
+    if (adsenseFilled === false) {
+      finish(false);
+      return;
     }
-    setVisible(false);
-    onCompleteRef.current();
-  };
+    if (adsenseFilled === true) return;
+    const t = window.setTimeout(() => finish(false), 4500);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- finish is stable via refs
+  }, [visible, network, adsenseFilled]);
 
   if (!visible) return null;
 
+  const showChrome = network !== "adsense" || adsenseFilled === true;
+
   return (
     <div
-      className="fixed inset-0 z-[235] flex items-center justify-center bg-black/85 p-4 backdrop-blur-md"
+      className={`fixed inset-0 z-[235] flex items-center justify-center p-4 ${
+        showChrome ? "bg-black/85 backdrop-blur-md" : "pointer-events-none bg-transparent"
+      }`}
       role="dialog"
-      aria-modal="true"
+      aria-modal={showChrome ? true : undefined}
       aria-label="Advertisement"
+      aria-hidden={showChrome ? undefined : true}
       data-testid="game-interstitial-ad"
     >
-      <div className="w-full max-w-lg rounded-xl border border-white/15 bg-[#0c0e14] p-5">
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-[10px] uppercase tracking-[0.35em] text-white/45">
-            {network === "adsense" ? "Google Advertisement" : "Advertisement"}
-          </p>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="text-white/50"
-            disabled={!canSkip}
-            onClick={() => finish(false)}
-            data-testid="button-skip-interstitial"
-          >
-            {canSkip ? "Continue" : "…"}
-          </Button>
-        </div>
+      <div
+        className={`w-full max-w-lg rounded-xl border border-white/15 bg-[#0c0e14] p-5 ${
+          showChrome ? "" : "max-h-[220px] overflow-hidden opacity-[0.01]"
+        }`}
+      >
+        {showChrome && (
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[10px] uppercase tracking-[0.35em] text-white/45">
+              {network === "adsense" ? "Google Advertisement" : "Advertisement"}
+            </p>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-white/50"
+              disabled={!canSkip}
+              onClick={() => finish(false)}
+              data-testid="button-skip-interstitial"
+            >
+              {canSkip ? "Continue" : "…"}
+            </Button>
+          </div>
+        )}
 
         {network === "adsense" ? (
-          <div className="mt-4 min-h-[180px]">
+          <div className={showChrome ? "mt-4 min-h-[180px]" : "min-h-[180px]"}>
             <AdSenseSlot
               placement="run_interstitial"
               className="min-h-[180px] w-full"
               format="auto"
+              onFillChange={setAdsenseFilled}
             />
           </div>
         ) : (
