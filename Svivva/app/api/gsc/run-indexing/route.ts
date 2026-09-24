@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     autoSetup = await runGscAutoSetup({ userId, accessToken, skipIndexingApi: true });
   }
 
-  const indexing = await runAutomatableManualActions({ googleMaxBatches: 5 });
+  const indexing = await runAutomatableManualActions({});
 
   const discoveryOk =
     indexing.indexNow.ok ||

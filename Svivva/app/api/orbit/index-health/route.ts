@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
   let resubmission: unknown = null;
   if (body.resubmit) {
     const actions = await runAutomatableManualActions({
-      googleMaxBatches: body.googleMaxBatches ?? 2,
+      googleMaxBatches: body.googleMaxBatches,
     });
     resubmission = {
       summary: actions.summaryLines,

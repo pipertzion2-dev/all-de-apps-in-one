@@ -63,7 +63,7 @@ export async function runFullTrafficAutomation(): Promise<FullTrafficAutomationR
   );
 
   summaryLines.push("", "▸ Phase 2 — Submit every URL to search engines");
-  const indexing = await runAutomatableManualActions({ googleMaxBatches: 5 });
+  const indexing = await runAutomatableManualActions({});
   summaryLines.push(...indexing.summaryLines);
 
   const indexNowOk = marketing.indexNow.ok && indexing.indexNow.ok;

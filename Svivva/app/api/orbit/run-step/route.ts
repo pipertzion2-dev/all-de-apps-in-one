@@ -704,7 +704,7 @@ export async function POST(req: NextRequest) {
 
     // ── STEP: Submit sitemap (IndexNow + Bing + GSC when creds exist) ───────
     if (stepId === "svivva-submit") {
-      const auto = await runAutomatableManualActions({ googleMaxBatches: 3 });
+      const auto = await runAutomatableManualActions({});
       return NextResponse.json({
         summary: [
           ...auto.summaryLines,
@@ -1682,7 +1682,7 @@ Return JSON:
         .filter((p) => p.category === "seed-marketing")
         .map((p) => `${BASE_URL}/${p.slug}`);
 
-      const auto = await runAutomatableManualActions({ googleMaxBatches: 5 });
+      const auto = await runAutomatableManualActions({});
 
       return NextResponse.json({
         summary: [

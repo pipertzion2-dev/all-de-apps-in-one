@@ -20,4 +20,10 @@ describe("runAutomatableManualActions indexing alternatives", () => {
   it("can skip Indexing API to avoid double quota burn", () => {
     expect(src).toContain("skipIndexingApi");
   });
+
+  it("rotates IndexNow instead of submitting the full sitemap every run", () => {
+    expect(src).toContain("getIndexingBatch");
+    expect(src).toContain("indexNowSubmitAll");
+    expect(src).toContain("rotated batch");
+  });
 });

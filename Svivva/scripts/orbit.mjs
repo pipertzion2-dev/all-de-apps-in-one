@@ -87,7 +87,7 @@ async function cmdHealth() {
   console.log("Crawling sampled URLs… (this checks they are live + indexable)\n");
   const r = await api("/api/orbit/index-health", {
     method: "POST",
-    body: { resubmit, googleMaxBatches: 3 },
+    body: { resubmit },
   });
   const h = r.health || {};
   console.log(`Score:        ${h.score}/100`);

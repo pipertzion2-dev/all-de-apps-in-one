@@ -20,11 +20,13 @@ import { submitIndexNowBatched } from "@/lib/indexing/indexnow-submit";
 import { getAllSiteUrlsForIndexing } from "@/lib/indexing/site-urls";
 import { getSitemapUrl, getSecuritySitemapUrl } from "@/lib/site-url";
 import { getIndexingBatch, recordSubmission } from "@/lib/seo/index-health";
+import {
+  clampGoogleMaxBatches,
+  GOOGLE_INDEXING_BATCH_SIZE,
+  indexNowMaxUrlsPerRun,
+} from "@/lib/indexing/indexing-policy";
 
-/** Google Indexing API daily quota is limited; stay aligned with /api/marketing/google-search. */
-const GOOGLE_INDEXING_BATCH = 200;
-const DEFAULT_GOOGLE_BATCHES = 1;
-const MAX_GOOGLE_BATCHES = 5;
+const GOOGLE_INDEXING_BATCH = GOOGLE_INDEXING_BATCH_SIZE;
 
 export type AutomateManualResult = {
   summaryLines: string[];
@@ -128,20 +130,35 @@ async function getGscCreds(): Promise<{
  * Does not post to Reddit/Medium/etc. — those still require your accounts.
  */
 export async function runAutomatableManualActions(opts?: {
-  /** Up to 5 × 200 URLs per run when GSC service account is configured. */
+  /** Batches of ~200 URLs (clamped — default 1 batch per run). */
   googleMaxBatches?: number;
   /** Skip Google Indexing API (e.g. already run in the same request). */
   skipIndexingApi?: boolean;
+  /** Submit every sitemap URL to IndexNow (discouraged — use rotated default). */
+  indexNowSubmitAll?: boolean;
 }): Promise<AutomateManualResult> {
   const summaryLines: string[] = [];
   const urls = await getAllSiteUrlsForIndexing();
   const sitemapUrl = getSitemapUrl();
   const securitySitemapUrl = getSecuritySitemapUrl();
 
-  const indexResult = await submitIndexNowBatched(urls);
+  const indexNowCap = indexNowMaxUrlsPerRun();
+  let indexNowTargets = urls;
+  if (!opts?.indexNowSubmitAll) {
+    const rotated = await getIndexingBatch(indexNowCap);
+    indexNowTargets =
+      rotated.length > 0 ? rotated.slice(0, indexNowCap) : urls.slice(0, indexNowCap);
+  }
+
+  const indexResult = await submitIndexNowBatched(indexNowTargets);
+  if (indexResult.ok && indexResult.submittedCount > 0) {
+    await recordSubmission(indexNowTargets.slice(0, indexResult.submittedCount));
+  }
   summaryLines.push(
     indexResult.ok
-      ? `✓ IndexNow: ${indexResult.submittedCount}/${indexResult.totalUrls} URLs accepted`
+      ? opts?.indexNowSubmitAll
+        ? `✓ IndexNow: ${indexResult.submittedCount}/${indexResult.totalUrls} URLs accepted (full list)`
+        : `✓ IndexNow: ${indexResult.submittedCount} URL(s) this run (${urls.length} on site — rotated batch, max ${indexNowCap}/run)`
       : `⚠ IndexNow: ${indexResult.message}`,
   );
 
@@ -222,10 +239,7 @@ export async function runAutomatableManualActions(opts?: {
       );
     } else {
       googleIndexing.attempted = true;
-      const batchCount = Math.min(
-        MAX_GOOGLE_BATCHES,
-        Math.max(DEFAULT_GOOGLE_BATCHES, opts?.googleMaxBatches ?? DEFAULT_GOOGLE_BATCHES),
-      );
+      const batchCount = clampGoogleMaxBatches(opts?.googleMaxBatches);
       let totalGiSubmitted = 0;
       let totalGiAttempted = 0;
       const allGiErrors: string[] = [];

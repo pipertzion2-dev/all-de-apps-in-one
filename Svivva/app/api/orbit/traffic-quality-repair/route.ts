@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     const urls = await getAllSiteUrlsForIndexing();
     const indexNow = await submitIndexNowBatched(urls);
 
-    const indexing = await runAutomatableManualActions({ googleMaxBatches: 2 });
+    const indexing = await runAutomatableManualActions({});
 
     return NextResponse.json({
       ok: true,

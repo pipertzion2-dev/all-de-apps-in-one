@@ -1,6 +1,11 @@
 #!/usr/bin/env node
 /**
- * Fire every server-side indexing action against production.
+ * Gentle production indexing — one throttled pass (not a stack of Orbit jobs).
+ *
+ * Default: GSC sitemap sync + ~200 rotated IndexNow URLs + ~200 Indexing API URLs.
+ * Avoid running this back-to-back with Launchpad "Run all steps" — that duplicates work
+ * and can confuse Search Console coverage.
+ *
  * Auth: admin passcode (2424) or ORBIT_INTERNAL_SECRET in .env.orbit
  */
 import { ensureOrbitAuth, loadOrbitEnv, orbitFetch } from "./orbit-api-auth.mjs";
@@ -28,30 +33,28 @@ async function get(path) {
   return { ok: res.ok, json };
 }
 
-console.log(`\n🚀 Full indexing run — ${SITE}\n`);
+console.log(`\n🚀 Throttled indexing run — ${SITE}\n`);
+console.log(
+  "Tip: Submit sitemap once in GSC UI, then let Orbit rotate ~200 URLs/day — do not bulk-request every URL.\n",
+);
 
 await get("/api/gsc/diagnose");
 
-await step("GSC sync + IndexNow + Indexing API (5 batches)", "/api/gsc/run-indexing", {});
+await step(
+  "GSC sync + rotated IndexNow + Indexing API (1 batch)",
+  "/api/gsc/run-indexing",
+  {},
+);
 
-await step("Submit sitemap to GSC", "/api/gsc/save", { action: "submit_sitemap" });
-
-await step("Automate manual indexing actions", "/api/orbit/automate-manual", {});
-
-await step("Index health crawl + resubmit stale URLs", "/api/orbit/index-health", {
-  resubmit: true,
-  googleMaxBatches: 5,
+await step("Index health sample (no resubmit)", "/api/orbit/index-health", {
+  resubmit: false,
+  sampleLimit: 40,
 });
-
-await step("Traffic quality repair + re-index", "/api/orbit/traffic-quality-repair", {});
-
-await step("SEO weekly routine (audit + indexing)", "/api/orbit/seo-weekly-routine", {
-  skipContentGeneration: false,
-});
-
-await step("Marketing autopilot run", "/api/orbit/marketing-autopilot", { action: "run" }, 600_000);
 
 await get("/api/orbit/index-health");
 await get("/api/gsc/diagnose");
 
-console.log("\n✅ Full indexing run complete.\n");
+console.log("\n✅ Throttled indexing run complete.\n");
+console.log(
+  "Skipped: automate-manual + index-health resubmit + traffic-quality + seo-weekly + marketing autopilot (run those separately on a schedule, not all at once).\n",
+);
