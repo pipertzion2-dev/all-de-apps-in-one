@@ -1,6 +1,9 @@
 /**
  * Single source of truth for crawl/index policy — used by robots.ts, audits, and middleware hints.
  * Public marketing routes stay crawlable by default; only private/system paths are blocked.
+ *
+ * Do NOT disallow `/_next` — Google needs `/_next/static` JS/CSS to render Next.js pages.
+ * Blocking it is a common cause of “crawled / not indexed” thin-content failures.
  */
 export const ROBOTS_DISALLOW_PATHS = [
   "/dashboard",
@@ -9,8 +12,6 @@ export const ROBOTS_DISALLOW_PATHS = [
   "/marketing-hub/*",
   "/api",
   "/api/*",
-  "/_next",
-  "/_next/*",
   "/gate",
   "/gate/*",
   "/admin",

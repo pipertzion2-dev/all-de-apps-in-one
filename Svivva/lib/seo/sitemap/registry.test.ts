@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "fs";
+import { resolve } from "path";
 import { blogPostsToSitemapEntries, getStaticSitemapFallback } from "./registry";
 import { NATIVE_SVIVVA_TOOLS } from "@/lib/orbit/mini-app-curation";
 import { FEATURE_MINI_APPS } from "@/lib/tools/feature-mini-apps";
@@ -36,6 +38,12 @@ describe("sitemap pages chunk", () => {
     const urls = getStaticSitemapFallback().map((e) => e.url);
     expect(urls.some((u) => u.endsWith("/clean-sneaks"))).toBe(true);
     expect(urls.some((u) => u.endsWith("/events"))).toBe(true);
+  });
+
+  it("does not re-score published SEO pages out of the sitemap", () => {
+    const src = readFileSync(resolve(__dirname, "./registry.ts"), "utf8");
+    expect(src).not.toContain("scorePageContent");
+    expect(src).toMatch(/published engineering-as-marketing pages/i);
   });
 });
 

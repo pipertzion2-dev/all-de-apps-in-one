@@ -4,7 +4,6 @@ import { blogPosts, seoLandingPages, pageCategories } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { getSiteUrl } from "@/lib/site-url";
 import { isNonIndexableSlug } from "@/lib/seo/legacy-paths";
-import { scorePageContent } from "@/lib/seo/content-quality/score";
 import { nativeToolSitemapPaths } from "@/lib/orbit/mini-app-curation";
 import { HUB_FEATURE_PATHS } from "@/lib/tools/catalogs/hub-feature-pages";
 import { dedupeSitemapUrls, normalizeSitemapUrl } from "@/lib/seo/sitemap/normalize";
@@ -162,15 +161,9 @@ export async function getSitemapEntries(): Promise<SitemapEntry[]> {
       if (!page.slug || isNonIndexableSlug(page.slug)) continue;
       if (page.slug.startsWith("svivva-seo-tool-fill-")) continue;
 
-      const quality = scorePageContent({
-        title: page.title,
-        content: page.content || "",
-        howItWorks: page.howItWorks || undefined,
-        whoItsFor: page.whoItsFor || undefined,
-        hasFaq: /\[FAQ_JSON\]/i.test(page.content || ""),
-      });
-      if (!quality.passed) continue;
-
+      // Include published engineering-as-marketing pages in the sitemap.
+      // Strict content-quality gating happens at insert/generation — re-scoring
+      // here was starving IndexNow/GSC of most programmatic URLs (DR/indexing stuck).
       const isTool =
         page.category === "seed-marketing" || page.category === "seo-landing" || !!page.toolUrl;
       entries.push({

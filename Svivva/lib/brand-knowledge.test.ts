@@ -72,5 +72,9 @@ describe("brand-knowledge (SearchDock / AEO entity)", () => {
     expect(k.citationUrls.some((u) => u.path === "/clean-sneaks")).toBe(true);
     expect(k.citationUrls.some((u) => u.path === "/events")).toBe(true);
     expect(k.faqs.some((f) => /Klean Sneaks/i.test(f.q))).toBe(true);
+    // Cube / Play citations must be indexable (not /play or /dashboard/*)
+    expect(k.cubeFaces.find((f) => f.id === "play")?.path).toBe("/clean-sneaks");
+    expect(k.cubeFaces.find((f) => f.id === "orbit")?.path).toBe("/orbit");
+    expect(k.citationUrls.some((u) => u.path === "/play")).toBe(false);
   });
 });

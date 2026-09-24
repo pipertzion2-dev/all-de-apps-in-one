@@ -24,6 +24,12 @@ describe("robots-config", () => {
     expect(isRobotsDisallowed("/orbit")).toBe(false);
   });
 
+  it("does not block Next.js assets Google needs to render pages", () => {
+    expect(isRobotsDisallowed("/_next/static/chunks/app.js")).toBe(false);
+    expect(isRobotsDisallowed("/_next/static/css/app.css")).toBe(false);
+    expect(ROBOTS_DISALLOW_PATHS.some((r) => r.includes("_next"))).toBe(false);
+  });
+
   it("marks private routes as noindex", () => {
     for (const prefix of NOINDEX_PATH_PREFIXES) {
       expect(isNoindexPath(prefix)).toBe(true);
