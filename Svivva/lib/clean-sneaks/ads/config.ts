@@ -113,13 +113,16 @@ export function adsenseUnitReady(placement: AdPlacementId): boolean {
 }
 
 /**
- * Prefer paid AdSense when a valid unit is ready; otherwise show house creatives
- * so the player always sees an ad (Google inventory is often empty on new sites).
+ * Prefer paid AdSense for the menu banner when a unit is ready.
+ * Rewarded + interstitial always use house creatives first — Google Display
+ * units rarely fill there and left players staring at blank boxes. Auto ads
+ * still run sitewide from the layout script for paid inventory.
  */
 export function resolveAdNetwork(placement: AdPlacementId): "adsense" | "house" | "unconfigured" {
   if (!adsEnabled()) return "unconfigured";
-  if (adsenseUnitReady(placement)) return "adsense";
+  if (placement === "menu_banner" && adsenseUnitReady(placement)) return "adsense";
   if (houseAdsAllowed()) return "house";
+  if (adsenseUnitReady(placement)) return "adsense";
   return "unconfigured";
 }
 
