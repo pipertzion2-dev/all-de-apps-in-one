@@ -605,9 +605,10 @@ export default function GscConnectPage() {
           </div>
 
           <p className="text-[10px] text-muted-foreground leading-relaxed">
-            Each run submits about <strong className="font-medium text-foreground">200 rotated URLs</strong>{" "}
-            (IndexNow + Indexing API), not the entire sitemap at once. Google&apos;s daily Indexing
-            API cap is ~200 — run once per day, not five stacked Orbit jobs.
+            Each run submits about{" "}
+            <strong className="font-medium text-foreground">200 rotated URLs</strong> (IndexNow +
+            Indexing API), not the entire sitemap at once. Google&apos;s daily Indexing API cap is
+            ~200 — run once per day, not five stacked Orbit jobs.
           </p>
           <p className="text-[10px] text-muted-foreground leading-relaxed">
             Requires the site to be verified in{" "}

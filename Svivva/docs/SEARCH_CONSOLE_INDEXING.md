@@ -8,11 +8,11 @@ Google discovers most pages via **one sitemap submission** + normal crawl. The I
 
 ## What we do now
 
-| Action | Per run |
-|--------|---------|
-| **GSC sitemap PUT** | Register/update sitemap (once per run — fine) |
-| **IndexNow** | Up to **200 rotated URLs** (least-recently submitted first) |
-| **Indexing API** | **1 batch × ~200 URLs** (max 2 if explicitly requested) |
+| Action              | Per run                                                     |
+| ------------------- | ----------------------------------------------------------- |
+| **GSC sitemap PUT** | Register/update sitemap (once per run — fine)               |
+| **IndexNow**        | Up to **200 rotated URLs** (least-recently submitted first) |
+| **Indexing API**    | **1 batch × ~200 URLs** (max 2 if explicitly requested)     |
 
 Env override: `INDEXNOW_MAX_URLS_PER_RUN=200` (max 5000).
 

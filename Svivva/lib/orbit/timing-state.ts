@@ -49,7 +49,8 @@ export async function loadTimingState(): Promise<TimingState> {
     const result = await db.execute(
       sql`SELECT orbit_timing_state FROM seed_credentials WHERE user_id = ${userId} LIMIT 1`,
     );
-    const raw = (result.rows?.[0] as { orbit_timing_state?: string } | undefined)?.orbit_timing_state;
+    const raw = (result.rows?.[0] as { orbit_timing_state?: string } | undefined)
+      ?.orbit_timing_state;
     if (!raw) return { ...EMPTY };
     const parsed = JSON.parse(raw) as TimingState;
     return {

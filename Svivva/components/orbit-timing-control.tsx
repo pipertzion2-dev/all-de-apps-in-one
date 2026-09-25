@@ -50,9 +50,7 @@ function TimingSwirlOrb({
             "conic-gradient(from 0deg, #1a1008, #d4af37, #f5e6a8, #b8860b, #d4af37, #1a1008)",
         }}
       >
-        <span
-          className="absolute inset-[3px] rounded-full bg-gradient-to-br from-[#1a1008] via-[#2a2010] to-[#1a1008] flex items-center justify-center border border-[#d4af37]/40"
-        >
+        <span className="absolute inset-[3px] rounded-full bg-gradient-to-br from-[#1a1008] via-[#2a2010] to-[#1a1008] flex items-center justify-center border border-[#d4af37]/40">
           <Clock className="h-7 w-7 text-[#d4af37]" aria-hidden />
         </span>
       </span>
@@ -141,11 +139,7 @@ export function OrbitTimingControl() {
       data-testid="orbit-timing-control"
     >
       <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-center sm:items-start">
-        <TimingSwirlOrb
-          active={running}
-          onClick={() => setOpen((o) => !o)}
-          disabled={loading}
-        />
+        <TimingSwirlOrb active={running} onClick={() => setOpen((o) => !o)} disabled={loading} />
 
         <div className="flex-1 min-w-0 w-full space-y-3 text-center sm:text-left">
           <div>
@@ -205,7 +199,9 @@ export function OrbitTimingControl() {
             <>
               {next && (
                 <div className="rounded-xl border border-[#d4af37]/30 bg-black/20 p-3 space-y-2">
-                  <p className="text-[10px] uppercase tracking-wider text-[#d4af37]">Current step</p>
+                  <p className="text-[10px] uppercase tracking-wider text-[#d4af37]">
+                    Current step
+                  </p>
                   <p className="font-bold text-foreground">{next.title}</p>
                   <p className="text-xs text-muted-foreground">{next.subtitle}</p>
                   <p className="text-[11px] text-emerald-700 dark:text-emerald-300">
@@ -252,9 +248,7 @@ export function OrbitTimingControl() {
                         }
                         data-testid="timing-run-next"
                       >
-                        {running ? (
-                          <Loader2 className="w-4 h-4 animate-spin mr-1" />
-                        ) : null}
+                        {running ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
                         {data?.planComplete || next.id === "index-weekly-maintain"
                           ? "Run weekly maintenance"
                           : "Run today's step"}
@@ -321,7 +315,13 @@ export function OrbitTimingControl() {
                 >
                   Reset plan
                 </Button>
-                <Button type="button" variant="ghost" size="sm" className="text-xs" onClick={() => void load()}>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs"
+                  onClick={() => void load()}
+                >
                   Refresh
                 </Button>
               </div>

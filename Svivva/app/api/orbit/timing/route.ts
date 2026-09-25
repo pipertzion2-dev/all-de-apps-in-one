@@ -40,7 +40,10 @@ function canRunMaintenance(state: TimingState): { allowed: boolean; reason?: str
   return { allowed: true };
 }
 
-function canRunStep(step: TimingPlanStep, state: TimingState): { allowed: boolean; reason?: string } {
+function canRunStep(
+  step: TimingPlanStep,
+  state: TimingState,
+): { allowed: boolean; reason?: string } {
   const prev = TIMING_PLAN_STEPS.find((s) => s.order === step.order - 1);
   if (prev && !state.completedStepIds.includes(prev.id)) {
     return { allowed: false, reason: `Complete “${prev.title}” first.` };
@@ -107,7 +110,11 @@ export async function POST(req: NextRequest) {
       logs: [],
     };
     await saveTimingState(state);
-    return NextResponse.json({ ok: true, state, message: "Timing plan reset — start from step 1." });
+    return NextResponse.json({
+      ok: true,
+      state,
+      message: "Timing plan reset — start from step 1.",
+    });
   }
 
   const planComplete = isTimingPlanComplete(state.completedStepIds);
@@ -160,7 +167,10 @@ export async function POST(req: NextRequest) {
 
   if (body.action === "complete_manual") {
     if (next.kind !== "manual") {
-      return NextResponse.json({ ok: false, error: "Current step is automated — use Run today's step." });
+      return NextResponse.json({
+        ok: false,
+        error: "Current step is automated — use Run today's step.",
+      });
     }
     const at = new Date().toISOString();
     state.completedStepIds.push(next.id);
@@ -215,6 +225,8 @@ export async function POST(req: NextRequest) {
     state,
     result,
     nextStep: nextTimingStep(state.completedStepIds) ?? TIMING_MAINTENANCE_STEP,
-    blockReason: result.ok ? null : "Fix issues above, then retry this step (Timing will not skip ahead).",
+    blockReason: result.ok
+      ? null
+      : "Fix issues above, then retry this step (Timing will not skip ahead).",
   });
 }

@@ -4,13 +4,13 @@ Orbit **Timing** runs one step at a time with enforced waits. It mirrors how exp
 
 ## What Google actually expects
 
-| Action | Professional approach | What Orbit Timing does |
-|--------|----------------------|-------------------------|
-| Sitemap | Submit **once** per property; fix errors before resubmitting | Step 2 only (`foundation-sitemap`) |
-| Discovery | Rely on sitemap + internal links + natural crawl | 48h **crawl settle** (manual) before URL nudges |
+| Action       | Professional approach                                                                      | What Orbit Timing does                                    |
+| ------------ | ------------------------------------------------------------------------------------------ | --------------------------------------------------------- |
+| Sitemap      | Submit **once** per property; fix errors before resubmitting                               | Step 2 only (`foundation-sitemap`)                        |
+| Discovery    | Rely on sitemap + internal links + natural crawl                                           | 48h **crawl settle** (manual) before URL nudges           |
 | URL requests | Selective; Indexing API quota is ~200/day but meant for job/livestream types on many sites | **~45 IndexNow** + **~35 Indexing API** per indexing step |
-| Performance | Impressions lag indexing by **days to weeks** | Performance review only after waits |
-| AdSense | Separate product from Search Console | Manual verify step |
+| Performance  | Impressions lag indexing by **days to weeks**                                              | Performance review only after waits                       |
+| AdSense      | Separate product from Search Console                                                       | Manual verify step                                        |
 
 ## Research notes (2024–2026)
 

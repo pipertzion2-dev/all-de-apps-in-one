@@ -24,7 +24,8 @@ export const TIMING_PLAN_STEPS: TimingPlanStep[] = [
     id: "foundation-gsc",
     order: 1,
     title: "Connect Search Console (once)",
-    subtitle: "Verify zzaizzai.com on the right Google account — rankings live here, not in Orbit ads.",
+    subtitle:
+      "Verify zzaizzai.com on the right Google account — rankings live here, not in Orbit ads.",
     successLooksLike:
       "GSC property sc-domain:zzaizzai.com or https://zzaizzai.com/ shows Verified with Owner access.",
     kind: "manual",
@@ -35,7 +36,8 @@ export const TIMING_PLAN_STEPS: TimingPlanStep[] = [
     order: 2,
     title: "Register sitemap (once)",
     subtitle: "Tell Google where URLs live — no bulk URL requests in this step.",
-    successLooksLike: "GSC → Sitemaps shows https://zzaizzai.com/sitemap.xml as Success or Pending.",
+    successLooksLike:
+      "GSC → Sitemaps shows https://zzaizzai.com/sitemap.xml as Success or Pending.",
     kind: "automated",
     minHoursAfterPrevious: 0,
   },
@@ -63,7 +65,8 @@ export const TIMING_PLAN_STEPS: TimingPlanStep[] = [
     order: 5,
     title: "Heal orphan internal links",
     subtitle: "Auto-fill related links so important URLs are reachable before indexing nudges.",
-    successLooksLike: "Log shows pages updated or “no orphans” — fewer orphan alerts in GSC over time.",
+    successLooksLike:
+      "Log shows pages updated or “no orphans” — fewer orphan alerts in GSC over time.",
     kind: "automated",
     minHoursAfterPrevious: 12,
   },
@@ -107,8 +110,10 @@ export const TIMING_PLAN_STEPS: TimingPlanStep[] = [
     id: "adsense-verify",
     order: 10,
     title: "AdSense site status (separate from GSC)",
-    subtitle: "Confirm approval + Auto ads in adsense.google.com — paid ads never appear in Search Console.",
-    successLooksLike: "AdSense → Sites → zzaizzai.com Ready; Reports show impressions when traffic exists.",
+    subtitle:
+      "Confirm approval + Auto ads in adsense.google.com — paid ads never appear in Search Console.",
+    successLooksLike:
+      "AdSense → Sites → zzaizzai.com Ready; Reports show impressions when traffic exists.",
     kind: "manual",
     minHoursAfterPrevious: 0,
   },
@@ -117,7 +122,8 @@ export const TIMING_PLAN_STEPS: TimingPlanStep[] = [
     order: 11,
     title: "Review search performance",
     subtitle: "Read GSC Performance (28 days) — impressions lag indexing by days or weeks.",
-    successLooksLike: "Queries/pages with impressions, or a clear fix list from health/monitor steps.",
+    successLooksLike:
+      "Queries/pages with impressions, or a clear fix list from health/monitor steps.",
     kind: "automated",
     minHoursAfterPrevious: 72,
   },

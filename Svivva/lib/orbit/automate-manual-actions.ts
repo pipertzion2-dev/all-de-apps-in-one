@@ -222,8 +222,7 @@ export async function runAutomatableManualActions(opts?: {
   if (gsc) {
     let gscSite = gsc.site;
     if (gsc.mode === "oauth" && gsc.accessToken) {
-      gscSite =
-        (await resolveGscPropertySiteUrl(gsc.accessToken, gsc.site)) || gsc.site;
+      gscSite = (await resolveGscPropertySiteUrl(gsc.accessToken, gsc.site)) || gsc.site;
     }
     if (opts?.skipGoogleSitemap) {
       googleSitemap = { attempted: false, ok: false };

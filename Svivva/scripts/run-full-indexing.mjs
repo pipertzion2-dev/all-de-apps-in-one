@@ -40,11 +40,7 @@ console.log(
 
 await get("/api/gsc/diagnose");
 
-await step(
-  "GSC sync + rotated IndexNow + Indexing API (1 batch)",
-  "/api/gsc/run-indexing",
-  {},
-);
+await step("GSC sync + rotated IndexNow + Indexing API (1 batch)", "/api/gsc/run-indexing", {});
 
 await step("Index health sample (no resubmit)", "/api/orbit/index-health", {
   resubmit: false,
