@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import {
   MessageSquare, AlignLeft, Languages, Code2, CheckCheck,
   Smile, Key, Wand2, Image as ImageIcon, Lightbulb,
-  Search, Cpu, Wrench, Package, ChevronDown, ChevronRight
+  Search, Cpu, Wrench, Package, ChevronDown, ChevronRight, Music, Microscope
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CATEGORIES, getToolsByCategory, Category } from "@/data/tools";
@@ -31,6 +31,8 @@ const CATEGORY_ICONS: Record<Category, React.ElementType> = {
   'Code Tools': Code2,
   'Language Tools': Languages,
   'Data Tools': Key,
+  'Music & Audio': Music,
+  'Research & Analysis': Microscope,
 };
 
 const UPLOADED_CATEGORIES: Category[] = [
