@@ -367,6 +367,28 @@ export default function HardwareBuilderPage() {
     }
   }, [uploadedSketchBase64, uploadedSketchMime, sketchUploadNotes, applySketchAnalysis]);
 
+  const lastAutoAnalyzedBase64Ref = useRef("");
+
+  useEffect(() => {
+    if (
+      entryMode !== "sketch" ||
+      !uploadedSketchBase64 ||
+      sketchCompressing ||
+      sketchAnalyzing ||
+      lastAutoAnalyzedBase64Ref.current === uploadedSketchBase64
+    ) {
+      return;
+    }
+    lastAutoAnalyzedBase64Ref.current = uploadedSketchBase64;
+    void handleAnalyzeSketch();
+  }, [
+    entryMode,
+    uploadedSketchBase64,
+    sketchCompressing,
+    sketchAnalyzing,
+    handleAnalyzeSketch,
+  ]);
+
   const handleNext = async () => {
     if (currentStep < steps.length - 1) {
       setIsProcessing(true);
@@ -1433,8 +1455,7 @@ export default function HardwareBuilderPage() {
                         Drop your sketch or click to upload
                       </span>
                       <span className="text-xs">
-                        Photo, scan, or drawing — JPEG, PNG, WebP (large photos are compressed
-                        automatically)
+                        Photo, scan, or drawing — we compress and analyze automatically to fill BUILD
                       </span>
                     </div>
                   )}
@@ -1481,7 +1502,7 @@ export default function HardwareBuilderPage() {
                     </>
                   ) : (
                     <>
-                      <Sparkles className="w-4 h-4" /> Analyze sketch &amp; start BUILD
+                      <Sparkles className="w-4 h-4" /> Analyze my image
                     </>
                   )}
                 </Button>
