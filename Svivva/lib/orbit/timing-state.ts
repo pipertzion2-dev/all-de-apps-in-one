@@ -14,6 +14,8 @@ export type TimingState = {
   version: number;
   completedStepIds: string[];
   lastCompletedAt: string | null;
+  /** Last weekly maintenance run after the full plan is complete. */
+  lastMaintenanceAt: string | null;
   logs: TimingStepLog[];
 };
 
@@ -21,6 +23,7 @@ const EMPTY: TimingState = {
   version: TIMING_PLAN_VERSION,
   completedStepIds: [],
   lastCompletedAt: null,
+  lastMaintenanceAt: null,
   logs: [],
 };
 
@@ -53,6 +56,7 @@ export async function loadTimingState(): Promise<TimingState> {
       version: parsed.version ?? TIMING_PLAN_VERSION,
       completedStepIds: parsed.completedStepIds ?? [],
       lastCompletedAt: parsed.lastCompletedAt ?? null,
+      lastMaintenanceAt: parsed.lastMaintenanceAt ?? null,
       logs: parsed.logs ?? [],
     };
   } catch {

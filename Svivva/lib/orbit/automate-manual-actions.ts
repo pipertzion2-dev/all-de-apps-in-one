@@ -140,13 +140,22 @@ export async function runAutomatableManualActions(opts?: {
   skipIndexingApi?: boolean;
   /** Submit every sitemap URL to IndexNow (discouraged — use rotated default). */
   indexNowSubmitAll?: boolean;
+  /** Cap IndexNow URLs for this run (Timing professional cadence). */
+  indexNowMaxUrlsOverride?: number;
+  /** Max Google Indexing API URL notifications this run (partial batch). */
+  indexingApiMaxUrls?: number;
+  /** Skip GSC sitemap PUT — use after one-time sitemap registration. */
+  skipGoogleSitemap?: boolean;
 }): Promise<AutomateManualResult> {
   const summaryLines: string[] = [];
   const urls = await getAllSiteUrlsForIndexing();
   const sitemapUrl = getSitemapUrl();
   const securitySitemapUrl = getSecuritySitemapUrl();
 
-  const indexNowCap = indexNowMaxUrlsPerRun();
+  const indexNowCap =
+    opts?.indexNowMaxUrlsOverride != null && opts.indexNowMaxUrlsOverride > 0
+      ? Math.min(opts.indexNowMaxUrlsOverride, indexNowMaxUrlsPerRun())
+      : indexNowMaxUrlsPerRun();
   let indexNowTargets = urls;
   if (!opts?.indexNowSubmitAll) {
     const rotated = await getIndexingBatch(indexNowCap);
@@ -216,25 +225,30 @@ export async function runAutomatableManualActions(opts?: {
       gscSite =
         (await resolveGscPropertySiteUrl(gsc.accessToken, gsc.site)) || gsc.site;
     }
-    googleSitemap.attempted = true;
-    const sm =
-      gsc.mode === "oauth" && gsc.accessToken
-        ? await submitSitemapWithAccessToken(gsc.accessToken, gscSite, sitemapUrl)
-        : await submitSitemapToGSC(gsc.sa!, gscSite, sitemapUrl);
-    const smSecurity =
-      gsc.mode === "oauth" && gsc.accessToken
-        ? await submitSitemapWithAccessToken(gsc.accessToken, gscSite, securitySitemapUrl)
-        : await submitSitemapToGSC(gsc.sa!, gscSite, securitySitemapUrl);
-    googleSitemap = {
-      attempted: true,
-      ok: sm.ok,
-      error: sm.error || (!smSecurity.ok ? smSecurity.error : undefined),
-    };
-    summaryLines.push(
-      sm.ok
-        ? `✓ Google Search Console: sitemap registered (API)${smSecurity.ok ? " · security sitemap too" : ""}`
-        : `⚠ GSC sitemap API: ${sm.error || "failed"}`,
-    );
+    if (opts?.skipGoogleSitemap) {
+      googleSitemap = { attempted: false, ok: false };
+      summaryLines.push("· GSC sitemap skipped — already registered in Timing step 2");
+    } else {
+      googleSitemap.attempted = true;
+      const sm =
+        gsc.mode === "oauth" && gsc.accessToken
+          ? await submitSitemapWithAccessToken(gsc.accessToken, gscSite, sitemapUrl)
+          : await submitSitemapToGSC(gsc.sa!, gscSite, sitemapUrl);
+      const smSecurity =
+        gsc.mode === "oauth" && gsc.accessToken
+          ? await submitSitemapWithAccessToken(gsc.accessToken, gscSite, securitySitemapUrl)
+          : await submitSitemapToGSC(gsc.sa!, gscSite, securitySitemapUrl);
+      googleSitemap = {
+        attempted: true,
+        ok: sm.ok,
+        error: sm.error || (!smSecurity.ok ? smSecurity.error : undefined),
+      };
+      summaryLines.push(
+        sm.ok
+          ? `✓ Google Search Console: sitemap registered (API)${smSecurity.ok ? " · security sitemap too" : ""}`
+          : `⚠ GSC sitemap API: ${sm.error || "failed"}`,
+      );
+    }
 
     const skipIndexing = opts?.skipIndexingApi === true || isGoogleIndexingQuotaExhaustedToday();
 
@@ -249,6 +263,10 @@ export async function runAutomatableManualActions(opts?: {
     } else {
       googleIndexing.attempted = true;
       const batchCount = clampGoogleMaxBatches(opts?.googleMaxBatches);
+      const indexingUrlCap =
+        opts?.indexingApiMaxUrls != null && opts.indexingApiMaxUrls > 0
+          ? Math.min(opts.indexingApiMaxUrls, batchCount * GOOGLE_INDEXING_BATCH)
+          : batchCount * GOOGLE_INDEXING_BATCH;
       let totalGiSubmitted = 0;
       let totalGiAttempted = 0;
       const allGiErrors: string[] = [];
@@ -256,12 +274,15 @@ export async function runAutomatableManualActions(opts?: {
 
       // Rotate through the site by least-recently-submitted so a slow, week-long
       // crawl reaches every URL across days instead of re-sending the first 200.
-      let rotating = await getIndexingBatch(batchCount * GOOGLE_INDEXING_BATCH);
-      if (rotating.length === 0) rotating = urls;
+      let rotating = await getIndexingBatch(indexingUrlCap);
+      if (rotating.length === 0) rotating = urls.slice(0, indexingUrlCap);
 
       for (let b = 0; b < batchCount; b++) {
         if (quotaExhausted || isGoogleIndexingQuotaExhaustedToday()) break;
-        const batch = rotating.slice(b * GOOGLE_INDEXING_BATCH, (b + 1) * GOOGLE_INDEXING_BATCH);
+        if (totalGiAttempted >= indexingUrlCap) break;
+        const batch = rotating
+          .slice(b * GOOGLE_INDEXING_BATCH, (b + 1) * GOOGLE_INDEXING_BATCH)
+          .slice(0, indexingUrlCap - totalGiAttempted);
         if (!batch.length) break;
         const gi =
           gsc.mode === "oauth" && gsc.accessToken

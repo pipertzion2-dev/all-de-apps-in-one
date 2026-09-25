@@ -26,4 +26,10 @@ describe("runAutomatableManualActions indexing alternatives", () => {
     expect(src).toContain("indexNowSubmitAll");
     expect(src).toContain("rotated batch");
   });
+
+  it("supports Timing cadence overrides", () => {
+    expect(src).toContain("indexNowMaxUrlsOverride");
+    expect(src).toContain("indexingApiMaxUrls");
+    expect(src).toContain("skipGoogleSitemap");
+  });
 });

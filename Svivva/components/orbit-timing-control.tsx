@@ -13,9 +13,12 @@ type TimingPayload = {
   state: {
     completedStepIds: string[];
     lastCompletedAt: string | null;
+    lastMaintenanceAt?: string | null;
     logs: { stepId: string; at: string; ok: boolean; summary: string }[];
   };
   nextStep: TimingPlanStep | null;
+  planComplete?: boolean;
+  maintenanceDue?: boolean;
   canRunNext: boolean;
   blockReason: string | null;
   completedCount: number;
@@ -41,8 +44,7 @@ function TimingSwirlOrb({
       data-testid="timing-swirl-button"
     >
       <span
-        className="relative flex h-[4.5rem] w-[4.5rem] sm:h-20 sm:w-20 items-center justify-center rounded-full shadow-[0_0_28px_rgba(212,175,55,0.45)]"
-        className={active ? "animate-[spin_2.4s_linear_infinite]" : ""}
+        className={`relative flex h-[4.5rem] w-[4.5rem] sm:h-20 sm:w-20 items-center justify-center rounded-full shadow-[0_0_28px_rgba(212,175,55,0.45)] ${active ? "animate-[spin_2.4s_linear_infinite]" : ""}`}
         style={{
           background:
             "conic-gradient(from 0deg, #1a1008, #d4af37, #f5e6a8, #b8860b, #d4af37, #1a1008)",
@@ -151,12 +153,12 @@ export function OrbitTimingControl() {
               One step at a time
             </p>
             <h2 className="text-lg sm:text-xl font-black text-foreground">
-              Timing plan — ads &amp; rankings without flooding Google
+              Professional SEO Timing — small batches, long waits
             </h2>
             <p className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-xl">
-              Replaces “run everything now.” Each step waits hours or days so Indexing API quota,
-              crawl budget, and AdSense setup stay healthy. Press the gold{" "}
-              <strong className="text-foreground">Timing</strong> orb to expand the checklist.
+              Sitemap once, 48h crawl settle, then ~45 IndexNow URLs per step (and ~35 Indexing API
+              only on later steps). Replaces “run everything now.” Press the gold{" "}
+              <strong className="text-foreground">Timing</strong> orb for the checklist.
             </p>
           </div>
 
@@ -168,7 +170,8 @@ export function OrbitTimingControl() {
               />
             </div>
             <span className="text-[11px] font-medium text-muted-foreground">
-              {data?.completedCount ?? 0}/{data?.totalSteps ?? 9} steps
+              {data?.completedCount ?? 0}/{data?.totalSteps ?? 12} steps
+              {data?.planComplete ? " · plan complete" : ""}
             </span>
           </div>
 
@@ -208,6 +211,12 @@ export function OrbitTimingControl() {
                   <p className="text-[11px] text-emerald-700 dark:text-emerald-300">
                     Success looks like: {next.successLooksLike}
                   </p>
+                  {next.id === "crawl-settle" && (
+                    <p className="text-[11px] text-muted-foreground mt-1">
+                      Do not run bulk indexing during this wait — let GSC discover URLs from the
+                      sitemap.
+                    </p>
+                  )}
                   {next.id === "foundation-gsc" && (
                     <Button size="sm" variant="outline" asChild className="mt-1">
                       <Link href="/dashboard/gsc-connect">Open GSC connect</Link>
@@ -233,13 +242,22 @@ export function OrbitTimingControl() {
                         size="sm"
                         className="bg-[#d4af37] text-[#1a1008] hover:bg-[#e0c15a] font-bold"
                         disabled={running || !data?.canRunNext}
-                        onClick={() => void post({ action: "run_next" })}
+                        onClick={() =>
+                          void post({
+                            action:
+                              data?.planComplete || next.id === "index-weekly-maintain"
+                                ? "run_maintenance"
+                                : "run_next",
+                          })
+                        }
                         data-testid="timing-run-next"
                       >
                         {running ? (
                           <Loader2 className="w-4 h-4 animate-spin mr-1" />
                         ) : null}
-                        Run today&apos;s step
+                        {data?.planComplete || next.id === "index-weekly-maintain"
+                          ? "Run weekly maintenance"
+                          : "Run today's step"}
                       </Button>
                     ) : (
                       <Button

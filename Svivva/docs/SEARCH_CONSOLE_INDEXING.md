@@ -18,7 +18,9 @@ Env override: `INDEXNOW_MAX_URLS_PER_RUN=200` (max 5000).
 
 ## Orbit Timing (recommended)
 
-On **Launchpad / Orbit**, use the gold **Timing** swirl button at the top. It runs **one step at a time** with enforced waits (24h–7d) between indexing pushes. Do not use **Start traffic now** or **Run Everything** in the same week unless you intentionally reset Timing.
+On **Launchpad / Orbit**, use the gold **Timing** swirl button at the top. Plan v2 follows a **professional SEO cadence**: sitemap once, **48h crawl settle**, audit + internal link heal, then **~45 IndexNow** URLs per step and **~35 Indexing API** only on later steps — with **48h–7d** waits between pushes. After the checklist completes, **weekly maintenance** repeats the same small caps every **168h**.
+
+See **`docs/TIMING_SEO_PLAYBOOK.md`** for the research summary. Do not use **Start traffic now** or **Run Everything** in the same week unless you intentionally reset Timing.
 
 ## What you should do in Search Console
 
