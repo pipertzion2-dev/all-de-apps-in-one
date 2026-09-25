@@ -54,6 +54,8 @@ export type SessionCasinoState = {
   scoreAccepted: boolean;
   cardGamesPlayed: number;
   cardGamesWon: number;
+  /** Permanent casino upgrades bought with earned credits. */
+  unlockedUpgrades?: string[];
 };
 
 /** High-level experience states spanning walk → casino → cards. */

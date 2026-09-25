@@ -10,6 +10,7 @@ import {
   describeCreditsGate,
   markScoreAccepted,
   playCue,
+  listUnlockedUpgrades,
   readCasinoSession,
   scoreToCredits,
   setSessionCredits,
@@ -19,7 +20,7 @@ import { settleParlay, type ParlayTicket } from "@/lib/clean-sneaks/casino/parla
 import type { RoomPublic } from "@/lib/clean-sneaks/casino/multiplayer/types";
 import { StealBundleBoard, type HandCompleteStats } from "./StealBundleBoard";
 import { ParlayDesk } from "./ParlayDesk";
-import { CreditPayPanel } from "./CreditPayPanel";
+import { UpgradeUnlockPanel } from "./UpgradeUnlockPanel";
 import { MultiplayerLobby } from "./MultiplayerLobby";
 import { KleanShop } from "@/components/clean-sneaks/monetization";
 import { syncCreditsFromCasino } from "@/lib/clean-sneaks/monetization";
@@ -29,7 +30,7 @@ const CasinoScene = dynamic(
   { ssr: false, loading: () => <div className="absolute inset-0 bg-[#07050a]" /> },
 );
 
-type LobbyPanel = "main" | "parlay" | "pay" | "multiplayer" | "shop";
+type LobbyPanel = "main" | "parlay" | "upgrades" | "multiplayer" | "shop";
 
 type Props = {
   walkingScore: number;
@@ -58,9 +59,12 @@ export function CasinoExperience({
     const session = readCasinoSession();
     return session.credits || scoreToCredits(walkingScore || session.walkingScore);
   });
+  const [unlockedUpgrades, setUnlockedUpgrades] = useState<string[]>(() =>
+    listUnlockedUpgrades(readCasinoSession()),
+  );
 
-  const ante = useMemo(() => computeAnte(credits), [credits]);
-  const canSit = canAffordTable(credits);
+  const ante = useMemo(() => computeAnte(credits, unlockedUpgrades), [credits, unlockedUpgrades]);
+  const canSit = canAffordTable(credits, unlockedUpgrades);
   const score = walkingScore || readCasinoSession().walkingScore || credits;
 
   useEffect(() => {
@@ -215,7 +219,7 @@ export function CasinoExperience({
             {canSit ? ` · Ante: ${ante.toLocaleString()}` : ""}
           </p>
           <p className="mt-1 max-w-sm text-[11px] text-[#e8dcc0]/55">
-            {describeCreditsGate(credits)}
+            {describeCreditsGate(credits, unlockedUpgrades)}
           </p>
           {parlayTicket && (
             <p className="mt-2 text-[11px] text-[#7dffb2]" data-testid="lobby-parlay-active">
@@ -265,10 +269,10 @@ export function CasinoExperience({
             <Button
               variant="outline"
               className="border-[#00D632]/45 text-[#00D632]"
-              onClick={() => setLobbyPanel("pay")}
-              data-testid="button-buy-credits"
+              onClick={() => setLobbyPanel("upgrades")}
+              data-testid="button-unlock-upgrades"
             >
-              Apple Pay / Cash App
+              Unlock upgrades
             </Button>
             <Button
               variant="outline"
@@ -312,10 +316,16 @@ export function CasinoExperience({
         </div>
       )}
 
-      {flow === "CASINO_LOBBY" && lobbyPanel === "pay" && (
+      {flow === "CASINO_LOBBY" && lobbyPanel === "upgrades" && (
         <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#07050a]/92">
-          <CreditPayPanel
-            onCreditsGranted={(_granted, balance) => setCredits(balance)}
+          <UpgradeUnlockPanel
+            credits={credits}
+            unlockedUpgrades={unlockedUpgrades}
+            onUnlocked={(balance, upgrades) => {
+              setCredits(balance);
+              setSessionCredits(balance);
+              setUnlockedUpgrades(upgrades);
+            }}
             onClose={() => setLobbyPanel("main")}
           />
         </div>

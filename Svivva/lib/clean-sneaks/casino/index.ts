@@ -71,6 +71,16 @@ export {
   cashAppPackUrl,
   parseLocalRedeemCode,
 } from "./credit-packs";
+export {
+  CASINO_UPGRADE_CATALOG,
+  UPGRADE_UNLOCK_DISCLAIMER,
+  getCasinoUpgrade,
+  listUnlockedUpgrades,
+  resolveUpgradeEffects,
+  tryUnlockCasinoUpgrade,
+  isUpgradeUnlocked,
+} from "./upgrades";
+export type { CasinoUpgradeId, CasinoUpgradeDef } from "./upgrades";
 export type {
   PlayingCard,
   CardPlayer,
