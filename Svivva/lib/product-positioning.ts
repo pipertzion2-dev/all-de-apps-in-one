@@ -4,22 +4,27 @@
 
 import type { FeatureId } from "@/components/svivva-artifact/feature-defs";
 
+/** Brand slogan — use across game, marketing, and product surfaces. */
+export const PRODUCT_TAGLINE = "Give your project rest to grow!";
+
+/** Sap / tree metaphor — automation works under the surface while you rest. */
+export const PRODUCT_SAP_METAPHOR =
+  "Like sap in a tree, ZZAI keeps the quiet work flowing — schema, guardrails, rollback — so you can rest, focus on other things, and grow.";
+
 /** One-sentence pitch (YC / hero / meta). */
 export const PRODUCT_ONE_LINER =
-  "ZZAI is Hybrid² for AI products — fuse two modules into one shippable feature, keep every fusion Klean in production, and play the car×sneaker colorway loop in Klean Sneaks.";
-
-export const PRODUCT_TAGLINE = "Keep what you ship Klean";
+  "ZZAI is Hybrid² for AI products — fuse two modules into one shippable feature, let the platform do the under-the-surface work, and play the car×sneaker loop in free Klean Sneaks.";
 
 /** Plain-language main goal (homepage game + product faces). */
 export const PRODUCT_MAIN_GOAL =
-  "Hybrid² Lab fuses any two ZZAI channels into one deployable product (H¹, then H²). API Builder and Pulse keep that hybrid Klean — hazard preview, live schema, one-click rollback.";
+  "Hybrid² Lab fuses any two ZZAI channels into one deployable product (H¹, then H²). API Builder and Pulse keep that hybrid Klean while you rest — hazard preview, live schema, one-click rollback.";
 
 /** Shorter hero subline. */
 export const PRODUCT_HERO_SUBLINE =
-  "Fuse modules on the Hybrid bus, then keep the ship Klean on Signal — hazard preview, schema, rollback.";
+  "Let the sap do the job. Fuse on the Hybrid bus, ship on Signal, grow while guardrails run.";
 
 /** Max ~12 words — mobile homepage faces only. */
-export const PRODUCT_HOOK_SHORT = "Hybrid² AI modules, keep fusions Klean, demo in Sneaks.";
+export const PRODUCT_HOOK_SHORT = "Rest. Let sap run. Hybrid² AI + free Sneaks demo.";
 
 /** Literal game ↔ product bridge (BALOON8 car×sneaker, Jordan 14 × Ferrari). */
 export const PRODUCT_GAME_HYBRID_METAPHOR =
@@ -28,11 +33,11 @@ export const PRODUCT_GAME_HYBRID_METAPHOR =
 /** First homepage panel — Klean Sneaks (not the product dashboard). */
 export const HOMEPAGE_GAME_FACE_TITLE = "Game · Klean Sneaks";
 export const HOMEPAGE_GAME_FACE_SUBLINE =
-  "BALOON8 car×sneaker — one hybrid chassis, colorway unlocks. Swipe down for Hybrid² + guardrails.";
+  "Free to play · real ads fund the walk. Rest — let the sap grow your score while you roam.";
 
 /** Shown under the tagline on the platform homepage face (mobile compact). */
 export const HOMEPAGE_PLATFORM_FACE_SUBLINE =
-  "Hybrid² desk — fuse channels, keep fusions Klean, ship on Signal. Not the game face.";
+  "Give your project rest to grow — Hybrid² desk fuses channels; Signal keeps ships Klean.";
 
 export const HOMEPAGE_SCROLL_TO_PLATFORM = "Swipe ↓ ZZAI platform";
 export const HOMEPAGE_SCROLL_TO_GAME = "Swipe ↓ Klean Sneaks game";

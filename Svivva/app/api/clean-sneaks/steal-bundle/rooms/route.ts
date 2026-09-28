@@ -7,15 +7,6 @@ import {
   patchRoom,
 } from "@/lib/clean-sneaks/casino/multiplayer/store";
 import { normalizeRoomCode, toPublicRoom } from "@/lib/clean-sneaks/casino/multiplayer/types";
-import { hasMembershipAccess } from "@/lib/auth/membership-access";
-import {
-  assertCanJoinOnlineTable,
-  loadDbUser,
-  playerHasUnlimitedOnline,
-  recordOnlineTableStart,
-  resolveOnlineSubject,
-} from "@/lib/clean-sneaks/monetization/online-access-server";
-
 export const dynamic = "force-dynamic";
 
 function deviceIdFromBody(body: Record<string, unknown>): string | null {
@@ -38,61 +29,7 @@ async function bindSeatIdentity(
   });
 }
 
-async function consumeOnlineStartsIfReady(
-  code: string,
-  requestPlayerId: string,
-  requestUserId: string | null,
-  membershipThisRequest: boolean,
-): Promise<{ ok: true } | { ok: false; status: number; error: string; code: string }> {
-  const room = getRoom(code);
-  if (!room || room.mode !== "online") return { ok: true };
-  if (room.players.length < 2 || !room.players.every((p) => p.ready)) return { ok: true };
-  if (room.phase !== "lobby" && room.phase !== "parlay") return { ok: true };
-
-  for (const seat of room.players) {
-    const dbUser = seat.userId ? await loadDbUser(seat.userId) : null;
-    const unlimited = playerHasUnlimitedOnline({
-      dbUser,
-      seat,
-      requestPlayerId,
-      requestUserId,
-      membershipThisRequest,
-    });
-    if (unlimited) continue;
-    const subject = resolveOnlineSubject(seat.userId ?? null, seat.deviceId ?? null);
-    if (!subject) {
-      return {
-        ok: false,
-        status: 401,
-        error: "Every player needs a zzai sign-in or device id before the table starts.",
-        code: "sign_in_required",
-      };
-    }
-    const gate = await assertCanJoinOnlineTable(subject, false);
-    if (!gate.ok) {
-      return {
-        ok: false,
-        status: 402,
-        error:
-          "Free online tables used this month. Subscribe with recurring Cash App on ZZAI for unlimited play.",
-        code: gate.code,
-      };
-    }
-  }
-
-  for (const seat of room.players) {
-    const dbUser = seat.userId ? await loadDbUser(seat.userId) : null;
-    const unlimited = playerHasUnlimitedOnline({
-      dbUser,
-      seat,
-      requestPlayerId,
-      requestUserId,
-      membershipThisRequest,
-    });
-    if (unlimited) continue;
-    const subject = resolveOnlineSubject(seat.userId ?? null, seat.deviceId ?? null);
-    if (subject) await recordOnlineTableStart(subject, code);
-  }
+async function consumeOnlineStartsIfReady(): Promise<{ ok: true }> {
   return { ok: true };
 }
 
@@ -247,23 +184,7 @@ export async function PATCH(request: NextRequest) {
       const user = await getCurrentUser();
       const deviceId = deviceIdFromBody(body);
       await bindSeatIdentity(code, playerId, user?.id ?? null, deviceId);
-      const membershipThisRequest = await hasMembershipAccess();
-      const consumed = await consumeOnlineStartsIfReady(
-        code,
-        playerId,
-        user?.id ?? null,
-        membershipThisRequest,
-      );
-      if (!consumed.ok) {
-        patchRoom(code, (room) => {
-          const seat = room.players.find((p) => p.id === playerId);
-          if (seat) seat.ready = false;
-        });
-        return NextResponse.json(
-          { error: consumed.error, code: consumed.code },
-          { status: consumed.status },
-        );
-      }
+      await consumeOnlineStartsIfReady();
     }
 
     return NextResponse.json({

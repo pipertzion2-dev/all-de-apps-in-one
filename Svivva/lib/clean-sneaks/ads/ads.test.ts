@@ -46,6 +46,11 @@ describe("clean-sneaks advertising", () => {
     expect(resolveAdNetwork("run_interstitial")).toBe("house");
   });
 
+  it("prefers Media.net when configured without AdSense banner slot", () => {
+    vi.stubEnv("NEXT_PUBLIC_MEDIANET_CID", "8CU123456");
+    expect(resolveAdNetwork("menu_banner")).toBe("medianet");
+  });
+
   it("uses AdSense for banner when client + slot env are set", () => {
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_CLIENT", "ca-pub-1234567890123456");
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT_BANNER", "1234567890");

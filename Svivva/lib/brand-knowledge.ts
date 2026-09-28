@@ -418,7 +418,7 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       },
       {
         q: `What does “${PRODUCT_TAGLINE}” mean?`,
-        a: "Hybrid² fuses modules like a car-meets-sneaker silhouette; colorways are new finishes on the same chassis. In production, preview hazards (Sneak Vision in Klean Sneaks), enforce schema on every response, and roll back when a deploy scuffs — so fused AI features stay Klean.",
+        a: "Like sap in a tree, ZZAI keeps the under-the-surface work moving — schema, guardrails, rollback — while you rest, focus on other things, and grow. Klean Sneaks is free with ads; the platform is where the sap runs for your real projects.",
       },
       {
         q: "How long does it take to ship with ZZAI?",

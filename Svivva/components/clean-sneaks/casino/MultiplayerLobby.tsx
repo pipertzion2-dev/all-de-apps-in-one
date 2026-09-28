@@ -9,9 +9,8 @@ import {
 } from "@/lib/clean-sneaks/casino/multiplayer/bluetooth";
 import type { RoomPublic } from "@/lib/clean-sneaks/casino/multiplayer/types";
 import { getOrCreateDeviceId } from "@/lib/clean-sneaks/prizes/year-subscription";
-import { OnlinePlayUpgradeSheet } from "@/components/clean-sneaks/monetization/OnlinePlayUpgradeSheet";
-import type { OnlineAccessSnapshot } from "@/lib/clean-sneaks/monetization/online-access-server";
 import { PLATFORM_FUNNEL_COPY } from "@/lib/clean-sneaks/monetization/platform-strategy";
+import { PRODUCT_TAGLINE } from "@/lib/product-positioning";
 
 const PLAYER_ID_KEY = "zzai.steal-bundle.playerId";
 const LOCAL_GAMERTAG_KEY = "zzai.klean.gamerTag";
@@ -54,8 +53,6 @@ export function MultiplayerLobby({ ante, onReadyToPlay, onBack }: Props) {
   const [room, setRoom] = useState<RoomPublic | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [onlineAccess, setOnlineAccess] = useState<OnlineAccessSnapshot | null>(null);
-  const [showUpgrade, setShowUpgrade] = useState(false);
   const ble = getBluetoothSupport();
   const launchedRef = useRef(false);
 
@@ -75,7 +72,6 @@ export function MultiplayerLobby({ ante, onReadyToPlay, onBack }: Props) {
           /* ignore */
         }
       }
-      if (data.online) setOnlineAccess(data.online);
     } catch {
       /* ignore */
     }
@@ -151,7 +147,6 @@ export function MultiplayerLobby({ ante, onReadyToPlay, onBack }: Props) {
       });
       const data = await res.json();
       if (!res.ok) {
-        if (data.code === "quota_exhausted") setShowUpgrade(true);
         setError(data.error || "Could not create room.");
         return;
       }
@@ -182,7 +177,6 @@ export function MultiplayerLobby({ ante, onReadyToPlay, onBack }: Props) {
       });
       const data = await res.json();
       if (!res.ok) {
-        if (data.code === "quota_exhausted") setShowUpgrade(true);
         setError(data.error || "Could not join.");
         return;
       }
@@ -210,15 +204,10 @@ export function MultiplayerLobby({ ante, onReadyToPlay, onBack }: Props) {
     });
     const data = await res.json();
     if (!res.ok) {
-      if (data.code === "quota_exhausted") setShowUpgrade(true);
       setError(data.error || "Could not ready up.");
-      void refreshAccess();
       return;
     }
-    if (res.ok) {
-      setRoom(data.room);
-      void refreshAccess();
-    }
+    setRoom(data.room);
   };
 
   const scanBluetooth = async () => {
@@ -247,29 +236,13 @@ export function MultiplayerLobby({ ante, onReadyToPlay, onBack }: Props) {
         <p className="text-[10px] uppercase tracking-[0.4em] text-[#7EC8D9]">Live table</p>
         <h2 className="mt-1 font-serif text-2xl text-[#f7e7b0]">Online · Nearby Bluetooth</h2>
         <p className="mt-2 text-xs text-[#e8dcc0]/65">
-          Host a table on the internet, or sit next to a friend — Bluetooth finds their device, then
-          the room code syncs the deal. Nearby tables stay free; online uses your monthly platform
-          allowance unless you subscribe on ZZAI.
+          {PRODUCT_TAGLINE} Host online or nearby — the game is free; ads fund the walk while the
+          sap runs your platform guardrails on ZZAI.
         </p>
-        {onlineAccess && mode === "online" && (
-          <p className="mt-2 text-[11px] text-[#7EC8D9]/90" data-testid="mp-online-quota">
-            {onlineAccess.unlimited
-              ? "ZZAI plan: unlimited online tables"
-              : PLATFORM_FUNNEL_COPY.monthlyLabel(
-                  onlineAccess.usedThisMonth,
-                  onlineAccess.limit,
-                )}
-          </p>
-        )}
+        <p className="mt-2 text-[11px] text-[#7EC8D9]/90" data-testid="mp-online-quota">
+          {PLATFORM_FUNNEL_COPY.monthlyLabel()}
+        </p>
       </div>
-
-      {showUpgrade && onlineAccess && (
-        <OnlinePlayUpgradeSheet
-          access={onlineAccess}
-          onDismiss={() => setShowUpgrade(false)}
-          onUnlocked={() => void refreshAccess()}
-        />
-      )}
 
       {!room && (
         <>

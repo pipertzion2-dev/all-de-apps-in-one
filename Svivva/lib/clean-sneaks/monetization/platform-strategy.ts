@@ -1,41 +1,31 @@
 /**
- * Klean Sneaks → ZZAI platform funnel (fair freemium).
+ * Klean Sneaks monetization — free game, real ads, optional ad-free pass.
  *
- * Research-aligned principles (NYT Games / Wordle, GeoGuessr, Duolingo-style caps):
- * - Never paywall the core solo loop (walk + solo Steal Bundle stays free).
- * - Gate **online** multiplayer — high marginal cost + strongest upgrade hook.
- * - Keep **nearby / Bluetooth** free (local play, no server matchmaking).
- * - Show remaining free sessions before the user commits (no surprise lockouts mid-lobby).
- * - Paid platform via **recurring Cash App** (Starter / Pro) unlocks unlimited online + saved scores.
- * - Optional ads on free solo remain; subscribers get ad-light / no interstitial policy in-game.
+ * - **Free**: unlimited solo, nearby, and online play.
+ * - **Revenue**: programmatic ads (Media.net / Adsterra / AdSense) + house fill.
+ * - **Ad-free**: one-time $5 Cash App on this device.
+ * - **Platform**: separate ZZAI desk subscription (Cash App recurring) for API tools.
  */
 
-/** Free signed-in accounts: online tables per UTC calendar month. */
-export const FREE_ONLINE_TABLES_PER_MONTH = 2;
-
-/** Guests (device only): one taste session before sign-in is required. */
-export const GUEST_ONLINE_TABLES_PER_MONTH = 1;
-
-/** Nearby Bluetooth tables — always free (local social). */
+export const FREE_ONLINE_TABLES_PER_MONTH = 9999;
+export const GUEST_ONLINE_TABLES_PER_MONTH = 9999;
 export const NEARBY_ONLINE_ALWAYS_FREE = true;
 
-export const PLATFORM_UPGRADE_PATH = "/dashboard/billing?ref=klean-online";
+export const PLATFORM_UPGRADE_PATH = "/dashboard/billing?ref=klean";
 
 export type PlatformFunnelTier = "guest" | "free" | "starter" | "pro";
 
 export const PLATFORM_FUNNEL_COPY = {
-  headline: "Play online on the ZZAI platform",
+  headline: "Give your project rest to grow!",
   subhead:
-    "Solo Vegas runs stay free. Online tables against real players use a small monthly allowance — unlimited with a ZZAI subscription.",
+    "Klean Sneaks is free — ads keep the lights on. Let the sap run your guardrails on ZZAI while you play, rest, and grow.",
   benefits: [
-    "Unlimited online Steal Bundle tables",
-    "Monthly recurring Cash App — Repeat → Monthly in the app",
-    "Gamer tag saved to your zzai zzai account",
-    "Scores sync when you sign in on another device",
-    "Full API Builder & Orbit on the same subscription",
+    "Free unlimited walks and online Steal Bundle tables",
+    "Real ad network revenue (not paywalled plays)",
+    "Optional $5 Cash App — no ads on this device",
+    "Gamer tag on your zzai zzai account when signed in",
+    "Platform tools on ZZAI when you are ready to ship",
   ],
-  fairnessNote:
-    "We only count a session when a table actually starts (everyone ready). Leaving lobby early does not spend a play.",
-  monthlyLabel: (used: number, limit: number) =>
-    limit <= 0 ? "Unlimited online" : `${Math.max(0, limit - used)} of ${limit} free online tables left this month`,
+  fairnessNote: "Prefer silence? Pay once on Cash App — no recurring fee for ad-free play.",
+  monthlyLabel: () => "Free to play · supported by ads",
 } as const;

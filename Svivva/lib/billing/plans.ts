@@ -28,7 +28,7 @@ export const BILLING_PLANS: BillingPlanDefinition[] = [
     features: [
       "1 project",
       "100 API calls/month",
-      "Klean Sneaks solo + 2 online tables/month",
+      "Klean Sneaks free (ads) · $5 Cash App ad-free",
       "Basic eval suite",
       "Community support",
     ],
@@ -45,7 +45,7 @@ export const BILLING_PLANS: BillingPlanDefinition[] = [
     features: [
       "3 projects",
       "2,000 API calls/month",
-      "Unlimited Klean Sneaks online tables",
+      "Klean Sneaks ad-free pass + platform tools",
       "Full eval suite",
       "Email support",
       "Orbit marketing copy",
@@ -63,7 +63,7 @@ export const BILLING_PLANS: BillingPlanDefinition[] = [
     features: [
       "10 projects",
       "10,000 API calls/month",
-      "Unlimited Klean Sneaks online + saved gamer tag",
+      "Klean Sneaks ad-free + saved gamer tag",
       "Auto-rollback eval suite",
       "Priority support",
       "Custom training data",

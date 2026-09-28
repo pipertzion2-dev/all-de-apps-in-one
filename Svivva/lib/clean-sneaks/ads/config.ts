@@ -1,4 +1,6 @@
+import { readAdFreePass } from "@/lib/clean-sneaks/monetization/ad-free-pass";
 import type { AdPlacementId, HouseCreative } from "./types";
+import { preferProgrammaticOverAdsense, programmaticNetwork } from "./programmatic";
 import {
   isValidAdsenseClientId,
   isValidAdsenseSlotId,
@@ -76,6 +78,7 @@ export function adsenseAnySlot(): string | null {
 
 export function adsEnabled(): boolean {
   if (process.env.NEXT_PUBLIC_CLEAN_SNEAKS_ADS === "0") return false;
+  if (typeof window !== "undefined" && readAdFreePass()) return false;
   return true;
 }
 
@@ -118,8 +121,16 @@ export function adsenseUnitReady(placement: AdPlacementId): boolean {
  * units rarely fill there and left players staring at blank boxes. Auto ads
  * still run sitewide from the layout script for paid inventory.
  */
-export function resolveAdNetwork(placement: AdPlacementId): "adsense" | "house" | "unconfigured" {
+export function resolveAdNetwork(
+  placement: AdPlacementId,
+): "adsense" | "house" | "unconfigured" | "medianet" | "adsterra" {
   if (!adsEnabled()) return "unconfigured";
+  const programmatic = programmaticNetwork();
+  if (placement === "menu_banner" && programmatic) {
+    const useAlt =
+      preferProgrammaticOverAdsense() || !adsenseUnitReady(placement) || !adsenseConfigured();
+    if (useAlt) return programmatic;
+  }
   if (placement === "menu_banner" && adsenseUnitReady(placement)) return "adsense";
   if (houseAdsAllowed()) return "house";
   if (adsenseUnitReady(placement)) return "adsense";
@@ -137,6 +148,15 @@ export const INTERSTITIAL_COOLDOWN_MS = 45_000;
 
 /** Direct / house sponsors — shown when Google has no fill (default on). */
 export const HOUSE_CREATIVES: readonly HouseCreative[] = [
+  {
+    id: "rest-grow",
+    headline: "Give your project rest to grow",
+    body: "Let the sap do the quiet work — schema, rollback, guardrails — while you focus elsewhere.",
+    cta: "Explore ZZAI",
+    href: "/",
+    accent: "#5B8DA8",
+    imageUrl: "/zzai-logo-signal.png",
+  },
   {
     id: "zzai-tools",
     headline: "ZZAI Tools Hub",
