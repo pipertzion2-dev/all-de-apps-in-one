@@ -108,10 +108,10 @@ Requires `VERCEL_TOKEN` (and optional `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID`). Or
 
 ### Choose one deploy path (not both)
 
-**Path A — Vercel Git (disabled for `main`)**
+**Path A — Vercel Git (default when no Actions secrets)**
 
-- `Svivva/vercel.json` sets **`main`: false** so spend-cap pauses do not post red **Account is blocked** on every push.
-- Production ships via **Path B** (Actions below).
+- Push to **`main`** with changes under **`Svivva/`** → Vercel Git deploy.
+- If GitHub shows **Account is blocked**, open the dashboard and **Resume**, or add **`VERCEL_TOKEN`** so Actions can unpause automatically (see Path B).
 
 **Path B — GitHub Actions only (requires secrets)**
 

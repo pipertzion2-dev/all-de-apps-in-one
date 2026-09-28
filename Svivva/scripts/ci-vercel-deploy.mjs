@@ -88,8 +88,11 @@ async function waitForGitDeploy() {
 
 if (!hasCredentials) {
   if (event === "workflow_dispatch" || requireDeploy) {
-    fail(
-      "Deploy credentials required. Add VERCEL_DEPLOY_HOOK (easiest) or VERCEL_TOKEN + VERCEL_ORG_ID + VERCEL_PROJECT_ID to GitHub secrets.",
+    console.warn(
+      "No VERCEL_TOKEN / VERCEL_DEPLOY_HOOK — falling back to Vercel Git integration on this commit.",
+    );
+    console.warn(
+      "If GitHub shows Account is blocked, add secrets (see docs/VERCEL_ACCOUNT.md) or Resume in the Vercel dashboard.",
     );
   }
   await waitForGitDeploy();
