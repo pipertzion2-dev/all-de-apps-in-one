@@ -1,4 +1,5 @@
-# Deploy latest main to production when Git deploys are stuck or queued.
+# Primary production deploy path — Vercel Git deploy on main is disabled in Svivva/vercel.json
+# so spend-cap "Account is blocked" Git checks do not block shipping; this job resumes + deploys.
 #
 # Setup (pick one):
 #   Easy — GitHub secret VERCEL_DEPLOY_HOOK
@@ -24,7 +25,7 @@ concurrency:
 
 permissions:
   contents: read
-  statuses: read
+  statuses: write
 
 jobs:
   deploy:
@@ -53,5 +54,25 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID || 'team_GuJh1mdYQPgRIhJaagdpM8lw' }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID || 'prj_dFOy1SeDx3JLYTxfsnZ7Fd68bIQr' }}
           VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
-          VERCEL_CI_DEPLOY: ${{ vars.VERCEL_CI_DEPLOY }}
+          VERCEL_CI_DEPLOY: "true"
         run: node scripts/ci-vercel-deploy.mjs
+
+      - name: Confirm production is live
+        if: success()
+        working-directory: Svivva
+        run: node scripts/verify-production-live.mjs
+
+      - name: Report deploy status (when Vercel Git is paused)
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: "success",
+              context: "Production deploy (Vercel Actions)",
+              description: "zzaizzai.com live — resume + CLI deploy",
+              target_url: "https://zzaizzai.com",
+            });
