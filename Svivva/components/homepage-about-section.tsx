@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BRAND } from "@/lib/brand";
-import { PRODUCT_HERO_SUBLINE, PRODUCT_ONE_LINER } from "@/lib/product-positioning";
+import { PRODUCT_MAIN_GOAL, PRODUCT_ONE_LINER, PRODUCT_TAGLINE } from "@/lib/product-positioning";
 import { BarChart3, Eye, GitBranch, Shield } from "lucide-react";
 import { FeatureBetaBadge } from "@/components/feature-beta-badge";
 
@@ -42,13 +42,13 @@ export function HomepageAboutSection() {
       <div className="mx-auto max-w-3xl space-y-8 text-center">
         <div className="space-y-3">
           <Badge variant="secondary" className="px-4 py-1.5">
-            What is {BRAND.name}?
+            What {BRAND.name} is for
           </Badge>
-          <h1 className="text-2xl font-bold sm:text-3xl">{BRAND.tagline}</h1>
-          <p className="mx-auto max-w-2xl text-base text-muted-foreground sm:text-lg">
-            {PRODUCT_ONE_LINER}
+          <h1 className="text-2xl font-bold sm:text-3xl">{PRODUCT_TAGLINE}</h1>
+          <p className="mx-auto max-w-2xl text-base font-medium text-foreground/90 sm:text-lg">
+            {PRODUCT_MAIN_GOAL}
           </p>
-          <p className="mx-auto max-w-2xl text-sm text-muted-foreground">{PRODUCT_HERO_SUBLINE}</p>
+          <p className="mx-auto max-w-2xl text-sm text-muted-foreground">{PRODUCT_ONE_LINER}</p>
         </div>
 
         <div className="grid gap-4 text-left sm:grid-cols-2">

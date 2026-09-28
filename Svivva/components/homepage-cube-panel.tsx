@@ -8,6 +8,7 @@ import { HomepageHeroBlock } from "@/components/homepage-hero-block";
 import { HomepageHowToSection } from "@/components/homepage-howto-section";
 import { HomepagePricingSection } from "@/components/homepage-pricing-section";
 import { HomepageCubeFaceHint } from "@/components/homepage-cube-face-hint";
+import { HomepageMainGoal } from "@/components/homepage-main-goal";
 
 const PlatformFeatureHub = dynamic(
   () => import("@/components/platform-feature-hub").then((m) => m.PlatformFeatureHub),
@@ -42,6 +43,10 @@ export function HomepageCubePanel({
   return (
     <div className="relative bg-background pb-8">
       {interactive ? <HomepageCubeFaceHint /> : null}
+
+      <div className="relative z-20 px-4 pt-6 sm:pt-8">
+        <HomepageMainGoal variant="light" />
+      </div>
 
       <HomepageHeroBlock
         mountCanvas={mountCanvas}

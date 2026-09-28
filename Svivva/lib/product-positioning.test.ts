@@ -35,6 +35,6 @@ describe("product-positioning", () => {
   });
 
   it("uses the new tagline", () => {
-    expect(PRODUCT_TAGLINE).toMatch(/clean/i);
+    expect(PRODUCT_TAGLINE).toMatch(/Klean/i);
   });
 });

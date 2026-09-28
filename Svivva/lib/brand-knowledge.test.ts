@@ -11,7 +11,7 @@ describe("brand-knowledge (SearchDock / AEO entity)", () => {
       expect.arrayContaining(["zzai zzai", "ZZAI", "zzaizzai", "zzaizzai.com", "Svivva"]),
     );
     expect(k.definition.toLowerCase()).toContain("zzaizzai.com");
-    expect(k.definition).toMatch(/Keep what you ship clean|production guardrails/i);
+    expect(k.definition).toMatch(/Keep what you ship Klean|production guardrails/i);
   });
 
   it("maps the six cube faces and core products", () => {

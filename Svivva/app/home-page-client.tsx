@@ -1088,7 +1088,7 @@ export default function LandingPage() {
                   <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">
                     {mode === "digital" ? (
                       <>
-                        Keep what you ship <span className="text-[#5B8DA8]">clean</span>
+                        Keep what you ship <span className="text-[#5B8DA8]">Klean</span>
                       </>
                     ) : (
                       <>
@@ -1098,7 +1098,7 @@ export default function LandingPage() {
                   </h2>
                   <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto">
                     {mode === "digital"
-                      ? "Preview hazards before deploy, enforce schema on every response, and roll back in one click — same metaphor as Klean Sneaks."
+                      ? "Main goal: AI APIs that stay Klean in production — preview hazards, enforce schema on every response, roll back in one click. Klean Sneaks shows the same loop in game form."
                       : "Schematics and BOM workflows — beta on the Crest bus."}
                   </p>
                 </div>
