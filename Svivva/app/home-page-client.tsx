@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { runBodyLayerHygiene } from "@/lib/body-layer-cleanup";
 import { showHomepageSection } from "@/lib/homepage-layout";
 import { flipPanelFromHash, scrollToHomepagePanel } from "@/lib/homepage-scroll";
+import { HomepageFaceSwitcher } from "@/components/homepage-face-switcher";
 import { HomepageFlipStack } from "@/components/homepage-flip-stack";
 import { HomepageCubePanel } from "@/components/homepage-cube-panel";
 import { HomepageGamePanel } from "@/components/homepage-game-panel";
@@ -723,6 +724,8 @@ export default function LandingPage() {
               </div>
             </div>
           </nav>
+
+          {flipComplete && showHomepageSection("scrollSnap") ? <HomepageFaceSwitcher /> : null}
 
           {showHomepageSection("scrollSnap") ? (
             <HomepageFlipStack

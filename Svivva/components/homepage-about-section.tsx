@@ -47,8 +47,8 @@ export function HomepageAboutSection() {
     >
       <div className="mx-auto max-w-3xl space-y-8 text-center">
         <div className="space-y-3">
-          <Badge variant="secondary" className="px-4 py-1.5">
-            What {BRAND.name} is for
+          <Badge variant="secondary" className="border-[#5B8DA8]/30 bg-[#5B8DA8]/10 px-4 py-1.5">
+            The platform · {BRAND.name}
           </Badge>
           <div className="hidden sm:block">
             <HomepageMainGoal density="full" />
