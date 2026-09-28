@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
+import { HOMEPAGE_SCROLL_TO_GAME } from "@/lib/product-positioning";
 
 const SCROLL_TOP_THRESHOLD = 48;
 
@@ -29,10 +30,10 @@ export function HomepageCubeFaceHint() {
       type="button"
       onClick={() => scrollToHomepagePanel("home-game")}
       className="pointer-events-auto fixed left-1/2 top-[4.75rem] z-[25] flex -translate-x-1/2 cursor-pointer flex-col items-center gap-1.5 transition-opacity duration-200 active:scale-95 sm:top-[5.5rem]"
-      aria-label="Swipe down for game"
+      aria-label={HOMEPAGE_SCROLL_TO_GAME}
     >
       <span className="rounded-full bg-background/85 px-4 py-1.5 text-[11px] font-medium tracking-wide text-muted-foreground shadow-md ring-1 ring-border/40 backdrop-blur-sm">
-        Swipe down · game
+        {HOMEPAGE_SCROLL_TO_GAME}
       </span>
       <svg
         width="18"

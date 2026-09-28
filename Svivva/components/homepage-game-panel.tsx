@@ -2,8 +2,8 @@
 
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
 import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
+import { HOMEPAGE_SCROLL_TO_PLATFORM } from "@/lib/product-positioning";
 import { HomepageScrollHint } from "@/components/homepage-scroll-hint";
 import { HomepageMainGoal } from "@/components/homepage-main-goal";
 
@@ -32,11 +32,12 @@ export function HomepageGamePanel() {
       />
 
       <div className="relative z-10 flex min-h-0 flex-1 flex-col px-3 pb-[5.5rem] pt-[4.5rem] sm:px-6 sm:pb-28 sm:pt-20">
-        <HomepageMainGoal variant="dark" density="compact" className="shrink-0 px-1" />
-
-        <p className="mt-2 shrink-0 text-center text-[9px] uppercase tracking-[0.35em] text-[#A8BA48]/80 sm:text-[10px]">
-          Demo · {KLEAN_SNEAKS.display}
-        </p>
+        <HomepageMainGoal
+          variant="dark"
+          density="compact"
+          surface="game"
+          className="shrink-0 px-1"
+        />
 
         <div
           className="relative mx-auto mt-1 flex min-h-0 w-full max-w-lg flex-1 items-center justify-center"
@@ -52,12 +53,12 @@ export function HomepageGamePanel() {
           className="mt-2 shrink-0 text-center text-[10px] uppercase tracking-[0.25em] text-white/50 sm:text-[11px]"
           data-testid="text-clean-sneaks-goal"
         >
-          Tap cube to play
+          Tap the cube to open the game
         </p>
       </div>
 
       <HomepageScrollHint
-        label="Swipe ↓ product home"
+        label={HOMEPAGE_SCROLL_TO_PLATFORM}
         direction="down"
         prominent={false}
         onActivate={() => scrollToHomepagePanel("nav-cube")}
