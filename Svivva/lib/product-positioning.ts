@@ -28,14 +28,14 @@ export const PRODUCT_GAME_HYBRID_METAPHOR =
 /** First homepage panel — Klean Sneaks (not the product dashboard). */
 export const HOMEPAGE_GAME_FACE_TITLE = "Game · Klean Sneaks";
 export const HOMEPAGE_GAME_FACE_SUBLINE =
-  "BALOON8 car×sneaker — one hybrid chassis, colorway unlocks. Swipe down for Hybrid² + guardrails.";
+  "BALOON8 car×sneaker — one chassis, unlockable colorways. Swipe down for the Hybrid² desk.";
 
 /** Shown under the tagline on the platform homepage face (mobile compact). */
 export const HOMEPAGE_PLATFORM_FACE_SUBLINE =
-  "Hybrid² desk — fuse channels, keep fusions Klean, ship on Signal. Not the game face.";
+  "Hybrid² desk — fuse channels, keep fusions Klean, ship on Signal.";
 
-export const HOMEPAGE_SCROLL_TO_PLATFORM = "Swipe ↓ ZZAI platform";
-export const HOMEPAGE_SCROLL_TO_GAME = "Swipe ↓ Klean Sneaks game";
+export const HOMEPAGE_SCROLL_TO_PLATFORM = "Swipe down · ZZAI platform";
+export const HOMEPAGE_SCROLL_TO_GAME = "Swipe up · Klean Sneaks game";
 
 /** Platform channel strips that ship today (not beta). */
 export const CORE_PLATFORM_FEATURE_IDS = new Set([

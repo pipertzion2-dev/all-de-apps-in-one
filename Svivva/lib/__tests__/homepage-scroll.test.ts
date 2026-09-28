@@ -42,7 +42,8 @@ describe("homepage scroll panels", () => {
     expect(cubeSrc).toContain("HomepageFaqSection");
     expect(cubeSrc).toContain("HomepageHowToSection");
     expect(cubeSrc).toContain("HomepageExploreLinks");
-    expect(cubeSrc).toContain("HomepageCubeFaceHint");
+    expect(cubeSrc).toContain("HOMEPAGE_SCROLL_TO_GAME");
+    expect(cubeSrc).toContain('direction="up"');
     expect(cubeSrc).toContain("PlatformFeatureHub");
     expect(cubeSrc).toContain('id="oaas"');
     expect(cubeSrc).not.toContain("Flip down · game");
