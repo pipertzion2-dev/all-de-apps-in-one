@@ -20,6 +20,6 @@
   "githubStatusCheck": {
     "required": "Vercel \u2013 all-de-apps-in-one",
     "ignore": "Vercel \u2013 svivva-main-app",
-    "note": "Production deploys via GitHub Actions (resume + VERCEL_TOKEN). Git deploy on main is off in vercel.json. Ignore Vercel \u2013 svivva-main-app."
+    "note": "Actions runs resume when VERCEL_TOKEN is set, else waits on Vercel Git with production HTTP fallback if blocked. Ignore Vercel \u2013 svivva-main-app."
   }
 }
