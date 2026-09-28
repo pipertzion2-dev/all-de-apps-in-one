@@ -62,7 +62,7 @@ describe("homepage scroll panels", () => {
     expect(hubSrc).toContain("BusOverviewFilter");
     expect(hubSrc).toContain("onSubmit");
     expect(hubSrc).toContain("Patch route");
-    expect(hubSrc).toContain("Mixing console");
+    expect(hubSrc).toContain("Beta desk modules");
     expect(hubSrc).not.toContain("The mixing board for your stack");
   });
 });
