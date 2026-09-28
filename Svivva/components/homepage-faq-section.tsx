@@ -17,8 +17,8 @@ export function HomepageFaqSection() {
             Frequently asked questions about zzai zzai
           </h2>
           <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-base">
-            Production guardrails for AI APIs, the Klean Sneaks demo, pricing, and which modules are
-            still in beta.
+            Hybrid² fusion, Klean guardrails, the BALOON8 demo, pricing, and which modules are still
+            in beta.
           </p>
         </div>
 

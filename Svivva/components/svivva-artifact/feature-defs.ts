@@ -33,9 +33,9 @@ export const FEATURES: FeatureDef[] = [
     shortLabel: "Play",
     artworkTitle: "BREATH AWAY",
     artworkSrc: MEDIA.artworks.play,
-    tagline: "Keep the product Klean — the public demo",
+    tagline: "Car×sneaker hybrid — BALOON8 colorways",
     description:
-      "Klean Sneaks — zone-based shoe state, Sneak Vision hazard preview, and mission saves that mirror production guardrails.",
+      "Klean Sneaks — one BALOON8 car×sneaker chassis, unlockable colorways, Sneak Vision hazards, and mission saves that mirror Hybrid² + keeping the ship Klean.",
     cta: { label: "Play Klean Sneaks", href: FEATURE_PUBLIC_PATHS.play },
     accentColor: "#90c4d8",
     motif: "waveform",
@@ -89,13 +89,13 @@ export const FEATURES: FeatureDef[] = [
   withBeta({
     id: "api",
     index: 4,
-    name: "Production guardrails",
+    name: "Keep fusions Klean",
     shortLabel: "Digital",
     artworkTitle: "BANG ON ME",
     artworkSrc: MEDIA.artworks.api,
-    tagline: "Hazard preview · schema · rollback",
+    tagline: "After Hybrid² — schema · hazards · rollback",
     description:
-      "The GA product — preview deploy risks, enforce JSON Schema on every response, and roll back in one click.",
+      "Signal bus guardrails — preview deploy risks on fused endpoints, enforce JSON Schema on every response, and roll back in one click.",
     cta: { label: "Open API Builder", href: FEATURE_PUBLIC_PATHS.api },
     accentColor: "#6880a0",
     motif: "packaging",

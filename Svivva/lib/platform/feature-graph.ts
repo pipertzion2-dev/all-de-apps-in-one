@@ -185,7 +185,7 @@ export const PLATFORM_FEATURES: PlatformFeature[] = [
     shortTitle: "APIaaS",
     href: "/dashboard/api-builder",
     description:
-      "Channel 02 — production guardrails: hazard preview, schema enforcement, deploy on the Signal bus.",
+      "Channel 02 — after Hybrid²: keep fused endpoints Klean with hazard preview, schema enforcement, deploy on Signal.",
     bus: "build",
     channel: 2,
     tags: ["api", "backend", "prompt", "endpoint", "deploy", "schema", "channel"],
@@ -211,7 +211,7 @@ export const PLATFORM_FEATURES: PlatformFeature[] = [
     shortTitle: "Hybrid FX",
     href: "/dashboard/hybrid-lab",
     description:
-      "Channel 06 — FX insert: any channel × any channel (H¹), then a marketplace of blends-of-blends (hybridization²).",
+      "Channel 06 — FX insert: fuse any channel × channel (H¹), then hybridization² blends — car×sneaker logic for AI modules.",
     bus: "hybrid",
     channel: 6,
     tags: [

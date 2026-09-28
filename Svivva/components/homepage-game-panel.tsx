@@ -53,7 +53,7 @@ export function HomepageGamePanel() {
           className="mt-2 shrink-0 text-center text-[10px] uppercase tracking-[0.25em] text-white/50 sm:text-[11px]"
           data-testid="text-clean-sneaks-goal"
         >
-          Tap the cube to open the game
+          Tap the cube — car×sneaker hybrid, colorways inside
         </p>
       </div>
 

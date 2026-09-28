@@ -30,10 +30,10 @@ export default function AboutPage() {
         <div className="space-y-4 text-muted-foreground leading-relaxed">
           <p>{PRODUCT_ONE_LINER}</p>
           <p>
-            <strong>Klean Sneaks</strong> (/clean-sneaks) is the public game demo — Sneak Vision,
-            zone-based shoe state, and mission saves mirror pre-ship checks and production rollback.
-            Seeds, Orbit, hardware, advocacy, and the full Play studio are labeled{" "}
-            <strong>Beta</strong> on the same domain.
+            <strong>Klean Sneaks</strong> (/clean-sneaks) is the BALOON8 car×sneaker demo — one
+            hybrid chassis, unlockable colorways, Sneak Vision hazards, and mission saves mirror
+            Hybrid² fusion plus keeping the ship Klean. Seeds, Orbit, hardware, advocacy, and the
+            full Play studio are labeled <strong>Beta</strong> on the same domain.
           </p>
         </div>
       </main>

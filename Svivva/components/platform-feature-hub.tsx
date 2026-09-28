@@ -269,8 +269,8 @@ export function PlatformFeatureHub({
               Beta desk modules
             </h2>
             <p className="text-sm sm:text-base text-muted-foreground max-w-xl">
-              {PRODUCT_HERO_SUBLINE} Patch routes below explore beta channels — core shipping is API
-              Builder, Projects, Pulse, and Klean Sneaks.
+              {PRODUCT_HERO_SUBLINE} Patch routes below explore beta channels — core shipping is
+              Hybrid² Lab, guardrails, Projects, Pulse, and Klean Sneaks.
             </p>
           </header>
         )}

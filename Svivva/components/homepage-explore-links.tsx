@@ -4,14 +4,19 @@ import { isBetaHref } from "@/lib/product-positioning";
 
 const LINKS = [
   {
+    href: "/dashboard/hybrid-lab",
+    title: "Hybrid² Lab",
+    description: "Fuse two ZZAI modules (H¹), then hybridize listed blends (H²) into one product.",
+  },
+  {
     href: "/lp/ai-api-builder",
-    title: "Production guardrails",
-    description: "Hazard preview, live schema enforcement, and one-click rollback for AI APIs.",
+    title: "Keep fusions Klean",
+    description: "After Hybrid², guardrails enforce schema, preview hazards, and roll back fast.",
   },
   {
     href: "/clean-sneaks",
     title: "Klean Sneaks demo",
-    description: "The game that teaches the metaphor — Sneak Vision and zone-based shoe state.",
+    description: "BALOON8 car×sneaker — one chassis, colorway unlocks, Sneak Vision hazards.",
   },
   {
     href: "/dashboard/pulse",
@@ -49,10 +54,11 @@ export function HomepageExploreLinks() {
             Explore
           </p>
           <h2 id="homepage-explore-heading" className="text-2xl font-bold sm:text-3xl">
-            Core product &amp; beta modules
+            Hybrid², Klean guardrails &amp; beta modules
           </h2>
           <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-base">
-            Guardrails and Klean Sneaks are GA; everything else on the desk is labeled Beta.
+            Hybrid² Lab, guardrails, Pulse, and Klean Sneaks are GA; the full OaaS patch bay and
+            other channels stay Beta.
           </p>
         </div>
 
