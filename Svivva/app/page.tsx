@@ -1,7 +1,20 @@
-import { permanentRedirect } from "next/navigation";
-import { CANONICAL_HOME_PATH } from "@/lib/homepage-path";
+import LandingPage from "./home-page-client";
+import { JsonLd } from "@/components/seo/json-ld";
+import { buildSeoMetadata } from "@/lib/seo/metadata";
+import { PRODUCT_ONE_LINER, PRODUCT_TAGLINE } from "@/lib/product-positioning";
+import { homepageJsonLdGraph } from "@/lib/seo/schema/builders";
 
-/** Apex `/` permanently forwards to the “Rest assured” homepage URL. */
-export default function RootRedirectPage() {
-  permanentRedirect(CANONICAL_HOME_PATH);
+export const metadata = buildSeoMetadata({
+  title: `zzai zzai — ${PRODUCT_TAGLINE}`,
+  description: `${PRODUCT_ONE_LINER} Free Klean Sneaks demo at /clean-sneaks. Start free — no credit card.`,
+  path: "/",
+});
+
+export default function HomePage() {
+  return (
+    <>
+      <JsonLd data={homepageJsonLdGraph()} />
+      <LandingPage />
+    </>
+  );
 }

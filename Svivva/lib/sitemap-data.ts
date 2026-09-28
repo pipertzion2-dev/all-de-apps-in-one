@@ -1,5 +1,4 @@
 import { getSiteUrl } from "@/lib/site-url";
-import { CANONICAL_HOME_PATH } from "@/lib/homepage-path";
 
 /** @deprecated Prefer {@link getSitemapEntries} from lib/seo/sitemap/registry — kept for legacy chunk helpers. */
 export interface SitemapChunk {
@@ -11,7 +10,7 @@ export interface SitemapChunk {
 export async function getSitemapChunks(): Promise<SitemapChunk[]> {
   const siteUrl = getSiteUrl().replace(/\/$/, "");
   const staticUrls = [
-    `${siteUrl}${CANONICAL_HOME_PATH}`,
+    `${siteUrl}/`,
     `${siteUrl}/orbit`,
     `${siteUrl}/referrals`,
     `${siteUrl}/marketing`,
