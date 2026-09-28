@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import introImage from "@/attached_assets/IMG_1493_1770509047497.png";
 import zzaiLogo from "@/attached_assets/ZZAI_OFFICIAL_LOGO.png";
-import { BED_STUY_VYBES } from "@/lib/brand/bed-stuy-vybes";
+import { BED_STUY_VYBEZ } from "@/lib/brand/bed-stuy-vybez";
 import {
   PRODUCT_PROTECTION_PITCH,
   PRODUCT_TAGLINE,
@@ -21,14 +21,14 @@ export function HomepageProtectionHero() {
       <div className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-2">
         <div className="space-y-5 text-center lg:text-left">
           <p className="text-[10px] font-medium uppercase tracking-[0.35em] text-[#5B8DA8]">
-            {BED_STUY_VYBES.name} · {BED_STUY_VYBES.fullAddress}
+            {BED_STUY_VYBEZ.name} · {BED_STUY_VYBEZ.fullAddress}
           </p>
           <h1 className="text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
             {PRODUCT_TAGLINE}
           </h1>
           <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
             {PRODUCT_PROTECTION_PITCH} As a fashion designer, I collaborate with{" "}
-            <strong className="text-foreground">{BED_STUY_VYBES.name}</strong> to make it easy to
+            <strong className="text-foreground">{BED_STUY_VYBEZ.name}</strong> to make it easy to
             protect your work through blockchain and our protection coin — before you ever need a
             courtroom.
           </p>

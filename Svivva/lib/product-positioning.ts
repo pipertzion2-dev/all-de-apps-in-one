@@ -41,7 +41,7 @@ export const HOMEPAGE_GAME_FACE_SUBLINE =
 
 /** Shown under the tagline on the platform homepage face (mobile compact). */
 export const HOMEPAGE_PLATFORM_FACE_SUBLINE =
-  "Bed Stuy Vybes × zzai zzai — protect ideas with crypto-backed evidence you can bring to court.";
+  "Bed Stuy Vybez × zzai zzai — protect ideas with crypto-backed evidence you can bring to court.";
 
 export const HOMEPAGE_SCROLL_TO_PLATFORM = "Swipe ↓ ZZAI platform";
 export const HOMEPAGE_SCROLL_TO_GAME = "Swipe ↓ Klean Sneaks game";

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BRAND } from "@/lib/brand";
-import { BED_STUY_VYBES } from "@/lib/brand/bed-stuy-vybes";
+import { BED_STUY_VYBEZ } from "@/lib/brand/bed-stuy-vybez";
 import {
   PRODUCT_HOOK_SHORT,
   PRODUCT_MAIN_GOAL,
@@ -25,8 +25,8 @@ const HIGHLIGHTS = [
   },
   {
     icon: GitMerge,
-    title: `${BED_STUY_VYBES.name}`,
-    description: `Fashion collaboration at ${BED_STUY_VYBES.fullAddress} — protect storefront ideas before they leak.`,
+    title: `${BED_STUY_VYBEZ.name}`,
+    description: `Fashion collaboration at ${BED_STUY_VYBEZ.fullAddress} — protect storefront ideas before they leak.`,
   },
   {
     icon: Eye,

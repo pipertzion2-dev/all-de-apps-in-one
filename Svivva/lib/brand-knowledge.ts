@@ -418,7 +418,7 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       },
       {
         q: `What does “${PRODUCT_TAGLINE}” mean?`,
-        a: "zzai zzai timestamps and seals your creative assets — fashion sketches, sneaker colorways, API schemas — with evidence you can verify and bring to court. Klean Sneaks protects kicks in the game; Poor Man Protection and our coin do it for real ideas, including work with Bed Stuy Vybes in Brooklyn.",
+        a: "zzai zzai timestamps and seals your creative assets — fashion sketches, sneaker colorways, API schemas — with evidence you can verify and bring to court. Klean Sneaks protects kicks in the game; Poor Man Protection and our coin do it for real ideas, including work with Bed Stuy Vybez in Brooklyn.",
       },
       {
         q: "How long does it take to ship with ZZAI?",

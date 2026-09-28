@@ -1270,7 +1270,7 @@ export default function LandingPage() {
                         sketches, and ideas you cannot afford to lose.
                       </p>
                       <p>
-                        I collaborate with Bed Stuy Vybes at 905 Dekalb Avenue in Brooklyn so
+                        I collaborate with Bed Stuy Vybez at 905 Dekalb Avenue in Brooklyn so
                         designers and storefront creators can seal work with timestamps, hashes, and
                         our protection coin — evidence you can bring to court if you ever need to
                         prove what was yours and when.

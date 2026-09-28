@@ -1,9 +1,8 @@
 /** Storefront collaboration — fashion + idea protection in Brooklyn. */
 
-export const BED_STUY_VYBES = {
-  name: "Bed Stuy Vybes",
-  /** User-facing spelling variants */
-  aliases: ["Bed Stuy Vibes", "bed stuy vybes"] as const,
+export const BED_STUY_VYBEZ = {
+  name: "Bed Stuy Vybez",
+  aliases: ["Bed Stuy Vybes", "Bed Stuy Vibes", "bed stuy vybez"] as const,
   addressLine: "905 Dekalb Avenue",
   city: "Brooklyn",
   state: "NY",
