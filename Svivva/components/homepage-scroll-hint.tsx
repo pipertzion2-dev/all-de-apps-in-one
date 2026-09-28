@@ -22,7 +22,9 @@ export function HomepageScrollHint({
       className={`absolute left-1/2 z-30 flex max-w-[92vw] -translate-x-1/2 flex-col items-center gap-1 ${
         onActivate ? "pointer-events-auto cursor-pointer active:scale-95" : "pointer-events-none"
       } ${direction === "down" ? "bottom-3 sm:bottom-8" : "top-20 sm:top-24"}`}
-      style={direction === "down" ? { bottom: "max(0.75rem, env(safe-area-inset-bottom))" } : undefined}
+      style={
+        direction === "down" ? { bottom: "max(0.75rem, env(safe-area-inset-bottom))" } : undefined
+      }
       aria-label={onActivate ? label : undefined}
     >
       <span
