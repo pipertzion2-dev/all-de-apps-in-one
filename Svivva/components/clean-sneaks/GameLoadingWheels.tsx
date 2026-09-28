@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { KAREN_THE_MUSCLE_LOGO_URL, LOADING_WHEEL_URLS } from "@/lib/clean-sneaks/assets";
+import { KLEAN_RUNNER_INTRO_LINE } from "@/lib/clean-sneaks/game-copy";
 
 const WHEEL_SPINS = [
   "animate-[spin_1.8s_linear_infinite]",
@@ -51,6 +52,13 @@ export function GameLoadingWheels({ fullscreen = false }: GameLoadingWheelsProps
           data-testid="img-karen-the-muscle-logo"
         />
       </div>
+
+      <p
+        className="mb-6 max-w-[min(88vw,22rem)] px-4 text-center text-xs font-semibold uppercase leading-relaxed tracking-[0.18em] text-[#1a3040]/85 sm:text-sm"
+        data-testid="text-game-loading-intro"
+      >
+        {KLEAN_RUNNER_INTRO_LINE}
+      </p>
 
       {/* Hubcaps spin inside circular clips so square JPEG bounds never overlap. */}
       <div className="flex items-center justify-center gap-[min(3.5vw,14px)] px-4">

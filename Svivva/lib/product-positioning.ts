@@ -4,22 +4,31 @@
 
 import type { FeatureId } from "@/components/svivva-artifact/feature-defs";
 
+/** Brand slogan — homepage hero and metadata. */
+export const PRODUCT_TAGLINE = "Let zzai zzai protect your assets. Rest assured!";
+
+/** Court-ready protection + crypto attestation for creators. */
+export const PRODUCT_PROTECTION_PITCH =
+  "Seal your ideas with timestamps, hashes, and blockchain-ready evidence — so if you ever need court, the record is valid.";
+
+/** Sap / tree metaphor — quiet work under the surface while you rest and grow. */
+export const PRODUCT_SAP_METAPHOR =
+  "Like sap in a tree, zzai zzai keeps protection and guardrails flowing underneath — so you can rest, focus on design, and grow.";
+
 /** One-sentence pitch (YC / hero / meta). */
 export const PRODUCT_ONE_LINER =
-  "ZZAI is Hybrid² for AI products — fuse two modules into one shippable feature, keep every fusion Klean in production, and play the car×sneaker colorway loop in Klean Sneaks.";
-
-export const PRODUCT_TAGLINE = "Keep what you ship Klean";
+  "zzai zzai protects your assets — sneakers in Klean Sneaks, sketches and fashion ideas via blockchain-ready proof — with Hybrid² tools when you ship to production.";
 
 /** Plain-language main goal (homepage game + product faces). */
 export const PRODUCT_MAIN_GOAL =
-  "Hybrid² Lab fuses any two ZZAI channels into one deployable product (H¹, then H²). API Builder and Pulse keep that hybrid Klean — hazard preview, live schema, one-click rollback.";
+  "Protect what you create — from BALOON8 colorways to Poor Man Protection court packs — then fuse modules in Hybrid² Lab when you are ready to ship.";
 
 /** Shorter hero subline. */
 export const PRODUCT_HERO_SUBLINE =
-  "Fuse modules on the Hybrid bus, then keep the ship Klean on Signal — hazard preview, schema, rollback.";
+  "Fashion, sneakers, and ideas — sealed, timestamped, and rest-assured with our protection coin.";
 
 /** Max ~12 words — mobile homepage faces only. */
-export const PRODUCT_HOOK_SHORT = "Hybrid² AI modules, keep fusions Klean, demo in Sneaks.";
+export const PRODUCT_HOOK_SHORT = "Rest. Let sap run. Hybrid² AI + free Sneaks demo.";
 
 /** Literal game ↔ product bridge (BALOON8 car×sneaker, Jordan 14 × Ferrari). */
 export const PRODUCT_GAME_HYBRID_METAPHOR =
@@ -28,25 +37,20 @@ export const PRODUCT_GAME_HYBRID_METAPHOR =
 /** First homepage panel — Klean Sneaks (not the product dashboard). */
 export const HOMEPAGE_GAME_FACE_TITLE = "Game · Klean Sneaks";
 export const HOMEPAGE_GAME_FACE_SUBLINE =
-  "BALOON8 car×sneaker — one hybrid chassis, colorway unlocks. Swipe down for Hybrid² + guardrails.";
+  "Protect your kicks on the walk — Klean Sneaks is the free demo of keeping sneaker assets Klean.";
 
 /** Shown under the tagline on the platform homepage face (mobile compact). */
 export const HOMEPAGE_PLATFORM_FACE_SUBLINE =
-  "Hybrid² desk — fuse channels, keep fusions Klean, ship on Signal. Not the game face.";
+  "Bed Stuy Vybez × zzai zzai — protect ideas with crypto-backed evidence you can bring to court.";
 
 export const HOMEPAGE_SCROLL_TO_PLATFORM = "Swipe ↓ ZZAI platform";
 export const HOMEPAGE_SCROLL_TO_GAME = "Swipe ↓ Klean Sneaks game";
 
-/** Platform channel strips that ship today (not beta). */
-export const CORE_PLATFORM_FEATURE_IDS = new Set([
-  "hybridization",
-  "api-builder",
-  "projects",
-  "pulse",
-]);
+/** Platform desk modules — Klean Sneaks ships; Hybrid² / API / Pulse stay beta. */
+export const CORE_PLATFORM_FEATURE_IDS = new Set<string>();
 
-/** Homepage cube faces that are GA (Play = Klean Sneaks demo). */
-export const CORE_CUBE_FACE_IDS = new Set<FeatureId>(["api", "play"]);
+/** Homepage cube — only Play (Klean Sneaks) is GA; API and other faces are beta. */
+export const CORE_CUBE_FACE_IDS = new Set<FeatureId>(["play"]);
 
 function normalizePath(pathname: string): string {
   const p = pathname.split("?")[0]?.split("#")[0] ?? "/";
@@ -63,12 +67,7 @@ function isCoreProductPath(path: string): boolean {
     "/contact",
     "/privacy",
     "/terms",
-    "/lp/ai-api-builder",
     "/clean-sneaks",
-    "/dashboard/projects",
-    "/dashboard/hybrid-lab",
-    "/dashboard/api-builder",
-    "/dashboard/pulse",
     "/dashboard/settings",
     "/dashboard/billing",
     "/dashboard/finish-setup",
@@ -103,13 +102,10 @@ export function isBetaHref(href: string): boolean {
   if (path.startsWith("/seeds")) return true;
   if (path.startsWith("/seo-pack")) return true;
   if (path === "/#oaas" || path === "#oaas") return true;
+  if (path.startsWith("/lp/")) return true;
 
   if (!path.startsWith("/dashboard")) return false;
   if (path === "/dashboard") return false;
-  if (path.startsWith("/dashboard/hybrid-lab")) return false;
-  if (path.startsWith("/dashboard/projects")) return false;
-  if (path.startsWith("/dashboard/api-builder")) return false;
-  if (path.startsWith("/dashboard/pulse")) return false;
   if (path.startsWith("/dashboard/settings")) return false;
   if (path.startsWith("/dashboard/billing")) return false;
   return true;

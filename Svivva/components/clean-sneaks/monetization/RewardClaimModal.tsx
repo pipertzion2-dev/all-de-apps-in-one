@@ -55,7 +55,7 @@ export function RewardClaimModal({
   const [adsenseFilled, setAdsenseFilled] = useState<boolean | null>(null);
   const [forceHouse, setForceHouse] = useState(false);
   const preferred = resolveAdNetwork("rewarded_credits");
-  const network: "adsense" | "house" | "unconfigured" = forceHouse
+  const network = forceHouse
     ? "house"
     : preferred === "unconfigured" && houseAdsAllowed()
       ? "house"

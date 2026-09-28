@@ -12,7 +12,12 @@ import { GameLoadingWheels } from "@/components/clean-sneaks/GameLoadingWheels";
 import { GameStartScreen } from "@/components/clean-sneaks/GameStartScreen";
 import { SceneErrorBoundary } from "@/components/clean-sneaks/SceneErrorBoundary";
 import { StealTheBundleCardGame } from "@/components/clean-sneaks/StealTheBundleCardGame";
-import { GameAdBanner, GameAdsEarningsChip } from "@/components/clean-sneaks/ads";
+import {
+  GameAdBanner,
+  GameAdsEarningsChip,
+  GameAdNetworkHint,
+} from "@/components/clean-sneaks/ads";
+import { AdFreePassStrip } from "@/components/clean-sneaks/monetization/AdFreePassStrip";
 import { KleanShop, OfflineEarningsHost } from "@/components/clean-sneaks/monetization";
 import { PendingYearSubClaimHost } from "@/components/clean-sneaks/prizes/PendingYearSubClaimHost";
 import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
@@ -171,7 +176,7 @@ function CleanSneaksPageContent() {
                   onClick={openBundleCard}
                   data-testid="button-header-steal-bundle"
                 >
-                  Casino
+                  Protect bundle
                 </Button>
               )}
               <Button
@@ -190,6 +195,8 @@ function CleanSneaksPageContent() {
         {showGameShell && !immersiveRun && (
           <div className={`shrink-0 ${portrait ? "px-1.5 pb-1" : "px-3 pb-2 sm:px-6"}`}>
             <GameAdBanner compact={portrait} />
+            <AdFreePassStrip className="mt-1.5" />
+            <GameAdNetworkHint className="mt-1" />
             <GameAdsEarningsChip className="mt-1 text-right" />
           </div>
         )}

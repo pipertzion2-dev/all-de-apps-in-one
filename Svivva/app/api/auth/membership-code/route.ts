@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { eq } from "drizzle-orm";
 import {
   membershipAccessCookieName,
   membershipAccessCookieOptions,
@@ -6,6 +7,14 @@ import {
   verifyMembershipAccessCode,
 } from "@/lib/auth/membership-access";
 import { checkRateLimit, clientIp } from "@/lib/auth/rate-limit";
+import {
+  CASHAPP_SUBSCRIPTION_SOURCE,
+  computeCashAppSubscriptionUntil,
+} from "@/lib/billing/cashapp-recurring";
+import { ensureBillingColumns } from "@/lib/billing/ensure-billing-columns";
+import { getCurrentUser } from "@/lib/auth/session";
+import { db } from "@/lib/db";
+import { users } from "@/lib/schema";
 
 /** Subscriber unlock — urrthang only. Never sets Orbit admin cookie. */
 export async function POST(request: NextRequest) {
@@ -31,9 +40,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Incorrect code" }, { status: 401 });
     }
 
+    const user = await getCurrentUser();
+    let proAccessUntil: string | null = null;
+    if (user) {
+      await ensureBillingColumns();
+      const [dbUser] = await db.select().from(users).where(eq(users.id, user.id));
+      const until = computeCashAppSubscriptionUntil(dbUser?.proAccessUntil ?? null);
+      await db
+        .update(users)
+        .set({
+          proAccessUntil: until,
+          proAccessSource: CASHAPP_SUBSCRIPTION_SOURCE,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, user.id));
+      proAccessUntil = until.toISOString();
+    }
+
     const response = NextResponse.json({
       success: true,
       membership: true,
+      proAccessUntil,
     });
 
     response.cookies.set(

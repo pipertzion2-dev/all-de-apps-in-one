@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import type { PlayingCard } from "@/lib/clean-sneaks/casino";
+import { KLEAN_BUNDLE_CARD_HEADLINE } from "@/lib/clean-sneaks/game-copy";
 import { PlayingCardView } from "./PlayingCardView";
 
 type Props = {
@@ -29,10 +30,10 @@ export function StealBundleHowToPlay({ onStart }: Props) {
     >
       <p className="text-[10px] uppercase tracking-[0.4em] text-[#d4af37]">How to play</p>
       <h2 className="mt-2 text-center font-serif text-2xl text-[#f7e7b0] sm:text-3xl">
-        Steal the Old Man&apos;s Bundle
+        {KLEAN_BUNDLE_CARD_HEADLINE}
       </h2>
       <p className="mt-2 max-w-md text-center text-sm text-[#e8dcc0]/70">
-        Match ranks. Grow your bundle. Steal theirs. Biggest stack wins.
+        Match ranks. Grow your bundle. Guard the stack. Biggest bundle wins.
       </p>
 
       <div className="mt-6 grid w-full max-w-lg gap-4">

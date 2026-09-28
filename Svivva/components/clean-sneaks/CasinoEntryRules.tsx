@@ -42,7 +42,7 @@ export function CasinoEntryRules({ compact, className }: Props) {
         </li>
         <li>
           At the door, turn in your <span className="text-[#ffd76a]">score ticket</span>. Those
-          credits are your chip stack for Steal the Old Man&apos;s Bundle.
+          credits are your chip stack — protect your bundle at the table.
         </li>
       </ol>
     </div>

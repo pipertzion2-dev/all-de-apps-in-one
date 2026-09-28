@@ -15,6 +15,9 @@ export type RoomPlayer = {
   connected: boolean;
   /** Optional BLE device id when joined via nearby/Bluetooth discovery. */
   bluetoothDeviceId?: string;
+  /** zzai zzai account — used for cross-device online play quotas. */
+  userId?: string | null;
+  deviceId?: string | null;
   lastSeenAt: number;
 };
 

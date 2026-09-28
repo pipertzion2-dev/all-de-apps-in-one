@@ -88,14 +88,18 @@ KLEAN_MONETIZATION_HMAC_SECRET=     # claim / receipt signatures
 
 Use **localized store prices** in native IAP UI; web falls back to `priceCents` in config.
 
-## 6. Ad-network setup
+## 6. Ad-network setup (free first — Google optional)
 
-1. AdSense app / site with Display units for banner, interstitial, rewarded placements.
-2. Set env slot ids above (or Orbit → AdSense).
-3. Rewarded flow is **opt-in only** via `RewardClaimModal` / shop — never auto-interrupts a run for rewards.
-4. Grant only after watch completion (`adCompleted: true`) + cooldown/daily limit.
+**Why Google often fails in-game:** site verification (`ca-pub` in layout) ≠ approved earning account; missing Display slot ids → blank boxes; consent/CMP in EEA; low fill in WebGL. See `lib/clean-sneaks/ads/google-in-game.ts`.
 
-For true rewarded video later: swap the timer gate for AdMob / Unity Ads completion callbacks calling the same `claimAdBonus`.
+**Recommended (free to join):**
+
+1. [Monetag](https://monetag.com/) or [Adsterra](https://www.adsterra.com/) → create banner tag → `NEXT_PUBLIC_MONETAG_ZONE_ID` or `NEXT_PUBLIC_ADSTERRA_INVOKE_URL` → redeploy.
+2. Until then, **house sponsors** always show (ZZAI / Clutety creatives) — players never see empty ad slots.
+3. AdSense in-game only if approved: set slot ids **and** `NEXT_PUBLIC_KLEAN_USE_ADSENSE=1`.
+4. Ad-free optional: **$5 one-time Cash App** (`ad-free-pass.ts`).
+
+Rewarded flow is **opt-in only** — never auto-interrupts a run for rewards.
 
 ## 7. Configurable economy values
 

@@ -58,10 +58,10 @@ function BillingPageContent() {
     trackUpgrade(plan.tier);
     window.open(plan.paymentLink, "_blank", "noopener,noreferrer");
     toast({
-      title: "Complete payment in Cash App",
+      title: "Set up recurring in Cash App",
       description: plansData?.membershipUnlock?.code
-        ? `Then enter access code ${plansData.membershipUnlock.code} on this page to activate your plan.`
-        : "Then enter your access code on this page to activate your plan.",
+        ? `Choose Repeat → Monthly, send payment, then enter access code ${plansData.membershipUnlock.code} here.`
+        : "Choose Repeat → Monthly in Cash App, then enter your access code on this page.",
     });
     setLoadingPlan(null);
   };
@@ -71,7 +71,7 @@ function BillingPageContent() {
       <div>
         <h1 className="text-3xl font-bold">Plans</h1>
         <p className="text-muted-foreground">
-          Subscribe with Cash App — ${cashAppTag} · Starter $20/mo · Pro $50/mo
+          Recurring Cash App — ${cashAppTag} · Starter $20/mo · Pro $50/mo (tap Repeat → Monthly)
         </p>
       </div>
 
@@ -91,8 +91,9 @@ function BillingPageContent() {
         <Card className="border border-[#00D632]/40 bg-[#00D632]/8">
           <CardContent className="pt-4 text-sm text-foreground space-y-2">
             <p>
-              <strong>Cash App is how you subscribe.</strong> Pick a plan below — Cash App opens
-              with the right amount. No card or Stripe required.
+              <strong>Cash App is how you subscribe.</strong> Pick a plan — Cash App opens with the
+              amount. Turn on <strong>Repeat → Monthly</strong> for recurring billing. No card
+              required.
             </p>
             {plansData?.membershipUnlock?.code ? (
               <p className="text-emerald-800 dark:text-emerald-200">

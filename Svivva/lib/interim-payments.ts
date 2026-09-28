@@ -34,7 +34,7 @@ export type InterimPaymentPublic = InterimPaymentConfig & {
 };
 
 const DEFAULT_NOTE =
-  "After you pay on Cash App, enter your access code above — or email your receipt to hello@zzaizzai.com and we'll activate your plan.";
+  "Subscribe monthly on Cash App: open your plan link, tap Repeat → Monthly, then send. Enter your access code here to activate (renews every 30 days). Email hello@zzaizzai.com if you need help.";
 
 function trimUrl(v: string | null | undefined): string | null {
   const t = v?.trim();

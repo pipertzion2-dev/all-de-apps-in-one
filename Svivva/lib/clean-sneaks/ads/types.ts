@@ -2,7 +2,7 @@
 
 export type AdPlacementId = "menu_banner" | "run_interstitial" | "rewarded_credits";
 
-export type AdNetwork = "adsense" | "house";
+export type AdNetwork = "adsense" | "house" | "medianet" | "adsterra" | "monetag";
 
 export type AdEventKind = "impression" | "click" | "reward_granted" | "dismiss" | "fill_fail";
 

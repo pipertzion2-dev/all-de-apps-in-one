@@ -2,6 +2,7 @@
 
 import type { CSSProperties } from "react";
 import { MAIN_GAME_COVER_URL } from "@/lib/clean-sneaks/assets";
+import { KLEAN_RUNNER_INTRO_LINE } from "@/lib/clean-sneaks/game-copy";
 
 export type GameStartScreenProps = {
   className?: string;
@@ -73,6 +74,12 @@ export function GameStartScreen({
           className="pointer-events-none absolute inset-x-0 z-10 flex flex-col items-center gap-2 px-4"
           style={{ bottom: "max(1.75rem, env(safe-area-inset-bottom, 0px))" }}
         >
+          <p
+            className="max-w-[min(92vw,28rem)] text-center text-sm font-semibold uppercase leading-snug tracking-[0.2em] text-white/95 drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)] sm:text-base"
+            data-testid="text-game-runner-intro"
+          >
+            {KLEAN_RUNNER_INTRO_LINE}
+          </p>
           <p
             className="text-5xl font-bold uppercase tracking-[0.35em] text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)] sm:text-6xl"
             data-testid="text-game-start"

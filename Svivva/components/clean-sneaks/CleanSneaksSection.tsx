@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
+import { KLEAN_BUNDLE_CARD_HEADLINE } from "@/lib/clean-sneaks/game-copy";
 import { bundleUnlockHint, isBundleCardUnlocked } from "@/lib/clean-sneaks/bundle-unlock";
 import { readBestScore } from "@/lib/clean-sneaks/storage";
 
@@ -78,14 +79,14 @@ export function CleanSneaksSection() {
               className="mt-4 text-xl font-semibold leading-snug tracking-[0.04em] text-[#E8D9A8] sm:text-2xl"
               data-testid="text-clean-sneaks-goal"
             >
-              Goal: Steal the old man&apos;s bundle
+              Goal: Protect your shoes — keep them Klean
             </p>
             <p className="mt-2 text-[11px] uppercase tracking-[0.28em] text-white/45">
               stiehl den alten Manns Bündel
             </p>
             <p className="mt-5 max-w-md text-sm leading-relaxed text-white/70 sm:text-base lg:max-w-none">
-              Keep the Baloon8 clean on the strip. Score becomes casino credits — cash out and Steal
-              the Old Man&apos;s Bundle.
+              Keep the Baloon8 Klean on the strip. Score becomes casino credits — cash out and
+              protect your bundle!
             </p>
 
             <div className="mt-8 flex flex-col items-center gap-3 lg:items-start">
@@ -106,7 +107,7 @@ export function CleanSneaksSection() {
                   data-testid="button-steal-bundle-home"
                 >
                   <Link href="/clean-sneaks?mode=bundle">
-                    Steal the Old Man&apos;s Bundle
+                    {KLEAN_BUNDLE_CARD_HEADLINE}
                     {best > 0 ? ` · ${best.toLocaleString()} credits` : ""}
                   </Link>
                 </Button>

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getCurrentUser } from "@/lib/auth/session";
 import {
   createRoom,
   getRoom,
@@ -6,8 +7,31 @@ import {
   patchRoom,
 } from "@/lib/clean-sneaks/casino/multiplayer/store";
 import { normalizeRoomCode, toPublicRoom } from "@/lib/clean-sneaks/casino/multiplayer/types";
-
 export const dynamic = "force-dynamic";
+
+function deviceIdFromBody(body: Record<string, unknown>): string | null {
+  const raw = body.deviceId ?? body.kleanDeviceId;
+  if (typeof raw !== "string" || raw.length < 8) return null;
+  return raw.slice(0, 64);
+}
+
+async function bindSeatIdentity(
+  roomCode: string,
+  playerId: string,
+  userId: string | null,
+  deviceId: string | null,
+) {
+  patchRoom(roomCode, (room) => {
+    const seat = room.players.find((p) => p.id === playerId);
+    if (!seat) return;
+    if (userId) seat.userId = userId;
+    if (deviceId) seat.deviceId = deviceId;
+  });
+}
+
+async function consumeOnlineStartsIfReady(): Promise<{ ok: true }> {
+  return { ok: true };
+}
 
 /** Create a new online / nearby table. */
 export async function POST(request: NextRequest) {
@@ -21,6 +45,8 @@ export async function POST(request: NextRequest) {
     if (!hostPlayerId) {
       return NextResponse.json({ error: "hostPlayerId required" }, { status: 400 });
     }
+    const user = await getCurrentUser();
+    const deviceId = deviceIdFromBody(body);
     const room = createRoom({
       hostPlayerId,
       displayName,
@@ -28,6 +54,8 @@ export async function POST(request: NextRequest) {
       maxPlayers,
       ante,
       bluetoothAdvertised: Boolean(body.bluetoothAdvertised),
+      hostUserId: user?.id ?? null,
+      hostDeviceId: deviceId,
     });
     return NextResponse.json({ room: toPublicRoom(room) });
   } catch (err) {
@@ -61,6 +89,8 @@ export async function PATCH(request: NextRequest) {
     }
 
     if (action === "join") {
+      const joinUser = await getCurrentUser();
+      const deviceId = deviceIdFromBody(body);
       const result = joinRoom({
         code,
         playerId,
@@ -68,6 +98,8 @@ export async function PATCH(request: NextRequest) {
         bluetoothDeviceId: body.bluetoothDeviceId
           ? String(body.bluetoothDeviceId).slice(0, 128)
           : undefined,
+        userId: joinUser?.id ?? null,
+        deviceId,
       });
       if (!result.ok) return NextResponse.json({ error: result.reason }, { status: 400 });
       return NextResponse.json({ room: toPublicRoom(result.room) });
@@ -147,6 +179,14 @@ export async function PATCH(request: NextRequest) {
     });
 
     if (!result.ok) return NextResponse.json({ error: result.reason }, { status: 400 });
+
+    if (body.action === "ready" && Boolean(body.ready)) {
+      const user = await getCurrentUser();
+      const deviceId = deviceIdFromBody(body);
+      await bindSeatIdentity(code, playerId, user?.id ?? null, deviceId);
+      await consumeOnlineStartsIfReady();
+    }
+
     return NextResponse.json({
       room: toPublicRoom(result.room),
       signal: result.room.signal,

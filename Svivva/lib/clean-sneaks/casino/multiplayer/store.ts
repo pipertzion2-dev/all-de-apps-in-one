@@ -40,6 +40,8 @@ export function createRoom(input: {
   maxPlayers?: 2 | 3;
   ante?: number;
   bluetoothAdvertised?: boolean;
+  hostUserId?: string | null;
+  hostDeviceId?: string | null;
 }): StealBundleRoom {
   purgeExpired();
   const { rooms } = bag();
@@ -52,6 +54,8 @@ export function createRoom(input: {
     role: "host",
     ready: false,
     connected: true,
+    userId: input.hostUserId ?? null,
+    deviceId: input.hostDeviceId ?? null,
     lastSeenAt: now,
   };
   const room: StealBundleRoom = {
@@ -94,6 +98,8 @@ export function joinRoom(input: {
   playerId: string;
   displayName: string;
   bluetoothDeviceId?: string;
+  userId?: string | null;
+  deviceId?: string | null;
 }): { ok: true; room: StealBundleRoom } | { ok: false; reason: string } {
   const room = getRoom(input.code);
   if (!room) return { ok: false, reason: "Room not found or expired." };
@@ -104,6 +110,8 @@ export function joinRoom(input: {
     existing.connected = true;
     existing.lastSeenAt = Date.now();
     if (input.bluetoothDeviceId) existing.bluetoothDeviceId = input.bluetoothDeviceId;
+    if (input.userId) existing.userId = input.userId;
+    if (input.deviceId) existing.deviceId = input.deviceId;
     return { ok: true, room: saveRoom(room) };
   }
 
@@ -118,6 +126,8 @@ export function joinRoom(input: {
     ready: false,
     connected: true,
     bluetoothDeviceId: input.bluetoothDeviceId,
+    userId: input.userId ?? null,
+    deviceId: input.deviceId ?? null,
     lastSeenAt: Date.now(),
   });
   room.parlays[input.playerId] = null;

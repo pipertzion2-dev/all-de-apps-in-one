@@ -54,11 +54,11 @@ export function HomepageExploreLinks() {
             Explore
           </p>
           <h2 id="homepage-explore-heading" className="text-2xl font-bold sm:text-3xl">
-            Hybrid², Klean guardrails &amp; beta modules
+            Klean Sneaks &amp; beta desk modules
           </h2>
           <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-base">
-            Hybrid² Lab, guardrails, Pulse, and Klean Sneaks are GA; the full OaaS patch bay and
-            other channels stay Beta.
+            Klean Sneaks is the live game demo. Hybrid² Lab, API Builder, Pulse, Seeds, Orbit, and
+            the rest of the desk are Beta on the same domain.
           </p>
         </div>
 

@@ -547,7 +547,7 @@ export default function LandingPage() {
                 >
                   <Image
                     src={introImage}
-                    alt="ZZAI"
+                    alt="zzai zzai — young logo designer at the computer"
                     width={1024}
                     height={1024}
                     sizes="100vw"
@@ -1233,19 +1233,21 @@ export default function LandingPage() {
                   <div className="relative order-2 lg:order-1 pb-8">
                     <div className="rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10 max-w-sm mx-auto lg:max-w-none">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src="/founder-son.jpeg"
-                        alt="ZZAI founder working with his 6-year-old son on the app design"
-                        className="w-full h-auto object-cover block"
+                      <Image
+                        src={introImage}
+                        alt="Six-year-old logo designer at the computer with zzai zzai"
+                        width={800}
+                        height={800}
+                        className="block h-auto w-full object-cover"
                       />
                     </div>
                     {/* Floating caption */}
                     <div className="absolute bottom-0 right-2 sm:right-0 bg-card border border-border/60 rounded-2xl px-4 py-3 shadow-xl backdrop-blur-xl max-w-[200px]">
                       <p className="text-xs font-semibold text-foreground leading-snug">
-                        Studying flower color palettes
+                        Logo designer at the computer
                       </p>
                       <p className="text-[11px] text-muted-foreground mt-0.5">
-                        Age 6 · Lead color designer
+                        Age 6 · zzai zzai mark
                       </p>
                     </div>
                   </div>
@@ -1257,33 +1259,31 @@ export default function LandingPage() {
                     </div>
 
                     <h2 className="text-3xl sm:text-4xl font-bold leading-tight">
-                      Built by a father and son, one petal at a time
+                      He designed the logo at the computer — we protect what you create
                     </h2>
 
                     <div className="space-y-4 text-muted-foreground leading-relaxed">
                       <p>
-                        I homeschool my six-year-old son, and somewhere between math lessons and
-                        afternoon walks, he developed a quiet obsession with flowers, plants, and
-                        herbs — the way they grow, the way they smell, and above everything else,
-                        the way they hold color.
+                        My six-year-old son sat with me at the computer and helped shape the zzai
+                        zzai logo — the crest, the colors, the mark you see on this site. That same
+                        care goes into protecting your assets: sneakers in Klean Sneaks, fashion
+                        sketches, and ideas you cannot afford to lose.
                       </p>
                       <p>
-                        He studies color the way most kids study cartoons. He'll spend an hour
-                        noting how orchid cyan flares against deep magenta, or how silver metal
-                        catches light next to digital noise. When I started designing ZZAI, he was
-                        right there next to me. The cyan and magenta you see throughout the app? His
-                        picks — the same dual energy inside the ZZAI crest.
+                        I collaborate with Bed Stuy Vybez at 905 Dekalb Avenue in Brooklyn so
+                        designers and storefront creators can seal work with timestamps, hashes, and
+                        our protection coin — evidence you can bring to court if you ever need to
+                        prove what was yours and when.
                       </p>
                       <p>
-                        The ZZAI mark — ornate silver crest, Yeoo-style lettering, glitch texture —
-                        is the brand signal for ZZAI. Crest on one side, Signal on the other. Ornate
-                        and digital at once. That duality is the product: Prompt to API, and
-                        manufacturing when you need hardware.
+                        zzai zzai is Hybrid² for production, too: fuse modules, enforce schema, roll
+                        back bad deploys. But the heart of the homepage is simple — protect your
+                        assets. Rest assured.
                       </p>
                       <p className="text-foreground/80 font-medium">
-                        We're building ZZAI to last. Not just as a platform for developers, but as
-                        something a six-year-old can one day point to and say he helped make
-                        beautiful.
+                        He still studies color like other kids study cartoons. The cyan and magenta
+                        in the app? His picks. We are building something he can point to and say he
+                        helped make — and something that keeps your ideas safe.
                       </p>
                     </div>
                   </div>

@@ -1,4 +1,7 @@
+import { readAdFreePass } from "@/lib/clean-sneaks/monetization/ad-free-pass";
 import type { AdPlacementId, HouseCreative } from "./types";
+import { kleanInGameUsesAdsense } from "./google-in-game";
+import { preferProgrammaticOverAdsense, programmaticNetwork } from "./programmatic";
 import {
   isValidAdsenseClientId,
   isValidAdsenseSlotId,
@@ -43,8 +46,8 @@ function readRuntimeSlot(placement: AdPlacementId): string | null {
 }
 
 /**
- * Real paid ads = Google AdSense.
- * Configure in Orbit admin → AdSense tab (stores in Platform Secrets) or Vercel env.
+ * Google AdSense (optional in-game — off by default; see google-in-game.ts).
+ * Free networks: Monetag / Adsterra / Media.net via programmatic.ts env vars.
  */
 export function adsenseClientId(): string | null {
   return readRuntimeClient();
@@ -76,6 +79,7 @@ export function adsenseAnySlot(): string | null {
 
 export function adsEnabled(): boolean {
   if (process.env.NEXT_PUBLIC_CLEAN_SNEAKS_ADS === "0") return false;
+  if (typeof window !== "undefined" && readAdFreePass()) return false;
   return true;
 }
 
@@ -118,11 +122,20 @@ export function adsenseUnitReady(placement: AdPlacementId): boolean {
  * units rarely fill there and left players staring at blank boxes. Auto ads
  * still run sitewide from the layout script for paid inventory.
  */
-export function resolveAdNetwork(placement: AdPlacementId): "adsense" | "house" | "unconfigured" {
+export function resolveAdNetwork(
+  placement: AdPlacementId,
+): "adsense" | "house" | "unconfigured" | "medianet" | "adsterra" | "monetag" {
   if (!adsEnabled()) return "unconfigured";
-  if (placement === "menu_banner" && adsenseUnitReady(placement)) return "adsense";
+  const programmatic = programmaticNetwork();
+  if (placement === "menu_banner" && programmatic && preferProgrammaticOverAdsense()) {
+    return programmatic;
+  }
+  if (kleanInGameUsesAdsense() && placement === "menu_banner" && adsenseUnitReady(placement)) {
+    return "adsense";
+  }
   if (houseAdsAllowed()) return "house";
-  if (adsenseUnitReady(placement)) return "adsense";
+  if (kleanInGameUsesAdsense() && adsenseUnitReady(placement)) return "adsense";
+  if (programmatic && placement === "menu_banner") return programmatic;
   return "unconfigured";
 }
 
@@ -137,6 +150,15 @@ export const INTERSTITIAL_COOLDOWN_MS = 45_000;
 
 /** Direct / house sponsors — shown when Google has no fill (default on). */
 export const HOUSE_CREATIVES: readonly HouseCreative[] = [
+  {
+    id: "rest-grow",
+    headline: "Give your project rest to grow",
+    body: "Let the sap do the quiet work — schema, rollback, guardrails — while you focus elsewhere.",
+    cta: "Explore ZZAI",
+    href: "/",
+    accent: "#5B8DA8",
+    imageUrl: "/zzai-logo-signal.png",
+  },
   {
     id: "zzai-tools",
     headline: "ZZAI Tools Hub",
