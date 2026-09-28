@@ -20,7 +20,7 @@ const PlatformFeatureHub = dynamic(
         className="py-14 sm:py-20 px-4 text-center text-sm text-muted-foreground"
         aria-busy
       >
-        Loading mixing console…
+        Loading ZZAI platform…
       </section>
     ),
   },
@@ -45,7 +45,7 @@ export function HomepageCubePanel({
       {interactive ? <HomepageCubeFaceHint /> : null}
 
       <div className="relative z-20 px-4 pt-4 sm:hidden">
-        <HomepageMainGoal variant="light" density="compact" />
+        <HomepageMainGoal variant="light" density="compact" surface="platform" />
       </div>
 
       <HomepageHeroBlock

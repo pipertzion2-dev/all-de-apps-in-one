@@ -1,19 +1,36 @@
-import { PRODUCT_HOOK_SHORT, PRODUCT_MAIN_GOAL, PRODUCT_TAGLINE } from "@/lib/product-positioning";
+import {
+  HOMEPAGE_GAME_FACE_SUBLINE,
+  HOMEPAGE_GAME_FACE_TITLE,
+  HOMEPAGE_PLATFORM_FACE_SUBLINE,
+  PRODUCT_HOOK_SHORT,
+  PRODUCT_MAIN_GOAL,
+  PRODUCT_TAGLINE,
+} from "@/lib/product-positioning";
 import { cn } from "@/lib/utils";
 
 type HomepageMainGoalProps = {
   variant?: "dark" | "light";
   /** compact = tagline + one short line (mobile-first faces) */
   density?: "compact" | "full";
+  /** game = Klean Sneaks demo face; platform = guardrails product story */
+  surface?: "platform" | "game";
   className?: string;
 };
 
 export function HomepageMainGoal({
   variant = "light",
   density = "compact",
+  surface = "platform",
   className,
 }: HomepageMainGoalProps) {
   const dark = variant === "dark";
+  const compactTitle = surface === "game" ? HOMEPAGE_GAME_FACE_TITLE : PRODUCT_TAGLINE;
+  const compactSubline =
+    surface === "game"
+      ? HOMEPAGE_GAME_FACE_SUBLINE
+      : density === "compact"
+        ? HOMEPAGE_PLATFORM_FACE_SUBLINE
+        : PRODUCT_HOOK_SHORT;
 
   if (density === "compact") {
     return (
@@ -27,7 +44,7 @@ export function HomepageMainGoal({
             dark ? "text-white" : "text-foreground",
           )}
         >
-          {PRODUCT_TAGLINE}
+          {compactTitle}
         </h2>
         <p
           className={cn(
@@ -35,7 +52,7 @@ export function HomepageMainGoal({
             dark ? "text-white/65" : "text-muted-foreground",
           )}
         >
-          {PRODUCT_HOOK_SHORT}
+          {compactSubline}
         </p>
       </div>
     );

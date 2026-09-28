@@ -21,6 +21,18 @@ export const PRODUCT_HERO_SUBLINE =
 /** Max ~12 words — mobile homepage faces only. */
 export const PRODUCT_HOOK_SHORT = "Guard AI APIs: preview hazards, enforce schema, roll back.";
 
+/** First homepage panel — Klean Sneaks (not the product dashboard). */
+export const HOMEPAGE_GAME_FACE_TITLE = "Game · Klean Sneaks";
+export const HOMEPAGE_GAME_FACE_SUBLINE =
+  "Playable demo only — not the API dashboard. Swipe down for the ZZAI platform.";
+
+/** Shown under the tagline on the platform homepage face (mobile compact). */
+export const HOMEPAGE_PLATFORM_FACE_SUBLINE =
+  "ZZAI platform — APIs, projects, Pulse, and pricing. Not the Klean Sneaks game.";
+
+export const HOMEPAGE_SCROLL_TO_PLATFORM = "Swipe ↓ ZZAI platform";
+export const HOMEPAGE_SCROLL_TO_GAME = "Swipe ↓ Klean Sneaks game";
+
 /** Platform channel strips that ship today (not beta). */
 export const CORE_PLATFORM_FEATURE_IDS = new Set(["api-builder", "projects", "pulse"]);
 
