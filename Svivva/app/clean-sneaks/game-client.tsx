@@ -172,7 +172,7 @@ function CleanSneaksPageContent() {
                   onClick={openBundleCard}
                   data-testid="button-header-steal-bundle"
                 >
-                  Casino
+                  Protect bundle
                 </Button>
               )}
               <Button

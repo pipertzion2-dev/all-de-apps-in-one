@@ -26,6 +26,7 @@ import {
 } from "@/lib/clean-sneaks/casino";
 import { PlayingCardView } from "./PlayingCardView";
 import { StealBundleHowToPlay } from "./StealBundleHowToPlay";
+import { KLEAN_BUNDLE_CARD_HEADLINE } from "@/lib/clean-sneaks/game-copy";
 import { FreeYearPrizeModal } from "@/components/clean-sneaks/prizes/FreeYearPrizeModal";
 
 export type HandCompleteStats = {
@@ -389,9 +390,9 @@ export function StealBundleBoard({
       <div className="flex items-center justify-between gap-2 border-b border-[#d4af37]/25 px-3 py-2 sm:px-4">
         <div>
           <p className="text-[9px] uppercase tracking-[0.35em] text-[#d4af37]">
-            Steal the Old Man&apos;s Bundle
+            {KLEAN_BUNDLE_CARD_HEADLINE}
           </p>
-          <p className="text-xs text-[#e8dcc0]/70">Build the biggest bundle.</p>
+          <p className="text-xs text-[#e8dcc0]/70">Protect the biggest bundle.</p>
         </div>
         <div className="text-right">
           <p

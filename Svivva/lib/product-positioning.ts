@@ -46,16 +46,11 @@ export const HOMEPAGE_PLATFORM_FACE_SUBLINE =
 export const HOMEPAGE_SCROLL_TO_PLATFORM = "Swipe ↓ ZZAI platform";
 export const HOMEPAGE_SCROLL_TO_GAME = "Swipe ↓ Klean Sneaks game";
 
-/** Platform channel strips that ship today (not beta). */
-export const CORE_PLATFORM_FEATURE_IDS = new Set([
-  "hybridization",
-  "api-builder",
-  "projects",
-  "pulse",
-]);
+/** Platform desk modules — Klean Sneaks ships; Hybrid² / API / Pulse stay beta. */
+export const CORE_PLATFORM_FEATURE_IDS = new Set<string>();
 
-/** Homepage cube faces that are GA (Play = Klean Sneaks demo). */
-export const CORE_CUBE_FACE_IDS = new Set<FeatureId>(["api", "play"]);
+/** Homepage cube — only Play (Klean Sneaks) is GA; API and other faces are beta. */
+export const CORE_CUBE_FACE_IDS = new Set<FeatureId>(["play"]);
 
 function normalizePath(pathname: string): string {
   const p = pathname.split("?")[0]?.split("#")[0] ?? "/";
@@ -72,12 +67,7 @@ function isCoreProductPath(path: string): boolean {
     "/contact",
     "/privacy",
     "/terms",
-    "/lp/ai-api-builder",
     "/clean-sneaks",
-    "/dashboard/projects",
-    "/dashboard/hybrid-lab",
-    "/dashboard/api-builder",
-    "/dashboard/pulse",
     "/dashboard/settings",
     "/dashboard/billing",
     "/dashboard/finish-setup",
@@ -112,13 +102,10 @@ export function isBetaHref(href: string): boolean {
   if (path.startsWith("/seeds")) return true;
   if (path.startsWith("/seo-pack")) return true;
   if (path === "/#oaas" || path === "#oaas") return true;
+  if (path.startsWith("/lp/")) return true;
 
   if (!path.startsWith("/dashboard")) return false;
   if (path === "/dashboard") return false;
-  if (path.startsWith("/dashboard/hybrid-lab")) return false;
-  if (path.startsWith("/dashboard/projects")) return false;
-  if (path.startsWith("/dashboard/api-builder")) return false;
-  if (path.startsWith("/dashboard/pulse")) return false;
   if (path.startsWith("/dashboard/settings")) return false;
   if (path.startsWith("/dashboard/billing")) return false;
   return true;

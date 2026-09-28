@@ -70,7 +70,7 @@ export function PostMissionReveal({
         >
           <p className="text-[10px] uppercase tracking-[0.3em] text-[#7EC8D9]">New high score</p>
           <p className="mt-1 text-sm font-semibold text-foreground">
-            Casino unlocked — turn in your score to play Steal the Old Man&apos;s Bundle.
+            Casino unlocked — turn in your score to protect your bundle!
           </p>
         </div>
       )}

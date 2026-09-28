@@ -168,14 +168,14 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
         id: "api",
         name: "API Builder (Signal)",
         path: "/dashboard/api-builder",
-        oneLiner: "Keep Hybrid² fusions Klean — schema, evals, hazard preview, rollback.",
+        oneLiner: "Beta — keep Hybrid² fusions Klean: schema, evals, hazard preview, rollback.",
         audience: "developers and no-code builders",
       },
       {
         id: "hybrid",
         name: "Hybrid² Lab (FX)",
         path: "/dashboard/hybrid-lab",
-        oneLiner: "Fuse any two ZZAI channels (H¹), then hybridize those blends (H²).",
+        oneLiner: "Beta — fuse any two ZZAI channels (H¹), then hybridize those blends (H²).",
         audience: "founders composing AI product modules",
       },
       {
@@ -414,7 +414,7 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       },
       {
         q: "Is ZZAI only an AI API builder?",
-        a: "No — the lead wedge is Hybrid² Lab: fuse two ZZAI modules into one shippable product, then keep that fusion Klean with API Builder, Projects, Pulse, and rollback. Guardrails support the hybrid ship; they are not the whole story. Seeds, Orbit, OaaS patch routing, and the full Play studio remain beta on zzaizzai.com.",
+        a: "No — the live public wedge is Klean Sneaks: protect your shoes on the walk, then protect your bundle at the card table. Hybrid² Lab, API Builder, Projects, Pulse, Seeds, Orbit, OaaS patch routing, and the full Play studio are beta on zzaizzai.com while the protection theme ships in the game.",
       },
       {
         q: `What does “${PRODUCT_TAGLINE}” mean?`,

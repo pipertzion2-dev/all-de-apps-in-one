@@ -23,6 +23,7 @@ import { CreditPayPanel } from "./CreditPayPanel";
 import { MultiplayerLobby } from "./MultiplayerLobby";
 import { KleanShop } from "@/components/clean-sneaks/monetization";
 import { syncCreditsFromCasino } from "@/lib/clean-sneaks/monetization";
+import { KLEAN_BUNDLE_CARD_HEADLINE } from "@/lib/clean-sneaks/game-copy";
 
 const CasinoScene = dynamic(
   () => import("./CasinoScene").then((m) => ({ default: m.CasinoScene })),
@@ -205,10 +206,10 @@ export function CasinoExperience({
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-4 text-center">
           <p className="text-[10px] uppercase tracking-[0.4em] text-[#ff4d7a]">Main Floor</p>
           <h2 className="mt-2 font-serif text-3xl text-[#f7e7b0] sm:text-4xl">
-            Steal the Old Man&apos;s Bundle
+            {KLEAN_BUNDLE_CARD_HEADLINE}
           </h2>
           <p className="mt-2 text-sm text-[#e8dcc0]/70">
-            Build the biggest bundle — solo, online, or nearby over Bluetooth.
+            Protect your stack — solo, online, or nearby over Bluetooth.
           </p>
           <p className="mt-2 text-sm text-[#ffd76a]" data-testid="lobby-credits">
             Credits: {credits.toLocaleString()}
@@ -346,7 +347,7 @@ export function CasinoExperience({
           data-testid="player-count-select"
         >
           <p className="text-[10px] uppercase tracking-[0.4em] text-[#d4af37]">
-            Steal the Old Man&apos;s Bundle
+            {KLEAN_BUNDLE_CARD_HEADLINE}
           </p>
           <h2 className="mt-2 font-serif text-2xl text-[#f7e7b0] sm:text-3xl">Choose Players</h2>
           <p className="mt-3 text-sm text-[#ffd76a]">
