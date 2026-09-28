@@ -5,11 +5,11 @@
 import type { FeatureId } from "@/components/svivva-artifact/feature-defs";
 
 /** Brand slogan — homepage hero and metadata. */
-export const PRODUCT_TAGLINE = "Let zzai zzai protect your assets. Rest assured!";
+export const PRODUCT_TAGLINE = "Poor Man Protection — prove what you created, and when.";
 
-/** Court-ready protection + crypto attestation for creators. */
+/** Court-ready protection — plain language for homepage and meta. */
 export const PRODUCT_PROTECTION_PITCH =
-  "Seal your ideas with timestamps, hashes, and blockchain-ready evidence — so if you ever need court, the record is valid.";
+  "Poor Man Protection timestamps your files, seals them with cryptographic hashes, and exports a court-ready pack. Supporting evidence of anteriority — not a USPTO patent or Copyright Office registration.";
 
 /** Sap / tree metaphor — quiet work under the surface while you rest and grow. */
 export const PRODUCT_SAP_METAPHOR =
@@ -17,18 +17,18 @@ export const PRODUCT_SAP_METAPHOR =
 
 /** One-sentence pitch (YC / hero / meta). */
 export const PRODUCT_ONE_LINER =
-  "zzai zzai protects your assets — sneakers in Klean Sneaks, sketches and fashion ideas via blockchain-ready proof — with Hybrid² tools when you ship to production.";
+  "zzai zzai leads with Poor Man Protection for sketches, designs, and code — timestamped seals and verify-at-a-link evidence, plus a free Klean Sneaks demo and beta builder tools.";
 
 /** Plain-language main goal (homepage game + product faces). */
 export const PRODUCT_MAIN_GOAL =
-  "Protect what you create — from BALOON8 colorways to Poor Man Protection court packs — then fuse modules in Hybrid² Lab when you are ready to ship.";
+  "Seal work in Poor Man Protection, verify hashes in the browser, and download a court pack when you need to show priority — before you spend on formal registration.";
 
 /** Shorter hero subline. */
 export const PRODUCT_HERO_SUBLINE =
-  "Fashion, sneakers, and ideas — sealed, timestamped, and rest-assured with our protection coin.";
+  "Upload, seal, verify — evidentiary workflow for creators who need a defensible record.";
 
 /** Max ~12 words — mobile homepage faces only. */
-export const PRODUCT_HOOK_SHORT = "Rest. Let sap run. Hybrid² AI + free Sneaks demo.";
+export const PRODUCT_HOOK_SHORT = "Poor Man Protection first — seal, verify, court pack.";
 
 /** Literal game ↔ product bridge (BALOON8 car×sneaker, Jordan 14 × Ferrari). */
 export const PRODUCT_GAME_HYBRID_METAPHOR =
@@ -41,7 +41,7 @@ export const HOMEPAGE_GAME_FACE_SUBLINE =
 
 /** Shown under the tagline on the platform homepage face (mobile compact). */
 export const HOMEPAGE_PLATFORM_FACE_SUBLINE =
-  "Bed Stuy Vybez × zzai zzai — protect ideas with crypto-backed evidence you can bring to court.";
+  "Timestamped seals, custody logs, and public verify links — built for Poor Man Protection.";
 
 export const HOMEPAGE_SCROLL_TO_PLATFORM = "Swipe ↓ ZZAI platform";
 export const HOMEPAGE_SCROLL_TO_GAME = "Swipe ↓ Klean Sneaks game";

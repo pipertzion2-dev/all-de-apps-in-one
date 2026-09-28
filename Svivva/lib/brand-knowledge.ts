@@ -414,11 +414,11 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       },
       {
         q: "Is ZZAI only an AI API builder?",
-        a: "No — the live public wedge is Klean Sneaks: protect your shoes on the walk, then protect your bundle at the card table. Hybrid² Lab, API Builder, Projects, Pulse, Seeds, Orbit, OaaS patch routing, and the full Play studio are beta on zzaizzai.com while the protection theme ships in the game.",
+        a: "No — the public story leads with Poor Man Protection: timestamped seals and court-ready exports for sketches, designs, and code. Klean Sneaks is a free demo; Hybrid² Lab, API Builder, Projects, Pulse, Seeds, Orbit, and the rest of the desk are beta on zzaizzai.com.",
       },
       {
         q: `What does “${PRODUCT_TAGLINE}” mean?`,
-        a: "zzai zzai timestamps and seals your creative assets — fashion sketches, sneaker colorways, API schemas — with evidence you can verify and bring to court. Klean Sneaks protects kicks in the game; Poor Man Protection and our coin do it for real ideas, including work with Bed Stuy Vybez in Brooklyn.",
+        a: "Poor Man Protection gives you a defensible record of what you created and when — hashes, custody, and verify links — as supporting evidence of anteriority. It is not a USPTO patent or Copyright Office registration. Use /protect/verify to check a seal without signing in.",
       },
       {
         q: "How long does it take to ship with ZZAI?",

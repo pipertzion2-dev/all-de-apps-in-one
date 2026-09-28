@@ -25,7 +25,10 @@ import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
 import Image from "next/image";
 import zzaiLogo from "@/attached_assets/ZZAI_OFFICIAL_LOGO.png";
 import seedsLogo from "@/attached_assets/Svivva_Seeds_6_1771888740460.png";
-import introImage from "@/attached_assets/IMG_1493_1770509047497.png";
+import {
+  FOUNDER_SON_COMPUTER_ALT,
+  FOUNDER_SON_COMPUTER_SRC,
+} from "@/lib/brand/founder-media";
 import {
   Shield,
   Code2,
@@ -546,10 +549,10 @@ export default function LandingPage() {
                   }}
                 >
                   <Image
-                    src={introImage}
-                    alt="zzai zzai — young logo designer at the computer"
-                    width={1024}
-                    height={1024}
+                    src={FOUNDER_SON_COMPUTER_SRC}
+                    alt={FOUNDER_SON_COMPUTER_ALT}
+                    width={1600}
+                    height={2000}
                     sizes="100vw"
                     style={{
                       // Fill the panel in both axes: `height: auto` left the square
@@ -1234,20 +1237,20 @@ export default function LandingPage() {
                     <div className="rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10 max-w-sm mx-auto lg:max-w-none">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <Image
-                        src={introImage}
-                        alt="Six-year-old logo designer at the computer with zzai zzai"
-                        width={800}
-                        height={800}
-                        className="block h-auto w-full object-cover"
+                        src={FOUNDER_SON_COMPUTER_SRC}
+                        alt={FOUNDER_SON_COMPUTER_ALT}
+                        width={1600}
+                        height={2000}
+                        className="block h-auto w-full object-cover object-center"
                       />
                     </div>
                     {/* Floating caption */}
-                    <div className="absolute bottom-0 right-2 sm:right-0 bg-card border border-border/60 rounded-2xl px-4 py-3 shadow-xl backdrop-blur-xl max-w-[200px]">
+                    <div className="absolute bottom-0 right-2 sm:right-0 bg-card border border-border/60 rounded-2xl px-4 py-3 shadow-xl backdrop-blur-xl max-w-[220px]">
                       <p className="text-xs font-semibold text-foreground leading-snug">
-                        Logo designer at the computer
+                        My son at the computer
                       </p>
                       <p className="text-[11px] text-muted-foreground mt-0.5">
-                        Age 6 · zzai zzai mark
+                        He helped design the zzai zzai logo
                       </p>
                     </div>
                   </div>
@@ -1259,31 +1262,26 @@ export default function LandingPage() {
                     </div>
 
                     <h2 className="text-3xl sm:text-4xl font-bold leading-tight">
-                      He designed the logo at the computer — we protect what you create
+                      Built at the computer — focused on evidence you can stand on
                     </h2>
 
                     <div className="space-y-4 text-muted-foreground leading-relaxed">
                       <p>
-                        My six-year-old son sat with me at the computer and helped shape the zzai
-                        zzai logo — the crest, the colors, the mark you see on this site. That same
-                        care goes into protecting your assets: sneakers in Klean Sneaks, fashion
-                        sketches, and ideas you cannot afford to lose.
+                        The photo is my son at the computer — the same session where he helped shape
+                        the zzai zzai logo. The product story on this site is not hype; it is Poor
+                        Man Protection: seal a file, keep custody notes, and export a pack a lawyer can
+                        read.
                       </p>
                       <p>
-                        I collaborate with Bed Stuy Vybez at 905 Dekalb Avenue in Brooklyn so
-                        designers and storefront creators can seal work with timestamps, hashes, and
-                        our protection coin — evidence you can bring to court if you ever need to
-                        prove what was yours and when.
+                        That workflow is for designers, musicians, and builders who need a timestamped
+                        record before formal patent or copyright filings. We also partner with Bed
+                        Stuy Vybez in Brooklyn for fashion and storefront creators who want the same
+                        discipline on early sketches.
                       </p>
                       <p>
-                        zzai zzai is Hybrid² for production, too: fuse modules, enforce schema, roll
-                        back bad deploys. But the heart of the homepage is simple — protect your
-                        assets. Rest assured.
-                      </p>
-                      <p className="text-foreground/80 font-medium">
-                        He still studies color like other kids study cartoons. The cyan and magenta
-                        in the app? His picks. We are building something he can point to and say he
-                        helped make — and something that keeps your ideas safe.
+                        Klean Sneaks and Hybrid² Lab stay available as demos and beta tools. The
+                        homepage leads with Poor Man Protection because that is the clearest promise
+                        we can keep in plain language.
                       </p>
                     </div>
                   </div>
