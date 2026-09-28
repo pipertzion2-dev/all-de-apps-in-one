@@ -4,10 +4,12 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BRAND } from "@/lib/brand";
+import { BED_STUY_VYBES } from "@/lib/brand/bed-stuy-vybes";
 import {
   PRODUCT_HOOK_SHORT,
   PRODUCT_MAIN_GOAL,
   PRODUCT_ONE_LINER,
+  PRODUCT_PROTECTION_PITCH,
   PRODUCT_TAGLINE,
 } from "@/lib/product-positioning";
 import { HomepageMainGoal } from "@/components/homepage-main-goal";
@@ -16,21 +18,26 @@ import { FeatureBetaBadge } from "@/components/feature-beta-badge";
 
 const HIGHLIGHTS = [
   {
-    icon: GitMerge,
-    title: "Hybrid² Lab",
+    icon: Shield,
+    title: "Court-ready evidence",
     description:
-      "Fuse any two ZZAI channels (H¹), then hybridize those blends (H²) — one chassis, many shippable colorways.",
+      "Poor Man Protection seals sketches and ideas with hashes, custody logs, and coin metadata you can verify.",
+  },
+  {
+    icon: GitMerge,
+    title: `${BED_STUY_VYBES.name}`,
+    description: `Fashion collaboration at ${BED_STUY_VYBES.fullAddress} — protect storefront ideas before they leak.`,
   },
   {
     icon: Eye,
-    title: "Hazard preview",
+    title: "Protect your sneakers",
     description:
-      "See where deploys will fail before traffic hits — like Sneak Vision on BALOON8 in Klean Sneaks.",
+      "Klean Sneaks demo — keep BALOON8 colorways Klean on the walk; same metaphor for real assets.",
   },
   {
     icon: Shield,
-    title: "Live schema enforcement",
-    description: "Every response validated and repaired — bad shapes never reach users.",
+    title: "Blockchain & coin",
+    description: "Mint-ready protection coin ties your file to a timestamped chain record.",
   },
   {
     icon: GitBranch,
@@ -63,7 +70,7 @@ export function HomepageAboutSection() {
             <HomepageMainGoal density="compact" />
           </div>
           <p className="mx-auto hidden max-w-2xl text-sm text-muted-foreground md:block">
-            {PRODUCT_ONE_LINER}
+            {PRODUCT_PROTECTION_PITCH} {PRODUCT_ONE_LINER}
           </p>
           <p className="mx-auto max-w-2xl text-xs text-muted-foreground sm:hidden">
             {PRODUCT_HOOK_SHORT}
@@ -95,8 +102,8 @@ export function HomepageAboutSection() {
           <Link href="/dashboard/hybrid-lab">
             <Button variant="outline">Hybrid² Lab</Button>
           </Link>
-          <Link href="/dashboard/api-builder">
-            <Button variant="outline">Keep fusions Klean</Button>
+          <Link href="/dashboard/poor-man-protection">
+            <Button variant="outline">Seal an idea</Button>
           </Link>
           <Link href="/clean-sneaks">
             <Button variant="outline">Play Klean Sneaks</Button>

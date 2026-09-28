@@ -4,24 +4,28 @@
 
 import type { FeatureId } from "@/components/svivva-artifact/feature-defs";
 
-/** Brand slogan — use across game, marketing, and product surfaces. */
-export const PRODUCT_TAGLINE = "Give your project rest to grow!";
+/** Brand slogan — homepage hero and metadata. */
+export const PRODUCT_TAGLINE = "Let zzai zzai protect your assets. Rest assured!";
 
-/** Sap / tree metaphor — automation works under the surface while you rest. */
+/** Court-ready protection + crypto attestation for creators. */
+export const PRODUCT_PROTECTION_PITCH =
+  "Seal your ideas with timestamps, hashes, and blockchain-ready evidence — so if you ever need court, the record is valid.";
+
+/** Sap / tree metaphor — quiet work under the surface while you rest and grow. */
 export const PRODUCT_SAP_METAPHOR =
-  "Like sap in a tree, ZZAI keeps the quiet work flowing — schema, guardrails, rollback — so you can rest, focus on other things, and grow.";
+  "Like sap in a tree, zzai zzai keeps protection and guardrails flowing underneath — so you can rest, focus on design, and grow.";
 
 /** One-sentence pitch (YC / hero / meta). */
 export const PRODUCT_ONE_LINER =
-  "ZZAI is Hybrid² for AI products — fuse two modules into one shippable feature, let the platform do the under-the-surface work, and play the car×sneaker loop in free Klean Sneaks.";
+  "zzai zzai protects your assets — sneakers in Klean Sneaks, sketches and fashion ideas via blockchain-ready proof — with Hybrid² tools when you ship to production.";
 
 /** Plain-language main goal (homepage game + product faces). */
 export const PRODUCT_MAIN_GOAL =
-  "Hybrid² Lab fuses any two ZZAI channels into one deployable product (H¹, then H²). API Builder and Pulse keep that hybrid Klean while you rest — hazard preview, live schema, one-click rollback.";
+  "Protect what you create — from BALOON8 colorways to Poor Man Protection court packs — then fuse modules in Hybrid² Lab when you are ready to ship.";
 
 /** Shorter hero subline. */
 export const PRODUCT_HERO_SUBLINE =
-  "Let the sap do the job. Fuse on the Hybrid bus, ship on Signal, grow while guardrails run.";
+  "Fashion, sneakers, and ideas — sealed, timestamped, and rest-assured with our protection coin.";
 
 /** Max ~12 words — mobile homepage faces only. */
 export const PRODUCT_HOOK_SHORT = "Rest. Let sap run. Hybrid² AI + free Sneaks demo.";
@@ -33,11 +37,11 @@ export const PRODUCT_GAME_HYBRID_METAPHOR =
 /** First homepage panel — Klean Sneaks (not the product dashboard). */
 export const HOMEPAGE_GAME_FACE_TITLE = "Game · Klean Sneaks";
 export const HOMEPAGE_GAME_FACE_SUBLINE =
-  "Free to play · real ads fund the walk. Rest — let the sap grow your score while you roam.";
+  "Protect your kicks on the walk — Klean Sneaks is the free demo of keeping sneaker assets Klean.";
 
 /** Shown under the tagline on the platform homepage face (mobile compact). */
 export const HOMEPAGE_PLATFORM_FACE_SUBLINE =
-  "Give your project rest to grow — Hybrid² desk fuses channels; Signal keeps ships Klean.";
+  "Bed Stuy Vybes × zzai zzai — protect ideas with crypto-backed evidence you can bring to court.";
 
 export const HOMEPAGE_SCROLL_TO_PLATFORM = "Swipe ↓ ZZAI platform";
 export const HOMEPAGE_SCROLL_TO_GAME = "Swipe ↓ Klean Sneaks game";

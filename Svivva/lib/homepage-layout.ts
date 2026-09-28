@@ -9,7 +9,7 @@ export const HOMEPAGE_SECTIONS = {
   buildSystem: false,
   tractionBar: false,
   features: false,
-  founderStory: false,
+  founderStory: true,
   howItWorks: false,
   evaluation: false,
   pricing: false,

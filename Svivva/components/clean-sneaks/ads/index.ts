@@ -4,3 +4,4 @@ export { GameRewardedAd } from "./GameRewardedAd";
 export { GameInterstitialAd } from "./GameInterstitialAd";
 export { HouseAdCreative } from "./HouseAdCreative";
 export { GameAdsEarningsChip } from "./GameAdsEarningsChip";
+export { GameAdNetworkHint } from "./GameAdNetworkHint";

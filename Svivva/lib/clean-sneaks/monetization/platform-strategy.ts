@@ -16,7 +16,7 @@ export const PLATFORM_UPGRADE_PATH = "/dashboard/billing?ref=klean";
 export type PlatformFunnelTier = "guest" | "free" | "starter" | "pro";
 
 export const PLATFORM_FUNNEL_COPY = {
-  headline: "Give your project rest to grow!",
+  headline: "Let zzai zzai protect your assets. Rest assured!",
   subhead:
     "Klean Sneaks is free — ads keep the lights on. Let the sap run your guardrails on ZZAI while you play, rest, and grow.",
   benefits: [
