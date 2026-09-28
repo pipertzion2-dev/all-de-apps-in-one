@@ -2,6 +2,7 @@ import { absoluteUrl } from "@/lib/seo/metadata";
 import { getBrandKnowledge, getBrandEntityCard } from "@/lib/brand-knowledge";
 import { BRAND } from "@/lib/brand";
 import { getSiteUrl } from "@/lib/site-url";
+import { CANONICAL_HOME_PATH } from "@/lib/homepage-path";
 
 const ORG_ID = () => `${getSiteUrl().replace(/\/$/, "")}/#organization`;
 
@@ -233,7 +234,7 @@ export const HOMEPAGE_HOWTO_STEPS = [
 
 /**
  * Site-wide graph for the root layout — Organization + WebSite only.
- * FAQ / HowTo / SoftwareApplication belong on `/` so they match visible content.
+ * FAQ / HowTo / SoftwareApplication belong on `/rest-assured` so they match visible content.
  */
 export function siteWideJsonLdGraph() {
   return [organizationSchema(), websiteSchema()];
@@ -249,7 +250,7 @@ export function homepageJsonLdGraph() {
     softwareApplicationSchema({
       name: k.name,
       description: k.definition,
-      path: "/",
+      path: CANONICAL_HOME_PATH,
       category: "DeveloperApplication",
     }),
     ...(faq ? [faq] : []),

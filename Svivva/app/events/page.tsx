@@ -51,7 +51,7 @@ export default function EventsPage() {
           }),
           eventSeriesSchema(),
           breadcrumbSchema([
-            { name: "Home", path: "/" },
+            { name: "Home", path: "/rest-assured" },
             { name: "Events", path: "/events" },
           ]),
           ...(faq ? [faq] : []),

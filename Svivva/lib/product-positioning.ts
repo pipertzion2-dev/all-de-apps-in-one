@@ -64,7 +64,7 @@ function normalizePath(pathname: string): string {
 }
 
 function isCoreProductPath(path: string): boolean {
-  if (path === "/" || path === "/dashboard") return true;
+  if (path === "/" || path === "/rest-assured" || path === "/dashboard") return true;
   const corePrefixes = [
     "/about",
     "/signup",

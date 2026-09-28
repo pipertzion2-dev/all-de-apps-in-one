@@ -90,7 +90,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       image: post.ogImage || undefined,
     }),
     breadcrumbSchema([
-      { name: "Home", path: "/" },
+      { name: "Home", path: "/rest-assured" },
       { name: "Blog", path: "/blog" },
       { name: post.title, path: `/blog/${post.slug}` },
     ]),

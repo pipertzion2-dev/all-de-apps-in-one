@@ -7,6 +7,7 @@ import { isNonIndexableSlug } from "@/lib/seo/legacy-paths";
 import { nativeToolSitemapPaths } from "@/lib/orbit/mini-app-curation";
 import { HUB_FEATURE_PATHS } from "@/lib/tools/catalogs/hub-feature-pages";
 import { dedupeSitemapUrls, normalizeSitemapUrl } from "@/lib/seo/sitemap/normalize";
+import { CANONICAL_HOME_PATH } from "@/lib/homepage-path";
 
 export const SITEMAP_CHUNK_IDS = ["pages", "blog", "tools", "features", "images"] as const;
 
@@ -35,7 +36,7 @@ function staticPagesEntries(): SitemapEntry[] {
     priority: number;
     changeFrequency: MetadataRoute.Sitemap[0]["changeFrequency"];
   }[] = [
-    { path: "", priority: 1, changeFrequency: "weekly" },
+    { path: CANONICAL_HOME_PATH, priority: 1, changeFrequency: "weekly" },
     { path: "/blog", priority: 0.9, changeFrequency: "daily" },
     { path: "/tools", priority: 0.85, changeFrequency: "weekly" },
     { path: "/ai-tools-hub", priority: 0.82, changeFrequency: "weekly" },
