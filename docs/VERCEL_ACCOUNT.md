@@ -108,10 +108,10 @@ Requires `VERCEL_TOKEN` (and optional `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID`). Or
 
 ### Choose one deploy path (not both)
 
-**Path A — Vercel Git (default, no secrets needed)**
+**Path A — Vercel Git (disabled for `main`)**
 
-- Push to **`main`** with changes under **`Svivva/`** → one production deploy.
-- Do **not** set `VERCEL_CI_DEPLOY=true` unless you switch to Path B.
+- `Svivva/vercel.json` sets **`main`: false** so spend-cap pauses do not post red **Account is blocked** on every push.
+- Production ships via **Path B** (Actions below).
 
 **Path B — GitHub Actions only (requires secrets)**
 

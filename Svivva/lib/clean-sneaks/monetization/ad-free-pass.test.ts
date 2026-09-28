@@ -1,20 +1,22 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.stubGlobal("localStorage", {
-  store: {} as Record<string, string>,
-  getItem(key: string) {
-    return this.store[key] ?? null;
-  },
-  setItem(key: string, value: string) {
-    this.store[key] = String(value);
-  },
-  removeItem(key: string) {
-    delete this.store[key];
-  },
-  clear() {
-    this.store = {};
-  },
-});
+function makeStorage() {
+  const store: Record<string, string> = {};
+  return {
+    getItem(key: string) {
+      return store[key] ?? null;
+    },
+    setItem(key: string, value: string) {
+      store[key] = String(value);
+    },
+    removeItem(key: string) {
+      delete store[key];
+    },
+    clear() {
+      for (const key of Object.keys(store)) delete store[key];
+    },
+  };
+}
 
 import {
   AD_FREE_CASHAPP_DOLLARS,
@@ -25,7 +27,7 @@ import {
 
 describe("ad-free pass", () => {
   beforeEach(() => {
-    localStorage.clear();
+    vi.stubGlobal("window", { localStorage: makeStorage() });
   });
 
   it("builds Cash App link for one-time fee", () => {
