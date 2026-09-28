@@ -29,6 +29,8 @@ export const users = pgTable("users", {
   /** Complimentary Pro from Klean Sneaks free-year prize (and future grants). */
   proAccessUntil: timestamp("pro_access_until"),
   proAccessSource: text("pro_access_source"),
+  /** Public handle for Klean Sneaks / mini-app leaderboards (zzai zzai account). */
+  gamerTag: text("gamer_tag"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

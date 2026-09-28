@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getCurrentUser } from "@/lib/auth/session";
+import { hasUnlimitedKleanOnline } from "@/lib/billing/resolve-user-plan";
 import {
   createRoom,
   getRoom,
@@ -6,8 +8,76 @@ import {
   patchRoom,
 } from "@/lib/clean-sneaks/casino/multiplayer/store";
 import { normalizeRoomCode, toPublicRoom } from "@/lib/clean-sneaks/casino/multiplayer/types";
+import {
+  assertCanJoinOnlineTable,
+  loadDbUser,
+  recordOnlineTableStart,
+  resolveOnlineSubject,
+} from "@/lib/clean-sneaks/monetization/online-access-server";
 
 export const dynamic = "force-dynamic";
+
+function deviceIdFromBody(body: Record<string, unknown>): string | null {
+  const raw = body.deviceId ?? body.kleanDeviceId;
+  if (typeof raw !== "string" || raw.length < 8) return null;
+  return raw.slice(0, 64);
+}
+
+async function bindSeatIdentity(
+  roomCode: string,
+  playerId: string,
+  userId: string | null,
+  deviceId: string | null,
+) {
+  patchRoom(roomCode, (room) => {
+    const seat = room.players.find((p) => p.id === playerId);
+    if (!seat) return;
+    if (userId) seat.userId = userId;
+    if (deviceId) seat.deviceId = deviceId;
+  });
+}
+
+async function consumeOnlineStartsIfReady(
+  code: string,
+): Promise<{ ok: true } | { ok: false; status: number; error: string; code: string }> {
+  const room = getRoom(code);
+  if (!room || room.mode !== "online") return { ok: true };
+  if (room.players.length < 2 || !room.players.every((p) => p.ready)) return { ok: true };
+  if (room.phase !== "lobby" && room.phase !== "parlay") return { ok: true };
+
+  for (const seat of room.players) {
+    const dbUser = seat.userId ? await loadDbUser(seat.userId) : null;
+    const unlimited = hasUnlimitedKleanOnline(dbUser);
+    if (unlimited) continue;
+    const subject = resolveOnlineSubject(seat.userId ?? null, seat.deviceId ?? null);
+    if (!subject) {
+      return {
+        ok: false,
+        status: 401,
+        error: "Every player needs a zzai sign-in or device id before the table starts.",
+        code: "sign_in_required",
+      };
+    }
+    const gate = await assertCanJoinOnlineTable(subject, false);
+    if (!gate.ok) {
+      return {
+        ok: false,
+        status: 402,
+        error:
+          "Free online tables used for this month. Upgrade on ZZAI for unlimited Steal Bundle tables.",
+        code: gate.code,
+      };
+    }
+  }
+
+  for (const seat of room.players) {
+    const dbUser = seat.userId ? await loadDbUser(seat.userId) : null;
+    if (hasUnlimitedKleanOnline(dbUser)) continue;
+    const subject = resolveOnlineSubject(seat.userId ?? null, seat.deviceId ?? null);
+    if (subject) await recordOnlineTableStart(subject, code);
+  }
+  return { ok: true };
+}
 
 /** Create a new online / nearby table. */
 export async function POST(request: NextRequest) {
@@ -21,6 +91,8 @@ export async function POST(request: NextRequest) {
     if (!hostPlayerId) {
       return NextResponse.json({ error: "hostPlayerId required" }, { status: 400 });
     }
+    const user = await getCurrentUser();
+    const deviceId = deviceIdFromBody(body);
     const room = createRoom({
       hostPlayerId,
       displayName,
@@ -28,6 +100,8 @@ export async function POST(request: NextRequest) {
       maxPlayers,
       ante,
       bluetoothAdvertised: Boolean(body.bluetoothAdvertised),
+      hostUserId: user?.id ?? null,
+      hostDeviceId: deviceId,
     });
     return NextResponse.json({ room: toPublicRoom(room) });
   } catch (err) {
@@ -61,6 +135,8 @@ export async function PATCH(request: NextRequest) {
     }
 
     if (action === "join") {
+      const joinUser = await getCurrentUser();
+      const deviceId = deviceIdFromBody(body);
       const result = joinRoom({
         code,
         playerId,
@@ -68,6 +144,8 @@ export async function PATCH(request: NextRequest) {
         bluetoothDeviceId: body.bluetoothDeviceId
           ? String(body.bluetoothDeviceId).slice(0, 128)
           : undefined,
+        userId: joinUser?.id ?? null,
+        deviceId,
       });
       if (!result.ok) return NextResponse.json({ error: result.reason }, { status: 400 });
       return NextResponse.json({ room: toPublicRoom(result.room) });
@@ -147,6 +225,24 @@ export async function PATCH(request: NextRequest) {
     });
 
     if (!result.ok) return NextResponse.json({ error: result.reason }, { status: 400 });
+
+    if (body.action === "ready" && Boolean(body.ready)) {
+      const user = await getCurrentUser();
+      const deviceId = deviceIdFromBody(body);
+      await bindSeatIdentity(code, playerId, user?.id ?? null, deviceId);
+      const consumed = await consumeOnlineStartsIfReady(code);
+      if (!consumed.ok) {
+        patchRoom(code, (room) => {
+          const seat = room.players.find((p) => p.id === playerId);
+          if (seat) seat.ready = false;
+        });
+        return NextResponse.json(
+          { error: consumed.error, code: consumed.code },
+          { status: consumed.status },
+        );
+      }
+    }
+
     return NextResponse.json({
       room: toPublicRoom(result.room),
       signal: result.room.signal,

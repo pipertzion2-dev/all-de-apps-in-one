@@ -25,7 +25,13 @@ export const BILLING_PLANS: BillingPlanDefinition[] = [
     amountCents: 0,
     period: "forever",
     description: "Try ZZAI with core tools",
-    features: ["1 project", "100 API calls/month", "Basic eval suite", "Community support"],
+    features: [
+      "1 project",
+      "100 API calls/month",
+      "Klean Sneaks solo + 2 online tables/month",
+      "Basic eval suite",
+      "Community support",
+    ],
     envPriceIdKey: null,
     interimLinkKey: null,
   },
@@ -39,6 +45,7 @@ export const BILLING_PLANS: BillingPlanDefinition[] = [
     features: [
       "3 projects",
       "2,000 API calls/month",
+      "Unlimited Klean Sneaks online tables",
       "Full eval suite",
       "Email support",
       "Orbit marketing copy",
@@ -56,6 +63,7 @@ export const BILLING_PLANS: BillingPlanDefinition[] = [
     features: [
       "10 projects",
       "10,000 API calls/month",
+      "Unlimited Klean Sneaks online + saved gamer tag",
       "Auto-rollback eval suite",
       "Priority support",
       "Custom training data",

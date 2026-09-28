@@ -8,8 +8,20 @@ import {
   pickNearbyBluetoothDevice,
 } from "@/lib/clean-sneaks/casino/multiplayer/bluetooth";
 import type { RoomPublic } from "@/lib/clean-sneaks/casino/multiplayer/types";
+import { getOrCreateDeviceId } from "@/lib/clean-sneaks/prizes/year-subscription";
+import { OnlinePlayUpgradeSheet } from "@/components/clean-sneaks/monetization/OnlinePlayUpgradeSheet";
+import type { OnlineAccessSnapshot } from "@/lib/clean-sneaks/monetization/online-access-server";
+import { PLATFORM_FUNNEL_COPY } from "@/lib/clean-sneaks/monetization/platform-strategy";
 
 const PLAYER_ID_KEY = "zzai.steal-bundle.playerId";
+const LOCAL_GAMERTAG_KEY = "zzai.klean.gamerTag";
+
+function kleanJsonHeaders(deviceId: string): HeadersInit {
+  return {
+    "Content-Type": "application/json",
+    "X-Klean-Device-Id": deviceId,
+  };
+}
 
 export function getOrCreatePlayerId(): string {
   if (typeof window === "undefined") return "server";
@@ -35,14 +47,62 @@ type Props = {
 
 export function MultiplayerLobby({ ante, onReadyToPlay, onBack }: Props) {
   const playerId = useRef(getOrCreatePlayerId()).current;
+  const deviceId = useRef(getOrCreateDeviceId()).current;
   const [name, setName] = useState("Player");
   const [mode, setMode] = useState<"online" | "nearby">("online");
   const [joinCode, setJoinCode] = useState("");
   const [room, setRoom] = useState<RoomPublic | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [onlineAccess, setOnlineAccess] = useState<OnlineAccessSnapshot | null>(null);
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const ble = getBluetoothSupport();
   const launchedRef = useRef(false);
+
+  const refreshAccess = useCallback(async () => {
+    try {
+      const res = await fetch("/api/clean-sneaks/profile", {
+        headers: { "X-Klean-Device-Id": deviceId },
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.gamerTag) setName(data.gamerTag);
+      else {
+        try {
+          const local = window.localStorage.getItem(LOCAL_GAMERTAG_KEY);
+          if (local) setName(local);
+        } catch {
+          /* ignore */
+        }
+      }
+      if (data.online) setOnlineAccess(data.online);
+    } catch {
+      /* ignore */
+    }
+  }, [deviceId]);
+
+  useEffect(() => {
+    void refreshAccess();
+  }, [refreshAccess]);
+
+  const persistGamerTag = useCallback(async () => {
+    const tag = name.trim().slice(0, 20);
+    if (tag.length < 3) return;
+    try {
+      window.localStorage.setItem(LOCAL_GAMERTAG_KEY, tag);
+    } catch {
+      /* ignore */
+    }
+    try {
+      await fetch("/api/clean-sneaks/profile", {
+        method: "PATCH",
+        headers: kleanJsonHeaders(deviceId),
+        body: JSON.stringify({ gamerTag: tag }),
+      });
+    } catch {
+      /* guest — local only */
+    }
+  }, [deviceId, name]);
 
   const poll = useCallback(async (code: string) => {
     const res = await fetch(
@@ -75,9 +135,10 @@ export function MultiplayerLobby({ ante, onReadyToPlay, onBack }: Props) {
     setBusy(true);
     setError(null);
     try {
+      await persistGamerTag();
       const res = await fetch("/api/clean-sneaks/steal-bundle/rooms", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: kleanJsonHeaders(deviceId),
         body: JSON.stringify({
           hostPlayerId: playerId,
           displayName: name,
@@ -85,10 +146,12 @@ export function MultiplayerLobby({ ante, onReadyToPlay, onBack }: Props) {
           maxPlayers: 2,
           ante,
           bluetoothAdvertised: mode === "nearby",
+          deviceId,
         }),
       });
       const data = await res.json();
       if (!res.ok) {
+        if (data.code === "quota_exhausted") setShowUpgrade(true);
         setError(data.error || "Could not create room.");
         return;
       }
@@ -104,19 +167,22 @@ export function MultiplayerLobby({ ante, onReadyToPlay, onBack }: Props) {
     setBusy(true);
     setError(null);
     try {
+      await persistGamerTag();
       const res = await fetch("/api/clean-sneaks/steal-bundle/rooms", {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: kleanJsonHeaders(deviceId),
         body: JSON.stringify({
           code,
           action: "join",
           playerId,
           displayName: name,
           bluetoothDeviceId,
+          deviceId,
         }),
       });
       const data = await res.json();
       if (!res.ok) {
+        if (data.code === "quota_exhausted") setShowUpgrade(true);
         setError(data.error || "Could not join.");
         return;
       }
@@ -133,16 +199,26 @@ export function MultiplayerLobby({ ante, onReadyToPlay, onBack }: Props) {
     const me = room.players.find((p) => p.id === playerId);
     const res = await fetch("/api/clean-sneaks/steal-bundle/rooms", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: kleanJsonHeaders(deviceId),
       body: JSON.stringify({
         code: room.code,
         action: "ready",
         playerId,
         ready: !me?.ready,
+        deviceId,
       }),
     });
     const data = await res.json();
-    if (res.ok) setRoom(data.room);
+    if (!res.ok) {
+      if (data.code === "quota_exhausted") setShowUpgrade(true);
+      setError(data.error || "Could not ready up.");
+      void refreshAccess();
+      return;
+    }
+    if (res.ok) {
+      setRoom(data.room);
+      void refreshAccess();
+    }
   };
 
   const scanBluetooth = async () => {
@@ -172,17 +248,36 @@ export function MultiplayerLobby({ ante, onReadyToPlay, onBack }: Props) {
         <h2 className="mt-1 font-serif text-2xl text-[#f7e7b0]">Online · Nearby Bluetooth</h2>
         <p className="mt-2 text-xs text-[#e8dcc0]/65">
           Host a table on the internet, or sit next to a friend — Bluetooth finds their device, then
-          the room code syncs the deal.
+          the room code syncs the deal. Nearby tables stay free; online uses your monthly platform
+          allowance unless you subscribe on ZZAI.
         </p>
+        {onlineAccess && mode === "online" && (
+          <p className="mt-2 text-[11px] text-[#7EC8D9]/90" data-testid="mp-online-quota">
+            {onlineAccess.unlimited
+              ? "ZZAI plan: unlimited online tables"
+              : PLATFORM_FUNNEL_COPY.monthlyLabel(
+                  onlineAccess.usedThisMonth,
+                  onlineAccess.limit,
+                )}
+          </p>
+        )}
       </div>
+
+      {showUpgrade && onlineAccess && (
+        <OnlinePlayUpgradeSheet
+          access={onlineAccess}
+          onDismiss={() => setShowUpgrade(false)}
+        />
+      )}
 
       {!room && (
         <>
           <label className="block text-left text-xs text-[#e8dcc0]/70">
-            Display name
+            Gamer tag (saved to zzai zzai when signed in)
             <input
               value={name}
               onChange={(e) => setName(e.target.value.slice(0, 24))}
+              onBlur={() => void persistGamerTag()}
               className="mt-1 w-full rounded-md border border-[#d4af37]/35 bg-black/40 px-3 py-2 text-sm text-[#ffd76a]"
               data-testid="mp-display-name"
             />
