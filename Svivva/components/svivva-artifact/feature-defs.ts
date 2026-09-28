@@ -33,7 +33,7 @@ export const FEATURES: FeatureDef[] = [
     shortLabel: "Play",
     artworkTitle: "BREATH AWAY",
     artworkSrc: MEDIA.artworks.play,
-    tagline: "Keep the product clean — the public demo",
+    tagline: "Keep the product Klean — the public demo",
     description:
       "Klean Sneaks — zone-based shoe state, Sneak Vision hazard preview, and mission saves that mirror production guardrails.",
     cta: { label: "Play Klean Sneaks", href: FEATURE_PUBLIC_PATHS.play },

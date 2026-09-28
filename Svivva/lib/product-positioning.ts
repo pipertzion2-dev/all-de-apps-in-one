@@ -6,13 +6,17 @@ import type { FeatureId } from "@/components/svivva-artifact/feature-defs";
 
 /** One-sentence pitch (YC / hero / meta). */
 export const PRODUCT_ONE_LINER =
-  "ZZAI keeps the AI features you ship from getting scuffed in production — preview hazards before deploy, enforce schema live, and rollback in one click when quality drops.";
+  "ZZAI keeps the AI features you ship Klean in production — preview hazards before deploy, enforce schema live, and rollback in one click when quality drops.";
 
-export const PRODUCT_TAGLINE = "Keep what you ship clean";
+export const PRODUCT_TAGLINE = "Keep what you ship Klean";
+
+/** Plain-language main goal (homepage game + product faces). */
+export const PRODUCT_MAIN_GOAL =
+  "Production guardrails for AI APIs: catch bad outputs before users do, enforce JSON Schema on every response, and roll back fast when a deploy scuffs.";
 
 /** Shorter hero subline. */
 export const PRODUCT_HERO_SUBLINE =
-  "Production guardrails for AI APIs — hazard preview, live schema enforcement, and one-click rollback.";
+  "Ship AI endpoints that stay Klean — hazard preview, live schema, one-click rollback.";
 
 /** Platform channel strips that ship today (not beta). */
 export const CORE_PLATFORM_FEATURE_IDS = new Set(["api-builder", "projects", "pulse"]);

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
 import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
 import { HomepageScrollHint } from "@/components/homepage-scroll-hint";
+import { HomepageMainGoal } from "@/components/homepage-main-goal";
 
 const CleanSneaksLogoCube = dynamic(
   () => import("@/components/clean-sneaks/CleanSneaksLogoCube").then((m) => m.CleanSneaksLogoCube),
@@ -30,19 +31,20 @@ export function HomepageGamePanel() {
         }}
       />
 
-      <div className="relative z-10 flex min-h-0 flex-1 flex-col items-center justify-center px-4 pb-24 pt-24 sm:px-6 sm:pt-28">
-        <p className="mb-2 text-[10px] uppercase tracking-[0.4em] text-[#A8BA48]/90">ZZAI Play</p>
-        <h2 className="seeds-holo-text text-center text-2xl font-bold tracking-[0.06em] sm:text-3xl">
+      <div className="relative z-10 flex min-h-0 flex-1 flex-col items-center justify-center px-4 pb-24 pt-20 sm:px-6 sm:pt-24">
+        <HomepageMainGoal variant="dark" className="mb-6" />
+        <p className="mb-1 text-[10px] uppercase tracking-[0.4em] text-[#A8BA48]/90">
+          Public demo · ZZAI Play
+        </p>
+        <h2 className="seeds-holo-text text-center text-xl font-bold tracking-[0.06em] sm:text-2xl">
           {KLEAN_SNEAKS.display}
         </h2>
         <p
-          className="mt-3 max-w-md text-center text-sm font-semibold text-[#E8D9A8] sm:text-base"
+          className="mt-2 max-w-md text-center text-xs text-white/60 sm:text-sm"
           data-testid="text-clean-sneaks-goal"
         >
-          Goal: Steal the old man&apos;s bundle
-        </p>
-        <p className="mt-1 text-[11px] uppercase tracking-[0.28em] text-white/45">
-          stiehl den alten Manns Bündel
+          Sneak Vision = hazard preview · zone dirt = live quality · mission save = rollback. Tap
+          the cube to play.
         </p>
 
         <div

@@ -183,7 +183,7 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
         id: "play",
         name: "ZZAI Play",
         path: "/clean-sneaks",
-        oneLiner: "Klean Sneaks demo — the same “keep it clean” loop as production guardrails.",
+        oneLiner: "Klean Sneaks demo — the same “keep it Klean” loop as production guardrails.",
       },
       {
         id: "klean-sneaks",
@@ -275,7 +275,7 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
             : f.id === "hardware"
               ? "Crest — schematics, BOM, manufacturing"
               : f.id === "play"
-                ? "Play — Klean Sneaks demo (keep the product clean)"
+                ? "Play — Klean Sneaks demo (keep the product Klean)"
                 : f.id === "orbit"
                   ? "Grow — SEO, indexing, launch automation"
                   : "Protect — seals and court packs";
@@ -300,7 +300,7 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       {
         term: PRODUCT_TAGLINE,
         definition:
-          "ZZAI’s tagline: treat shipped AI like something worth keeping clean — preview hazards, enforce structure live, and roll back before users see a scuff.",
+          "ZZAI’s tagline: treat shipped AI like something worth keeping Klean — preview hazards, enforce structure live, and roll back before users see a scuff.",
       },
       {
         term: "OaaS (Orchestration as a Service)",
