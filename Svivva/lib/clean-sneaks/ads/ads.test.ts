@@ -70,14 +70,16 @@ describe("clean-sneaks advertising", () => {
   });
 
   it("keeps interstitial on house even with its own AdSense slot", () => {
+    vi.stubEnv("NEXT_PUBLIC_KLEAN_USE_ADSENSE", "1");
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_CLIENT", "ca-pub-1234567890123456");
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT_INTERSTITIAL", "9876543210");
+    vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT_BANNER", "1111111111");
     expect(resolveAdNetwork("run_interstitial")).toBe("house");
-    // Banner may use any configured display slot via adsenseAnySlot.
     expect(resolveAdNetwork("menu_banner")).toBe("adsense");
   });
 
   it("refuses interstitial AdSense when it reuses the banner slot id", () => {
+    vi.stubEnv("NEXT_PUBLIC_KLEAN_USE_ADSENSE", "1");
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_CLIENT", "ca-pub-1234567890123456");
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT_BANNER", "1234567890");
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT_INTERSTITIAL", "1234567890");
