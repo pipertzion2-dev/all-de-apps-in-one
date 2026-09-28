@@ -12,7 +12,8 @@ const HIGHLIGHTS = [
   {
     icon: Eye,
     title: "Hazard preview",
-    description: "See where deploys will fail before traffic hits — like Sneak Vision in Klean Sneaks.",
+    description:
+      "See where deploys will fail before traffic hits — like Sneak Vision in Klean Sneaks.",
   },
   {
     icon: Shield,

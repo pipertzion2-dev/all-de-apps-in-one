@@ -8,11 +8,7 @@
 import { BRAND } from "@/lib/brand";
 import { listCubeFaces } from "@/lib/cube/cube-faces";
 import { HOMEPAGE_PRICING_TIERS } from "@/lib/homepage-pricing";
-import {
-  isBetaCubeFaceId,
-  PRODUCT_ONE_LINER,
-  PRODUCT_TAGLINE,
-} from "@/lib/product-positioning";
+import { isBetaCubeFaceId, PRODUCT_ONE_LINER, PRODUCT_TAGLINE } from "@/lib/product-positioning";
 import { MIXING_BUSES, PLATFORM_FEATURES } from "@/lib/platform/feature-graph";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -100,7 +96,8 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
     ],
     entity: {
       category: "AI developer platform",
-      subcategory: "Production guardrails for AI APIs — schema enforcement, evals, hazard preview, rollback",
+      subcategory:
+        "Production guardrails for AI APIs — schema enforcement, evals, hazard preview, rollback",
       geography: "Remote-first · web SaaS at zzaizzai.com",
       foundedNote: "Independent team shipping guarded AI endpoints and a Klean Sneaks Play demo",
       hosting: "Production on Vercel (team zzai-zzai, project all-de-apps-in-one)",

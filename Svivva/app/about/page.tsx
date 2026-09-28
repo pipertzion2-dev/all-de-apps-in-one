@@ -32,8 +32,8 @@ export default function AboutPage() {
           <p>
             <strong>Klean Sneaks</strong> (/clean-sneaks) is the public game demo — Sneak Vision,
             zone-based shoe state, and mission saves mirror pre-ship checks and production rollback.
-            Seeds, Orbit, hardware, advocacy, and the full Play studio are labeled <strong>Beta</strong>{" "}
-            on the same domain.
+            Seeds, Orbit, hardware, advocacy, and the full Play studio are labeled{" "}
+            <strong>Beta</strong> on the same domain.
           </p>
         </div>
       </main>

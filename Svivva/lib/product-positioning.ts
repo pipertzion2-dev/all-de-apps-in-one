@@ -15,11 +15,7 @@ export const PRODUCT_HERO_SUBLINE =
   "Production guardrails for AI APIs — hazard preview, live schema enforcement, and one-click rollback.";
 
 /** Platform channel strips that ship today (not beta). */
-export const CORE_PLATFORM_FEATURE_IDS = new Set([
-  "api-builder",
-  "projects",
-  "pulse",
-]);
+export const CORE_PLATFORM_FEATURE_IDS = new Set(["api-builder", "projects", "pulse"]);
 
 /** Homepage cube faces that are GA (Play = Klean Sneaks demo). */
 export const CORE_CUBE_FACE_IDS = new Set<FeatureId>(["api", "play"]);
