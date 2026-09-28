@@ -9,7 +9,8 @@ export const HOMEPAGE_SECTIONS = {
   buildSystem: false,
   tractionBar: false,
   features: false,
-  founderStory: true,
+  /** Rendered in HomepageCubePanel (scrollSnap) or before legacy pricing — not inline below the fold. */
+  founderStory: false,
   howItWorks: false,
   evaluation: false,
   pricing: false,

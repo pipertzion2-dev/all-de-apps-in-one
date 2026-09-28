@@ -3,14 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import zzaiLogo from "@/attached_assets/ZZAI_OFFICIAL_LOGO.png";
-import {
-  FOUNDER_SON_COMPUTER_ALT,
-  FOUNDER_SON_COMPUTER_SRC,
-} from "@/lib/brand/founder-media";
 import { PRODUCT_PROTECTION_PITCH, PRODUCT_TAGLINE } from "@/lib/product-positioning";
 import { Button } from "@/components/ui/button";
 
-/** Homepage hero — Poor Man Protection first; founder photo is son at the computer. */
+/** Homepage hero — Poor Man Protection first; founder photo lives once above pricing. */
 export function HomepageProtectionHero() {
   return (
     <section
@@ -42,28 +38,19 @@ export function HomepageProtectionHero() {
           </div>
         </div>
 
-        <div className="relative mx-auto w-full max-w-md lg:max-w-none">
-          <div className="relative aspect-[4/5] overflow-hidden rounded-2xl border border-border/60 bg-card shadow-xl ring-1 ring-black/5 sm:aspect-[3/4]">
-            <Image
-              src={FOUNDER_SON_COMPUTER_SRC}
-              alt={FOUNDER_SON_COMPUTER_ALT}
-              fill
-              className="object-cover object-center"
-              sizes="(max-width: 1024px) 100vw, 480px"
-              priority
-            />
-          </div>
-          <div className="absolute -bottom-4 left-4 flex items-center gap-3 rounded-xl border border-border/60 bg-background/95 px-3 py-2 shadow-lg backdrop-blur-sm sm:left-6">
+        <div className="relative mx-auto flex w-full max-w-md flex-col items-center gap-4 lg:max-w-none lg:items-end">
+          <div className="flex items-center gap-4 rounded-2xl border border-border/60 bg-card/80 px-6 py-5 shadow-lg ring-1 ring-black/5 backdrop-blur-sm">
             <Image
               src={zzaiLogo}
               alt="zzai zzai official logo"
-              width={48}
-              height={48}
-              className="h-12 w-12 rounded-md object-contain"
+              width={96}
+              height={96}
+              className="h-24 w-24 rounded-lg object-contain"
+              priority
             />
             <div className="text-left">
-              <p className="text-xs font-semibold leading-snug">Logo at the computer</p>
-              <p className="text-[10px] text-muted-foreground">My son helped design the mark</p>
+              <p className="text-sm font-semibold leading-snug">Logo at the computer</p>
+              <p className="mt-1 text-xs text-muted-foreground">My son helped design the mark</p>
             </div>
           </div>
         </div>

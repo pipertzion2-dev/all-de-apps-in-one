@@ -14,6 +14,7 @@ import { flipPanelFromHash, scrollToHomepagePanel } from "@/lib/homepage-scroll"
 import { HomepageFlipStack } from "@/components/homepage-flip-stack";
 import { HomepageCubePanel } from "@/components/homepage-cube-panel";
 import { HomepageGamePanel } from "@/components/homepage-game-panel";
+import { HomepageFounderStorySection } from "@/components/homepage-founder-story-section";
 import { HomepageHeroBlock } from "@/components/homepage-hero-block";
 import { HOMEPAGE_PRICING_TIERS } from "@/lib/homepage-pricing";
 import type { HomepageFlipPanelId } from "@/lib/homepage-flip-stack";
@@ -1227,69 +1228,6 @@ export default function LandingPage() {
             </section>
           )}
 
-          {/* Founder Story */}
-          {showHomepageSection("founderStory") && (
-            <section className="py-16 sm:py-24 relative overflow-hidden">
-              <div className="max-w-6xl mx-auto px-4 sm:px-6">
-                <div className="grid lg:grid-cols-2 gap-10 sm:gap-16 items-center">
-                  {/* Image */}
-                  <div className="relative order-2 lg:order-1 pb-8">
-                    <div className="rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10 max-w-sm mx-auto lg:max-w-none">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <Image
-                        src={FOUNDER_SON_COMPUTER_SRC}
-                        alt={FOUNDER_SON_COMPUTER_ALT}
-                        width={1600}
-                        height={2000}
-                        className="block h-auto w-full object-cover object-center"
-                      />
-                    </div>
-                    {/* Floating caption */}
-                    <div className="absolute bottom-0 right-2 sm:right-0 bg-card border border-border/60 rounded-2xl px-4 py-3 shadow-xl backdrop-blur-xl max-w-[220px]">
-                      <p className="text-xs font-semibold text-foreground leading-snug">
-                        My son at the computer
-                      </p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">
-                        He helped design the zzai zzai logo
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Text */}
-                  <div className="order-1 lg:order-2 space-y-6">
-                    <div className="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.2em] text-[#5B8DA8]">
-                      Founder story
-                    </div>
-
-                    <h2 className="text-3xl sm:text-4xl font-bold leading-tight">
-                      Built at the computer — focused on evidence you can stand on
-                    </h2>
-
-                    <div className="space-y-4 text-muted-foreground leading-relaxed">
-                      <p>
-                        The photo is my son at the computer — the same session where he helped shape
-                        the zzai zzai logo. The product story on this site is not hype; it is Poor
-                        Man Protection: seal a file, keep custody notes, and export a pack a lawyer can
-                        read.
-                      </p>
-                      <p>
-                        That workflow is for designers, musicians, and builders who need a timestamped
-                        record before formal patent or copyright filings. We also partner with Bed
-                        Stuy Vybez in Brooklyn for fashion and storefront creators who want the same
-                        discipline on early sketches.
-                      </p>
-                      <p>
-                        Klean Sneaks and Hybrid² Lab stay available as demos and beta tools. The
-                        homepage leads with Poor Man Protection because that is the clearest promise
-                        we can keep in plain language.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-          )}
-
           {showHomepageSection("howItWorks") && (
             <section
               id="how-it-works"
@@ -1781,6 +1719,8 @@ export default function LandingPage() {
           )}
 
           {showHomepageSection("pricing") && (
+            <>
+              <HomepageFounderStorySection />
             <section id="pricing" className="py-16 sm:py-24 min-h-[600px] relative overflow-hidden">
               <div className="absolute inset-0 opacity-60 md:opacity-50">
                 <CamoThreeOverlay preset="pricing" />
@@ -1891,6 +1831,7 @@ export default function LandingPage() {
                 </p>
               </div>
             </section>
+            </>
           )}
 
           {showHomepageSection("finalCta") && (
