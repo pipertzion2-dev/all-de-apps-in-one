@@ -52,6 +52,14 @@ jobs:
         run: node scripts/resume-vercel-project.mjs
         continue-on-error: true
 
+      - name: Disconnect deprecated Vercel Git (svivva-main-app)
+        working-directory: Svivva
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID || 'team_GuJh1mdYQPgRIhJaagdpM8lw' }}
+        run: node scripts/disconnect-deprecated-vercel-git.mjs
+        continue-on-error: true
+
       - name: Clear queue and deploy latest
         working-directory: Svivva
         env:
