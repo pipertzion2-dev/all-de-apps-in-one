@@ -44,6 +44,7 @@ jobs:
         run: npm install -g vercel@53.3.1
 
       - name: Resume paused Vercel project
+        if: ${{ secrets.VERCEL_TOKEN != '' }}
         working-directory: Svivva
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -53,6 +54,7 @@ jobs:
         continue-on-error: true
 
       - name: Disconnect deprecated Vercel Git (svivva-main-app)
+        if: ${{ secrets.VERCEL_TOKEN != '' }}
         working-directory: Svivva
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
