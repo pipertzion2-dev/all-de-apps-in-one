@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { HomepageAboutSection } from "@/components/homepage-about-section";
+import { HomepageFounderStorySection } from "@/components/homepage-founder-story-section";
 import { HomepageProtectionHero } from "@/components/homepage-protection-hero";
 import { HomepageExploreLinks } from "@/components/homepage-explore-links";
 import { HomepageFaqSection } from "@/components/homepage-faq-section";
@@ -78,6 +79,7 @@ export function HomepageCubePanel({
         <PlatformFeatureHub hideBackground hideChannelStrips />
       </div>
 
+      {interactive ? <HomepageFounderStorySection /> : null}
       <HomepagePricingSection />
       <HomepageFaqSection />
     </div>
