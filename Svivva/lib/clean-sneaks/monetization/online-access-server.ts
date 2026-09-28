@@ -14,6 +14,7 @@ import {
   type OnlineSubject,
 } from "./online-access";
 import { ensureKleanProfileTables } from "./ensure-klean-profile";
+import type { RoomPlayer } from "@/lib/clean-sneaks/casino/multiplayer/types";
 
 export type OnlineAccessSnapshot = {
   unlimited: boolean;
@@ -24,7 +25,28 @@ export type OnlineAccessSnapshot = {
   resetsAt: string;
   requiresSignIn: boolean;
   gamerTag: string | null;
+  /** Active Cash App membership cookie on this browser. */
+  cashAppMembership: boolean;
 };
+
+export function playerHasUnlimitedOnline(opts: {
+  dbUser: typeof users.$inferSelect | null;
+  seat: Pick<RoomPlayer, "id" | "userId">;
+  requestPlayerId: string;
+  requestUserId: string | null;
+  membershipThisRequest: boolean;
+}): boolean {
+  if (hasUnlimitedKleanOnline(opts.dbUser)) return true;
+  if (opts.membershipThisRequest && opts.seat.id === opts.requestPlayerId) return true;
+  if (
+    opts.membershipThisRequest &&
+    opts.requestUserId &&
+    opts.seat.userId === opts.requestUserId
+  ) {
+    return true;
+  }
+  return false;
+}
 
 export function resolveOnlineSubject(
   userId: string | null,
@@ -57,10 +79,12 @@ export async function getOnlineAccessSnapshot(opts: {
   userId: string | null;
   deviceId: string | null;
   dbUser?: typeof users.$inferSelect | null;
+  membershipAccess?: boolean;
 }): Promise<OnlineAccessSnapshot> {
   await ensureKleanProfileTables();
   const signedIn = Boolean(opts.userId);
-  const unlimited = hasUnlimitedKleanOnline(opts.dbUser ?? null);
+  const unlimited =
+    hasUnlimitedKleanOnline(opts.dbUser ?? null) || Boolean(opts.membershipAccess);
   const subject = resolveOnlineSubject(opts.userId, opts.deviceId);
   const limit =
     subject != null
@@ -83,6 +107,7 @@ export async function getOnlineAccessSnapshot(opts: {
     resetsAt: nextUtcMonthStart().toISOString(),
     requiresSignIn: !signedIn && !unlimited,
     gamerTag: opts.dbUser?.gamerTag ?? null,
+    cashAppMembership: Boolean(opts.membershipAccess),
   };
 }
 

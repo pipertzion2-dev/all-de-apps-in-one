@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { hasMembershipAccess } from "@/lib/auth/membership-access";
 import { getCurrentUser } from "@/lib/auth/session";
 import { normalizeGamerTag } from "@/lib/clean-sneaks/monetization/online-access";
 import {
@@ -24,6 +25,7 @@ export async function GET(request: NextRequest) {
       userId: user?.id ?? null,
       deviceId,
       dbUser,
+      membershipAccess: await hasMembershipAccess(),
     });
     return NextResponse.json({
       signedIn: Boolean(user),

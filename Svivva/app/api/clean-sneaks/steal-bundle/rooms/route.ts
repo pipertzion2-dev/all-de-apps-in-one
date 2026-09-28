@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
-import { hasUnlimitedKleanOnline } from "@/lib/billing/resolve-user-plan";
 import {
   createRoom,
   getRoom,
@@ -8,9 +7,11 @@ import {
   patchRoom,
 } from "@/lib/clean-sneaks/casino/multiplayer/store";
 import { normalizeRoomCode, toPublicRoom } from "@/lib/clean-sneaks/casino/multiplayer/types";
+import { hasMembershipAccess } from "@/lib/auth/membership-access";
 import {
   assertCanJoinOnlineTable,
   loadDbUser,
+  playerHasUnlimitedOnline,
   recordOnlineTableStart,
   resolveOnlineSubject,
 } from "@/lib/clean-sneaks/monetization/online-access-server";
@@ -39,6 +40,9 @@ async function bindSeatIdentity(
 
 async function consumeOnlineStartsIfReady(
   code: string,
+  requestPlayerId: string,
+  requestUserId: string | null,
+  membershipThisRequest: boolean,
 ): Promise<{ ok: true } | { ok: false; status: number; error: string; code: string }> {
   const room = getRoom(code);
   if (!room || room.mode !== "online") return { ok: true };
@@ -47,7 +51,13 @@ async function consumeOnlineStartsIfReady(
 
   for (const seat of room.players) {
     const dbUser = seat.userId ? await loadDbUser(seat.userId) : null;
-    const unlimited = hasUnlimitedKleanOnline(dbUser);
+    const unlimited = playerHasUnlimitedOnline({
+      dbUser,
+      seat,
+      requestPlayerId,
+      requestUserId,
+      membershipThisRequest,
+    });
     if (unlimited) continue;
     const subject = resolveOnlineSubject(seat.userId ?? null, seat.deviceId ?? null);
     if (!subject) {
@@ -64,7 +74,7 @@ async function consumeOnlineStartsIfReady(
         ok: false,
         status: 402,
         error:
-          "Free online tables used for this month. Upgrade on ZZAI for unlimited Steal Bundle tables.",
+          "Free online tables used this month. Subscribe with recurring Cash App on ZZAI for unlimited play.",
         code: gate.code,
       };
     }
@@ -72,7 +82,14 @@ async function consumeOnlineStartsIfReady(
 
   for (const seat of room.players) {
     const dbUser = seat.userId ? await loadDbUser(seat.userId) : null;
-    if (hasUnlimitedKleanOnline(dbUser)) continue;
+    const unlimited = playerHasUnlimitedOnline({
+      dbUser,
+      seat,
+      requestPlayerId,
+      requestUserId,
+      membershipThisRequest,
+    });
+    if (unlimited) continue;
     const subject = resolveOnlineSubject(seat.userId ?? null, seat.deviceId ?? null);
     if (subject) await recordOnlineTableStart(subject, code);
   }
@@ -230,7 +247,13 @@ export async function PATCH(request: NextRequest) {
       const user = await getCurrentUser();
       const deviceId = deviceIdFromBody(body);
       await bindSeatIdentity(code, playerId, user?.id ?? null, deviceId);
-      const consumed = await consumeOnlineStartsIfReady(code);
+      const membershipThisRequest = await hasMembershipAccess();
+      const consumed = await consumeOnlineStartsIfReady(
+        code,
+        playerId,
+        user?.id ?? null,
+        membershipThisRequest,
+      );
       if (!consumed.ok) {
         patchRoom(code, (room) => {
           const seat = room.players.find((p) => p.id === playerId);

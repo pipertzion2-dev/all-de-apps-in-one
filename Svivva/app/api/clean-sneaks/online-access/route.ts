@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { hasMembershipAccess } from "@/lib/auth/membership-access";
 import { getCurrentUser } from "@/lib/auth/session";
 import {
   getOnlineAccessSnapshot,
@@ -25,6 +26,7 @@ export async function GET(request: NextRequest) {
       userId: user?.id ?? null,
       deviceId,
       dbUser,
+      membershipAccess: await hasMembershipAccess(),
     });
     return NextResponse.json(snapshot);
   } catch (err) {

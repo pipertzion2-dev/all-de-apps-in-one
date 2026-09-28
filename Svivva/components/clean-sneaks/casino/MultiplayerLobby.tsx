@@ -267,6 +267,7 @@ export function MultiplayerLobby({ ante, onReadyToPlay, onBack }: Props) {
         <OnlinePlayUpgradeSheet
           access={onlineAccess}
           onDismiss={() => setShowUpgrade(false)}
+          onUnlocked={() => void refreshAccess()}
         />
       )}
 

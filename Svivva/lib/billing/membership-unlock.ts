@@ -8,7 +8,7 @@ export function getMembershipUnlockInfo(): {
   const code = getPublicMembershipAccessCode();
   return {
     instructions:
-      "After you pay on Cash App, enter this access code on the Billing page to activate your Starter or Pro plan.",
+      "Set up monthly recurring in Cash App (Repeat → Monthly), then enter this access code to activate Starter or Pro for 30 days. Re-enter after each renewal if needed.",
     code,
   };
 }
