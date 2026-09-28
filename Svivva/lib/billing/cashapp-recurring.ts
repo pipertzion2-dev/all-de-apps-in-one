@@ -43,9 +43,7 @@ export function cashAppRecurringPaymentLink(
   return `${base}${sep}note=${noteForTier(tier)}`;
 }
 
-export function cashAppRecurringPlans(
-  config: InterimPaymentConfig,
-): CashAppRecurringPlan[] {
+export function cashAppRecurringPlans(config: InterimPaymentConfig): CashAppRecurringPlan[] {
   const tag = getCashAppTag(config);
   const plans: CashAppRecurringPlan[] = [];
 

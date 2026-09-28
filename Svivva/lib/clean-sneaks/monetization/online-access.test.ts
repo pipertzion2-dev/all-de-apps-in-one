@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  canStartOnlineTable,
-  normalizeGamerTag,
-  utcMonthKey,
-} from "./online-access";
+import { canStartOnlineTable, normalizeGamerTag, utcMonthKey } from "./online-access";
 import { hasUnlimitedKleanOnline, kleanOnlineMonthlyLimit } from "@/lib/billing/resolve-user-plan";
 
 describe("klean online access", () => {

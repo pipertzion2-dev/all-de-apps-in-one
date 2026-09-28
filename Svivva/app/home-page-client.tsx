@@ -1276,9 +1276,9 @@ export default function LandingPage() {
                         prove what was yours and when.
                       </p>
                       <p>
-                        zzai zzai is Hybrid² for production, too: fuse modules, enforce schema,
-                        roll back bad deploys. But the heart of the homepage is simple — protect
-                        your assets. Rest assured.
+                        zzai zzai is Hybrid² for production, too: fuse modules, enforce schema, roll
+                        back bad deploys. But the heart of the homepage is simple — protect your
+                        assets. Rest assured.
                       </p>
                       <p className="text-foreground/80 font-medium">
                         He still studies color like other kids study cartoons. The cyan and magenta

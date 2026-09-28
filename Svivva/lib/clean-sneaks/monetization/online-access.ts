@@ -1,7 +1,4 @@
-import {
-  FREE_ONLINE_TABLES_PER_MONTH,
-  GUEST_ONLINE_TABLES_PER_MONTH,
-} from "./platform-strategy";
+import { FREE_ONLINE_TABLES_PER_MONTH, GUEST_ONLINE_TABLES_PER_MONTH } from "./platform-strategy";
 
 export type OnlineSubject = { type: "user" | "device"; id: string };
 
@@ -15,10 +12,7 @@ export function nextUtcMonthStart(now = new Date()): Date {
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0, 0));
 }
 
-export function monthlyLimitForSubject(
-  subject: OnlineSubject,
-  unlimited: boolean,
-): number {
+export function monthlyLimitForSubject(subject: OnlineSubject, unlimited: boolean): number {
   if (unlimited) return 0;
   return subject.type === "user" ? FREE_ONLINE_TABLES_PER_MONTH : GUEST_ONLINE_TABLES_PER_MONTH;
 }

@@ -29,10 +29,7 @@ export function hasUnlimitedKleanOnline(user: UserBillingRow | null | undefined)
   return false;
 }
 
-export function kleanOnlineMonthlyLimit(
-  signedIn: boolean,
-  unlimited: boolean,
-): number {
+export function kleanOnlineMonthlyLimit(signedIn: boolean, unlimited: boolean): number {
   if (unlimited) return 0;
   return signedIn ? FREE_ONLINE_TABLES_PER_MONTH : GUEST_ONLINE_TABLES_PER_MONTH;
 }

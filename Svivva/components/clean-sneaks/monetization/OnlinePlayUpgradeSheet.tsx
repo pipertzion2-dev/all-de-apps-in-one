@@ -72,8 +72,8 @@ export function OnlinePlayUpgradeSheet({ access, onDismiss, onUnlocked, classNam
       <h3 className="mt-1 font-serif text-xl text-[#f7e7b0]">{PLATFORM_FUNNEL_COPY.headline}</h3>
       <p className="mt-2 text-xs leading-relaxed text-[#e8dcc0]/75">
         Subscribe with <strong className="text-[#00D632]">recurring Cash App</strong> — tap{" "}
-        <em>Repeat → Monthly</em> when you pay. Unlimited online tables + platform tools on the
-        same plan.
+        <em>Repeat → Monthly</em> when you pay. Unlimited online tables + platform tools on the same
+        plan.
       </p>
 
       <p className="mt-3 text-sm text-[#ffd76a]">

@@ -12,7 +12,11 @@ import { GameLoadingWheels } from "@/components/clean-sneaks/GameLoadingWheels";
 import { GameStartScreen } from "@/components/clean-sneaks/GameStartScreen";
 import { SceneErrorBoundary } from "@/components/clean-sneaks/SceneErrorBoundary";
 import { StealTheBundleCardGame } from "@/components/clean-sneaks/StealTheBundleCardGame";
-import { GameAdBanner, GameAdsEarningsChip, GameAdNetworkHint } from "@/components/clean-sneaks/ads";
+import {
+  GameAdBanner,
+  GameAdsEarningsChip,
+  GameAdNetworkHint,
+} from "@/components/clean-sneaks/ads";
 import { AdFreePassStrip } from "@/components/clean-sneaks/monetization/AdFreePassStrip";
 import { KleanShop, OfflineEarningsHost } from "@/components/clean-sneaks/monetization";
 import { PendingYearSubClaimHost } from "@/components/clean-sneaks/prizes/PendingYearSubClaimHost";

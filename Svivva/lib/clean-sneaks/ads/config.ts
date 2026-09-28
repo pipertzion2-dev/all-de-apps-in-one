@@ -130,11 +130,7 @@ export function resolveAdNetwork(
   if (placement === "menu_banner" && programmatic && preferProgrammaticOverAdsense()) {
     return programmatic;
   }
-  if (
-    kleanInGameUsesAdsense() &&
-    placement === "menu_banner" &&
-    adsenseUnitReady(placement)
-  ) {
+  if (kleanInGameUsesAdsense() && placement === "menu_banner" && adsenseUnitReady(placement)) {
     return "adsense";
   }
   if (houseAdsAllowed()) return "house";

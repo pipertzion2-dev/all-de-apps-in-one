@@ -5,10 +5,7 @@ import Link from "next/link";
 import introImage from "@/attached_assets/IMG_1493_1770509047497.png";
 import zzaiLogo from "@/attached_assets/ZZAI_OFFICIAL_LOGO.png";
 import { BED_STUY_VYBEZ } from "@/lib/brand/bed-stuy-vybez";
-import {
-  PRODUCT_PROTECTION_PITCH,
-  PRODUCT_TAGLINE,
-} from "@/lib/product-positioning";
+import { PRODUCT_PROTECTION_PITCH, PRODUCT_TAGLINE } from "@/lib/product-positioning";
 import { Button } from "@/components/ui/button";
 
 /** Main homepage message: asset protection + son who designed the logo at the computer. */

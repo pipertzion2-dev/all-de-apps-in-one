@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { programmaticNetwork } from "@/lib/clean-sneaks/ads/programmatic";
-import { kleanInGameUsesAdsense, GOOGLE_ADS_TROUBLESHOOTING } from "@/lib/clean-sneaks/ads/google-in-game";
+import {
+  kleanInGameUsesAdsense,
+  GOOGLE_ADS_TROUBLESHOOTING,
+} from "@/lib/clean-sneaks/ads/google-in-game";
 
 type Props = { className?: string };
 

@@ -1,10 +1,7 @@
 import { and, eq, ne, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { users } from "@/lib/schema";
-import {
-  hasUnlimitedKleanOnline,
-  kleanOnlineMonthlyLimit,
-} from "@/lib/billing/resolve-user-plan";
+import { hasUnlimitedKleanOnline, kleanOnlineMonthlyLimit } from "@/lib/billing/resolve-user-plan";
 import {
   canStartOnlineTable,
   consumptionId,
@@ -38,11 +35,7 @@ export function playerHasUnlimitedOnline(opts: {
 }): boolean {
   if (hasUnlimitedKleanOnline(opts.dbUser)) return true;
   if (opts.membershipThisRequest && opts.seat.id === opts.requestPlayerId) return true;
-  if (
-    opts.membershipThisRequest &&
-    opts.requestUserId &&
-    opts.seat.userId === opts.requestUserId
-  ) {
+  if (opts.membershipThisRequest && opts.requestUserId && opts.seat.userId === opts.requestUserId) {
     return true;
   }
   return false;
@@ -83,8 +76,7 @@ export async function getOnlineAccessSnapshot(opts: {
 }): Promise<OnlineAccessSnapshot> {
   await ensureKleanProfileTables();
   const signedIn = Boolean(opts.userId);
-  const unlimited =
-    hasUnlimitedKleanOnline(opts.dbUser ?? null) || Boolean(opts.membershipAccess);
+  const unlimited = hasUnlimitedKleanOnline(opts.dbUser ?? null) || Boolean(opts.membershipAccess);
   const subject = resolveOnlineSubject(opts.userId, opts.deviceId);
   const limit =
     subject != null
@@ -153,7 +145,10 @@ export async function loadDbUser(userId: string) {
   return row ?? null;
 }
 
-export async function setGamerTagForUser(userId: string, tag: string): Promise<{ ok: true } | { ok: false; reason: string }> {
+export async function setGamerTagForUser(
+  userId: string,
+  tag: string,
+): Promise<{ ok: true } | { ok: false; reason: string }> {
   await ensureKleanProfileTables();
   try {
     const [existing] = await db
@@ -163,7 +158,10 @@ export async function setGamerTagForUser(userId: string, tag: string): Promise<{
     if (existing) {
       return { ok: false, reason: "Gamer tag already taken." };
     }
-    await db.update(users).set({ gamerTag: tag, updatedAt: new Date() }).where(eq(users.id, userId));
+    await db
+      .update(users)
+      .set({ gamerTag: tag, updatedAt: new Date() })
+      .where(eq(users.id, userId));
     return { ok: true };
   } catch {
     return { ok: false, reason: "Could not save gamer tag." };
