@@ -19,16 +19,17 @@ export function HomepageScrollHint({
     <Tag
       type={onActivate ? "button" : undefined}
       onClick={onActivate}
-      className={`absolute left-1/2 z-30 flex -translate-x-1/2 flex-col items-center gap-1.5 ${
+      className={`absolute left-1/2 z-30 flex max-w-[92vw] -translate-x-1/2 flex-col items-center gap-1 ${
         onActivate ? "pointer-events-auto cursor-pointer active:scale-95" : "pointer-events-none"
-      } ${direction === "down" ? "bottom-5 sm:bottom-8" : "top-20 sm:top-24"}`}
+      } ${direction === "down" ? "bottom-3 sm:bottom-8" : "top-20 sm:top-24"}`}
+      style={direction === "down" ? { bottom: "max(0.75rem, env(safe-area-inset-bottom))" } : undefined}
       aria-label={onActivate ? label : undefined}
     >
       <span
         className={`rounded-full shadow-md ring-1 backdrop-blur-sm ${
           prominent
-            ? "bg-[#5B8DA8] px-6 py-2.5 text-sm font-semibold tracking-wide text-white ring-[#5B8DA8]/50"
-            : "bg-background/85 px-4 py-1.5 text-[11px] font-medium tracking-wide text-muted-foreground ring-border/40"
+            ? "bg-[#5B8DA8] px-4 py-2 text-xs font-semibold tracking-wide text-white ring-[#5B8DA8]/50 sm:px-6 sm:py-2.5 sm:text-sm"
+            : "bg-background/90 px-3 py-1.5 text-[10px] font-medium tracking-wide text-muted-foreground ring-border/40 sm:px-4 sm:text-[11px]"
         }`}
       >
         {label}

@@ -18,6 +18,9 @@ export const PRODUCT_MAIN_GOAL =
 export const PRODUCT_HERO_SUBLINE =
   "Ship AI endpoints that stay Klean — hazard preview, live schema, one-click rollback.";
 
+/** Max ~12 words — mobile homepage faces only. */
+export const PRODUCT_HOOK_SHORT = "Guard AI APIs: preview hazards, enforce schema, roll back.";
+
 /** Platform channel strips that ship today (not beta). */
 export const CORE_PLATFORM_FEATURE_IDS = new Set(["api-builder", "projects", "pulse"]);
 
