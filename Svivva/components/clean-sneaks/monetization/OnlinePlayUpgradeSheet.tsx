@@ -79,7 +79,7 @@ export function OnlinePlayUpgradeSheet({ access, onDismiss, onUnlocked, classNam
       <p className="mt-3 text-sm text-[#ffd76a]">
         {access.unlimited || access.cashAppMembership || codeOk
           ? "Your recurring plan is active — unlimited online tables."
-          : PLATFORM_FUNNEL_COPY.monthlyLabel(access.usedThisMonth, access.limit)}
+          : PLATFORM_FUNNEL_COPY.monthlyLabel()}
       </p>
       <p className="mt-1 text-[11px] text-[#e8dcc0]/50">{PLATFORM_FUNNEL_COPY.fairnessNote}</p>
 
