@@ -59,7 +59,7 @@ export function GameAdBanner({ className, compact = false }: Props) {
     );
   }
 
-  if (network === "medianet" || network === "adsterra") {
+  if (network === "monetag" || network === "medianet" || network === "adsterra") {
     return (
       <aside
         className={`w-full overflow-hidden rounded-lg border border-white/10 bg-black/40 backdrop-blur-sm ${

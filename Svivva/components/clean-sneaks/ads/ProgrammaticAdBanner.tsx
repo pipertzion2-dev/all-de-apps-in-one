@@ -6,6 +6,7 @@ import {
   adsterraContainerId,
   adsterraInvokeUrl,
   medianetConfig,
+  monetagZoneId,
   programmaticNetwork,
 } from "@/lib/clean-sneaks/ads/programmatic";
 import { recordAdEvent } from "@/lib/clean-sneaks/ads";
@@ -29,6 +30,19 @@ export function ProgrammaticAdBanner({ className, onReady }: Props) {
     recordAdEvent({ placement: "menu_banner", kind: "impression", network });
     onReady?.();
   }, [network, onReady]);
+
+  if (network === "monetag") {
+    const zone = monetagZoneId();
+    if (!zone) return null;
+    return (
+      <div className={className} data-testid="programmatic-ad-monetag">
+        <Script id="monetag-tag" strategy="afterInteractive">
+          {`(function(s,u,z,p){s.src=u;s.async=true;s.setAttribute("data-zone",z);p.parentNode.insertBefore(s,p);})(document.createElement("script"),"https://s.monetag.com/tag/tag.js?tag=${zone}","${zone}",document.body);`}
+        </Script>
+        <div className="min-h-[50px] w-full" data-zone={zone} />
+      </div>
+    );
+  }
 
   if (network === "medianet" && medianet) {
     return (

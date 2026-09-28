@@ -46,12 +46,21 @@ describe("clean-sneaks advertising", () => {
     expect(resolveAdNetwork("run_interstitial")).toBe("house");
   });
 
-  it("prefers Media.net when configured without AdSense banner slot", () => {
-    vi.stubEnv("NEXT_PUBLIC_MEDIANET_CID", "8CU123456");
-    expect(resolveAdNetwork("menu_banner")).toBe("medianet");
+  it("prefers Monetag (free network) over AdSense by default", () => {
+    vi.stubEnv("NEXT_PUBLIC_MONETAG_ZONE_ID", "12345678");
+    vi.stubEnv("NEXT_PUBLIC_ADSENSE_CLIENT", "ca-pub-1234567890123456");
+    vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT_BANNER", "1234567890");
+    expect(resolveAdNetwork("menu_banner")).toBe("monetag");
   });
 
-  it("uses AdSense for banner when client + slot env are set", () => {
+  it("uses house when no free network and AdSense not opted in", () => {
+    vi.stubEnv("NEXT_PUBLIC_ADSENSE_CLIENT", "ca-pub-1234567890123456");
+    vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT_BANNER", "1234567890");
+    expect(resolveAdNetwork("menu_banner")).toBe("house");
+  });
+
+  it("uses AdSense for banner only when KLEAN_USE_ADSENSE=1", () => {
+    vi.stubEnv("NEXT_PUBLIC_KLEAN_USE_ADSENSE", "1");
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_CLIENT", "ca-pub-1234567890123456");
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT_BANNER", "1234567890");
     expect(resolveAdNetwork("menu_banner")).toBe("adsense");

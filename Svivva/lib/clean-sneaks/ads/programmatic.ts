@@ -1,20 +1,27 @@
 /**
- * Alternatives when Google AdSense has no fill or is not approved.
- * Configure one network via env — Media.net or Adsterra invoke script.
+ * Free-to-join publisher networks (no Google approval wait).
+ * Sign up → paste tag / invoke URL into Vercel env → redeploy.
  */
 
-export type ProgrammaticNetwork = "medianet" | "adsterra";
+export type ProgrammaticNetwork = "monetag" | "adsterra" | "medianet";
 
+/** First configured free network (Monetag is fastest signup for many publishers). */
 export function programmaticNetwork(): ProgrammaticNetwork | null {
-  if (process.env.NEXT_PUBLIC_MEDIANET_CID?.trim()) return "medianet";
+  if (process.env.NEXT_PUBLIC_MONETAG_ZONE_ID?.trim()) return "monetag";
   if (process.env.NEXT_PUBLIC_ADSTERRA_INVOKE_URL?.trim()) return "adsterra";
+  if (process.env.NEXT_PUBLIC_MEDIANET_CID?.trim()) return "medianet";
   return null;
+}
+
+export function monetagZoneId(): string | null {
+  const z = process.env.NEXT_PUBLIC_MONETAG_ZONE_ID?.trim();
+  return z && z.length >= 4 ? z : null;
 }
 
 export function preferProgrammaticOverAdsense(): boolean {
   if (process.env.NEXT_PUBLIC_PREFER_PROGRAMMATIC_ADS === "1") return true;
-  // When AdSense slots are missing but an alt network exists, use it.
-  return programmaticNetwork() !== null && !process.env.NEXT_PUBLIC_ADSENSE_SLOT_BANNER?.trim();
+  if (programmaticNetwork() !== null) return true;
+  return !process.env.NEXT_PUBLIC_ADSENSE_SLOT_BANNER?.trim();
 }
 
 export function medianetConfig(): { cid: string; tagId: string } | null {

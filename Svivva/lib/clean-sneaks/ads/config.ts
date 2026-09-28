@@ -1,5 +1,6 @@
 import { readAdFreePass } from "@/lib/clean-sneaks/monetization/ad-free-pass";
 import type { AdPlacementId, HouseCreative } from "./types";
+import { kleanInGameUsesAdsense } from "./google-in-game";
 import { preferProgrammaticOverAdsense, programmaticNetwork } from "./programmatic";
 import {
   isValidAdsenseClientId,
@@ -45,8 +46,8 @@ function readRuntimeSlot(placement: AdPlacementId): string | null {
 }
 
 /**
- * Real paid ads = Google AdSense.
- * Configure in Orbit admin → AdSense tab (stores in Platform Secrets) or Vercel env.
+ * Google AdSense (optional in-game — off by default; see google-in-game.ts).
+ * Free networks: Monetag / Adsterra / Media.net via programmatic.ts env vars.
  */
 export function adsenseClientId(): string | null {
   return readRuntimeClient();
@@ -123,17 +124,22 @@ export function adsenseUnitReady(placement: AdPlacementId): boolean {
  */
 export function resolveAdNetwork(
   placement: AdPlacementId,
-): "adsense" | "house" | "unconfigured" | "medianet" | "adsterra" {
+): "adsense" | "house" | "unconfigured" | "medianet" | "adsterra" | "monetag" {
   if (!adsEnabled()) return "unconfigured";
   const programmatic = programmaticNetwork();
-  if (placement === "menu_banner" && programmatic) {
-    const useAlt =
-      preferProgrammaticOverAdsense() || !adsenseUnitReady(placement) || !adsenseConfigured();
-    if (useAlt) return programmatic;
+  if (placement === "menu_banner" && programmatic && preferProgrammaticOverAdsense()) {
+    return programmatic;
   }
-  if (placement === "menu_banner" && adsenseUnitReady(placement)) return "adsense";
+  if (
+    kleanInGameUsesAdsense() &&
+    placement === "menu_banner" &&
+    adsenseUnitReady(placement)
+  ) {
+    return "adsense";
+  }
   if (houseAdsAllowed()) return "house";
-  if (adsenseUnitReady(placement)) return "adsense";
+  if (kleanInGameUsesAdsense() && adsenseUnitReady(placement)) return "adsense";
+  if (programmatic && placement === "menu_banner") return programmatic;
   return "unconfigured";
 }
 
