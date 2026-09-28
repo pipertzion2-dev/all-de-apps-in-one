@@ -34,7 +34,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const title = pathname.startsWith(DASH) ? dashboardTitleFromPath(pathname) : "Dashboard";
   return {
     title,
-    description: "Your ZZAI workspace — From seed to symphony.",
+    description: "ZZAI dashboard — production guardrails for AI APIs.",
     robots: {
       index: false,
       follow: false,

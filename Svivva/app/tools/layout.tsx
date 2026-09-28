@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ProductBetaShell } from "@/components/product-beta-shell";
 
 /** Child routes set their own canonical URLs — do not set alternates here or /tools/* inherits /tools. */
 export const metadata: Metadata = {
@@ -9,5 +10,5 @@ export const metadata: Metadata = {
 };
 
 export default function ToolsLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return <ProductBetaShell>{children}</ProductBetaShell>;
 }

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ProductBetaShell } from "@/components/product-beta-shell";
 import { buildSeoMetadata } from "@/lib/seo/metadata";
 
 export const metadata: Metadata = buildSeoMetadata({
@@ -9,5 +10,5 @@ export const metadata: Metadata = buildSeoMetadata({
 });
 
 export default function OrbitLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return <ProductBetaShell>{children}</ProductBetaShell>;
 }

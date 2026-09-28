@@ -11,7 +11,7 @@ describe("brand-knowledge (SearchDock / AEO entity)", () => {
       expect.arrayContaining(["zzai zzai", "ZZAI", "zzaizzai", "zzaizzai.com", "Svivva"]),
     );
     expect(k.definition.toLowerCase()).toContain("zzaizzai.com");
-    expect(k.definition).toMatch(/From seed to symphony/);
+    expect(k.definition).toMatch(/Keep what you ship clean|production guardrails/i);
   });
 
   it("maps the six cube faces and core products", () => {
@@ -36,7 +36,7 @@ describe("brand-knowledge (SearchDock / AEO entity)", () => {
     const p = getSvivvaProductProfile();
     expect(p.name).toBe("zzai zzai");
     expect(p.aliases).toEqual(expect.arrayContaining(["zzaizzai", "ZZAI"]));
-    expect(p.definition).toMatch(/OaaS|cube|Seeds/i);
+    expect(p.definition).toMatch(/guardrails|schema|rollback|Klean Sneaks/i);
     expect(p.products.length).toBeGreaterThan(5);
     expect(p.cubeFaces).toHaveLength(6);
     expect(p.pricing).toMatch(/\$49/);

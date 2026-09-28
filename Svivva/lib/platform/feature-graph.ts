@@ -184,7 +184,8 @@ export const PLATFORM_FEATURES: PlatformFeature[] = [
     title: "API Builder",
     shortTitle: "APIaaS",
     href: "/dashboard/api-builder",
-    description: "Channel 02 — plain-English prompts become production APIs on the Signal bus.",
+    description:
+      "Channel 02 — production guardrails: hazard preview, schema enforcement, deploy on the Signal bus.",
     bus: "build",
     channel: 2,
     tags: ["api", "backend", "prompt", "endpoint", "deploy", "schema", "channel"],
@@ -196,7 +197,8 @@ export const PLATFORM_FEATURES: PlatformFeature[] = [
     title: "Projects",
     shortTitle: "Projects",
     href: "/dashboard/projects",
-    description: "Channel 03 — versioned prompts, evals, rollback; monitor levels before master.",
+    description:
+      "Channel 03 — versioned prompts, auto-evals, and one-click rollback when quality scuffs.",
     bus: "build",
     channel: 3,
     tags: ["projects", "version", "eval", "rollback", "monitor", "channel"],

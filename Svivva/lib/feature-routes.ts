@@ -9,7 +9,7 @@ export { isAdminCodeFirstPath, isDashboardGuestPath };
 
 /** Public landing routes for each cube face — prefer indexable URLs when a public page exists. */
 export const FEATURE_PUBLIC_PATHS: Record<FeatureId, string> = {
-  play: "/play",
+  play: "/clean-sneaks",
   seeds: "/seeds",
   orbit: "/orbit",
   security: "/dashboard/poor-man-protection",

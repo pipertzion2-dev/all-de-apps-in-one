@@ -1,10 +1,22 @@
 import Link from "next/link";
+import { FeatureBetaBadge } from "@/components/feature-beta-badge";
+import { isBetaHref } from "@/lib/product-positioning";
 
 const LINKS = [
   {
     href: "/lp/ai-api-builder",
-    title: "AI API builder",
-    description: "Prompt to production endpoint with schema validation and rollback.",
+    title: "Production guardrails",
+    description: "Hazard preview, live schema enforcement, and one-click rollback for AI APIs.",
+  },
+  {
+    href: "/clean-sneaks",
+    title: "Klean Sneaks demo",
+    description: "The game that teaches the metaphor — Sneak Vision and zone-based shoe state.",
+  },
+  {
+    href: "/dashboard/pulse",
+    title: "Pulse metrics",
+    description: "Live latency, success rate, and spend across your guarded endpoints.",
   },
   {
     href: "/seeds",
@@ -17,19 +29,9 @@ const LINKS = [
     description: "Growth and indexing autopilot for search and answer engines.",
   },
   {
-    href: "/events",
-    title: "ZZAI Show events",
-    description: "Live and on-demand product drops, Play sessions, and showcases.",
-  },
-  {
-    href: "/clean-sneaks",
-    title: "Klean Sneaks game",
-    description: "ZZAI Play endless runner — keep your kicks clean on the web.",
-  },
-  {
     href: "/tools",
     title: "Free AI & security tools",
-    description: "Crawlable mini-apps and utilities — no signup required for basics.",
+    description: "Crawlable mini-apps — beta funnel slices, no signup for basics.",
   },
 ] as const;
 
@@ -47,11 +49,10 @@ export function HomepageExploreLinks() {
             Explore
           </p>
           <h2 id="homepage-explore-heading" className="text-2xl font-bold sm:text-3xl">
-            Product, events, and Play on zzaizzai.com
+            Core product &amp; beta modules
           </h2>
           <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-base">
-            Indexable paths for the AI product workspace, ZZAI Show, and the Klean Sneaks
-            entertainment experience.
+            Guardrails and Klean Sneaks are GA; everything else on the desk is labeled Beta.
           </p>
         </div>
 
@@ -62,7 +63,10 @@ export function HomepageExploreLinks() {
                 href={link.href}
                 className="block h-full rounded-xl border border-border/50 bg-card/80 p-4 transition-colors hover:border-[#5B8DA8]/50"
               >
-                <h3 className="text-sm font-semibold text-foreground">{link.title}</h3>
+                <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                  {link.title}
+                  {isBetaHref(link.href) ? <FeatureBetaBadge compact /> : null}
+                </h3>
                 <p className="mt-1 text-sm text-muted-foreground">{link.description}</p>
               </Link>
             </li>

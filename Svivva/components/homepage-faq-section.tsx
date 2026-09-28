@@ -17,8 +17,8 @@ export function HomepageFaqSection() {
             Frequently asked questions about zzai zzai
           </h2>
           <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-base">
-            What ZZAI is, how prompt-to-API shipping works, pricing, Poor Man Protection, and where
-            the product lives on zzaizzai.com.
+            Production guardrails for AI APIs, the Klean Sneaks demo, pricing, and which modules are
+            still in beta.
           </p>
         </div>
 

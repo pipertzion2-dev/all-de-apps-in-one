@@ -63,6 +63,9 @@ import {
   featureTitleFromPath,
   isAdminCodeFirstPath,
 } from "@/lib/feature-routes";
+import { BetaSurfaceBanner } from "@/components/beta-surface-banner";
+import { FeatureBetaBadge } from "@/components/feature-beta-badge";
+import { isBetaHref, isBetaSurfacePath } from "@/lib/product-positioning";
 import { TutorialProvider } from "@/components/tutorial-system";
 import { CommandPalette, SearchTrigger } from "@/components/command-palette";
 
@@ -74,6 +77,7 @@ type MenuItem = {
   highlight?: boolean;
   adminOnly?: boolean;
   proOnly?: boolean;
+  beta?: boolean;
 };
 type MenuGroup = { label: string; items: MenuItem[] };
 
@@ -83,6 +87,12 @@ const digitalMenuGroups: MenuGroup[] = [
     items: [
       { title: "Home", desc: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
       { title: "Projects", desc: "Your APIs", href: "/dashboard/projects", icon: FolderOpen },
+      {
+        title: "Pulse",
+        desc: "Live API health",
+        href: "/dashboard/pulse",
+        icon: BarChart2,
+      },
     ],
   },
   {
@@ -90,7 +100,7 @@ const digitalMenuGroups: MenuGroup[] = [
     items: [
       {
         title: "API Builder",
-        desc: "Create an API",
+        desc: "Production guardrails",
         href: "/dashboard/api-builder",
         icon: Package,
         proOnly: true,
@@ -101,18 +111,21 @@ const digitalMenuGroups: MenuGroup[] = [
         href: "/dashboard/hypothesis",
         icon: FlaskConical,
         proOnly: true,
+        beta: true,
       },
       {
         title: "Hybrid² Lab",
         desc: "Blend channels, then blends",
         href: "/dashboard/hybrid-lab",
         icon: FlaskConical,
+        beta: true,
       },
       {
         title: "Security",
         desc: "Feeds & threats",
         href: "/dashboard/security",
         icon: Lock,
+        beta: true,
       },
       {
         title: "Poor Man Protection",
@@ -120,18 +133,21 @@ const digitalMenuGroups: MenuGroup[] = [
         href: "/dashboard/poor-man-protection",
         icon: ShieldCheck,
         proOnly: true,
+        beta: true,
       },
       {
         title: "Education Advocacy",
         desc: "Rights, vault, human help",
         href: "/dashboard/education-advocacy",
         icon: BookOpen,
+        beta: true,
       },
       {
         title: "ZZAI ZZAI Show",
         desc: "Events & payment divvy",
         href: "/dashboard/zzai-show",
         icon: Mic2,
+        beta: true,
       },
     ],
   },
@@ -144,12 +160,14 @@ const digitalMenuGroups: MenuGroup[] = [
         href: "/dashboard/idea-engine",
         icon: Lightbulb,
         proOnly: true,
+        beta: true,
       },
       {
         title: "Launch Studio",
         desc: "Marketing",
         href: "/dashboard/launch-studio",
         icon: Sparkles,
+        beta: true,
       },
       {
         title: "Marketing AI",
@@ -157,6 +175,7 @@ const digitalMenuGroups: MenuGroup[] = [
         href: "/dashboard/marketing",
         icon: Sparkles,
         adminOnly: true,
+        beta: true,
       },
       {
         title: "Growth Engine",
@@ -164,6 +183,7 @@ const digitalMenuGroups: MenuGroup[] = [
         href: "/dashboard/growth",
         icon: TrendingUp,
         adminOnly: true,
+        beta: true,
       },
     ],
   },
@@ -177,6 +197,7 @@ const digitalMenuGroups: MenuGroup[] = [
         href: "/dashboard/traffic",
         icon: BarChart2,
         adminOnly: true,
+        beta: true,
       },
       {
         title: "Finish Setup",
@@ -185,6 +206,7 @@ const digitalMenuGroups: MenuGroup[] = [
         icon: Smartphone,
         adminOnly: true,
         highlight: true,
+        beta: true,
       },
       {
         title: "Google Search",
@@ -192,6 +214,7 @@ const digitalMenuGroups: MenuGroup[] = [
         href: "/dashboard/gsc-connect",
         icon: Search,
         adminOnly: true,
+        beta: true,
       },
       {
         title: "Piggy Bank",
@@ -200,6 +223,7 @@ const digitalMenuGroups: MenuGroup[] = [
         icon: PiggyBank,
         adminOnly: true,
         highlight: true,
+        beta: true,
       },
       {
         title: "Admin",
@@ -207,6 +231,7 @@ const digitalMenuGroups: MenuGroup[] = [
         href: "/dashboard/admin",
         icon: Users,
         adminOnly: true,
+        beta: true,
       },
       {
         title: "Orbit",
@@ -214,6 +239,7 @@ const digitalMenuGroups: MenuGroup[] = [
         href: "/dashboard/orbit",
         icon: Rocket,
         adminOnly: true,
+        beta: true,
       },
       {
         title: "Burns System",
@@ -222,6 +248,7 @@ const digitalMenuGroups: MenuGroup[] = [
         icon: Flame,
         adminOnly: true,
         highlight: true,
+        beta: true,
       },
     ],
   },
@@ -243,36 +270,42 @@ const physicalMenuGroups: MenuGroup[] = [
         desc: "Design a product",
         href: "/dashboard/hardware-builder",
         icon: Box,
+        beta: true,
       },
       {
         title: "Hypothesis Lab",
         desc: "Innovation engine",
         href: "/dashboard/hypothesis-hardware",
         icon: FlaskConical,
+        beta: true,
       },
       {
         title: "Hybrid² Lab",
         desc: "Blend channels, then blends",
         href: "/dashboard/hybrid-lab",
         icon: FlaskConical,
+        beta: true,
       },
       {
         title: "Security",
         desc: "Feeds & threats",
         href: "/dashboard/security",
         icon: Lock,
+        beta: true,
       },
       {
         title: "Education Advocacy",
         desc: "Rights, vault, human help",
         href: "/dashboard/education-advocacy",
         icon: BookOpen,
+        beta: true,
       },
       {
         title: "ZZAI ZZAI Show",
         desc: "Events & payment divvy",
         href: "/dashboard/zzai-show",
         icon: Mic2,
+        beta: true,
       },
     ],
   },
@@ -284,6 +317,7 @@ const physicalMenuGroups: MenuGroup[] = [
         desc: "Opportunities",
         href: "/dashboard/idea-engine",
         icon: Lightbulb,
+        beta: true,
       },
     ],
   },
@@ -521,6 +555,8 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
                     {group.items.map((item) => {
                       const locked = item.proOnly && !effectiveIsPro && !effectiveIsAdmin;
                       const href = locked ? "/dashboard/billing" : item.href;
+                      const showBeta =
+                        item.beta ?? (href !== "/dashboard/billing" && isBetaHref(href));
                       return (
                         <SidebarMenuItem key={item.title}>
                           <SidebarMenuButton asChild>
@@ -532,6 +568,7 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
                             >
                               <item.icon className="w-4 h-4" />
                               <span className="text-sm flex-1">{item.title}</span>
+                              {showBeta ? <FeatureBetaBadge compact /> : null}
                               {locked && (
                                 <Lock className="w-3 h-3 text-muted-foreground flex-shrink-0" />
                               )}
@@ -631,16 +668,25 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
                 <span className="seeds-holo-text text-xs font-bold tracking-wide hidden sm:inline">
                   Seeds
                 </span>
+                <FeatureBetaBadge compact />
               </Link>
               <Link
-                href="/play"
+                href="/clean-sneaks"
                 className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-muted/50 transition-colors"
                 data-testid="link-dashboard-play"
               >
                 <span className="seeds-holo-text text-base leading-none">&#9835;</span>
                 <span className="seeds-holo-text text-xs font-bold tracking-wide hidden sm:inline">
-                  Play
+                  Klean Sneaks
                 </span>
+              </Link>
+              <Link
+                href="/play"
+                className="hidden items-center gap-1 px-2 py-1 rounded-md hover:bg-muted/50 transition-colors sm:flex"
+                data-testid="link-dashboard-play-studio"
+              >
+                <span className="text-xs text-muted-foreground">Studio</span>
+                <FeatureBetaBadge compact />
               </Link>
               <ThemeToggle />
             </div>
@@ -649,6 +695,7 @@ export function DashboardLayoutClient({ children }: { children: React.ReactNode 
           <main
             className={`flex-1 overflow-auto w-full min-h-0 ${featureThreeBg ? "bg-transparent p-0" : "bg-background p-4 sm:p-6"}`}
           >
+            {isBetaSurfacePath(pathname) ? <BetaSurfaceBanner /> : null}
             {children}
             <TutorialProvider pathname={pathname} />
           </main>

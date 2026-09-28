@@ -4,28 +4,31 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BRAND } from "@/lib/brand";
-import { BarChart3, GitBranch, Shield, Zap } from "lucide-react";
+import { PRODUCT_HERO_SUBLINE, PRODUCT_ONE_LINER } from "@/lib/product-positioning";
+import { BarChart3, Eye, GitBranch, Shield } from "lucide-react";
+import { FeatureBetaBadge } from "@/components/feature-beta-badge";
 
 const HIGHLIGHTS = [
   {
+    icon: Eye,
+    title: "Hazard preview",
+    description:
+      "See where deploys will fail before traffic hits — like Sneak Vision in Klean Sneaks.",
+  },
+  {
     icon: Shield,
-    title: "Schema validation & repair",
-    description: "Catch hallucinated fields before they reach production.",
+    title: "Live schema enforcement",
+    description: "Every response validated and repaired — bad shapes never reach users.",
   },
   {
     icon: GitBranch,
-    title: "Versioning & rollback",
-    description: "Every prompt edit is immutable — roll back in one click.",
+    title: "One-click rollback",
+    description: "When quality scuffs, revert to the last good prompt version instantly.",
   },
   {
     icon: BarChart3,
-    title: "Live metrics & alerts",
-    description: "Latency, success rates, and spend — before users complain.",
-  },
-  {
-    icon: Zap,
-    title: "Prompt to API in minutes",
-    description: "Describe it, deploy it, scale it — no YAML required.",
+    title: "Pulse metrics",
+    description: "Latency, success rate, and token spend — alerts before support tickets.",
   },
 ] as const;
 
@@ -41,14 +44,11 @@ export function HomepageAboutSection() {
           <Badge variant="secondary" className="px-4 py-1.5">
             What is {BRAND.name}?
           </Badge>
-          <h1 className="text-2xl font-bold sm:text-3xl">
-            {BRAND.name} — AI API builder, Seeds, Orbit SEO &amp; Play
-          </h1>
+          <h1 className="text-2xl font-bold sm:text-3xl">{BRAND.tagline}</h1>
           <p className="mx-auto max-w-2xl text-base text-muted-foreground sm:text-lg">
-            {BRAND.shortDescription} Prompt-to-API shipping with schema validation, versioning, and
-            rollback — plus ZZAI Seeds, Orbit growth automation, Poor Man Protection, and Klean
-            Sneaks on ZZAI Play.
+            {PRODUCT_ONE_LINER}
           </p>
+          <p className="mx-auto max-w-2xl text-sm text-muted-foreground">{PRODUCT_HERO_SUBLINE}</p>
         </div>
 
         <div className="grid gap-4 text-left sm:grid-cols-2">
@@ -70,19 +70,16 @@ export function HomepageAboutSection() {
           <Link href="/signup">
             <Button className="bg-[#5B8DA8] text-white">Start free</Button>
           </Link>
-          <a href="#oaas">
-            <Button variant="outline" className="border-[#5B8DA8]/40">
-              Open mixing console
-            </Button>
-          </a>
-          <Link href="/dashboard">
-            <Button variant="outline">Open dashboard</Button>
-          </Link>
-          <Link href="/events">
-            <Button variant="outline">ZZAI Show events</Button>
+          <Link href="/dashboard/api-builder">
+            <Button variant="outline">API Builder</Button>
           </Link>
           <Link href="/clean-sneaks">
             <Button variant="outline">Play Klean Sneaks</Button>
+          </Link>
+          <Link href="/seeds" className="inline-flex items-center gap-2">
+            <Button variant="outline" className="gap-2">
+              ZZAI Seeds <FeatureBetaBadge compact />
+            </Button>
           </Link>
         </div>
       </div>
