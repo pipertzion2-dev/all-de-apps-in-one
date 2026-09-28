@@ -60,24 +60,21 @@ export function SvivvaArtifact({ mountCanvas = true }: SvivvaArtifactProps) {
           className="text-[10px] uppercase tracking-[0.35em] mb-3 font-mono font-semibold"
           style={{ color: "#5B8DA8", letterSpacing: "0.28em" }}
         >
-          Main navigation · 6 faces
+          Main navigation · six faces
         </p>
         <h1
           className="text-3xl md:text-4xl font-light tracking-tight text-foreground"
           style={{ letterSpacing: "-0.01em" }}
         >
-          Six products. One cube.
+          Six faces. One cube.
         </h1>
         <p
-          className="mt-3 text-sm font-light text-muted-foreground"
-          style={{ letterSpacing: "0.04em" }}
+          className="mt-3 text-sm font-light leading-relaxed text-muted-foreground"
+          style={{ letterSpacing: "0.02em" }}
         >
-          Each face is a product. Drag to rotate. Tap a face — or a name below — to open it.
+          Each face opens a product. Drag to rotate the cube. Tap a face or a label below.
         </p>
-        <p
-          className="mt-3 text-muted-foreground/80 text-sm"
-          style={{ fontFamily: '"Zc", sans-serif' }}
-        >
+        <p className="mt-3 text-sm font-medium tracking-wide text-muted-foreground/90">
           Play · Seeds · Hardware · Digital · Orbit · Protect
         </p>
       </div>

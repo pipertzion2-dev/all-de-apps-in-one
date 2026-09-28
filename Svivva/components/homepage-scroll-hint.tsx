@@ -5,6 +5,8 @@ type HomepageScrollHintProps = {
   direction?: "down" | "up";
   onActivate?: () => void;
   prominent?: boolean;
+  /** In document flow (e.g. platform face) instead of absolute overlay. */
+  inline?: boolean;
 };
 
 export function HomepageScrollHint({
@@ -12,18 +14,28 @@ export function HomepageScrollHint({
   direction = "down",
   onActivate,
   prominent = false,
+  inline = false,
 }: HomepageScrollHintProps) {
   const Tag = onActivate ? "button" : "div";
+  const up = direction === "up";
 
   return (
     <Tag
       type={onActivate ? "button" : undefined}
       onClick={onActivate}
-      className={`absolute left-1/2 z-30 flex max-w-[92vw] -translate-x-1/2 flex-col items-center gap-1 ${
+      className={`z-30 flex max-w-[92vw] flex-col items-center gap-1 ${
+        up ? "flex-col-reverse" : ""
+      } ${
         onActivate ? "pointer-events-auto cursor-pointer active:scale-95" : "pointer-events-none"
-      } ${direction === "down" ? "bottom-3 sm:bottom-8" : "top-20 sm:top-24"}`}
+      } ${
+        inline
+          ? "relative mx-auto w-fit py-1"
+          : `absolute left-1/2 -translate-x-1/2 ${up ? "top-20 sm:top-24" : "bottom-3 sm:bottom-8"}`
+      }`}
       style={
-        direction === "down" ? { bottom: "max(0.75rem, env(safe-area-inset-bottom))" } : undefined
+        !inline && !up
+          ? { bottom: "max(0.75rem, env(safe-area-inset-bottom))" }
+          : undefined
       }
       aria-label={onActivate ? label : undefined}
     >
@@ -43,10 +55,8 @@ export function HomepageScrollHint({
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
-        className={`text-muted-foreground ${direction === "up" ? "rotate-180" : ""}`}
-        style={
-          direction === "down" ? { animation: "scrollBounce 1.5s ease-in-out infinite" } : undefined
-        }
+        className={`text-muted-foreground ${up ? "rotate-180" : ""}`}
+        style={{ animation: "scrollBounce 1.5s ease-in-out infinite" }}
         aria-hidden
       >
         <path d="M10 4v12M5 11l5 5 5-5" />

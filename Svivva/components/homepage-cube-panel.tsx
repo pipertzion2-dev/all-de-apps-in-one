@@ -7,8 +7,10 @@ import { HomepageFaqSection } from "@/components/homepage-faq-section";
 import { HomepageHeroBlock } from "@/components/homepage-hero-block";
 import { HomepageHowToSection } from "@/components/homepage-howto-section";
 import { HomepagePricingSection } from "@/components/homepage-pricing-section";
-import { HomepageCubeFaceHint } from "@/components/homepage-cube-face-hint";
 import { HomepageMainGoal } from "@/components/homepage-main-goal";
+import { HomepageScrollHint } from "@/components/homepage-scroll-hint";
+import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
+import { HOMEPAGE_SCROLL_TO_GAME } from "@/lib/product-positioning";
 
 const PlatformFeatureHub = dynamic(
   () => import("@/components/platform-feature-hub").then((m) => m.PlatformFeatureHub),
@@ -42,10 +44,16 @@ export function HomepageCubePanel({
 
   return (
     <div className="relative bg-background pb-8">
-      {interactive ? <HomepageCubeFaceHint /> : null}
-
       <div className="relative z-20 px-4 pt-4 sm:hidden">
         <HomepageMainGoal variant="light" density="compact" surface="platform" />
+        {interactive ? (
+          <HomepageScrollHint
+            inline
+            direction="up"
+            label={HOMEPAGE_SCROLL_TO_GAME}
+            onActivate={() => scrollToHomepagePanel("home-game")}
+          />
+        ) : null}
       </div>
 
       <HomepageHeroBlock

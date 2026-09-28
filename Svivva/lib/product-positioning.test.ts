@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   CORE_PLATFORM_FEATURE_IDS,
+  HOMEPAGE_SCROLL_TO_GAME,
+  HOMEPAGE_SCROLL_TO_PLATFORM,
   isBetaHref,
   isBetaPlatformFeatureId,
   isBetaSurfacePath,
@@ -39,5 +41,11 @@ describe("product-positioning", () => {
 
   it("uses the new tagline", () => {
     expect(PRODUCT_TAGLINE).toMatch(/Klean/i);
+  });
+
+  it("points scroll hints in the flip-stack direction (game above platform)", () => {
+    expect(HOMEPAGE_SCROLL_TO_GAME).toMatch(/up/i);
+    expect(HOMEPAGE_SCROLL_TO_GAME).not.toMatch(/down/i);
+    expect(HOMEPAGE_SCROLL_TO_PLATFORM).toMatch(/down/i);
   });
 });
