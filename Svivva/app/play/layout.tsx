@@ -3,12 +3,12 @@ import { ProductBetaShell } from "@/components/product-beta-shell";
 import { buildSeoMetadata } from "@/lib/seo/metadata";
 
 export const metadata: Metadata = buildSeoMetadata({
-  title: "Seeds — From PDF or YouTube to Apps",
+  title: "ZZAI Play — Beta",
   description:
-    "ZZAI Seeds turns PDFs, YouTube transcripts, and plain-language briefs into deployable apps with guardrails — describe, ship, and grow.",
-  path: "/seeds",
+    "Full ZZAI Play studio (beta). The GA demo is Klean Sneaks at /clean-sneaks — production guardrails metaphor in game form.",
+  path: "/play",
 });
 
-export default function SeedsLayout({ children }: { children: React.ReactNode }) {
+export default function PlayLayout({ children }: { children: React.ReactNode }) {
   return <ProductBetaShell>{children}</ProductBetaShell>;
 }

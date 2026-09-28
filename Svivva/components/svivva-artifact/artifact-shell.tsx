@@ -126,14 +126,19 @@ export function SvivvaArtifact({ mountCanvas = true }: SvivvaArtifactProps) {
             key={f.id}
             type="button"
             onClick={() => handleSelect(f.id)}
-            aria-label={`Open ${f.name}`}
+            aria-label={`Open ${f.name}${f.beta ? " (beta)" : ""}`}
             className="group flex flex-col items-start gap-0.5 rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm px-3 py-2.5 text-left hover:border-[#5B8DA8]/60 transition-colors"
           >
             <span
-              className="text-[10px] font-mono uppercase tracking-widest"
+              className="text-[10px] font-mono uppercase tracking-widest flex items-center gap-1.5"
               style={{ color: f.accentColor }}
             >
               Face
+              {f.beta ? (
+                <span className="rounded bg-amber-500/15 px-1 text-[8px] text-amber-800 dark:text-amber-200">
+                  Beta
+                </span>
+              ) : null}
             </span>
             <span
               className="text-sm font-normal text-foreground group-hover:text-[#5B8DA8]"

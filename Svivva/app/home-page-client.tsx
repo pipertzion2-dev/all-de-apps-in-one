@@ -819,17 +819,16 @@ export default function LandingPage() {
                         </div>
                         <div className="flex-1 text-center md:text-left space-y-3">
                           <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                            <Badge className="text-[10px] bg-[#5B8DA8]">OaaS</Badge>
+                            <Badge className="text-[10px] bg-[#5B8DA8]">Core</Badge>
                             <Badge variant="secondary" className="text-[10px]">
-                              Mixing-console OS
+                              Production guardrails
                             </Badge>
                           </div>
                           <p className="text-sm sm:text-base text-muted-foreground max-w-lg">
-                            <strong>OaaS</strong> is the patch bay on a mixing-console OS. Every
-                            ZZAI module is a <strong>channel strip</strong>; subgroup{" "}
-                            <strong>buses</strong> sum your signal through <strong>Signal</strong>{" "}
-                            or <strong>Crest</strong> mains to the <strong>Master bus</strong> —
-                            deploy, launch, and ship.
+                            ZZAI keeps AI features from getting scuffed in production — hazard
+                            preview, live schema enforcement, and one-click rollback.{" "}
+                            <strong>Klean Sneaks</strong> is the public demo; the mixing-console
+                            patch bay below routes <strong>beta</strong> desk modules.
                           </p>
                           <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-1">
                             {[
@@ -1089,18 +1088,18 @@ export default function LandingPage() {
                   <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">
                     {mode === "digital" ? (
                       <>
-                        Built for shipping <span className="text-[#5B8DA8]">production APIs</span>
+                        Keep what you ship <span className="text-[#5B8DA8]">clean</span>
                       </>
                     ) : (
                       <>
-                        Built for shipping <span className="text-[#8DB87D]">real products</span>
+                        Hardware desk <span className="text-[#8DB87D]">(Beta)</span>
                       </>
                     )}
                   </h2>
                   <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto">
                     {mode === "digital"
-                      ? "Prompt to endpoint with evals, versioning, and rollback."
-                      : "Concept to production with schematics, materials, and budgets."}
+                      ? "Preview hazards before deploy, enforce schema on every response, and roll back in one click — same metaphor as Klean Sneaks."
+                      : "Schematics and BOM workflows — beta on the Crest bus."}
                   </p>
                 </div>
 

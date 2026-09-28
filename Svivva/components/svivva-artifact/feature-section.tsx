@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
+import { FeatureBetaBadge } from "@/components/feature-beta-badge";
 import type { FeatureDef, FeatureId } from "./feature-defs";
 
 type Props = {
@@ -20,11 +21,11 @@ const FEATURE_STATS: Record<FeatureId, [string, string, string]> = {
 };
 
 const FEATURE_HEADLINE: Record<FeatureId, [string, string]> = {
-  play: ["ONE STUDIO.", "INFINITE SOUND."],
+  play: ["KEEP IT CLEAN.", "KLEAN SNEAKS."],
   seeds: ["ONE SPEC.", "MANY APPS."],
   orbit: ["ONE ENGINE.", "FULL FUNNEL."],
   security: ["ONE SKETCH.", "COURT-READY PACK."],
-  api: ["ONE PROMPT.", "PRODUCTION API."],
+  api: ["PREVIEW HAZARDS.", "ROLL BACK FAST."],
   hardware: ["ONE CONCEPT.", "REAL PRODUCT."],
 };
 
@@ -93,6 +94,11 @@ export function FeatureSection({ feature, index, reverse }: Props) {
               <span className="text-foreground">{headA}</span>
               <br />
               <span style={{ color: feature.accentColor }}>{headB}</span>
+              {feature.beta ? (
+                <span className="ml-3 inline-block align-middle">
+                  <FeatureBetaBadge />
+                </span>
+              ) : null}
             </h2>
             <p className="text-sm text-muted-foreground font-mono leading-relaxed max-w-md">
               {feature.description}

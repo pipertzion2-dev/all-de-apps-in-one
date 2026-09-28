@@ -21,9 +21,10 @@ import {
   getFeaturesByBus,
   MIXING_BUSES,
   OAAS_NAME,
-  OAAS_TAGLINE,
   type MixingBusId,
 } from "@/lib/platform/feature-graph";
+import { FeatureBetaBadge } from "@/components/feature-beta-badge";
+import { isBetaPlatformFeatureId, PRODUCT_HERO_SUBLINE } from "@/lib/product-positioning";
 import type { FeatureSuggestionResult } from "@/lib/platform/feature-suggestions";
 
 const CamoThreeOverlay = dynamic(
@@ -61,20 +62,23 @@ const ChannelLink = memo(function ChannelLink({
   channelLabel,
   shortTitle,
   href,
+  beta,
 }: {
   channelLabel: string;
   shortTitle: string;
   href: string;
+  beta?: boolean;
 }) {
   return (
     <Link
       href={href}
-      className="inline-flex items-baseline gap-2 py-1 text-sm text-foreground/90 hover:text-[#5B8DA8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B8DA8] rounded-sm"
+      className="inline-flex items-center gap-2 py-1 text-sm text-foreground/90 hover:text-[#5B8DA8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B8DA8] rounded-sm"
     >
       <span className="font-mono text-[10px] text-muted-foreground tabular-nums">
         {channelLabel}
       </span>
       <span>{shortTitle}</span>
+      {beta ? <FeatureBetaBadge compact /> : null}
     </Link>
   );
 });
@@ -152,6 +156,7 @@ const ChannelStripGrid = memo(function ChannelStripGrid({
                   channelLabel={f.channelLabel}
                   shortTitle={f.shortTitle}
                   href={f.href}
+                  beta={isBetaPlatformFeatureId(f.id)}
                 />
               </li>
             ))}
@@ -257,11 +262,16 @@ export function PlatformFeatureHub({
       >
         {!isCompact && (
           <header className="space-y-3 text-center sm:text-left">
-            <p className="text-[11px] uppercase tracking-[0.28em] text-[#5B8DA8]">{OAAS_NAME}</p>
+            <p className="text-[11px] uppercase tracking-[0.28em] text-[#5B8DA8] flex flex-wrap items-center justify-center sm:justify-start gap-2">
+              {OAAS_NAME} <FeatureBetaBadge compact />
+            </p>
             <h2 id="oaas-heading" className="text-3xl sm:text-4xl font-semibold tracking-tight">
-              Mixing console
+              Beta desk modules
             </h2>
-            <p className="text-sm sm:text-base text-muted-foreground max-w-xl">{OAAS_TAGLINE}</p>
+            <p className="text-sm sm:text-base text-muted-foreground max-w-xl">
+              {PRODUCT_HERO_SUBLINE} Patch routes below explore beta channels — core shipping is API
+              Builder, Projects, Pulse, and Klean Sneaks.
+            </p>
           </header>
         )}
 

@@ -12,6 +12,7 @@ import { eq } from "drizzle-orm";
 import { getPrimaryAdminUserId } from "@/lib/auth/admin";
 import { getSiteUrl } from "@/lib/site-url";
 import { BRAND } from "@/lib/brand";
+import { PRODUCT_ONE_LINER, PRODUCT_TAGLINE } from "@/lib/product-positioning";
 import { MEDIA } from "@/lib/media-assets";
 import { adsenseRuntimeInlineScript, getAdsenseRuntimeConfig } from "@/lib/adsense-runtime";
 import { siteWideJsonLdGraph } from "@/lib/seo/schema/builders";
@@ -57,9 +58,8 @@ export async function generateMetadata(): Promise<Metadata> {
     } catch {}
   }
 
-  const title = "zzai zzai — AI API builder, Seeds, Orbit SEO & Klean Sneaks";
-  const description =
-    "zzai zzai (ZZAI / zzaizzai.com) — From seed to symphony. AI API builder with schema validation, ZZAI Seeds, Orbit SEO/AEO, ZZAI Show events, and Klean Sneaks on ZZAI Play.";
+  const title = `zzai zzai — ${PRODUCT_TAGLINE}`;
+  const description = `zzai zzai (ZZAI / zzaizzai.com) — ${PRODUCT_ONE_LINER} Try Klean Sneaks at /clean-sneaks; other desk modules are beta.`;
 
   return {
     title: {

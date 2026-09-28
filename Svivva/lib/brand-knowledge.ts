@@ -8,6 +8,11 @@
 import { BRAND } from "@/lib/brand";
 import { listCubeFaces } from "@/lib/cube/cube-faces";
 import { HOMEPAGE_PRICING_TIERS } from "@/lib/homepage-pricing";
+import {
+  isBetaCubeFaceId,
+  PRODUCT_ONE_LINER,
+  PRODUCT_TAGLINE,
+} from "@/lib/product-positioning";
 import { MIXING_BUSES, PLATFORM_FEATURES } from "@/lib/platform/feature-graph";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -94,25 +99,22 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       },
     ],
     entity: {
-      category: "AI developer platform / product workspace",
-      subcategory:
-        "Prompt-to-API builder, hardware builder, growth automation, IP protection, free AI & security tools",
+      category: "AI developer platform",
+      subcategory: "Production guardrails for AI APIs — schema enforcement, evals, hazard preview, rollback",
       geography: "Remote-first · web SaaS at zzaizzai.com",
-      foundedNote: "Independent product workspace shipping software and hardware from one desk",
+      foundedNote: "Independent team shipping guarded AI endpoints and a Klean Sneaks Play demo",
       hosting: "Production on Vercel (team zzai-zzai, project all-de-apps-in-one)",
     },
-    definition:
-      "zzai zzai (ZZAI / zzaizzai.com) is a product workspace with the tagline “From seed to symphony.” It turns plain-language intent into shipped product — software APIs, hardware prototypes, audio branding, go-to-market, and IP protection — through a six-face cube navigator and an Orchestration-as-a-Service (OaaS) mixing-console OS. Free AI tools and cyber-security mini-apps are top-of-funnel; the paid platform is the full seed→build→hybrid→grow→protect desk.",
+    definition: `zzai zzai (ZZAI / zzaizzai.com) — ${PRODUCT_TAGLINE}. ${PRODUCT_ONE_LINER} Klean Sneaks (/clean-sneaks) is the public game demo of the same metaphor; Seeds, Orbit, hardware, advocacy, and other desk modules are in beta.`,
     shortDescription: BRAND.shortDescription,
     longDescription: [
-      "zzai zzai is one workspace to describe what you want, ship it with guardrails, and grow it without babysitting infrastructure.",
-      "The homepage cube routes work across six faces: Seeds (document/YouTube → apps), Signal/API (prompt-to-API with schema, evals, versioning, rollback), Crest/Hardware (schematics, BOM, manufacturing), Play (sonic branding), Orbit (SEO, indexing, launch, traffic automation), and Protect (Poor Man Protection — timestamped seals and court packs).",
-      "OaaS treats features as mixing-console channels on Seed, Build, Hybrid, Grow, Protect, Play, and Advocate buses — patch any channel into Signal (digital) or Crest (hardware) and out the Master bus.",
-      "Free surfaces include AI Tools Hub, Cyber-Security Mini Apps, and single-job /tools/* mini-apps (no signup). Paid Pro and Enterprise unlock unlimited endpoints, hardware projects, Seeds, Play, and OaaS routing.",
-      "Also ships Education Advocacy (rights info, vault, crisis routing) and ZZAI ZZAI Show inside the same domain.",
+      PRODUCT_ONE_LINER,
+      "Core (GA): API Builder and Projects — prompt-to-endpoint with JSON Schema on every response, auto-generated evals, version history, live Pulse metrics, and one-click rollback when quality scuffs.",
+      "Play demo: Klean Sneaks — zone-based shoe state, Sneak Vision hazard preview, and mission-complete flows that mirror pre-ship checks and production saves.",
+      "Beta modules (same domain): Seeds, Orbit, hardware builder, Poor Man Protection, Hybrid², free tool hubs, ZZAI Show, education advocacy, and the full ZZAI Play studio.",
     ].join(" "),
     audience:
-      "Indie hackers, developers, founders, and small teams who want to ship AI features, hardware SKUs, and growth systems from one workspace — without assembling a backend team, agency stack, and IP workflow separately.",
+      "Developers and founders shipping AI-powered features who need production guardrails — not another weekend wiring validation, evals, and rollback by hand.",
     competitors: [
       "Zapier",
       "Make",
@@ -128,8 +130,11 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       "ZZAI",
       "zzaizzai",
       "zzaizzai.com",
-      "From seed to symphony",
-      "AI API builder",
+      PRODUCT_TAGLINE,
+      "production guardrails for AI APIs",
+      "AI API guardrails",
+      "schema enforcement",
+      "prompt rollback",
       "prompt to API",
       "no-code AI backend",
       "schema enforced AI",
@@ -156,63 +161,63 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
         id: "home",
         name: "zzai zzai home",
         path: "/",
-        oneLiner: "Six-face cube navigator — From seed to symphony workspace.",
+        oneLiner: PRODUCT_ONE_LINER,
       },
       {
         id: "api",
         name: "API Builder (Signal)",
         path: "/dashboard/api-builder",
-        oneLiner: "Plain English → production AI API with schema, evals, versioning, rollback.",
+        oneLiner: "Production guardrails — schema, evals, hazard preview, rollback.",
         audience: "developers and no-code builders",
       },
       {
         id: "seeds",
         name: "ZZAI Seeds",
         path: "/seeds",
-        oneLiner: "PDF or YouTube transcript → many deployable apps.",
+        oneLiner: "Beta — PDF or YouTube transcript → many deployable apps.",
       },
       {
         id: "hardware",
         name: "Hardware Builder (Crest)",
         path: "/dashboard/hardware-builder",
-        oneLiner: "Schematics, BOM, suppliers, and manufacturing for physical SKUs.",
+        oneLiner: "Beta — schematics, BOM, suppliers, and manufacturing for physical SKUs.",
       },
       {
         id: "play",
         name: "ZZAI Play",
         path: "/clean-sneaks",
-        oneLiner: "Klean Sneaks endless runner + sonic branding on the Play face.",
+        oneLiner: "Klean Sneaks demo — the same “keep it clean” loop as production guardrails.",
       },
       {
         id: "klean-sneaks",
         name: "Klean Sneaks",
         path: "/clean-sneaks",
-        oneLiner: "Free ZZAI Play endless runner — keep your kicks clean in the browser.",
+        oneLiner: "Free endless runner — zone-based shoe state and Sneak Vision hazard preview.",
         audience: "players and entertainment visitors",
       },
       {
         id: "events",
         name: "ZZAI Show events",
         path: "/events",
-        oneLiner: "Live and on-demand product drops, Play sessions, and community showcases.",
+        oneLiner: "Beta — live product drops, Play sessions, and community showcases.",
       },
       {
         id: "orbit",
         name: "Orbit",
         path: "/orbit",
-        oneLiner: "Growth + indexing autopilot — SEO, AEO, GSC, launch copy.",
+        oneLiner: "Beta — growth and indexing autopilot (SEO, AEO, GSC).",
       },
       {
         id: "protect",
         name: "Poor Man Protection",
         path: "/dashboard/poor-man-protection",
-        oneLiner: "Timestamped evidentiary seals and court-ready packs (not a registered patent).",
+        oneLiner: "Beta — timestamped evidentiary seals and court-ready packs.",
       },
       {
         id: "oaas",
         name: "Orchestration as a Service",
         path: "/#oaas",
-        oneLiner: "Mixing-console OS — 16 channels, buses, patch bay, Master out.",
+        oneLiner: "Beta — mixing-console routing across workspace modules.",
       },
       {
         id: "ai-tools",
@@ -265,22 +270,23 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
                 : f.id === "orbit"
                   ? "/orbit"
                   : "/events";
+      const baseRole =
+        f.id === "seeds"
+          ? "Seed the product — brief becomes an app suite"
+          : f.id === "api"
+            ? "Signal — production guardrails (schema, evals, rollback)"
+            : f.id === "hardware"
+              ? "Crest — schematics, BOM, manufacturing"
+              : f.id === "play"
+                ? "Play — Klean Sneaks demo (keep the product clean)"
+                : f.id === "orbit"
+                  ? "Grow — SEO, indexing, launch automation"
+                  : "Protect — seals and court packs";
       return {
         id: f.id,
         name: f.name,
         path: citationPath,
-        role:
-          f.id === "seeds"
-            ? "Seed the product — brief becomes an app suite"
-            : f.id === "api"
-              ? "Signal — production API with schema and evals"
-              : f.id === "hardware"
-                ? "Crest — schematics, BOM, manufacturing"
-                : f.id === "play"
-                  ? "Aux — Play entertainment (Klean Sneaks) + sonic branding"
-                  : f.id === "orbit"
-                    ? "Grow — SEO, indexing, launch automation"
-                    : "Protect — seals and court packs",
+        role: isBetaCubeFaceId(f.id) ? `${baseRole} (Beta)` : baseRole,
       };
     }),
     buses: MIXING_BUSES.map((b) => ({
@@ -295,9 +301,9 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
           "The official brand name of the product workspace at zzaizzai.com. Also written ZZAI or zzaizzai. Tagline: From seed to symphony.",
       },
       {
-        term: "From seed to symphony",
+        term: PRODUCT_TAGLINE,
         definition:
-          "ZZAI’s tagline: start from a seed (idea, PDF, or YouTube brief) and route it through build, hybrid, grow, and protect until it ships as a finished product.",
+          "ZZAI’s tagline: treat shipped AI like something worth keeping clean — preview hazards, enforce structure live, and roll back before users see a scuff.",
       },
       {
         term: "OaaS (Orchestration as a Service)",
@@ -400,15 +406,15 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
     faqs: [
       {
         q: "What is zzai zzai / ZZAI / zzaizzai?",
-        a: "zzai zzai (also ZZAI, zzaizzai.com) is a product workspace: From seed to symphony. It turns plain-language intent into shipped product — software, hardware, audio, growth, and IP protection — with validation, evaluations, versioning, and rollback.",
+        a: `${PRODUCT_ONE_LINER} The public Klean Sneaks game at /clean-sneaks demonstrates the same metaphor; other modules (Seeds, Orbit, hardware, tools hubs) are in beta on the same domain.`,
       },
       {
         q: "Is ZZAI only an AI API builder?",
-        a: "No. Prompt-to-API (Signal) is one cube face. ZZAI also includes Seeds, Hardware (Crest), Play, Orbit growth automation, Poor Man Protection, Hybrid², free AI/security tools, and Education Advocacy — one domain, one desk.",
+        a: "The GA product is production guardrails for AI APIs — schema enforcement, evals, live metrics (Pulse), and rollback. Seeds, Orbit, hardware, advocacy, and the full Play studio are beta experiments on zzaizzai.com.",
       },
       {
-        q: "What does From seed to symphony mean?",
-        a: "Start from a seed (idea, PDF, or YouTube brief), route it through build/hybrid/grow/protect faces, and ship a finished product — the “symphony” — without babysitting infrastructure.",
+        q: `What does “${PRODUCT_TAGLINE}” mean?`,
+        a: "Before deploy, preview where your endpoint will fail (like Sneak Vision in Klean Sneaks). In production, validate every response against your schema and roll back in one click when quality drops — so AI features do not silently scuff.",
       },
       {
         q: "How long does it take to ship with ZZAI?",
@@ -440,11 +446,11 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       },
       {
         q: "What is Klean Sneaks?",
-        a: "Klean Sneaks is a free browser endless runner from ZZAI Play at /clean-sneaks on zzaizzai.com — the entertainment face of the same zzai zzai workspace as the AI API builder and Orbit SEO.",
+        a: "Klean Sneaks is a free browser runner at /clean-sneaks — zone-based shoe state, hazard preview, and mission-complete flows that mirror ZZAI’s production guardrails story.",
       },
       {
         q: "What is ZZAI Show / events?",
-        a: "ZZAI Show is the public events hub at /events — live and on-demand product drops, Play sessions, and community showcases. Creators can open the Show console after signing in.",
+        a: "ZZAI Show (beta) is the public events hub at /events — live drops and Play sessions. The Show console for hosts is in beta after sign-in.",
       },
     ],
   };

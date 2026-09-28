@@ -1,5 +1,6 @@
 import { FEATURE_PUBLIC_PATHS } from "@/lib/feature-routes";
 import { MEDIA } from "@/lib/media-assets";
+import { isBetaCubeFaceId } from "@/lib/product-positioning";
 
 export type FeatureId = "play" | "seeds" | "orbit" | "security" | "api" | "hardware";
 
@@ -17,25 +18,30 @@ export type FeatureDef = {
   accentColor: string;
   motif: string;
   signatureMotion: string;
+  beta?: boolean;
 };
 
+function withBeta(f: Omit<FeatureDef, "beta">): FeatureDef {
+  return { ...f, beta: isBetaCubeFaceId(f.id) };
+}
+
 export const FEATURES: FeatureDef[] = [
-  {
+  withBeta({
     id: "play",
     index: 0,
-    name: "ZZAI Play",
+    name: "Klean Sneaks",
     shortLabel: "Play",
     artworkTitle: "BREATH AWAY",
     artworkSrc: MEDIA.artworks.play,
-    tagline: "Sampler · stems · neural audio",
+    tagline: "Keep the product clean — the public demo",
     description:
-      "ZZAI Play — the music studio face. Hardware sampler UI, stems, patches, and neural audio workflows.",
-    cta: { label: "Open ZZAI Play", href: FEATURE_PUBLIC_PATHS.play },
+      "Klean Sneaks — zone-based shoe state, Sneak Vision hazard preview, and mission saves that mirror production guardrails.",
+    cta: { label: "Play Klean Sneaks", href: FEATURE_PUBLIC_PATHS.play },
     accentColor: "#90c4d8",
     motif: "waveform",
     signatureMotion: "scan-lines pulse with rhythm",
-  },
-  {
+  }),
+  withBeta({
     id: "seeds",
     index: 1,
     name: "ZZAI Seeds",
@@ -49,8 +55,8 @@ export const FEATURES: FeatureDef[] = [
     accentColor: "#9085c4",
     motif: "branching",
     signatureMotion: "nodes branch outward from centre",
-  },
-  {
+  }),
+  withBeta({
     id: "orbit",
     index: 2,
     name: "Marketing Orbit",
@@ -64,8 +70,8 @@ export const FEATURES: FeatureDef[] = [
     accentColor: "#b85020",
     motif: "web",
     signatureMotion: "web filaments pulse on scroll",
-  },
-  {
+  }),
+  withBeta({
     id: "security",
     index: 3,
     name: "Poor Man Protection",
@@ -79,23 +85,23 @@ export const FEATURES: FeatureDef[] = [
     accentColor: "#a888bc",
     motif: "seal",
     signatureMotion: "ornamental border traces and locks",
-  },
-  {
+  }),
+  withBeta({
     id: "api",
     index: 4,
-    name: "Digital",
+    name: "Production guardrails",
     shortLabel: "Digital",
     artworkTitle: "BANG ON ME",
     artworkSrc: MEDIA.artworks.api,
-    tagline: "Signal bus — prompt to API",
+    tagline: "Hazard preview · schema · rollback",
     description:
-      "Digital — the Signal path. Plain English becomes a production API with schema, evals, and rollback.",
-    cta: { label: "Open Digital / API Builder", href: FEATURE_PUBLIC_PATHS.api },
+      "The GA product — preview deploy risks, enforce JSON Schema on every response, and roll back in one click.",
+    cta: { label: "Open API Builder", href: FEATURE_PUBLIC_PATHS.api },
     accentColor: "#6880a0",
     motif: "packaging",
     signatureMotion: "panels fold and assemble",
-  },
-  {
+  }),
+  withBeta({
     id: "hardware",
     index: 5,
     name: "Hardware",
@@ -109,5 +115,5 @@ export const FEATURES: FeatureDef[] = [
     accentColor: "#d880b0",
     motif: "crystal",
     signatureMotion: "diamonds rotate and refract light",
-  },
+  }),
 ];
