@@ -38,7 +38,7 @@ describe("product-positioning", () => {
     expect(isBetaSurfacePath("/seeds")).toBe(true);
   });
 
-  it("uses the protection tagline", () => {
-    expect(PRODUCT_TAGLINE).toMatch(/Rest assured/i);
+  it("uses the Poor Man Protection tagline", () => {
+    expect(PRODUCT_TAGLINE).toMatch(/Poor Man Protection/i);
   });
 });

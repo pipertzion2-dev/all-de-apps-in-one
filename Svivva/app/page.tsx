@@ -6,7 +6,7 @@ import { homepageJsonLdGraph } from "@/lib/seo/schema/builders";
 
 export const metadata = buildSeoMetadata({
   title: `zzai zzai — ${PRODUCT_TAGLINE}`,
-  description: `${PRODUCT_ONE_LINER} Free Klean Sneaks demo at /clean-sneaks. Start free — no credit card.`,
+  description: `${PRODUCT_ONE_LINER} Verify seals at /protect/verify.`,
   path: "/",
 });
 
