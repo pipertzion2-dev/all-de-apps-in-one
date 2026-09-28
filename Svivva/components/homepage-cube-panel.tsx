@@ -44,8 +44,8 @@ export function HomepageCubePanel({
     <div className="relative bg-background pb-8">
       {interactive ? <HomepageCubeFaceHint /> : null}
 
-      <div className="relative z-20 px-4 pt-6 sm:pt-8">
-        <HomepageMainGoal variant="light" />
+      <div className="relative z-20 px-4 pt-4 sm:hidden">
+        <HomepageMainGoal variant="light" density="compact" />
       </div>
 
       <HomepageHeroBlock

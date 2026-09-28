@@ -21,7 +21,7 @@ export function HomepageGamePanel() {
   };
 
   return (
-    <section className="relative flex h-[100svh] flex-col overflow-hidden bg-black">
+    <section className="relative flex h-[100svh] min-h-0 flex-col overflow-hidden bg-black">
       <div
         className="pointer-events-none absolute inset-0 opacity-35 mix-blend-soft-light"
         aria-hidden
@@ -31,38 +31,35 @@ export function HomepageGamePanel() {
         }}
       />
 
-      <div className="relative z-10 flex min-h-0 flex-1 flex-col items-center justify-center px-4 pb-24 pt-20 sm:px-6 sm:pt-24">
-        <HomepageMainGoal variant="dark" className="mb-6" />
-        <p className="mb-1 text-[10px] uppercase tracking-[0.4em] text-[#A8BA48]/90">
-          Public demo · ZZAI Play
-        </p>
-        <h2 className="seeds-holo-text text-center text-xl font-bold tracking-[0.06em] sm:text-2xl">
-          {KLEAN_SNEAKS.display}
-        </h2>
-        <p
-          className="mt-2 max-w-md text-center text-xs text-white/60 sm:text-sm"
-          data-testid="text-clean-sneaks-goal"
-        >
-          Sneak Vision = hazard preview · zone dirt = live quality · mission save = rollback. Tap
-          the cube to play.
+      <div className="relative z-10 flex min-h-0 flex-1 flex-col px-3 pb-[5.5rem] pt-[4.5rem] sm:px-6 sm:pb-28 sm:pt-20">
+        <HomepageMainGoal variant="dark" density="compact" className="shrink-0 px-1" />
+
+        <p className="mt-2 shrink-0 text-center text-[9px] uppercase tracking-[0.35em] text-[#A8BA48]/80 sm:text-[10px]">
+          Demo · {KLEAN_SNEAKS.display}
         </p>
 
         <div
-          className="relative mt-8 flex h-[min(52vh,420px)] w-full max-w-xl items-center justify-center"
+          className="relative mx-auto mt-1 flex min-h-0 w-full max-w-lg flex-1 items-center justify-center"
           data-testid="homepage-bundle-cube"
         >
-          <CleanSneaksLogoCube className="h-full w-full" onActivate={enterGame} />
+          <CleanSneaksLogoCube
+            className="h-full max-h-[min(48svh,380px)] w-full"
+            onActivate={enterGame}
+          />
         </div>
 
-        <p className="mt-6 text-center text-[11px] uppercase tracking-[0.32em] text-white/45">
-          Drag cube to spin · Tap to play
+        <p
+          className="mt-2 shrink-0 text-center text-[10px] uppercase tracking-[0.25em] text-white/50 sm:text-[11px]"
+          data-testid="text-clean-sneaks-goal"
+        >
+          Tap cube to play
         </p>
       </div>
 
       <HomepageScrollHint
-        label="Swipe the cube once to go to the main homepage"
+        label="Swipe ↓ product home"
         direction="down"
-        prominent
+        prominent={false}
         onActivate={() => scrollToHomepagePanel("nav-cube")}
       />
     </section>
