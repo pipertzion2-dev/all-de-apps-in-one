@@ -6,35 +6,44 @@ import type { FeatureId } from "@/components/svivva-artifact/feature-defs";
 
 /** One-sentence pitch (YC / hero / meta). */
 export const PRODUCT_ONE_LINER =
-  "ZZAI keeps the AI features you ship Klean in production — preview hazards before deploy, enforce schema live, and rollback in one click when quality drops.";
+  "ZZAI is Hybrid² for AI products — fuse two modules into one shippable feature, keep every fusion Klean in production, and play the car×sneaker colorway loop in Klean Sneaks.";
 
 export const PRODUCT_TAGLINE = "Keep what you ship Klean";
 
 /** Plain-language main goal (homepage game + product faces). */
 export const PRODUCT_MAIN_GOAL =
-  "Production guardrails for AI APIs: catch bad outputs before users do, enforce JSON Schema on every response, and roll back fast when a deploy scuffs.";
+  "Hybrid² Lab fuses any two ZZAI channels into one deployable product (H¹, then H²). API Builder and Pulse keep that hybrid Klean — hazard preview, live schema, one-click rollback.";
 
 /** Shorter hero subline. */
 export const PRODUCT_HERO_SUBLINE =
-  "Ship AI endpoints that stay Klean — hazard preview, live schema, one-click rollback.";
+  "Fuse modules on the Hybrid bus, then keep the ship Klean on Signal — hazard preview, schema, rollback.";
 
 /** Max ~12 words — mobile homepage faces only. */
-export const PRODUCT_HOOK_SHORT = "Guard AI APIs: preview hazards, enforce schema, roll back.";
+export const PRODUCT_HOOK_SHORT = "Hybrid² AI modules, keep fusions Klean, demo in Sneaks.";
+
+/** Literal game ↔ product bridge (BALOON8 car×sneaker, Jordan 14 × Ferrari). */
+export const PRODUCT_GAME_HYBRID_METAPHOR =
+  "One car×sneaker chassis (BALOON8), many unlockable colorways — the same H¹ silhouette, different finishes, like Hybrid² on the desk.";
 
 /** First homepage panel — Klean Sneaks (not the product dashboard). */
 export const HOMEPAGE_GAME_FACE_TITLE = "Game · Klean Sneaks";
 export const HOMEPAGE_GAME_FACE_SUBLINE =
-  "Playable demo only — not the API dashboard. Swipe down for the ZZAI platform.";
+  "BALOON8 car×sneaker — one hybrid chassis, colorway unlocks. Swipe down for Hybrid² + guardrails.";
 
 /** Shown under the tagline on the platform homepage face (mobile compact). */
 export const HOMEPAGE_PLATFORM_FACE_SUBLINE =
-  "ZZAI platform — APIs, projects, Pulse, and pricing. Not the Klean Sneaks game.";
+  "Hybrid² desk — fuse channels, keep fusions Klean, ship on Signal. Not the game face.";
 
 export const HOMEPAGE_SCROLL_TO_PLATFORM = "Swipe ↓ ZZAI platform";
 export const HOMEPAGE_SCROLL_TO_GAME = "Swipe ↓ Klean Sneaks game";
 
 /** Platform channel strips that ship today (not beta). */
-export const CORE_PLATFORM_FEATURE_IDS = new Set(["api-builder", "projects", "pulse"]);
+export const CORE_PLATFORM_FEATURE_IDS = new Set([
+  "hybridization",
+  "api-builder",
+  "projects",
+  "pulse",
+]);
 
 /** Homepage cube faces that are GA (Play = Klean Sneaks demo). */
 export const CORE_CUBE_FACE_IDS = new Set<FeatureId>(["api", "play"]);
@@ -57,6 +66,7 @@ function isCoreProductPath(path: string): boolean {
     "/lp/ai-api-builder",
     "/clean-sneaks",
     "/dashboard/projects",
+    "/dashboard/hybrid-lab",
     "/dashboard/api-builder",
     "/dashboard/pulse",
     "/dashboard/settings",
@@ -96,6 +106,7 @@ export function isBetaHref(href: string): boolean {
 
   if (!path.startsWith("/dashboard")) return false;
   if (path === "/dashboard") return false;
+  if (path.startsWith("/dashboard/hybrid-lab")) return false;
   if (path.startsWith("/dashboard/projects")) return false;
   if (path.startsWith("/dashboard/api-builder")) return false;
   if (path.startsWith("/dashboard/pulse")) return false;

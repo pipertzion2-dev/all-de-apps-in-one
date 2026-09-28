@@ -97,21 +97,22 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
     entity: {
       category: "AI developer platform",
       subcategory:
-        "Production guardrails for AI APIs — schema enforcement, evals, hazard preview, rollback",
+        "Hybrid² for AI products — channel×channel fusion, then Klean guardrails on Signal",
       geography: "Remote-first · web SaaS at zzaizzai.com",
-      foundedNote: "Independent team shipping guarded AI endpoints and a Klean Sneaks Play demo",
+      foundedNote:
+        "Independent team shipping Hybrid² module fusion, Klean production guardrails, and the BALOON8 Klean Sneaks demo",
       hosting: "Production on Vercel (team zzai-zzai, project all-de-apps-in-one)",
     },
     definition: `zzai zzai (ZZAI / zzaizzai.com) — ${PRODUCT_TAGLINE}. ${PRODUCT_ONE_LINER} Klean Sneaks (/clean-sneaks) is the public game demo of the same metaphor; Seeds, Orbit, hardware, advocacy, and other desk modules are in beta.`,
     shortDescription: BRAND.shortDescription,
     longDescription: [
       PRODUCT_ONE_LINER,
-      "Core (GA): API Builder and Projects — prompt-to-endpoint with JSON Schema on every response, auto-generated evals, version history, live Pulse metrics, and one-click rollback when quality scuffs.",
-      "Play demo: Klean Sneaks — zone-based shoe state, Sneak Vision hazard preview, and mission-complete flows that mirror pre-ship checks and production saves.",
-      "Beta modules (same domain): Seeds, Orbit, hardware builder, Poor Man Protection, Hybrid², free tool hubs, ZZAI Show, education advocacy, and the full ZZAI Play studio.",
+      "Core (GA): Hybrid² Lab — fuse any two ZZAI channels (H¹), then hybridize listed blends (H²). API Builder, Projects, and Pulse keep fused endpoints Klean with schema, evals, hazard preview, and rollback.",
+      "Play demo: Klean Sneaks — BALOON8 car×sneaker (one chassis, unlockable colorways), Sneak Vision hazard preview, and mission saves that mirror keeping a hybrid ship Klean.",
+      "Beta modules (same domain): OaaS patch bay, Seeds, Orbit, hardware builder, Poor Man Protection, free tool hubs, ZZAI Show, education advocacy, and the full ZZAI Play studio.",
     ].join(" "),
     audience:
-      "Developers and founders shipping AI-powered features who need production guardrails — not another weekend wiring validation, evals, and rollback by hand.",
+      "Founders composing AI product modules who need Hybrid² fusion plus Klean guardrails — not another thin API wrapper or hand-rolled validation stack.",
     competitors: [
       "Zapier",
       "Make",
@@ -128,8 +129,11 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       "zzaizzai",
       "zzaizzai.com",
       PRODUCT_TAGLINE,
+      "Hybrid² AI products",
+      "channel fusion AI platform",
       "production guardrails for AI APIs",
       "AI API guardrails",
+      "hybridization marketplace",
       "schema enforcement",
       "prompt rollback",
       "prompt to API",
@@ -164,8 +168,15 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
         id: "api",
         name: "API Builder (Signal)",
         path: "/dashboard/api-builder",
-        oneLiner: "Production guardrails — schema, evals, hazard preview, rollback.",
+        oneLiner: "Keep Hybrid² fusions Klean — schema, evals, hazard preview, rollback.",
         audience: "developers and no-code builders",
+      },
+      {
+        id: "hybrid",
+        name: "Hybrid² Lab (FX)",
+        path: "/dashboard/hybrid-lab",
+        oneLiner: "Fuse any two ZZAI channels (H¹), then hybridize those blends (H²).",
+        audience: "founders composing AI product modules",
       },
       {
         id: "seeds",
@@ -183,13 +194,15 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
         id: "play",
         name: "ZZAI Play",
         path: "/clean-sneaks",
-        oneLiner: "Klean Sneaks demo — the same “keep it Klean” loop as production guardrails.",
+        oneLiner:
+          "BALOON8 car×sneaker demo — one hybrid chassis, colorways, Sneak Vision ≈ hazard preview.",
       },
       {
         id: "klean-sneaks",
         name: "Klean Sneaks",
         path: "/clean-sneaks",
-        oneLiner: "Free endless runner — zone-based shoe state and Sneak Vision hazard preview.",
+        oneLiner:
+          "Free runner — car×sneaker hybrid, unlockable colorways, zone state, Sneak Vision hazards.",
         audience: "players and entertainment visitors",
       },
       {
@@ -233,12 +246,6 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
         name: "All Tools",
         path: "/tools",
         oneLiner: "Full free tool directory and mini-app slices.",
-      },
-      {
-        id: "hybrid",
-        name: "Hybrid² Lab",
-        path: "/dashboard/hybrid-lab",
-        oneLiner: "Channel×channel fusion and hybrid marketplace.",
       },
       {
         id: "advocacy",
@@ -407,11 +414,11 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       },
       {
         q: "Is ZZAI only an AI API builder?",
-        a: "The GA product is production guardrails for AI APIs — schema enforcement, evals, live metrics (Pulse), and rollback. Seeds, Orbit, hardware, advocacy, and the full Play studio are beta experiments on zzaizzai.com.",
+        a: "No — the lead wedge is Hybrid² Lab: fuse two ZZAI modules into one shippable product, then keep that fusion Klean with API Builder, Projects, Pulse, and rollback. Guardrails support the hybrid ship; they are not the whole story. Seeds, Orbit, OaaS patch routing, and the full Play studio remain beta on zzaizzai.com.",
       },
       {
         q: `What does “${PRODUCT_TAGLINE}” mean?`,
-        a: "Before deploy, preview where your endpoint will fail (like Sneak Vision in Klean Sneaks). In production, validate every response against your schema and roll back in one click when quality drops — so AI features do not silently scuff.",
+        a: "Hybrid² fuses modules like a car-meets-sneaker silhouette; colorways are new finishes on the same chassis. In production, preview hazards (Sneak Vision in Klean Sneaks), enforce schema on every response, and roll back when a deploy scuffs — so fused AI features stay Klean.",
       },
       {
         q: "How long does it take to ship with ZZAI?",
@@ -443,7 +450,7 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       },
       {
         q: "What is Klean Sneaks?",
-        a: "Klean Sneaks is a free browser runner at /clean-sneaks — zone-based shoe state, hazard preview, and mission-complete flows that mirror ZZAI’s production guardrails story.",
+        a: "Klean Sneaks is a free browser runner at /clean-sneaks built around BALOON8 — a car×sneaker hybrid (Jordan 14 × Ferrari logic) with one chassis and unlockable colorways. Zone-based shoe state, Sneak Vision hazards, and mission saves mirror Hybrid² fusion plus keeping the ship Klean.",
       },
       {
         q: "What is ZZAI Show / events?",

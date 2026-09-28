@@ -821,14 +821,15 @@ export default function LandingPage() {
                           <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
                             <Badge className="text-[10px] bg-[#5B8DA8]">Core</Badge>
                             <Badge variant="secondary" className="text-[10px]">
-                              Production guardrails
+                              Hybrid² + Klean guardrails
                             </Badge>
                           </div>
                           <p className="text-sm sm:text-base text-muted-foreground max-w-lg">
-                            ZZAI keeps AI features from getting scuffed in production — hazard
-                            preview, live schema enforcement, and one-click rollback.{" "}
-                            <strong>Klean Sneaks</strong> is the public demo; the mixing-console
-                            patch bay below routes <strong>beta</strong> desk modules.
+                            ZZAI fuses AI modules on the Hybrid bus, then keeps every fusion Klean
+                            on Signal — hazard preview, schema, rollback.{" "}
+                            <strong>Klean Sneaks</strong> is the literal car×sneaker demo; the
+                            mixing-console patch bay below routes <strong>beta</strong> desk
+                            modules.
                           </p>
                           <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-1">
                             {[
@@ -1098,7 +1099,7 @@ export default function LandingPage() {
                   </h2>
                   <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto">
                     {mode === "digital"
-                      ? "Main goal: AI APIs that stay Klean in production — preview hazards, enforce schema on every response, roll back in one click. Klean Sneaks shows the same loop in game form."
+                      ? "Main goal: Hybrid² fuses AI modules; guardrails keep every fusion Klean in production. Klean Sneaks is BALOON8 — one car×sneaker chassis, colorway unlocks, Sneak Vision hazards."
                       : "Schematics and BOM workflows — beta on the Crest bus."}
                   </p>
                 </div>

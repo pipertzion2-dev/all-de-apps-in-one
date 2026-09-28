@@ -99,8 +99,14 @@ const digitalMenuGroups: MenuGroup[] = [
     label: "Build",
     items: [
       {
+        title: "Hybrid² Lab",
+        desc: "Fuse channels, then blends",
+        href: "/dashboard/hybrid-lab",
+        icon: FlaskConical,
+      },
+      {
         title: "API Builder",
-        desc: "Production guardrails",
+        desc: "Keep Hybrid² fusions Klean",
         href: "/dashboard/api-builder",
         icon: Package,
         proOnly: true,
@@ -111,13 +117,6 @@ const digitalMenuGroups: MenuGroup[] = [
         href: "/dashboard/hypothesis",
         icon: FlaskConical,
         proOnly: true,
-        beta: true,
-      },
-      {
-        title: "Hybrid² Lab",
-        desc: "Blend channels, then blends",
-        href: "/dashboard/hybrid-lab",
-        icon: FlaskConical,
         beta: true,
       },
       {

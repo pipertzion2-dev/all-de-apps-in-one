@@ -11,15 +11,21 @@ import {
   PRODUCT_TAGLINE,
 } from "@/lib/product-positioning";
 import { HomepageMainGoal } from "@/components/homepage-main-goal";
-import { BarChart3, Eye, GitBranch, Shield } from "lucide-react";
+import { BarChart3, Eye, GitBranch, GitMerge, Shield } from "lucide-react";
 import { FeatureBetaBadge } from "@/components/feature-beta-badge";
 
 const HIGHLIGHTS = [
   {
+    icon: GitMerge,
+    title: "Hybrid² Lab",
+    description:
+      "Fuse any two ZZAI channels (H¹), then hybridize those blends (H²) — one chassis, many shippable colorways.",
+  },
+  {
     icon: Eye,
     title: "Hazard preview",
     description:
-      "See where deploys will fail before traffic hits — like Sneak Vision in Klean Sneaks.",
+      "See where deploys will fail before traffic hits — like Sneak Vision on BALOON8 in Klean Sneaks.",
   },
   {
     icon: Shield,
@@ -86,8 +92,11 @@ export function HomepageAboutSection() {
           <Link href="/signup">
             <Button className="bg-[#5B8DA8] text-white">Start free</Button>
           </Link>
+          <Link href="/dashboard/hybrid-lab">
+            <Button variant="outline">Hybrid² Lab</Button>
+          </Link>
           <Link href="/dashboard/api-builder">
-            <Button variant="outline">API Builder</Button>
+            <Button variant="outline">Keep fusions Klean</Button>
           </Link>
           <Link href="/clean-sneaks">
             <Button variant="outline">Play Klean Sneaks</Button>
