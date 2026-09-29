@@ -414,9 +414,9 @@ export function HomepageFlipStack({
       const target = e.target instanceof Node ? e.target : null;
       touchOnScroller = Boolean(
         isNavCubeScrollActive() &&
-          scrollRef.current &&
-          (scrollRef.current.contains(target) ||
-            !(target instanceof Element && target.closest("[data-homepage-flip-stack]"))),
+        scrollRef.current &&
+        (scrollRef.current.contains(target) ||
+          !(target instanceof Element && target.closest("[data-homepage-flip-stack]"))),
       );
       if (wheelSnapTimerRef.current) {
         window.clearTimeout(wheelSnapTimerRef.current);
