@@ -28,6 +28,8 @@ import seedsLogo from "@/attached_assets/Svivva_Seeds_6_1771888740460.png";
 import {
   FOUNDER_SON_COMPUTER_ALT,
   FOUNDER_SON_COMPUTER_SRC,
+  HOMEPAGE_INTRO_ALT,
+  HOMEPAGE_INTRO_IMAGE,
 } from "@/lib/brand/founder-media";
 import {
   Shield,
@@ -549,10 +551,10 @@ export default function LandingPage() {
                   }}
                 >
                   <Image
-                    src={FOUNDER_SON_COMPUTER_SRC}
-                    alt={FOUNDER_SON_COMPUTER_ALT}
-                    width={1600}
-                    height={2000}
+                    src={HOMEPAGE_INTRO_IMAGE}
+                    alt={HOMEPAGE_INTRO_ALT}
+                    width={1024}
+                    height={1024}
                     sizes="100vw"
                     style={{
                       // Fill the panel in both axes: `height: auto` left the square
@@ -1269,14 +1271,14 @@ export default function LandingPage() {
                       <p>
                         The photo is my son at the computer — the same session where he helped shape
                         the zzai zzai logo. The product story on this site is not hype; it is Poor
-                        Man Protection: seal a file, keep custody notes, and export a pack a lawyer can
-                        read.
+                        Man Protection: seal a file, keep custody notes, and export a pack a lawyer
+                        can read.
                       </p>
                       <p>
-                        That workflow is for designers, musicians, and builders who need a timestamped
-                        record before formal patent or copyright filings. We also partner with Bed
-                        Stuy Vybez in Brooklyn for fashion and storefront creators who want the same
-                        discipline on early sketches.
+                        That workflow is for designers, musicians, and builders who need a
+                        timestamped record before formal patent or copyright filings. We also
+                        partner with Bed Stuy Vybez in Brooklyn for fashion and storefront creators
+                        who want the same discipline on early sketches.
                       </p>
                       <p>
                         Klean Sneaks and Hybrid² Lab stay available as demos and beta tools. The
