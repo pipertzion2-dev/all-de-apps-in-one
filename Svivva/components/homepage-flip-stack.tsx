@@ -71,7 +71,7 @@ export function HomepageFlipStack({
       const shellHidden = scrollEnabled;
 
       if (scroller) {
-        scroller.style.opacity = String(opacity);
+        scroller.style.opacity = scrollEnabled ? "1" : String(opacity);
         scroller.style.visibility = index >= OVERLAY_FADE_START - 0.02 ? "visible" : "hidden";
         scroller.style.pointerEvents = scrollEnabled ? "auto" : "none";
         scroller.style.touchAction = scrollEnabled ? "pan-y" : "none";
@@ -337,23 +337,6 @@ export function HomepageFlipStack({
       return atTop || atBottom;
     };
 
-    /** Wheel/touch must scroll the fixed overlay — document body does not scroll. */
-    const scrollPlatformOverlay = (deltaY: number) => {
-      if (!isNavCubeScrollActive()) return false;
-      const face = scrollSurfaceFor();
-      if (!face) return false;
-      const { canScrollDown, canScrollUp } = faceScrollState(face);
-      if (deltaY > 0 && canScrollDown) {
-        face.scrollTop += deltaY;
-        return true;
-      }
-      if (deltaY < 0 && canScrollUp) {
-        face.scrollTop += deltaY;
-        return true;
-      }
-      return false;
-    };
-
     const applyDelta = (deltaY: number) => {
       if (Math.abs(deltaY) < 0.5) return false;
 
@@ -393,22 +376,25 @@ export function HomepageFlipStack({
     };
 
     const onWheel = (e: WheelEvent) => {
+      if (platformScrollMode()) return;
+
       const delta = normalizeWheelDelta(e);
       if (Math.abs(delta) < 4) return;
 
-      if (platformScrollMode()) {
-        if (scrollPlatformOverlay(delta)) {
-          e.preventDefault();
-          return;
-        }
-        const { atTop } = faceScrollState(scrollSurfaceFor());
-        if (atTop && delta < 0 && applyDelta(delta)) {
-          e.preventDefault();
-        }
-        return;
-      }
-
       if (applyDelta(delta)) {
+        e.preventDefault();
+      }
+    };
+
+    const onPlatformWheel = (e: WheelEvent) => {
+      if (!platformScrollMode()) return;
+
+      const delta = normalizeWheelDelta(e);
+      if (Math.abs(delta) < 4 || delta >= 0) return;
+
+      const face = scrollSurfaceFor();
+      const { atTop } = faceScrollState(face);
+      if (atTop && applyDelta(delta)) {
         e.preventDefault();
       }
     };
@@ -508,6 +494,7 @@ export function HomepageFlipStack({
       platformPullTracking = false;
     };
 
+    scroller?.addEventListener("wheel", onPlatformWheel, { passive: false });
     scroller?.addEventListener("touchstart", onPlatformTouchStart, { passive: true });
     scroller?.addEventListener("touchmove", onPlatformTouchMove, { passive: false });
     scroller?.addEventListener("touchend", onPlatformTouchEnd, { passive: true });
@@ -517,6 +504,7 @@ export function HomepageFlipStack({
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("touchend", onTouchEnd);
+      scroller?.removeEventListener("wheel", onPlatformWheel);
       scroller?.removeEventListener("touchstart", onPlatformTouchStart);
       scroller?.removeEventListener("touchmove", onPlatformTouchMove);
       scroller?.removeEventListener("touchend", onPlatformTouchEnd);
@@ -594,7 +582,7 @@ export function HomepageFlipStack({
         ref={scrollRef}
         data-homepage-flip-scroll=""
         aria-hidden="true"
-        className="fixed inset-x-0 bottom-0 top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-[15] overflow-x-hidden overflow-y-auto bg-background sm:top-[calc(4rem+env(safe-area-inset-top,0px))]"
+        className="fixed inset-x-0 bottom-0 top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-[15] scroll-smooth snap-y snap-proximity overflow-x-hidden overflow-y-auto bg-background sm:top-[calc(4rem+env(safe-area-inset-top,0px))]"
         style={{
           scrollPaddingTop: "0.75rem",
           opacity: overlayOpacityForIndex(flipPanelIndex(initialPanel)),

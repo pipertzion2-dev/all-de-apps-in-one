@@ -45,7 +45,7 @@ export function HomepageAboutSection() {
   return (
     <section
       id="about"
-      className="relative border-t border-border/40 bg-background px-4 py-12 sm:px-6 sm:py-16"
+      className="relative snap-start scroll-mt-3 border-t border-border/40 bg-background px-4 py-12 sm:px-6 sm:py-16"
     >
       <div className="mx-auto max-w-3xl space-y-8 text-center">
         <div className="space-y-3">
