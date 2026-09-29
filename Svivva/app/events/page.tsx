@@ -93,8 +93,14 @@ export default function EventsPage() {
 
         <div className="mt-8 flex flex-wrap gap-3">
           <Link
-            href="/dashboard/zzai-show"
+            href="/events/model-agency"
             className="rounded-md bg-[#5B8DA8] px-5 py-2.5 text-sm font-semibold text-white"
+          >
+            Model agency signing desk
+          </Link>
+          <Link
+            href="/dashboard/zzai-show"
+            className="rounded-md border border-border px-5 py-2.5 text-sm font-semibold"
           >
             Join or host a show
           </Link>
@@ -133,6 +139,10 @@ export default function EventsPage() {
               {
                 title: "Community showcase",
                 body: "Builders sharing Seeds apps, hybrid builds, and Poor Man Protection workflows.",
+              },
+              {
+                title: "Talent & casting desk",
+                body: "Model agency signing flow — comp card upload, measurements, board fit, and submission email pack.",
               },
             ].map((item) => (
               <li key={item.title} className="rounded-xl border border-border/50 bg-card/60 p-5">
