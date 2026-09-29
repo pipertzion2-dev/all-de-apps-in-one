@@ -335,12 +335,20 @@ export function HomepageFlipStack({
       return atTop || atBottom;
     };
 
-    const shouldDeferToNativeScroll = (deltaY: number) => {
+    /** Wheel/touch must scroll the fixed overlay — document body does not scroll. */
+    const scrollPlatformOverlay = (deltaY: number) => {
       if (!isNavCubeScrollActive()) return false;
       const face = scrollSurfaceFor();
+      if (!face) return false;
       const { canScrollDown, canScrollUp } = faceScrollState(face);
-      if (deltaY > 0 && canScrollDown) return true;
-      if (deltaY < 0 && canScrollUp) return true;
+      if (deltaY > 0 && canScrollDown) {
+        face.scrollTop += deltaY;
+        return true;
+      }
+      if (deltaY < 0 && canScrollUp) {
+        face.scrollTop += deltaY;
+        return true;
+      }
       return false;
     };
 
@@ -386,7 +394,8 @@ export function HomepageFlipStack({
       const delta = normalizeWheelDelta(e);
       if (Math.abs(delta) < 4) return;
 
-      if (shouldDeferToNativeScroll(delta)) {
+      if (scrollPlatformOverlay(delta)) {
+        e.preventDefault();
         return;
       }
 
@@ -402,9 +411,12 @@ export function HomepageFlipStack({
     const onTouchStart = (e: TouchEvent) => {
       touchStartY = e.touches[0]?.clientY ?? 0;
       touchScrubbing = false;
+      const target = e.target instanceof Node ? e.target : null;
       touchOnScroller = Boolean(
         isNavCubeScrollActive() &&
-        scrollRef.current?.contains(e.target instanceof Node ? e.target : null),
+          scrollRef.current &&
+          (scrollRef.current.contains(target) ||
+            !(target instanceof Element && target.closest("[data-homepage-flip-stack]"))),
       );
       if (wheelSnapTimerRef.current) {
         window.clearTimeout(wheelSnapTimerRef.current);
@@ -418,7 +430,8 @@ export function HomepageFlipStack({
       if (Math.abs(delta) < 6) return;
 
       if (touchOnScroller) {
-        const { atTop } = faceScrollState(scrollSurfaceFor());
+        const face = scrollSurfaceFor();
+        const { atTop, canScrollDown, canScrollUp } = faceScrollState(face);
         if (atTop && delta < 0) {
           touchScrubbing = true;
           touchOnScroller = false;
@@ -426,6 +439,11 @@ export function HomepageFlipStack({
           if (applyDelta(delta)) {
             e.preventDefault();
           }
+          return;
+        }
+        if (scrollPlatformOverlay(delta)) {
+          touchStartY = y;
+          e.preventDefault();
         }
         return;
       }

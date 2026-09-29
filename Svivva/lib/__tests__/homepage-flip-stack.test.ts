@@ -31,7 +31,7 @@ describe("homepage flip stack", () => {
     expect(flipSrc).toContain("virtualIndexRef");
     expect(flipSrc).toContain("scheduleSnap");
     expect(flipSrc).toContain("paintDirect");
-    expect(flipSrc).toContain("shouldDeferToNativeScroll");
+    expect(flipSrc).toContain("scrollPlatformOverlay");
     expect(flipSrc).toContain("data-homepage-flip-scroll");
     expect(flipSrc).toContain("scrollRef");
     expect(flipSrc).toContain("syncOverlayVisuals");
