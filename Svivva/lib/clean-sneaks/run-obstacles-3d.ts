@@ -59,6 +59,43 @@ export function buildObstacle3D(kind: ObstacleKind): THREE.Object3D {
     );
     head.position.y = 1.62;
     root.add(body, head);
+  } else if (kind === "copycam") {
+    const jacket = new THREE.MeshPhysicalMaterial({
+      color: 0x2a2a32,
+      roughness: 0.8,
+      sheen: 0.15,
+    });
+    const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.15, 0.62, 8, 12), jacket);
+    body.position.y = 0.92;
+    const head = new THREE.Mesh(
+      new THREE.SphereGeometry(0.13, 16, 16),
+      new THREE.MeshStandardMaterial({ color: 0xc4b8a8, roughness: 0.65 }),
+    );
+    head.position.y = 1.48;
+    const camBody = new THREE.Mesh(
+      new THREE.BoxGeometry(0.28, 0.18, 0.32),
+      new THREE.MeshStandardMaterial({ color: 0x111116, metalness: 0.35, roughness: 0.45 }),
+    );
+    camBody.position.set(0.22, 1.22, 0.18);
+    camBody.rotation.y = -0.55;
+    const lens = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.09, 0.1, 0.12, 16),
+      new THREE.MeshStandardMaterial({ color: 0x0a0a0f, metalness: 0.5, roughness: 0.25 }),
+    );
+    lens.rotation.x = Math.PI / 2;
+    lens.position.set(0.34, 1.22, 0.32);
+    const flashBulb = new THREE.Mesh(
+      new THREE.BoxGeometry(0.06, 0.04, 0.04),
+      new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        emissive: 0xfff4d0,
+        emissiveIntensity: 0.4,
+      }),
+    );
+    flashBulb.position.set(0.12, 1.32, 0.28);
+    flashBulb.name = "copycam-flash";
+    root.rotation.y = Math.PI * 0.15;
+    root.add(body, head, camBody, lens, flashBulb);
   } else if (kind === "bike") {
     const frameMat = new THREE.MeshPhysicalMaterial({
       color: meta.color,

@@ -6,6 +6,7 @@ import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
 import { HOMEPAGE_SCROLL_TO_PLATFORM } from "@/lib/product-positioning";
 import { HomepageScrollHint } from "@/components/homepage-scroll-hint";
 import { HomepageMainGoal } from "@/components/homepage-main-goal";
+import { KLEAN_HOMEPAGE_TAGLINE } from "@/lib/clean-sneaks/game-copy";
 
 const CleanSneaksLogoCube = dynamic(
   () => import("@/components/clean-sneaks/CleanSneaksLogoCube").then((m) => m.CleanSneaksLogoCube),
@@ -53,7 +54,7 @@ export function HomepageGamePanel() {
           className="mt-2 shrink-0 text-center text-[10px] uppercase tracking-[0.25em] text-white/50 sm:text-[11px]"
           data-testid="text-clean-sneaks-goal"
         >
-          Protect your sneakers — tap to play Klean Sneaks free
+          {KLEAN_HOMEPAGE_TAGLINE} — tap to play Klean Sneaks free
         </p>
       </div>
 

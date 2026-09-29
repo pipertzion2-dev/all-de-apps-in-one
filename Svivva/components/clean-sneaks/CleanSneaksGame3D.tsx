@@ -46,6 +46,7 @@ import {
 } from "@/lib/clean-sneaks/sneaker-catalog";
 import { preloadMainGameCover } from "./GameStartScreen";
 import { ShoeCamHud } from "./ShoeCamHud";
+import { DesignCopyCameraOverlay } from "./DesignCopyCameraOverlay";
 import { PostMissionReveal } from "./PostMissionReveal";
 import { CleanPathHud, OhNoOverlay } from "./OhNoOverlay";
 import { Baloon8ColorwayPicker } from "./Baloon8ColorwayPicker";
@@ -186,6 +187,8 @@ export function CleanSneaksGame3D({
   const interstitialResumeRef = useRef<(() => void) | null>(null);
   const countdownTimerRef = useRef<number | null>(null);
   const destinationCelebratedRef = useRef(false);
+  const [copycamFlashTrigger, setCopycamFlashTrigger] = useState(0);
+  const lastCopycamFlashUntilRef = useRef(0);
 
   const emitStats = useCallback(() => {
     const s = stateRef.current;
@@ -198,6 +201,10 @@ export function CleanSneaksGame3D({
     setNpcLine(s.npcLine);
     setOhNo(s.ohNo ? { ...s.ohNo } : null);
     if (s.ohNo?.active) setOhNoTick((n) => n + 1);
+    if (s.copycamFlashUntil > lastCopycamFlashUntilRef.current) {
+      lastCopycamFlashUntilRef.current = s.copycamFlashUntil;
+      setCopycamFlashTrigger((n) => n + 1);
+    }
     onStats?.(stats);
   }, [onStats]);
 
@@ -863,6 +870,12 @@ export function CleanSneaksGame3D({
             onStreakFlash={handleStreakFlash}
             onStatsTick={emitStats}
             className="absolute inset-0"
+          />
+
+          <DesignCopyCameraOverlay
+            active={phase === "running" || phase === "colorPick" || phase === "countdown"}
+            compact={portrait}
+            flashTrigger={copycamFlashTrigger}
           />
 
           {popups.length > 0 && (

@@ -76,6 +76,8 @@ export type RunObstacle = {
   cleared: boolean;
   closeCalled: boolean;
   ohNoOffered: boolean;
+  /** Next timestamp (ms) this copycam may attempt a flash burst. */
+  copyFlashNext?: number;
 };
 
 export type RunPowerUp = {
@@ -151,6 +153,8 @@ export type RunEngineState = {
   destinationReached: boolean;
   /** One grace save when cleanliness would hit 0%. */
   secondWindUsed: boolean;
+  /** Screen flash from a nearby copycam photographer (performance.now() ms). */
+  copycamFlashUntil: number;
 };
 
 function randItem<T>(arr: readonly T[]): T {
@@ -222,6 +226,7 @@ export function createRunEngineState(
     streetGritAcc: 0,
     destinationReached: false,
     secondWindUsed: false,
+    copycamFlashUntil: 0,
   };
 }
 
@@ -237,6 +242,7 @@ function wetObstacles(): ObstacleKind[] {
 }
 
 function spawnKind(weather: WeatherId): ObstacleKind {
+  if (Math.random() < 0.09) return "copycam";
   const wetBias = WEATHER[weather].wetBias;
   if (wetBias > 0 && Math.random() < wetBias) return randItem(wetObstacles());
   // Sticky street trash (dirt / poop / banana / gum) shows up often.
@@ -699,6 +705,23 @@ export function stepRunEngine(
   for (const p of s.powerups) p.z += scroll * 0.08;
   s.obstacles = s.obstacles.filter((o) => o.z < DESPAWN_Z);
   s.powerups = s.powerups.filter((p) => p.z < DESPAWN_Z && !p.taken);
+
+  for (const o of s.obstacles) {
+    if (o.kind !== "copycam" || o.hit) continue;
+    if (o.z < -18 || o.z > 5) continue;
+    if (Math.abs(o.lane - s.lane) > 1) continue;
+    if (o.copyFlashNext == null) {
+      o.copyFlashNext = ts + 350 + Math.random() * 450;
+    }
+    if (ts < o.copyFlashNext) continue;
+    o.copyFlashNext = ts + 650 + Math.random() * 900;
+    s.copycamFlashUntil = ts + 280;
+    s.popups.push({ text: "FLASH!", life: 0.55, color: "#fff8e8" });
+    if (ts >= s.npcLineUntil) {
+      s.npcLine = "Copycat's flashing your colorway — block or dodge!";
+      s.npcLineUntil = ts + 2800;
+    }
+  }
 
   // Oh No window — milliseconds before contact
   if (s.ohNo && (s.ohNo.resolved || ts > s.ohNo.endsAt)) {

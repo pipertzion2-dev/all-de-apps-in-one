@@ -561,9 +561,13 @@ function DynamicEntities({ stateRef }: { stateRef: React.MutableRefObject<RunEng
       }
       obj.position.set(laneWorldX(o.lane), 0, o.z);
       obj.visible = !(o.hit && o.z > 2);
+      const copycamBurst = o.kind === "copycam" && !o.hit && now < s.copycamFlashUntil + 40;
       obj.traverse((c) => {
         if (c instanceof THREE.Mesh) {
           const mat = c.material as THREE.MeshStandardMaterial;
+          if (c.name === "copycam-flash" && o.kind === "copycam") {
+            mat.emissiveIntensity = copycamBurst ? 4.2 : 0.2;
+          }
           if (mat.transparent !== undefined) {
             mat.transparent = o.hit;
             mat.opacity = o.hit ? 0.35 : 1;
