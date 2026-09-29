@@ -40,6 +40,12 @@ describe("homepage scroll panels", () => {
     expect(cubeSrc).toContain("HomepageAboutSection");
     expect(cubeSrc).toContain("HomepageFounderSonSection");
     expect(cubeSrc).toMatch(/HomepageFounderSonSection[\s\S]*HomepagePricingSection/);
+    const founderSrc = readFileSync(
+      resolve(__dirname, "../../components/homepage-founder-son-section.tsx"),
+      "utf8",
+    );
+    expect(founderSrc).toContain("He designed the logo at the computer");
+    expect(founderSrc).not.toMatch(/Poor Man Protection|Klean Sneaks|Hybrid² Lab|Bed Stuy/);
     expect(cubeSrc).toContain("HomepagePricingSection");
     expect(cubeSrc).toContain("HomepageFaqSection");
     expect(cubeSrc).toContain("HomepageHowToSection");
