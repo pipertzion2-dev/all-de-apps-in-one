@@ -1271,14 +1271,14 @@ export default function LandingPage() {
                       <p>
                         The photo is my son at the computer — the same session where he helped shape
                         the zzai zzai logo. The product story on this site is not hype; it is Poor
-                        Man Protection: seal a file, keep custody notes, and export a pack a lawyer can
-                        read.
+                        Man Protection: seal a file, keep custody notes, and export a pack a lawyer
+                        can read.
                       </p>
                       <p>
-                        That workflow is for designers, musicians, and builders who need a timestamped
-                        record before formal patent or copyright filings. We also partner with Bed
-                        Stuy Vybez in Brooklyn for fashion and storefront creators who want the same
-                        discipline on early sketches.
+                        That workflow is for designers, musicians, and builders who need a
+                        timestamped record before formal patent or copyright filings. We also
+                        partner with Bed Stuy Vybez in Brooklyn for fashion and storefront creators
+                        who want the same discipline on early sketches.
                       </p>
                       <p>
                         Klean Sneaks and Hybrid² Lab stay available as demos and beta tools. The
