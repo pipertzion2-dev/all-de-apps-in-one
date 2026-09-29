@@ -44,8 +44,8 @@ export function HomepageCubePanel({
 
   return (
     <div className="relative bg-background pb-8">
-      {interactive ? <HomepageProtectionHero /> : null}
       {interactive ? <HomepageCubeFaceHint /> : null}
+      {interactive ? <HomepageProtectionHero /> : null}
 
       <div className="relative z-20 px-4 pt-4 sm:hidden">
         <HomepageMainGoal variant="light" density="compact" surface="platform" />
