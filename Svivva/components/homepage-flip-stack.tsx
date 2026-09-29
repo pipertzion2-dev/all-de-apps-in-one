@@ -21,8 +21,9 @@ const WHEEL_SNAP_MS = 320;
 const SWIPE_THRESHOLD_PX = 40;
 const MAX_PANEL_INDEX = 1;
 const SCROLL_EDGE_THRESHOLD = 8;
-const OVERLAY_FADE_START = 0.12;
-const OVERLAY_FADE_END = 0.88;
+/** Platform content fades in only as the game → home flip finishes (avoids clipping mid-rotation). */
+const OVERLAY_FADE_START = 0.88;
+const OVERLAY_FADE_END = 1;
 
 function overlayOpacityForIndex(index: number): number {
   return Math.min(
@@ -71,7 +72,7 @@ export function HomepageFlipStack({
 
       if (scroller) {
         scroller.style.opacity = String(opacity);
-        scroller.style.visibility = index > 0.02 ? "visible" : "hidden";
+        scroller.style.visibility = index >= OVERLAY_FADE_START - 0.02 ? "visible" : "hidden";
         scroller.style.pointerEvents = scrollEnabled ? "auto" : "none";
         scroller.style.touchAction = scrollEnabled ? "pan-y" : "none";
         scroller.setAttribute("aria-hidden", scrollEnabled ? "false" : "true");
@@ -161,14 +162,23 @@ export function HomepageFlipStack({
     animRef.current = requestAnimationFrame(tick);
   }, [paintRotor, syncOverlayVisuals]);
 
+  const resetPlatformScroll = useCallback(() => {
+    const scroller = scrollRef.current;
+    if (!scroller) return;
+    scroller.scrollTop = 0;
+  }, []);
+
   const commitPanel = useCallback(
     (panel: HomepageFlipPanelId) => {
       activePanelRef.current = panel;
       setActivePanel(panel);
       window.history.replaceState(null, "", `/#${hashForFlipPanel(panel)}`);
+      if (panel === "nav-cube") {
+        resetPlatformScroll();
+      }
       syncOverlayVisuals(displayedIndexRef.current, panel);
     },
-    [syncOverlayVisuals],
+    [resetPlatformScroll, syncOverlayVisuals],
   );
 
   const clearSnapTimer = useCallback(() => {
@@ -205,13 +215,16 @@ export function HomepageFlipStack({
     ) {
       virtualIndexRef.current = snapped;
       targetIndexRef.current = snapped;
+      if (snapped === flipPanelIndex("nav-cube")) {
+        resetPlatformScroll();
+      }
       return;
     }
     virtualIndexRef.current = snapped;
     targetIndexRef.current = snapped;
     commitPanel(flipPanelFromIndex(snapped));
     ensureTick();
-  }, [commitPanel, ensureTick]);
+  }, [commitPanel, ensureTick, resetPlatformScroll]);
 
   const scheduleSnap = useCallback(() => {
     if (wheelSnapTimerRef.current) {
@@ -549,10 +562,12 @@ export function HomepageFlipStack({
         ref={scrollRef}
         data-homepage-flip-scroll=""
         aria-hidden="true"
-        className="fixed inset-x-0 bottom-0 top-16 z-[15] overflow-x-hidden overflow-y-auto bg-background sm:top-20"
+        className="fixed inset-x-0 bottom-0 top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-[15] overflow-x-hidden overflow-y-auto bg-background sm:top-[calc(4rem+env(safe-area-inset-top,0px))]"
         style={{
+          scrollPaddingTop: "0.75rem",
           opacity: overlayOpacityForIndex(flipPanelIndex(initialPanel)),
-          visibility: flipPanelIndex(initialPanel) > 0.02 ? "visible" : "hidden",
+          visibility:
+            flipPanelIndex(initialPanel) >= OVERLAY_FADE_START - 0.02 ? "visible" : "hidden",
           pointerEvents: overlayScrollEnabled(flipPanelIndex(initialPanel), initialPanel)
             ? "auto"
             : "none",
