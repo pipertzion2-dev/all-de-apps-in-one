@@ -3,14 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import zzaiLogo from "@/attached_assets/ZZAI_OFFICIAL_LOGO.png";
-import {
-  FOUNDER_SON_COMPUTER_ALT,
-  FOUNDER_SON_COMPUTER_SRC,
-} from "@/lib/brand/founder-media";
+import { HOMEPAGE_INTRO_ALT, HOMEPAGE_INTRO_IMAGE } from "@/lib/brand/founder-media";
 import { PRODUCT_PROTECTION_PITCH, PRODUCT_TAGLINE } from "@/lib/product-positioning";
 import { Button } from "@/components/ui/button";
 
-/** Homepage hero — Poor Man Protection first; founder photo is son at the computer. */
+/** Homepage hero — Poor Man Protection first; intro photo is founder in the zzai shirt. */
 export function HomepageProtectionHero() {
   return (
     <section
@@ -43,13 +40,13 @@ export function HomepageProtectionHero() {
         </div>
 
         <div className="relative mx-auto w-full max-w-md lg:max-w-none">
-          <div className="relative aspect-[4/5] overflow-hidden rounded-2xl border border-border/60 bg-card shadow-xl ring-1 ring-black/5 sm:aspect-[3/4]">
+          <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-xl ring-1 ring-black/5">
             <Image
-              src={FOUNDER_SON_COMPUTER_SRC}
-              alt={FOUNDER_SON_COMPUTER_ALT}
-              fill
-              className="object-cover object-center"
-              sizes="(max-width: 1024px) 100vw, 480px"
+              src={HOMEPAGE_INTRO_IMAGE}
+              alt={HOMEPAGE_INTRO_ALT}
+              width={1024}
+              height={1024}
+              className="h-auto w-full object-cover"
               priority
             />
           </div>
@@ -62,8 +59,8 @@ export function HomepageProtectionHero() {
               className="h-12 w-12 rounded-md object-contain"
             />
             <div className="text-left">
-              <p className="text-xs font-semibold leading-snug">Logo at the computer</p>
-              <p className="text-[10px] text-muted-foreground">My son helped design the mark</p>
+              <p className="text-xs font-semibold leading-snug">Logo by my son</p>
+              <p className="text-[10px] text-muted-foreground">Designed at the computer · Age 6</p>
             </div>
           </div>
         </div>

@@ -28,6 +28,8 @@ import seedsLogo from "@/attached_assets/Svivva_Seeds_6_1771888740460.png";
 import {
   FOUNDER_SON_COMPUTER_ALT,
   FOUNDER_SON_COMPUTER_SRC,
+  HOMEPAGE_INTRO_ALT,
+  HOMEPAGE_INTRO_IMAGE,
 } from "@/lib/brand/founder-media";
 import {
   Shield,
@@ -549,10 +551,10 @@ export default function LandingPage() {
                   }}
                 >
                   <Image
-                    src={FOUNDER_SON_COMPUTER_SRC}
-                    alt={FOUNDER_SON_COMPUTER_ALT}
-                    width={1600}
-                    height={2000}
+                    src={HOMEPAGE_INTRO_IMAGE}
+                    alt={HOMEPAGE_INTRO_ALT}
+                    width={1024}
+                    height={1024}
                     sizes="100vw"
                     style={{
                       // Fill the panel in both axes: `height: auto` left the square
