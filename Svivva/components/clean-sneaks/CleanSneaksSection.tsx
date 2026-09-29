@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
-import { KLEAN_BUNDLE_CARD_HEADLINE } from "@/lib/clean-sneaks/game-copy";
+import { KLEAN_BUNDLE_CARD_HEADLINE, KLEAN_HOMEPAGE_TAGLINE } from "@/lib/clean-sneaks/game-copy";
 import { bundleUnlockHint, isBundleCardUnlocked } from "@/lib/clean-sneaks/bundle-unlock";
 import { readBestScore } from "@/lib/clean-sneaks/storage";
 
@@ -79,7 +79,7 @@ export function CleanSneaksSection() {
               className="mt-4 text-xl font-semibold leading-snug tracking-[0.04em] text-[#E8D9A8] sm:text-2xl"
               data-testid="text-clean-sneaks-goal"
             >
-              Goal: Protect your shoes — keep them Klean
+              {KLEAN_HOMEPAGE_TAGLINE}
             </p>
             <p className="mt-2 text-[11px] uppercase tracking-[0.28em] text-white/45">
               stiehl den alten Manns Bündel

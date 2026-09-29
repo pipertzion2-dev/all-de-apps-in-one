@@ -21,7 +21,8 @@ export type ObstacleKind =
   | "bag"
   | "street"
   | "pedestrian"
-  | "bike";
+  | "bike"
+  | "copycam";
 
 export type PowerUpKind = "shield" | "quickClean" | "freshKicks" | "perfectStep";
 

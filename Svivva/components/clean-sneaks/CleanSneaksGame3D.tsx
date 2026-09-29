@@ -46,6 +46,7 @@ import {
 } from "@/lib/clean-sneaks/sneaker-catalog";
 import { preloadMainGameCover } from "./GameStartScreen";
 import { ShoeCamHud } from "./ShoeCamHud";
+import { DesignCopyCameraOverlay } from "./DesignCopyCameraOverlay";
 import { PostMissionReveal } from "./PostMissionReveal";
 import { CleanPathHud, OhNoOverlay } from "./OhNoOverlay";
 import { Baloon8ColorwayPicker } from "./Baloon8ColorwayPicker";
@@ -863,6 +864,16 @@ export function CleanSneaksGame3D({
             onStreakFlash={handleStreakFlash}
             onStatsTick={emitStats}
             className="absolute inset-0"
+          />
+
+          <DesignCopyCameraOverlay
+            active={
+              phase === "running" ||
+              phase === "start" ||
+              phase === "colorPick" ||
+              phase === "countdown"
+            }
+            compact={portrait}
           />
 
           {popups.length > 0 && (
