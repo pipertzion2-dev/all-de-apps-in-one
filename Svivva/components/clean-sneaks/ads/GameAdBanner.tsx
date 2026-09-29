@@ -69,7 +69,7 @@ export function GameAdBanner({ className, compact = false }: Props) {
         data-testid="game-ad-banner"
       >
         <p className="mb-1 text-[9px] uppercase tracking-[0.28em] text-white/40">Advertisement</p>
-        <ProgrammaticAdBanner className="min-h-[50px] w-full" />
+        <ProgrammaticAdBanner network={network} className="min-h-[50px] w-full" />
       </aside>
     );
   }

@@ -10,28 +10,39 @@ import {
   resolveAdNetwork,
   rewardedCreditsAmount,
 } from "@/lib/clean-sneaks/ads";
+import { resetPaidRotationForTests } from "@/lib/clean-sneaks/ads/paid-rotation";
 
 function installMemoryStorage() {
   const store = new Map<string, string>();
-  const localStorage = {
-    getItem: (k: string) => store.get(k) ?? null,
+  const sessionStore = new Map<string, string>();
+  const mk = (backing: Map<string, string>) => ({
+    getItem: (k: string) => backing.get(k) ?? null,
     setItem: (k: string, v: string) => {
-      store.set(k, String(v));
+      backing.set(k, String(v));
     },
     removeItem: (k: string) => {
-      store.delete(k);
+      backing.delete(k);
     },
-    clear: () => store.clear(),
-  };
-  (globalThis as unknown as { window: { localStorage: typeof localStorage } }).window = {
-    localStorage,
-  };
+    clear: () => backing.clear(),
+    get length() {
+      return backing.size;
+    },
+    key: (i: number) => [...backing.keys()][i] ?? null,
+  });
+  const localStorage = mk(store);
+  const sessionStorage = mk(sessionStore);
+  (globalThis as unknown as { window: { localStorage: typeof localStorage; sessionStorage: typeof sessionStorage } }).window =
+    {
+      localStorage,
+      sessionStorage,
+    };
   return store;
 }
 
 describe("clean-sneaks advertising", () => {
   beforeEach(() => {
     installMemoryStorage();
+    resetPaidRotationForTests();
     vi.unstubAllEnvs();
   });
 
@@ -46,7 +57,20 @@ describe("clean-sneaks advertising", () => {
     expect(resolveAdNetwork("run_interstitial")).toBe("house");
   });
 
-  it("prefers Monetag (free network) over AdSense by default", () => {
+  it("rotates Monetag and AdSense when both paid stacks are configured", () => {
+    vi.stubEnv("NEXT_PUBLIC_KLEAN_USE_ADSENSE", "1");
+    vi.stubEnv("NEXT_PUBLIC_MONETAG_ZONE_ID", "12345678");
+    vi.stubEnv("NEXT_PUBLIC_ADSENSE_CLIENT", "ca-pub-1234567890123456");
+    vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT_BANNER", "1234567890");
+    const seen = new Set<string>();
+    for (let i = 0; i < 6; i++) {
+      seen.add(resolveAdNetwork("menu_banner"));
+    }
+    expect(seen.has("monetag")).toBe(true);
+    expect(seen.has("adsense")).toBe(true);
+  });
+
+  it("uses Monetag alone when AdSense is not opted in", () => {
     vi.stubEnv("NEXT_PUBLIC_MONETAG_ZONE_ID", "12345678");
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_CLIENT", "ca-pub-1234567890123456");
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT_BANNER", "1234567890");
@@ -59,22 +83,23 @@ describe("clean-sneaks advertising", () => {
     expect(resolveAdNetwork("menu_banner")).toBe("house");
   });
 
-  it("uses AdSense for banner only when KLEAN_USE_ADSENSE=1", () => {
+  it("uses AdSense for in-game placements when KLEAN_USE_ADSENSE=1 and slots exist", () => {
     vi.stubEnv("NEXT_PUBLIC_KLEAN_USE_ADSENSE", "1");
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_CLIENT", "ca-pub-1234567890123456");
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT_BANNER", "1234567890");
+    vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT_INTERSTITIAL", "9876543210");
+    vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT_REWARDED", "5555555555");
     expect(resolveAdNetwork("menu_banner")).toBe("adsense");
-    // Rewarded/interstitial stay on house so players always see a creative.
-    expect(resolveAdNetwork("run_interstitial")).toBe("house");
-    expect(resolveAdNetwork("rewarded_credits")).toBe("house");
+    expect(resolveAdNetwork("run_interstitial")).toBe("adsense");
+    expect(resolveAdNetwork("rewarded_credits")).toBe("adsense");
   });
 
-  it("keeps interstitial on house even with its own AdSense slot", () => {
+  it("uses interstitial AdSense when it has its own slot id", () => {
     vi.stubEnv("NEXT_PUBLIC_KLEAN_USE_ADSENSE", "1");
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_CLIENT", "ca-pub-1234567890123456");
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT_INTERSTITIAL", "9876543210");
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT_BANNER", "1111111111");
-    expect(resolveAdNetwork("run_interstitial")).toBe("house");
+    expect(resolveAdNetwork("run_interstitial")).toBe("adsense");
     expect(resolveAdNetwork("menu_banner")).toBe("adsense");
   });
 
