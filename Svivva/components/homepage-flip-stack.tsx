@@ -215,9 +215,6 @@ export function HomepageFlipStack({
     ) {
       virtualIndexRef.current = snapped;
       targetIndexRef.current = snapped;
-      if (snapped === flipPanelIndex("nav-cube")) {
-        resetPlatformScroll();
-      }
       return;
     }
     virtualIndexRef.current = snapped;
@@ -294,6 +291,11 @@ export function HomepageFlipStack({
 
     const isNavCubeScrollActive = () =>
       overlayScrollEnabled(displayedIndexRef.current, activePanelRef.current);
+
+    /** Settled on platform face — use native overlay scroll, not flip scrubbing. */
+    const platformScrollMode = () =>
+      activePanelRef.current === "nav-cube" &&
+      displayedIndexRef.current >= OVERLAY_FADE_END - FLIP_SETTLE_EPSILON;
 
     const faceScrollState = (face: HTMLDivElement | null) => {
       if (!face) {
@@ -394,8 +396,15 @@ export function HomepageFlipStack({
       const delta = normalizeWheelDelta(e);
       if (Math.abs(delta) < 4) return;
 
-      if (scrollPlatformOverlay(delta)) {
-        e.preventDefault();
+      if (platformScrollMode()) {
+        if (scrollPlatformOverlay(delta)) {
+          e.preventDefault();
+          return;
+        }
+        const { atTop } = faceScrollState(scrollSurfaceFor());
+        if (atTop && delta < 0 && applyDelta(delta)) {
+          e.preventDefault();
+        }
         return;
       }
 
@@ -406,18 +415,11 @@ export function HomepageFlipStack({
 
     let touchStartY = 0;
     let touchScrubbing = false;
-    let touchOnScroller = false;
 
     const onTouchStart = (e: TouchEvent) => {
+      if (platformScrollMode()) return;
       touchStartY = e.touches[0]?.clientY ?? 0;
       touchScrubbing = false;
-      const target = e.target instanceof Node ? e.target : null;
-      touchOnScroller = Boolean(
-        isNavCubeScrollActive() &&
-        scrollRef.current &&
-        (scrollRef.current.contains(target) ||
-          !(target instanceof Element && target.closest("[data-homepage-flip-stack]"))),
-      );
       if (wheelSnapTimerRef.current) {
         window.clearTimeout(wheelSnapTimerRef.current);
         wheelSnapTimerRef.current = 0;
@@ -425,28 +427,11 @@ export function HomepageFlipStack({
     };
 
     const onTouchMove = (e: TouchEvent) => {
+      if (platformScrollMode()) return;
+
       const y = e.touches[0]?.clientY ?? touchStartY;
       const delta = touchStartY - y;
       if (Math.abs(delta) < 6) return;
-
-      if (touchOnScroller) {
-        const face = scrollSurfaceFor();
-        const { atTop, canScrollDown, canScrollUp } = faceScrollState(face);
-        if (atTop && delta < 0) {
-          touchScrubbing = true;
-          touchOnScroller = false;
-          touchStartY = y;
-          if (applyDelta(delta)) {
-            e.preventDefault();
-          }
-          return;
-        }
-        if (scrollPlatformOverlay(delta)) {
-          touchStartY = y;
-          e.preventDefault();
-        }
-        return;
-      }
 
       touchScrubbing = true;
       touchStartY = y;
@@ -456,16 +441,7 @@ export function HomepageFlipStack({
     };
 
     const onTouchEnd = (e: TouchEvent) => {
-      if (touchOnScroller) {
-        const endY = e.changedTouches[0]?.clientY ?? touchStartY;
-        const delta = touchStartY - endY;
-        const { atTop } = faceScrollState(scrollSurfaceFor());
-        if (atTop && delta < -SWIPE_THRESHOLD_PX) {
-          goToPanel("home-game");
-        }
-        touchOnScroller = false;
-        return;
-      }
+      if (platformScrollMode()) return;
 
       if (touchScrubbing) {
         snapToNearestPanel();
@@ -501,11 +477,49 @@ export function HomepageFlipStack({
     window.addEventListener("touchstart", onTouchStart, { passive: true });
     window.addEventListener("touchmove", onTouchMove, { passive: false });
     window.addEventListener("touchend", onTouchEnd, { passive: true });
+
+    const scroller = scrollRef.current;
+    let platformTouchStartY = 0;
+    let platformPullTracking = false;
+
+    const onPlatformTouchStart = (e: TouchEvent) => {
+      if (!platformScrollMode()) {
+        platformPullTracking = false;
+        return;
+      }
+      platformTouchStartY = e.touches[0]?.clientY ?? 0;
+      platformPullTracking = true;
+    };
+
+    const onPlatformTouchMove = (e: TouchEvent) => {
+      if (!platformPullTracking || !platformScrollMode()) return;
+      const face = scrollSurfaceFor();
+      if (!face || face.scrollTop > SCROLL_EDGE_THRESHOLD) return;
+      const y = e.touches[0]?.clientY ?? platformTouchStartY;
+      const pullDown = y - platformTouchStartY;
+      if (pullDown > SWIPE_THRESHOLD_PX) {
+        platformPullTracking = false;
+        e.preventDefault();
+        goToPanel("home-game");
+      }
+    };
+
+    const onPlatformTouchEnd = () => {
+      platformPullTracking = false;
+    };
+
+    scroller?.addEventListener("touchstart", onPlatformTouchStart, { passive: true });
+    scroller?.addEventListener("touchmove", onPlatformTouchMove, { passive: false });
+    scroller?.addEventListener("touchend", onPlatformTouchEnd, { passive: true });
+
     return () => {
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("touchend", onTouchEnd);
+      scroller?.removeEventListener("touchstart", onPlatformTouchStart);
+      scroller?.removeEventListener("touchmove", onPlatformTouchMove);
+      scroller?.removeEventListener("touchend", onPlatformTouchEnd);
     };
   }, [
     interactive,
