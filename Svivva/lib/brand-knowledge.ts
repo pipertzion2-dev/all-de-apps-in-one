@@ -454,7 +454,7 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       },
       {
         q: "What is ZZAI Show / events?",
-        a: "ZZAI Show (beta) is the public events hub at /events — live drops and Play sessions. The Show console for hosts is in beta after sign-in.",
+        a: "ZZAI Show (beta) is the public events hub at /events — live drops, Play sessions, and the model agency signing desk at /events/model-agency (comp card → submission pack). The Show console for hosts is in beta after sign-in.",
       },
     ],
   };

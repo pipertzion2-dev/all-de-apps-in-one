@@ -50,6 +50,7 @@ function staticPagesEntries(): SitemapEntry[] {
     { path: "/seeds", priority: 0.7, changeFrequency: "weekly" },
     { path: "/clean-sneaks", priority: 0.78, changeFrequency: "weekly" },
     { path: "/events", priority: 0.76, changeFrequency: "weekly" },
+    { path: "/events/model-agency", priority: 0.72, changeFrequency: "weekly" },
     { path: "/referrals", priority: 0.6, changeFrequency: "monthly" },
     { path: "/marketing", priority: 0.75, changeFrequency: "monthly" },
   ];
