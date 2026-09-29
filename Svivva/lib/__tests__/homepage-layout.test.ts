@@ -10,6 +10,7 @@ describe("homepage-layout", () => {
     expect(HOMEPAGE_SECTIONS.features).toBe(false);
     expect(HOMEPAGE_SECTIONS.pricing).toBe(false);
     expect(HOMEPAGE_SECTIONS.cleanSneaks).toBe(false);
+    expect(HOMEPAGE_SECTIONS.founderStory).toBe(false);
   });
 
   it("uses the Dune-style flip stack for begin, game, and home", () => {

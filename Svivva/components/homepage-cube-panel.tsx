@@ -7,6 +7,7 @@ import { HomepageExploreLinks } from "@/components/homepage-explore-links";
 import { HomepageFaqSection } from "@/components/homepage-faq-section";
 import { HomepageHeroBlock } from "@/components/homepage-hero-block";
 import { HomepageHowToSection } from "@/components/homepage-howto-section";
+import { HomepageFounderSonSection } from "@/components/homepage-founder-son-section";
 import { HomepagePricingSection } from "@/components/homepage-pricing-section";
 import { HomepageCubeFaceHint } from "@/components/homepage-cube-face-hint";
 import { HomepageMainGoal } from "@/components/homepage-main-goal";
@@ -78,6 +79,7 @@ export function HomepageCubePanel({
         <PlatformFeatureHub hideBackground hideChannelStrips />
       </div>
 
+      <HomepageFounderSonSection />
       <HomepagePricingSection />
       <HomepageFaqSection />
     </div>

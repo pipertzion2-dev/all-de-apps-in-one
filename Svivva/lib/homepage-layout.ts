@@ -9,7 +9,8 @@ export const HOMEPAGE_SECTIONS = {
   buildSystem: false,
   tractionBar: false,
   features: false,
-  founderStory: true,
+  /** Legacy path only — scrollSnap uses HomepageFounderSonSection before pricing. */
+  founderStory: false,
   howItWorks: false,
   evaluation: false,
   pricing: false,

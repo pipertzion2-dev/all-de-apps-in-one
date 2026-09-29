@@ -38,6 +38,8 @@ describe("homepage scroll panels", () => {
     expect(pageSrc).toContain('useState<HomepageFlipPanelId>("home-game")');
     expect(pageSrc).toContain("HomepageCubePanel");
     expect(cubeSrc).toContain("HomepageAboutSection");
+    expect(cubeSrc).toContain("HomepageFounderSonSection");
+    expect(cubeSrc).toMatch(/HomepageFounderSonSection[\s\S]*HomepagePricingSection/);
     expect(cubeSrc).toContain("HomepagePricingSection");
     expect(cubeSrc).toContain("HomepageFaqSection");
     expect(cubeSrc).toContain("HomepageHowToSection");
