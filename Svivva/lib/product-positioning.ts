@@ -44,7 +44,7 @@ export const HOMEPAGE_PLATFORM_FACE_SUBLINE =
   "Timestamped seals, custody logs, and public verify links — built for Poor Man Protection.";
 
 export const HOMEPAGE_SCROLL_TO_PLATFORM = "Swipe ↓ ZZAI platform";
-export const HOMEPAGE_SCROLL_TO_GAME = "Swipe ↓ Klean Sneaks game";
+export const HOMEPAGE_SCROLL_TO_GAME = "Swipe ↑ Klean Sneaks game";
 
 /** Platform desk modules — Klean Sneaks ships; Hybrid² / API / Pulse stay beta. */
 export const CORE_PLATFORM_FEATURE_IDS = new Set<string>();
