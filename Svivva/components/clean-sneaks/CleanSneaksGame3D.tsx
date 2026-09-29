@@ -187,6 +187,8 @@ export function CleanSneaksGame3D({
   const interstitialResumeRef = useRef<(() => void) | null>(null);
   const countdownTimerRef = useRef<number | null>(null);
   const destinationCelebratedRef = useRef(false);
+  const [copycamFlashTrigger, setCopycamFlashTrigger] = useState(0);
+  const lastCopycamFlashUntilRef = useRef(0);
 
   const emitStats = useCallback(() => {
     const s = stateRef.current;
@@ -199,6 +201,10 @@ export function CleanSneaksGame3D({
     setNpcLine(s.npcLine);
     setOhNo(s.ohNo ? { ...s.ohNo } : null);
     if (s.ohNo?.active) setOhNoTick((n) => n + 1);
+    if (s.copycamFlashUntil > lastCopycamFlashUntilRef.current) {
+      lastCopycamFlashUntilRef.current = s.copycamFlashUntil;
+      setCopycamFlashTrigger((n) => n + 1);
+    }
     onStats?.(stats);
   }, [onStats]);
 
@@ -874,6 +880,7 @@ export function CleanSneaksGame3D({
               phase === "countdown"
             }
             compact={portrait}
+            flashTrigger={copycamFlashTrigger}
           />
 
           {popups.length > 0 && (

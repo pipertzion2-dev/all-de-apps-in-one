@@ -93,6 +93,7 @@ export function buildObstacle3D(kind: ObstacleKind): THREE.Object3D {
       }),
     );
     flashBulb.position.set(0.12, 1.32, 0.28);
+    flashBulb.name = "copycam-flash";
     root.rotation.y = Math.PI * 0.15;
     root.add(body, head, camBody, lens, flashBulb);
   } else if (kind === "bike") {
