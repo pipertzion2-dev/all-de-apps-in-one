@@ -43,13 +43,14 @@ export function HomepageScrollHint({
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
-        className={`text-muted-foreground ${direction === "up" ? "rotate-180" : ""}`}
-        style={
-          direction === "down" ? { animation: "scrollBounce 1.5s ease-in-out infinite" } : undefined
-        }
+        className="text-muted-foreground"
+        style={{
+          animation: "scrollBounce 1.5s ease-in-out infinite",
+          animationDirection: direction === "up" ? "reverse" : "normal",
+        }}
         aria-hidden
       >
-        <path d="M10 4v12M5 11l5 5 5-5" />
+        <path d={direction === "up" ? "M10 16V4M5 9l5-5 5 5" : "M10 4v12M5 11l5 5 5-5"} />
       </svg>
     </Tag>
   );

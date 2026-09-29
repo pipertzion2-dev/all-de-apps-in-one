@@ -6,7 +6,7 @@ import { HOMEPAGE_SCROLL_TO_GAME } from "@/lib/product-positioning";
 
 const SCROLL_TOP_THRESHOLD = 48;
 
-/** Shown only at the top of the nav-cube face — swipe down to return to the game panel. */
+/** Shown only at the top of the nav-cube face — swipe up to return to the game panel. */
 export function HomepageCubeFaceHint() {
   const [atTop, setAtTop] = useState(true);
 
@@ -43,10 +43,10 @@ export function HomepageCubeFaceHint() {
         stroke="currentColor"
         strokeWidth="2"
         className="text-muted-foreground"
-        style={{ animation: "scrollBounce 1.5s ease-in-out infinite" }}
+        style={{ animation: "scrollBounce 1.5s ease-in-out infinite reverse" }}
         aria-hidden
       >
-        <path d="M10 4v12M5 11l5 5 5-5" />
+        <path d="M10 16V4M5 9l5-5 5 5" />
       </svg>
     </button>
   );
