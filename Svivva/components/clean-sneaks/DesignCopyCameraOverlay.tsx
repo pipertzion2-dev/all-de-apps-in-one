@@ -61,7 +61,10 @@ export function DesignCopyCameraOverlay({ active, compact, flashTrigger = 0 }: P
 
   useEffect(() => {
     if (!active) return;
-    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
       return;
     }
 
@@ -87,8 +90,7 @@ export function DesignCopyCameraOverlay({ active, compact, flashTrigger = 0 }: P
 
   if (!active) return null;
 
-  const screenOpacity =
-    screenFlash >= 1 ? 0.58 : screenFlash > 0 ? 0.22 + screenFlash * 0.35 : 0;
+  const screenOpacity = screenFlash >= 1 ? 0.58 : screenFlash > 0 ? 0.22 + screenFlash * 0.35 : 0;
 
   return (
     <div
@@ -116,8 +118,22 @@ export function DesignCopyCameraOverlay({ active, compact, flashTrigger = 0 }: P
         <div
           className={`relative transition-transform duration-100 ${shutter ? "scale-[0.94]" : "scale-100"}`}
         >
-          <svg width="88" height="72" viewBox="0 0 88 72" className="drop-shadow-[0_4px_18px_rgba(0,0,0,0.65)]">
-            <rect x="8" y="22" width="52" height="36" rx="6" fill="#1a1a1f" stroke="#e8e8ec" strokeWidth="1.2" />
+          <svg
+            width="88"
+            height="72"
+            viewBox="0 0 88 72"
+            className="drop-shadow-[0_4px_18px_rgba(0,0,0,0.65)]"
+          >
+            <rect
+              x="8"
+              y="22"
+              width="52"
+              height="36"
+              rx="6"
+              fill="#1a1a1f"
+              stroke="#e8e8ec"
+              strokeWidth="1.2"
+            />
             <circle cx="34" cy="40" r="14" fill="#0d0d12" stroke="#c4c4cc" strokeWidth="2" />
             <circle cx="34" cy="40" r="9" fill="#2a3040" />
             <circle cx="31" cy="37" r="2.5" fill="#ffffff" opacity="0.35" />
@@ -131,7 +147,9 @@ export function DesignCopyCameraOverlay({ active, compact, flashTrigger = 0 }: P
               rx="2"
               fill="#fffef5"
               opacity={onCamFlash ? 1 : 0.15}
-              style={{ filter: onCamFlash ? "drop-shadow(0 0 8px rgba(255,255,255,0.95))" : undefined }}
+              style={{
+                filter: onCamFlash ? "drop-shadow(0 0 8px rgba(255,255,255,0.95))" : undefined,
+              }}
             />
           </svg>
           <span
@@ -165,7 +183,9 @@ export function DesignCopyCameraOverlay({ active, compact, flashTrigger = 0 }: P
         <span className="absolute left-2 top-2 text-[9px] font-mono uppercase tracking-widest text-white/70">
           AF · LIVE
         </span>
-        <span className="absolute bottom-2 right-2 text-[9px] font-mono text-[#ffd76a]/90">1/250</span>
+        <span className="absolute bottom-2 right-2 text-[9px] font-mono text-[#ffd76a]/90">
+          1/250
+        </span>
         <div className="absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/40" />
       </div>
 

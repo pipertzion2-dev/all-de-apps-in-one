@@ -873,12 +873,7 @@ export function CleanSneaksGame3D({
           />
 
           <DesignCopyCameraOverlay
-            active={
-              phase === "running" ||
-              phase === "start" ||
-              phase === "colorPick" ||
-              phase === "countdown"
-            }
+            active={phase === "running" || phase === "colorPick" || phase === "countdown"}
             compact={portrait}
             flashTrigger={copycamFlashTrigger}
           />

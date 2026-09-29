@@ -30,7 +30,5 @@ export function showHomepageSection(section: HomepageSection): boolean {
  * Fixed homepage nav (`home-page-client`) — flip-stack scroll layer must start below this
  * (includes safe-area inset on the nav bar).
  */
-export const HOMEPAGE_MAIN_NAV_OFFSET =
-  "calc(3.5rem + env(safe-area-inset-top, 0px))" as const;
-export const HOMEPAGE_MAIN_NAV_OFFSET_SM =
-  "calc(4rem + env(safe-area-inset-top, 0px))" as const;
+export const HOMEPAGE_MAIN_NAV_OFFSET = "calc(3.5rem + env(safe-area-inset-top, 0px))" as const;
+export const HOMEPAGE_MAIN_NAV_OFFSET_SM = "calc(4rem + env(safe-area-inset-top, 0px))" as const;

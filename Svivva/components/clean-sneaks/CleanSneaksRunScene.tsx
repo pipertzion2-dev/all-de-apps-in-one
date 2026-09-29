@@ -561,8 +561,7 @@ function DynamicEntities({ stateRef }: { stateRef: React.MutableRefObject<RunEng
       }
       obj.position.set(laneWorldX(o.lane), 0, o.z);
       obj.visible = !(o.hit && o.z > 2);
-      const copycamBurst =
-        o.kind === "copycam" && !o.hit && now < s.copycamFlashUntil + 40;
+      const copycamBurst = o.kind === "copycam" && !o.hit && now < s.copycamFlashUntil + 40;
       obj.traverse((c) => {
         if (c instanceof THREE.Mesh) {
           const mat = c.material as THREE.MeshStandardMaterial;
