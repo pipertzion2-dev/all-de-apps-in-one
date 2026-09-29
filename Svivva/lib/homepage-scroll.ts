@@ -28,8 +28,7 @@ export function scrollPlatformSection(
 
   const scrollerRect = scroller.getBoundingClientRect();
   const targetRect = target.getBoundingClientRect();
-  const scrollPadding =
-    Number.parseFloat(getComputedStyle(scroller).scrollPaddingTop || "0") || 0;
+  const scrollPadding = Number.parseFloat(getComputedStyle(scroller).scrollPaddingTop || "0") || 0;
   const blockOffset =
     block === "center"
       ? (scroller.clientHeight - targetRect.height) / 2
