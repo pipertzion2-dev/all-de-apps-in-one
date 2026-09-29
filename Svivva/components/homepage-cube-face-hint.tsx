@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
+import { getHomepageFlipScroller, scrollToHomepagePanel } from "@/lib/homepage-scroll";
 import { HOMEPAGE_SCROLL_TO_GAME } from "@/lib/product-positioning";
 
 const SCROLL_TOP_THRESHOLD = 48;
@@ -11,7 +11,7 @@ export function HomepageCubeFaceHint() {
   const [atTop, setAtTop] = useState(true);
 
   useEffect(() => {
-    const scroller = document.querySelector<HTMLElement>("[data-homepage-flip-scroll]");
+    const scroller = getHomepageFlipScroller();
     if (!scroller) return;
 
     const onScroll = () => {

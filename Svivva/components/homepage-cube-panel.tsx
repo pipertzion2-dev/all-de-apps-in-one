@@ -11,6 +11,7 @@ import { HomepageFounderSonSection } from "@/components/homepage-founder-son-sec
 import { HomepagePricingSection } from "@/components/homepage-pricing-section";
 import { HomepageCubeFaceHint } from "@/components/homepage-cube-face-hint";
 import { HomepageMainGoal } from "@/components/homepage-main-goal";
+import { scrollPlatformSection } from "@/lib/homepage-scroll";
 
 const PlatformFeatureHub = dynamic(
   () => import("@/components/platform-feature-hub").then((m) => m.PlatformFeatureHub),
@@ -38,10 +39,6 @@ export function HomepageCubePanel({
   mountCanvas = true,
   interactive = true,
 }: HomepageCubePanelProps) {
-  const scrollToSection = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
   return (
     <div className="relative bg-background pb-8">
       {interactive ? <HomepageCubeFaceHint /> : null}
@@ -62,7 +59,7 @@ export function HomepageCubePanel({
         <div className="relative z-20 flex justify-center px-4 pb-4">
           <button
             type="button"
-            onClick={() => scrollToSection("about")}
+            onClick={() => scrollPlatformSection("about")}
             className="rounded-full border border-[#5B8DA8]/40 bg-background/90 px-5 py-2 text-xs font-medium tracking-wide text-foreground shadow-sm backdrop-blur-sm transition-transform active:scale-95"
           >
             Scroll ↓
