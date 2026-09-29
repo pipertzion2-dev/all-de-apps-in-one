@@ -169,6 +169,16 @@ export const OBSTACLE_CONTACT: Record<ObstacleKind, ContactProfile> = {
     canScuff: true,
     closeCallPad: 1.0,
   },
+  copycam: {
+    substance: "dust",
+    intensity: 0.85,
+    splash: false,
+    preferShoe: null,
+    zones: ["toeBox", "leftSide", "rightSide", "laces"],
+    jumpable: false,
+    canScuff: true,
+    closeCallPad: 1.05,
+  },
 };
 
 export function contactForObstacle(kind: ObstacleKind): ContactProfile {
@@ -283,6 +293,7 @@ const OBSTACLE_OH_NO: Record<ObstacleKind, readonly OhNoAction[]> = {
   street: ["twist", "liftFoot"],
   pedestrian: ["block", "liftFoot"],
   bike: ["hop", "block"],
+  copycam: ["block", "twist"],
 };
 
 export function pickOhNoActionForObstacle(kind: ObstacleKind): OhNoAction {

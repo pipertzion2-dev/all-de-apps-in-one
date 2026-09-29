@@ -42,6 +42,7 @@ const OBSTACLE_VISION: Record<ObstacleKind, VisionLevel> = {
   mud: "disaster",
   pedestrian: "danger",
   bike: "danger",
+  copycam: "unknown",
 };
 
 export function visionForObstacle(kind: ObstacleKind): VisionLevel {

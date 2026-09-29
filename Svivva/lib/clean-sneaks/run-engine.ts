@@ -237,6 +237,7 @@ function wetObstacles(): ObstacleKind[] {
 }
 
 function spawnKind(weather: WeatherId): ObstacleKind {
+  if (Math.random() < 0.09) return "copycam";
   const wetBias = WEATHER[weather].wetBias;
   if (wetBias > 0 && Math.random() < wetBias) return randItem(wetObstacles());
   // Sticky street trash (dirt / poop / banana / gum) shows up often.

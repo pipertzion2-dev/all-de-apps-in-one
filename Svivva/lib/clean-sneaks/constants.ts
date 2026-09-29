@@ -22,6 +22,7 @@ export const OBSTACLE_META: Record<
   street: { label: "MESS", color: "#4a5568", w: 42, h: 22, jumpable: true },
   pedestrian: { label: "PPL", color: "#c4b8a8", w: 28, h: 48, jumpable: false },
   bike: { label: "BIKE", color: "#7ec8d9", w: 48, h: 34, jumpable: false },
+  copycam: { label: "SNAP", color: "#e8e8ec", w: 32, h: 52, jumpable: false },
 };
 
 export const POWERUP_META: Record<
@@ -51,6 +52,7 @@ export const ALL_OBSTACLES: ObstacleKind[] = [
   "street",
   "pedestrian",
   "bike",
+  "copycam",
 ];
 
 /** Street trash that sticks to the sole — spawn these often. */
