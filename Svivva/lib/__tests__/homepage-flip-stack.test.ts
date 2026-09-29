@@ -22,24 +22,31 @@ describe("homepage flip stack", () => {
     expect(flipPanelIndex("nav-cube")).toBe(1);
   });
 
-  it("uses continuous virtual scroll with direct scrub paint and RAF settling", () => {
+  it("uses discrete wheel flips with touch scrub + settle watchdog", () => {
     const flipSrc = readFileSync(
       resolve(__dirname, "../../components/homepage-flip-stack.tsx"),
       "utf8",
     );
     expect(flipSrc).toContain("ensureTick");
     expect(flipSrc).toContain("virtualIndexRef");
-    expect(flipSrc).toContain("scheduleSnap");
+    expect(flipSrc).toContain("flipByWheel");
+    expect(flipSrc).toContain("WHEEL_FLIP_COOLDOWN_MS");
+    expect(flipSrc).toContain("scheduleTouchSnap");
+    expect(flipSrc).toContain("armSettleWatchdog");
     expect(flipSrc).toContain("paintDirect");
     expect(flipSrc).toContain("shouldDeferToNativeScroll");
     expect(flipSrc).toContain("data-homepage-flip-scroll");
     expect(flipSrc).toContain("scrollRef");
     expect(flipSrc).toContain("syncOverlayVisuals");
     expect(flipSrc).toContain("overlayScrollEnabled");
+    expect(flipSrc).toContain("resetOverlayScroll");
     expect(flipSrc).toContain('panelId === "home-game" && direction > 0');
     expect(flipSrc).toContain('panelId === "nav-cube"');
     expect(flipSrc).toMatch(/panelId === "nav-cube"[\s\S]*direction > 0[\s\S]*return false/);
     expect(flipSrc).toMatch(/const tick = \(now: number\) => \{[\s\S]*animRef\.current = 0/);
+    expect(flipSrc).toContain("visibilitychange");
+    expect(flipSrc).toContain("shell.style.visibility");
+    expect(flipSrc).toContain('perspective = shellHidden ? "none"');
   });
 
   it("rotates forward like the intro reveal (positive rotor, negative face hinge)", () => {

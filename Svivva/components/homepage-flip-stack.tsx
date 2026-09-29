@@ -17,12 +17,15 @@ type HomepageFlipStackProps = {
 };
 
 const FLIP_SETTLE_EPSILON = 0.02;
-const WHEEL_SNAP_MS = 320;
+const TOUCH_SNAP_MS = 180;
 const SWIPE_THRESHOLD_PX = 40;
 const MAX_PANEL_INDEX = 1;
 const SCROLL_EDGE_THRESHOLD = 8;
-const OVERLAY_FADE_START = 0.12;
-const OVERLAY_FADE_END = 0.88;
+/** Narrow fade so mid-flip never lingers as a readable ghost of about/pricing. */
+const OVERLAY_FADE_START = 0.55;
+const OVERLAY_FADE_END = 0.92;
+const SETTLE_WATCHDOG_MS = 420;
+const WHEEL_FLIP_COOLDOWN_MS = 480;
 
 function overlayOpacityForIndex(index: number): number {
   return Math.min(
@@ -31,8 +34,9 @@ function overlayOpacityForIndex(index: number): number {
   );
 }
 
-function overlayScrollEnabled(index: number, panel: HomepageFlipPanelId): boolean {
-  return panel === "nav-cube" && index >= OVERLAY_FADE_END - FLIP_SETTLE_EPSILON;
+/** Scroll unlocks from progress alone so we never block the overlay while it looks settled. */
+function overlayScrollEnabled(index: number): boolean {
+  return index >= OVERLAY_FADE_END - FLIP_SETTLE_EPSILON;
 }
 
 /** Two full-viewport faces — game, then homepage (cube + pricing). */
@@ -53,7 +57,10 @@ export function HomepageFlipStack({
   const activePanelRef = useRef<HomepageFlipPanelId>(initialPanel);
   const scrubbingRef = useRef(false);
   const animRef = useRef(0);
-  const wheelSnapTimerRef = useRef(0);
+  const touchSnapTimerRef = useRef(0);
+  const settleWatchdogRef = useRef(0);
+  const wheelCooldownRef = useRef(0);
+  const wheelLockUntilRef = useRef(0);
   const [activePanel, setActivePanel] = useState<HomepageFlipPanelId>(initialPanel);
 
   const panels = [
@@ -61,17 +68,27 @@ export function HomepageFlipStack({
     { id: "nav-cube" as const, node: begin },
   ];
 
+  const resetOverlayScroll = useCallback(() => {
+    const scroller = scrollRef.current;
+    if (scroller && scroller.scrollTop !== 0) {
+      scroller.scrollTop = 0;
+    }
+  }, []);
+
   const syncOverlayVisuals = useCallback(
     (index: number, panel: HomepageFlipPanelId) => {
       const scroller = scrollRef.current;
       const shell = shellRef.current;
+      const rotor = rotorRef.current;
       const opacity = overlayOpacityForIndex(index);
-      const scrollEnabled = overlayScrollEnabled(index, panel);
+      const scrollEnabled = overlayScrollEnabled(index);
       const shellHidden = scrollEnabled;
 
       if (scroller) {
         scroller.style.opacity = String(opacity);
-        scroller.style.visibility = index > 0.02 ? "visible" : "hidden";
+        // Keep the overlay out of Safari's compositor until the flip is nearly done,
+        // so about/pricing never ghost over the game face mid-scrub.
+        scroller.style.visibility = opacity > 0.04 ? "visible" : "hidden";
         scroller.style.pointerEvents = scrollEnabled ? "auto" : "none";
         scroller.style.touchAction = scrollEnabled ? "pan-y" : "none";
         scroller.setAttribute("aria-hidden", scrollEnabled ? "false" : "true");
@@ -79,10 +96,29 @@ export function HomepageFlipStack({
 
       if (shell) {
         shell.style.opacity = shellHidden ? "0" : "1";
+        shell.style.visibility = shellHidden ? "hidden" : "visible";
         shell.style.pointerEvents = interactive && !shellHidden ? "auto" : "none";
+        // Drop 3D promotion while the homepage overlay owns the screen — Safari
+        // otherwise composites the dormant rotor with WebGL camo and "sticks".
+        shell.style.perspective = shellHidden ? "none" : "2400px";
+      }
+
+      if (rotor) {
+        rotor.style.willChange = shellHidden ? "auto" : "transform";
+      }
+
+      faceRefs.current.forEach((face) => {
+        if (!face) return;
+        face.style.willChange = shellHidden ? "auto" : "transform";
+      });
+
+      // Leaving the homepage face: wipe scroll so a later fade never reveals
+      // about/pricing mid-viewport from a previous visit.
+      if (panel === "home-game" || index < OVERLAY_FADE_START) {
+        resetOverlayScroll();
       }
     },
-    [interactive],
+    [interactive, resetOverlayScroll],
   );
 
   const paintFaces = useCallback(() => {
@@ -112,6 +148,13 @@ export function HomepageFlipStack({
     if (animRef.current) {
       cancelAnimationFrame(animRef.current);
       animRef.current = 0;
+    }
+  }, []);
+
+  const clearSettleWatchdog = useCallback(() => {
+    if (settleWatchdogRef.current) {
+      window.clearTimeout(settleWatchdogRef.current);
+      settleWatchdogRef.current = 0;
     }
   }, []);
 
@@ -147,7 +190,7 @@ export function HomepageFlipStack({
         return;
       }
 
-      const smoothing = 1 - Math.exp(-20 * dt);
+      const smoothing = 1 - Math.exp(-22 * dt);
       current += delta * smoothing;
       if ((delta > 0 && current > target) || (delta < 0 && current < target)) {
         current = target;
@@ -171,10 +214,10 @@ export function HomepageFlipStack({
     [syncOverlayVisuals],
   );
 
-  const clearSnapTimer = useCallback(() => {
-    if (wheelSnapTimerRef.current) {
-      window.clearTimeout(wheelSnapTimerRef.current);
-      wheelSnapTimerRef.current = 0;
+  const clearTouchSnapTimer = useCallback(() => {
+    if (touchSnapTimerRef.current) {
+      window.clearTimeout(touchSnapTimerRef.current);
+      touchSnapTimerRef.current = 0;
     }
   }, []);
 
@@ -187,17 +230,20 @@ export function HomepageFlipStack({
       if (settled) return;
 
       scrubbingRef.current = false;
-      clearSnapTimer();
+      clearTouchSnapTimer();
+      clearSettleWatchdog();
+      if (panel === "home-game") resetOverlayScroll();
       virtualIndexRef.current = next;
       targetIndexRef.current = next;
       commitPanel(panel);
       ensureTick();
     },
-    [clearSnapTimer, commitPanel, ensureTick],
+    [clearSettleWatchdog, clearTouchSnapTimer, commitPanel, ensureTick, resetOverlayScroll],
   );
 
   const snapToNearestPanel = useCallback(() => {
     scrubbingRef.current = false;
+    clearSettleWatchdog();
     const snapped = Math.min(MAX_PANEL_INDEX, Math.max(0, Math.round(virtualIndexRef.current)));
     if (
       snapped === Math.round(targetIndexRef.current) &&
@@ -205,22 +251,37 @@ export function HomepageFlipStack({
     ) {
       virtualIndexRef.current = snapped;
       targetIndexRef.current = snapped;
+      commitPanel(flipPanelFromIndex(snapped));
+      syncOverlayVisuals(snapped, flipPanelFromIndex(snapped));
       return;
     }
     virtualIndexRef.current = snapped;
     targetIndexRef.current = snapped;
+    if (snapped === 0) resetOverlayScroll();
     commitPanel(flipPanelFromIndex(snapped));
     ensureTick();
-  }, [commitPanel, ensureTick]);
+  }, [clearSettleWatchdog, commitPanel, ensureTick, resetOverlayScroll, syncOverlayVisuals]);
 
-  const scheduleSnap = useCallback(() => {
-    if (wheelSnapTimerRef.current) {
-      window.clearTimeout(wheelSnapTimerRef.current);
+  const armSettleWatchdog = useCallback(() => {
+    clearSettleWatchdog();
+    settleWatchdogRef.current = window.setTimeout(() => {
+      settleWatchdogRef.current = 0;
+      if (scrubbingRef.current) return;
+      const nearest = Math.round(displayedIndexRef.current);
+      if (Math.abs(displayedIndexRef.current - nearest) > FLIP_SETTLE_EPSILON) {
+        snapToNearestPanel();
+      }
+    }, SETTLE_WATCHDOG_MS);
+  }, [clearSettleWatchdog, snapToNearestPanel]);
+
+  const scheduleTouchSnap = useCallback(() => {
+    if (touchSnapTimerRef.current) {
+      window.clearTimeout(touchSnapTimerRef.current);
     }
-    wheelSnapTimerRef.current = window.setTimeout(() => {
-      wheelSnapTimerRef.current = 0;
+    touchSnapTimerRef.current = window.setTimeout(() => {
+      touchSnapTimerRef.current = 0;
       snapToNearestPanel();
-    }, WHEEL_SNAP_MS);
+    }, TOUCH_SNAP_MS);
   }, [snapToNearestPanel]);
 
   useLayoutEffect(() => {
@@ -249,7 +310,9 @@ export function HomepageFlipStack({
   useEffect(() => {
     return () => {
       stopAnim();
-      if (wheelSnapTimerRef.current) window.clearTimeout(wheelSnapTimerRef.current);
+      if (touchSnapTimerRef.current) window.clearTimeout(touchSnapTimerRef.current);
+      if (settleWatchdogRef.current) window.clearTimeout(settleWatchdogRef.current);
+      if (wheelCooldownRef.current) window.clearTimeout(wheelCooldownRef.current);
     };
   }, [stopAnim]);
 
@@ -262,12 +325,24 @@ export function HomepageFlipStack({
     return () => window.removeEventListener(HOMEPAGE_FLIP_EVENT, onFlip);
   }, [goToPanel]);
 
+  // Force-complete any mid-flip if the tab hides — Safari often freezes RAF there.
+  useEffect(() => {
+    if (!interactive) return;
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") {
+        snapToNearestPanel();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
+  }, [interactive, snapToNearestPanel]);
+
   useEffect(() => {
     if (!interactive) return;
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const mobile = window.matchMedia("(max-width: 767px)").matches;
-    const scrollGain = mobile ? 0.0028 : 0.0022;
+    const scrollGain = mobile ? 0.0032 : 0.0026;
 
     const settledPanelIndex = () =>
       Math.min(MAX_PANEL_INDEX, Math.max(0, Math.round(targetIndexRef.current)));
@@ -275,12 +350,11 @@ export function HomepageFlipStack({
     const panelIdForInput = () =>
       scrubbingRef.current
         ? activePanelRef.current
-        : (panels[settledPanelIndex()]?.id ?? "home-game");
+        : (flipPanelFromIndex(settledPanelIndex()) as HomepageFlipPanelId);
 
     const scrollSurfaceFor = () => scrollRef.current;
 
-    const isNavCubeScrollActive = () =>
-      overlayScrollEnabled(displayedIndexRef.current, activePanelRef.current);
+    const isNavCubeScrollActive = () => overlayScrollEnabled(displayedIndexRef.current);
 
     const faceScrollState = (face: HTMLDivElement | null) => {
       if (!face) {
@@ -331,7 +405,32 @@ export function HomepageFlipStack({
       return false;
     };
 
-    const applyDelta = (deltaY: number) => {
+    /** Trackpad/mouse: one gesture → one panel. Continuous scrub caused mid-flip stuck states. */
+    const flipByWheel = (deltaY: number) => {
+      if (Math.abs(deltaY) < 0.5) return false;
+      if (performance.now() < wheelLockUntilRef.current) return true;
+
+      const direction: 1 | -1 = deltaY > 0 ? 1 : -1;
+      const panelId = panelIdForInput();
+      const face = isNavCubeScrollActive() ? scrollSurfaceFor() : null;
+      if (!canFlipFromFace(face, direction, panelId)) return false;
+
+      const current = settledPanelIndex();
+      const next = Math.min(MAX_PANEL_INDEX, Math.max(0, current + direction));
+      if (next === current) return false;
+
+      wheelLockUntilRef.current = performance.now() + WHEEL_FLIP_COOLDOWN_MS;
+      if (wheelCooldownRef.current) window.clearTimeout(wheelCooldownRef.current);
+      wheelCooldownRef.current = window.setTimeout(() => {
+        wheelCooldownRef.current = 0;
+        wheelLockUntilRef.current = 0;
+      }, WHEEL_FLIP_COOLDOWN_MS);
+
+      goToPanel(flipPanelFromIndex(next));
+      return true;
+    };
+
+    const applyTouchDelta = (deltaY: number) => {
       if (Math.abs(deltaY) < 0.5) return false;
 
       const direction: 1 | -1 = deltaY > 0 ? 1 : -1;
@@ -357,8 +456,19 @@ export function HomepageFlipStack({
         Math.max(0, virtualIndexRef.current + deltaY * scrollGain),
       );
       targetIndexRef.current = virtualIndexRef.current;
+
+      // Commit early when crossing the midpoint so overlay unlock matches what users see.
+      const provisional = flipPanelFromIndex(Math.round(virtualIndexRef.current));
+      if (
+        provisional !== activePanelRef.current &&
+        Math.abs(virtualIndexRef.current - 0.5) > 0.08
+      ) {
+        commitPanel(provisional);
+      }
+
       paintDirect(virtualIndexRef.current);
-      scheduleSnap();
+      scheduleTouchSnap();
+      armSettleWatchdog();
       return true;
     };
 
@@ -377,7 +487,7 @@ export function HomepageFlipStack({
         return;
       }
 
-      if (applyDelta(delta)) {
+      if (flipByWheel(delta)) {
         e.preventDefault();
       }
     };
@@ -393,10 +503,7 @@ export function HomepageFlipStack({
         isNavCubeScrollActive() &&
         scrollRef.current?.contains(e.target instanceof Node ? e.target : null),
       );
-      if (wheelSnapTimerRef.current) {
-        window.clearTimeout(wheelSnapTimerRef.current);
-        wheelSnapTimerRef.current = 0;
-      }
+      clearTouchSnapTimer();
     };
 
     const onTouchMove = (e: TouchEvent) => {
@@ -410,7 +517,7 @@ export function HomepageFlipStack({
           touchScrubbing = true;
           touchOnScroller = false;
           touchStartY = y;
-          if (applyDelta(delta)) {
+          if (applyTouchDelta(delta)) {
             e.preventDefault();
           }
         }
@@ -419,7 +526,7 @@ export function HomepageFlipStack({
 
       touchScrubbing = true;
       touchStartY = y;
-      if (applyDelta(delta)) {
+      if (applyTouchDelta(delta)) {
         e.preventDefault();
       }
     };
@@ -451,19 +558,9 @@ export function HomepageFlipStack({
       const face = isNavCubeScrollActive() ? scrollSurfaceFor() : null;
       if (!canFlipFromFace(face, direction, panelId)) return;
 
-      if (reducedMotion) {
-        const next = Math.min(MAX_PANEL_INDEX, Math.max(0, current + direction));
-        if (next !== current) goToPanel(flipPanelFromIndex(next));
-        return;
-      }
-
       const next = Math.min(MAX_PANEL_INDEX, Math.max(0, current + direction));
       if (next === current) return;
-      scrubbingRef.current = false;
-      virtualIndexRef.current = next;
-      targetIndexRef.current = next;
-      commitPanel(flipPanelFromIndex(next));
-      ensureTick();
+      goToPanel(flipPanelFromIndex(next));
     };
 
     window.addEventListener("wheel", onWheel, { passive: false });
@@ -478,12 +575,12 @@ export function HomepageFlipStack({
     };
   }, [
     interactive,
+    armSettleWatchdog,
+    clearTouchSnapTimer,
     commitPanel,
-    ensureTick,
     goToPanel,
     paintDirect,
-    panels,
-    scheduleSnap,
+    scheduleTouchSnap,
     snapToNearestPanel,
   ]);
 
@@ -553,12 +650,11 @@ export function HomepageFlipStack({
         style={{
           opacity: overlayOpacityForIndex(flipPanelIndex(initialPanel)),
           visibility: flipPanelIndex(initialPanel) > 0.02 ? "visible" : "hidden",
-          pointerEvents: overlayScrollEnabled(flipPanelIndex(initialPanel), initialPanel)
-            ? "auto"
-            : "none",
+          pointerEvents: overlayScrollEnabled(flipPanelIndex(initialPanel)) ? "auto" : "none",
           overscrollBehavior: "contain",
           WebkitOverflowScrolling: "touch",
-          transform: "translateZ(0)",
+          // Avoid translateZ(0) here — it fights WebGL camo layers in Safari.
+          transform: "none",
         }}
       >
         {begin}
