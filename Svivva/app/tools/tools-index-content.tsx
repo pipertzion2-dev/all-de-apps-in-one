@@ -38,7 +38,13 @@ const NATIVE_TOOL_SLUGS = new Set([
   "channel-blend-preview",
   "oaas-patch-preview",
   "zzai-face-chooser",
+  "cube-walkthrough-pack",
   "sketch-hash-stamp",
+  "klean-score-estimator",
+  "bundle-unlock-checker",
+  "homepage-flip-guide",
+  "bpm-tap-tempo",
+  "sneaker-clean-label",
 ]);
 
 function toolPageHref(tool: { slug: string; published: boolean; toolUrl: string | null }): string {
