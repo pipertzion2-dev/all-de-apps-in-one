@@ -43,6 +43,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import type { GuardrailsAssessment } from "@/lib/guardrails";
 
 interface Project {
   id: string;
@@ -84,6 +95,8 @@ export default function ProjectDetailPage() {
   const [breedVersionA, setBreedVersionA] = useState("");
   const [breedVersionB, setBreedVersionB] = useState("");
   const [augmentStrategy, setAugmentStrategy] = useState("diversity");
+  const [deployGuardrailsOpen, setDeployGuardrailsOpen] = useState(false);
+  const [deployGuardrails, setDeployGuardrails] = useState<GuardrailsAssessment | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -196,7 +209,24 @@ export default function ProjectDetailPage() {
       });
       if (!response.ok) return [];
       const data = await response.json();
-      return data.versions || [];
+      return Array.isArray(data) ? data : data.versions || [];
+    },
+    enabled: !!projectId,
+  });
+
+  const { data: guardrailsPreview, refetch: refetchGuardrails } = useQuery<{
+    guardrails: GuardrailsAssessment;
+  }>({
+    queryKey: ["/api/projects", projectId, "guardrails", "preview"],
+    queryFn: async () => {
+      const response = await fetch(`/api/projects/${projectId}/guardrails/preview`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      if (!response.ok) throw new Error("Failed to preview guardrails");
+      return response.json();
     },
     enabled: !!projectId,
   });
@@ -469,6 +499,107 @@ export default function ProjectDetailPage() {
     },
   });
 
+  const runEvalsMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch(`/api/projects/${projectId}/run-evals`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ threshold: 0.7, autoRollback: true }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Eval run failed");
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "versions"] });
+      const pass = data.results?.passRatePercent ?? "—";
+      toast({
+        title: `Eval pass rate: ${pass}`,
+        description: data.rollback?.performed
+          ? `Auto-rollback to v${data.rollback.version}`
+          : data.results?.thresholdMet
+            ? "Threshold met — ship stays Klean."
+            : "Review failed cases before deploy.",
+      });
+    },
+    onError: (err) => {
+      toast({
+        title: "Eval run failed",
+        description: err instanceof Error ? err.message : "Unknown error",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deployMutation = useMutation({
+    mutationFn: async (force: boolean) => {
+      const response = await fetch(`/api/projects/${projectId}/deploy`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ force }),
+      });
+      const data = await response.json();
+      if (response.status === 422) {
+        return { blocked: true as const, guardrails: data.guardrails as GuardrailsAssessment };
+      }
+      if (!response.ok) throw new Error(data.error || "Deploy failed");
+      return { blocked: false as const, ...data };
+    },
+    onSuccess: (data) => {
+      if (data.blocked) {
+        setDeployGuardrails(data.guardrails);
+        setDeployGuardrailsOpen(true);
+        return;
+      }
+      queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId] });
+      refetchGuardrails();
+      toast({
+        title: "Deployed",
+        description: data.liveUrl ? `Live at ${data.liveUrl}` : "Endpoint is live.",
+      });
+    },
+    onError: (err) => {
+      toast({
+        title: "Deploy failed",
+        description: err instanceof Error ? err.message : "Unknown error",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const rollbackMutation = useMutation({
+    mutationFn: async (versionId: string) => {
+      const response = await fetch(`/api/projects/${projectId}/rollback`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ versionId }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Rollback failed");
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "versions"] });
+      refetchGuardrails();
+      toast({
+        title: "Rolled back",
+        description: `Restored v${data.rolledBackTo?.version}`,
+      });
+    },
+    onError: (err) => {
+      toast({
+        title: "Rollback failed",
+        description: err instanceof Error ? err.message : "Unknown error",
+        variant: "destructive",
+      });
+    },
+  });
+
   const neuralAnomalyMutation = useMutation({
     mutationFn: async () => {
       const response = await fetch(`/api/projects/${projectId}/neural/anomalies`, {
@@ -606,16 +737,101 @@ export default function ProjectDetailPage() {
             )}
             {isExporting ? "Exporting..." : "Export API Blueprint"}
           </Button>
-          <Button variant="outline" className="gap-2" data-testid="button-run-evals">
-            <Play className="w-4 h-4" />
+          <Button
+            variant="outline"
+            className="gap-2"
+            data-testid="button-run-evals"
+            onClick={() => runEvalsMutation.mutate()}
+            disabled={runEvalsMutation.isPending}
+          >
+            {runEvalsMutation.isPending ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Play className="w-4 h-4" />
+            )}
             Run Tests
           </Button>
-          <Button className="bg-[#7B8DAC] hover:bg-[#6B7D9C] gap-2" data-testid="button-deploy">
-            <CheckCircle2 className="w-4 h-4" />
+          <Button
+            className="bg-[#7B8DAC] hover:bg-[#6B7D9C] gap-2"
+            data-testid="button-deploy"
+            onClick={() => deployMutation.mutate(false)}
+            disabled={deployMutation.isPending}
+          >
+            {deployMutation.isPending ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <CheckCircle2 className="w-4 h-4" />
+            )}
             Deploy
           </Button>
         </div>
       </div>
+
+      <AlertDialog open={deployGuardrailsOpen} onOpenChange={setDeployGuardrailsOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <ShieldAlert className="w-5 h-5 text-amber-500" />
+              Sneak Vision — deploy hazards
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3 text-sm text-muted-foreground">
+                <p>
+                  Klean guardrails blocked this deploy. Fix high-severity hazards or deploy anyway
+                  (not recommended).
+                </p>
+                <ul className="space-y-2">
+                  {deployGuardrails?.blockers.map((h, i) => (
+                    <li key={`${h.key}-${i}`} className="rounded-md border p-2 text-foreground">
+                      <span className="font-medium text-amber-600">{h.category}</span>: {h.message}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Fix first</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deployMutation.mutate(true)}
+              className="bg-amber-600 hover:bg-amber-700"
+            >
+              Deploy anyway
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {guardrailsPreview?.guardrails && (
+        <Card data-testid="card-guardrails-preview">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-base">
+              {guardrailsPreview.guardrails.ready ? (
+                <ShieldCheck className="w-5 h-5 text-green-600" />
+              ) : (
+                <ShieldAlert className="w-5 h-5 text-amber-500" />
+              )}
+              Klean guardrails
+            </CardTitle>
+            <CardDescription>
+              Score {guardrailsPreview.guardrails.score}/100 — schema enforcement{" "}
+              {guardrailsPreview.guardrails.schemaEnforced ? "on" : "off"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" onClick={() => refetchGuardrails()}>
+              <RefreshCw className="w-3 h-3 mr-1" />
+              Refresh hazard preview
+            </Button>
+            {!guardrailsPreview.guardrails.ready && (
+              <Badge variant="secondary" className="text-amber-700">
+                {guardrailsPreview.guardrails.blockers.length} blocker
+                {guardrailsPreview.guardrails.blockers.length === 1 ? "" : "s"}
+              </Badge>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>
@@ -1028,7 +1244,24 @@ export default function ProjectDetailPage() {
                           </p>
                         </div>
                       </div>
-                      {i === 0 && <Badge variant="secondary">Current</Badge>}
+                      <div className="flex items-center gap-2">
+                        {i === 0 && <Badge variant="secondary">Current</Badge>}
+                        {i !== 0 && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={rollbackMutation.isPending}
+                            onClick={() => rollbackMutation.mutate(v.id)}
+                            data-testid={`button-rollback-${v.version}`}
+                          >
+                            {rollbackMutation.isPending ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              "Roll back"
+                            )}
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   ))
                 ) : (
