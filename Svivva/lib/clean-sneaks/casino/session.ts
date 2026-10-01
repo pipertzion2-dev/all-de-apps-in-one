@@ -12,6 +12,7 @@ export function emptyCasinoSession(): SessionCasinoState {
     scoreAccepted: false,
     cardGamesPlayed: 0,
     cardGamesWon: 0,
+    unlockedUpgrades: [],
   };
 }
 
@@ -36,6 +37,9 @@ export function readCasinoSession(): SessionCasinoState {
       cardGamesWon: Math.max(0, Math.floor(Number(parsed.cardGamesWon) || 0)),
       casinoUnlocked: Boolean(parsed.casinoUnlocked),
       scoreAccepted: Boolean(parsed.scoreAccepted),
+      unlockedUpgrades: Array.isArray(parsed.unlockedUpgrades)
+        ? parsed.unlockedUpgrades.map(String)
+        : [],
     };
   } catch {
     return emptyCasinoSession();

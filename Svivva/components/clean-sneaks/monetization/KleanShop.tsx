@@ -218,7 +218,7 @@ export function KleanShop({ open, onClose }: Props) {
                 )}
                 {item.section === "currency" && item.priceCents != null && (
                   <p className="text-[11px] text-[#e8dcc0]/55">
-                    ${(item.priceCents / 100).toFixed(2)} via Apple Pay / Cash App in casino lobby
+                    Earn credits on the walk — unlock table upgrades in the casino lobby
                   </p>
                 )}
               </div>

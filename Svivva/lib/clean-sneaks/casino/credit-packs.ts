@@ -1,6 +1,6 @@
 /**
- * Entertainment credit packs for Steal the Bundle.
- * Apple Pay (via Stripe) and Cash App buy virtual chips — never redeemable for cash.
+ * Legacy pack ids for upgrade tiers (see casino/upgrades.ts).
+ * Real-money checkout routes remain for admin tooling; the game UI unlocks with earned credits.
  */
 
 import { getCashAppTag } from "@/lib/interim-payments";
