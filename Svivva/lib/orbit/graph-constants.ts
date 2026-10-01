@@ -123,6 +123,15 @@ export const ORBIT_PUBLISH_STATUSES = [
 ] as const;
 export type OrbitPublishStatus = (typeof ORBIT_PUBLISH_STATUSES)[number];
 
+export const ORBIT_VALIDATION_STATUSES = ["pending", "passed", "failed", "skipped"] as const;
+export type OrbitValidationStatus = (typeof ORBIT_VALIDATION_STATUSES)[number];
+
+export const ORBIT_APPROVAL_STATUSES = ["pending", "approved", "rejected"] as const;
+export type OrbitApprovalStatus = (typeof ORBIT_APPROVAL_STATUSES)[number];
+
+export const ORBIT_BODY_FORMATS = ["markdown", "html", "json", "plain"] as const;
+export type OrbitBodyFormat = (typeof ORBIT_BODY_FORMATS)[number];
+
 export const ORBIT_DISTRIBUTION_PROVIDERS = [
   "devto",
   "hashnode",
