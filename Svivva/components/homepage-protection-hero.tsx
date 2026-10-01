@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 export function HomepageProtectionHero() {
   return (
     <section
-      className="relative snap-start scroll-mt-4 border-b border-border/40 bg-gradient-to-b from-[#5B8DA8]/8 to-background px-4 pb-10 pt-8 sm:px-6 sm:pb-14 sm:pt-10"
+      className="relative scroll-mt-4 border-b border-border/40 bg-gradient-to-b from-[#5B8DA8]/8 to-background px-4 pb-10 pt-8 sm:px-6 sm:pb-14 sm:pt-10"
       data-testid="homepage-protection-hero"
     >
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-8 lg:max-w-6xl lg:flex-row lg:items-center lg:justify-between">
@@ -23,7 +23,14 @@ export function HomepageProtectionHero() {
           </h1>
           <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
             {PRODUCT_PROTECTION_PITCH} Use it for sketches, sneaker colorways, lyrics, or API
-            schemas — anything you may need to prove you had first.
+            schemas — anything you may need to prove you had first.{" "}
+            <a
+              href="#why-poor-man-protection"
+              className="font-medium text-[#5B8DA8] underline-offset-2 hover:underline"
+            >
+              Why it beats a stamped envelope
+            </a>
+            .
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3 lg:justify-start">
             <Button asChild className="bg-[#5B8DA8] text-white">

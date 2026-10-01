@@ -32,7 +32,7 @@ describe("homepage flip stack", () => {
     expect(flipSrc).toContain("scheduleSnap");
     expect(flipSrc).toContain("paintDirect");
     expect(flipSrc).toContain("onPlatformWheel");
-    expect(flipSrc).toContain("scroll-smooth");
+    expect(flipSrc).toContain("overscroll-y-contain");
     expect(flipSrc).toContain("platformScrollMode");
     expect(flipSrc).toContain("data-homepage-flip-scroll");
     expect(flipSrc).toContain("scrollRef");

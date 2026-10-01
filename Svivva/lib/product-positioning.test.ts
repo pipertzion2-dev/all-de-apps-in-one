@@ -5,6 +5,8 @@ import {
   isBetaPlatformFeatureId,
   isBetaSurfacePath,
   isCorePlatformFeatureId,
+  POOR_MAN_COMPARISON_ROWS,
+  POOR_MAN_UNIQUE_POINTS,
   PRODUCT_TAGLINE,
 } from "./product-positioning";
 
@@ -40,5 +42,10 @@ describe("product-positioning", () => {
 
   it("uses the Poor Man Protection tagline", () => {
     expect(PRODUCT_TAGLINE).toMatch(/Poor Man Protection/i);
+  });
+
+  it("documents poor-man vs envelope comparison for the homepage", () => {
+    expect(POOR_MAN_COMPARISON_ROWS.length).toBeGreaterThanOrEqual(4);
+    expect(POOR_MAN_UNIQUE_POINTS.some((p) => /dual-axis/i.test(p.title))).toBe(true);
   });
 });

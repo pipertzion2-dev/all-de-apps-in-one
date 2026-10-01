@@ -32,8 +32,9 @@ function overlayOpacityForIndex(index: number): number {
   );
 }
 
+/** Match visibility — if users can read the overlay, they must be able to scroll it (mobile). */
 function overlayScrollEnabled(index: number, panel: HomepageFlipPanelId): boolean {
-  return panel === "nav-cube" && index >= OVERLAY_FADE_END - FLIP_SETTLE_EPSILON;
+  return panel === "nav-cube" && index >= OVERLAY_FADE_START - FLIP_SETTLE_EPSILON;
 }
 
 /** Two full-viewport faces — game, then homepage (cube + pricing). */
@@ -292,10 +293,10 @@ export function HomepageFlipStack({
     const isNavCubeScrollActive = () =>
       overlayScrollEnabled(displayedIndexRef.current, activePanelRef.current);
 
-    /** Settled on platform face — use native overlay scroll, not flip scrubbing. */
+    /** Platform face visible — native overlay scroll, not flip scrubbing (see OVERLAY_FADE_START). */
     const platformScrollMode = () =>
       activePanelRef.current === "nav-cube" &&
-      displayedIndexRef.current >= OVERLAY_FADE_END - FLIP_SETTLE_EPSILON;
+      displayedIndexRef.current >= OVERLAY_FADE_START - FLIP_SETTLE_EPSILON;
 
     const faceScrollState = (face: HTMLDivElement | null) => {
       if (!face) {
@@ -582,7 +583,7 @@ export function HomepageFlipStack({
         ref={scrollRef}
         data-homepage-flip-scroll=""
         aria-hidden="true"
-        className="fixed inset-x-0 bottom-0 top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-[15] scroll-smooth snap-y snap-proximity overflow-x-hidden overflow-y-auto bg-background sm:top-[calc(4rem+env(safe-area-inset-top,0px))]"
+        className="fixed inset-x-0 bottom-0 top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-[15] overflow-x-hidden overflow-y-auto overscroll-y-contain bg-background sm:top-[calc(4rem+env(safe-area-inset-top,0px))]"
         style={{
           scrollPaddingTop: "0.75rem",
           opacity: overlayOpacityForIndex(flipPanelIndex(initialPanel)),
