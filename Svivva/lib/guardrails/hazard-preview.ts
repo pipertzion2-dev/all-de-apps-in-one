@@ -115,7 +115,9 @@ export function analyzePromptHazards(systemPrompt: string): GuardrailScanResult 
   return { score: scoreFindings(findings), findings };
 }
 
-export function analyzeOutputSchemaHazards(outputSchema: Record<string, unknown>): GuardrailScanResult {
+export function analyzeOutputSchemaHazards(
+  outputSchema: Record<string, unknown>,
+): GuardrailScanResult {
   const findings: GuardrailFinding[] = [];
   const keys = Object.keys(outputSchema ?? {});
 
