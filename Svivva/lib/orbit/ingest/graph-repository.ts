@@ -52,6 +52,29 @@ export async function getOrbitProjectById(
   return row;
 }
 
+/** Internal scheduler/cron — no user ownership check. */
+export async function getOrbitProjectByIdInternal(
+  projectId: string,
+): Promise<OrbitProject | undefined> {
+  const [row] = await db
+    .select()
+    .from(orbitProjects)
+    .where(eq(orbitProjects.id, projectId))
+    .limit(1);
+  return row;
+}
+
+export async function listReadyOrbitProjectsForScheduler(
+  limit = 50,
+): Promise<OrbitProject[]> {
+  return db
+    .select()
+    .from(orbitProjects)
+    .where(eq(orbitProjects.status, "ready"))
+    .orderBy(desc(orbitProjects.updatedAt))
+    .limit(limit);
+}
+
 export async function getOrbitGraph(projectId: string) {
   const entities = await db
     .select()
