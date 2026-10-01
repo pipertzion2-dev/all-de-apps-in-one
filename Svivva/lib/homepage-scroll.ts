@@ -48,5 +48,6 @@ export function scrollToHomepagePanel(id: HomepageScrollPanelId) {
 export {
   flipPanelFromHash,
   hashForFlipPanel,
+  homepageSectionFromHash,
   type HomepageFlipPanelId,
 } from "./homepage-flip-stack";

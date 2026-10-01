@@ -10,7 +10,13 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { runBodyLayerHygiene } from "@/lib/body-layer-cleanup";
 import { showHomepageSection } from "@/lib/homepage-layout";
-import { flipPanelFromHash, scrollToHomepagePanel } from "@/lib/homepage-scroll";
+import {
+  flipPanelFromHash,
+  getHomepageFlipScroller,
+  homepageSectionFromHash,
+  scrollPlatformSection,
+  scrollToHomepagePanel,
+} from "@/lib/homepage-scroll";
 import { HomepageFlipStack } from "@/components/homepage-flip-stack";
 import { HomepageCubePanel } from "@/components/homepage-cube-panel";
 import { HomepageGamePanel } from "@/components/homepage-game-panel";
@@ -181,14 +187,47 @@ export default function LandingPage() {
 
     const hash = window.location.hash.replace("#", "");
     const flipPanel = flipPanelFromHash(hash);
+    const sectionId = homepageSectionFromHash(hash);
 
     const nextPanel = flipPanel ?? "home-game";
     setFlipInitialPanel((current) => (current === nextPanel ? current : nextPanel));
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
 
+    let sectionTimer: number | undefined;
+    if (sectionId) {
+      const scrollSection = () => {
+        if (!getHomepageFlipScroller()) return false;
+        scrollPlatformSection(sectionId, { behavior: "instant", block: "start" });
+        return true;
+      };
+      scrollToHomepagePanel("nav-cube");
+      requestAnimationFrame(() => {
+        if (!scrollSection()) {
+          sectionTimer = window.setTimeout(scrollSection, 520);
+        }
+      });
+    }
+
     return () => {
+      if (sectionTimer !== undefined) window.clearTimeout(sectionTimer);
       history.scrollRestoration = previousScrollRestoration;
     };
+  }, [flipComplete]);
+
+  useEffect(() => {
+    if (!flipComplete || !showHomepageSection("scrollSnap")) return;
+
+    const onHashChange = () => {
+      const sectionId = homepageSectionFromHash(window.location.hash);
+      if (!sectionId) return;
+      scrollToHomepagePanel("nav-cube");
+      window.requestAnimationFrame(() => {
+        scrollPlatformSection(sectionId, { behavior: "instant", block: "start" });
+      });
+    };
+
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
   }, [flipComplete]);
 
   useEffect(() => {

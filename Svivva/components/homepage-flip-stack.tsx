@@ -24,6 +24,8 @@ const SCROLL_EDGE_THRESHOLD = 8;
 /** Platform content fades in only as the game → home flip finishes (avoids clipping mid-rotation). */
 const OVERLAY_FADE_START = 0.88;
 const OVERLAY_FADE_END = 1;
+/** Absorb flip-wheel momentum so the platform overlay does not shoot to the footer. */
+const PLATFORM_WHEEL_LOCK_MS = 480;
 
 function overlayOpacityForIndex(index: number): number {
   return Math.min(
@@ -55,6 +57,8 @@ export function HomepageFlipStack({
   const scrubbingRef = useRef(false);
   const animRef = useRef(0);
   const wheelSnapTimerRef = useRef(0);
+  const overlayScrollWasEnabledRef = useRef(false);
+  const platformWheelLockUntilRef = useRef(0);
   const [activePanel, setActivePanel] = useState<HomepageFlipPanelId>(initialPanel);
 
   const panels = [
@@ -76,6 +80,15 @@ export function HomepageFlipStack({
         scroller.style.pointerEvents = scrollEnabled ? "auto" : "none";
         scroller.style.touchAction = scrollEnabled ? "pan-y" : "none";
         scroller.setAttribute("aria-hidden", scrollEnabled ? "false" : "true");
+
+        if (!scrollEnabled) {
+          scroller.scrollTop = 0;
+        } else if (!overlayScrollWasEnabledRef.current) {
+          scroller.scrollTop = 0;
+          platformWheelLockUntilRef.current = performance.now() + PLATFORM_WHEEL_LOCK_MS;
+          document.body.style.overflow = "hidden";
+        }
+        overlayScrollWasEnabledRef.current = scrollEnabled;
       }
 
       if (shell) {
@@ -165,7 +178,7 @@ export function HomepageFlipStack({
   const resetPlatformScroll = useCallback(() => {
     const scroller = scrollRef.current;
     if (!scroller) return;
-    scroller.scrollTop = 0;
+    scroller.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
   }, []);
 
   const commitPanel = useCallback(
@@ -175,6 +188,10 @@ export function HomepageFlipStack({
       window.history.replaceState(null, "", `/#${hashForFlipPanel(panel)}`);
       if (panel === "nav-cube") {
         resetPlatformScroll();
+        platformWheelLockUntilRef.current = performance.now() + PLATFORM_WHEEL_LOCK_MS;
+      } else {
+        resetPlatformScroll();
+        document.body.style.overflow = "";
       }
       syncOverlayVisuals(displayedIndexRef.current, panel);
     },
@@ -376,7 +393,13 @@ export function HomepageFlipStack({
     };
 
     const onWheel = (e: WheelEvent) => {
-      if (platformScrollMode()) return;
+      if (platformScrollMode()) {
+        const scroller = scrollRef.current;
+        if (scroller && !scroller.contains(e.target as Node)) {
+          e.preventDefault();
+        }
+        return;
+      }
 
       const delta = normalizeWheelDelta(e);
       if (Math.abs(delta) < 4) return;
@@ -494,16 +517,25 @@ export function HomepageFlipStack({
       platformPullTracking = false;
     };
 
+    const onScrollerWheelCapture = (e: WheelEvent) => {
+      if (performance.now() >= platformWheelLockUntilRef.current) return;
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    scroller?.addEventListener("wheel", onScrollerWheelCapture, { passive: false, capture: true });
     scroller?.addEventListener("wheel", onPlatformWheel, { passive: false });
     scroller?.addEventListener("touchstart", onPlatformTouchStart, { passive: true });
     scroller?.addEventListener("touchmove", onPlatformTouchMove, { passive: false });
     scroller?.addEventListener("touchend", onPlatformTouchEnd, { passive: true });
 
     return () => {
+      document.body.style.overflow = "";
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("touchend", onTouchEnd);
+      scroller?.removeEventListener("wheel", onScrollerWheelCapture, true);
       scroller?.removeEventListener("wheel", onPlatformWheel);
       scroller?.removeEventListener("touchstart", onPlatformTouchStart);
       scroller?.removeEventListener("touchmove", onPlatformTouchMove);
@@ -582,7 +614,7 @@ export function HomepageFlipStack({
         ref={scrollRef}
         data-homepage-flip-scroll=""
         aria-hidden="true"
-        className="fixed inset-x-0 bottom-0 top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-[15] scroll-smooth snap-y snap-proximity overflow-x-hidden overflow-y-auto bg-background sm:top-[calc(4rem+env(safe-area-inset-top,0px))]"
+        className="fixed inset-x-0 bottom-0 top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-[15] overflow-x-hidden overflow-y-auto scroll-auto bg-background sm:top-[calc(4rem+env(safe-area-inset-top,0px))]"
         style={{
           scrollPaddingTop: "0.75rem",
           opacity: overlayOpacityForIndex(flipPanelIndex(initialPanel)),

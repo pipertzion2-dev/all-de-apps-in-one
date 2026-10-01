@@ -10,6 +10,8 @@ describe("homepage flip stack", () => {
     expect(flipPanelFromHash("home-game")).toBe("home-game");
     expect(flipPanelFromHash("clean-sneaks")).toBe("home-game");
     expect(flipPanelFromHash("home-explore")).toBe("nav-cube");
+    expect(flipPanelFromHash("oaas")).toBe("nav-cube");
+    expect(flipPanelFromHash("pricing")).toBe("nav-cube");
   });
 
   it("round-trips hash helpers", () => {
@@ -32,7 +34,9 @@ describe("homepage flip stack", () => {
     expect(flipSrc).toContain("scheduleSnap");
     expect(flipSrc).toContain("paintDirect");
     expect(flipSrc).toContain("onPlatformWheel");
-    expect(flipSrc).toContain("scroll-smooth");
+    expect(flipSrc).toContain("scroll-auto");
+    expect(flipSrc).toContain("PLATFORM_WHEEL_LOCK_MS");
+    expect(flipSrc).toContain("onScrollerWheelCapture");
     expect(flipSrc).toContain("platformScrollMode");
     expect(flipSrc).toContain("data-homepage-flip-scroll");
     expect(flipSrc).toContain("scrollRef");

@@ -15,6 +15,22 @@ export function flipPanelFromIndex(index: number): HomepageFlipPanelId {
   return HOMEPAGE_FLIP_PANELS[Math.min(Math.max(index, 0), HOMEPAGE_FLIP_PANELS.length - 1)];
 }
 
+/** Section ids inside the platform scroll overlay (third homepage face). */
+export const HOMEPAGE_PLATFORM_SECTION_HASHES = new Set([
+  "about",
+  "explore",
+  "faq",
+  "founder-story",
+  "how-it-works",
+  "oaas",
+  "pricing",
+]);
+
+export function homepageSectionFromHash(hash: string): string | null {
+  const id = hash.replace(/^#/, "").trim();
+  return HOMEPAGE_PLATFORM_SECTION_HASHES.has(id) ? id : null;
+}
+
 export function flipPanelFromHash(hash: string): HomepageFlipPanelId | null {
   const id = hash.replace(/^#/, "").trim();
   if (!id) return "home-game";
@@ -22,6 +38,7 @@ export function flipPanelFromHash(hash: string): HomepageFlipPanelId | null {
   if (id === "home-game" || id === "clean-sneaks") return "home-game";
   // Retired explore face — land on the cube homepage instead.
   if (id === "home-explore") return "nav-cube";
+  if (homepageSectionFromHash(id)) return "nav-cube";
   return null;
 }
 
