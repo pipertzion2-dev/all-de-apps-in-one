@@ -27,6 +27,8 @@ export function CleanSneaksLogoCube({ className = "", cacheBust = "v1", onActiva
     if (!host) return;
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const mobile = window.matchMedia("(max-width: 767px)").matches;
+    const dragThreshold = mobile ? 10 : 2;
     const scene = new THREE.Scene();
 
     const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 40);
@@ -46,7 +48,7 @@ export function CleanSneaksLogoCube({ className = "", cacheBust = "v1", onActiva
       display: "block",
       pointerEvents: "auto",
       cursor: "grab",
-      touchAction: "none",
+      touchAction: mobile ? "pan-y" : "none",
     });
     renderer.domElement.setAttribute("aria-hidden", "true");
 
@@ -144,7 +146,10 @@ export function CleanSneaksLogoCube({ className = "", cacheBust = "v1", onActiva
 
     // Drag + momentum (same feel as the homepage artifact cube)
     let isDragging = false;
+    let dragCommitted = false;
     let pointerMoved = false;
+    let pointerStartX = 0;
+    let pointerStartY = 0;
     let lastX = 0;
     let lastY = 0;
     let velX = 0;
@@ -156,20 +161,30 @@ export function CleanSneaksLogoCube({ className = "", cacheBust = "v1", onActiva
     const cv = renderer.domElement;
 
     const onDown = (e: PointerEvent) => {
-      isDragging = true;
+      dragCommitted = false;
+      isDragging = false;
       pointerMoved = false;
+      pointerStartX = e.clientX;
+      pointerStartY = e.clientY;
       lastX = e.clientX;
       lastY = e.clientY;
       velX = velY = 0;
-      cv.setPointerCapture(e.pointerId);
-      cv.style.cursor = "grabbing";
-      e.preventDefault();
     };
     const onMove = (e: PointerEvent) => {
+      if (!dragCommitted) {
+        const totalDx = e.clientX - pointerStartX;
+        const totalDy = e.clientY - pointerStartY;
+        if (Math.abs(totalDx) < dragThreshold && Math.abs(totalDy) < dragThreshold) return;
+        if (mobile && Math.abs(totalDy) >= Math.abs(totalDx)) return;
+        dragCommitted = true;
+        isDragging = true;
+        cv.setPointerCapture(e.pointerId);
+        cv.style.cursor = "grabbing";
+      }
       if (!isDragging) return;
       const dx = e.clientX - lastX;
       const dy = e.clientY - lastY;
-      if (Math.abs(dx) > 2 || Math.abs(dy) > 2) pointerMoved = true;
+      if (Math.abs(dx) > dragThreshold || Math.abs(dy) > dragThreshold) pointerMoved = true;
       velX = dx * 0.015;
       velY = dy * 0.015;
       targetRotY += dx * 0.009;
@@ -179,6 +194,7 @@ export function CleanSneaksLogoCube({ className = "", cacheBust = "v1", onActiva
     };
     const onUp = (e: PointerEvent) => {
       isDragging = false;
+      dragCommitted = false;
       cv.style.cursor = "grab";
       if (cv.hasPointerCapture(e.pointerId)) {
         cv.releasePointerCapture(e.pointerId);

@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 export function HomepageProtectionHero() {
   return (
     <section
-      className="relative snap-start scroll-mt-4 border-b border-border/40 bg-gradient-to-b from-[#5B8DA8]/8 to-background px-4 pb-10 pt-8 sm:px-6 sm:pb-14 sm:pt-10"
+      className="relative scroll-mt-4 border-b border-border/40 bg-gradient-to-b from-[#5B8DA8]/8 to-background px-4 pb-10 pt-8 sm:snap-start sm:px-6 sm:pb-14 sm:pt-10"
       data-testid="homepage-protection-hero"
     >
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-8 lg:max-w-6xl lg:flex-row lg:items-center lg:justify-between">

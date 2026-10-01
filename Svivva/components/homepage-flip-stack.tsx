@@ -32,8 +32,14 @@ function overlayOpacityForIndex(index: number): number {
   );
 }
 
+function isMobileViewport(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(max-width: 767px)").matches;
+}
+
 function overlayScrollEnabled(index: number, panel: HomepageFlipPanelId): boolean {
-  return panel === "nav-cube" && index >= OVERLAY_FADE_END - FLIP_SETTLE_EPSILON;
+  const settleAt = isMobileViewport() ? 0.78 : OVERLAY_FADE_END - FLIP_SETTLE_EPSILON;
+  return panel === "nav-cube" && index >= settleAt;
 }
 
 /** Two full-viewport faces — game, then homepage (cube + pricing). */
@@ -277,7 +283,8 @@ export function HomepageFlipStack({
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const mobile = window.matchMedia("(max-width: 767px)").matches;
-    const scrollGain = mobile ? 0.0028 : 0.0022;
+    const scrollGain = mobile ? 0.005 : 0.0022;
+    const swipeThresholdPx = mobile ? 28 : SWIPE_THRESHOLD_PX;
 
     const settledPanelIndex = () =>
       Math.min(MAX_PANEL_INDEX, Math.max(0, Math.round(targetIndexRef.current)));
@@ -412,12 +419,29 @@ export function HomepageFlipStack({
       }
     };
 
+    const touchTargetInScroller = (e: TouchEvent) => {
+      const scroller = scrollRef.current;
+      const target = e.target;
+      if (!scroller || !(target instanceof Node)) return false;
+      return scroller.contains(target);
+    };
+
     const onTouchMove = (e: TouchEvent) => {
       if (platformScrollMode()) return;
 
+      if (touchTargetInScroller(e)) {
+        const face = scrollSurfaceFor();
+        const { canScrollDown, canScrollUp } = faceScrollState(face);
+        const y = e.touches[0]?.clientY ?? touchStartY;
+        const delta = touchStartY - y;
+        if ((delta > 0 && canScrollDown) || (delta < 0 && canScrollUp)) {
+          return;
+        }
+      }
+
       const y = e.touches[0]?.clientY ?? touchStartY;
       const delta = touchStartY - y;
-      if (Math.abs(delta) < 6) return;
+      if (Math.abs(delta) < (mobile ? 4 : 6)) return;
 
       touchScrubbing = true;
       touchStartY = y;
@@ -436,7 +460,7 @@ export function HomepageFlipStack({
 
       const endY = e.changedTouches[0]?.clientY ?? touchStartY;
       const delta = touchStartY - endY;
-      if (Math.abs(delta) < SWIPE_THRESHOLD_PX) return;
+      if (Math.abs(delta) < swipeThresholdPx) return;
 
       const direction: 1 | -1 = delta > 0 ? 1 : -1;
       const current = settledPanelIndex();
@@ -483,7 +507,7 @@ export function HomepageFlipStack({
       if (!face || face.scrollTop > SCROLL_EDGE_THRESHOLD) return;
       const y = e.touches[0]?.clientY ?? platformTouchStartY;
       const pullDown = y - platformTouchStartY;
-      if (pullDown > SWIPE_THRESHOLD_PX) {
+      if (pullDown > swipeThresholdPx) {
         platformPullTracking = false;
         e.preventDefault();
         goToPanel("home-game");
@@ -582,7 +606,7 @@ export function HomepageFlipStack({
         ref={scrollRef}
         data-homepage-flip-scroll=""
         aria-hidden="true"
-        className="fixed inset-x-0 bottom-0 top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-[15] scroll-smooth snap-y snap-proximity overflow-x-hidden overflow-y-auto bg-background sm:top-[calc(4rem+env(safe-area-inset-top,0px))]"
+        className="fixed inset-x-0 bottom-0 top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-[15] scroll-smooth max-md:scroll-auto max-md:snap-none snap-y snap-proximity overflow-x-hidden overflow-y-auto bg-background sm:top-[calc(4rem+env(safe-area-inset-top,0px))]"
         style={{
           scrollPaddingTop: "0.75rem",
           opacity: overlayOpacityForIndex(flipPanelIndex(initialPanel)),
