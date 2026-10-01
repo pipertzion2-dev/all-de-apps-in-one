@@ -14,7 +14,7 @@ export function HomepagePoorManPatentSection() {
   return (
     <section
       id="why-poor-man-protection"
-      className="relative snap-start scroll-mt-4 border-b border-border/40 bg-muted/20 px-4 py-12 sm:px-6 sm:py-16"
+      className="relative scroll-mt-4 border-b border-border/40 bg-muted/20 px-4 py-12 sm:px-6 sm:py-16"
       aria-labelledby="poor-man-vs-patent-heading"
       data-testid="homepage-poor-man-patent-section"
     >

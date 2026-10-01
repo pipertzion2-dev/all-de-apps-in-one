@@ -11,7 +11,6 @@ import { HomepageHowToSection } from "@/components/homepage-howto-section";
 import { HomepageFounderSonSection } from "@/components/homepage-founder-son-section";
 import { HomepagePricingSection } from "@/components/homepage-pricing-section";
 import { HomepageCubeFaceHint } from "@/components/homepage-cube-face-hint";
-import { HomepageMainGoal } from "@/components/homepage-main-goal";
 import { scrollPlatformSection } from "@/lib/homepage-scroll";
 
 const PlatformFeatureHub = dynamic(
@@ -45,10 +44,6 @@ export function HomepageCubePanel({
       {interactive ? <HomepageCubeFaceHint /> : null}
       {interactive ? <HomepageProtectionHero /> : null}
       {interactive ? <HomepagePoorManPatentSection /> : null}
-
-      <div className="relative z-20 px-4 pt-4 sm:hidden">
-        <HomepageMainGoal variant="light" density="compact" surface="platform" />
-      </div>
 
       <HomepageHeroBlock
         mountCanvas={mountCanvas}
