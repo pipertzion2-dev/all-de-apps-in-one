@@ -48,9 +48,9 @@ export async function GET(req: NextRequest) {
   // here instead of running both and double-submitting.
   if (job === "burns" || job === "all") {
     try {
-      const { runBurnsSystem } = await import("@/lib/burns/burns-runner");
+      const { runBurnsSystem, BURNS_RUN_BUDGET_MS } = await import("@/lib/burns/burns-runner");
       const { recordBurnsAudit, saveBurnsRun } = await import("@/lib/burns/burns-store");
-      const run = await runBurnsSystem({ trigger: "cron" });
+      const run = await runBurnsSystem({ trigger: "cron", budgetMs: BURNS_RUN_BUDGET_MS });
       await saveBurnsRun(run);
       await recordBurnsAudit(run);
       out.burns = {
