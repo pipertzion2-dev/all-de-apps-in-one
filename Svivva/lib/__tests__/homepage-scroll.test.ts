@@ -37,6 +37,7 @@ describe("homepage scroll panels", () => {
     expect(stackSrc).toMatch(/HOMEPAGE_FLIP_PANELS[\s\S]*"home-game"[\s\S]*"nav-cube"/);
     expect(pageSrc).toContain('useState<HomepageFlipPanelId>("home-game")');
     expect(pageSrc).toContain("HomepageCubePanel");
+    expect(cubeSrc).toContain("HomepagePoorManPatentSection");
     expect(cubeSrc).toContain("HomepageAboutSection");
     expect(cubeSrc).toContain("HomepageFounderSonSection");
     expect(cubeSrc).toMatch(/HomepageFounderSonSection[\s\S]*HomepagePricingSection/);

@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { HomepageAboutSection } from "@/components/homepage-about-section";
 import { HomepageProtectionHero } from "@/components/homepage-protection-hero";
+import { HomepagePoorManPatentSection } from "@/components/homepage-poor-man-patent-section";
 import { HomepageExploreLinks } from "@/components/homepage-explore-links";
 import { HomepageFaqSection } from "@/components/homepage-faq-section";
 import { HomepageHeroBlock } from "@/components/homepage-hero-block";
@@ -43,6 +44,7 @@ export function HomepageCubePanel({
     <div className="relative bg-background pb-8">
       {interactive ? <HomepageCubeFaceHint /> : null}
       {interactive ? <HomepageProtectionHero /> : null}
+      {interactive ? <HomepagePoorManPatentSection /> : null}
 
       <div className="relative z-20 px-4 pt-4 sm:hidden">
         <HomepageMainGoal variant="light" density="compact" surface="platform" />

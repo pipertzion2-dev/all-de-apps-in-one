@@ -441,6 +441,10 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
         a: "A ZZAI workflow that creates timestamped, cryptographically sealed evidentiary packages and court packs. It is not a registered patent, trademark, or copyright with any government office.",
       },
       {
+        q: "Why is Poor Man Protection better than mailing myself a sealed envelope?",
+        a: "The classic poor man's patent relies on a postmark and an unopened package — slow, hard for others to verify, and weak on tamper proof. ZZAI seals the actual file bytes with SHA-256, logs custody, exports a court pack, and lets anyone verify at /protect/verify without opening your mail. Dual-axis hybridization and group-patent Merkle schedules are unique to ZZAI. It is still supporting evidence, not a USPTO grant — use counsel before formal filing.",
+      },
+      {
         q: "Where is zzai zzai hosted?",
         a: "The live site is https://zzaizzai.com on Vercel (team zzai-zzai).",
       },

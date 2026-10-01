@@ -11,6 +11,84 @@ export const PRODUCT_TAGLINE = "Poor Man Protection — prove what you created, 
 export const PRODUCT_PROTECTION_PITCH =
   "Poor Man Protection timestamps your files, seals them with cryptographic hashes, and exports a court-ready pack. Supporting evidence of anteriority — not a USPTO patent or Copyright Office registration.";
 
+/** Homepage section — headline for poor-man vs physical envelope / USPTO contrast. */
+export const POOR_MAN_VS_PATENT_HEADLINE =
+  "Why Poor Man Protection beats a stamped envelope — and what makes it unique";
+
+/** One paragraph under the headline (homepage explainer). */
+export const POOR_MAN_VS_PATENT_LEDE =
+  "The classic “poor man’s patent” is a sealed envelope you mail yourself. That postmark helps, but it is slow, easy to challenge, and blind to the actual bytes inside. ZZAI keeps the same anteriority goal — prove you had the work first — with hashes anyone can verify, a structured court pack, and dual-axis metadata no envelope can carry.";
+
+export type PoorManComparisonRow = {
+  label: string;
+  physicalEnvelope: string;
+  usptoPatent: string;
+  zzaiPoorMan: string;
+};
+
+/** Three-way contrast for homepage (crawlable text). */
+export const POOR_MAN_COMPARISON_ROWS: readonly PoorManComparisonRow[] = [
+  {
+    label: "Time to evidence",
+    physicalEnvelope: "Days for mail + postmark",
+    usptoPatent: "Often years of examination",
+    zzaiPoorMan: "Minutes — seal, timestamp, download pack",
+  },
+  {
+    label: "Cost to start",
+    physicalEnvelope: "Postage + printing",
+    usptoPatent: "Thousands in fees and attorney time",
+    zzaiPoorMan: "Seal on zzai zzai before you spend on formal filing",
+  },
+  {
+    label: "Tamper detection",
+    physicalEnvelope: "Envelope can be opened or re-sealed — contents disputed",
+    usptoPatent: "Office file, not a live hash of your source files",
+    zzaiPoorMan: "SHA-256 content seals — change a pixel, the hash breaks",
+  },
+  {
+    label: "Independent verify",
+    physicalEnvelope: "Third parties must trust your unopened package",
+    usptoPatent: "Public record after grant — not instant for drafts",
+    zzaiPoorMan: "Anyone checks /protect/verify without signing in",
+  },
+  {
+    label: "What judges see",
+    physicalEnvelope: "Postmark + your testimony about what was inside",
+    usptoPatent: "Claims and prosecution history after filing",
+    zzaiPoorMan: "Court PDF, custody log, dual-axis hybridization notes",
+  },
+] as const;
+
+export type PoorManUniquePoint = {
+  title: string;
+  body: string;
+};
+
+/** Only-on-ZZAI differentiators (not generic timestamping). */
+export const POOR_MAN_UNIQUE_POINTS: readonly PoorManUniquePoint[] = [
+  {
+    title: "Dual-axis scientific hybridization",
+    body: "Form composition (axis A) and spectral palette (axis B) are coupled into one prior-art fingerprint — not just a file hash with a date.",
+  },
+  {
+    title: "Group patent organizer",
+    body: "Drop many figure images; ZZAI families them, builds a Merkle root, and exports a multi-sheet disclosure schedule for design-heavy work.",
+  },
+  {
+    title: "Chain of custody you can export",
+    body: "Structured JSON certificate plus court pack PDF — built for disputes, not a shoebox of mail.",
+  },
+  {
+    title: "Optional postal reinforcement",
+    body: "Still want paper? Print the postal sheet and mail an opaque envelope — the digital seal remains the verifiable anchor.",
+  },
+] as const;
+
+/** Required honesty line — pair with comparison section. */
+export const POOR_MAN_LEGAL_FOOTNOTE =
+  "Poor Man Protection is supporting evidence of anteriority and possession — not a registered patent, trademark, or copyright. Consult IP counsel before relying on any method alone or before public launch that could affect novelty.";
+
 /** Sap / tree metaphor — quiet work under the surface while you rest and grow. */
 export const PRODUCT_SAP_METAPHOR =
   "Like sap in a tree, zzai zzai keeps protection and guardrails flowing underneath — so you can rest, focus on design, and grow.";
