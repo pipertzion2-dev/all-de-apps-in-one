@@ -1,6 +1,7 @@
 import { absoluteUrl } from "@/lib/seo/metadata";
 import { getBrandKnowledge, getBrandEntityCard } from "@/lib/brand-knowledge";
 import { BRAND } from "@/lib/brand";
+import { HOMEPAGE_HOWTO_TITLE } from "@/lib/product-positioning";
 import { getSiteUrl } from "@/lib/site-url";
 
 const ORG_ID = () => `${getSiteUrl().replace(/\/$/, "")}/#organization`;
@@ -210,24 +211,20 @@ export function eventSeriesSchema(input?: { name?: string; description?: string;
 /** Shared HowTo steps — keep in sync with homepage HowTo HTML. */
 export const HOMEPAGE_HOWTO_STEPS = [
   {
-    name: "Describe your API",
-    text: "Write what you want your API to do in plain English — no code required.",
+    name: "Upload your work",
+    text: "Add sketches, designs, lyrics, code, or any file you may need to prove you created first.",
   },
   {
-    name: "Define your output schema",
-    text: "Set the JSON structure you expect back. ZZAI will enforce and validate it on every call.",
+    name: "Seal with hashes and timestamps",
+    text: "Poor Man Protection records custody and binds a cryptographic seal to each upload.",
   },
   {
-    name: "Auto-generate evaluations",
-    text: "ZZAI writes up to 200 test cases automatically — edge cases, adversarial inputs, and boundary conditions.",
+    name: "Share a public verify link",
+    text: "Anyone can check the seal at /protect/verify — no account required for verification.",
   },
   {
-    name: "Deploy your endpoint",
-    text: "One click publishes a live, auto-scaling API endpoint with full OpenAPI documentation.",
-  },
-  {
-    name: "Monitor and rollback",
-    text: "Watch latency, success rate, and token costs in real time. Enable auto-rollback for hands-free quality control.",
+    name: "Download a court pack",
+    text: "When a dispute arises, export a structured pack with hashes, logs, and metadata for counsel.",
   },
 ] as const;
 
@@ -254,9 +251,9 @@ export function homepageJsonLdGraph() {
     }),
     ...(faq ? [faq] : []),
     howToSchema({
-      name: "How to ship with ZZAI",
+      name: HOMEPAGE_HOWTO_TITLE,
       description:
-        "Build a production-ready endpoint from a plain-language prompt with ZZAI — schema validation, evaluations, and rollback included.",
+        "Seal creative work with timestamped hashes, verify at a public link, and export a court-ready pack with zzai zzai.",
       steps: [...HOMEPAGE_HOWTO_STEPS],
     }),
   ];

@@ -5,6 +5,7 @@ import {
   isBetaPlatformFeatureId,
   isBetaSurfacePath,
   isCorePlatformFeatureId,
+  PRODUCT_HERO_HEADLINE,
   PRODUCT_TAGLINE,
 } from "./product-positioning";
 
@@ -40,5 +41,10 @@ describe("product-positioning", () => {
 
   it("uses the Poor Man Protection tagline", () => {
     expect(PRODUCT_TAGLINE).toMatch(/Poor Man Protection/i);
+  });
+
+  it("leads the homepage with a single focused thesis", () => {
+    expect(PRODUCT_HERO_HEADLINE.length).toBeGreaterThan(20);
+    expect(PRODUCT_HERO_HEADLINE).toMatch(/who had it first/i);
   });
 });

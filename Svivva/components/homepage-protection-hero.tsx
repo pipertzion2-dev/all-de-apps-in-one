@@ -3,7 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import zzaiLogo from "@/attached_assets/ZZAI_OFFICIAL_LOGO.png";
-import { PRODUCT_PROTECTION_PITCH, PRODUCT_TAGLINE } from "@/lib/product-positioning";
+import {
+  PRODUCT_HERO_HEADLINE,
+  PRODUCT_NAME_LINE,
+  PRODUCT_PROTECTION_PITCH,
+  PRODUCT_TAGLINE,
+} from "@/lib/product-positioning";
 import { Button } from "@/components/ui/button";
 
 /** Homepage hero — Poor Man Protection copy only (shirt photo is on the intro flip). */
@@ -16,14 +21,15 @@ export function HomepageProtectionHero() {
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-8 lg:max-w-6xl lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-5 text-center lg:max-w-xl lg:text-left">
           <p className="text-[10px] font-medium uppercase tracking-[0.35em] text-[#5B8DA8]">
-            Poor Man Protection
+            {PRODUCT_NAME_LINE}
           </p>
-          <h1 className="text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
-            {PRODUCT_TAGLINE}
+          <h1 className="text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-[2.75rem] lg:leading-[1.12]">
+            {PRODUCT_HERO_HEADLINE}
           </h1>
+          <p className="text-base font-medium leading-snug text-foreground/90">{PRODUCT_TAGLINE}</p>
           <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
-            {PRODUCT_PROTECTION_PITCH} Use it for sketches, sneaker colorways, lyrics, or API
-            schemas — anything you may need to prove you had first.
+            {PRODUCT_PROTECTION_PITCH} Sketches, sneaker colorways, lyrics, API schemas — anything
+            you may need to prove you had first.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3 lg:justify-start">
             <Button asChild className="bg-[#5B8DA8] text-white">

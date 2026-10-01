@@ -51,14 +51,14 @@ export function HomepageExploreLinks() {
       <div className="mx-auto max-w-3xl space-y-8">
         <div className="space-y-3 text-center">
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#5B8DA8]">
-            Explore
+            Also on zzai zzai
           </p>
           <h2 id="homepage-explore-heading" className="text-2xl font-bold sm:text-3xl">
-            Klean Sneaks &amp; beta desk modules
+            Demo game &amp; beta builder desk
           </h2>
           <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-base">
-            Klean Sneaks is the live game demo. Hybrid² Lab, API Builder, Pulse, Seeds, Orbit, and
-            the rest of the desk are Beta on the same domain.
+            Poor Man Protection is the core product. Klean Sneaks is the free demo; Hybrid², Seeds,
+            Orbit, and the rest of the desk stay in beta on the same domain.
           </p>
         </div>
 

@@ -1,3 +1,4 @@
+import { HOMEPAGE_HOWTO_SUBLINE, HOMEPAGE_HOWTO_TITLE } from "@/lib/product-positioning";
 import { HOMEPAGE_HOWTO_STEPS } from "@/lib/seo/schema/builders";
 
 /** Crawlable HowTo steps that match homepage HowTo JSON-LD. */
@@ -14,11 +15,10 @@ export function HomepageHowToSection() {
             How it works
           </p>
           <h2 id="homepage-howto-heading" className="text-2xl font-bold sm:text-3xl">
-            How to ship with ZZAI
+            {HOMEPAGE_HOWTO_TITLE}
           </h2>
           <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-base">
-            Build a production-ready AI API from a plain-language prompt — schema validation,
-            evaluations, and rollback included.
+            {HOMEPAGE_HOWTO_SUBLINE}
           </p>
         </div>
 

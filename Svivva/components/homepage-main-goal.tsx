@@ -2,6 +2,7 @@ import {
   HOMEPAGE_GAME_FACE_SUBLINE,
   HOMEPAGE_GAME_FACE_TITLE,
   HOMEPAGE_PLATFORM_FACE_SUBLINE,
+  PRODUCT_HERO_HEADLINE,
   PRODUCT_HOOK_SHORT,
   PRODUCT_MAIN_GOAL,
   PRODUCT_TAGLINE,
@@ -24,7 +25,7 @@ export function HomepageMainGoal({
   className,
 }: HomepageMainGoalProps) {
   const dark = variant === "dark";
-  const compactTitle = surface === "game" ? HOMEPAGE_GAME_FACE_TITLE : PRODUCT_TAGLINE;
+  const compactTitle = surface === "game" ? HOMEPAGE_GAME_FACE_TITLE : PRODUCT_HERO_HEADLINE;
   const compactSubline =
     surface === "game"
       ? HOMEPAGE_GAME_FACE_SUBLINE
@@ -40,7 +41,7 @@ export function HomepageMainGoal({
       >
         <h2
           className={cn(
-            "text-base font-bold leading-tight tracking-tight sm:text-xl",
+            "text-sm font-bold leading-snug tracking-tight sm:text-lg sm:leading-tight",
             dark ? "text-white" : "text-foreground",
           )}
         >
@@ -63,10 +64,11 @@ export function HomepageMainGoal({
       className={cn("mx-auto max-w-xl space-y-2 text-center", className)}
       data-testid="homepage-main-goal"
     >
-      <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">{PRODUCT_TAGLINE}</h2>
+      <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">{PRODUCT_HERO_HEADLINE}</h2>
       <p className="text-base font-medium leading-snug text-foreground/90 sm:text-lg">
-        {PRODUCT_MAIN_GOAL}
+        {PRODUCT_TAGLINE}
       </p>
+      <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">{PRODUCT_MAIN_GOAL}</p>
     </div>
   );
 }

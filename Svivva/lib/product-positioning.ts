@@ -4,12 +4,24 @@
 
 import type { FeatureId } from "@/components/svivva-artifact/feature-defs";
 
-/** Brand slogan — homepage hero and metadata. */
+/** Scale-style homepage thesis — one clear job for the whole page. */
+export const PRODUCT_HERO_HEADLINE =
+  "Every creative dispute starts with one question: who had it first.";
+
+/** Product name — eyebrows, metadata suffix, and compact labels. */
+export const PRODUCT_NAME_LINE = "Poor Man Protection";
+
+/** Brand slogan — metadata and secondary hero line. */
 export const PRODUCT_TAGLINE = "Poor Man Protection — prove what you created, and when.";
 
 /** Court-ready protection — plain language for homepage and meta. */
 export const PRODUCT_PROTECTION_PITCH =
-  "Poor Man Protection timestamps your files, seals them with cryptographic hashes, and exports a court-ready pack. Supporting evidence of anteriority — not a USPTO patent or Copyright Office registration.";
+  "Timestamp your files, seal them with cryptographic hashes, and export a court-ready pack. Supporting evidence of anteriority — not a USPTO patent or Copyright Office registration.";
+
+/** Applications block (below the hero) — Scale-style focused section intro. */
+export const HOMEPAGE_APPLICATIONS_TITLE = "The proof layer for what you create.";
+export const HOMEPAGE_APPLICATIONS_SUBLINE =
+  "Upload once, seal with hashes, verify at a public link, and download a structured court pack when priority matters.";
 
 /** Sap / tree metaphor — quiet work under the surface while you rest and grow. */
 export const PRODUCT_SAP_METAPHOR =
@@ -17,7 +29,7 @@ export const PRODUCT_SAP_METAPHOR =
 
 /** One-sentence pitch (YC / hero / meta). */
 export const PRODUCT_ONE_LINER =
-  "zzai zzai leads with Poor Man Protection for sketches, designs, and code — timestamped seals and verify-at-a-link evidence, plus a free Klean Sneaks demo and beta builder tools.";
+  "zzai zzai leads with Poor Man Protection — timestamped seals, public verify links, and court-ready packs for sketches, designs, and code. Klean Sneaks is the free demo; other desk tools are beta.";
 
 /** Plain-language main goal (homepage game + product faces). */
 export const PRODUCT_MAIN_GOAL =
@@ -25,26 +37,31 @@ export const PRODUCT_MAIN_GOAL =
 
 /** Shorter hero subline. */
 export const PRODUCT_HERO_SUBLINE =
-  "Upload, seal, verify — evidentiary workflow for creators who need a defensible record.";
+  "Upload, seal, verify — an evidentiary workflow for creators who need a defensible record.";
 
 /** Max ~12 words — mobile homepage faces only. */
-export const PRODUCT_HOOK_SHORT = "Poor Man Protection first — seal, verify, court pack.";
+export const PRODUCT_HOOK_SHORT = "Seal work. Verify anywhere. Export a court pack.";
+
+/** HowTo section — keep in sync with `HOMEPAGE_HOWTO_STEPS` in seo/schema/builders.ts */
+export const HOMEPAGE_HOWTO_TITLE = "How Poor Man Protection works";
+export const HOMEPAGE_HOWTO_SUBLINE =
+  "Four steps from upload to a verify link — no lawyer required to start a defensible record.";
 
 /** Literal game ↔ product bridge (BALOON8 car×sneaker, Jordan 14 × Ferrari). */
 export const PRODUCT_GAME_HYBRID_METAPHOR =
   "One car×sneaker chassis (BALOON8), many unlockable colorways — the same H¹ silhouette, different finishes, like Hybrid² on the desk.";
 
-/** First homepage panel — Klean Sneaks (not the product dashboard). */
-export const HOMEPAGE_GAME_FACE_TITLE = "Game · Klean Sneaks";
+/** First homepage panel — Klean Sneaks (demo of the same protection story). */
+export const HOMEPAGE_GAME_FACE_TITLE = "Play the demo";
 export const HOMEPAGE_GAME_FACE_SUBLINE =
-  "Protect your kicks on the walk — Klean Sneaks is the free demo of keeping sneaker assets Klean.";
+  "Klean Sneaks — free on the walk. Same “protect what you made” idea as Poor Man Protection.";
 
-/** Shown under the tagline on the platform homepage face (mobile compact). */
+/** Shown under the headline on the platform homepage face (mobile compact). */
 export const HOMEPAGE_PLATFORM_FACE_SUBLINE =
-  "Timestamped seals, custody logs, and public verify links — built for Poor Man Protection.";
+  "Seal uploads, verify hashes in the browser, export a court pack when you need proof.";
 
-export const HOMEPAGE_SCROLL_TO_PLATFORM = "Swipe ↓ ZZAI platform";
-export const HOMEPAGE_SCROLL_TO_GAME = "Swipe ↑ Klean Sneaks game";
+export const HOMEPAGE_SCROLL_TO_PLATFORM = "Swipe ↓ Poor Man Protection";
+export const HOMEPAGE_SCROLL_TO_GAME = "Swipe ↑ Klean Sneaks demo";
 
 /** Platform desk modules — Klean Sneaks ships; Hybrid² / API / Pulse stay beta. */
 export const CORE_PLATFORM_FEATURE_IDS = new Set<string>();

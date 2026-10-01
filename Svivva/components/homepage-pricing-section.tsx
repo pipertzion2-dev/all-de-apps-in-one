@@ -31,7 +31,7 @@ export function HomepagePricingSection() {
             Simple, transparent <span className="solid-accent">pricing</span>
           </h2>
           <p className="mx-auto max-w-2xl text-base text-muted-foreground sm:text-lg">
-            Start free, scale as you grow. No hidden fees.
+            Start with Poor Man Protection, then upgrade when you need the full builder desk.
           </p>
         </div>
 

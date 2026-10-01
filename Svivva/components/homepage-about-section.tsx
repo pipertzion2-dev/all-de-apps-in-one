@@ -5,12 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BRAND } from "@/lib/brand";
 import {
-  PRODUCT_HOOK_SHORT,
-  PRODUCT_MAIN_GOAL,
-  PRODUCT_PROTECTION_PITCH,
-  PRODUCT_TAGLINE,
+  HOMEPAGE_APPLICATIONS_SUBLINE,
+  HOMEPAGE_APPLICATIONS_TITLE,
+  PRODUCT_NAME_LINE,
 } from "@/lib/product-positioning";
-import { HomepageMainGoal } from "@/components/homepage-main-goal";
 import { FileCheck, Scale, Shield, Stamp } from "lucide-react";
 import { FeatureBetaBadge } from "@/components/feature-beta-badge";
 
@@ -49,24 +47,18 @@ export function HomepageAboutSection() {
     >
       <div className="mx-auto max-w-3xl space-y-8 text-center">
         <div className="space-y-3">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#5B8DA8]">
+            Applications
+          </p>
+          <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+            {HOMEPAGE_APPLICATIONS_TITLE}
+          </h2>
+          <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-base">
+            {HOMEPAGE_APPLICATIONS_SUBLINE}
+          </p>
           <Badge variant="secondary" className="px-4 py-1.5">
-            What {BRAND.name} is for
+            {PRODUCT_NAME_LINE} on {BRAND.name}
           </Badge>
-          <div className="hidden sm:block">
-            <HomepageMainGoal density="full" />
-          </div>
-          <div className="sm:hidden">
-            <HomepageMainGoal density="compact" />
-          </div>
-          <p className="mx-auto hidden max-w-2xl text-sm text-muted-foreground md:block">
-            {PRODUCT_PROTECTION_PITCH}
-          </p>
-          <p className="mx-auto max-w-2xl text-xs text-muted-foreground sm:hidden">
-            {PRODUCT_HOOK_SHORT}
-          </p>
-          <p className="mx-auto hidden max-w-2xl text-sm text-muted-foreground sm:block md:hidden">
-            {PRODUCT_MAIN_GOAL}
-          </p>
         </div>
 
         <div className="grid gap-4 text-left sm:grid-cols-2">
