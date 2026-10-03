@@ -16,6 +16,13 @@ export const STIEHL_LOGO_CUBE_URL = "/assets/clean-sneaks/stiehl-logo-cube.jpg";
 /** Main cover art — start screen after loading wheels. */
 export const MAIN_GAME_COVER_URL = "/assets/clean-sneaks/ipbw-main-cover.jpg";
 
+/**
+ * Steal the Old Man's Bundle title graphic —
+ * shown fullscreen before the card game begins.
+ */
+export const STEAL_BUNDLE_TITLE_ART_URL =
+  "/assets/clean-sneaks/stiehl-den-alten-manns-buendel.jpg";
+
 /** iPbw hubcap wheels — loading screen before each run. */
 export const LOADING_WHEEL_URLS = [
   "/assets/clean-sneaks/loading-wheel-yin.jpg",

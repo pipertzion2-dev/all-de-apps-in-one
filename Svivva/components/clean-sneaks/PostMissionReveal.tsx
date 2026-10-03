@@ -116,7 +116,7 @@ export function PostMissionReveal({
         {payload.bundleCardUnlocked && onPlayBundleCard && (
           <Button
             size="lg"
-            className="bg-[#d4af37] text-[#1a1008] hover:bg-[#e0c15a]"
+            className="bg-[#8A9A7A] text-[#1a1220] hover:bg-[#a8b896]"
             onClick={onPlayBundleCard}
             data-testid="button-play-steal-bundle"
           >

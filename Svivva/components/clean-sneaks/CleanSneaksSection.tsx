@@ -102,7 +102,7 @@ export function CleanSneaksSection() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="min-w-[220px] border-[#d4af37]/50 text-[#ffd76a]"
+                  className="min-w-[220px] border-[#A992C1]/55 text-[#E5E4C2]"
                   asChild
                   data-testid="button-steal-bundle-home"
                 >

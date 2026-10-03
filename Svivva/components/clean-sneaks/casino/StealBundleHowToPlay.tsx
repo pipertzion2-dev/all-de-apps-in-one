@@ -25,14 +25,14 @@ export function StealBundleHowToPlay({ onStart }: Props) {
       data-testid="steal-bundle-tutorial"
       style={{
         background:
-          "radial-gradient(ellipse at 50% 12%, rgba(212,175,55,0.14), transparent 48%), #0a0c10",
+          "radial-gradient(ellipse at 50% 12%, rgba(169,146,193,0.16), transparent 48%), #1a1220",
       }}
     >
-      <p className="text-[10px] uppercase tracking-[0.4em] text-[#d4af37]">How to play</p>
-      <h2 className="mt-2 text-center font-serif text-2xl text-[#f7e7b0] sm:text-3xl">
+      <p className="text-[10px] uppercase tracking-[0.4em] text-[#A992C1]">How to play</p>
+      <h2 className="mt-2 text-center font-serif text-2xl text-[#E5E4C2] sm:text-3xl">
         {KLEAN_BUNDLE_CARD_HEADLINE}
       </h2>
-      <p className="mt-2 max-w-md text-center text-sm text-[#e8dcc0]/70">
+      <p className="mt-2 max-w-md text-center text-sm text-[#E5E4C2]/70">
         Match ranks. Grow your bundle. Guard the stack. Biggest bundle wins.
       </p>
 
@@ -62,11 +62,11 @@ export function StealBundleHowToPlay({ onStart }: Props) {
           <div className="flex flex-wrap items-center justify-center gap-3">
             <LabeledCard label="Your hand" card={demo("hq", "Q", "diamonds")} highlight />
             <Arrow />
-            <div className="rounded-lg border border-[#ff2d6a]/70 bg-[#ff2d6a]/15 px-3 py-2 text-left ring-2 ring-[#ff2d6a]/40">
-              <p className="text-[9px] uppercase tracking-wider text-[#ff7aa0]">
+            <div className="rounded-lg border border-[#c478a0]/70 bg-[#c478a0]/15 px-3 py-2 text-left ring-2 ring-[#c478a0]/40">
+              <p className="text-[9px] uppercase tracking-wider text-[#c478a0]">
                 Opponent · Steal!
               </p>
-              <p className="text-[10px] text-[#e8dcc0]/80">Bundle · Top Match: Q</p>
+              <p className="text-[10px] text-[#E5E4C2]/80">Bundle · Top Match: Q</p>
               <div className="mt-1.5 flex -space-x-2">
                 <PlayingCardView
                   card={demo("oq1", "4", "clubs")}
@@ -115,7 +115,7 @@ export function StealBundleHowToPlay({ onStart }: Props) {
       </div>
 
       <Button
-        className="mt-8 mb-4 bg-[#d4af37] text-[#1a1008] hover:bg-[#e0c15a]"
+        className="mt-8 mb-4 bg-[#8A9A7A] text-[#1a1220] hover:bg-[#a8b896]"
         onClick={onStart}
         data-testid="button-deal-cards"
       >
@@ -137,17 +137,17 @@ function HowToStep({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-xl border border-[#d4af37]/25 bg-black/40 px-3 py-3 sm:px-4 sm:py-4">
+    <section className="rounded-xl border border-[#A992C1]/25 bg-black/40 px-3 py-3 sm:px-4 sm:py-4">
       <div className="mb-3 flex items-start gap-3 text-left">
-        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#d4af37] text-[11px] font-bold text-[#1a1008]">
+        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#8A9A7A] text-[11px] font-bold text-[#1a1220]">
           {step}
         </span>
         <div>
-          <h3 className="text-sm font-semibold text-[#f7e7b0]">{title}</h3>
-          <p className="mt-0.5 text-xs leading-relaxed text-[#e8dcc0]/70">{body}</p>
+          <h3 className="text-sm font-semibold text-[#E5E4C2]">{title}</h3>
+          <p className="mt-0.5 text-xs leading-relaxed text-[#E5E4C2]/70">{body}</p>
         </div>
       </div>
-      <div className="rounded-lg border border-white/5 bg-[#0d4a2f]/15 px-2 py-3">{children}</div>
+      <div className="rounded-lg border border-white/5 bg-[#3a4535]/15 px-2 py-3">{children}</div>
     </section>
   );
 }
@@ -165,7 +165,7 @@ function LabeledCard({
 }) {
   return (
     <div className="flex flex-col items-center gap-1">
-      <p className="text-[9px] uppercase tracking-[0.2em] text-[#d4af37]/75">{label}</p>
+      <p className="text-[9px] uppercase tracking-[0.2em] text-[#A992C1]/75">{label}</p>
       <PlayingCardView card={card} size="sm" highlight={highlight} selected={selected} />
     </div>
   );
@@ -184,7 +184,7 @@ function BundleStack({
     <div className="flex flex-col items-center gap-1">
       <p
         className={`text-[9px] uppercase tracking-[0.2em] ${
-          emphasize ? "text-[#ffd76a]" : "text-[#d4af37]/75"
+          emphasize ? "text-[#E5E4C2]" : "text-[#A992C1]/75"
         }`}
       >
         {label}
@@ -206,7 +206,7 @@ function BundleStack({
 
 function Arrow() {
   return (
-    <span className="px-0.5 text-sm font-bold text-[#d4af37]/80" aria-hidden>
+    <span className="px-0.5 text-sm font-bold text-[#A992C1]/80" aria-hidden>
       →
     </span>
   );

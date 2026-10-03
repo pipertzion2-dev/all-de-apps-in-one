@@ -61,9 +61,9 @@ export function ParlayDesk({ credits, disabled, onPlaced, onSkip }: Props) {
       data-testid="parlay-desk"
     >
       <div className="text-center">
-        <p className="text-[10px] uppercase tracking-[0.4em] text-[#d4af37]">Parlay desk</p>
-        <h2 className="mt-1 font-serif text-2xl text-[#f7e7b0]">Build a credit parlay</h2>
-        <p className="mt-2 text-xs text-[#e8dcc0]/65">
+        <p className="text-[10px] uppercase tracking-[0.4em] text-[#A992C1]">Parlay desk</p>
+        <h2 className="mt-1 font-serif text-2xl text-[#E5E4C2]">Build a credit parlay</h2>
+        <p className="mt-2 text-xs text-[#E5E4C2]/65">
           Multi-leg bets settle in entertainment credits only — never cash. Pick {PARLAY_MIN_LEGS}–
           {PARLAY_MAX_LEGS} legs.
         </p>
@@ -80,24 +80,24 @@ export function ParlayDesk({ credits, disabled, onPlaced, onSkip }: Props) {
               onClick={() => toggle(leg.id)}
               className={`rounded-md border px-3 py-2 text-left transition ${
                 on
-                  ? "border-[#d4af37] bg-[#d4af37]/15 text-[#ffd76a]"
-                  : "border-[#d4af37]/25 bg-black/30 text-[#e8dcc0]/85 hover:border-[#d4af37]/50"
+                  ? "border-[#A992C1] bg-[#8A9A7A]/15 text-[#E5E4C2]"
+                  : "border-[#A992C1]/25 bg-black/30 text-[#E5E4C2]/85 hover:border-[#A992C1]/50"
               }`}
               data-testid={`parlay-leg-${leg.id}`}
             >
               <div className="flex items-baseline justify-between gap-2">
                 <span className="text-sm font-medium">{leg.label}</span>
-                <span className="text-[11px] tabular-nums text-[#d4af37]">
+                <span className="text-[11px] tabular-nums text-[#A992C1]">
                   {leg.odds.toFixed(2)}×
                 </span>
               </div>
-              <p className="mt-0.5 text-[11px] text-[#e8dcc0]/50">{leg.hint}</p>
+              <p className="mt-0.5 text-[11px] text-[#E5E4C2]/50">{leg.hint}</p>
             </button>
           );
         })}
       </div>
 
-      <label className="block text-xs text-[#e8dcc0]/70">
+      <label className="block text-xs text-[#E5E4C2]/70">
         Stake (min {PARLAY_MIN_STAKE}) · you have {credits.toLocaleString()}
         <input
           type="number"
@@ -106,12 +106,12 @@ export function ParlayDesk({ credits, disabled, onPlaced, onSkip }: Props) {
           value={stake}
           disabled={disabled}
           onChange={(e) => setStake(Math.max(0, Math.floor(Number(e.target.value) || 0)))}
-          className="mt-1 w-full rounded-md border border-[#d4af37]/35 bg-black/40 px-3 py-2 text-sm text-[#ffd76a]"
+          className="mt-1 w-full rounded-md border border-[#A992C1]/35 bg-black/40 px-3 py-2 text-sm text-[#E5E4C2]"
           data-testid="parlay-stake"
         />
       </label>
 
-      <p className="text-center text-sm text-[#ffd76a]" data-testid="parlay-payout-preview">
+      <p className="text-center text-sm text-[#E5E4C2]" data-testid="parlay-payout-preview">
         {selected.length >= PARLAY_MIN_LEGS
           ? `${selected.length} legs · ${odds.toFixed(2)}× · payout ${payout.toLocaleString()} credits`
           : `Select at least ${PARLAY_MIN_LEGS} legs`}
@@ -125,7 +125,7 @@ export function ParlayDesk({ credits, disabled, onPlaced, onSkip }: Props) {
 
       <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
         <Button
-          className="bg-[#d4af37] text-[#1a1008] hover:bg-[#e0c15a]"
+          className="bg-[#8A9A7A] text-[#1a1220] hover:bg-[#a8b896]"
           disabled={disabled || selected.length < PARLAY_MIN_LEGS}
           onClick={submit}
           data-testid="button-place-parlay"
@@ -134,7 +134,7 @@ export function ParlayDesk({ credits, disabled, onPlaced, onSkip }: Props) {
         </Button>
         <Button
           variant="outline"
-          className="border-[#d4af37]/40 text-[#e8dcc0]"
+          className="border-[#A992C1]/40 text-[#E5E4C2]"
           disabled={disabled}
           onClick={onSkip}
           data-testid="button-skip-parlay"

@@ -81,30 +81,30 @@ function CasinoExterior({ doorsOpen }: { doorsOpen: number }) {
     }
   });
 
-  const gold = "#d4af37";
-  const burgundy = "#7a1028";
+  const lavender = "#A992C1";
+  const purple = "#4B3B5B";
 
   return (
     <group>
       {/* Building */}
       <mesh position={[0, 3.2, -6]} castShadow receiveShadow>
         <boxGeometry args={[14, 7, 4]} />
-        <meshStandardMaterial color="#1a0a10" metalness={0.35} roughness={0.55} />
+        <meshStandardMaterial color="#1a1220" metalness={0.35} roughness={0.55} />
       </mesh>
-      {/* Gold trim */}
+      {/* Lavender trim — matches title graphic film-strip */}
       <mesh position={[0, 6.6, -4.1]}>
         <boxGeometry args={[14.4, 0.25, 0.3]} />
         <meshStandardMaterial
-          color={gold}
+          color={lavender}
           metalness={0.8}
           roughness={0.25}
-          emissive={gold}
+          emissive={lavender}
           emissiveIntensity={0.25}
         />
       </mesh>
-      <NeonSign text="CASINO" position={[0, 5.6, -3.9]} color="#ff3b6b" />
-      <NeonSign text="KLEAN" position={[-3.4, 4.7, -3.9]} color="#ffd76a" />
-      <NeonSign text="NIGHTS" position={[3.4, 4.7, -3.9]} color="#5cf0ff" />
+      <NeonSign text="CASINO" position={[0, 5.6, -3.9]} color="#c478a0" />
+      <NeonSign text="KLEAN" position={[-3.4, 4.7, -3.9]} color="#E5E4C2" />
+      <NeonSign text="NIGHTS" position={[3.4, 4.7, -3.9]} color="#8A9A7A" />
 
       {/* Marquee bulbs */}
       <group ref={marquee} position={[0, 4.05, -3.85]}>
@@ -112,8 +112,8 @@ function CasinoExterior({ doorsOpen }: { doorsOpen: number }) {
           <mesh key={i} position={[-4.2 + i * 0.5, 0, 0]}>
             <sphereGeometry args={[0.08, 8, 8]} />
             <meshStandardMaterial
-              color="#ffe08a"
-              emissive="#ffe08a"
+              color="#E5E4C2"
+              emissive="#A992C1"
               emissiveIntensity={1}
               toneMapped={false}
             />
@@ -124,16 +124,16 @@ function CasinoExterior({ doorsOpen }: { doorsOpen: number }) {
       {/* Entrance frame */}
       <mesh position={[0, 1.6, -4.05]}>
         <boxGeometry args={[4.4, 3.4, 0.35]} />
-        <meshStandardMaterial color={burgundy} metalness={0.4} roughness={0.4} />
+        <meshStandardMaterial color={purple} metalness={0.4} roughness={0.4} />
       </mesh>
       {/* Doors */}
       <mesh ref={leftDoor} position={[-1.05, 1.55, -3.85]} castShadow>
         <boxGeometry args={[2.0, 3.1, 0.12]} />
-        <meshStandardMaterial color="#2a0f18" metalness={0.5} roughness={0.35} />
+        <meshStandardMaterial color="#2a1f33" metalness={0.5} roughness={0.35} />
       </mesh>
       <mesh ref={rightDoor} position={[1.05, 1.55, -3.85]} castShadow>
         <boxGeometry args={[2.0, 3.1, 0.12]} />
-        <meshStandardMaterial color="#2a0f18" metalness={0.5} roughness={0.35} />
+        <meshStandardMaterial color="#2a1f33" metalness={0.5} roughness={0.35} />
       </mesh>
 
       {/* Velvet ropes */}
@@ -141,11 +141,11 @@ function CasinoExterior({ doorsOpen }: { doorsOpen: number }) {
         <group key={x} position={[x, 0, -2.2]}>
           <mesh position={[0, 0.45, 0]}>
             <cylinderGeometry args={[0.06, 0.08, 0.9, 10]} />
-            <meshStandardMaterial color={gold} metalness={0.85} roughness={0.2} />
+            <meshStandardMaterial color={lavender} metalness={0.85} roughness={0.2} />
           </mesh>
           <mesh position={[x > 0 ? -0.7 : 0.7, 0.75, 0.35]} rotation={[0, 0, x > 0 ? 0.35 : -0.35]}>
             <cylinderGeometry args={[0.035, 0.035, 1.5, 8]} />
-            <meshStandardMaterial color="#6b1024" roughness={0.7} />
+            <meshStandardMaterial color="#3a2a45" roughness={0.7} />
           </mesh>
         </group>
       ))}
@@ -153,15 +153,15 @@ function CasinoExterior({ doorsOpen }: { doorsOpen: number }) {
       {/* Check-in podium */}
       <mesh position={[0, 0.55, -1.1]} castShadow receiveShadow>
         <cylinderGeometry args={[0.7, 0.85, 1.1, 20]} />
-        <meshStandardMaterial color="#1c1210" metalness={0.3} roughness={0.45} />
+        <meshStandardMaterial color="#1a1220" metalness={0.3} roughness={0.45} />
       </mesh>
       <mesh position={[0, 1.15, -1.1]}>
         <cylinderGeometry args={[0.72, 0.72, 0.08, 20]} />
         <meshStandardMaterial
-          color={gold}
+          color={lavender}
           metalness={0.9}
           roughness={0.2}
-          emissive={gold}
+          emissive={lavender}
           emissiveIntensity={0.15}
         />
       </mesh>
@@ -169,7 +169,7 @@ function CasinoExterior({ doorsOpen }: { doorsOpen: number }) {
       {/* Ground */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
         <planeGeometry args={[40, 40]} />
-        <meshStandardMaterial color="#12080c" roughness={0.9} />
+        <meshStandardMaterial color="#120c18" roughness={0.9} />
       </mesh>
 
       <Sparkles
@@ -177,7 +177,7 @@ function CasinoExterior({ doorsOpen }: { doorsOpen: number }) {
         scale={[12, 6, 8]}
         size={2.5}
         speed={0.35}
-        color="#ffd76a"
+        color="#A992C1"
         position={[0, 3, -3]}
       />
       <SpotLightBeam />
@@ -196,7 +196,7 @@ function SpotLightBeam() {
     <mesh ref={ref} position={[0, 4.5, -2]} rotation={[0.35, 0, 0]}>
       <coneGeometry args={[1.8, 6, 24, 1, true]} />
       <meshBasicMaterial
-        color="#ffd76a"
+        color="#A992C1"
         transparent
         opacity={0.1}
         side={THREE.DoubleSide}
@@ -228,21 +228,21 @@ function CasinoInterior({ highlightTable }: { highlightTable: boolean }) {
       {/* Carpet */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} receiveShadow>
         <planeGeometry args={[16, 12]} />
-        <meshStandardMaterial color="#3a0d18" roughness={0.85} />
+        <meshStandardMaterial color="#2a1f33" roughness={0.85} />
       </mesh>
 
-      {/* Main felt table */}
+      {/* Main felt table — sage felt + lavender rim from title graphic */}
       <group position={[0, 0.9, 0]}>
         <mesh castShadow receiveShadow>
           <cylinderGeometry args={[2.6, 2.8, 0.35, 48]} />
-          <meshStandardMaterial color="#0d4a2f" roughness={0.65} />
+          <meshStandardMaterial color="#3a4535" roughness={0.65} />
         </mesh>
         <mesh position={[0, 0.2, 0]}>
           <torusGeometry args={[2.55, 0.08, 8, 48]} />
-          <meshStandardMaterial color="#d4af37" metalness={0.85} roughness={0.25} />
+          <meshStandardMaterial color="#A992C1" metalness={0.85} roughness={0.25} />
         </mesh>
         {highlightTable && (
-          <pointLight color="#ffd76a" intensity={2.4} distance={7} position={[0, 1.2, 0]} />
+          <pointLight color="#A992C1" intensity={2.4} distance={7} position={[0, 1.2, 0]} />
         )}
       </group>
 
@@ -256,8 +256,8 @@ function CasinoInterior({ highlightTable }: { highlightTable: boolean }) {
           <mesh position={[0, -0.7, 0]}>
             <sphereGeometry args={[0.22, 12, 12]} />
             <meshStandardMaterial
-              color="#ffe6a8"
-              emissive="#ffc857"
+              color="#E5E4C2"
+              emissive="#8A9A7A"
               emissiveIntensity={1.2}
               toneMapped={false}
             />
@@ -266,7 +266,7 @@ function CasinoInterior({ highlightTable }: { highlightTable: boolean }) {
             ref={(el) => {
               if (el) lamps.current[i] = el;
             }}
-            color="#ffd9a0"
+            color="#c8c4a8"
             intensity={1.2}
             distance={8}
             position={[0, -0.7, 0]}
@@ -279,22 +279,22 @@ function CasinoInterior({ highlightTable }: { highlightTable: boolean }) {
         <mesh key={x} position={[x, 1.1, -4.5]}>
           <boxGeometry args={[0.9, 2.2, 0.7]} />
           <meshStandardMaterial
-            color="#1a1018"
-            emissive={i % 2 ? "#ff2d6a" : "#3de0ff"}
+            color="#1a1220"
+            emissive={i % 2 ? "#c478a0" : "#6a7a9a"}
             emissiveIntensity={0.35}
           />
         </mesh>
       ))}
 
       {/* Neon wall sign */}
-      <NeonSign text="STEAL THE BUNDLE" position={[0, 3.2, -6.5]} color="#ff4d7a" />
+      <NeonSign text="STEAL THE BUNDLE" position={[0, 3.2, -6.5]} color="#A992C1" />
 
       <Sparkles
         count={28}
         scale={[14, 4, 10]}
         size={2}
         speed={0.2}
-        color="#d4af37"
+        color="#A992C1"
         position={[0, 2, 0]}
       />
     </group>

@@ -83,3 +83,5 @@ export type {
   Rank,
   Suit,
 } from "./types";
+export { STEAL_BUNDLE_THEME, STEAL_BUNDLE_CSS_VARS } from "./theme";
+export type { StealBundleTheme } from "./theme";
