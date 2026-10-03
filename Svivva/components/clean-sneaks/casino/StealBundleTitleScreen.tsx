@@ -3,7 +3,10 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { STEAL_BUNDLE_TITLE_ART_URL } from "@/lib/clean-sneaks/assets";
-import { STEAL_BUNDLE_GERMAN_TITLE, KLEAN_BUNDLE_CARD_HEADLINE } from "@/lib/clean-sneaks/game-copy";
+import {
+  STEAL_BUNDLE_GERMAN_TITLE,
+  KLEAN_BUNDLE_CARD_HEADLINE,
+} from "@/lib/clean-sneaks/game-copy";
 import { STEAL_BUNDLE_THEME } from "@/lib/clean-sneaks/casino/theme";
 
 type Props = {
@@ -90,9 +93,7 @@ export function StealBundleTitleScreen({ onContinue }: Props) {
         }}
       />
 
-      <div
-        className="relative z-10 mt-auto flex flex-col items-center gap-3 px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-8 text-center"
-      >
+      <div className="relative z-10 mt-auto flex flex-col items-center gap-3 px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-8 text-center">
         <p
           className="font-serif text-lg leading-tight tracking-wide sm:text-xl"
           style={{ color: STEAL_BUNDLE_THEME.lavenderSoft }}
@@ -100,7 +101,10 @@ export function StealBundleTitleScreen({ onContinue }: Props) {
         >
           {STEAL_BUNDLE_GERMAN_TITLE}
         </p>
-        <p className="text-[11px] uppercase tracking-[0.35em]" style={{ color: STEAL_BUNDLE_THEME.sage }}>
+        <p
+          className="text-[11px] uppercase tracking-[0.35em]"
+          style={{ color: STEAL_BUNDLE_THEME.sage }}
+        >
           {KLEAN_BUNDLE_CARD_HEADLINE}
         </p>
         <Button

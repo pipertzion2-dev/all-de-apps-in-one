@@ -23,7 +23,10 @@ import { CreditPayPanel } from "./CreditPayPanel";
 import { MultiplayerLobby } from "./MultiplayerLobby";
 import { KleanShop } from "@/components/clean-sneaks/monetization";
 import { syncCreditsFromCasino } from "@/lib/clean-sneaks/monetization";
-import { KLEAN_BUNDLE_CARD_HEADLINE, STEAL_BUNDLE_GERMAN_TITLE } from "@/lib/clean-sneaks/game-copy";
+import {
+  KLEAN_BUNDLE_CARD_HEADLINE,
+  STEAL_BUNDLE_GERMAN_TITLE,
+} from "@/lib/clean-sneaks/game-copy";
 import { STEAL_BUNDLE_TITLE_ART_URL } from "@/lib/clean-sneaks/assets";
 
 const CasinoScene = dynamic(
@@ -225,103 +228,103 @@ export function CasinoExperience({
             }}
           />
           <div className="relative z-[1] flex flex-col items-center">
-          <p className="text-[10px] uppercase tracking-[0.4em] text-[#A992C1]">Main Floor</p>
-          <p
-            className="mt-2 max-w-md font-serif text-base tracking-wide text-[#c4b0d4] sm:text-lg"
-            data-testid="lobby-german-title"
-          >
-            {STEAL_BUNDLE_GERMAN_TITLE}
-          </p>
-          <h2 className="mt-1 font-serif text-3xl text-[#E5E4C2] sm:text-4xl">
-            {KLEAN_BUNDLE_CARD_HEADLINE}
-          </h2>
-          <p className="mt-2 text-sm text-[#E5E4C2]/70">
-            Protect your stack — solo, online, or nearby over Bluetooth.
-          </p>
-          <p className="mt-2 text-sm text-[#E5E4C2]" data-testid="lobby-credits">
-            Credits: {credits.toLocaleString()}
-            {canSit ? ` · Ante: ${ante.toLocaleString()}` : ""}
-          </p>
-          <p className="mt-1 max-w-sm text-[11px] text-[#E5E4C2]/55">
-            {describeCreditsGate(credits)}
-          </p>
-          {parlayTicket && (
-            <p className="mt-2 text-[11px] text-[#a8b896]" data-testid="lobby-parlay-active">
-              Parlay live · {parlayTicket.legIds.length} legs · stake{" "}
-              {parlayTicket.stake.toLocaleString()}
+            <p className="text-[10px] uppercase tracking-[0.4em] text-[#A992C1]">Main Floor</p>
+            <p
+              className="mt-2 max-w-md font-serif text-base tracking-wide text-[#c4b0d4] sm:text-lg"
+              data-testid="lobby-german-title"
+            >
+              {STEAL_BUNDLE_GERMAN_TITLE}
             </p>
-          )}
-          {parlayFlash && (
-            <p className="mt-2 text-xs text-[#E5E4C2]" data-testid="parlay-settle-flash">
-              {parlayFlash}
+            <h2 className="mt-1 font-serif text-3xl text-[#E5E4C2] sm:text-4xl">
+              {KLEAN_BUNDLE_CARD_HEADLINE}
+            </h2>
+            <p className="mt-2 text-sm text-[#E5E4C2]/70">
+              Protect your stack — solo, online, or nearby over Bluetooth.
             </p>
-          )}
-          {liveRoom && (
-            <p className="mt-1 text-[11px] text-[#7EC8D9]" data-testid="lobby-live-room">
-              Live table {liveRoom.code} · {liveRoom.mode}
+            <p className="mt-2 text-sm text-[#E5E4C2]" data-testid="lobby-credits">
+              Credits: {credits.toLocaleString()}
+              {canSit ? ` · Ante: ${ante.toLocaleString()}` : ""}
             </p>
-          )}
-          <Button
-            className="mt-6 bg-[#8A9A7A] text-[#1a1220] hover:bg-[#a8b896] disabled:opacity-40"
-            disabled={!canSit}
-            onClick={() => {
-              setLobbyPanel("main");
-              setFlow("CARD_GAME_SETUP");
-            }}
-            data-testid="button-sit-at-table"
-          >
-            {canSit ? "Sit at the Table (vs dealers)" : "Need more credits"}
-          </Button>
-          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-center">
+            <p className="mt-1 max-w-sm text-[11px] text-[#E5E4C2]/55">
+              {describeCreditsGate(credits)}
+            </p>
+            {parlayTicket && (
+              <p className="mt-2 text-[11px] text-[#a8b896]" data-testid="lobby-parlay-active">
+                Parlay live · {parlayTicket.legIds.length} legs · stake{" "}
+                {parlayTicket.stake.toLocaleString()}
+              </p>
+            )}
+            {parlayFlash && (
+              <p className="mt-2 text-xs text-[#E5E4C2]" data-testid="parlay-settle-flash">
+                {parlayFlash}
+              </p>
+            )}
+            {liveRoom && (
+              <p className="mt-1 text-[11px] text-[#7EC8D9]" data-testid="lobby-live-room">
+                Live table {liveRoom.code} · {liveRoom.mode}
+              </p>
+            )}
             <Button
-              variant="outline"
-              className="border-[#A992C1]/45 text-[#E5E4C2]"
+              className="mt-6 bg-[#8A9A7A] text-[#1a1220] hover:bg-[#a8b896] disabled:opacity-40"
               disabled={!canSit}
-              onClick={() => setLobbyPanel("parlay")}
-              data-testid="button-open-parlay"
+              onClick={() => {
+                setLobbyPanel("main");
+                setFlow("CARD_GAME_SETUP");
+              }}
+              data-testid="button-sit-at-table"
             >
-              Parlay desk
+              {canSit ? "Sit at the Table (vs dealers)" : "Need more credits"}
             </Button>
-            <Button
-              variant="outline"
-              className="border-[#7EC8D9]/45 text-[#7EC8D9]"
-              onClick={() => setLobbyPanel("multiplayer")}
-              data-testid="button-open-multiplayer"
-            >
-              Online / Bluetooth
-            </Button>
-            <Button
-              variant="outline"
-              className="border-[#00D632]/45 text-[#00D632]"
-              onClick={() => setLobbyPanel("pay")}
-              data-testid="button-buy-credits"
-            >
-              Apple Pay / Cash App
-            </Button>
-            <Button
-              variant="outline"
-              className="border-[#E5E4C2]/45 text-[#E5E4C2]"
-              onClick={() => setLobbyPanel("shop")}
-              data-testid="button-open-klean-shop"
-            >
-              Corner Store
-            </Button>
-          </div>
-          {!canSit && (
-            <Button
-              className="mt-3 border border-[#7EC8D9]/40 text-[#7EC8D9]"
-              variant="outline"
-              onClick={onNewWalk}
-              data-testid="button-earn-credits-walk"
-            >
-              New Walk — earn credits
-            </Button>
-          )}
-          {onExit && (
-            <Button variant="ghost" className="mt-2 text-[#E5E4C2]/60" onClick={onExit}>
-              Exit
-            </Button>
-          )}
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-center">
+              <Button
+                variant="outline"
+                className="border-[#A992C1]/45 text-[#E5E4C2]"
+                disabled={!canSit}
+                onClick={() => setLobbyPanel("parlay")}
+                data-testid="button-open-parlay"
+              >
+                Parlay desk
+              </Button>
+              <Button
+                variant="outline"
+                className="border-[#7EC8D9]/45 text-[#7EC8D9]"
+                onClick={() => setLobbyPanel("multiplayer")}
+                data-testid="button-open-multiplayer"
+              >
+                Online / Bluetooth
+              </Button>
+              <Button
+                variant="outline"
+                className="border-[#00D632]/45 text-[#00D632]"
+                onClick={() => setLobbyPanel("pay")}
+                data-testid="button-buy-credits"
+              >
+                Apple Pay / Cash App
+              </Button>
+              <Button
+                variant="outline"
+                className="border-[#E5E4C2]/45 text-[#E5E4C2]"
+                onClick={() => setLobbyPanel("shop")}
+                data-testid="button-open-klean-shop"
+              >
+                Corner Store
+              </Button>
+            </div>
+            {!canSit && (
+              <Button
+                className="mt-3 border border-[#7EC8D9]/40 text-[#7EC8D9]"
+                variant="outline"
+                onClick={onNewWalk}
+                data-testid="button-earn-credits-walk"
+              >
+                New Walk — earn credits
+              </Button>
+            )}
+            {onExit && (
+              <Button variant="ghost" className="mt-2 text-[#E5E4C2]/60" onClick={onExit}>
+                Exit
+              </Button>
+            )}
           </div>
         </div>
       )}

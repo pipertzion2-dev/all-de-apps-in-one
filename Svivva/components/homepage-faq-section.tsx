@@ -17,7 +17,8 @@ export function HomepageFaqSection() {
             Questions about Poor Man Protection
           </h2>
           <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-base">
-            Seals, verify links, court packs, pricing, and which zzai zzai modules are still in beta.
+            Seals, verify links, court packs, pricing, and which zzai zzai modules are still in
+            beta.
           </p>
         </div>
 

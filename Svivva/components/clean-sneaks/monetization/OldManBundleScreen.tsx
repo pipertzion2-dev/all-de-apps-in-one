@@ -114,8 +114,7 @@ export function OldManBundleScreen({ open, onClose, onPurchased }: Props) {
         <div
           className="pointer-events-none absolute inset-x-0 top-0 h-44 opacity-50 sm:h-52"
           style={{
-            background:
-              "linear-gradient(180deg, transparent 40%, rgba(18,12,24,0.85) 100%)",
+            background: "linear-gradient(180deg, transparent 40%, rgba(18,12,24,0.85) 100%)",
           }}
         />
         <div className="relative p-6">
