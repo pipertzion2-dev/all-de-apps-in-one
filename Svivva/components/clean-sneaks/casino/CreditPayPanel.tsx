@@ -172,13 +172,13 @@ export function CreditPayPanel({ onCreditsGranted, onClose }: Props) {
     >
       <div className="text-center">
         <p className="text-[10px] uppercase tracking-[0.4em] text-[#7dffb2]">Buy chips</p>
-        <h2 className="mt-1 font-serif text-2xl text-[#f7e7b0]">Apple Pay · Cash App</h2>
-        <p className="mt-2 text-xs text-[#e8dcc0]/65">
+        <h2 className="mt-1 font-serif text-2xl text-[#E5E4C2]">Apple Pay · Cash App</h2>
+        <p className="mt-2 text-xs text-[#E5E4C2]/65">
           {catalog?.disclaimer || ENTERTAINMENT_DISCLAIMER}
         </p>
       </div>
 
-      <label className="flex items-start gap-2 text-xs text-[#e8dcc0]/75">
+      <label className="flex items-start gap-2 text-xs text-[#E5E4C2]/75">
         <input
           type="checkbox"
           checked={ageOk}
@@ -193,14 +193,14 @@ export function CreditPayPanel({ onCreditsGranted, onClose }: Props) {
         {(catalog?.packs || []).map((pack) => (
           <div
             key={pack.id}
-            className="rounded-md border border-[#d4af37]/30 bg-black/35 px-3 py-3"
+            className="rounded-md border border-[#A992C1]/30 bg-black/35 px-3 py-3"
             data-testid={`credit-pack-${pack.id}`}
           >
             <div className="flex items-baseline justify-between gap-2">
-              <p className="font-serif text-lg text-[#f7e7b0]">{pack.label}</p>
-              <p className="text-sm text-[#ffd76a]">{pack.priceLabel}</p>
+              <p className="font-serif text-lg text-[#E5E4C2]">{pack.label}</p>
+              <p className="text-sm text-[#E5E4C2]">{pack.priceLabel}</p>
             </div>
-            <p className="text-xs text-[#e8dcc0]/60">
+            <p className="text-xs text-[#E5E4C2]/60">
               {pack.credits.toLocaleString()} entertainment credits
             </p>
             <div className="mt-3 flex flex-col gap-2 sm:flex-row">
@@ -233,19 +233,19 @@ export function CreditPayPanel({ onCreditsGranted, onClose }: Props) {
                 </a>
               </Button>
             </div>
-            <p className="mt-2 text-[10px] text-[#e8dcc0]/45">{pack.redeemHint}</p>
+            <p className="mt-2 text-[10px] text-[#E5E4C2]/45">{pack.redeemHint}</p>
           </div>
         ))}
       </div>
 
       <div className="rounded-md border border-[#00D632]/30 bg-black/30 px-3 py-3">
-        <p className="text-xs text-[#e8dcc0]/70">Redeem Cash App code</p>
+        <p className="text-xs text-[#E5E4C2]/70">Redeem Cash App code</p>
         <div className="mt-2 flex gap-2">
           <input
             value={redeemCode}
             onChange={(e) => setRedeemCode(e.target.value)}
             placeholder="SB-7-750"
-            className="flex-1 rounded-md border border-[#d4af37]/30 bg-black/40 px-3 py-2 text-sm text-[#ffd76a]"
+            className="flex-1 rounded-md border border-[#A992C1]/30 bg-black/40 px-3 py-2 text-sm text-[#E5E4C2]"
             data-testid="cashapp-redeem-input"
           />
           <Button
@@ -260,12 +260,12 @@ export function CreditPayPanel({ onCreditsGranted, onClose }: Props) {
       </div>
 
       {message && (
-        <p className="text-center text-xs text-[#ffd76a]" data-testid="credit-pay-message">
+        <p className="text-center text-xs text-[#E5E4C2]" data-testid="credit-pay-message">
           {message}
         </p>
       )}
 
-      <Button variant="ghost" className="text-[#e8dcc0]/60" onClick={onClose}>
+      <Button variant="ghost" className="text-[#E5E4C2]/60" onClick={onClose}>
         Back to lobby
       </Button>
     </div>

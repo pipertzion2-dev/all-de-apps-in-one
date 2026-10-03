@@ -3,6 +3,8 @@ import {
   KLEAN_BUNDLE_CARD_HEADLINE,
   KLEAN_HOMEPAGE_TAGLINE,
   KLEAN_RUNNER_INTRO_LINE,
+  STEAL_BUNDLE_ENGLISH_TITLE,
+  STEAL_BUNDLE_GERMAN_TITLE,
 } from "./game-copy";
 
 describe("Klean Sneaks game copy", () => {
@@ -18,5 +20,10 @@ describe("Klean Sneaks game copy", () => {
   it("states homepage protection from cameras and wear", () => {
     expect(KLEAN_HOMEPAGE_TAGLINE).toMatch(/cameras/i);
     expect(KLEAN_HOMEPAGE_TAGLINE).toMatch(/everyday wear/i);
+  });
+
+  it("keeps Steal Bundle German title matching the main graphic", () => {
+    expect(STEAL_BUNDLE_GERMAN_TITLE).toMatch(/stiehl den alten Manns Bündel/i);
+    expect(STEAL_BUNDLE_ENGLISH_TITLE).toMatch(/Steal the Old Man's Bundle/i);
   });
 });

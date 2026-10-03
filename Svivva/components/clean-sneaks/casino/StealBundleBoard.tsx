@@ -26,6 +26,7 @@ import {
 } from "@/lib/clean-sneaks/casino";
 import { PlayingCardView } from "./PlayingCardView";
 import { StealBundleHowToPlay } from "./StealBundleHowToPlay";
+import { StealBundleTitleScreen } from "./StealBundleTitleScreen";
 import { KLEAN_BUNDLE_CARD_HEADLINE } from "@/lib/clean-sneaks/game-copy";
 import { FreeYearPrizeModal } from "@/components/clean-sneaks/prizes/FreeYearPrizeModal";
 
@@ -63,6 +64,7 @@ export function StealBundleBoard({
   onPlayAgain,
   onHandComplete,
 }: Props) {
+  const [titleDone, setTitleDone] = useState(!showTutorialFirst);
   const [tutorialDone, setTutorialDone] = useState(!showTutorialFirst);
   const [state, setState] = useState<CardGameState | null>(null);
   const [flash, setFlash] = useState<UiFlash>(null);
@@ -287,12 +289,16 @@ export function StealBundleBoard({
     };
   }, [state]);
 
+  if (!titleDone) {
+    return <StealBundleTitleScreen onContinue={() => setTitleDone(true)} />;
+  }
+
   if (!tutorialDone) {
     return <StealBundleHowToPlay onStart={() => setTutorialDone(true)} />;
   }
 
   if (!state) {
-    return <div className="flex flex-1 items-center justify-center text-[#d4af37]">Shuffling…</div>;
+    return <div className="flex flex-1 items-center justify-center text-[#A992C1]">Shuffling…</div>;
   }
 
   if (state.phase === "results") {
@@ -309,10 +315,10 @@ export function StealBundleBoard({
         data-testid="steal-bundle-results"
         style={{
           background:
-            "radial-gradient(ellipse at 50% 30%, rgba(255,77,122,0.15), transparent 55%), #0a0c10",
+            "radial-gradient(ellipse at 50% 30%, rgba(169,146,193,0.18), transparent 55%), #1a1220",
         }}
       >
-        <p className="text-[10px] uppercase tracking-[0.4em] text-[#d4af37]">Final Count</p>
+        <p className="text-[10px] uppercase tracking-[0.4em] text-[#A992C1]">Final Count</p>
         <div className="mt-4 w-full max-w-sm space-y-2">
           {sizes
             .slice()
@@ -322,8 +328,8 @@ export function StealBundleBoard({
                 key={s.id}
                 className={`flex justify-between rounded border px-4 py-2 text-sm ${
                   winners.includes(s.id)
-                    ? "border-[#d4af37] bg-[#d4af37]/15 text-[#ffd76a]"
-                    : "border-white/10 bg-white/5 text-[#e8dcc0]"
+                    ? "border-[#A992C1] bg-[#8A9A7A]/15 text-[#E5E4C2]"
+                    : "border-white/10 bg-white/5 text-[#E5E4C2]"
                 }`}
               >
                 <span>{s.name}</span>
@@ -331,17 +337,17 @@ export function StealBundleBoard({
               </div>
             ))}
         </div>
-        <h3 className="mt-6 font-serif text-2xl text-[#f7e7b0] sm:text-3xl">
+        <h3 className="mt-6 font-serif text-2xl text-[#E5E4C2] sm:text-3xl">
           {tie
             ? "TIE!"
             : `${state.players.find((p) => p.id === winners[0])?.name ?? "Player"} WINS!`}
         </h3>
-        <p className="mt-2 text-sm text-[#ffd76a]" data-testid="results-credits">
+        <p className="mt-2 text-sm text-[#E5E4C2]" data-testid="results-credits">
           Chip stack: {credits.toLocaleString()} credits
         </p>
         {winners.includes("p1") && winners.length === 1 && (
           <p
-            className="mt-3 max-w-sm text-[11px] leading-relaxed text-[#e8dcc0]/70"
+            className="mt-3 max-w-sm text-[11px] leading-relaxed text-[#E5E4C2]/70"
             data-testid="year-sub-odds-teaser"
           >
             Solo wins roll for a free year of ZZAI Pro (~5% chance). Winners sign in to claim.
@@ -349,7 +355,7 @@ export function StealBundleBoard({
         )}
         <div className="mt-8 flex flex-wrap justify-center gap-2">
           <Button
-            className="bg-[#d4af37] text-[#1a1008]"
+            className="bg-[#8A9A7A] text-[#1a1220]"
             onClick={onPlayAgain}
             data-testid="button-play-again"
           >
@@ -357,12 +363,12 @@ export function StealBundleBoard({
           </Button>
           <Button
             variant="outline"
-            className="border-[#d4af37]/50 text-[#f7e7b0]"
+            className="border-[#A992C1]/50 text-[#E5E4C2]"
             onClick={onReturnToCasino}
           >
             Return to Casino
           </Button>
-          <Button variant="ghost" className="text-[#e8dcc0]/70" onClick={onRequestNewWalk}>
+          <Button variant="ghost" className="text-[#E5E4C2]/70" onClick={onRequestNewWalk}>
             New Walk
           </Button>
         </div>
@@ -384,20 +390,20 @@ export function StealBundleBoard({
       data-phase={state.phase}
       style={{
         background:
-          "radial-gradient(ellipse at 50% 40%, rgba(13,74,47,0.55), #0a120e 60%), #060a08",
+          "radial-gradient(ellipse at 50% 40%, rgba(75,59,91,0.55), #1a1220 60%), #120c18",
       }}
     >
-      <div className="flex items-center justify-between gap-2 border-b border-[#d4af37]/25 px-3 py-2 sm:px-4">
+      <div className="flex items-center justify-between gap-2 border-b border-[#A992C1]/25 px-3 py-2 sm:px-4">
         <div>
-          <p className="text-[9px] uppercase tracking-[0.35em] text-[#d4af37]">
+          <p className="text-[9px] uppercase tracking-[0.35em] text-[#A992C1]">
             {KLEAN_BUNDLE_CARD_HEADLINE}
           </p>
-          <p className="text-xs text-[#e8dcc0]/70">Protect the biggest bundle.</p>
+          <p className="text-xs text-[#E5E4C2]/70">Protect the biggest bundle.</p>
         </div>
         <div className="text-right">
           <p
             className={`text-xs font-semibold uppercase tracking-wider ${
-              dealing ? "text-[#7dffb2]" : yourTurn ? "text-[#ffd76a]" : "text-[#e8dcc0]/60"
+              dealing ? "text-[#a8b896]" : yourTurn ? "text-[#E5E4C2]" : "text-[#E5E4C2]/60"
             }`}
             data-testid="turn-indicator"
           >
@@ -407,7 +413,7 @@ export function StealBundleBoard({
                 ? "Player 1 — Your Turn"
                 : `${cur?.name ?? ""} — Playing…`}
           </p>
-          <p className="text-[10px] tabular-nums text-[#d4af37]/80" data-testid="table-credits">
+          <p className="text-[10px] tabular-nums text-[#A992C1]/80" data-testid="table-credits">
             Credits {credits.toLocaleString()} · Ante {anteLocked.toLocaleString()}
           </p>
         </div>
@@ -417,10 +423,10 @@ export function StealBundleBoard({
         <div
           className={`pointer-events-none absolute left-1/2 top-16 z-20 -translate-x-1/2 rounded-full px-4 py-2 text-sm font-bold tracking-wide shadow-lg ${
             flash.kind === "steal"
-              ? "bg-[#ff2d6a] text-white"
+              ? "bg-[#c478a0] text-white"
               : flash.kind === "match"
-                ? "bg-[#0d4a2f] text-[#7dffb2]"
-                : "bg-black/80 text-[#ffd76a]"
+                ? "bg-[#3a4535] text-[#a8b896]"
+                : "bg-black/80 text-[#E5E4C2]"
           }`}
           data-testid="bundle-flash"
         >
@@ -460,18 +466,18 @@ export function StealBundleBoard({
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-2 py-3">
         <div className="flex w-full max-w-3xl flex-wrap items-start justify-center gap-4 sm:gap-6">
           <div className="flex flex-col items-center gap-1" data-testid="deck-stock">
-            <p className="text-[10px] uppercase tracking-[0.3em] text-[#d4af37]/70">Deck</p>
+            <p className="text-[10px] uppercase tracking-[0.3em] text-[#A992C1]/70">Deck</p>
             <div className="relative h-[4.5rem] w-[3.15rem] sm:h-20 sm:w-14">
               {state.deck.length > 2 && (
                 <div
                   aria-hidden
-                  className="absolute inset-0 translate-x-1 translate-y-1 rounded-md border border-[#d4af37]/25 bg-[#1a0810]"
+                  className="absolute inset-0 translate-x-1 translate-y-1 rounded-md border border-[#A992C1]/25 bg-[#120c18]"
                 />
               )}
               {state.deck.length > 1 && (
                 <div
                   aria-hidden
-                  className="absolute inset-0 translate-x-0.5 translate-y-0.5 rounded-md border border-[#d4af37]/35 bg-[#2a1018]"
+                  className="absolute inset-0 translate-x-0.5 translate-y-0.5 rounded-md border border-[#A992C1]/35 bg-[#2a1f33]"
                 />
               )}
               {deckTop ? (
@@ -485,16 +491,16 @@ export function StealBundleBoard({
                 <div className="absolute inset-0 rounded-md border border-dashed border-white/15" />
               )}
             </div>
-            <p className="text-[10px] tabular-nums text-[#e8dcc0]/55" data-testid="deck-count">
+            <p className="text-[10px] tabular-nums text-[#E5E4C2]/55" data-testid="deck-count">
               {state.deck.length} left
             </p>
           </div>
 
           <div className="flex min-w-0 flex-1 flex-col items-center gap-2">
-            <p className="text-[10px] uppercase tracking-[0.3em] text-[#d4af37]/70">Table</p>
+            <p className="text-[10px] uppercase tracking-[0.3em] text-[#A992C1]/70">Table</p>
             <div className="flex flex-wrap items-center justify-center gap-2">
               {state.tableCards.length === 0 && (
-                <p className="text-xs text-[#e8dcc0]/40">
+                <p className="text-xs text-[#E5E4C2]/40">
                   {dealing ? "Flipping table cards…" : "No cards on the felt"}
                 </p>
               )}
@@ -526,12 +532,12 @@ export function StealBundleBoard({
             </div>
           </div>
         </div>
-        <p className="text-[10px] text-[#e8dcc0]/45">{state.lastEvent ?? ""}</p>
+        <p className="text-[10px] text-[#E5E4C2]/45">{state.lastEvent ?? ""}</p>
       </div>
 
       {/* Human hand + bundle */}
-      <div className="border-t border-[#d4af37]/20 bg-black/35 px-2 py-3 sm:px-4">
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-xs text-[#e8dcc0]/80">
+      <div className="border-t border-[#A992C1]/20 bg-black/35 px-2 py-3 sm:px-4">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-xs text-[#E5E4C2]/80">
           <span>
             {human.name} · Cards: {human.hand.length} · Bundle: {human.bundle.length}
             {human.bundleMatchRank ? ` · Top: ${human.bundleMatchRank}` : ""}
@@ -539,7 +545,7 @@ export function StealBundleBoard({
           {yourTurn && state.selectedCardId && (
             <button
               type="button"
-              className="text-[10px] uppercase tracking-wider text-[#ffd76a] underline"
+              className="text-[10px] uppercase tracking-wider text-[#E5E4C2] underline"
               onClick={() => setState((s) => (s ? selectHandCard(s, null) : s))}
             >
               Deselect
@@ -586,7 +592,7 @@ export function StealBundleBoard({
               <Button
                 size="sm"
                 variant="outline"
-                className="border-[#d4af37]/40 text-[#f7e7b0]"
+                className="border-[#A992C1]/40 text-[#E5E4C2]"
                 onClick={() =>
                   commitMove({ type: "dropToTable", handCardId: state.selectedCardId! })
                 }
@@ -623,18 +629,18 @@ function OpponentPanel({
       onClick={onSteal}
       className={`rounded-lg border px-3 py-2 text-left transition ${
         stealTarget
-          ? "border-[#ff2d6a] bg-[#ff2d6a]/15 ring-2 ring-[#ff2d6a]/60"
+          ? "border-[#c478a0] bg-[#c478a0]/15 ring-2 ring-[#c478a0]/60"
           : "border-white/10 bg-black/30"
       }`}
       data-testid={`opponent-${name}`}
     >
-      <p className="text-[10px] uppercase tracking-wider text-[#d4af37]">{name}</p>
-      <p className="text-xs text-[#e8dcc0]/80">
+      <p className="text-[10px] uppercase tracking-wider text-[#A992C1]">{name}</p>
+      <p className="text-xs text-[#E5E4C2]/80">
         Cards: {handCount} · Bundle: {bundleCount}
         {topRank ? ` · Top Match: ${topRank}` : ""}
       </p>
       {stealTarget && (
-        <p className="mt-1 text-[10px] font-bold uppercase tracking-wider text-[#ff7aa0]">Steal!</p>
+        <p className="mt-1 text-[10px] font-bold uppercase tracking-wider text-[#c478a0]">Steal!</p>
       )}
     </button>
   );

@@ -234,8 +234,8 @@ export function MultiplayerLobby({ ante, onReadyToPlay, onBack }: Props) {
     >
       <div>
         <p className="text-[10px] uppercase tracking-[0.4em] text-[#7EC8D9]">Live table</p>
-        <h2 className="mt-1 font-serif text-2xl text-[#f7e7b0]">Online · Nearby Bluetooth</h2>
-        <p className="mt-2 text-xs text-[#e8dcc0]/65">
+        <h2 className="mt-1 font-serif text-2xl text-[#E5E4C2]">Online · Nearby Bluetooth</h2>
+        <p className="mt-2 text-xs text-[#E5E4C2]/65">
           {PRODUCT_TAGLINE} Host online or nearby — the game is free; ads fund the walk while the
           sap runs your platform guardrails on ZZAI.
         </p>
@@ -246,13 +246,13 @@ export function MultiplayerLobby({ ante, onReadyToPlay, onBack }: Props) {
 
       {!room && (
         <>
-          <label className="block text-left text-xs text-[#e8dcc0]/70">
+          <label className="block text-left text-xs text-[#E5E4C2]/70">
             Gamer tag (saved to zzai zzai when signed in)
             <input
               value={name}
               onChange={(e) => setName(e.target.value.slice(0, 24))}
               onBlur={() => void persistGamerTag()}
-              className="mt-1 w-full rounded-md border border-[#d4af37]/35 bg-black/40 px-3 py-2 text-sm text-[#ffd76a]"
+              className="mt-1 w-full rounded-md border border-[#A992C1]/35 bg-black/40 px-3 py-2 text-sm text-[#E5E4C2]"
               data-testid="mp-display-name"
             />
           </label>
@@ -262,8 +262,8 @@ export function MultiplayerLobby({ ante, onReadyToPlay, onBack }: Props) {
               variant={mode === "online" ? "default" : "outline"}
               className={
                 mode === "online"
-                  ? "bg-[#d4af37] text-[#1a1008]"
-                  : "border-[#d4af37]/40 text-[#e8dcc0]"
+                  ? "bg-[#8A9A7A] text-[#1a1220]"
+                  : "border-[#A992C1]/40 text-[#E5E4C2]"
               }
               onClick={() => setMode("online")}
               data-testid="button-mode-online"
@@ -285,7 +285,7 @@ export function MultiplayerLobby({ ante, onReadyToPlay, onBack }: Props) {
           </div>
 
           <Button
-            className="bg-[#d4af37] text-[#1a1008]"
+            className="bg-[#8A9A7A] text-[#1a1220]"
             disabled={busy}
             onClick={create}
             data-testid="button-host-table"
@@ -298,13 +298,13 @@ export function MultiplayerLobby({ ante, onReadyToPlay, onBack }: Props) {
               value={joinCode}
               onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
               placeholder="ROOM CODE"
-              className="flex-1 rounded-md border border-[#d4af37]/35 bg-black/40 px-3 py-2 text-center text-sm tracking-[0.3em] text-[#ffd76a]"
+              className="flex-1 rounded-md border border-[#A992C1]/35 bg-black/40 px-3 py-2 text-center text-sm tracking-[0.3em] text-[#E5E4C2]"
               data-testid="mp-join-code"
             />
             <Button
               disabled={busy || joinCode.length < 4}
               onClick={() => join()}
-              className="bg-[#7a1028] text-[#f7e7b0] hover:bg-[#9a1834]"
+              className="bg-[#7a1028] text-[#E5E4C2] hover:bg-[#9a1834]"
               data-testid="button-join-table"
             >
               Join
@@ -323,18 +323,18 @@ export function MultiplayerLobby({ ante, onReadyToPlay, onBack }: Props) {
             </Button>
           )}
           {mode === "nearby" && !ble.available && ble.reason && (
-            <p className="text-[11px] text-[#e8dcc0]/45">{ble.reason}</p>
+            <p className="text-[11px] text-[#E5E4C2]/45">{ble.reason}</p>
           )}
         </>
       )}
 
       {room && (
-        <div className="rounded-md border border-[#d4af37]/35 bg-black/40 px-4 py-4 text-left">
-          <p className="text-[10px] uppercase tracking-[0.35em] text-[#d4af37]">
+        <div className="rounded-md border border-[#A992C1]/35 bg-black/40 px-4 py-4 text-left">
+          <p className="text-[10px] uppercase tracking-[0.35em] text-[#A992C1]">
             {room.mode === "nearby" ? "Nearby table" : "Online table"}
           </p>
           <p
-            className="mt-2 font-serif text-3xl tracking-[0.2em] text-[#ffd76a]"
+            className="mt-2 font-serif text-3xl tracking-[0.2em] text-[#E5E4C2]"
             data-testid="mp-room-code"
           >
             {room.code}
@@ -344,7 +344,7 @@ export function MultiplayerLobby({ ante, onReadyToPlay, onBack }: Props) {
               Advertise as {bluetoothHostLabel(room.code)} if your OS supports BLE naming.
             </p>
           )}
-          <ul className="mt-4 space-y-1 text-sm text-[#e8dcc0]/80">
+          <ul className="mt-4 space-y-1 text-sm text-[#E5E4C2]/80">
             {room.players.map((p) => (
               <li key={p.id} className="flex justify-between gap-2">
                 <span>
@@ -352,7 +352,7 @@ export function MultiplayerLobby({ ante, onReadyToPlay, onBack }: Props) {
                   {p.id === playerId ? " (you)" : ""}
                   {p.bluetoothDeviceId ? " · BT" : ""}
                 </span>
-                <span className={p.ready ? "text-[#7dffb2]" : "text-[#e8dcc0]/45"}>
+                <span className={p.ready ? "text-[#7dffb2]" : "text-[#E5E4C2]/45"}>
                   {p.ready ? "Ready" : "Waiting"}
                 </span>
               </li>
@@ -360,13 +360,13 @@ export function MultiplayerLobby({ ante, onReadyToPlay, onBack }: Props) {
           </ul>
           <div className="mt-4 flex flex-col gap-2">
             <Button
-              className="bg-[#d4af37] text-[#1a1008]"
+              className="bg-[#8A9A7A] text-[#1a1220]"
               onClick={toggleReady}
               data-testid="button-mp-ready"
             >
               {room.players.find((p) => p.id === playerId)?.ready ? "Unready" : "Ready up"}
             </Button>
-            <Button variant="ghost" className="text-[#e8dcc0]/55" onClick={() => setRoom(null)}>
+            <Button variant="ghost" className="text-[#E5E4C2]/55" onClick={() => setRoom(null)}>
               Leave lobby
             </Button>
           </div>
@@ -379,7 +379,7 @@ export function MultiplayerLobby({ ante, onReadyToPlay, onBack }: Props) {
         </p>
       )}
 
-      <Button variant="ghost" className="text-[#e8dcc0]/55" onClick={onBack}>
+      <Button variant="ghost" className="text-[#E5E4C2]/55" onClick={onBack}>
         Back
       </Button>
     </div>

@@ -36,6 +36,14 @@ public/assets/clean-sneaks/ipbw-main-cover.jpg
 
 Shown fullscreen after loading with a **Start** prompt in ZZAI holo type — tap to begin the countdown.
 
+## Steal Bundle title graphic
+
+```
+public/assets/clean-sneaks/stiehl-den-alten-manns-buendel.jpg
+```
+
+Main art for **Stiehl den alten Manns Bündel** / Steal the Old Man's Bundle — shown fullscreen before the card game begins (title screen), washed into the casino lobby, and on The Old Man's Bundle shop panel. Palette: deep purple, lavender film-strip, sage fan-rays, cream highlights.
+
 Colorways live in `baloon8-variants/` — same orthographic model, different finishes:
 
 | File          | Colorway            |

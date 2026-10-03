@@ -68,7 +68,9 @@ export function HomepageMainGoal({
       <p className="text-base font-medium leading-snug text-foreground/90 sm:text-lg">
         {PRODUCT_TAGLINE}
       </p>
-      <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">{PRODUCT_MAIN_GOAL}</p>
+      <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
+        {PRODUCT_MAIN_GOAL}
+      </p>
     </div>
   );
 }
