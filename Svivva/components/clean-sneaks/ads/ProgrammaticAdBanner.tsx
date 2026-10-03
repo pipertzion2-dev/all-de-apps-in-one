@@ -8,17 +8,20 @@ import {
   medianetConfig,
   monetagZoneId,
   programmaticNetwork,
+  type ProgrammaticNetwork,
 } from "@/lib/clean-sneaks/ads/programmatic";
 import { recordAdEvent } from "@/lib/clean-sneaks/ads";
 
 type Props = {
   className?: string;
   onReady?: () => void;
+  /** When rotating between multiple alt networks, pass the resolved network id. */
+  network?: ProgrammaticNetwork | null;
 };
 
 /** Media.net or Adsterra display unit for the menu banner. */
-export function ProgrammaticAdBanner({ className, onReady }: Props) {
-  const network = programmaticNetwork();
+export function ProgrammaticAdBanner({ className, onReady, network: networkProp }: Props) {
+  const network = networkProp ?? programmaticNetwork();
   const mounted = useRef(false);
   const medianet = medianetConfig();
   const adsterraUrl = adsterraInvokeUrl();

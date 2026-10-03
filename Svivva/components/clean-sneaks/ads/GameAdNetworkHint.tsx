@@ -32,10 +32,15 @@ export function GameAdNetworkHint({ className }: Props) {
               network instead.
             </p>
           )}
-          {alt ? (
+          {alt && kleanInGameUsesAdsense() ? (
             <p>
-              Active free network: <strong className="text-[#7dffb2]">{alt}</strong> (real CPM
-              payouts — not Google).
+              Paid inventory rotates between <strong className="text-[#7dffb2]">Google AdSense</strong>{" "}
+              and <strong className="text-[#7dffb2]">{alt}</strong>. House sponsors only fill when a
+              network returns no ad.
+            </p>
+          ) : alt ? (
+            <p>
+              Active alt network: <strong className="text-[#7dffb2]">{alt}</strong> (real CPM payouts).
             </p>
           ) : (
             <p>

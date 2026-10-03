@@ -8,7 +8,8 @@
  * 5. **Low fill in WebGL/fullscreen** — game surfaces get worse match rates than blog content.
  * 6. **Auto ads ≠ game units** — head script helps site verification but in-game needs explicit units or another network.
  *
- * Default: **free alt networks + house sponsors** in-game. Opt in to Google with NEXT_PUBLIC_KLEAN_USE_ADSENSE=1.
+ * Default: **alt networks + house fill** in-game. Opt in to Google with NEXT_PUBLIC_KLEAN_USE_ADSENSE=1;
+ * when both Google units and an alt network are set, the game rotates between paid stacks (house only on no-fill).
  */
 
 export const KLEAN_USE_ADSENSE_ENV = "NEXT_PUBLIC_KLEAN_USE_ADSENSE";
