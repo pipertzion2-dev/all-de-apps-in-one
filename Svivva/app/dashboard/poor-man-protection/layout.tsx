@@ -1,6 +1,4 @@
-"use client";
-import { ProGate } from "@/app/components/pro-gate";
-
+/** Poor Man Protection is a public product surface (guest-reachable); no Pro gate. */
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <ProGate feature="Poor Man Protection">{children}</ProGate>;
+  return children;
 }

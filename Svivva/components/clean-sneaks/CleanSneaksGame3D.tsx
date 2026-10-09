@@ -50,7 +50,14 @@ import { DesignCopyCameraOverlay } from "./DesignCopyCameraOverlay";
 import { PostMissionReveal } from "./PostMissionReveal";
 import { CleanPathHud, OhNoOverlay } from "./OhNoOverlay";
 import { Baloon8ColorwayPicker } from "./Baloon8ColorwayPicker";
+import { ReferenceUiRemixPanel } from "./ReferenceUiRemixPanel";
 import { CasinoEntryRules } from "./CasinoEntryRules";
+import {
+  readSavedReferenceUiTheme,
+  referenceUiThemeStyle,
+  type KleanReferenceUiTheme,
+} from "@/lib/clean-sneaks/reference-ui-theme";
+import { getUiOption } from "@/lib/clean-sneaks/ui-options-catalog";
 import { GameInterstitialAd, GameRewardedAd } from "./ads";
 import { RewardClaimModal } from "./monetization/RewardClaimModal";
 import {
@@ -89,6 +96,9 @@ export type CleanSneaksGame3DProps = {
   fullscreen?: boolean;
   className?: string;
   style?: CSSProperties;
+  /** Reference-driven shell theme from parent (optional; game also loads saved theme). */
+  uiTheme?: KleanReferenceUiTheme | null;
+  onUiThemeChange?: (theme: KleanReferenceUiTheme | null) => void;
 };
 
 function prefersReducedMotion(): boolean {
@@ -144,10 +154,16 @@ export function CleanSneaksGame3D({
   fullscreen = false,
   className,
   style,
+  uiTheme: uiThemeProp,
+  onUiThemeChange,
 }: CleanSneaksGame3DProps) {
   const [colorwayId, setColorwayId] = useState<Baloon8ColorwayId>(() =>
     typeof window === "undefined" ? "oilSlick" : readSavedColorway(),
   );
+  const [localUiTheme, setLocalUiTheme] = useState<KleanReferenceUiTheme | null>(() =>
+    typeof window === "undefined" ? null : readSavedReferenceUiTheme(),
+  );
+  const uiTheme = uiThemeProp !== undefined ? uiThemeProp : localUiTheme;
   const colorwayIdRef = useRef(colorwayId);
   colorwayIdRef.current = colorwayId;
   const sneaker = resolvePlayerSneaker({
@@ -503,6 +519,16 @@ export function CleanSneaksGame3D({
         return;
       }
       if (phase === "colorPick") {
+        // Don't steal Enter/Space from Discover your perfect UI form fields.
+        const target = e.target as HTMLElement | null;
+        const tag = target?.tagName?.toLowerCase();
+        const inField =
+          tag === "input" ||
+          tag === "textarea" ||
+          tag === "select" ||
+          Boolean(target?.isContentEditable) ||
+          Boolean(target?.closest?.("[data-testid='reference-ui-remix-panel']"));
+        if (inField) return;
         if (k === " " || k === "enter" || e.code === "Space") {
           e.preventDefault();
           confirmColorwayAndCountdown();
@@ -687,18 +713,59 @@ export function CleanSneaksGame3D({
     );
   }
 
+  const uiOption = uiTheme ? getUiOption(uiTheme.uiOptionId) : null;
+  const themedStyle: CSSProperties = {
+    ...style,
+    ...referenceUiThemeStyle(uiTheme),
+    ...(uiTheme
+      ? {
+          background: `linear-gradient(180deg, ${uiTheme.colors.bgDeep}, ${uiTheme.colors.bg})`,
+        }
+      : {}),
+  };
+
+  const hudPlacement = uiOption?.hudPlacement ?? "top-split";
+  const hudClass =
+    hudPlacement === "bottom-dock"
+      ? `pointer-events-none absolute inset-x-0 bottom-0 z-10 flex items-end justify-between gap-2 ${portrait ? "px-2 py-2 pb-14" : "p-3 sm:p-4 pb-16"}`
+      : hudPlacement === "letterbox"
+        ? `pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-2 border-b border-black/80 bg-black/70 ${portrait ? "px-2 py-2" : "px-4 py-3"}`
+        : hudPlacement === "broadcast"
+          ? `pointer-events-none absolute inset-x-0 bottom-0 z-10 flex items-stretch justify-between gap-2 border-t-2 ${portrait ? "px-2 py-1.5" : "px-3 py-2"}`
+          : hudPlacement === "corners"
+            ? `pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-6 ${portrait ? "px-2 py-1.5 pr-16" : "p-3 sm:p-4"}`
+            : hudPlacement === "top-bar"
+              ? `pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center justify-between gap-2 backdrop-blur-md ${portrait ? "px-2 py-1.5 pr-16" : "px-3 py-2 sm:px-4"}`
+              : `pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-2 ${portrait ? "px-2 py-1.5 pr-16" : "p-3 sm:p-4"}`;
+
+  const shoeCamClass =
+    hudPlacement === "bottom-dock" || hudPlacement === "broadcast"
+      ? `pointer-events-none absolute z-10 ${portrait ? "top-2 right-2" : "top-3 right-3"}`
+      : `pointer-events-none absolute z-10 ${portrait ? "bottom-2 right-2" : "bottom-24 left-3"}`;
+
   return (
     <div
       ref={wrapRef}
       className={`flex min-h-0 flex-col ${fullscreen ? "h-full flex-1" : ""} ${className ?? ""}`}
-      style={style}
+      style={themedStyle}
+      data-klean-reference-ui={uiTheme ? "1" : undefined}
+      data-klean-ui-option={uiTheme?.uiOptionId}
+      data-klean-hud={hudPlacement}
       role="application"
       aria-label={`${KLEAN_SNEAKS.title} 3D game`}
     >
       <div
-        className={`relative flex min-h-0 flex-1 flex-col overflow-hidden bg-[#0a0c10]/85 ${
+        className={`relative flex min-h-0 flex-1 flex-col overflow-hidden ${
           fullscreen ? "rounded-lg border border-white/10" : "rounded-xl border border-white/10"
         }`}
+        style={{
+          background: uiTheme
+            ? `color-mix(in srgb, ${uiTheme.colors.bgDeep} 85%, transparent)`
+            : "rgb(10 12 16 / 0.85)",
+          borderColor: uiTheme
+            ? `color-mix(in srgb, ${uiTheme.colors.accent} 35%, transparent)`
+            : undefined,
+        }}
       >
         {(phase === "running" || phase === "paused") && (
           <div
@@ -789,26 +856,57 @@ export function CleanSneaksGame3D({
         )}
 
         <div
-          className={`pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-2 ${
-            portrait ? "px-2 py-1.5 pr-16" : "p-3 sm:p-4"
-          }`}
+          className={hudClass}
+          style={
+            uiTheme
+              ? {
+                  borderColor:
+                    hudPlacement === "broadcast" || hudPlacement === "letterbox"
+                      ? uiTheme.colors.accent
+                      : undefined,
+                  background:
+                    hudPlacement === "top-bar" || hudPlacement === "broadcast"
+                      ? `color-mix(in srgb, ${uiTheme.colors.bgPanel} 82%, transparent)`
+                      : hudPlacement === "letterbox"
+                        ? undefined
+                        : undefined,
+                  fontFamily:
+                    uiOption?.typeTone === "mono"
+                      ? "ui-monospace, SFMono-Regular, Menlo, monospace"
+                      : uiOption?.typeTone === "editorial"
+                        ? "Georgia, 'Times New Roman', serif"
+                        : undefined,
+                  letterSpacing: uiOption?.typeTone === "editorial" ? "0.04em" : undefined,
+                }
+              : undefined
+          }
+          data-testid="klean-strategic-hud"
         >
           <div className={portrait ? "space-y-0" : "space-y-1"}>
             {!portrait && (
-              <p className="text-[10px] uppercase tracking-[0.25em] text-[#5B8DA8]/80">
-                {sneaker.label ?? "Walkers"} · How clean can you keep the fit?
+              <p
+                className="text-[10px] uppercase tracking-[0.25em]"
+                style={{ color: uiTheme?.colors.accentSoft ?? "rgb(91 141 168 / 0.8)" }}
+              >
+                {sneaker.label ?? "Walkers"}
+                {uiOption ? ` · ${uiOption.label}` : ""} · How clean can you keep the fit?
               </p>
             )}
             <p
-              className={`font-bold tabular-nums text-foreground ${portrait ? "text-base" : "text-lg sm:text-xl"}`}
+              className={`font-bold tabular-nums ${portrait ? "text-base" : "text-lg sm:text-xl"}`}
+              style={{ color: uiTheme?.colors.text ?? undefined }}
             >
               {hud.score.toLocaleString()}
             </p>
-            <p className={`text-[#ffd76a]/90 ${portrait ? "text-[10px]" : "text-xs"}`}>
+            <p
+              className={portrait ? "text-[10px]" : "text-xs"}
+              style={{ color: uiTheme?.colors.highlight ?? "rgb(255 215 106 / 0.9)" }}
+            >
               Credits {scoreToCredits(hud.score).toLocaleString()}
             </p>
             <p
-              className={`text-muted-foreground ${portrait ? "text-[10px] tabular-nums" : "text-xs"}`}
+              className={portrait ? "text-[10px] tabular-nums" : "text-xs"}
+              style={{ color: uiTheme?.colors.muted ?? undefined }}
             >
               {hud.distance}m
               {hud.distance >= FINISH_DISTANCE ? " · BONUS" : ` / ${FINISH_DISTANCE}m`} · L{" "}
@@ -816,7 +914,10 @@ export function CleanSneaksGame3D({
               {!portrait && <> · Best {hud.bestScore.toLocaleString()}</>}
             </p>
             {!portrait && (
-              <p className="text-[10px] uppercase tracking-wider text-white/40">
+              <p
+                className="text-[10px] uppercase tracking-wider"
+                style={{ color: uiTheme?.colors.muted ?? "rgb(255 255 255 / 0.4)" }}
+              >
                 {weatherLabel} · {hud.walkStyle} · chain x{hud.cleanChain}
                 {visionOn ? " · SNEAK VISION" : ""}
               </p>
@@ -825,7 +926,26 @@ export function CleanSneaksGame3D({
           <div
             className={`space-y-1 text-right ${portrait ? "min-w-[110px] max-w-[150px]" : "min-w-[140px] max-w-[200px] flex-1"}`}
           >
-            <div className="flex items-center justify-end gap-1.5">
+            <div
+              className="flex items-center justify-end gap-1.5"
+              style={
+                uiOption?.chrome === "sticker"
+                  ? {
+                      background: uiTheme?.colors.accent,
+                      color: uiTheme?.colors.bgDeep,
+                      borderRadius: "var(--klean-radius, 8px)",
+                      padding: "2px 8px",
+                      transform: "rotate(-2deg)",
+                    }
+                  : uiOption?.chrome === "glow" && uiTheme
+                    ? {
+                        boxShadow: `0 0 14px ${uiTheme.colors.accent}88`,
+                        borderRadius: "var(--klean-radius, 8px)",
+                        padding: "2px 6px",
+                      }
+                    : undefined
+              }
+            >
               <span
                 className={`font-semibold uppercase tracking-wider ${cleanTone} ${portrait ? "text-[10px]" : "text-xs"}`}
               >
@@ -840,7 +960,8 @@ export function CleanSneaksGame3D({
             </div>
             {!portrait && (
               <p
-                className={`text-[11px] font-medium tracking-wide text-[#7EC8D9] transition-transform ${flashStreak ? "scale-110" : ""}`}
+                className={`text-[11px] font-medium tracking-wide transition-transform ${flashStreak ? "scale-110" : ""}`}
+                style={{ color: uiTheme?.colors.accentSoft ?? "#7EC8D9" }}
               >
                 {hud.streakLabel} · {hud.closeCalls} close calls
               </p>
@@ -848,11 +969,14 @@ export function CleanSneaksGame3D({
           </div>
         </div>
 
-        <div
-          className={`pointer-events-none absolute z-10 ${
-            portrait ? "bottom-2 right-2" : "bottom-24 left-3"
-          }`}
-        >
+        {hudPlacement === "letterbox" ? (
+          <div
+            className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-10 bg-black/80 sm:h-12"
+            aria-hidden
+          />
+        ) : null}
+
+        <div className={shoeCamClass}>
           <ShoeCamHud left={shoes.left} right={shoes.right} compact={portrait} />
         </div>
 
@@ -949,24 +1073,57 @@ export function CleanSneaksGame3D({
         )}
 
         {phase === "colorPick" && (
-          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/75 px-4 backdrop-blur-sm">
-            <p className="seeds-holo-text mb-2 text-xs uppercase tracking-[0.35em]">
+          <div
+            className="absolute inset-0 z-20 flex flex-col items-center justify-start overflow-y-auto bg-black/75 px-4 py-6 backdrop-blur-sm sm:justify-center"
+            style={{
+              background: uiTheme
+                ? `color-mix(in srgb, ${uiTheme.colors.bgDeep} 78%, transparent)`
+                : undefined,
+            }}
+          >
+            <p
+              className="seeds-holo-text mb-2 text-xs uppercase tracking-[0.35em]"
+              style={uiTheme ? { color: uiTheme.colors.highlight } : undefined}
+            >
               {KLEAN_SNEAKS.title}
             </p>
-            <p className="mb-3 text-center text-sm text-[#7EC8D9]">Pick your BALOON8 colorway</p>
+            <p
+              className="mb-3 text-center text-sm"
+              style={{ color: uiTheme?.colors.accentSoft ?? "#7EC8D9" }}
+            >
+              Pick your BALOON8 colorway — or drop a photo/video to make your own game UI
+            </p>
+            <div className="mb-3 w-full max-w-md">
+              <ReferenceUiRemixPanel
+                compact
+                theme={uiTheme}
+                onThemeApplied={(next) => {
+                  setLocalUiTheme(next);
+                  onUiThemeChange?.(next);
+                  selectColorway(next.nearestColorwayId);
+                }}
+                onThemeCleared={() => {
+                  setLocalUiTheme(null);
+                  onUiThemeChange?.(null);
+                }}
+                onColorwayHint={selectColorway}
+              />
+            </div>
             <div className="mb-5 w-full max-w-md rounded-lg border border-white/10 bg-black/50 p-3">
               <Baloon8ColorwayPicker value={colorwayId} onChange={selectColorway} compact />
             </div>
             <Button
               type="button"
-              className="mb-3 bg-[#5B8DA8] text-white hover:bg-[#6a9cb8]"
+              className="mb-3 text-white hover:opacity-90"
+              style={{ background: uiTheme?.colors.accent ?? "#5B8DA8" }}
               onClick={confirmColorwayAndCountdown}
               data-testid="button-confirm-colorway"
             >
               Start countdown
             </Button>
             <p className="max-w-xs text-center text-[11px] text-white/45">
-              Tap a color to change · then Start countdown (or Enter)
+              Remix from a reference to restyle the game · auto-patents the new UI · then Start
+              countdown (or Enter)
             </p>
           </div>
         )}

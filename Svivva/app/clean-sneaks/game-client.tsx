@@ -22,6 +22,13 @@ import { KleanShop, OfflineEarningsHost } from "@/components/clean-sneaks/moneti
 import { PendingYearSubClaimHost } from "@/components/clean-sneaks/prizes/PendingYearSubClaimHost";
 import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
 import { isBundleCardUnlocked } from "@/lib/clean-sneaks/bundle-unlock";
+import { flushPendingUiSeal } from "@/lib/clean-sneaks/auto-seal-ui-theme";
+import {
+  readPendingUiSeal,
+  readSavedReferenceUiTheme,
+  referenceUiThemeStyle,
+  type KleanReferenceUiTheme,
+} from "@/lib/clean-sneaks/reference-ui-theme";
 import type { GamePhase } from "@/lib/clean-sneaks/types";
 
 type PlayMode = "runner" | "bundle-card";
@@ -45,6 +52,19 @@ function CleanSneaksPageContent() {
   /** Cover "Start" was tapped — do not show the start splash again this visit. */
   const [introComplete, setIntroComplete] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
+  const [uiTheme, setUiTheme] = useState<KleanReferenceUiTheme | null>(null);
+
+  useEffect(() => {
+    setUiTheme(readSavedReferenceUiTheme());
+  }, []);
+
+  useEffect(() => {
+    const pending = readPendingUiSeal();
+    if (!pending) return;
+    void flushPendingUiSeal(pending).then((result) => {
+      if (result.status === "sealed") setUiTheme(result.theme);
+    });
+  }, []);
 
   const preGame =
     playMode === "runner" && !introComplete && (gamePhase === "loading" || gamePhase === "start");
@@ -91,14 +111,25 @@ function CleanSneaksPageContent() {
     setPlayMode("bundle-card");
   }, []);
 
+  const shellThemeStyle = {
+    ...(preGame ? {} : shellStyle),
+    ...referenceUiThemeStyle(uiTheme),
+    ...(uiTheme && !preGame
+      ? {
+          background: `linear-gradient(180deg, ${uiTheme.colors.bgDeep}, ${uiTheme.colors.bg})`,
+        }
+      : {}),
+  };
+
   return (
     <div
       data-svivva-app-shell=""
       data-clean-sneaks-fullscreen=""
+      data-klean-reference-ui={uiTheme ? "1" : undefined}
       className={`fixed inset-0 z-[200] flex h-[100dvh] min-h-[100dvh] w-full flex-col overflow-hidden ${
-        gamePhase === "loading" ? "bg-white" : preGame ? "bg-black" : "bg-[#0a0c10]"
+        gamePhase === "loading" ? "bg-white" : preGame ? "bg-black" : uiTheme ? "" : "bg-[#0a0c10]"
       }`}
-      style={preGame ? undefined : shellStyle}
+      style={Object.keys(shellThemeStyle).length ? shellThemeStyle : undefined}
     >
       {!introComplete &&
         playMode === "runner" &&
@@ -252,6 +283,8 @@ function CleanSneaksPageContent() {
                 active
                 fullscreen
                 style={shellStyle}
+                uiTheme={uiTheme}
+                onUiThemeChange={setUiTheme}
                 onPhaseChange={setGamePhase}
                 onRegisterBegin={registerBegin}
                 onPlayBundleCard={openBundleCard}

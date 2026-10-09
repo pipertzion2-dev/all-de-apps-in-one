@@ -9,6 +9,9 @@ export const KLEAN_HOMEPAGE_TAGLINE = "Protect the sneaker design from cameras a
 /** Card / casino table headline (bundle protection theme). */
 export const KLEAN_BUNDLE_CARD_HEADLINE = "Protect your bundle!";
 
+/** Reference-driven UI remix — player inputs a reference; shell restyles + auto-patents. */
+export const KLEAN_DISCOVER_PERFECT_UI = "Discover your perfect UI";
+
 /** German title as lettered on the main Steal Bundle graphic. */
 export const STEAL_BUNDLE_GERMAN_TITLE = "stiehl den alten Manns Bündel";
 

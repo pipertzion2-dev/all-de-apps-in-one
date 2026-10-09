@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   KLEAN_BUNDLE_CARD_HEADLINE,
+  KLEAN_DISCOVER_PERFECT_UI,
   KLEAN_HOMEPAGE_TAGLINE,
   KLEAN_RUNNER_INTRO_LINE,
   STEAL_BUNDLE_ENGLISH_TITLE,
@@ -15,6 +16,10 @@ describe("Klean Sneaks game copy", () => {
 
   it("names the card game with bundle protection theme", () => {
     expect(KLEAN_BUNDLE_CARD_HEADLINE).toBe("Protect your bundle!");
+  });
+
+  it("labels the reference UI remix feature", () => {
+    expect(KLEAN_DISCOVER_PERFECT_UI).toBe("Discover your perfect UI");
   });
 
   it("states homepage protection from cameras and wear", () => {

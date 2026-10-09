@@ -7,5 +7,6 @@ export { ShoeCamHud } from "./ShoeCamHud";
 export { PostMissionReveal } from "./PostMissionReveal";
 export { OhNoOverlay, CleanPathHud } from "./OhNoOverlay";
 export { Baloon8ColorwayPicker } from "./Baloon8ColorwayPicker";
+export { ReferenceUiRemixPanel } from "./ReferenceUiRemixPanel";
 export { StealTheBundleCardGame } from "./StealTheBundleCardGame";
 export { CasinoExperience } from "./casino/CasinoExperience";
