@@ -129,11 +129,11 @@ const faqs = [
   },
   {
     q: "Where do my files go?",
-    a: "Nowhere. Clutety processes everything locally in your browser using the Web Crypto API. Files never touch a server.",
+    a: "Nowhere. ZZAI Security processes everything locally in your browser using the Web Crypto API. Files never touch a server.",
   },
   {
-    q: "Can I decrypt files without Clutety?",
-    a: "Yes. Clutety uses standard AES-256-GCM. Any tool that supports this cipher can decrypt your files if you have the key.",
+    q: "Can I decrypt files without ZZAI Security?",
+    a: "Yes. ZZAI Security uses standard AES-256-GCM. Any tool that supports this cipher can decrypt your files if you have the key.",
   },
   {
     q: "What makes the paid plans different?",
@@ -141,7 +141,7 @@ const faqs = [
   },
   {
     q: "Is this connected to ZZAI's AI platform?",
-    a: "Clutety is an independent protection tool within the ZZAI ecosystem. It uses cryptographic algorithms — not AI — at its core.",
+    a: "ZZAI Security is an independent protection suite within the ZZAI ecosystem. It uses cryptographic algorithms — not AI — at its core.",
   },
 ];
 
@@ -177,7 +177,7 @@ export default function ClutetyLandingPage() {
             <Shield className="w-3.5 h-3.5" /> Free plan · No sign-up · Browser-based
           </div>
           <h1 className="text-4xl sm:text-5xl font-black tracking-tight mb-4">
-            <span style={{ color: TEAL }}>Clutety</span>
+            <span style={{ color: TEAL }}>ZZAI Security</span>
             <span className="text-white/90"> — Control Your Feeds</span>
             <br />
             <span className="text-white/50">
@@ -220,7 +220,7 @@ export default function ClutetyLandingPage() {
               >
                 <Lock className="w-3 h-3 text-[#28C840]" />
                 <span className="truncate font-medium tracking-wide">
-                  Clutety — Encrypted & Secure
+                  ZZAI Security — Encrypted & Secure
                 </span>
               </div>
             </div>
@@ -253,7 +253,7 @@ export default function ClutetyLandingPage() {
             className="flex items-center gap-2 px-6 py-3 rounded-xl text-white font-bold"
             style={{ background: TEAL }}
           >
-            Try Clutety Free <ArrowRight className="w-4 h-4" />
+            Try ZZAI Security Free <ArrowRight className="w-4 h-4" />
           </a>
           <a
             href="#pricing"
@@ -266,7 +266,7 @@ export default function ClutetyLandingPage() {
 
       {/* Features */}
       <section className="max-w-6xl mx-auto px-4 py-20">
-        <h2 className="text-2xl font-black text-center mb-3">Why Clutety?</h2>
+        <h2 className="text-2xl font-black text-center mb-3">Why ZZAI Security?</h2>
         <p className="text-center text-white/40 mb-12 text-sm">
           No cloud. No backdoors. No compromises.
         </p>
@@ -400,7 +400,7 @@ export default function ClutetyLandingPage() {
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-bold text-sm"
               style={{ background: TEAL }}
             >
-              Try Clutety <ArrowRight className="w-4 h-4" />
+              Try ZZAI Security <ArrowRight className="w-4 h-4" />
             </a>
             <a
               href="#pricing"

@@ -95,7 +95,7 @@ Use **localized store prices** in native IAP UI; web falls back to `priceCents` 
 **Recommended (free to join):**
 
 1. [Monetag](https://monetag.com/) or [Adsterra](https://www.adsterra.com/) → create banner tag → `NEXT_PUBLIC_MONETAG_ZONE_ID` or `NEXT_PUBLIC_ADSTERRA_INVOKE_URL` → redeploy.
-2. Until then, **house sponsors** always show (ZZAI / Clutety creatives) — players never see empty ad slots.
+2. Until then, **house sponsors** always show (ZZAI / ZZAI Security creatives) — players never see empty ad slots.
 3. AdSense in-game only if approved: set slot ids **and** `NEXT_PUBLIC_KLEAN_USE_ADSENSE=1`.
 4. Ad-free optional: **$5 one-time Cash App** (`ad-free-pass.ts`).
 

@@ -169,13 +169,13 @@ export const HOUSE_CREATIVES: readonly HouseCreative[] = [
     imageUrl: "/zzai-logo-signal.png",
   },
   {
-    id: "clutety",
-    headline: "Clutety Shield",
+    id: "zzai-security",
+    headline: "ZZAI Security",
     body: "Cut feed noise. Keep the focus on what you actually want to ship.",
-    cta: "Try Clutety",
-    href: "/clutety",
+    cta: "Open security tools",
+    href: "/cyber-security-mini-apps",
     accent: "#7EC8D9",
-    imageUrl: "/clutety-logo.png",
+    imageUrl: "/zzai-logo-signal.png",
   },
   {
     id: "baloon8",

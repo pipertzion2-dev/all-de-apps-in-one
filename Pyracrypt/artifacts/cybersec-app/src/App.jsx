@@ -216,7 +216,7 @@ function Header({ featCount }) {
         style={{ cursor: 'pointer', flexShrink: 0, display: 'flex', alignItems: 'center' }}>
         <img
           src={clutetyLogo}
-          alt="Clutety"
+          alt="ZZAI Security"
           style={{ height: 44, width: 'auto', display: 'block' }}
         />
       </div>
@@ -298,7 +298,7 @@ function HeroSection() {
       }} />
 
       <div style={{ position: 'relative', zIndex: 1, maxWidth: 680 }}>
-        <Eyebrow color="#6D91B3">Clutety</Eyebrow>
+        <Eyebrow color="#6D91B3">ZZAI Security</Eyebrow>
 
         <h1 style={{
           margin: '0 0 24px', fontWeight: 800,
@@ -462,7 +462,7 @@ function Footer() {
             <img src={clutetyGraphic} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
           </div>
           <span style={{ fontSize: 8.5, fontWeight: 700, color: '#505860', letterSpacing: '0.14em', textTransform: 'uppercase' }}>
-            Clutety · Embedded in Svivva
+            ZZAI Security · Embedded in ZZAI
           </span>
         </div>
         <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'center' }}>

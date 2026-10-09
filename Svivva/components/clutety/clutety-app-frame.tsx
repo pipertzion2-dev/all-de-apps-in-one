@@ -67,7 +67,7 @@ export function ClutetyAppFrame({
             <Shield className="w-8 h-8" style={{ color: TEAL }} />
           </div>
           <div>
-            <p className="text-lg font-bold text-white mb-2">Clutety</p>
+            <p className="text-lg font-bold text-white mb-2">ZZAI Security</p>
             <p className="text-sm text-white/50 mb-6 max-w-sm">
               Encrypted file protection, right in your browser. No uploads. No accounts. Just
               shield.
@@ -77,7 +77,7 @@ export function ClutetyAppFrame({
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-bold text-sm"
               style={{ background: TEAL }}
             >
-              Open Clutety <ArrowRight className="w-4 h-4" />
+              Open security suite <ArrowRight className="w-4 h-4" />
             </a>
           </div>
         </div>

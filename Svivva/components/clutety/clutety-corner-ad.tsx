@@ -47,7 +47,7 @@ export function ClutetyCornerAd() {
   const logo = (
     <img
       src={LOGO_SRC}
-      alt="Clutety — coming soon"
+      alt="ZZAI Security — coming soon"
       width={128}
       height={40}
       className="h-8 w-auto max-w-[128px] object-contain drop-shadow-md"
@@ -76,7 +76,7 @@ export function ClutetyCornerAd() {
           setDismissed(true);
         }}
         className="pointer-events-auto text-[10px] text-muted-foreground hover:text-foreground px-1.5 py-0.5 rounded bg-background/70"
-        aria-label="Dismiss Clutety promo"
+        aria-label="Dismiss ZZAI Security promo"
       >
         ✕
       </button>
@@ -84,7 +84,7 @@ export function ClutetyCornerAd() {
         <Link
           href={href}
           className={`${linkClass} pointer-events-auto`}
-          aria-label="Clutety — coming soon"
+          aria-label="ZZAI Security — coming soon"
         >
           {logo}
         </Link>
@@ -94,7 +94,7 @@ export function ClutetyCornerAd() {
           target="_blank"
           rel="noopener noreferrer"
           className={`${linkClass} pointer-events-auto`}
-          aria-label="Clutety — coming soon"
+          aria-label="ZZAI Security — coming soon"
         >
           {logo}
         </a>
