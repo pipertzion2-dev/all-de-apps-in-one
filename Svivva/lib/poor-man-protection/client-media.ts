@@ -52,7 +52,10 @@ export async function extractPalette(file: File): Promise<ColorSwatch[]> {
 }
 
 /** Downscale for protect API imageBase64 (size-capped). */
-export async function fileToDownscaledBase64(file: File, maxEdge = 768): Promise<string | undefined> {
+export async function fileToDownscaledBase64(
+  file: File,
+  maxEdge = 768,
+): Promise<string | undefined> {
   try {
     const bitmap = await createImageBitmap(file);
     const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));

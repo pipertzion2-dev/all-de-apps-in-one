@@ -64,7 +64,8 @@ function buildProtectBody(
     },
     palette: theme.palette,
     contentHash: theme.contentHash,
-    mimeType: opts?.mimeType || (opts?.imageBase64 ? "image/jpeg" : "application/zzai-klean-ui-theme"),
+    mimeType:
+      opts?.mimeType || (opts?.imageBase64 ? "image/jpeg" : "application/zzai-klean-ui-theme"),
     fileName: opts?.fileName || `${theme.name.replace(/\s+/g, "-").slice(0, 48)}.json`,
     imageBase64: opts?.imageBase64,
     hybridizationMode: "emergent" as const,
@@ -147,9 +148,7 @@ export async function autoSealReferenceUiTheme(
 }
 
 /** Retry a pending seal after the player signs in. */
-export async function flushPendingUiSeal(
-  pending: PendingUiSeal,
-): Promise<AutoSealResult> {
+export async function flushPendingUiSeal(pending: PendingUiSeal): Promise<AutoSealResult> {
   return autoSealReferenceUiTheme(pending.theme, {
     imageBase64: pending.imageBase64,
     mimeType: pending.mimeType,

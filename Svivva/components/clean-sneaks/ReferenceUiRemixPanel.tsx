@@ -335,7 +335,6 @@ export function ReferenceUiRemixPanel({
       >
         {previewUrl && file ? (
           file.type.startsWith("video/") ? (
-            // eslint-disable-next-line jsx-a11y/media-has-caption
             <video
               src={previewUrl}
               className="absolute inset-0 h-full w-full object-cover opacity-40"
@@ -357,7 +356,9 @@ export function ReferenceUiRemixPanel({
           {file ? file.name : "Drop image or video here"}
         </p>
         <p className="relative z-[1] text-[10px] text-white/55">
-          {file ? "Tap to replace · mp4, webm, png, jpg, webp" : "or tap to choose · mp4 / webm / png / jpg"}
+          {file
+            ? "Tap to replace · mp4, webm, png, jpg, webp"
+            : "or tap to choose · mp4 / webm / png / jpg"}
         </p>
         <input
           ref={fileRef}
@@ -475,7 +476,10 @@ export function ReferenceUiRemixPanel({
             })}
           </div>
           {activeOption ? (
-            <p className="text-[10px] leading-snug text-white/55" data-testid="text-active-ui-option">
+            <p
+              className="text-[10px] leading-snug text-white/55"
+              data-testid="text-active-ui-option"
+            >
               <span className="text-white/80">{activeOption.label}</span> — {activeOption.blurb}
             </p>
           ) : null}

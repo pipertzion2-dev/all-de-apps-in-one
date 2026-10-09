@@ -80,7 +80,13 @@ function clampByte(n: number): number {
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
   const h = hex.replace("#", "");
-  const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
+  const full =
+    h.length === 3
+      ? h
+          .split("")
+          .map((c) => c + c)
+          .join("")
+      : h;
   const n = Number.parseInt(full.slice(0, 6), 16);
   if (Number.isNaN(n)) return { r: 91, g: 141, b: 168 };
   return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
@@ -308,9 +314,11 @@ export function buildReferenceUiTheme(input: {
     fileName: input.fileName,
   });
 
-  const chosenId = (input.uiOptionId && getUiOption(input.uiOptionId).id === input.uiOptionId
-    ? input.uiOptionId
-    : ranked[0]?.id) as KleanUiOptionId;
+  const chosenId = (
+    input.uiOptionId && getUiOption(input.uiOptionId).id === input.uiOptionId
+      ? input.uiOptionId
+      : ranked[0]?.id
+  ) as KleanUiOptionId;
   const option = getUiOption(chosenId);
 
   const trimmed = input.referenceText.trim();
