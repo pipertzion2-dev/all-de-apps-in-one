@@ -1,14 +1,14 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
-  extractPalette,
-  fileToDownscaledBase64,
+  isMediaReferenceFile,
+  sampleMediaReference,
   sha256Hex,
   sha256Text,
 } from "@/lib/poor-man-protection/client-media";
@@ -22,6 +22,12 @@ import {
   writeSavedReferenceUiTheme,
 } from "@/lib/clean-sneaks/reference-ui-theme";
 import { getUiOption, KLEAN_UI_OPTIONS } from "@/lib/clean-sneaks/ui-options-catalog";
+import {
+  deleteSavedGameUi,
+  listSavedGameUis,
+  saveGameUi,
+  type SavedGameUi,
+} from "@/lib/clean-sneaks/saved-game-ui";
 import type { Baloon8ColorwayId } from "@/lib/clean-sneaks/sneaker-catalog";
 import { KLEAN_DISCOVER_PERFECT_UI } from "@/lib/clean-sneaks/game-copy";
 
@@ -30,7 +36,8 @@ type SealStatus =
   | { kind: "working"; step: string }
   | { kind: "sealed"; hash: string }
   | { kind: "queued"; reason: "auth_required" | "network" }
-  | { kind: "error"; message: string };
+  | { kind: "error"; message: string }
+  | { kind: "saved"; title: string };
 
 type Props = {
   theme: KleanReferenceUiTheme | null;
@@ -50,22 +57,54 @@ export function ReferenceUiRemixPanel({
   const fileRef = useRef<HTMLInputElement>(null);
   const [referenceText, setReferenceText] = useState(theme?.referenceText ?? "");
   const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState(false);
   const [autoPatent, setAutoPatent] = useState(true);
+  const [saveTitle, setSaveTitle] = useState("");
+  const [library, setLibrary] = useState<SavedGameUi[]>([]);
   const [status, setStatus] = useState<SealStatus>({ kind: "idle" });
   const [busy, setBusy] = useState(false);
-  /** Stash media so switching UI options can re-seal with the same reference bytes */
   const mediaRef = useRef<{
     imageBase64?: string;
     mimeType?: string;
     fileName?: string;
+    mediaKind?: "image" | "video" | "text";
   }>({});
+
+  const refreshLibrary = useCallback(() => {
+    setLibrary(listSavedGameUis());
+  }, []);
+
+  useEffect(() => {
+    refreshLibrary();
+  }, [refreshLibrary]);
+
+  useEffect(() => {
+    if (!file) {
+      setPreviewUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+
+  const takeFile = useCallback((next: File | null) => {
+    if (!next) {
+      setFile(null);
+      return;
+    }
+    if (!isMediaReferenceFile(next)) {
+      setStatus({ kind: "error", message: "Drop an image or video (mp4, webm, png, jpg…)." });
+      return;
+    }
+    setFile(next);
+    setStatus({ kind: "idle" });
+  }, []);
 
   const sealTheme = useCallback(
     async (next: KleanReferenceUiTheme) => {
-      if (!autoPatent) {
-        setStatus({ kind: "idle" });
-        return;
-      }
+      if (!autoPatent) return;
       setStatus({ kind: "working", step: "Auto-sealing with Poor Man Protection…" });
       const result = await autoSealReferenceUiTheme(next, mediaRef.current);
       if (result.status === "sealed") {
@@ -80,41 +119,52 @@ export function ReferenceUiRemixPanel({
     [autoPatent, onThemeApplied],
   );
 
-  const applyRemix = useCallback(async () => {
+  const createGameUi = useCallback(async () => {
     const text = referenceText.trim();
     if (!text && !file) {
-      setStatus({ kind: "error", message: "Add a text/URL reference or upload an image." });
+      setStatus({
+        kind: "error",
+        message: "Add an image or video — and optional text — then create your game UI.",
+      });
       return;
     }
 
     setBusy(true);
-    setStatus({ kind: "working", step: "Reading reference…" });
+    setStatus({ kind: "working", step: "Reading your reference…" });
     try {
       let palette = paletteFromTextReference(text || file?.name || "klean remix");
       let contentHash = "";
       let imageBase64: string | undefined;
       let mimeType: string | undefined;
       let fileName: string | undefined;
+      let mediaKind: "image" | "video" | "text" = "text";
 
       if (file) {
-        setStatus({ kind: "working", step: "Sampling exact palette…" });
+        setStatus({
+          kind: "working",
+          step: file.type.startsWith("video/")
+            ? "Sampling video frames…"
+            : "Sampling exact palette…",
+        });
         const buf = await file.arrayBuffer();
         contentHash = await sha256Hex(buf);
-        palette = await extractPalette(file);
-        imageBase64 = await fileToDownscaledBase64(file);
-        mimeType = file.type || "image/png";
+        const sampled = await sampleMediaReference(file);
+        palette = sampled.palette;
+        imageBase64 = sampled.imageBase64;
+        mimeType = sampled.mimeType;
         fileName = file.name;
+        mediaKind = sampled.kind;
       } else {
         contentHash = await sha256Text(
           JSON.stringify({ referenceText: text, kind: "klean-ui-reference" }),
         );
       }
 
-      mediaRef.current = { imageBase64, mimeType, fileName };
+      mediaRef.current = { imageBase64, mimeType, fileName, mediaKind };
 
-      setStatus({ kind: "working", step: "Matching UI options…" });
+      setStatus({ kind: "working", step: "Building your game UI…" });
       const next = buildReferenceUiTheme({
-        referenceText: text || fileName || "Uploaded reference",
+        referenceText: text || fileName || "My reference",
         palette,
         contentHash,
         fileName,
@@ -122,16 +172,18 @@ export function ReferenceUiRemixPanel({
       writeSavedReferenceUiTheme(next);
       onThemeApplied(next);
       onColorwayHint?.(next.nearestColorwayId);
+      setSaveTitle(next.name.slice(0, 80));
       await sealTheme(next);
+      if (!autoPatent) setStatus({ kind: "idle" });
     } catch (e) {
       setStatus({
         kind: "error",
-        message: e instanceof Error ? e.message : "Remix failed",
+        message: e instanceof Error ? e.message : "Could not create game UI",
       });
     } finally {
       setBusy(false);
     }
-  }, [file, onColorwayHint, onThemeApplied, referenceText, sealTheme]);
+  }, [autoPatent, file, onColorwayHint, onThemeApplied, referenceText, sealTheme]);
 
   const pickUiOption = useCallback(
     async (optionId: string) => {
@@ -142,18 +194,56 @@ export function ReferenceUiRemixPanel({
         writeSavedReferenceUiTheme(next);
         onThemeApplied(next);
         onColorwayHint?.(next.nearestColorwayId);
+        setSaveTitle(next.name.slice(0, 80));
         await sealTheme(next);
+        if (!autoPatent) setStatus({ kind: "idle" });
       } finally {
         setBusy(false);
       }
     },
-    [onColorwayHint, onThemeApplied, sealTheme, theme],
+    [autoPatent, onColorwayHint, onThemeApplied, sealTheme, theme],
+  );
+
+  const handleSave = useCallback(() => {
+    if (!theme) {
+      setStatus({ kind: "error", message: "Create a game UI first, then save it." });
+      return;
+    }
+    const entry = saveGameUi({
+      theme,
+      title: saveTitle.trim() || theme.name,
+      thumbBase64: mediaRef.current.imageBase64,
+      mediaKind: mediaRef.current.mediaKind,
+    });
+    refreshLibrary();
+    setStatus({ kind: "saved", title: entry.title });
+  }, [refreshLibrary, saveTitle, theme]);
+
+  const handleLoad = useCallback(
+    (entry: SavedGameUi) => {
+      writeSavedReferenceUiTheme(entry.theme);
+      onThemeApplied(entry.theme);
+      onColorwayHint?.(entry.theme.nearestColorwayId);
+      setReferenceText(entry.theme.referenceText);
+      setSaveTitle(entry.title);
+      setStatus({ kind: "idle" });
+    },
+    [onColorwayHint, onThemeApplied],
+  );
+
+  const handleDelete = useCallback(
+    (id: string) => {
+      deleteSavedGameUi(id);
+      refreshLibrary();
+    },
+    [refreshLibrary],
   );
 
   const clearRemix = useCallback(() => {
     clearSavedReferenceUiTheme();
     setFile(null);
     setReferenceText("");
+    setSaveTitle("");
     setStatus({ kind: "idle" });
     mediaRef.current = {};
     onThemeCleared();
@@ -193,8 +283,7 @@ export function ReferenceUiRemixPanel({
             {KLEAN_DISCOVER_PERFECT_UI}
           </p>
           <p className={`text-white/70 ${compact ? "text-[10px]" : "text-xs"}`}>
-            Import a reference — colors come out exact; chrome strategically reshapes across{" "}
-            {KLEAN_UI_OPTIONS.length} UI options.
+            Drop an image or video, add a short note, create your game UI — then save it.
           </p>
         </div>
         {theme ? (
@@ -209,34 +298,89 @@ export function ReferenceUiRemixPanel({
         ) : null}
       </div>
 
+      <div
+        role="button"
+        tabIndex={0}
+        data-testid="dropzone-reference-media"
+        onClick={() => fileRef.current?.click()}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            fileRef.current?.click();
+          }
+        }}
+        onDragEnter={(e) => {
+          e.preventDefault();
+          setDragOver(true);
+        }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragOver(true);
+        }}
+        onDragLeave={(e) => {
+          e.preventDefault();
+          setDragOver(false);
+        }}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragOver(false);
+          const dropped = e.dataTransfer.files?.[0];
+          if (dropped) takeFile(dropped);
+        }}
+        className={`relative flex min-h-[7.5rem] cursor-pointer flex-col items-center justify-center gap-1.5 overflow-hidden rounded-lg border border-dashed px-3 py-4 text-center transition ${
+          dragOver
+            ? "border-[var(--klean-accent,#5B8DA8)] bg-white/10"
+            : "border-white/25 bg-black/35 hover:border-white/45"
+        }`}
+      >
+        {previewUrl && file ? (
+          file.type.startsWith("video/") ? (
+            // eslint-disable-next-line jsx-a11y/media-has-caption
+            <video
+              src={previewUrl}
+              className="absolute inset-0 h-full w-full object-cover opacity-40"
+              muted
+              playsInline
+              loop
+              autoPlay
+            />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={previewUrl}
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover opacity-40"
+            />
+          )
+        ) : null}
+        <p className="relative z-[1] text-xs font-semibold text-white">
+          {file ? file.name : "Drop image or video here"}
+        </p>
+        <p className="relative z-[1] text-[10px] text-white/55">
+          {file ? "Tap to replace · mp4, webm, png, jpg, webp" : "or tap to choose · mp4 / webm / png / jpg"}
+        </p>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*,video/*,.mp4,.webm,.mov,.m4v,.png,.jpg,.jpeg,.webp,.gif"
+          className="hidden"
+          data-testid="input-reference-media"
+          onChange={(e) => takeFile(e.target.files?.[0] ?? null)}
+        />
+      </div>
+
       <div className="space-y-1.5">
         <Label htmlFor="klean-ref-text" className="text-[10px] text-white/55">
-          Text or URL reference
+          Text with it (optional)
         </Label>
         <Textarea
           id="klean-ref-text"
           value={referenceText}
           onChange={(e) => setReferenceText(e.target.value)}
-          placeholder="e.g. neon tokyo night rain, court docket seal, vapor pastel lookbook"
-          className="min-h-[64px] border-white/15 bg-black/40 text-xs text-white placeholder:text-white/30"
+          placeholder="e.g. neon tokyo night rain — vibe notes for your UI"
+          className="min-h-[52px] border-white/15 bg-black/40 text-xs text-white placeholder:text-white/30"
           data-testid="input-reference-text"
         />
-      </div>
-
-      <div className="space-y-1.5">
-        <Label htmlFor="klean-ref-file" className="text-[10px] text-white/55">
-          Image reference (optional)
-        </Label>
-        <Input
-          id="klean-ref-file"
-          ref={fileRef}
-          type="file"
-          accept="image/*"
-          className="cursor-pointer border-white/15 bg-black/40 text-xs text-white file:mr-2 file:text-xs"
-          data-testid="input-reference-image"
-          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-        />
-        {file ? <p className="truncate text-[10px] text-white/45">{file.name}</p> : null}
       </div>
 
       <label className="flex items-center gap-2 text-[11px] text-white/70">
@@ -253,7 +397,7 @@ export function ReferenceUiRemixPanel({
       <Button
         type="button"
         disabled={busy}
-        onClick={() => void applyRemix()}
+        onClick={() => void createGameUi()}
         className="w-full text-white"
         style={{ background: "var(--klean-accent, #5B8DA8)" }}
         data-testid="button-apply-reference-ui"
@@ -263,8 +407,8 @@ export function ReferenceUiRemixPanel({
             ? status.step
             : "Working…"
           : theme
-            ? "Re-discover from reference"
-            : "Discover UI options"}
+            ? "Recreate my game UI"
+            : "Create my game UI"}
       </Button>
 
       {theme ? (
@@ -284,14 +428,14 @@ export function ReferenceUiRemixPanel({
           </div>
 
           <p className="text-[10px] uppercase tracking-[0.2em] text-white/45">
-            {KLEAN_UI_OPTIONS.length} UI options · best match selected
+            {KLEAN_UI_OPTIONS.length} UI options · tap to reshape chrome
           </p>
           <div
             className="grid max-h-[9.5rem] grid-cols-2 gap-1.5 overflow-y-auto sm:grid-cols-3"
             role="listbox"
             aria-label="Strategic UI options"
           >
-            {orderedOptions.map((opt, index) => {
+            {orderedOptions.map((opt) => {
               const selected = theme.uiOptionId === opt.id;
               const rank = theme.rankedUiOptions.findIndex((r) => r.id === opt.id);
               return (
@@ -325,7 +469,6 @@ export function ReferenceUiRemixPanel({
                   <span className="mt-0.5 block text-[9px] leading-snug text-white/45">
                     {rank === 0 ? "Best match · " : rank > 0 ? `#${rank + 1} · ` : ""}
                     {opt.hudPlacement}
-                    {index === 0 && rank === 0 ? "" : ""}
                   </span>
                 </button>
               );
@@ -333,11 +476,102 @@ export function ReferenceUiRemixPanel({
           </div>
           {activeOption ? (
             <p className="text-[10px] leading-snug text-white/55" data-testid="text-active-ui-option">
-              <span className="text-white/80">{activeOption.label}</span> — {activeOption.blurb}{" "}
-              Colors stay exact to your reference; layout/chrome is the strategic change.
+              <span className="text-white/80">{activeOption.label}</span> — {activeOption.blurb}
             </p>
           ) : null}
+
+          <div
+            className="space-y-1.5 rounded-md border border-white/15 bg-black/40 p-2"
+            data-testid="save-game-ui-box"
+          >
+            <Label htmlFor="klean-save-title" className="text-[10px] text-white/55">
+              Save this game UI
+            </Label>
+            <div className="flex gap-2">
+              <Input
+                id="klean-save-title"
+                value={saveTitle}
+                onChange={(e) => setSaveTitle(e.target.value)}
+                placeholder="Name your UI"
+                className="h-8 border-white/15 bg-black/40 text-xs text-white"
+                data-testid="input-save-game-ui-title"
+              />
+              <Button
+                type="button"
+                size="sm"
+                className="shrink-0 text-white"
+                style={{ background: "var(--klean-accent, #5B8DA8)" }}
+                onClick={handleSave}
+                data-testid="button-save-game-ui"
+              >
+                Save
+              </Button>
+            </div>
+          </div>
         </div>
+      ) : null}
+
+      {library.length > 0 ? (
+        <div className="space-y-1.5" data-testid="saved-game-ui-library">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-white/45">
+            Saved game UIs ({library.length})
+          </p>
+          <ul className="max-h-36 space-y-1 overflow-y-auto">
+            {library.map((entry) => (
+              <li
+                key={entry.id}
+                className="flex items-center gap-2 rounded-md border border-white/10 bg-black/35 px-2 py-1.5"
+              >
+                {entry.thumbBase64 ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={`data:image/jpeg;base64,${entry.thumbBase64}`}
+                    alt=""
+                    className="h-8 w-8 shrink-0 rounded object-cover"
+                  />
+                ) : (
+                  <span
+                    className="h-8 w-8 shrink-0 rounded"
+                    style={{ background: entry.theme.colors.accent }}
+                    aria-hidden
+                  />
+                )}
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[11px] font-medium text-white">{entry.title}</p>
+                  <p className="truncate text-[9px] text-white/45">
+                    {getUiOption(entry.theme.uiOptionId).label}
+                    {entry.mediaKind ? ` · ${entry.mediaKind}` : ""}
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="h-7 border-white/20 px-2 text-[10px] text-white"
+                  onClick={() => handleLoad(entry)}
+                  data-testid={`button-load-game-ui-${entry.id}`}
+                >
+                  Load
+                </Button>
+                <button
+                  type="button"
+                  className="text-[10px] text-white/40 hover:text-red-300"
+                  onClick={() => handleDelete(entry.id)}
+                  data-testid={`button-delete-game-ui-${entry.id}`}
+                  aria-label={`Delete ${entry.title}`}
+                >
+                  ✕
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      {status.kind === "saved" ? (
+        <p className="text-[11px] text-emerald-300/90" data-testid="text-game-ui-saved">
+          Saved “{status.title}” — load it anytime from your library below.
+        </p>
       ) : null}
 
       {status.kind === "sealed" ? (

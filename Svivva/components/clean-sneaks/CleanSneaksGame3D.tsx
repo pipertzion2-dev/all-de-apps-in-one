@@ -1091,7 +1091,7 @@ export function CleanSneaksGame3D({
               className="mb-3 text-center text-sm"
               style={{ color: uiTheme?.colors.accentSoft ?? "#7EC8D9" }}
             >
-              Pick your BALOON8 colorway — or Discover your perfect UI (16 strategic layouts)
+              Pick your BALOON8 colorway — or drop a photo/video to make your own game UI
             </p>
             <div className="mb-3 w-full max-w-md">
               <ReferenceUiRemixPanel
