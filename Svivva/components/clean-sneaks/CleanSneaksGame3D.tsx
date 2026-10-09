@@ -519,6 +519,16 @@ export function CleanSneaksGame3D({
         return;
       }
       if (phase === "colorPick") {
+        // Don't steal Enter/Space from Discover your perfect UI form fields.
+        const target = e.target as HTMLElement | null;
+        const tag = target?.tagName?.toLowerCase();
+        const inField =
+          tag === "input" ||
+          tag === "textarea" ||
+          tag === "select" ||
+          Boolean(target?.isContentEditable) ||
+          Boolean(target?.closest?.("[data-testid='reference-ui-remix-panel']"));
+        if (inField) return;
         if (k === " " || k === "enter" || e.code === "Space") {
           e.preventDefault();
           confirmColorwayAndCountdown();
