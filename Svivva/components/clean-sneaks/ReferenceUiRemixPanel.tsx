@@ -172,6 +172,8 @@ export function ReferenceUiRemixPanel({
       className={`w-full rounded-lg border border-white/15 bg-black/55 ${compact ? "p-2.5 space-y-2" : "p-3 space-y-3"}`}
       data-testid="reference-ui-remix-panel"
       data-klean-ui-option={theme?.uiOptionId}
+      onKeyDown={(e) => e.stopPropagation()}
+      onKeyUp={(e) => e.stopPropagation()}
       style={{
         borderColor: theme
           ? "color-mix(in srgb, var(--klean-accent, #5B8DA8) 55%, transparent)"
