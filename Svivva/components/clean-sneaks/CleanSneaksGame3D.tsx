@@ -50,7 +50,13 @@ import { DesignCopyCameraOverlay } from "./DesignCopyCameraOverlay";
 import { PostMissionReveal } from "./PostMissionReveal";
 import { CleanPathHud, OhNoOverlay } from "./OhNoOverlay";
 import { Baloon8ColorwayPicker } from "./Baloon8ColorwayPicker";
+import { ReferenceUiRemixPanel } from "./ReferenceUiRemixPanel";
 import { CasinoEntryRules } from "./CasinoEntryRules";
+import {
+  readSavedReferenceUiTheme,
+  referenceUiThemeStyle,
+  type KleanReferenceUiTheme,
+} from "@/lib/clean-sneaks/reference-ui-theme";
 import { GameInterstitialAd, GameRewardedAd } from "./ads";
 import { RewardClaimModal } from "./monetization/RewardClaimModal";
 import {
@@ -89,6 +95,9 @@ export type CleanSneaksGame3DProps = {
   fullscreen?: boolean;
   className?: string;
   style?: CSSProperties;
+  /** Reference-driven shell theme from parent (optional; game also loads saved theme). */
+  uiTheme?: KleanReferenceUiTheme | null;
+  onUiThemeChange?: (theme: KleanReferenceUiTheme | null) => void;
 };
 
 function prefersReducedMotion(): boolean {
@@ -144,10 +153,16 @@ export function CleanSneaksGame3D({
   fullscreen = false,
   className,
   style,
+  uiTheme: uiThemeProp,
+  onUiThemeChange,
 }: CleanSneaksGame3DProps) {
   const [colorwayId, setColorwayId] = useState<Baloon8ColorwayId>(() =>
     typeof window === "undefined" ? "oilSlick" : readSavedColorway(),
   );
+  const [localUiTheme, setLocalUiTheme] = useState<KleanReferenceUiTheme | null>(() =>
+    typeof window === "undefined" ? null : readSavedReferenceUiTheme(),
+  );
+  const uiTheme = uiThemeProp !== undefined ? uiThemeProp : localUiTheme;
   const colorwayIdRef = useRef(colorwayId);
   colorwayIdRef.current = colorwayId;
   const sneaker = resolvePlayerSneaker({
@@ -687,18 +702,37 @@ export function CleanSneaksGame3D({
     );
   }
 
+  const themedStyle: CSSProperties = {
+    ...style,
+    ...referenceUiThemeStyle(uiTheme),
+    ...(uiTheme
+      ? {
+          background: `linear-gradient(180deg, ${uiTheme.colors.bgDeep}, ${uiTheme.colors.bg})`,
+        }
+      : {}),
+  };
+
   return (
     <div
       ref={wrapRef}
       className={`flex min-h-0 flex-col ${fullscreen ? "h-full flex-1" : ""} ${className ?? ""}`}
-      style={style}
+      style={themedStyle}
+      data-klean-reference-ui={uiTheme ? "1" : undefined}
       role="application"
       aria-label={`${KLEAN_SNEAKS.title} 3D game`}
     >
       <div
-        className={`relative flex min-h-0 flex-1 flex-col overflow-hidden bg-[#0a0c10]/85 ${
+        className={`relative flex min-h-0 flex-1 flex-col overflow-hidden ${
           fullscreen ? "rounded-lg border border-white/10" : "rounded-xl border border-white/10"
         }`}
+        style={{
+          background: uiTheme
+            ? `color-mix(in srgb, ${uiTheme.colors.bgDeep} 85%, transparent)`
+            : "rgb(10 12 16 / 0.85)",
+          borderColor: uiTheme
+            ? `color-mix(in srgb, ${uiTheme.colors.accent} 35%, transparent)`
+            : undefined,
+        }}
       >
         {(phase === "running" || phase === "paused") && (
           <div
@@ -949,24 +983,57 @@ export function CleanSneaksGame3D({
         )}
 
         {phase === "colorPick" && (
-          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/75 px-4 backdrop-blur-sm">
-            <p className="seeds-holo-text mb-2 text-xs uppercase tracking-[0.35em]">
+          <div
+            className="absolute inset-0 z-20 flex flex-col items-center justify-start overflow-y-auto bg-black/75 px-4 py-6 backdrop-blur-sm sm:justify-center"
+            style={{
+              background: uiTheme
+                ? `color-mix(in srgb, ${uiTheme.colors.bgDeep} 78%, transparent)`
+                : undefined,
+            }}
+          >
+            <p
+              className="seeds-holo-text mb-2 text-xs uppercase tracking-[0.35em]"
+              style={uiTheme ? { color: uiTheme.colors.highlight } : undefined}
+            >
               {KLEAN_SNEAKS.title}
             </p>
-            <p className="mb-3 text-center text-sm text-[#7EC8D9]">Pick your BALOON8 colorway</p>
+            <p
+              className="mb-3 text-center text-sm"
+              style={{ color: uiTheme?.colors.accentSoft ?? "#7EC8D9" }}
+            >
+              Pick your BALOON8 colorway — or Discover your perfect UI from a reference
+            </p>
+            <div className="mb-3 w-full max-w-md">
+              <ReferenceUiRemixPanel
+                compact
+                theme={uiTheme}
+                onThemeApplied={(next) => {
+                  setLocalUiTheme(next);
+                  onUiThemeChange?.(next);
+                  selectColorway(next.nearestColorwayId);
+                }}
+                onThemeCleared={() => {
+                  setLocalUiTheme(null);
+                  onUiThemeChange?.(null);
+                }}
+                onColorwayHint={selectColorway}
+              />
+            </div>
             <div className="mb-5 w-full max-w-md rounded-lg border border-white/10 bg-black/50 p-3">
               <Baloon8ColorwayPicker value={colorwayId} onChange={selectColorway} compact />
             </div>
             <Button
               type="button"
-              className="mb-3 bg-[#5B8DA8] text-white hover:bg-[#6a9cb8]"
+              className="mb-3 text-white hover:opacity-90"
+              style={{ background: uiTheme?.colors.accent ?? "#5B8DA8" }}
               onClick={confirmColorwayAndCountdown}
               data-testid="button-confirm-colorway"
             >
               Start countdown
             </Button>
             <p className="max-w-xs text-center text-[11px] text-white/45">
-              Tap a color to change · then Start countdown (or Enter)
+              Remix from a reference to restyle the game · auto-patents the new UI · then Start
+              countdown (or Enter)
             </p>
           </div>
         )}

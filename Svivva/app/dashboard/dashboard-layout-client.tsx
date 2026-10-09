@@ -131,7 +131,6 @@ const digitalMenuGroups: MenuGroup[] = [
         desc: "Sketch + group patent seal",
         href: "/dashboard/poor-man-protection",
         icon: ShieldCheck,
-        proOnly: true,
         beta: true,
       },
       {
