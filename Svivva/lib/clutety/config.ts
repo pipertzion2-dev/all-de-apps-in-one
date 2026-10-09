@@ -4,12 +4,13 @@ export const CLUTETY_BURG = "#6B2C4E";
 
 export const ZZAI_SECURITY_DISPLAY_NAME = "ZZAI Security";
 
-export const CLUTETY_LOGO_PATH = "/clutety-logo.png";
+/** Prefer ZZAI mark for visitor-facing surfaces; legacy Clutety PNGs remain as redirects only. */
+export const CLUTETY_LOGO_PATH = "/zzai-logo-signal.png";
 
-/** Corner ad only — black matte removed (colorkey); do not reuse JPEG mislabeled as PNG. */
-export const CLUTETY_CORNER_LOGO_PATH = "/clutety-corner-logo.png";
+/** Corner ad — ZZAI mark (legacy clutety-corner-logo.png retired from UI). */
+export const CLUTETY_CORNER_LOGO_PATH = "/zzai-logo-signal.png";
 
-/** Internal landing while Clutety iOS / standalone app is not live yet. */
+/** Internal landing while the security iOS / standalone app is not live yet. */
 export const CLUTETY_COMING_SOON_PATH = "/clutety-coming-soon";
 
 /** Corner ad + promo links (defaults to coming soon, not a dead external host). */

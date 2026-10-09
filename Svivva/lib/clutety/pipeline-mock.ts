@@ -63,7 +63,7 @@ export function mockSimulate(hypothesis: string) {
 export function mockRemedy(attack: { hypothesis?: string }) {
   const h = attack?.hypothesis || "feed surface";
   return {
-    fix: "Enable Clutety feed shields + tighten ranker input validation",
+    fix: "Enable ZZAI Security feed shields + tighten ranker input validation",
     explanation: `Remediation plan generated for: ${h}`,
     improved_architecture:
       "Zero-trust feed ingress, category blocklists, and local-only preference storage.",

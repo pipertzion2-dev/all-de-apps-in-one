@@ -1,5 +1,5 @@
 /**
- * Curated mini-app / tool surface for Orbit — traffic funnels to ZZAI + Clutety
+ * Curated mini-app / tool surface for Orbit — traffic funnels to ZZAI Security
  * without shipping full product replacements on free tiers.
  */
 
@@ -224,8 +224,8 @@ export function buildHubPageHtml(hub: HubSlug): string {
       lead: "Free utilities that solve one job well — each tool has its own indexed keyword page, then funnel to ZZAI for schema validation, deployment, and rollback.",
     },
     "cyber-security-mini-apps": {
-      h1: "Cyber Security Mini Apps (Clutety)",
-      lead: "Security scanners and hardening utilities — each checker is a crawlable feature URL with its own search keywords. Full parental controls ship with Clutety on iOS.",
+      h1: "Cyber Security Mini Apps",
+      lead: "Security scanners and hardening utilities — each checker is a crawlable feature URL with its own search keywords. Parental controls ship with ZZAI Security.",
     },
     "seo-pack": {
       h1: "ZZAI SEO Pack",

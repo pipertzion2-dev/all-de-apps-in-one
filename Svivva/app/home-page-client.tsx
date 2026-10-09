@@ -2120,7 +2120,7 @@ export default function LandingPage() {
                           href="/cyber-security-mini-apps"
                           className="hover:text-foreground transition-colors"
                         >
-                          Security Tools (Clutety)
+                          Security Tools
                         </Link>
                       </li>
                       <li>

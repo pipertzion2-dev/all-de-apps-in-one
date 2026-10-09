@@ -1,11 +1,11 @@
 import type { Metadata, Viewport } from "next";
 
 export const metadata: Metadata = {
-  title: "Clutety App",
-  description: "Pyracrypt Lock UI — encrypt and scan in your browser, on ZZAI.",
+  title: "ZZAI Security",
+  description: "Encrypt and scan in your browser — ZZAI Security suite.",
   appleWebApp: {
     capable: true,
-    title: "Clutety",
+    title: "ZZAI Security",
     statusBarStyle: "black-translucent",
   },
 };

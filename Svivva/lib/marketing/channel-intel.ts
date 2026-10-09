@@ -438,7 +438,7 @@ Product: ${product.name} — ${product.tagline}
 ${product.description}
 Audience: ${product.audience}
 Site: ${product.url}
-Existing surfaces: Marketing dashboard, Orbit SEO automation, Poor Man Protection (group patents), Channel Intel (YouTube transcripts), Clutety, Play, AI Tools Hub.
+Existing surfaces: Marketing dashboard, Orbit SEO automation, Poor Man Protection (group patents), Channel Intel (YouTube transcripts), ZZAI Security, Play, AI Tools Hub.
 
 Channel watched: ${options.channelTitle}
 ${newVideos ? `New videos this run: ${newVideos}` : ""}
