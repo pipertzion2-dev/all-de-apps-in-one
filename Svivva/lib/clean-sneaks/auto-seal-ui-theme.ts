@@ -35,27 +35,29 @@ function buildProtectBody(
 ) {
   const paletteLine = theme.palette.map((p) => `${p.role}:${p.hex}`).join(", ");
   const ref = theme.referenceText || theme.name;
+  const uiOption = theme.uiOptionId || "unknown";
   return {
     title: theme.name.slice(0, 200),
     description: [
-      "Klean Sneaks reference UI remix — automatically sealed when the player applied a custom reference.",
+      "Klean Sneaks — Discover your perfect UI remix. Automatically sealed when the player applied a custom reference.",
       `Reference: ${ref}`,
+      `Strategic UI option: ${uiOption} (palette stays exact to the reference; chrome/layout is the strategic change).`,
       `Shell colors: bg ${theme.colors.bg}, accent ${theme.colors.accent}, highlight ${theme.colors.highlight}.`,
       `Nearest BALOON8 colorway: ${theme.nearestColorwayId}.`,
       "This certificate covers the player-authored UI skin derived from the reference (supporting evidence of anteriority — not a government registration).",
     ]
       .join("\n\n")
       .slice(0, 4000),
-    formVariable: `Klean Sneaks HUD / shell layout remixed from reference · colorway ${theme.nearestColorwayId}`,
+    formVariable: `Klean Sneaks Discover UI · option ${uiOption} · colorway ${theme.nearestColorwayId}`,
     paletteVariable: paletteLine || theme.colors.accent,
     formInterrogation: {
-      silhouette: "Fullscreen game shell with colorway picker, HUD chips, and runner canvas",
-      hierarchy: "Brand mark → reference remix controls → colorway → primary CTA",
-      negativeSpace: "Dark atmospheric gradients with accent-lit interactive chips",
-      distinctiveMarks: `Reference-driven CSS theme vars + nearest BALOON8 tint (${theme.nearestColorwayId})`,
+      silhouette: `Fullscreen game shell remixed as “${uiOption}” with strategic HUD placement`,
+      hierarchy: "Reference import → ranked UI options → exact palette + strategic chrome → CTA",
+      negativeSpace: "Layout density and panel shape driven by the selected UI option",
+      distinctiveMarks: `UI option ${uiOption}; exact reference palette; BALOON8 tint ${theme.nearestColorwayId}`,
     },
     paletteInterrogation: {
-      emotionalIntent: "Player-authored atmosphere from their reference input",
+      emotionalIntent: "Exact colors from the player's reference; strategic UI option for chrome",
       contrastStrategy: "Accent CTAs on deep shell with highlight text",
       forbiddenColors: "None — palette extracted or seeded from the reference",
       lightingContext: "In-game overlay / mobile fullscreen",

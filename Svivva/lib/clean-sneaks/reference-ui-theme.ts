@@ -1,6 +1,6 @@
 /**
  * Reference → Klean Sneaks UI theme.
- * Palette from an image or seeded from text drives CSS vars + nearest BALOON8 colorway.
+ * Palette stays faithful to the import; strategic UI options reshape chrome/layout.
  */
 
 import type { ColorSwatch } from "@/lib/poor-man-protection/types";
@@ -9,12 +9,34 @@ import {
   BALOON8_COLORWAYS,
   type Baloon8ColorwayId,
 } from "@/lib/clean-sneaks/sneaker-catalog";
+import {
+  getUiOption,
+  KLEAN_UI_OPTIONS,
+  radiusCss,
+  type KleanUiOption,
+  type KleanUiOptionId,
+} from "@/lib/clean-sneaks/ui-options-catalog";
 
 export const REFERENCE_UI_THEME_STORAGE_KEY = "zzai.clean-sneaks.uiTheme.v1";
 export const REFERENCE_UI_PENDING_SEAL_KEY = "zzai.clean-sneaks.uiTheme.pendingSeal.v1";
 
+export type ReferenceSignals = {
+  luminance: "dark" | "light";
+  saturation: "low" | "mid" | "high";
+  contrast: "soft" | "hard";
+  avgLuminance: number;
+  avgSaturation: number;
+  contrastSpan: number;
+};
+
+export type RankedUiOption = {
+  id: KleanUiOptionId;
+  score: number;
+  reasons: string[];
+};
+
 export type KleanReferenceUiTheme = {
-  version: 1;
+  version: 2;
   /** User-facing label for this remix */
   name: string;
   /** Free-text or URL reference the user entered */
@@ -24,7 +46,7 @@ export type KleanReferenceUiTheme = {
   /** Content hash of reference bytes or theme JSON */
   contentHash: string;
   palette: ColorSwatch[];
-  /** Shell / HUD colors */
+  /** Shell / HUD colors — sampled/seeded to match the reference */
   colors: {
     bgDeep: string;
     bg: string;
@@ -36,6 +58,12 @@ export type KleanReferenceUiTheme = {
     muted: string;
     danger: string;
   };
+  /** Strategic layout option (catalog) */
+  uiOptionId: KleanUiOptionId;
+  /** Ranked alternatives for the same reference */
+  rankedUiOptions: RankedUiOption[];
+  /** Analyzed signals used for matching */
+  signals: ReferenceSignals;
   /** Nearest stock colorway for 3D chassis tint */
   nearestColorwayId: Baloon8ColorwayId;
   /** Optional source file name */
@@ -54,6 +82,7 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } {
   const h = hex.replace("#", "");
   const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
   const n = Number.parseInt(full.slice(0, 6), 16);
+  if (Number.isNaN(n)) return { r: 91, g: 141, b: 168 };
   return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
 }
 
@@ -74,6 +103,14 @@ function relativeLuminance(hex: string): number {
     return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
   });
   return 0.2126 * lin[0]! + 0.7152 * lin[1]! + 0.0722 * lin[2]!;
+}
+
+function saturationOf(hex: string): number {
+  const { r, g, b } = hexToRgb(hex);
+  const max = Math.max(r, g, b) / 255;
+  const min = Math.min(r, g, b) / 255;
+  if (max === 0) return 0;
+  return (max - min) / max;
 }
 
 function darken(hex: string, amount: number): string {
@@ -140,7 +177,6 @@ export function nearestColorwayId(palette: ColorSwatch[]): Baloon8ColorwayId {
   let best: Baloon8ColorwayId = "oilSlick";
   let bestDist = Infinity;
   for (const id of ALL_COLORWAY_IDS) {
-    // `swatch` is a CSS gradient string — compare against solid `tint` hex.
     const d = colorDistance(BALOON8_COLORWAYS[id].tint, target);
     if (d < bestDist) {
       bestDist = d;
@@ -150,6 +186,96 @@ export function nearestColorwayId(palette: ColorSwatch[]): Baloon8ColorwayId {
   return best;
 }
 
+/** Derive luminance / saturation / contrast buckets from the reference palette. */
+export function analyzeReferenceSignals(palette: ColorSwatch[]): ReferenceSignals {
+  const lum = palette.map((p) => relativeLuminance(p.hex));
+  const sat = palette.map((p) => saturationOf(p.hex));
+  const avgLuminance = lum.reduce((a, b) => a + b, 0) / Math.max(1, lum.length);
+  const avgSaturation = sat.reduce((a, b) => a + b, 0) / Math.max(1, sat.length);
+  const contrastSpan = Math.max(...lum, 0) - Math.min(...lum, 1);
+  return {
+    luminance: avgLuminance >= 0.42 ? "light" : "dark",
+    saturation: avgSaturation < 0.28 ? "low" : avgSaturation < 0.55 ? "mid" : "high",
+    contrast: contrastSpan >= 0.35 ? "hard" : "soft",
+    avgLuminance,
+    avgSaturation,
+    contrastSpan,
+  };
+}
+
+function keywordScore(option: KleanUiOption, haystack: string): { score: number; hits: string[] } {
+  const hits: string[] = [];
+  let score = 0;
+  for (const tag of option.tags) {
+    if (haystack.includes(tag.toLowerCase())) {
+      hits.push(tag);
+      score += 3;
+    }
+  }
+  // Soft match on label words
+  for (const word of option.label.toLowerCase().split(/\s+/)) {
+    if (word.length > 3 && haystack.includes(word)) {
+      score += 1;
+      if (!hits.includes(word)) hits.push(word);
+    }
+  }
+  return { score, hits };
+}
+
+function preferenceScore(option: KleanUiOption, signals: ReferenceSignals): number {
+  let score = 0;
+  const { prefer } = option;
+  if (!prefer.luminance || prefer.luminance === "any" || prefer.luminance === signals.luminance) {
+    score += prefer.luminance && prefer.luminance !== "any" ? 2 : 0.5;
+  } else {
+    score -= 1.5;
+  }
+  if (!prefer.saturation || prefer.saturation === signals.saturation) {
+    score += prefer.saturation ? 2 : 0.5;
+  } else if (
+    (prefer.saturation === "mid" && signals.saturation !== "mid") ||
+    (signals.saturation === "mid" && prefer.saturation)
+  ) {
+    score += 0.25;
+  } else {
+    score -= 1;
+  }
+  if (!prefer.contrast || prefer.contrast === signals.contrast) {
+    score += prefer.contrast ? 2 : 0.5;
+  } else {
+    score -= 1;
+  }
+  return score;
+}
+
+/**
+ * Rank every UI option for a reference.
+ * Palette fidelity is separate — matching only chooses strategic chrome.
+ */
+export function rankUiOptionsForReference(input: {
+  referenceText: string;
+  palette: ColorSwatch[];
+  fileName?: string;
+}): { signals: ReferenceSignals; ranked: RankedUiOption[] } {
+  const signals = analyzeReferenceSignals(input.palette);
+  const haystack = `${input.referenceText} ${input.fileName ?? ""}`.toLowerCase();
+  const seed = hashTextToSeed(haystack || "klean");
+
+  const ranked: RankedUiOption[] = KLEAN_UI_OPTIONS.map((option, index) => {
+    const { score: kw, hits } = keywordScore(option, haystack);
+    const pref = preferenceScore(option, signals);
+    // Tiny deterministic jitter so ties still diversify across references
+    const jitter = ((seed >> (index % 16)) & 7) * 0.01;
+    const score = Number((kw + pref + jitter).toFixed(3));
+    const reasons: string[] = [];
+    if (hits.length) reasons.push(`matches “${hits.slice(0, 3).join(", ")}”`);
+    reasons.push(`${signals.luminance}/${signals.saturation}/${signals.contrast} fit`);
+    return { id: option.id, score, reasons };
+  }).sort((a, b) => b.score - a.score);
+
+  return { signals, ranked };
+}
+
 export function buildReferenceUiTheme(input: {
   name?: string;
   referenceText: string;
@@ -157,9 +283,13 @@ export function buildReferenceUiTheme(input: {
   contentHash: string;
   fileName?: string;
   createdAt?: string;
+  /** Force a catalog option; otherwise auto-picks the best ranked match */
+  uiOptionId?: KleanUiOptionId | string;
 }): KleanReferenceUiTheme {
   const palette =
     input.palette.length > 0 ? input.palette : paletteFromTextReference(input.referenceText);
+
+  // Faithful color shell from the reference itself
   const dominant = swatchByRole(palette, "dominant", "#5B8DA8");
   const secondary = swatchByRole(palette, "secondary", darken(dominant, 0.35));
   const accent = swatchByRole(palette, "accent", lighten(dominant, 0.2));
@@ -172,15 +302,26 @@ export function buildReferenceUiTheme(input: {
   const text = relativeLuminance(highlight) > 0.55 ? highlight : "#f4f1ea";
   const muted = mixHex(text, bg, 0.45);
 
+  const { signals, ranked } = rankUiOptionsForReference({
+    referenceText: input.referenceText,
+    palette,
+    fileName: input.fileName,
+  });
+
+  const chosenId = (input.uiOptionId && getUiOption(input.uiOptionId).id === input.uiOptionId
+    ? input.uiOptionId
+    : ranked[0]?.id) as KleanUiOptionId;
+  const option = getUiOption(chosenId);
+
   const trimmed = input.referenceText.trim();
   const name =
     input.name?.trim() ||
     (trimmed.length > 0
-      ? `Klean remix · ${trimmed.slice(0, 40)}${trimmed.length > 40 ? "…" : ""}`
-      : "Klean remix from reference");
+      ? `${option.label} · ${trimmed.slice(0, 28)}${trimmed.length > 28 ? "…" : ""}`
+      : `${option.label} remix`);
 
   return {
-    version: 1,
+    version: 2,
     name,
     referenceText: trimmed,
     createdAt: input.createdAt ?? new Date().toISOString(),
@@ -197,13 +338,35 @@ export function buildReferenceUiTheme(input: {
       muted,
       danger: mixHex("#e85d5d", accent, 0.25),
     },
+    uiOptionId: option.id,
+    rankedUiOptions: ranked,
+    signals,
     nearestColorwayId: nearestColorwayId(palette),
     fileName: input.fileName,
   };
 }
 
+/** Re-skin the same reference palette onto another strategic UI option. */
+export function retargetUiOption(
+  theme: KleanReferenceUiTheme,
+  uiOptionId: KleanUiOptionId | string,
+): KleanReferenceUiTheme {
+  const option = getUiOption(uiOptionId);
+  const trimmed = theme.referenceText.trim();
+  return {
+    ...theme,
+    version: 2,
+    uiOptionId: option.id,
+    name:
+      trimmed.length > 0
+        ? `${option.label} · ${trimmed.slice(0, 28)}${trimmed.length > 28 ? "…" : ""}`
+        : `${option.label} remix`,
+  };
+}
+
 export function referenceUiThemeToCssVars(theme: KleanReferenceUiTheme): ReferenceUiCssVars {
   const c = theme.colors;
+  const option = getUiOption(theme.uiOptionId);
   return {
     "--klean-bg-deep": c.bgDeep,
     "--klean-bg": c.bg,
@@ -214,6 +377,12 @@ export function referenceUiThemeToCssVars(theme: KleanReferenceUiTheme): Referen
     "--klean-text": c.text,
     "--klean-muted": c.muted,
     "--klean-danger": c.danger,
+    "--klean-radius": radiusCss(option.radius),
+    "--klean-hud": option.hudPlacement,
+    "--klean-chrome": option.chrome,
+    "--klean-density": option.density,
+    "--klean-type": option.typeTone,
+    "--klean-panel-shape": option.panelShape,
   };
 }
 
@@ -223,14 +392,30 @@ export function referenceUiThemeStyle(theme: KleanReferenceUiTheme | null): Reco
   return referenceUiThemeToCssVars(theme) as Record<string, string>;
 }
 
+function migrateLegacyTheme(raw: unknown): KleanReferenceUiTheme | null {
+  if (!raw || typeof raw !== "object") return null;
+  const parsed = raw as Partial<KleanReferenceUiTheme> & { version?: number };
+  if (!parsed.colors?.accent || !parsed.contentHash) return null;
+  if (parsed.version === 2 && parsed.uiOptionId && parsed.rankedUiOptions) {
+    return parsed as KleanReferenceUiTheme;
+  }
+  // v1 → rebuild ranking from stored palette / text
+  return buildReferenceUiTheme({
+    name: parsed.name,
+    referenceText: parsed.referenceText || parsed.name || "legacy remix",
+    palette: parsed.palette || paletteFromTextReference(parsed.referenceText || "legacy"),
+    contentHash: parsed.contentHash,
+    fileName: parsed.fileName,
+    createdAt: parsed.createdAt,
+  });
+}
+
 export function readSavedReferenceUiTheme(): KleanReferenceUiTheme | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = window.localStorage.getItem(REFERENCE_UI_THEME_STORAGE_KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as KleanReferenceUiTheme;
-    if (parsed?.version !== 1 || !parsed.colors?.accent) return null;
-    return parsed;
+    return migrateLegacyTheme(JSON.parse(raw));
   } catch {
     return null;
   }
@@ -259,7 +444,10 @@ export function readPendingUiSeal(): PendingUiSeal | null {
   try {
     const raw = window.localStorage.getItem(REFERENCE_UI_PENDING_SEAL_KEY);
     if (!raw) return null;
-    return JSON.parse(raw) as PendingUiSeal;
+    const pending = JSON.parse(raw) as PendingUiSeal;
+    const theme = migrateLegacyTheme(pending.theme);
+    if (!theme) return null;
+    return { ...pending, theme };
   } catch {
     return null;
   }
@@ -276,12 +464,15 @@ export function clearPendingUiSeal(): void {
 }
 
 /** Canonical payload string used when hashing a text-only remix. */
-export function themeHashPayload(theme: Omit<KleanReferenceUiTheme, "contentHash" | "sealContentHash">): string {
+export function themeHashPayload(
+  theme: Omit<KleanReferenceUiTheme, "contentHash" | "sealContentHash">,
+): string {
   return JSON.stringify({
     name: theme.name,
     referenceText: theme.referenceText,
     palette: theme.palette,
     colors: theme.colors,
+    uiOptionId: theme.uiOptionId,
     nearestColorwayId: theme.nearestColorwayId,
   });
 }

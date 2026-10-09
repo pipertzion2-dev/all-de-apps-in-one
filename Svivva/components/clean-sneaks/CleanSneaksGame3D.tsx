@@ -57,6 +57,7 @@ import {
   referenceUiThemeStyle,
   type KleanReferenceUiTheme,
 } from "@/lib/clean-sneaks/reference-ui-theme";
+import { getUiOption } from "@/lib/clean-sneaks/ui-options-catalog";
 import { GameInterstitialAd, GameRewardedAd } from "./ads";
 import { RewardClaimModal } from "./monetization/RewardClaimModal";
 import {
@@ -702,6 +703,7 @@ export function CleanSneaksGame3D({
     );
   }
 
+  const uiOption = uiTheme ? getUiOption(uiTheme.uiOptionId) : null;
   const themedStyle: CSSProperties = {
     ...style,
     ...referenceUiThemeStyle(uiTheme),
@@ -712,12 +714,33 @@ export function CleanSneaksGame3D({
       : {}),
   };
 
+  const hudPlacement = uiOption?.hudPlacement ?? "top-split";
+  const hudClass =
+    hudPlacement === "bottom-dock"
+      ? `pointer-events-none absolute inset-x-0 bottom-0 z-10 flex items-end justify-between gap-2 ${portrait ? "px-2 py-2 pb-14" : "p-3 sm:p-4 pb-16"}`
+      : hudPlacement === "letterbox"
+        ? `pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-2 border-b border-black/80 bg-black/70 ${portrait ? "px-2 py-2" : "px-4 py-3"}`
+        : hudPlacement === "broadcast"
+          ? `pointer-events-none absolute inset-x-0 bottom-0 z-10 flex items-stretch justify-between gap-2 border-t-2 ${portrait ? "px-2 py-1.5" : "px-3 py-2"}`
+          : hudPlacement === "corners"
+            ? `pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-6 ${portrait ? "px-2 py-1.5 pr-16" : "p-3 sm:p-4"}`
+            : hudPlacement === "top-bar"
+              ? `pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center justify-between gap-2 backdrop-blur-md ${portrait ? "px-2 py-1.5 pr-16" : "px-3 py-2 sm:px-4"}`
+              : `pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-2 ${portrait ? "px-2 py-1.5 pr-16" : "p-3 sm:p-4"}`;
+
+  const shoeCamClass =
+    hudPlacement === "bottom-dock" || hudPlacement === "broadcast"
+      ? `pointer-events-none absolute z-10 ${portrait ? "top-2 right-2" : "top-3 right-3"}`
+      : `pointer-events-none absolute z-10 ${portrait ? "bottom-2 right-2" : "bottom-24 left-3"}`;
+
   return (
     <div
       ref={wrapRef}
       className={`flex min-h-0 flex-col ${fullscreen ? "h-full flex-1" : ""} ${className ?? ""}`}
       style={themedStyle}
       data-klean-reference-ui={uiTheme ? "1" : undefined}
+      data-klean-ui-option={uiTheme?.uiOptionId}
+      data-klean-hud={hudPlacement}
       role="application"
       aria-label={`${KLEAN_SNEAKS.title} 3D game`}
     >
@@ -823,26 +846,57 @@ export function CleanSneaksGame3D({
         )}
 
         <div
-          className={`pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-2 ${
-            portrait ? "px-2 py-1.5 pr-16" : "p-3 sm:p-4"
-          }`}
+          className={hudClass}
+          style={
+            uiTheme
+              ? {
+                  borderColor:
+                    hudPlacement === "broadcast" || hudPlacement === "letterbox"
+                      ? uiTheme.colors.accent
+                      : undefined,
+                  background:
+                    hudPlacement === "top-bar" || hudPlacement === "broadcast"
+                      ? `color-mix(in srgb, ${uiTheme.colors.bgPanel} 82%, transparent)`
+                      : hudPlacement === "letterbox"
+                        ? undefined
+                        : undefined,
+                  fontFamily:
+                    uiOption?.typeTone === "mono"
+                      ? "ui-monospace, SFMono-Regular, Menlo, monospace"
+                      : uiOption?.typeTone === "editorial"
+                        ? "Georgia, 'Times New Roman', serif"
+                        : undefined,
+                  letterSpacing: uiOption?.typeTone === "editorial" ? "0.04em" : undefined,
+                }
+              : undefined
+          }
+          data-testid="klean-strategic-hud"
         >
           <div className={portrait ? "space-y-0" : "space-y-1"}>
             {!portrait && (
-              <p className="text-[10px] uppercase tracking-[0.25em] text-[#5B8DA8]/80">
-                {sneaker.label ?? "Walkers"} · How clean can you keep the fit?
+              <p
+                className="text-[10px] uppercase tracking-[0.25em]"
+                style={{ color: uiTheme?.colors.accentSoft ?? "rgb(91 141 168 / 0.8)" }}
+              >
+                {sneaker.label ?? "Walkers"}
+                {uiOption ? ` · ${uiOption.label}` : ""} · How clean can you keep the fit?
               </p>
             )}
             <p
-              className={`font-bold tabular-nums text-foreground ${portrait ? "text-base" : "text-lg sm:text-xl"}`}
+              className={`font-bold tabular-nums ${portrait ? "text-base" : "text-lg sm:text-xl"}`}
+              style={{ color: uiTheme?.colors.text ?? undefined }}
             >
               {hud.score.toLocaleString()}
             </p>
-            <p className={`text-[#ffd76a]/90 ${portrait ? "text-[10px]" : "text-xs"}`}>
+            <p
+              className={portrait ? "text-[10px]" : "text-xs"}
+              style={{ color: uiTheme?.colors.highlight ?? "rgb(255 215 106 / 0.9)" }}
+            >
               Credits {scoreToCredits(hud.score).toLocaleString()}
             </p>
             <p
-              className={`text-muted-foreground ${portrait ? "text-[10px] tabular-nums" : "text-xs"}`}
+              className={portrait ? "text-[10px] tabular-nums" : "text-xs"}
+              style={{ color: uiTheme?.colors.muted ?? undefined }}
             >
               {hud.distance}m
               {hud.distance >= FINISH_DISTANCE ? " · BONUS" : ` / ${FINISH_DISTANCE}m`} · L{" "}
@@ -850,7 +904,10 @@ export function CleanSneaksGame3D({
               {!portrait && <> · Best {hud.bestScore.toLocaleString()}</>}
             </p>
             {!portrait && (
-              <p className="text-[10px] uppercase tracking-wider text-white/40">
+              <p
+                className="text-[10px] uppercase tracking-wider"
+                style={{ color: uiTheme?.colors.muted ?? "rgb(255 255 255 / 0.4)" }}
+              >
                 {weatherLabel} · {hud.walkStyle} · chain x{hud.cleanChain}
                 {visionOn ? " · SNEAK VISION" : ""}
               </p>
@@ -859,7 +916,26 @@ export function CleanSneaksGame3D({
           <div
             className={`space-y-1 text-right ${portrait ? "min-w-[110px] max-w-[150px]" : "min-w-[140px] max-w-[200px] flex-1"}`}
           >
-            <div className="flex items-center justify-end gap-1.5">
+            <div
+              className="flex items-center justify-end gap-1.5"
+              style={
+                uiOption?.chrome === "sticker"
+                  ? {
+                      background: uiTheme?.colors.accent,
+                      color: uiTheme?.colors.bgDeep,
+                      borderRadius: "var(--klean-radius, 8px)",
+                      padding: "2px 8px",
+                      transform: "rotate(-2deg)",
+                    }
+                  : uiOption?.chrome === "glow" && uiTheme
+                    ? {
+                        boxShadow: `0 0 14px ${uiTheme.colors.accent}88`,
+                        borderRadius: "var(--klean-radius, 8px)",
+                        padding: "2px 6px",
+                      }
+                    : undefined
+              }
+            >
               <span
                 className={`font-semibold uppercase tracking-wider ${cleanTone} ${portrait ? "text-[10px]" : "text-xs"}`}
               >
@@ -874,7 +950,8 @@ export function CleanSneaksGame3D({
             </div>
             {!portrait && (
               <p
-                className={`text-[11px] font-medium tracking-wide text-[#7EC8D9] transition-transform ${flashStreak ? "scale-110" : ""}`}
+                className={`text-[11px] font-medium tracking-wide transition-transform ${flashStreak ? "scale-110" : ""}`}
+                style={{ color: uiTheme?.colors.accentSoft ?? "#7EC8D9" }}
               >
                 {hud.streakLabel} · {hud.closeCalls} close calls
               </p>
@@ -882,11 +959,14 @@ export function CleanSneaksGame3D({
           </div>
         </div>
 
-        <div
-          className={`pointer-events-none absolute z-10 ${
-            portrait ? "bottom-2 right-2" : "bottom-24 left-3"
-          }`}
-        >
+        {hudPlacement === "letterbox" ? (
+          <div
+            className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-10 bg-black/80 sm:h-12"
+            aria-hidden
+          />
+        ) : null}
+
+        <div className={shoeCamClass}>
           <ShoeCamHud left={shoes.left} right={shoes.right} compact={portrait} />
         </div>
 
@@ -1001,7 +1081,7 @@ export function CleanSneaksGame3D({
               className="mb-3 text-center text-sm"
               style={{ color: uiTheme?.colors.accentSoft ?? "#7EC8D9" }}
             >
-              Pick your BALOON8 colorway — or Discover your perfect UI from a reference
+              Pick your BALOON8 colorway — or Discover your perfect UI (16 strategic layouts)
             </p>
             <div className="mb-3 w-full max-w-md">
               <ReferenceUiRemixPanel
