@@ -70,4 +70,21 @@ describe("homepage flip stack", () => {
     expect(flipSrc).toContain('addEventListener("touchend"');
     expect(flipSrc).toContain("SWIPE_THRESHOLD_PX");
   });
+
+  it("keeps platform body scroll lock stable across re-renders", () => {
+    const flipSrc = readFileSync(
+      resolve(__dirname, "../../components/homepage-flip-stack.tsx"),
+      "utf8",
+    );
+    // Unstable inline `panels` in effect deps re-ran cleanup and cleared body
+    // overflow on every parent render — mobile scroll stuck on Poor Man Protection.
+    expect(flipSrc).not.toMatch(/}, \[[^\]]*panels[^\]]*\]\)/);
+    expect(flipSrc).toContain("flipPanelFromIndex(settledPanelIndex())");
+    expect(flipSrc).toContain(
+      "Keep body locked whenever the overlay owns scroll",
+    );
+    expect(flipSrc).toContain(
+      "syncOverlayVisuals(displayedIndexRef.current, activePanelRef.current)",
+    );
+  });
 });
