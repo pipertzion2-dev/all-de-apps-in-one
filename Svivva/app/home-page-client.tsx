@@ -241,7 +241,8 @@ export default function LandingPage() {
     if (!captureEl) return;
 
     document.body.style.overflow = "hidden";
-    document.body.style.touchAction = "none";
+    // Do not set touch-action:none on body — it freezes iOS interaction with the
+    // Bunny Stream iframe (play/scrub). Capture layer handles scroll-to-flip.
 
     const stopFlipAnim = () => {
       if (flipAnimRef.current) {
@@ -261,7 +262,6 @@ export default function LandingPage() {
       }
       setFlipComplete(true);
       document.body.style.overflow = "";
-      document.body.style.touchAction = "";
       window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
     };
 
@@ -348,7 +348,6 @@ export default function LandingPage() {
       targetProgressRef.current = 1;
       paintFlip(1);
       document.body.style.overflow = "";
-      document.body.style.touchAction = "";
       captureEl.style.pointerEvents = "none";
       captureEl.style.transition = "opacity 420ms cubic-bezier(0.22, 1, 0.36, 1)";
       captureEl.style.opacity = "0";
@@ -498,7 +497,6 @@ export default function LandingPage() {
       stopFlipAnim();
       window.removeEventListener("resize", handleResize);
       document.body.style.overflow = "";
-      document.body.style.touchAction = "";
       window.removeEventListener("wheel", handleWheel);
       window.removeEventListener("wheel", handleWheelEnd);
       window.removeEventListener("touchstart", handleTouchStart);
@@ -519,7 +517,9 @@ export default function LandingPage() {
           className="fixed inset-0"
           style={{
             zIndex: 70,
-            touchAction: "none",
+            // auto — touch-action:none on this full-screen layer freezes the
+            // Bunny iframe on iOS (play/scrub never receive gestures).
+            touchAction: "auto",
             overflow: "visible",
             // Transparent on purpose: the receding corners now expose the page
             // face rotating in behind, which is what reads as a solid box. An
@@ -591,14 +591,9 @@ export default function LandingPage() {
                     alignItems: "center",
                   }}
                 >
-                  {/* Three.js camo flowers background */}
-                  <div className="pointer-events-none absolute inset-0 opacity-40" aria-hidden>
-                    <CamoThreeOverlay
-                      preset="oaas"
-                      eagerMount
-                      keepMounted
-                      className="h-full w-full"
-                    />
+                  {/* Canvas camo only — WebGL flowers freeze iPhone with the video player */}
+                  <div className="pointer-events-none absolute inset-0 opacity-50" aria-hidden>
+                    <CamoThreeOverlay preset="oaas" disableFlowers className="h-full w-full" />
                   </div>
 
                   {/* Bunny Stream video — replaces the previous intro still */}
