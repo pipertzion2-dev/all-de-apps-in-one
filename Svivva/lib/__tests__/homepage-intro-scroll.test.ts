@@ -24,8 +24,12 @@ describe("homepage intro scroll", () => {
     expect(pageSrc).not.toMatch(/if \(!mobile\) setCanMountHeavy3d\(true\)/);
   });
 
-  it("auto-advances to homepage when intro is idle", () => {
-    expect(pageSrc).toContain("autoSkipTimer");
+  it("keeps Bunny Stream intro playable (no timed auto-skip)", () => {
+    // Long-form intro video must not be dismissed by a short idle timer.
+    expect(pageSrc).not.toContain("autoSkipTimer");
+    expect(pageSrc).toContain("INTRO_BUNNY_STREAM_SRC");
+    expect(pageSrc).toContain("player.mediadelivery.net/embed/");
+    expect(pageSrc).toContain("isOverIntroVideo");
     expect(pageSrc).toContain("snapToFinish");
     expect(pageSrc).toContain("bumpIdleComplete");
   });
