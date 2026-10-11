@@ -10,9 +10,13 @@ describe("Bunny Stream CSP", () => {
     expect(headers).toMatch(/frame-src[\s\S]*BUNNY_STREAM_FRAME/);
   });
 
-  it("embeds Bunny Stream on the homepage intro", () => {
+  it("embeds Bunny Stream on the homepage intro with thumbnail poster", () => {
     const page = readFileSync(resolve(__dirname, "../../app/home-page-client.tsx"), "utf8");
-    expect(page).toContain("INTRO_BUNNY_STREAM_SRC");
+    expect(page).toContain("INTRO_BUNNY_STREAM_PLAY");
+    expect(page).toContain("INTRO_BUNNY_THUMBNAIL");
+    expect(page).toContain("vz-2b70ed0c-5f4.b-cdn.net");
     expect(page).toContain("player.mediadelivery.net/embed/");
+    expect(page).toContain("eagerMount");
+    expect(page).not.toMatch(/disableFlowers/);
   });
 });

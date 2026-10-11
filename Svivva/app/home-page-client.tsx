@@ -33,9 +33,13 @@ import zzaiLogo from "@/attached_assets/ZZAI_OFFICIAL_LOGO.png";
 import seedsLogo from "@/attached_assets/Svivva_Seeds_6_1771888740460.png";
 import { FOUNDER_SON_COMPUTER_ALT, FOUNDER_SON_COMPUTER_SRC } from "@/lib/brand/founder-media";
 
-/** Bunny Stream embed — streamed from CDN; not stored in this repo. */
-const INTRO_BUNNY_STREAM_SRC =
-  "https://player.mediadelivery.net/embed/775492/ed40154f-81ba-4c45-a955-5c80245bd342?autoplay=false&loop=false&muted=false&preload=true&responsive=true";
+/** Bunny Stream — CDN embed + official thumbnail (not stored in this repo). */
+const INTRO_BUNNY_VIDEO_ID = "ed40154f-81ba-4c45-a955-5c80245bd342";
+const INTRO_BUNNY_LIBRARY_ID = "775492";
+const INTRO_BUNNY_THUMBNAIL =
+  "https://vz-2b70ed0c-5f4.b-cdn.net/ed40154f-81ba-4c45-a955-5c80245bd342/thumbnail_3cc784e7.jpg";
+/** Mounted only after tap so the Bunny thumbnail poster stays visible first. */
+const INTRO_BUNNY_STREAM_PLAY = `https://player.mediadelivery.net/embed/${INTRO_BUNNY_LIBRARY_ID}/${INTRO_BUNNY_VIDEO_ID}?autoplay=true&loop=false&muted=false&preload=true&responsive=true&playsinline=true`;
 import {
   Shield,
   Code2,
@@ -140,6 +144,7 @@ export default function LandingPage() {
   const scrollHintBounceRef = useRef<HTMLDivElement>(null);
   const halfHRef = useRef(400);
   const [flipComplete, setFlipComplete] = useState(false);
+  const [introVideoStarted, setIntroVideoStarted] = useState(false);
   const virtualScrollRef = useRef(0);
   const targetProgressRef = useRef(0);
   const displayedProgressRef = useRef(0);
@@ -591,9 +596,14 @@ export default function LandingPage() {
                     alignItems: "center",
                   }}
                 >
-                  {/* Canvas camo only — WebGL flowers freeze iPhone with the video player */}
-                  <div className="pointer-events-none absolute inset-0 opacity-50" aria-hidden>
-                    <CamoThreeOverlay preset="oaas" disableFlowers className="h-full w-full" />
+                  {/* Three.js camo flowers behind the player */}
+                  <div className="pointer-events-none absolute inset-0 opacity-45" aria-hidden>
+                    <CamoThreeOverlay
+                      preset="oaas"
+                      eagerMount
+                      keepMounted
+                      className="h-full w-full"
+                    />
                   </div>
 
                   {/* Bunny Stream video — replaces the previous intro still */}
@@ -611,28 +621,52 @@ export default function LandingPage() {
                       </p>
                     </div>
 
-                    {/* 16:9 responsive Bunny Stream iframe */}
+                    {/* 16:9 — Bunny thumbnail poster until tap, then iframe with autoplay */}
                     <div
                       className="relative w-full overflow-hidden rounded-xl bg-black"
                       style={{ paddingTop: "56.25%" }}
                     >
-                      <iframe
-                        src={INTRO_BUNNY_STREAM_SRC}
-                        title="Svivva intro video — foreword by Hank Shocklee, featuring Lil Yachty"
-                        loading="eager"
-                        referrerPolicy="strict-origin-when-cross-origin"
-                        style={{
-                          border: 0,
-                          position: "absolute",
-                          top: 0,
-                          left: 0,
-                          height: "100%",
-                          width: "100%",
-                          backgroundColor: "#000000",
-                        }}
-                        allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
-                        allowFullScreen
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={INTRO_BUNNY_THUMBNAIL}
+                        alt=""
+                        aria-hidden
+                        className="absolute inset-0 h-full w-full object-cover"
+                        decoding="async"
+                        fetchPriority="high"
                       />
+                      {introVideoStarted ? (
+                        <iframe
+                          src={INTRO_BUNNY_STREAM_PLAY}
+                          title="Svivva intro video — foreword by Hank Shocklee, featuring Lil Yachty"
+                          loading="eager"
+                          referrerPolicy="strict-origin-when-cross-origin"
+                          className="absolute inset-0 z-[1] h-full w-full border-0 bg-black"
+                          allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
+                          allowFullScreen
+                        />
+                      ) : (
+                        <button
+                          type="button"
+                          className="absolute inset-0 z-10 flex items-center justify-center bg-black/25"
+                          onClick={() => setIntroVideoStarted(true)}
+                          aria-label="Press to start video"
+                          data-testid="button-intro-video-start"
+                        >
+                          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/90 text-black shadow-lg ring-1 ring-black/10 sm:h-20 sm:w-20">
+                            <svg
+                              width="28"
+                              height="28"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                              aria-hidden
+                              className="ml-1"
+                            >
+                              <path d="M8 5v14l11-7L8 5z" />
+                            </svg>
+                          </span>
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
