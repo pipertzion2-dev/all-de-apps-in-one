@@ -99,8 +99,10 @@ interface CamoThreeOverlayProps {
   eagerMount?: boolean;
   /** Once flowers mount, keep the WebGL scene alive to avoid remount flicker. */
   keepMounted?: boolean;
-  /** Canvas camo only — skip Three.js flowers (intro video must stay playable on iPhone). */
+  /** Canvas camo only — skip Three.js flowers. */
   disableFlowers?: boolean;
+  /** Pause WebGL animation (keep last frame) while video plays. */
+  paused?: boolean;
 }
 
 export function CamoThreeOverlay({
@@ -110,6 +112,7 @@ export function CamoThreeOverlay({
   eagerMount = false,
   keepMounted = false,
   disableFlowers = false,
+  paused = false,
 }: CamoThreeOverlayProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -405,7 +408,9 @@ export function CamoThreeOverlay({
                   : "brightness(1.15) saturate(1.1)",
         }}
       >
-        {flowersActive ? <ThreeCRTFlowers key={preset} preset={preset} isIntro={isIntro} /> : null}
+        {flowersActive ? (
+          <ThreeCRTFlowers key={preset} preset={preset} isIntro={isIntro} paused={paused} />
+        ) : null}
       </div>
 
       <canvas

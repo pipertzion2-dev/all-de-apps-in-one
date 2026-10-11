@@ -17,6 +17,7 @@ describe("Bunny Stream CSP", () => {
     expect(page).toContain("vz-2b70ed0c-5f4.b-cdn.net");
     expect(page).toContain("player.mediadelivery.net/embed/");
     expect(page).toContain("eagerMount");
+    expect(page).toContain("paused={introVideoStarted}");
     expect(page).not.toMatch(/disableFlowers/);
   });
 });

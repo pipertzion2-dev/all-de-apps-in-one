@@ -953,11 +953,19 @@ function createExoticFlower(
 interface ThreeCRTFlowersProps {
   preset?: ScenePreset;
   isIntro?: boolean;
+  /** Freeze the render loop (keep last frame) — used while intro video plays. */
+  paused?: boolean;
 }
 
-export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFlowersProps) {
+export function ThreeCRTFlowers({
+  preset = "hero",
+  isIntro = false,
+  paused = false,
+}: ThreeCRTFlowersProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const pausedRef = useRef(paused);
+  pausedRef.current = paused;
   const [webGLAvailable, setWebGLAvailable] = useState(true);
   const [dimensions, setDimensions] = useState<{ width: number; height: number } | null>(null);
 
@@ -1112,7 +1120,9 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
       powerPreference: isMobile ? "low-power" : "high-performance",
     });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.25 : 2));
+    // Intro + mobile: hard-cap DPR so WebGL does not freeze iPhone with the video.
+    const maxDpr = isIntro ? 1 : isMobile ? 1.25 : 2;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, maxDpr));
 
     // Style the canvas to fill container and stay positioned correctly
     renderer.domElement.style.position = "absolute";
@@ -1120,6 +1130,7 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
     renderer.domElement.style.left = "0";
     renderer.domElement.style.width = "100%";
     renderer.domElement.style.height = renderHeightCapped ? `${height}px` : "100%";
+    renderer.domElement.style.pointerEvents = "none";
 
     container.appendChild(renderer.domElement);
     rendererRef.current = renderer;
@@ -1415,6 +1426,9 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
     let animationId: number;
     let isVisible = true;
     const clock = new THREE.Clock();
+    let lastFrameMs = 0;
+    // Intro flowers stay visible but run at a gentle cadence so the Bunny player stays smooth.
+    const minFrameMs = isIntro ? (isMobile ? 50 : 33) : 0;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -1426,7 +1440,10 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
 
     const animate = () => {
       animationId = requestAnimationFrame(animate);
-      if (!isVisible) return;
+      if (!isVisible || pausedRef.current) return;
+      const now = performance.now();
+      if (minFrameMs > 0 && now - lastFrameMs < minFrameMs) return;
+      lastFrameMs = now;
 
       const elapsed = clock.getElapsedTime();
 
@@ -1551,9 +1568,8 @@ export function ThreeCRTFlowers({ preset = "hero", isIntro = false }: ThreeCRTFl
   return (
     <div
       ref={containerRef}
-      className="absolute inset-0 w-full h-full"
+      className="pointer-events-none absolute inset-0 h-full w-full"
       style={{
-        pointerEvents: "auto",
         minHeight: "100%",
         minWidth: "100%",
       }}
