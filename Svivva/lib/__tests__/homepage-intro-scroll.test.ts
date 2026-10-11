@@ -5,9 +5,10 @@ import { resolve } from "path";
 describe("homepage intro scroll", () => {
   const pageSrc = readFileSync(resolve(__dirname, "../../app/home-page-client.tsx"), "utf8");
 
-  it("does not steal wheel/touch for the Bunny Stream video intro", () => {
-    // Window preventDefault + flip RAF froze iPhone with WebGL + the player.
-    expect(pageSrc).not.toContain('window.addEventListener("wheel", handleWheel');
+  it("enters on scroll up without touchmove preventDefault", () => {
+    // Passive scroll-up enter is OK; flip RAF + touchmove preventDefault froze iPhone.
+    expect(pageSrc).toContain("Scroll up to enter");
+    expect(pageSrc).toContain('window.addEventListener("wheel", handleWheel');
     expect(pageSrc).not.toContain('window.addEventListener("touchmove", handleTouchMove');
     expect(pageSrc).toContain("skipIntroRef");
     expect(pageSrc).toContain("Skip intro");

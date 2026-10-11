@@ -289,10 +289,43 @@ export default function LandingPage() {
     }
     if (scrollHintRef.current) scrollHintRef.current.style.opacity = "1";
 
+    const isOverIntroVideo = (target: EventTarget | null) => {
+      const videoEl = introVideoRef.current;
+      if (!videoEl || !(target instanceof Node)) return false;
+      return videoEl.contains(target);
+    };
+
+    // Scroll / swipe up outside the player enters the site (no flip RAF).
+    const handleWheel = (e: WheelEvent) => {
+      if (finishingIntroRef.current) return;
+      if (isOverIntroVideo(e.target)) return;
+      if (e.deltaY < 0) {
+        finishIntro();
+      }
+    };
+    let touchStartY = 0;
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0]?.clientY ?? 0;
+    };
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (finishingIntroRef.current) return;
+      if (isOverIntroVideo(e.target)) return;
+      const y = e.changedTouches[0]?.clientY ?? touchStartY;
+      if (touchStartY - y > 48) {
+        finishIntro();
+      }
+    };
+    window.addEventListener("wheel", handleWheel, { passive: true });
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchend", handleTouchEnd, { passive: true });
+
     return () => {
       skipIntroRef.current = null;
       stopFlipAnim();
       document.body.style.overflow = "";
+      window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchend", handleTouchEnd);
     };
   }, [flipComplete]);
 
@@ -489,7 +522,7 @@ export default function LandingPage() {
                 The inspiration for the site in one episode
               </span>
               <span className="text-[10px] uppercase tracking-[0.2em] text-white/55 no-underline">
-                Tap Skip intro to enter the site
+                Scroll up to enter
               </span>
               <svg
                 width="20"
@@ -500,7 +533,7 @@ export default function LandingPage() {
                 strokeWidth="2"
                 className="text-white/80"
               >
-                <path d="M10 4v12M5 11l5 5 5-5" />
+                <path d="M10 16V4M5 9l5-5 5 5" />
               </svg>
             </div>
           </div>
