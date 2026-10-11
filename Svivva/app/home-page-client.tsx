@@ -31,12 +31,11 @@ import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
 import Image from "next/image";
 import zzaiLogo from "@/attached_assets/ZZAI_OFFICIAL_LOGO.png";
 import seedsLogo from "@/attached_assets/Svivva_Seeds_6_1771888740460.png";
-import {
-  FOUNDER_SON_COMPUTER_ALT,
-  FOUNDER_SON_COMPUTER_SRC,
-  HOMEPAGE_INTRO_ALT,
-  HOMEPAGE_INTRO_IMAGE,
-} from "@/lib/brand/founder-media";
+import { FOUNDER_SON_COMPUTER_ALT, FOUNDER_SON_COMPUTER_SRC } from "@/lib/brand/founder-media";
+
+/** Bunny Stream embed — streamed from CDN; not stored in this repo. */
+const INTRO_BUNNY_STREAM_SRC =
+  "https://player.mediadelivery.net/embed/775492/ed40154f-81ba-4c45-a955-5c80245bd342?autoplay=false&loop=false&muted=false&preload=true&responsive=true";
 import {
   Shield,
   Code2,
@@ -132,6 +131,7 @@ export default function LandingPage() {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const introCaptureRef = useRef<HTMLDivElement>(null);
+  const introVideoRef = useRef<HTMLDivElement>(null);
   const flipRotorRef = useRef<HTMLDivElement>(null);
   const flipFrontRef = useRef<HTMLDivElement>(null);
   /** The page itself is the flip's second face, so it rotates in as a real surface. */
@@ -408,15 +408,12 @@ export default function LandingPage() {
       }, 750);
     };
 
-    const autoSkipMs = mobile ? 5500 : 8000;
-    const autoSkipTimer = window.setTimeout(() => {
-      if (finishingIntroRef.current) return;
-      if (displayedProgressRef.current >= 0.12) {
-        snapToFinish();
-      } else {
-        scheduleFinish();
-      }
-    }, autoSkipMs);
+    /** Keep the Bunny Stream player usable — do not steal scroll/touch over the video. */
+    const isOverIntroVideo = (target: EventTarget | null) => {
+      const videoEl = introVideoRef.current;
+      if (!videoEl || !(target instanceof Node)) return false;
+      return videoEl.contains(target);
+    };
 
     const applyDelta = (delta: number) => {
       if (finishingIntroRef.current) return;
@@ -443,6 +440,7 @@ export default function LandingPage() {
 
     const handleWheel = (e: WheelEvent) => {
       if (finishingIntroRef.current) return;
+      if (isOverIntroVideo(e.target)) return;
       e.preventDefault();
       let delta = e.deltaY;
       if (e.deltaMode === WheelEvent.DOM_DELTA_LINE) delta *= 16;
@@ -451,11 +449,14 @@ export default function LandingPage() {
     };
 
     let touchStartY = 0;
+    let touchStartedOnVideo = false;
     const handleTouchStart = (e: TouchEvent) => {
+      touchStartedOnVideo = isOverIntroVideo(e.target);
       touchStartY = e.touches[0]?.clientY ?? 0;
     };
     const handleTouchMove = (e: TouchEvent) => {
       if (finishingIntroRef.current) return;
+      if (touchStartedOnVideo || isOverIntroVideo(e.target)) return;
       e.preventDefault();
       const y = e.touches[0]?.clientY ?? touchStartY;
       const delta = touchStartY - y;
@@ -464,14 +465,15 @@ export default function LandingPage() {
     };
 
     const handleTouchEnd = () => {
-      if (finishingIntroRef.current) return;
+      if (finishingIntroRef.current || touchStartedOnVideo) return;
       if (displayedProgressRef.current >= 0.72) {
         snapToFinish();
       }
     };
 
     let wheelEndTimer: number | undefined;
-    const handleWheelEnd = () => {
+    const handleWheelEnd = (e: WheelEvent) => {
+      if (isOverIntroVideo(e.target)) return;
       if (wheelEndTimer !== undefined) window.clearTimeout(wheelEndTimer);
       wheelEndTimer = window.setTimeout(() => {
         if (finishingIntroRef.current) return;
@@ -482,6 +484,7 @@ export default function LandingPage() {
     };
 
     // Single window listeners only — capture + window previously doubled every delta.
+    // No auto-skip: the intro hosts a long-form Bunny Stream video users can watch.
     window.addEventListener("wheel", handleWheel, { passive: false });
     window.addEventListener("touchstart", handleTouchStart, { passive: true });
     window.addEventListener("touchmove", handleTouchMove, { passive: false });
@@ -490,7 +493,6 @@ export default function LandingPage() {
 
     return () => {
       skipIntroRef.current = null;
-      window.clearTimeout(autoSkipTimer);
       if (idleCompleteTimer !== undefined) window.clearTimeout(idleCompleteTimer);
       if (wheelEndTimer !== undefined) window.clearTimeout(wheelEndTimer);
       stopFlipAnim();
@@ -565,9 +567,9 @@ export default function LandingPage() {
               >
                 {/* Overscan bleed. Under perspective the panel's top corners
                     pull inward as they recede, and neither face covers the gap
-                    mid-rotation, which showed as black wedges. Extending the
-                    white past the top and sides keeps it covered; the bottom
-                    stays flush so it never hides the page face rising in. */}
+                    mid-rotation, which showed as wedges. Extending the black
+                    past the top and sides keeps it covered; the bottom stays
+                    flush so it never hides the page face rising in. */}
                 <div
                   aria-hidden
                   style={{
@@ -576,37 +578,64 @@ export default function LandingPage() {
                     left: "-45%",
                     right: "-45%",
                     bottom: 0,
-                    backgroundColor: "#ffffff",
+                    backgroundColor: "#000000",
                   }}
                 />
                 <div
                   className="w-full h-full overflow-hidden relative"
                   style={{
-                    backgroundColor: "#ffffff",
+                    backgroundColor: "#000000",
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "center",
                     alignItems: "center",
                   }}
                 >
-                  <Image
-                    src={HOMEPAGE_INTRO_IMAGE}
-                    alt={HOMEPAGE_INTRO_ALT}
-                    width={1024}
-                    height={1024}
-                    sizes="100vw"
-                    style={{
-                      // Fill the panel in both axes: `height: auto` left the square
-                      // image only as tall as the viewport was wide, stranding the
-                      // slack as blank space on portrait/mobile viewports.
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "contain",
-                      objectPosition: "center",
-                      display: "block",
-                    }}
-                    priority
-                  />
+                  {/* Three.js camo flowers background */}
+                  <div className="pointer-events-none absolute inset-0 opacity-40" aria-hidden>
+                    <CamoThreeOverlay
+                      preset="oaas"
+                      eagerMount
+                      keepMounted
+                      className="h-full w-full"
+                    />
+                  </div>
+
+                  {/* Bunny Stream video — replaces the previous intro still */}
+                  <div
+                    ref={introVideoRef}
+                    data-intro-video
+                    className="relative z-10 w-full max-w-5xl px-4 sm:px-6 lg:px-8"
+                  >
+                    <div className="mb-4 space-y-2 text-center">
+                      <p className="text-lg font-semibold text-white sm:text-xl md:text-2xl">
+                        Press the video to start it
+                      </p>
+                      <p className="text-sm text-white/80 sm:text-base">
+                        Foreword by Hank Shocklee · Featuring Lil Yachty
+                      </p>
+                    </div>
+
+                    {/* 16:9 responsive Bunny Stream iframe */}
+                    <div className="relative w-full" style={{ paddingTop: "56.25%" }}>
+                      <iframe
+                        src={INTRO_BUNNY_STREAM_SRC}
+                        title="Svivva intro video — foreword by Hank Shocklee, featuring Lil Yachty"
+                        loading="lazy"
+                        style={{
+                          border: 0,
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          height: "100%",
+                          width: "100%",
+                          borderRadius: "12px",
+                        }}
+                        allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture;fullscreen;"
+                        allowFullScreen
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -622,18 +651,18 @@ export default function LandingPage() {
           >
             <div
               ref={scrollHintBounceRef}
-              className="flex flex-col items-center gap-1 rounded-full bg-white/85 px-5 py-2.5 shadow-sm ring-1 ring-black/5 backdrop-blur-sm max-w-[min(92vw,22rem)]"
+              className="flex max-w-[min(92vw,22rem)] flex-col items-center gap-1 rounded-full bg-black/70 px-5 py-2.5 shadow-sm ring-1 ring-white/15 backdrop-blur-sm"
               style={{ animation: "scrollBounce 1.5s ease-in-out 0s infinite" }}
               data-testid="text-intro-swipe-cube-twice"
             >
               <span
-                className="text-center text-sm font-medium leading-snug text-gray-700"
+                className="text-center text-sm font-medium leading-snug text-white/90"
                 style={{ fontFamily: "'Zc', sans-serif" }}
               >
-                Swipe the cube twice to go to the main homepage
+                Press the video to play · Scroll outside it to enter
               </span>
-              <span className="text-[10px] uppercase tracking-[0.2em] text-gray-500">
-                Scroll to enter
+              <span className="text-[10px] uppercase tracking-[0.2em] text-white/55">
+                Or tap Skip intro
               </span>
               <svg
                 width="20"
@@ -642,7 +671,7 @@ export default function LandingPage() {
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
-                className="text-gray-700"
+                className="text-white/80"
               >
                 <path d="M10 4v12M5 11l5 5 5-5" />
               </svg>
