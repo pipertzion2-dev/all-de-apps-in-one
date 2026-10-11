@@ -591,9 +591,14 @@ export default function LandingPage() {
                 >
                   {/* Three.js camo flowers background */}
                   <div className="absolute inset-0 opacity-40">
-                    <CamoThreeOverlay preset="oaas" eagerMount keepMounted className="h-full w-full" />
+                    <CamoThreeOverlay
+                      preset="oaas"
+                      eagerMount
+                      keepMounted
+                      className="h-full w-full"
+                    />
                   </div>
-                  
+
                   {/* Video player container */}
                   <div className="relative z-10 w-full max-w-5xl px-4 sm:px-6 lg:px-8">
                     {/* Video info text */}
@@ -605,7 +610,7 @@ export default function LandingPage() {
                         Featuring a foreword by Hank Shocklee • Starring Lil Yachty
                       </p>
                     </div>
-                    
+
                     {/* Responsive video player */}
                     <div
                       style={{
