@@ -576,37 +576,60 @@ export default function LandingPage() {
                     left: "-45%",
                     right: "-45%",
                     bottom: 0,
-                    backgroundColor: "#ffffff",
+                    backgroundColor: "#000000",
                   }}
                 />
                 <div
                   className="w-full h-full overflow-hidden relative"
                   style={{
-                    backgroundColor: "#ffffff",
+                    backgroundColor: "#000000",
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "center",
                     alignItems: "center",
                   }}
                 >
-                  <Image
-                    src={HOMEPAGE_INTRO_IMAGE}
-                    alt={HOMEPAGE_INTRO_ALT}
-                    width={1024}
-                    height={1024}
-                    sizes="100vw"
-                    style={{
-                      // Fill the panel in both axes: `height: auto` left the square
-                      // image only as tall as the viewport was wide, stranding the
-                      // slack as blank space on portrait/mobile viewports.
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "contain",
-                      objectPosition: "center",
-                      display: "block",
-                    }}
-                    priority
-                  />
+                  {/* Three.js camo flowers background */}
+                  <div className="absolute inset-0 opacity-40">
+                    <CamoThreeOverlay preset="oaas" eagerMount keepMounted className="h-full w-full" />
+                  </div>
+                  
+                  {/* Video player container */}
+                  <div className="relative z-10 w-full max-w-5xl px-4 sm:px-6 lg:px-8">
+                    {/* Video info text */}
+                    <div className="mb-4 text-center space-y-2">
+                      <p className="text-white text-lg sm:text-xl md:text-2xl font-semibold">
+                        Press the video to start it
+                      </p>
+                      <p className="text-white/80 text-sm sm:text-base">
+                        Featuring a foreword by Hank Shocklee • Starring Lil Yachty
+                      </p>
+                    </div>
+                    
+                    {/* Responsive video player */}
+                    <div
+                      style={{
+                        position: "relative",
+                        paddingTop: "56.25%",
+                        width: "100%",
+                      }}
+                    >
+                      <iframe
+                        src="https://player.mediadelivery.net/embed/775492/ed40154f-81ba-4c45-a955-5c80245bd342?autoplay=false&loop=false&muted=false&preload=true&responsive=true"
+                        loading="lazy"
+                        style={{
+                          border: 0,
+                          position: "absolute",
+                          top: 0,
+                          height: "100%",
+                          width: "100%",
+                          borderRadius: "12px",
+                        }}
+                        allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture;fullscreen;"
+                        allowFullScreen={true}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
