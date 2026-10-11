@@ -14,6 +14,9 @@ const ADSENSE_IMG =
   "https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://www.gstatic.com https://www.google.com https://www.googletagmanager.com";
 /** SearchDock site-agent SDK (AEO heartbeat) */
 const SEARCHDOCK_SCRIPT = "https://app.searchdock.io";
+/** Bunny Stream iframe player (homepage intro video). */
+const BUNNY_STREAM_FRAME =
+  "https://player.mediadelivery.net https://iframe.mediadelivery.net https://*.mediadelivery.net";
 
 export const SECURITY_HEADERS = [
   { key: "X-DNS-Prefetch-Control", value: "on" },
@@ -26,7 +29,8 @@ export const SECURITY_HEADERS = [
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   {
     key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=(), payment=(self)",
+    value:
+      'camera=(), microphone=(), geolocation=(), payment=(self), fullscreen=(self "https://player.mediadelivery.net" "https://iframe.mediadelivery.net")',
   },
   { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
   {
@@ -39,7 +43,8 @@ export const SECURITY_HEADERS = [
       "font-src 'self' data:",
       "worker-src 'self' blob:",
       `connect-src 'self' https: wss: blob: ${GA_CONNECT} ${ADSENSE_CONNECT} ${SEARCHDOCK_SCRIPT}`,
-      `frame-src 'self' https://js.stripe.com https://hooks.stripe.com ${ADSENSE_FRAME}`,
+      `frame-src 'self' https://js.stripe.com https://hooks.stripe.com ${ADSENSE_FRAME} ${BUNNY_STREAM_FRAME}`,
+      "media-src 'self' blob: https://*.mediadelivery.net https://*.b-cdn.net",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",

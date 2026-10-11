@@ -617,11 +617,15 @@ export default function LandingPage() {
                     </div>
 
                     {/* 16:9 responsive Bunny Stream iframe */}
-                    <div className="relative w-full" style={{ paddingTop: "56.25%" }}>
+                    <div
+                      className="relative w-full overflow-hidden rounded-xl bg-black"
+                      style={{ paddingTop: "56.25%" }}
+                    >
                       <iframe
                         src={INTRO_BUNNY_STREAM_SRC}
                         title="Svivva intro video — foreword by Hank Shocklee, featuring Lil Yachty"
-                        loading="lazy"
+                        loading="eager"
+                        referrerPolicy="strict-origin-when-cross-origin"
                         style={{
                           border: 0,
                           position: "absolute",
@@ -629,9 +633,9 @@ export default function LandingPage() {
                           left: 0,
                           height: "100%",
                           width: "100%",
-                          borderRadius: "12px",
+                          backgroundColor: "#000000",
                         }}
-                        allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture;fullscreen;"
+                        allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
                         allowFullScreen
                       />
                     </div>
