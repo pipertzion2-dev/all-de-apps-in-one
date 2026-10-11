@@ -1459,14 +1459,20 @@ export function ThreeCRTFlowers({
       flowers.forEach((flower) => {
         const { phase, baseY, bloomSpeed, rotationOffset } = flower.userData;
 
-        if (flower.userData.growthProgress < flower.userData.targetGrowth) {
+        if (isIntro) {
+          // Continuous bloom / breathe — never settle fully closed on the intro.
+          flower.userData.growthProgress =
+            0.42 + 0.58 * (0.5 + 0.5 * Math.sin(elapsed * (0.55 + bloomSpeed * 12) + phase));
+        } else if (flower.userData.growthProgress < flower.userData.targetGrowth) {
           flower.userData.growthProgress += bloomSpeed;
         }
 
         const growth = Math.min(flower.userData.growthProgress, 1);
         flower.scale.setScalar(growth);
-        flower.position.y = baseY + Math.sin(elapsed * 0.7 + phase) * 0.06 * growth;
-        flower.rotation.y = rotationOffset + Math.sin(elapsed * 0.3 + phase) * 0.06;
+        const sway = isIntro ? 0.12 : 0.06;
+        flower.position.y = baseY + Math.sin(elapsed * 0.7 + phase) * sway * growth;
+        flower.rotation.y =
+          rotationOffset + Math.sin(elapsed * 0.3 + phase) * (isIntro ? 0.12 : 0.06);
 
         flower.children.forEach((child) => {
           if (child.userData.material) {

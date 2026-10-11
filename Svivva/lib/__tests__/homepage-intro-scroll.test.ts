@@ -23,8 +23,9 @@ describe("homepage intro scroll", () => {
     expect(pageSrc).toContain("INTRO_BUNNY_STREAM_PLAY");
     expect(pageSrc).toContain("INTRO_BUNNY_THUMBNAIL");
     expect(pageSrc).toContain("player.mediadelivery.net/embed/");
-    expect(pageSrc).toContain("paused={introVideoStarted}");
+    expect(pageSrc).toContain("The inspiration for the site in one episode");
     expect(pageSrc).toContain("isIntro");
+    expect(pageSrc).not.toContain("paused={introVideoStarted}");
   });
 
   it("releases the page from 3D when the intro finishes", () => {

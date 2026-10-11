@@ -382,14 +382,13 @@ export default function LandingPage() {
                     alignItems: "center",
                   }}
                 >
-                  {/* Three.js camo flowers behind the player — paused while video plays */}
-                  <div className="pointer-events-none absolute inset-0 opacity-45" aria-hidden>
+                  {/* Three.js camo flowers — keep blooming behind the player */}
+                  <div className="pointer-events-none absolute inset-0 opacity-50" aria-hidden>
                     <CamoThreeOverlay
                       preset="oaas"
                       isIntro
                       eagerMount
                       keepMounted
-                      paused={introVideoStarted}
                       className="h-full w-full"
                     />
                   </div>
@@ -400,12 +399,19 @@ export default function LandingPage() {
                     data-intro-video
                     className="relative z-10 w-full max-w-5xl px-4 sm:px-6 lg:px-8"
                   >
-                    <div className="mb-4 space-y-2 text-center">
-                      <p className="text-lg font-semibold text-white sm:text-xl md:text-2xl">
-                        Press the video to start it
+                    <div className="mb-4 space-y-2 text-center no-underline">
+                      <p
+                        className="text-lg font-semibold text-white no-underline decoration-transparent sm:text-xl md:text-2xl"
+                        style={{ textDecoration: "none", borderBottom: "none" }}
+                      >
+                        The inspiration for the site in one episode
                       </p>
-                      <p className="text-sm text-white/80 sm:text-base">
-                        Foreword by Hank Shocklee · Featuring Lil Yachty
+                      <p
+                        className="text-sm text-white/80 no-underline decoration-transparent sm:text-base"
+                        style={{ textDecoration: "none", borderBottom: "none" }}
+                      >
+                        Press the video to start it · Foreword by Hank Shocklee · Featuring Lil
+                        Yachty
                       </p>
                     </div>
 
@@ -472,17 +478,17 @@ export default function LandingPage() {
           >
             <div
               ref={scrollHintBounceRef}
-              className="flex max-w-[min(92vw,22rem)] flex-col items-center gap-1 rounded-full bg-black/70 px-5 py-2.5 shadow-sm ring-1 ring-white/15 backdrop-blur-sm"
+              className="flex max-w-[min(92vw,22rem)] flex-col items-center gap-1 rounded-full bg-black/70 px-5 py-2.5 shadow-sm backdrop-blur-sm"
               style={{ animation: "scrollBounce 1.5s ease-in-out 0s infinite" }}
               data-testid="text-intro-swipe-cube-twice"
             >
               <span
-                className="text-center text-sm font-medium leading-snug text-white/90"
-                style={{ fontFamily: "'Zc', sans-serif" }}
+                className="text-center text-sm font-medium leading-snug text-white/90 no-underline"
+                style={{ fontFamily: "'Zc', sans-serif", textDecoration: "none" }}
               >
-                Press the video to play
+                The inspiration for the site in one episode
               </span>
-              <span className="text-[10px] uppercase tracking-[0.2em] text-white/55">
+              <span className="text-[10px] uppercase tracking-[0.2em] text-white/55 no-underline">
                 Tap Skip intro to enter the site
               </span>
               <svg
