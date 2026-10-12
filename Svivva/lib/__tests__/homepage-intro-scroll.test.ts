@@ -23,7 +23,10 @@ describe("homepage intro scroll", () => {
     expect(pageSrc).not.toContain("autoSkipTimer");
     expect(pageSrc).toContain("INTRO_BUNNY_STREAM_PLAY");
     expect(pageSrc).toContain("INTRO_BUNNY_THUMBNAIL");
-    expect(pageSrc).toContain("player.mediadelivery.net/embed/");
+    // Chromeless progressive MP4 — no Bunny iframe progress/control hairline on play
+    expect(pageSrc).toContain("play_720p.mp4");
+    expect(pageSrc).not.toContain("player.mediadelivery.net/embed/");
+    expect(pageSrc).toContain("controls={false}");
     expect(pageSrc).toContain("The inspiration for the site in one episode");
     expect(pageSrc).toContain("isIntro");
     expect(pageSrc).not.toContain("paused={introVideoStarted}");

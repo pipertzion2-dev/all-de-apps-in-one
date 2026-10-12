@@ -33,13 +33,15 @@ import zzaiLogo from "@/attached_assets/ZZAI_OFFICIAL_LOGO.png";
 import seedsLogo from "@/attached_assets/Svivva_Seeds_6_1771888740460.png";
 import { FOUNDER_SON_COMPUTER_ALT, FOUNDER_SON_COMPUTER_SRC } from "@/lib/brand/founder-media";
 
-/** Bunny Stream — CDN embed + official thumbnail (not stored in this repo). */
+/** Bunny Stream — progressive MP4 + official thumbnail (not stored in this repo). */
 const INTRO_BUNNY_VIDEO_ID = "ed40154f-81ba-4c45-a955-5c80245bd342";
-const INTRO_BUNNY_LIBRARY_ID = "775492";
-const INTRO_BUNNY_THUMBNAIL =
-  "https://vz-2b70ed0c-5f4.b-cdn.net/ed40154f-81ba-4c45-a955-5c80245bd342/thumbnail_3cc784e7.jpg";
-/** Mounted only after tap so the Bunny thumbnail poster stays visible first. */
-const INTRO_BUNNY_STREAM_PLAY = `https://player.mediadelivery.net/embed/${INTRO_BUNNY_LIBRARY_ID}/${INTRO_BUNNY_VIDEO_ID}?autoplay=true&loop=false&muted=false&preload=true&responsive=true&playsinline=true`;
+const INTRO_BUNNY_CDN = `https://vz-2b70ed0c-5f4.b-cdn.net/${INTRO_BUNNY_VIDEO_ID}`;
+const INTRO_BUNNY_THUMBNAIL = `${INTRO_BUNNY_CDN}/thumbnail_3cc784e7.jpg`;
+/**
+ * Chromeless progressive MP4 — avoids Bunny iframe controls/progress hairline that
+ * reappears on iPhone while watching. media-src already allows *.b-cdn.net.
+ */
+const INTRO_BUNNY_STREAM_PLAY = `${INTRO_BUNNY_CDN}/play_720p.mp4`;
 import {
   Shield,
   Code2,
@@ -136,6 +138,7 @@ export default function LandingPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const introCaptureRef = useRef<HTMLDivElement>(null);
   const introVideoRef = useRef<HTMLDivElement>(null);
+  const introMediaRef = useRef<HTMLVideoElement>(null);
   const flipRotorRef = useRef<HTMLDivElement>(null);
   const flipFrontRef = useRef<HTMLDivElement>(null);
   /** The page itself is the flip's second face, so it rotates in as a real surface. */
@@ -448,51 +451,79 @@ export default function LandingPage() {
                       </p>
                     </div>
 
-                    {/* 16:9 — Bunny thumbnail poster until tap, then iframe with autoplay */}
+                    {/* 16:9 — chromeless MP4 (no Bunny progress/control hairline on play) */}
                     <div
-                      className="relative w-full overflow-hidden rounded-xl bg-black"
-                      style={{ paddingTop: "56.25%" }}
+                      className="relative w-full overflow-hidden rounded-xl bg-black [transform:translateZ(0)]"
+                      style={{
+                        paddingTop: "56.25%",
+                        // iOS Safari: mask kills 1px white compositing hairlines on rounded video
+                        WebkitMaskImage: "-webkit-radial-gradient(white, black)",
+                      }}
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={INTRO_BUNNY_THUMBNAIL}
-                        alt=""
-                        aria-hidden
-                        className="absolute inset-0 h-full w-full object-cover"
-                        decoding="async"
-                        fetchPriority="high"
+                      <video
+                        ref={introMediaRef}
+                        src={INTRO_BUNNY_STREAM_PLAY}
+                        poster={INTRO_BUNNY_THUMBNAIL}
+                        playsInline
+                        preload="metadata"
+                        controls={false}
+                        disablePictureInPicture
+                        controlsList="nodownload noplaybackrate noremoteplayback"
+                        className="absolute inset-0 z-[1] h-full w-full scale-[1.02] object-cover bg-black"
+                        aria-label="Svivva intro video — foreword by Hank Shocklee, featuring Lil Yachty"
                       />
-                      {introVideoStarted ? (
-                        <iframe
-                          src={INTRO_BUNNY_STREAM_PLAY}
-                          title="Svivva intro video — foreword by Hank Shocklee, featuring Lil Yachty"
-                          loading="eager"
-                          referrerPolicy="strict-origin-when-cross-origin"
-                          className="absolute inset-0 z-[1] h-full w-full border-0 bg-black"
-                          allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
-                          allowFullScreen
-                        />
-                      ) : (
-                        <button
-                          type="button"
-                          className="absolute inset-0 z-10 flex items-center justify-center bg-black/25"
-                          onClick={() => setIntroVideoStarted(true)}
-                          aria-label="Press to start video"
-                          data-testid="button-intro-video-start"
-                        >
-                          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/90 text-black shadow-lg ring-1 ring-black/10 sm:h-20 sm:w-20">
-                            <svg
-                              width="28"
-                              height="28"
-                              viewBox="0 0 24 24"
-                              fill="currentColor"
-                              aria-hidden
-                              className="ml-1"
-                            >
-                              <path d="M8 5v14l11-7L8 5z" />
-                            </svg>
-                          </span>
-                        </button>
+                      {/* Cover iOS/Safari 1px compositing hairlines on rounded video edges */}
+                      <div
+                        className="pointer-events-none absolute inset-x-0 top-0 z-[2] h-[2px] bg-black"
+                        aria-hidden
+                      />
+                      <div
+                        className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] h-[3px] bg-black"
+                        aria-hidden
+                      />
+                      {!introVideoStarted && (
+                        <>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={INTRO_BUNNY_THUMBNAIL}
+                            alt=""
+                            aria-hidden
+                            className="absolute inset-0 z-[3] h-full w-full scale-[1.02] object-cover"
+                            decoding="async"
+                            fetchPriority="high"
+                          />
+                          <button
+                            type="button"
+                            className="absolute inset-0 z-10 flex items-center justify-center bg-black/25"
+                            onClick={() => {
+                              const media = introMediaRef.current;
+                              if (!media) return;
+                              media.muted = false;
+                              void media
+                                .play()
+                                .then(() => setIntroVideoStarted(true))
+                                .catch(() => {
+                                  // Keep poster + play button if gesture/network blocks play
+                                  setIntroVideoStarted(false);
+                                });
+                            }}
+                            aria-label="Press to start video"
+                            data-testid="button-intro-video-start"
+                          >
+                            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/90 text-black shadow-lg ring-1 ring-black/10 sm:h-20 sm:w-20">
+                              <svg
+                                width="28"
+                                height="28"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                                aria-hidden
+                                className="ml-1"
+                              >
+                                <path d="M8 5v14l11-7L8 5z" />
+                              </svg>
+                            </span>
+                          </button>
+                        </>
                       )}
                     </div>
                   </div>
