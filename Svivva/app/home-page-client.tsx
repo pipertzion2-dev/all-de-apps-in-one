@@ -472,7 +472,11 @@ export default function LandingPage() {
                         className="absolute inset-0 z-[1] h-full w-full scale-[1.02] object-cover bg-black"
                         aria-label="Svivva intro video — foreword by Hank Shocklee, featuring Lil Yachty"
                       />
-                      {/* Cover any remaining bottom edge hairline from iOS video layers */}
+                      {/* Cover iOS/Safari 1px compositing hairlines on rounded video edges */}
+                      <div
+                        className="pointer-events-none absolute inset-x-0 top-0 z-[2] h-[2px] bg-black"
+                        aria-hidden
+                      />
                       <div
                         className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] h-[3px] bg-black"
                         aria-hidden
