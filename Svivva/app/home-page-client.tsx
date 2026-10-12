@@ -492,14 +492,16 @@ export default function LandingPage() {
                             type="button"
                             className="absolute inset-0 z-10 flex items-center justify-center bg-black/25"
                             onClick={() => {
-                              setIntroVideoStarted(true);
                               const media = introMediaRef.current;
-                              if (media) {
-                                media.muted = false;
-                                void media.play().catch(() => {
-                                  // iOS may still require a second tap if gesture was lost
+                              if (!media) return;
+                              media.muted = false;
+                              void media
+                                .play()
+                                .then(() => setIntroVideoStarted(true))
+                                .catch(() => {
+                                  // Keep poster + play button if gesture/network blocks play
+                                  setIntroVideoStarted(false);
                                 });
-                              }
                             }}
                             aria-label="Press to start video"
                             data-testid="button-intro-video-start"
