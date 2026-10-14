@@ -32,14 +32,6 @@ import Image from "next/image";
 import zzaiLogo from "@/attached_assets/ZZAI_OFFICIAL_LOGO.png";
 import seedsLogo from "@/attached_assets/Svivva_Seeds_6_1771888740460.png";
 import { FOUNDER_SON_COMPUTER_ALT, FOUNDER_SON_COMPUTER_SRC } from "@/lib/brand/founder-media";
-
-/** Bunny Stream — CDN embed + official thumbnail (not stored in this repo). */
-const INTRO_BUNNY_VIDEO_ID = "ed40154f-81ba-4c45-a955-5c80245bd342";
-const INTRO_BUNNY_LIBRARY_ID = "775492";
-const INTRO_BUNNY_THUMBNAIL =
-  "https://vz-2b70ed0c-5f4.b-cdn.net/ed40154f-81ba-4c45-a955-5c80245bd342/thumbnail_3cc784e7.jpg";
-/** Mounted only after tap so the Bunny thumbnail poster stays visible first. */
-const INTRO_BUNNY_STREAM_PLAY = `https://player.mediadelivery.net/embed/${INTRO_BUNNY_LIBRARY_ID}/${INTRO_BUNNY_VIDEO_ID}?autoplay=true&loop=false&muted=false&preload=true&responsive=true&playsinline=true`;
 import {
   Shield,
   Code2,
@@ -62,6 +54,34 @@ import {
   Users,
 } from "lucide-react";
 import dynamic from "next/dynamic";
+
+/** Bunny Stream — CDN embed + official thumbnail (not stored in this repo). */
+const INTRO_BUNNY_VIDEO_ID = "ed40154f-81ba-4c45-a955-5c80245bd342";
+const INTRO_BUNNY_LIBRARY_ID = "775492";
+const INTRO_BUNNY_THUMBNAIL =
+  "https://vz-2b70ed0c-5f4.b-cdn.net/ed40154f-81ba-4c45-a955-5c80245bd342/thumbnail_3cc784e7.jpg";
+/**
+ * Muted autoplay so browsers allow playback without a visible play control.
+ * Bunny's large orange play button only appears while the player is paused —
+ * we keep our thumbnail cover over the iframe whenever it's paused.
+ */
+const INTRO_BUNNY_STREAM_PLAY = `https://player.mediadelivery.net/embed/${INTRO_BUNNY_LIBRARY_ID}/${INTRO_BUNNY_VIDEO_ID}?autoplay=true&muted=true&loop=false&preload=true&responsive=true&playsinline=true`;
+const INTRO_BUNNY_PLAYERJS = "https://assets.mediadelivery.net/playerjs/playerjs-latest.min.js";
+
+type BunnyPlayerJs = {
+  on: (event: string, cb: (...args: unknown[]) => void) => void;
+  play: () => void;
+  mute: () => void;
+};
+
+declare global {
+  interface Window {
+    playerjs?: {
+      Player: new (el: HTMLIFrameElement | string) => BunnyPlayerJs;
+    };
+  }
+}
+
 const PlatformFeatureHub = dynamic(
   () => import("@/components/platform-feature-hub").then((m) => m.PlatformFeatureHub),
   { ssr: false },
@@ -136,6 +156,8 @@ export default function LandingPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const introCaptureRef = useRef<HTMLDivElement>(null);
   const introVideoRef = useRef<HTMLDivElement>(null);
+  const introIframeRef = useRef<HTMLIFrameElement>(null);
+  const introPlayerRef = useRef<BunnyPlayerJs | null>(null);
   const flipRotorRef = useRef<HTMLDivElement>(null);
   const flipFrontRef = useRef<HTMLDivElement>(null);
   /** The page itself is the flip's second face, so it rotates in as a real surface. */
@@ -144,7 +166,8 @@ export default function LandingPage() {
   const scrollHintBounceRef = useRef<HTMLDivElement>(null);
   const halfHRef = useRef(400);
   const [flipComplete, setFlipComplete] = useState(false);
-  const [introVideoStarted, setIntroVideoStarted] = useState(false);
+  /** Cover Bunny chrome (incl. large play) until the muted video is actually playing. */
+  const [introPosterCover, setIntroPosterCover] = useState(true);
   const virtualScrollRef = useRef(0);
   const targetProgressRef = useRef(0);
   const displayedProgressRef = useRef(0);
@@ -177,6 +200,62 @@ export default function LandingPage() {
 
   useEffect(() => {
     runBodyLayerHygiene();
+  }, []);
+
+  // Drive muted autoplay and keep Bunny's large play button covered while paused.
+  useEffect(() => {
+    let cancelled = false;
+    let player: BunnyPlayerJs | null = null;
+
+    const bindPlayer = () => {
+      const iframe = introIframeRef.current;
+      const PlayerCtor = window.playerjs?.Player;
+      if (!iframe || !PlayerCtor || cancelled) return;
+
+      player = new PlayerCtor(iframe);
+      introPlayerRef.current = player;
+      player.on("ready", () => {
+        if (cancelled || !player) return;
+        player.mute();
+        player.play();
+        player.on("play", () => {
+          if (!cancelled) setIntroPosterCover(false);
+        });
+        player.on("pause", () => {
+          if (!cancelled) setIntroPosterCover(true);
+        });
+        player.on("ended", () => {
+          if (!cancelled) setIntroPosterCover(true);
+        });
+      });
+    };
+
+    const existing = document.querySelector<HTMLScriptElement>(
+      `script[src="${INTRO_BUNNY_PLAYERJS}"]`,
+    );
+    if (window.playerjs?.Player) {
+      bindPlayer();
+    } else if (existing) {
+      existing.addEventListener("load", bindPlayer, { once: true });
+    } else {
+      const script = document.createElement("script");
+      script.src = INTRO_BUNNY_PLAYERJS;
+      script.async = true;
+      script.addEventListener("load", bindPlayer, { once: true });
+      document.head.appendChild(script);
+    }
+
+    // Fallback: if player.js never fires play, still lift the cover once muted autoplay
+    // has had time to start (Bunny hides large-play while not paused).
+    const fallback = window.setTimeout(() => {
+      if (!cancelled) setIntroPosterCover(false);
+    }, 2500);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(fallback);
+      introPlayerRef.current = null;
+    };
   }, []);
 
   useEffect(() => {
@@ -443,46 +522,49 @@ export default function LandingPage() {
                         className="text-sm text-white/80 no-underline decoration-transparent sm:text-base"
                         style={{ textDecoration: "none", borderBottom: "none" }}
                       >
-                        Press the video to start it · Foreword by Hank Shocklee · Featuring Lil
-                        Yachty
+                        Foreword by Hank Shocklee · Featuring Lil Yachty
                       </p>
                     </div>
 
-                    {/* 16:9 — Bunny thumbnail poster until tap, then iframe with autoplay */}
+                    {/* 16:9 — muted Bunny autoplay; thumbnail covers large-play while paused */}
                     <div
                       className="relative w-full overflow-hidden rounded-xl bg-black"
                       style={{ paddingTop: "56.25%" }}
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={INTRO_BUNNY_THUMBNAIL}
-                        alt=""
-                        aria-hidden
-                        className="absolute inset-0 h-full w-full object-cover"
-                        decoding="async"
-                        fetchPriority="high"
+                      <iframe
+                        ref={introIframeRef}
+                        src={INTRO_BUNNY_STREAM_PLAY}
+                        title="Svivva intro video — foreword by Hank Shocklee, featuring Lil Yachty"
+                        loading="eager"
+                        referrerPolicy="strict-origin-when-cross-origin"
+                        className="absolute inset-0 z-[1] h-full w-full border-0 bg-black"
+                        allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
+                        allowFullScreen
                       />
-                      {introVideoStarted ? (
-                        <iframe
-                          src={INTRO_BUNNY_STREAM_PLAY}
-                          title="Svivva intro video — foreword by Hank Shocklee, featuring Lil Yachty"
-                          loading="eager"
-                          referrerPolicy="strict-origin-when-cross-origin"
-                          className="absolute inset-0 z-[1] h-full w-full border-0 bg-black"
-                          allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
-                          allowFullScreen
-                        />
-                      ) : (
-                        // Invisible hit target only — no play icon overlay on the first page.
-                        // Tap still mounts the Bunny iframe so unmuted autoplay can start after a gesture.
+                      {introPosterCover ? (
                         <button
                           type="button"
-                          className="absolute inset-0 z-10 cursor-pointer bg-transparent"
-                          onClick={() => setIntroVideoStarted(true)}
-                          aria-label="Press to start video"
-                          data-testid="button-intro-video-start"
-                        />
-                      )}
+                          className="absolute inset-0 z-10 cursor-pointer border-0 bg-black p-0"
+                          onClick={() => {
+                            const player = introPlayerRef.current;
+                            player?.mute();
+                            player?.play();
+                            setIntroPosterCover(false);
+                          }}
+                          aria-label="Watch intro video"
+                          data-testid="button-intro-video-cover"
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={INTRO_BUNNY_THUMBNAIL}
+                            alt=""
+                            aria-hidden
+                            className="h-full w-full object-cover"
+                            decoding="async"
+                            fetchPriority="high"
+                          />
+                        </button>
+                      ) : null}
                     </div>
                   </div>
                 </div>

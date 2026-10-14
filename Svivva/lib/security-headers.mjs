@@ -17,6 +17,8 @@ const SEARCHDOCK_SCRIPT = "https://app.searchdock.io";
 /** Bunny Stream iframe player (homepage intro video). */
 const BUNNY_STREAM_FRAME =
   "https://player.mediadelivery.net https://iframe.mediadelivery.net https://*.mediadelivery.net";
+/** Bunny player.js host — playback control API for the intro embed. */
+const BUNNY_PLAYERJS_SCRIPT = "https://assets.mediadelivery.net";
 
 export const SECURITY_HEADERS = [
   { key: "X-DNS-Prefetch-Control", value: "on" },
@@ -37,7 +39,7 @@ export const SECURITY_HEADERS = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      `script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://js.stripe.com https://va.vercel-scripts.com ${GA_SCRIPT} ${CLARITY_SCRIPT} ${ADSENSE_SCRIPT} ${SEARCHDOCK_SCRIPT}`,
+      `script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://js.stripe.com https://va.vercel-scripts.com ${GA_SCRIPT} ${CLARITY_SCRIPT} ${ADSENSE_SCRIPT} ${SEARCHDOCK_SCRIPT} ${BUNNY_PLAYERJS_SCRIPT}`,
       "style-src 'self' 'unsafe-inline'",
       `img-src 'self' data: blob: https: ${ADSENSE_IMG} https://www.google-analytics.com https://www.googletagmanager.com`,
       "font-src 'self' data:",
