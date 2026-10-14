@@ -473,26 +473,15 @@ export default function LandingPage() {
                           allowFullScreen
                         />
                       ) : (
+                        // Invisible hit target only — no play icon overlay on the first page.
+                        // Tap still mounts the Bunny iframe so unmuted autoplay can start after a gesture.
                         <button
                           type="button"
-                          className="absolute inset-0 z-10 flex items-center justify-center bg-black/25"
+                          className="absolute inset-0 z-10 cursor-pointer bg-transparent"
                           onClick={() => setIntroVideoStarted(true)}
                           aria-label="Press to start video"
                           data-testid="button-intro-video-start"
-                        >
-                          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/90 text-black shadow-lg ring-1 ring-black/10 sm:h-20 sm:w-20">
-                            <svg
-                              width="28"
-                              height="28"
-                              viewBox="0 0 24 24"
-                              fill="currentColor"
-                              aria-hidden
-                              className="ml-1"
-                            >
-                              <path d="M8 5v14l11-7L8 5z" />
-                            </svg>
-                          </span>
-                        </button>
+                        />
                       )}
                     </div>
                   </div>
