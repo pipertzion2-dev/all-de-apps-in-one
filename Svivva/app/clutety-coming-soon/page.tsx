@@ -6,12 +6,13 @@ import {
   CLUTETY_COMING_SOON_PATH,
   CLUTETY_LOGO_PATH,
   CLUTETY_TEAL,
+  ZZAI_SECURITY_DISPLAY_NAME,
 } from "@/lib/clutety/config";
 
 export const metadata: Metadata = {
-  title: "Clutety — Coming Soon",
+  title: `${ZZAI_SECURITY_DISPLAY_NAME} — Coming Soon`,
   description:
-    "Clutety for iOS is coming soon. Until then, explore ZZAI security tools in your browser.",
+    "ZZAI Security for iOS is coming soon. Until then, explore security tools in your browser on zzaizzai.com.",
   robots: { index: true, follow: true },
   alternates: { canonical: CLUTETY_COMING_SOON_PATH },
 };
@@ -28,8 +29,8 @@ export default function ClutetyComingSoonPage() {
       <div className="max-w-md w-full flex flex-col items-center gap-6">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={`${CLUTETY_LOGO_PATH}?v=6`}
-          alt="Clutety"
+          src={`${CLUTETY_LOGO_PATH}?v=7`}
+          alt={ZZAI_SECURITY_DISPLAY_NAME}
           width={320}
           height={213}
           className="w-[min(280px,85vw)] h-auto object-contain drop-shadow-[0_4px_24px_rgba(91, 141, 168,0.35)]"
@@ -44,7 +45,7 @@ export default function ClutetyComingSoonPage() {
             Coming soon
           </p>
           <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
-            Clutety for iOS
+            {ZZAI_SECURITY_DISPLAY_NAME} for iOS
           </h1>
           <p className="text-sm text-white/60 leading-relaxed max-w-sm mx-auto">
             Native app store launch is in progress. Security tools are already available on ZZAI

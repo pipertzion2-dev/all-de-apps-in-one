@@ -352,7 +352,7 @@ export const PLATFORM_FEATURES: PlatformFeature[] = [
   }),
   feature({
     id: "security",
-    title: "Security / Clutety",
+    title: "ZZAI Security",
     shortTitle: "Security",
     href: "/dashboard/security",
     description: "Channel 14 — Protect bus gate: threat sim, PQC, and cyber mini-apps.",

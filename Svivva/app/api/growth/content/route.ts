@@ -41,11 +41,11 @@ function getProducts(): Record<ProductKey, ProductInfo> {
       ],
     },
     clutety: {
-      name: "Clutety",
+      name: "ZZAI Security",
       tagline: "Feed filtering & protection — embedded in ZZAI",
-      url: `${base}/clutety`,
+      url: `${base}/cyber-security-mini-apps`,
       description:
-        "Clutety blocks unwanted content on YouTube and other social feeds, using the Pyracrypt-grade UI embedded in ZZAI. Same platform, same domain.",
+        "ZZAI Security blocks unwanted content on YouTube and other social feeds, using the protection suite embedded in ZZAI. Same platform, same domain.",
       audience: "parents, creators, privacy-conscious users, mobile-first users",
       competitors: ["YouTube Kids", "BlockSite", "Freedom", "Screen Time"],
       keywords: [
@@ -53,18 +53,18 @@ function getProducts(): Record<ProductKey, ProductInfo> {
         "feed filter app",
         "social media blocker",
         "parental feed controls",
-        "clutety svivva",
+        "zzai security",
       ],
     },
     clutter: {
-      name: "Clutety",
+      name: "ZZAI Security",
       tagline: "Feed filtering & protection — embedded in ZZAI",
-      url: `${base}/clutety`,
+      url: `${base}/cyber-security-mini-apps`,
       description:
-        "Clutety blocks unwanted content on feeds (YouTube, etc.) — embedded in ZZAI with the Pyracrypt UI.",
+        "ZZAI Security blocks unwanted content on feeds (YouTube, etc.) — embedded in ZZAI with the protection suite UI.",
       audience: "parents, creators, privacy-conscious users",
       competitors: ["YouTube Kids", "BlockSite", "Freedom"],
-      keywords: ["feed filter", "block youtube", "clutety"],
+      keywords: ["feed filter", "block youtube", "zzai security"],
     },
     mini_apps: {
       name: "ZZAI Mini Apps",
