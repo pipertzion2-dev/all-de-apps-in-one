@@ -71,6 +71,7 @@ const INTRO_BUNNY_PLAYERJS = "https://assets.mediadelivery.net/playerjs/playerjs
 type BunnyPlayerJs = {
   on: (event: string, cb: (...args: unknown[]) => void) => void;
   play: () => void;
+  pause: () => void;
   mute: () => void;
 };
 
@@ -166,8 +167,12 @@ export default function LandingPage() {
   const scrollHintBounceRef = useRef<HTMLDivElement>(null);
   const halfHRef = useRef(400);
   const [flipComplete, setFlipComplete] = useState(false);
-  /** Cover Bunny chrome (incl. large play) until the muted video is actually playing. */
-  const [introPosterCover, setIntroPosterCover] = useState(true);
+  /**
+   * When false, an opaque thumbnail covers the iframe (no play icon).
+   * When true, a transparent click-catcher sits on top so Bunny large-play
+   * never receives clicks / never needs to show.
+   */
+  const [introVideoPlaying, setIntroVideoPlaying] = useState(false);
   const virtualScrollRef = useRef(0);
   const targetProgressRef = useRef(0);
   const displayedProgressRef = useRef(0);
@@ -202,7 +207,8 @@ export default function LandingPage() {
     runBodyLayerHygiene();
   }, []);
 
-  // Drive muted autoplay and keep Bunny's large play button covered while paused.
+  // Drive muted autoplay. Our overlays always sit above the iframe so Bunny's
+  // large-play control is never the visible / clickable surface.
   useEffect(() => {
     let cancelled = false;
     let player: BunnyPlayerJs | null = null;
@@ -219,13 +225,13 @@ export default function LandingPage() {
         player.mute();
         player.play();
         player.on("play", () => {
-          if (!cancelled) setIntroPosterCover(false);
+          if (!cancelled) setIntroVideoPlaying(true);
         });
         player.on("pause", () => {
-          if (!cancelled) setIntroPosterCover(true);
+          if (!cancelled) setIntroVideoPlaying(false);
         });
         player.on("ended", () => {
-          if (!cancelled) setIntroPosterCover(true);
+          if (!cancelled) setIntroVideoPlaying(false);
         });
       });
     };
@@ -245,10 +251,9 @@ export default function LandingPage() {
       document.head.appendChild(script);
     }
 
-    // Fallback: if player.js never fires play, still lift the cover once muted autoplay
-    // has had time to start (Bunny hides large-play while not paused).
+    // Fallback: assume muted autoplay started if player.js is slow.
     const fallback = window.setTimeout(() => {
-      if (!cancelled) setIntroPosterCover(false);
+      if (!cancelled) setIntroVideoPlaying(true);
     }, 2500);
 
     return () => {
@@ -537,11 +542,25 @@ export default function LandingPage() {
                         title="Svivva intro video — foreword by Hank Shocklee, featuring Lil Yachty"
                         loading="eager"
                         referrerPolicy="strict-origin-when-cross-origin"
-                        className="absolute inset-0 z-[1] h-full w-full border-0 bg-black"
+                        className="pointer-events-none absolute inset-0 z-[1] h-full w-full border-0 bg-black"
                         allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
                         allowFullScreen
+                        tabIndex={-1}
                       />
-                      {introPosterCover ? (
+                      {introVideoPlaying ? (
+                        // Transparent catcher: click pauses via player.js — Bunny large-play never shows.
+                        <button
+                          type="button"
+                          className="absolute inset-0 z-10 cursor-pointer border-0 bg-transparent p-0"
+                          onClick={() => {
+                            introPlayerRef.current?.pause();
+                            setIntroVideoPlaying(false);
+                          }}
+                          aria-label="Pause intro video"
+                          data-testid="button-intro-video-pause"
+                        />
+                      ) : (
+                        // Opaque thumbnail only — no play icon. Click resumes muted playback.
                         <button
                           type="button"
                           className="absolute inset-0 z-10 cursor-pointer border-0 bg-black p-0"
@@ -549,7 +568,7 @@ export default function LandingPage() {
                             const player = introPlayerRef.current;
                             player?.mute();
                             player?.play();
-                            setIntroPosterCover(false);
+                            setIntroVideoPlaying(true);
                           }}
                           aria-label="Watch intro video"
                           data-testid="button-intro-video-cover"
@@ -564,7 +583,7 @@ export default function LandingPage() {
                             fetchPriority="high"
                           />
                         </button>
-                      ) : null}
+                      )}
                     </div>
                   </div>
                 </div>

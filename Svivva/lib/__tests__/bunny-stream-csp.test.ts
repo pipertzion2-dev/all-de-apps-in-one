@@ -20,7 +20,7 @@ describe("Bunny Stream CSP", () => {
     expect(page).toContain("vz-2b70ed0c-5f4.b-cdn.net");
     expect(page).toContain("player.mediadelivery.net/embed/");
     expect(page).toContain("muted=true");
-    expect(page).toContain("introPosterCover");
+    expect(page).toContain("introVideoPlaying");
     expect(page).toContain("eagerMount");
     expect(page).toContain("The inspiration for the site in one episode");
     expect(page).not.toMatch(/disableFlowers/);

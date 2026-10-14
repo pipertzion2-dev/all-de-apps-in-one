@@ -25,7 +25,8 @@ describe("homepage intro scroll", () => {
     expect(pageSrc).toContain("INTRO_BUNNY_THUMBNAIL");
     expect(pageSrc).toContain("player.mediadelivery.net/embed/");
     expect(pageSrc).toContain("muted=true");
-    expect(pageSrc).toContain("introPosterCover");
+    expect(pageSrc).toContain("introVideoPlaying");
+    expect(pageSrc).toContain("pointer-events-none");
     expect(pageSrc).toContain("The inspiration for the site in one episode");
     expect(pageSrc).toContain("isIntro");
     expect(pageSrc).not.toContain("button-intro-video-start");
