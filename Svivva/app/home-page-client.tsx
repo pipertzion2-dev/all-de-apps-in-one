@@ -63,7 +63,9 @@ const INTRO_BUNNY_THUMBNAIL =
 /**
  * Muted autoplay so browsers allow playback without a visible play control.
  * Bunny's large orange play button only appears while the player is paused —
- * we keep our thumbnail cover over the iframe whenever it's paused.
+ * our opaque thumbnail cover stays up until player.js confirms a real "play"
+ * event (never on a timer / optimistic click). That way the orange button
+ * never becomes the visible surface.
  */
 const INTRO_BUNNY_STREAM_PLAY = `https://player.mediadelivery.net/embed/${INTRO_BUNNY_LIBRARY_ID}/${INTRO_BUNNY_VIDEO_ID}?autoplay=true&muted=true&loop=false&preload=true&responsive=true&playsinline=true`;
 const INTRO_BUNNY_PLAYERJS = "https://assets.mediadelivery.net/playerjs/playerjs-latest.min.js";
@@ -207,8 +209,9 @@ export default function LandingPage() {
     runBodyLayerHygiene();
   }, []);
 
-  // Drive muted autoplay. Our overlays always sit above the iframe so Bunny's
-  // large-play control is never the visible / clickable surface.
+  // Drive muted autoplay. Opaque thumbnail stays above the iframe until a
+  // confirmed "play" event — never lift the cover on a timer (that exposed
+  // Bunny's large-play when autoplay was still blocked).
   useEffect(() => {
     let cancelled = false;
     let player: BunnyPlayerJs | null = null;
@@ -222,8 +225,6 @@ export default function LandingPage() {
       introPlayerRef.current = player;
       player.on("ready", () => {
         if (cancelled || !player) return;
-        player.mute();
-        player.play();
         player.on("play", () => {
           if (!cancelled) setIntroVideoPlaying(true);
         });
@@ -233,6 +234,8 @@ export default function LandingPage() {
         player.on("ended", () => {
           if (!cancelled) setIntroVideoPlaying(false);
         });
+        player.mute();
+        player.play();
       });
     };
 
@@ -251,14 +254,8 @@ export default function LandingPage() {
       document.head.appendChild(script);
     }
 
-    // Fallback: assume muted autoplay started if player.js is slow.
-    const fallback = window.setTimeout(() => {
-      if (!cancelled) setIntroVideoPlaying(true);
-    }, 2500);
-
     return () => {
       cancelled = true;
-      window.clearTimeout(fallback);
       introPlayerRef.current = null;
     };
   }, []);
@@ -531,7 +528,7 @@ export default function LandingPage() {
                       </p>
                     </div>
 
-                    {/* 16:9 — muted Bunny autoplay; thumbnail covers large-play while paused */}
+                    {/* 16:9 — muted Bunny autoplay; opaque poster hides large-play until play confirms */}
                     <div
                       className="relative w-full overflow-hidden rounded-xl bg-black"
                       style={{ paddingTop: "56.25%" }}
@@ -547,11 +544,44 @@ export default function LandingPage() {
                         allowFullScreen
                         tabIndex={-1}
                       />
+                      {/* Opaque poster always mounts; only hides after confirmed play (no orange button flash). */}
+                      <button
+                        type="button"
+                        className={
+                          introVideoPlaying
+                            ? "pointer-events-none absolute inset-0 z-10 border-0 bg-black p-0 opacity-0"
+                            : "absolute inset-0 z-10 cursor-pointer border-0 bg-black p-0"
+                        }
+                        onClick={() => {
+                          // Do not lift the cover here — wait for player.js "play".
+                          const player = introPlayerRef.current;
+                          player?.mute();
+                          player?.play();
+                        }}
+                        aria-label="Watch intro video"
+                        aria-hidden={introVideoPlaying}
+                        tabIndex={introVideoPlaying ? -1 : 0}
+                        data-testid="button-intro-video-cover"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={INTRO_BUNNY_THUMBNAIL}
+                          alt=""
+                          aria-hidden
+                          className="h-full w-full object-cover"
+                          decoding="async"
+                          fetchPriority="high"
+                          // Keep solid black cover if CDN thumbnail fails — never reveal Bunny large-play.
+                          onError={(e) => {
+                            e.currentTarget.style.visibility = "hidden";
+                          }}
+                        />
+                      </button>
                       {introVideoPlaying ? (
-                        // Transparent catcher: click pauses via player.js — Bunny large-play never shows.
+                        // Transparent catcher only while actually playing — Bunny large-play is gone then.
                         <button
                           type="button"
-                          className="absolute inset-0 z-10 cursor-pointer border-0 bg-transparent p-0"
+                          className="absolute inset-0 z-20 cursor-pointer border-0 bg-transparent p-0"
                           onClick={() => {
                             introPlayerRef.current?.pause();
                             setIntroVideoPlaying(false);
@@ -559,31 +589,7 @@ export default function LandingPage() {
                           aria-label="Pause intro video"
                           data-testid="button-intro-video-pause"
                         />
-                      ) : (
-                        // Opaque thumbnail only — no play icon. Click resumes muted playback.
-                        <button
-                          type="button"
-                          className="absolute inset-0 z-10 cursor-pointer border-0 bg-black p-0"
-                          onClick={() => {
-                            const player = introPlayerRef.current;
-                            player?.mute();
-                            player?.play();
-                            setIntroVideoPlaying(true);
-                          }}
-                          aria-label="Watch intro video"
-                          data-testid="button-intro-video-cover"
-                        >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={INTRO_BUNNY_THUMBNAIL}
-                            alt=""
-                            aria-hidden
-                            className="h-full w-full object-cover"
-                            decoding="async"
-                            fetchPriority="high"
-                          />
-                        </button>
-                      )}
+                      ) : null}
                     </div>
                   </div>
                 </div>

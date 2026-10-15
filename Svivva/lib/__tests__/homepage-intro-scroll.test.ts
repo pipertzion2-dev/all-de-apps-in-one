@@ -31,6 +31,10 @@ describe("homepage intro scroll", () => {
     expect(pageSrc).toContain("isIntro");
     expect(pageSrc).not.toContain("button-intro-video-start");
     expect(pageSrc).not.toContain("paused={introVideoStarted}");
+    // Cover stays until a real play event — timer/optimistic reveal showed Bunny large-play.
+    expect(pageSrc).not.toContain("2500");
+    expect(pageSrc).toContain('player.on("play"');
+    expect(pageSrc).toContain("button-intro-video-cover");
   });
 
   it("releases the page from 3D when the intro finishes", () => {
