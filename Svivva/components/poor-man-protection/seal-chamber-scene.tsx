@@ -13,7 +13,7 @@ type Props = {
 };
 
 /**
- * Distinctive ZZAI Poor Man Protection chamber — dual-axis rings + protection coin.
+ * Distinctive ZZAI The Moves Like chamber — dual-axis rings + protection coin.
  * Section-scoped WebGL so it does not compete with page FeatureThreeBackground.
  */
 export function SealChamberScene({

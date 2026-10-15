@@ -1,5 +1,5 @@
 /**
- * Automatically seal a reference-driven Klean UI remix via Poor Man Protection.
+ * Automatically seal a reference-driven Klean UI remix via The Moves Like.
  */
 
 import type { PoorManCertificate } from "@/lib/poor-man-protection/types";
@@ -85,7 +85,7 @@ function buildProtectBody(
       {
         at: new Date().toISOString(),
         event: "auto_seal_requested",
-        detail: "Klean Sneaks automatic Poor Man Protection",
+        detail: "Klean Sneaks automatic The Moves Like seal",
       },
     ],
   };

@@ -11,7 +11,7 @@ import {
 } from "@/lib/product-positioning";
 import { Button } from "@/components/ui/button";
 
-/** Homepage hero — Poor Man Protection copy only (shirt photo is on the intro flip). */
+/** Homepage hero — The Moves Like copy only (shirt photo is on the intro flip). */
 export function HomepageProtectionHero() {
   return (
     <section
@@ -33,7 +33,7 @@ export function HomepageProtectionHero() {
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3 lg:justify-start">
             <Button asChild className="bg-[#5B8DA8] text-white">
-              <Link href="/dashboard/poor-man-protection">Open Poor Man Protection</Link>
+              <Link href="/dashboard/poor-man-protection">Open The Moves Like</Link>
             </Button>
             <Button asChild variant="outline">
               <Link href="/protect/verify">Verify a seal</Link>

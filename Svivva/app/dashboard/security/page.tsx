@@ -86,7 +86,7 @@ export default function SecurityDashboardPage() {
 
         <div className="rounded-xl border border-[#5B8DA8]/25 bg-[#5B8DA8]/5 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <p className="text-sm font-semibold text-foreground">Poor Man Protection</p>
+            <p className="text-sm font-semibold text-foreground">The Moves Like</p>
             <p className="text-xs text-muted-foreground mt-0.5">
               Seal sketches with dual-axis hybridization, a protection coin, and cyber integrity —
               then watch threats here.

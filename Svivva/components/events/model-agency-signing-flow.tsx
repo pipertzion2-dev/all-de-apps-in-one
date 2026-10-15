@@ -586,7 +586,7 @@ export function ModelAgencySigningFlow() {
                 href="/dashboard/poor-man-protection"
                 className="text-[#5B8DA8] underline-offset-2 hover:underline"
               >
-                Poor Man Protection
+                The Moves Like
               </Link>{" "}
               can timestamp portfolio or comp exports if you need a dated record of your look.
             </p>

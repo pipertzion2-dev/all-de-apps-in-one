@@ -51,7 +51,7 @@ export default function ProtectVerifyPage() {
             <Shield className="w-7 h-7 text-[#5B8DA8]" /> Verify protection
           </h1>
           <p className="text-white/60 text-sm">
-            Paste a Poor Man Protection certificate JSON to check integrity of the certificate hash.
+            Paste The Moves Like certificate JSON to check integrity of the certificate hash.
           </p>
         </div>
 
@@ -111,7 +111,7 @@ export default function ProtectVerifyPage() {
 
         <p className="text-center text-sm text-white/50">
           <Link href="/dashboard/poor-man-protection" className="text-[#5B8DA8] underline">
-            Open Poor Man Protection
+            Open The Moves Like
           </Link>
         </p>
       </div>

@@ -68,7 +68,7 @@ export const ARTIFACT_FEATURES: ArtworkFeature[] = [
     id: "security",
     artwork: MEDIA.artworks.security,
     artworkAlt: "ROMEO_3 — Security",
-    title: "Poor Man Protection",
+    title: "The Moves Like",
     subtitle: "Sketch-to-seal group patents",
     description:
       "Deposit sketches, mint a protection coin, and build a court-ready pack for group patents.",

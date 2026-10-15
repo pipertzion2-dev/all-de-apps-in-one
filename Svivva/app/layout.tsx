@@ -76,7 +76,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "OaaS",
       "ZZAI Seeds",
       "Orbit SEO",
-      "Poor Man Protection",
+      "The Moves Like",
       "Klean Sneaks",
       "ZZAI Show",
       "ZZAI Play",

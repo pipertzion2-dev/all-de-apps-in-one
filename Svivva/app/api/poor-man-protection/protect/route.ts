@@ -5,14 +5,14 @@ import { protectRequestSchema, runPoorManProtection } from "@/lib/poor-man-prote
 export const maxDuration = 120;
 
 /**
- * Create a Poor Man Protection certificate:
+ * Create The Moves Like certificate:
  * dual-axis scientific hybridization + crypto coin metadata + cyber seal.
  */
 export async function POST(req: NextRequest) {
   try {
     if (!(await canUseHybridizationEngine(req))) {
       return NextResponse.json(
-        { error: "Sign in or enter your Pro access code to use Poor Man Protection." },
+        { error: "Sign in or enter your Pro access code to use The Moves Like." },
         { status: 401 },
       );
     }

@@ -1300,7 +1300,7 @@ export default function LandingPage() {
                       </p>
                       <p>
                         Klean Sneaks and Hybrid² Lab stay available as demos and beta tools. The
-                        homepage leads with Poor Man Protection because that is the clearest promise
+                        homepage leads with The Moves Like because that is the clearest promise
                         we can keep in plain language.
                       </p>
                     </div>

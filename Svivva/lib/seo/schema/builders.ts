@@ -216,7 +216,7 @@ export const HOMEPAGE_HOWTO_STEPS = [
   },
   {
     name: "Seal with hashes and timestamps",
-    text: "Poor Man Protection records custody and binds a cryptographic seal to each upload.",
+    text: "The Moves Like records custody and binds a cryptographic seal to each upload.",
   },
   {
     name: "Share a public verify link",

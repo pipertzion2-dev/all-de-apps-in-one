@@ -21,7 +21,7 @@ export default function SketchHashStampPage() {
   const [error, setError] = useState<string | null>(null);
 
   return (
-    <MiniAppShell app={APP} nextLabel="Poor Man Protection">
+    <MiniAppShell app={APP} nextLabel="The Moves Like">
       <label className="block rounded-2xl border border-dashed border-border p-6 text-center cursor-pointer hover:border-[#5B8DA8]/50">
         <ShieldCheck className="w-8 h-8 mx-auto text-[#5B8DA8] mb-2" />
         <p className="text-sm font-medium">Drop a sketch or click to hash</p>
@@ -52,7 +52,7 @@ export default function SketchHashStampPage() {
           <p className="text-sm font-medium">{name}</p>
           <p className="font-mono text-xs break-all text-muted-foreground">{hash}</p>
           <p className="text-xs text-muted-foreground">
-            A hash is not a seal. Open Poor Man Protection to hybridize, timestamp, and pack court
+            A hash is not a seal. Open The Moves Like to hybridize, timestamp, and pack court
             evidence.
           </p>
         </div>

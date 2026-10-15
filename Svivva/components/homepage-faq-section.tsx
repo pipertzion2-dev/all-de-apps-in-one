@@ -14,7 +14,7 @@ export function HomepageFaqSection() {
         <div className="space-y-3 text-center">
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#5B8DA8]">FAQ</p>
           <h2 id="homepage-faq-heading" className="text-2xl font-bold sm:text-3xl">
-            Questions about Poor Man Protection
+            Questions about The Moves Like
           </h2>
           <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-base">
             Seals, verify links, court packs, pricing, and which zzai zzai modules are still in

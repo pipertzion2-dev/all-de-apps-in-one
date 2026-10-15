@@ -12,7 +12,7 @@ import type {
 import { groupMerkleCanonical } from "./group-organize";
 
 export const DISCLAIMER =
-  "ZZAI Poor Man Protection creates a timestamped, cryptographically sealed evidentiary package with dual-axis scientific hybridization and mint-ready digital asset metadata. It is NOT a registered patent, trademark, or copyright registration with any government office (including the U.S. Copyright Office). Self-mailing and platform certificates are supporting evidence of anteriority/possession — not a substitute for counsel or formal registration. Courts weigh digital evidence in context (hash integrity, chain of custody, independent timestamps, authorship corroboration).";
+  "ZZAI The Moves Like creates a timestamped, cryptographically sealed evidentiary package with dual-axis scientific hybridization and mint-ready digital asset metadata. It is NOT a registered patent, trademark, or copyright registration with any government office (including the U.S. Copyright Office). Self-mailing and platform certificates are supporting evidence of anteriority/possession — not a substitute for counsel or formal registration. Courts weigh digital evidence in context (hash integrity, chain of custody, independent timestamps, authorship corroboration).";
 
 /** sRGB hex → approximate CIELAB (D65). */
 export function hexToLab(hex: string): { L: number; a: number; b: number } {

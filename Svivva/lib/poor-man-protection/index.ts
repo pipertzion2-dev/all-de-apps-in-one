@@ -62,7 +62,7 @@ export async function runPoorManProtection(input: ProtectRequest): Promise<{
         ],
       },
       hybridizationMode: input.hybridizationMode,
-      targetApplication: `Poor man protection / dual-axis prior-art fingerprint for: ${input.title}`,
+      targetApplication: `The Moves Like / dual-axis prior-art fingerprint for: ${input.title}`,
       scientificDepth: "research",
       surface: "poor-man-protection",
     });
