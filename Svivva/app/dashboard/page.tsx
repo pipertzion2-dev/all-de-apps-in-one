@@ -422,7 +422,7 @@ function ReturningUserDashboard({
     },
     {
       href: "/dashboard/poor-man-protection",
-      title: "The Moves Like",
+      title: "The moves like",
       subtitle: "Seal sketches — or dump a group of images and let ZZAI organize",
       icon: ShieldCheck,
       color: "#5B8DA8",

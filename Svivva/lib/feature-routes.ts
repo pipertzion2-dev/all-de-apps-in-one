@@ -38,7 +38,7 @@ export function featureTitleFromPath(pathname: string): string {
   if (pathname.startsWith("/dashboard/burns")) return "Burns System";
   if (pathname.startsWith("/dashboard/gsc-connect")) return "Google Search Console";
   if (pathname.startsWith("/dashboard/security")) return "Security Center";
-  if (pathname.startsWith("/dashboard/poor-man-protection")) return "The Moves Like";
+  if (pathname.startsWith("/dashboard/poor-man-protection")) return "The moves like";
   if (pathname.startsWith("/dashboard/education-advocacy")) return "Education Advocacy";
   if (pathname.startsWith("/dashboard/zzai-show")) return "ZZAI ZZAI Show";
   if (pathname.startsWith("/education/verify")) return "Verify Education Proof";

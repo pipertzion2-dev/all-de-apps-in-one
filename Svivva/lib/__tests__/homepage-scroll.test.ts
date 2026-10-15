@@ -45,7 +45,7 @@ describe("homepage scroll panels", () => {
       "utf8",
     );
     expect(founderSrc).toContain("He designed the logo at the computer");
-    expect(founderSrc).not.toMatch(/The Moves Like|Klean Sneaks|Hybrid² Lab|Bed Stuy/);
+    expect(founderSrc).not.toMatch(/The moves like|Klean Sneaks|Hybrid² Lab|Bed Stuy/);
     expect(cubeSrc).toContain("HomepagePricingSection");
     expect(cubeSrc).toContain("HomepageFaqSection");
     expect(cubeSrc).toContain("HomepageHowToSection");

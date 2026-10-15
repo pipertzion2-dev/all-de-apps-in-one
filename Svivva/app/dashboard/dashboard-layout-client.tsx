@@ -127,7 +127,7 @@ const digitalMenuGroups: MenuGroup[] = [
         beta: true,
       },
       {
-        title: "The Moves Like",
+        title: "The moves like",
         desc: "Sketch + group patent seal",
         href: "/dashboard/poor-man-protection",
         icon: ShieldCheck,

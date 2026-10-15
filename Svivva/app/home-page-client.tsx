@@ -32,6 +32,7 @@ import Image from "next/image";
 import zzaiLogo from "@/attached_assets/ZZAI_OFFICIAL_LOGO.png";
 import seedsLogo from "@/attached_assets/Svivva_Seeds_6_1771888740460.png";
 import { FOUNDER_SON_COMPUTER_ALT, FOUNDER_SON_COMPUTER_SRC } from "@/lib/brand/founder-media";
+import { PRODUCT_NAME_LINE } from "@/lib/product-positioning";
 import {
   Shield,
   Code2,
@@ -685,7 +686,7 @@ export default function LandingPage() {
                   className="min-w-0 truncate text-[10px] font-bold tracking-[0.18em] text-foreground/90 sm:text-xs sm:tracking-[0.2em]"
                   data-testid="link-home-brand"
                 >
-                  zzai zzai
+                  {PRODUCT_NAME_LINE}
                 </Link>
               </div>
 
@@ -1288,8 +1289,8 @@ export default function LandingPage() {
                     <div className="space-y-4 text-muted-foreground leading-relaxed">
                       <p>
                         The photo is my son at the computer — the same session where he helped shape
-                        the zzai zzai logo. The product story on this site is not hype; it is Poor
-                        Man Protection: seal a file, keep custody notes, and export a pack a lawyer
+                        the zzai zzai logo. The product story on this site is not hype; it is The
+                        moves like: seal a file, keep custody notes, and export a pack a lawyer
                         can read.
                       </p>
                       <p>
@@ -1300,7 +1301,7 @@ export default function LandingPage() {
                       </p>
                       <p>
                         Klean Sneaks and Hybrid² Lab stay available as demos and beta tools. The
-                        homepage leads with The Moves Like because that is the clearest promise
+                        homepage leads with The moves like because that is the clearest promise
                         we can keep in plain language.
                       </p>
                     </div>

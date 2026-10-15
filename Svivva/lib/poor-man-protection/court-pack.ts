@@ -22,7 +22,7 @@ export async function buildCourtEvidencePdf(cert: PoorManCertificate): Promise<B
       size: "LETTER",
       margins: { top: 54, bottom: 54, left: 50, right: 50 },
       info: {
-        Title: `ZZAI The Moves Like — ${cert.title}`,
+        Title: `ZZAI The moves like — ${cert.title}`,
         Author: cert.creatorOath?.fullLegalName || "ZZAI",
         Subject: "Evidentiary package / prior-art disclosure",
       },
@@ -32,7 +32,7 @@ export async function buildCourtEvidencePdf(cert: PoorManCertificate): Promise<B
     doc.on("end", () => resolve(Buffer.concat(chunks)));
     doc.on("error", reject);
 
-    doc.fontSize(18).fillColor("#5B8DA8").text("ZZAI The Moves Like", { align: "left" });
+    doc.fontSize(18).fillColor("#5B8DA8").text("ZZAI The moves like", { align: "left" });
     doc.fontSize(11).fillColor("#6B2C4E").text("Court-oriented evidentiary package");
     doc.moveDown(0.3);
     doc.fontSize(9).fillColor("#4B5563").text(DISCLAIMER, { align: "justify" });

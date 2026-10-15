@@ -6,7 +6,7 @@ const bodySchema = z.object({
   certificate: z.record(z.unknown()),
 });
 
-/** Verify a downloaded The Moves Like certificate's integrity hash. */
+/** Verify a downloaded The moves like certificate's integrity hash. */
 export async function POST(req: NextRequest) {
   try {
     const parsed = bodySchema.safeParse(await req.json());

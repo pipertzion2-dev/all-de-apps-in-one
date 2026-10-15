@@ -98,7 +98,7 @@ const digitalCommands: CommandItem[] = [
     section: "Build",
   },
   {
-    title: "The Moves Like",
+    title: "The moves like",
     href: "/dashboard/poor-man-protection",
     icon: ShieldCheck,
     keywords: ["patent", "moves like", "the moves like", "protection", "sketch", "coin", "blockchain", "ip", "group"],

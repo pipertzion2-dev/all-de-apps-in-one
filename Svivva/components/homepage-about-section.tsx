@@ -15,7 +15,7 @@ import { FeatureBetaBadge } from "@/components/feature-beta-badge";
 const HIGHLIGHTS = [
   {
     icon: Shield,
-    title: "The Moves Like",
+    title: "The moves like",
     description:
       "Seal uploads with hashes and timestamps. Download a structured court pack — supporting evidence, not a government filing.",
   },
@@ -78,7 +78,7 @@ export function HomepageAboutSection() {
 
         <div className="flex flex-wrap items-center justify-center gap-3">
           <Link href="/dashboard/poor-man-protection">
-            <Button className="bg-[#5B8DA8] text-white">The Moves Like</Button>
+            <Button className="bg-[#5B8DA8] text-white">The moves like</Button>
           </Link>
           <Link href="/protect/verify">
             <Button variant="outline">Verify evidence</Button>

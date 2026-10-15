@@ -242,7 +242,7 @@ export const PLATFORM_FEATURES: PlatformFeature[] = [
   }),
   feature({
     id: "poor-man-protection",
-    title: "The Moves Like",
+    title: "The moves like",
     shortTitle: "ProtectaaS",
     href: "/dashboard/poor-man-protection",
     description: "Channel 13 — limiter on the Protect bus: sketch-to-seal IP and court packs.",

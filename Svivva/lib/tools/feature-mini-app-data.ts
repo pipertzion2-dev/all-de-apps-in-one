@@ -91,10 +91,10 @@ export const FEATURE_MINI_APPS: FeatureMiniApp[] = [
     path: "/tools/sketch-hash-stamp",
     name: "Sketch Hash Stamp",
     description:
-      "Hash a sketch in the browser. The Moves Like seals, timestamps, and builds a court pack.",
+      "Hash a sketch in the browser. The moves like seals, timestamps, and builds a court pack.",
     hub: "cyber-security-mini-apps",
     parentHref: "/dashboard/poor-man-protection",
-    parentLabel: "The Moves Like",
+    parentLabel: "The moves like",
     sliceNote: "SHA-256 only — not dual-axis hybridization, coin mint, or court PDF.",
     keyword: "sketch file hash",
   },

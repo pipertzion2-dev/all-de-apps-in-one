@@ -74,14 +74,14 @@ export const FEATURES: FeatureDef[] = [
   withBeta({
     id: "security",
     index: 3,
-    name: "The Moves Like",
+    name: "The moves like",
     shortLabel: "Protect",
     artworkTitle: "FOREVER YOURS",
     artworkSrc: MEDIA.artworks.security,
     tagline: "Sketch-to-seal group patents",
     description:
-      "The Moves Like — deposit sketches, mint a protection coin, and build a court-ready pack.",
-    cta: { label: "Open The Moves Like", href: FEATURE_PUBLIC_PATHS.security },
+      "The moves like — deposit sketches, mint a protection coin, and build a court-ready pack.",
+    cta: { label: "Open The moves like", href: FEATURE_PUBLIC_PATHS.security },
     accentColor: "#a888bc",
     motif: "seal",
     signatureMotion: "ornamental border traces and locks",
