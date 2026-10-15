@@ -571,6 +571,10 @@ export default function LandingPage() {
                           className="h-full w-full object-cover"
                           decoding="async"
                           fetchPriority="high"
+                          // Keep solid black cover if CDN thumbnail fails — never reveal Bunny large-play.
+                          onError={(e) => {
+                            e.currentTarget.style.visibility = "hidden";
+                          }}
                         />
                       </button>
                       {introVideoPlaying ? (
