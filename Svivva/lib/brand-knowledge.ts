@@ -109,7 +109,7 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       PRODUCT_ONE_LINER,
       "Core (GA): Hybrid² Lab — fuse any two ZZAI channels (H¹), then hybridize listed blends (H²). API Builder, Projects, and Pulse keep fused endpoints Klean with schema, evals, hazard preview, and rollback.",
       "Play demo: Klean Sneaks — BALOON8 car×sneaker (one chassis, unlockable colorways), Sneak Vision hazard preview, and mission saves that mirror keeping a hybrid ship Klean.",
-      "Beta modules (same domain): OaaS patch bay, Seeds, Orbit, hardware builder, Poor Man Protection, free tool hubs, ZZAI Show, education advocacy, and the full ZZAI Play studio.",
+      "Beta modules (same domain): OaaS patch bay, Seeds, Orbit, hardware builder, The moves like, free tool hubs, ZZAI Show, education advocacy, and the full ZZAI Play studio.",
     ].join(" "),
     audience:
       "Founders composing AI product modules who need Hybrid² fusion plus Klean guardrails — not another thin API wrapper or hand-rolled validation stack.",
@@ -144,7 +144,7 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       "ZZAI Seeds",
       "ZZAI Play",
       "Orbit marketing",
-      "Poor Man Protection",
+      "The moves like",
       "free AI tools",
       "cyber security mini apps",
       "hardware builder AI",
@@ -219,7 +219,7 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       },
       {
         id: "protect",
-        name: "Poor Man Protection",
+        name: "The moves like",
         path: "/dashboard/poor-man-protection",
         oneLiner: "Beta — timestamped evidentiary seals and court-ready packs.",
       },
@@ -335,7 +335,7 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
           "ZZAI’s growth and indexing autopilot: SEO/AEO pages, Google Search Console, launch packs, and traffic automation on zzaizzai.com.",
       },
       {
-        term: "Poor Man Protection",
+        term: "The moves like",
         definition:
           "ZZAI’s IP evidence workflow: cryptographic seals, dual-axis hybridization metadata, and court packs. Supporting evidence of anteriority — not a registered patent, trademark, or copyright.",
       },
@@ -414,11 +414,11 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       },
       {
         q: "Is ZZAI only an AI API builder?",
-        a: "No — the public story leads with Poor Man Protection: timestamped seals and court-ready exports for sketches, designs, and code. Klean Sneaks is a free demo; Hybrid² Lab, API Builder, Projects, Pulse, Seeds, Orbit, and the rest of the desk are beta on zzaizzai.com.",
+        a: "No — the public story leads with The moves like: timestamped seals and court-ready exports for sketches, designs, and code. Klean Sneaks is a free demo; Hybrid² Lab, API Builder, Projects, Pulse, Seeds, Orbit, and the rest of the desk are beta on zzaizzai.com.",
       },
       {
         q: `What does “${PRODUCT_TAGLINE}” mean?`,
-        a: "Poor Man Protection gives you a defensible record of what you created and when — hashes, custody, and verify links — as supporting evidence of anteriority. It is not a USPTO patent or Copyright Office registration. Use /protect/verify to check a seal without signing in.",
+        a: "The moves like gives you a defensible record of what you created and when — hashes, custody, and verify links — as supporting evidence of anteriority. It is not a USPTO patent or Copyright Office registration. Use /protect/verify to check a seal without signing in.",
       },
       {
         q: "How long does it take to ship with ZZAI?",
@@ -437,7 +437,7 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
         a: "Yes. Free tier with no credit card required. Pro is $49/month; Enterprise is $299/month for teams at scale.",
       },
       {
-        q: "What is Poor Man Protection?",
+        q: "What is The moves like?",
         a: "A ZZAI workflow that creates timestamped, cryptographically sealed evidentiary packages and court packs. It is not a registered patent, trademark, or copyright with any government office.",
       },
       {

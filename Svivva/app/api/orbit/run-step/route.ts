@@ -3422,7 +3422,7 @@ Return JSON:
                   },
                   {
                     role: "user",
-                    content: `Create directory listing content for zzai zzai (ZZAI / zzaizzai.com) — a product workspace (tagline: From seed to symphony) that turns plain-language intent into shipped product: prompt-to-API with schema/evals/rollback, Seeds, Hardware, Play, Orbit growth, Poor Man Protection, plus free AI & cyber tools.
+                    content: `Create directory listing content for zzai zzai (ZZAI / zzaizzai.com) — a product workspace (tagline: From seed to symphony) that turns plain-language intent into shipped product: prompt-to-API with schema/evals/rollback, Seeds, Hardware, Play, Orbit growth, The moves like, plus free AI & cyber tools.
 
 Return JSON:
 {
@@ -3449,7 +3449,7 @@ Return JSON:
               shortDesc:
                 "zzai zzai turns plain-language intent into shipped product — APIs, hardware, growth, and IP protection.",
               description:
-                "zzai zzai (ZZAI / zzaizzai.com) is a product workspace: prompt-to-API with schema & evals, Seeds, Hardware, Play, Orbit growth, Poor Man Protection, plus free AI & cyber tools.",
+                "zzai zzai (ZZAI / zzaizzai.com) is a product workspace: prompt-to-API with schema & evals, Seeds, Hardware, Play, Orbit growth, The moves like, plus free AI & cyber tools.",
               longDesc:
                 "zzai zzai (also ZZAI, zzaizzai) is one workspace — From seed to symphony. Six cube faces (Seeds, Signal/API, Crest/Hardware, Play, Orbit, Protect) plus OaaS mixing-console routing. Free AI Tools Hub and Cyber-Security Mini Apps funnel to the paid platform. Free tier available; Pro $49/month; Enterprise $299/month.",
               features: [
@@ -3457,7 +3457,7 @@ Return JSON:
                 "ZZAI Seeds (PDF/YouTube → apps)",
                 "Hardware builder (Crest)",
                 "Orbit growth + AEO/SEO",
-                "Poor Man Protection seals",
+                "The moves like seals",
                 "Free AI & cyber mini-apps",
               ],
               categories: ["AI Tools", "Developer Tools", "API Builder", "No-Code", "SaaS"],
@@ -3483,7 +3483,7 @@ Return JSON:
             shortDesc:
               "zzai zzai turns plain-language intent into shipped product — APIs, hardware, growth, and IP protection.",
             description:
-              "zzai zzai (ZZAI / zzaizzai.com) is a product workspace: prompt-to-API with schema & evals, Seeds, Hardware, Play, Orbit growth, Poor Man Protection, plus free AI & cyber tools.",
+              "zzai zzai (ZZAI / zzaizzai.com) is a product workspace: prompt-to-API with schema & evals, Seeds, Hardware, Play, Orbit growth, The moves like, plus free AI & cyber tools.",
             longDesc:
               "zzai zzai (also ZZAI, zzaizzai) is one workspace — From seed to symphony. Six cube faces (Seeds, Signal/API, Crest/Hardware, Play, Orbit, Protect) plus OaaS mixing-console routing. Free AI Tools Hub and Cyber-Security Mini Apps funnel to the paid platform. Free tier available; Pro $49/month; Enterprise $299/month.",
             features: [
@@ -3491,7 +3491,7 @@ Return JSON:
               "ZZAI Seeds (PDF/YouTube → apps)",
               "Hardware builder (Crest)",
               "Orbit growth + AEO/SEO",
-              "Poor Man Protection seals",
+              "The moves like seals",
               "Free AI & cyber mini-apps",
             ],
             categories: ["AI Tools", "Developer Tools", "API Builder", "No-Code", "SaaS"],

@@ -1,5 +1,5 @@
 /**
- * Transactional email for Poor Man Protection certificates.
+ * Transactional email for The moves like certificates.
  * Prefers RESEND_API_KEY + RESEND_FROM_EMAIL env (ziontpiper production).
  */
 export async function sendProtectionEmail(opts: {
@@ -63,7 +63,7 @@ export function buildCertificateEmailHtml(opts: {
   const greet = opts.recipientName ? `Hi ${opts.recipientName},` : "Hello,";
   return `<!doctype html><html><body style="font-family:Georgia,serif;background:#0b1220;color:#e8eef6;padding:24px">
   <div style="max-width:560px;margin:0 auto;background:#121a2b;border:1px solid #5B8DA855;border-radius:16px;padding:28px">
-    <p style="color:#5B8DA8;letter-spacing:.2em;font-size:11px;text-transform:uppercase">zzai zzai · Poor Man Protection</p>
+    <p style="color:#5B8DA8;letter-spacing:.2em;font-size:11px;text-transform:uppercase">zzai zzai · The moves like</p>
     <h1 style="font-size:22px;margin:8px 0 16px">Your evidentiary package is sealed</h1>
     <p>${greet}</p>
     <p>This email is an official delivery channel for your ZZAI protection package regarding <strong>${escapeHtml(opts.title)}</strong>.</p>

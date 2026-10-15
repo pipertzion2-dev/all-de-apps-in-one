@@ -1,5 +1,5 @@
 /**
- * Browser-only helpers shared by Poor Man Protection and Klean reference remix.
+ * Browser-only helpers shared by The moves like and Klean reference remix.
  * Keep heavy canvas work off the server.
  */
 

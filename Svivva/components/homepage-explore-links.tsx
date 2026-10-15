@@ -57,7 +57,7 @@ export function HomepageExploreLinks() {
             Demo game &amp; beta builder desk
           </h2>
           <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-base">
-            Poor Man Protection is the core product. Klean Sneaks is the free demo; Hybrid², Seeds,
+            The moves like is the core product. Klean Sneaks is the free demo; Hybrid², Seeds,
             Orbit, and the rest of the desk stay in beta on the same domain.
           </p>
         </div>

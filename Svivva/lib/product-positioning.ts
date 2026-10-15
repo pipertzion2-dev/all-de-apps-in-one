@@ -9,10 +9,10 @@ export const PRODUCT_HERO_HEADLINE =
   "Every creative dispute starts with one question: who had it first.";
 
 /** Product name — eyebrows, metadata suffix, and compact labels. */
-export const PRODUCT_NAME_LINE = "Poor Man Protection";
+export const PRODUCT_NAME_LINE = "The moves like";
 
 /** Brand slogan — metadata and secondary hero line. */
-export const PRODUCT_TAGLINE = "Poor Man Protection — prove what you created, and when.";
+export const PRODUCT_TAGLINE = "The moves like — prove what you created, and when.";
 
 /** Court-ready protection — plain language for homepage and meta. */
 export const PRODUCT_PROTECTION_PITCH =
@@ -29,11 +29,11 @@ export const PRODUCT_SAP_METAPHOR =
 
 /** One-sentence pitch (YC / hero / meta). */
 export const PRODUCT_ONE_LINER =
-  "zzai zzai leads with Poor Man Protection — timestamped seals, public verify links, and court-ready packs for sketches, designs, and code. Klean Sneaks is the free demo; other desk tools are beta.";
+  "zzai zzai leads with The moves like — timestamped seals, public verify links, and court-ready packs for sketches, designs, and code. Klean Sneaks is the free demo; other desk tools are beta.";
 
 /** Plain-language main goal (homepage game + product faces). */
 export const PRODUCT_MAIN_GOAL =
-  "Seal work in Poor Man Protection, verify hashes in the browser, and download a court pack when you need to show priority — before you spend on formal registration.";
+  "Seal work in The moves like, verify hashes in the browser, and download a court pack when you need to show priority — before you spend on formal registration.";
 
 /** Shorter hero subline. */
 export const PRODUCT_HERO_SUBLINE =
@@ -43,7 +43,7 @@ export const PRODUCT_HERO_SUBLINE =
 export const PRODUCT_HOOK_SHORT = "Seal work. Verify anywhere. Export a court pack.";
 
 /** HowTo section — keep in sync with `HOMEPAGE_HOWTO_STEPS` in seo/schema/builders.ts */
-export const HOMEPAGE_HOWTO_TITLE = "How Poor Man Protection works";
+export const HOMEPAGE_HOWTO_TITLE = "How The moves like works";
 export const HOMEPAGE_HOWTO_SUBLINE =
   "Four steps from upload to a verify link — no lawyer required to start a defensible record.";
 
@@ -54,13 +54,13 @@ export const PRODUCT_GAME_HYBRID_METAPHOR =
 /** First homepage panel — Klean Sneaks (demo of the same protection story). */
 export const HOMEPAGE_GAME_FACE_TITLE = "Play the demo";
 export const HOMEPAGE_GAME_FACE_SUBLINE =
-  "Klean Sneaks — free on the walk. Same “protect what you made” idea as Poor Man Protection.";
+  "Klean Sneaks — free on the walk. Same “protect what you made” idea as The moves like.";
 
 /** Shown under the headline on the platform homepage face (mobile compact). */
 export const HOMEPAGE_PLATFORM_FACE_SUBLINE =
   "Seal uploads, verify hashes in the browser, export a court pack when you need proof.";
 
-export const HOMEPAGE_SCROLL_TO_PLATFORM = "Swipe ↓ Poor Man Protection";
+export const HOMEPAGE_SCROLL_TO_PLATFORM = "Swipe ↓ The moves like";
 export const HOMEPAGE_SCROLL_TO_GAME = "Swipe ↑ Klean Sneaks demo";
 
 /** Platform desk modules — Klean Sneaks ships; Hybrid² / API / Pulse stay beta. */

@@ -74,14 +74,14 @@ export const FEATURES: FeatureDef[] = [
   withBeta({
     id: "security",
     index: 3,
-    name: "Poor Man Protection",
+    name: "The moves like",
     shortLabel: "Protect",
     artworkTitle: "FOREVER YOURS",
     artworkSrc: MEDIA.artworks.security,
     tagline: "Sketch-to-seal group patents",
     description:
-      "Poor Man Protection — deposit sketches, mint a protection coin, and build a court-ready pack.",
-    cta: { label: "Open Poor Man Protection", href: FEATURE_PUBLIC_PATHS.security },
+      "The moves like — deposit sketches, mint a protection coin, and build a court-ready pack.",
+    cta: { label: "Open The moves like", href: FEATURE_PUBLIC_PATHS.security },
     accentColor: "#a888bc",
     motif: "seal",
     signatureMotion: "ornamental border traces and locks",
