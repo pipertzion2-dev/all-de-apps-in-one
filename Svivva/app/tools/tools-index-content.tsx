@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Search, Wrench } from "lucide-react";
 import { BrandMark } from "@/components/brand-mark";
 import { Badge } from "@/components/ui/badge";
+import { FEATURE_MINI_APP_SLUGS } from "@/lib/tools/feature-mini-app-data";
 
 interface SeoPage {
   id: string;
@@ -33,12 +34,7 @@ const NATIVE_TOOL_SLUGS = new Set([
   "prompt-forge",
   "json-schema-validator",
   "ai-api-cost-calculator",
-  "youtube-caption-preview",
-  "event-divvy-preview",
-  "channel-blend-preview",
-  "oaas-patch-preview",
-  "zzai-face-chooser",
-  "sketch-hash-stamp",
+  ...FEATURE_MINI_APP_SLUGS,
 ]);
 
 function toolPageHref(tool: { slug: string; published: boolean; toolUrl: string | null }): string {
