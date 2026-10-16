@@ -4,6 +4,7 @@ import { eq, desc } from "drizzle-orm";
 import { getBrandKnowledge } from "@/lib/brand-knowledge";
 import { getSiteUrl } from "@/lib/site-url";
 import { getHubFeaturePagesForHub } from "@/lib/tools/catalogs/hub-feature-pages";
+import { FEATURE_MINI_APPS } from "@/lib/tools/feature-mini-app-data";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 3600;
@@ -93,20 +94,13 @@ export async function GET() {
   lines.push("");
   lines.push("## Featured free slices (one job each, no signup)");
   lines.push(
-    `- [YouTube Caption Preview](${base}/tools/youtube-caption-preview): Public captions from a watch URL. Seeds turns captions into apps.`,
+    "Indexable mini-tools for Google Search Console and ChatGPT / AEO — one URL per main ZZAI channel job.",
   );
-  lines.push(
-    `- [Channel Blend Preview](${base}/tools/channel-blend-preview): First-order hybrid sketch of two ZZAI channels. Hybrid² Lab lists and fuses blends.`,
-  );
-  lines.push(
-    `- [OaaS Patch Preview](${base}/tools/oaas-patch-preview): Keyword mixing-board patch order. Orchestration as a Service is the full desk.`,
-  );
-  lines.push(
-    `- [ZZAI Face Chooser](${base}/tools/zzai-face-chooser): Pick a job, open one cube face. The homepage cube is the six-face navigator.`,
-  );
-  lines.push(
-    `- [Sketch Hash Stamp](${base}/tools/sketch-hash-stamp): SHA-256 in the browser. Poor Man Protection seals and court-packs.`,
-  );
+  for (const app of FEATURE_MINI_APPS) {
+    lines.push(
+      `- [${app.name}](${base}${app.path}): ${app.description} Keyword: ${app.keyword}.`,
+    );
+  }
   lines.push("");
 
   const cyberFeatures = getHubFeaturePagesForHub("cyber-security-mini-apps").slice(0, 24);

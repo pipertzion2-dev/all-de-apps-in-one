@@ -9,12 +9,20 @@ import {
   BLEND_PREVIEW_CHANNELS,
   FEATURE_MINI_APPS,
   FEATURE_MINI_APP_SLUGS,
+  MAIN_PLATFORM_FEATURE_IDS,
   getFeatureMiniApp,
   type FeatureMiniApp,
+  type MainPlatformFeatureId,
 } from "@/lib/tools/feature-mini-app-data";
 
-export type { FeatureMiniApp };
-export { BLEND_PREVIEW_CHANNELS, FEATURE_MINI_APPS, FEATURE_MINI_APP_SLUGS, getFeatureMiniApp };
+export type { FeatureMiniApp, MainPlatformFeatureId };
+export {
+  BLEND_PREVIEW_CHANNELS,
+  FEATURE_MINI_APPS,
+  FEATURE_MINI_APP_SLUGS,
+  MAIN_PLATFORM_FEATURE_IDS,
+  getFeatureMiniApp,
+};
 
 export function featureMiniAppLayoutMeta(slug: string): {
   title: string;
