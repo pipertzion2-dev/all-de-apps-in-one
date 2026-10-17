@@ -3,8 +3,7 @@
 import dynamic from "next/dynamic";
 
 const MovesLikeApp = dynamic(
-  () =>
-    import("@/components/the-moves-like/MovesLikeApp").then((m) => m.MovesLikeApp),
+  () => import("@/components/the-moves-like/MovesLikeApp").then((m) => m.MovesLikeApp),
   {
     ssr: false,
     loading: () => (
