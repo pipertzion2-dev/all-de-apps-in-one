@@ -4,8 +4,8 @@ import { cn } from "@/lib/utils";
 import { Button, type ButtonProps } from "@/components/ui/button";
 
 /**
- * Clear colored glass — translucent so stage/camera show through,
- * tinted with ZZAI teal / magenta like the rest of the site.
+ * Clear colored glass for light ZZAI UI —
+ * mostly transparent white frost with soft teal / magenta tint.
  */
 export function GlassPanel({
   children,
@@ -20,17 +20,17 @@ export function GlassPanel({
 }) {
   const tintClass =
     tint === "teal"
-      ? "border-[hsl(197_55%_60%/0.45)] bg-[hsl(197_45%_55%/0.18)] shadow-[0_8px_40px_rgba(91,141,168,0.22)]"
+      ? "border-primary/25 bg-[hsl(197_55%_94%/0.32)] shadow-[0_10px_36px_rgba(91,141,168,0.08)]"
       : tint === "magenta"
-        ? "border-[hsl(315_70%_65%/0.4)] bg-[hsl(315_55%_50%/0.18)] shadow-[0_8px_40px_rgba(196,74,154,0.22)]"
+        ? "border-[hsl(315_55%_65%/0.35)] bg-[hsl(315_90%_97%/0.35)] shadow-[0_10px_36px_rgba(196,74,154,0.08)]"
         : tint === "ink"
-          ? "border-white/20 bg-[hsl(180_20%_10%/0.28)] shadow-[0_12px_48px_rgba(0,0,0,0.28)]"
-          : "border-white/20 bg-white/10 shadow-[0_8px_40px_rgba(0,0,0,0.2)]";
+          ? "border-border/40 bg-white/40 shadow-[0_12px_40px_rgba(15,26,28,0.06)]"
+          : "border-border/30 bg-white/35 shadow-[0_10px_36px_rgba(15,26,28,0.05)]";
 
   return (
     <div
       className={cn(
-        "rounded-2xl border backdrop-blur-2xl [-webkit-backdrop-filter:blur(24px)]",
+        "rounded-2xl border backdrop-blur-xl [-webkit-backdrop-filter:blur(20px)]",
         tintClass,
         padding && "p-4 sm:p-5",
         className,
@@ -59,10 +59,10 @@ export function GlassChip({
       type={type}
       onClick={onClick}
       className={cn(
-        "min-h-10 shrink-0 rounded-full border px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] backdrop-blur-xl [-webkit-backdrop-filter:blur(16px)] transition",
+        "min-h-10 shrink-0 rounded-full border px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] backdrop-blur-md [-webkit-backdrop-filter:blur(12px)] transition",
         active
-          ? "border-primary/55 bg-primary/35 text-white"
-          : "border-white/20 bg-white/12 text-white/90 hover:border-primary/45 hover:bg-primary/20",
+          ? "border-primary/45 bg-primary/15 text-foreground"
+          : "border-border/50 bg-white/40 text-muted-foreground hover:border-primary/35 hover:bg-primary/8 hover:text-foreground",
         className,
       )}
     >
@@ -77,11 +77,11 @@ export function GlassButton({ className, variant = "default", ...props }: Button
       <Button
         variant={variant}
         className={cn(
-          "min-h-11 backdrop-blur-xl [-webkit-backdrop-filter:blur(16px)]",
+          "min-h-11 backdrop-blur-md [-webkit-backdrop-filter:blur(12px)]",
           variant === "outline" &&
-            "border-white/30 bg-white/12 text-white hover:bg-white/20 hover:text-white",
-          variant === "secondary" && "bg-secondary/70 backdrop-blur-xl",
-          variant === "ghost" && "text-white hover:bg-white/12",
+            "border-border/70 bg-white/45 text-foreground hover:bg-white/70 hover:text-foreground",
+          variant === "secondary" && "bg-secondary/90",
+          variant === "ghost" && "text-foreground hover:bg-primary/10",
           className,
         )}
         {...props}
@@ -92,7 +92,7 @@ export function GlassButton({ className, variant = "default", ...props }: Button
     <Button
       variant={variant}
       className={cn(
-        "min-h-11 border-primary/50 bg-primary/80 text-primary-foreground shadow-[0_0_28px_rgba(91,141,168,0.35)] backdrop-blur-xl [-webkit-backdrop-filter:blur(16px)]",
+        "min-h-11 border-primary-border bg-primary text-primary-foreground shadow-[0_8px_24px_rgba(91,141,168,0.25)]",
         className,
       )}
       {...props}
@@ -104,7 +104,7 @@ export function GlassMagentaButton({ className, ...props }: ButtonProps) {
   return (
     <Button
       className={cn(
-        "min-h-11 border border-[hsl(315_70%_60%/0.5)] bg-[hsl(315_65%_45%/0.72)] text-white shadow-[0_0_32px_rgba(196,74,154,0.4)] backdrop-blur-xl [-webkit-backdrop-filter:blur(16px)] hover:brightness-110",
+        "min-h-11 border border-[hsl(315_55%_55%/0.35)] bg-[hsl(315_55%_42%)] text-white shadow-[0_8px_28px_rgba(196,74,154,0.28)] hover:brightness-105",
         className,
       )}
       {...props}
@@ -112,6 +112,7 @@ export function GlassMagentaButton({ className, ...props }: ButtonProps) {
   );
 }
 
+/** Frosted white dock over camera / stage — stays readable without going black. */
 export function GlassDock({
   children,
   className,
@@ -122,8 +123,8 @@ export function GlassDock({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-white/20 bg-[hsl(197_30%_12%/0.28)] p-3 shadow-[0_16px_56px_rgba(0,0,0,0.3)] backdrop-blur-2xl [-webkit-backdrop-filter:blur(28px)] sm:p-4",
-        "ring-1 ring-inset ring-[hsl(197_45%_55%/0.2)]",
+        "rounded-2xl border border-white/80 bg-white/40 p-3 shadow-[0_16px_40px_rgba(15,26,28,0.1)] backdrop-blur-2xl [-webkit-backdrop-filter:blur(24px)] sm:p-4",
+        "ring-1 ring-inset ring-primary/12",
         className,
       )}
     >

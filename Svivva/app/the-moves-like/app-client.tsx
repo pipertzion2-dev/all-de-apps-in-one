@@ -7,7 +7,7 @@ const MovesLikeApp = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex min-h-[100dvh] items-center justify-center bg-[#071014] text-sm text-[#90C4D8]">
+      <div className="flex min-h-[100dvh] items-center justify-center bg-[#F7FBFC] text-sm text-primary">
         Loading THE MOVES LIKE…
       </div>
     ),

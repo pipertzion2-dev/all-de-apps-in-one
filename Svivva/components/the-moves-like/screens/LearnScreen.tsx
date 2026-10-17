@@ -187,12 +187,12 @@ export function LearnScreen() {
 
             <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-3 pt-[max(0.75rem,env(safe-area-inset-top))] sm:p-4">
               <GlassPanel tint="magenta" className="px-3 py-2" padding={false}>
-                <p className="text-[10px] uppercase tracking-[0.18em] text-[#E8A0D0]">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-[#9a3a78]">
                   Ghost Mode · Front camera
                 </p>
-                <h2 className="text-lg font-bold text-white">{move.name}</h2>
+                <h2 className="text-lg font-bold text-foreground">{move.name}</h2>
               </GlassPanel>
-              <span className="tml-glass-teal px-3 py-1.5 text-[10px] uppercase tracking-[0.12em] text-[#d8eef6]">
+              <span className="tml-glass-teal px-3 py-1.5 text-[10px] uppercase tracking-[0.12em] text-primary">
                 {camera.starting
                   ? "Opening…"
                   : camera.active
@@ -208,7 +208,7 @@ export function LearnScreen() {
                 className="tml-glass absolute right-3 top-24 w-[32vw] max-w-[140px] overflow-hidden p-0 sm:right-6 sm:top-28 sm:max-w-[180px]"
                 style={{ opacity }}
               >
-                <p className="bg-[hsl(315_60%_45%/0.35)] px-2 py-0.5 text-[9px] uppercase tracking-[0.14em] text-[#E8A0D0]">
+                <p className="bg-[hsl(315_70%_92%/0.9)] px-2 py-0.5 text-[9px] uppercase tracking-[0.14em] text-[#9a3a78]">
                   Reference
                 </p>
                 <video
@@ -225,7 +225,7 @@ export function LearnScreen() {
 
             <div className="absolute inset-x-0 bottom-0 p-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-5">
               <GlassDock className="space-y-3">
-                <p className="text-center text-sm text-white/95">{move.tutorialSteps[step]}</p>
+                <p className="text-center text-sm text-foreground">{move.tutorialSteps[step]}</p>
 
                 <div className="flex items-center justify-center gap-2 overflow-x-auto pb-1">
                   {MOVES_LIBRARY.slice(0, 8).map((m) => (
@@ -278,10 +278,10 @@ export function LearnScreen() {
 
       {/* Controls sheet */}
       {sheetOpen ? (
-        <div className="fixed inset-0 z-50 flex items-end bg-black/55 backdrop-blur-sm sm:items-center sm:justify-center">
+        <div className="fixed inset-0 z-50 flex items-end bg-black/25 backdrop-blur-sm sm:items-center sm:justify-center">
           <GlassPanel
             tint="ink"
-            className="max-h-[80dvh] w-full overflow-y-auto rounded-t-3xl border-white/15 bg-[hsl(180_15%_7%/0.82)] p-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:max-w-md sm:rounded-3xl"
+            className="max-h-[80dvh] w-full overflow-y-auto rounded-t-3xl border-border/50 bg-white/85 p-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:max-w-md sm:rounded-3xl"
           >
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-primary">
@@ -296,7 +296,7 @@ export function LearnScreen() {
                 Done
               </GlassButton>
             </div>
-            <label className="block text-xs text-[#9BB0B8]">
+            <label className="block text-xs text-muted-foreground">
               Ghost opacity ({Math.round(opacity * 100)}%)
               <input
                 type="range"
@@ -308,7 +308,7 @@ export function LearnScreen() {
                 className="mt-2 w-full"
               />
             </label>
-            <label className="mt-4 block text-xs text-[#9BB0B8]">
+            <label className="mt-4 block text-xs text-muted-foreground">
               Slow motion ({rate.toFixed(2)}×)
               <input
                 type="range"
@@ -324,21 +324,21 @@ export function LearnScreen() {
               <button
                 type="button"
                 onClick={() => stepFrame(-1)}
-                className="min-h-[44px] border border-border/40 bg-white/5 backdrop-blur-md px-3 text-xs text-white"
+                className="min-h-[44px] border border-border/40 bg-white/55 backdrop-blur-md px-3 text-xs text-foreground"
               >
                 −1 frame
               </button>
               <button
                 type="button"
                 onClick={() => stepFrame(1)}
-                className="min-h-[44px] border border-border/40 bg-white/5 backdrop-blur-md px-3 text-xs text-white"
+                className="min-h-[44px] border border-border/40 bg-white/55 backdrop-blur-md px-3 text-xs text-foreground"
               >
                 +1 frame
               </button>
               <button
                 type="button"
                 onClick={() => setShowSkeleton((v) => !v)}
-                className="min-h-[44px] border border-border/40 bg-white/5 backdrop-blur-md px-3 text-xs text-white"
+                className="min-h-[44px] border border-border/40 bg-white/55 backdrop-blur-md px-3 text-xs text-foreground"
               >
                 Skeleton {showSkeleton ? "on" : "off"}
               </button>
@@ -351,7 +351,7 @@ export function LearnScreen() {
                     loopEndSec: (refVideo.current?.currentTime ?? 2) + 1,
                   })
                 }
-                className="min-h-[44px] border border-[#5B8DA8]/50 px-3 text-xs text-[#90C4D8]"
+                className="min-h-[44px] border border-primary/50 px-3 text-xs text-primary"
               >
                 Loop section
               </button>
@@ -361,7 +361,7 @@ export function LearnScreen() {
                 type="button"
                 disabled={step === 0}
                 onClick={() => setStep((s) => Math.max(0, s - 1))}
-                className="min-h-[44px] flex-1 border border-border/40 bg-white/5 backdrop-blur-md text-xs disabled:opacity-40"
+                className="min-h-[44px] flex-1 border border-border/40 bg-white/55 backdrop-blur-md text-xs disabled:opacity-40"
               >
                 Prev step
               </button>
@@ -369,7 +369,7 @@ export function LearnScreen() {
                 type="button"
                 disabled={step >= move.tutorialSteps.length - 1}
                 onClick={() => setStep((s) => Math.min(move.tutorialSteps.length - 1, s + 1))}
-                className="min-h-[44px] flex-1 bg-[#5B8DA8] text-xs font-semibold text-[#071014] disabled:opacity-40"
+                className="min-h-[44px] flex-1 bg-primary text-xs font-semibold text-primary-foreground disabled:opacity-40"
               >
                 Next step
               </button>

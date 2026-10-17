@@ -20,7 +20,7 @@ const MovementStage = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-full min-h-[280px] items-center justify-center bg-[#071014] text-sm text-primary">
+      <div className="flex h-full min-h-[280px] items-center justify-center bg-[#F7FBFC] text-sm text-primary">
         Loading stage…
       </div>
     ),
@@ -50,7 +50,7 @@ export function DiscoverScreen() {
           />
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#071014] via-[#071014]/45 to-black/30 sm:bg-gradient-to-r sm:from-[#071014]/90 sm:via-[#071014]/50 sm:to-transparent"
+            className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#F7FBFC] via-[#F7FBFC]/55 to-white/25 sm:bg-gradient-to-r sm:from-white/90 sm:via-white/55 sm:to-transparent"
           />
         </div>
 
@@ -62,9 +62,9 @@ export function DiscoverScreen() {
             <BrandMark
               size="hero"
               priority
-              className="mb-4 max-w-[min(86vw,400px)] drop-shadow-[0_12px_40px_rgba(0,0,0,0.45)]"
+              className="mb-4 max-w-[min(86vw,400px)]"
             />
-            <p className="max-w-md text-sm leading-relaxed text-[#D5E4EA] sm:text-base">
+            <p className="max-w-md text-sm leading-relaxed text-foreground/80 sm:text-base">
               {mobileCam
                 ? "Built for your front camera — practice, record, and clash from your phone."
                 : MOVES_LIKE.tagline}
@@ -103,7 +103,7 @@ export function DiscoverScreen() {
 
       <section className="relative border-t border-border/30 px-4 py-10 sm:px-10 sm:py-12">
         <GlassPanel tint="teal" className="mb-6 inline-block px-4 py-2">
-          <h2 className="text-lg font-semibold tracking-tight text-[#e8f4f8]">Pick a move</h2>
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">Pick a move</h2>
         </GlassPanel>
         <p className="mb-6 max-w-xl text-sm text-muted-foreground">
           Tap a move, then Practice with your front camera — or open Studio.
@@ -119,13 +119,16 @@ export function DiscoverScreen() {
                   className={cn(
                     "min-h-[64px] flex-1 rounded-2xl border p-3 text-left backdrop-blur-xl transition",
                     on
-                      ? "border-primary/45 bg-primary/15"
-                      : "border-border/40 bg-card/25 hover:border-primary/30 hover:bg-card/40",
+                      ? "border-primary/45 bg-primary/12"
+                      : "border-border/40 bg-white/40 hover:border-primary/30 hover:bg-white/60",
                   )}
                 >
                   <div className="flex items-baseline justify-between gap-3">
                     <h3
-                      className={cn("text-base font-semibold", on ? "text-primary" : "text-white")}
+                      className={cn(
+                        "text-base font-semibold",
+                        on ? "text-primary" : "text-foreground",
+                      )}
                     >
                       {move.name}
                     </h3>

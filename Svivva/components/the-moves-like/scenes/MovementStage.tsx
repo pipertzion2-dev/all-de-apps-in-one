@@ -30,7 +30,7 @@ function StageFloor() {
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.2, 0]} receiveShadow>
       <circleGeometry args={[3.4, 64]} />
-      <meshStandardMaterial color="#0a1418" metalness={0.55} roughness={0.35} />
+      <meshStandardMaterial color="#d8e8ee" metalness={0.12} roughness={0.72} />
     </mesh>
   );
 }
@@ -64,17 +64,17 @@ function StageContent({
 
   return (
     <>
-      <color attach="background" args={["#071014"]} />
-      <fog attach="fog" args={["#071014", 7, 18]} />
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[3.5, 5.5, 2.5]} intensity={1.15} color="#eef6f8" castShadow />
-      <pointLight position={[-2.5, 2.2, -1.5]} intensity={0.75} color="#c44a9a" />
-      <pointLight position={[2.8, 1.2, 2]} intensity={0.55} color="#5b8da8" />
+      <color attach="background" args={["#f4fafc"]} />
+      <fog attach="fog" args={["#e8f3f7", 8, 20]} />
+      <ambientLight intensity={0.78} />
+      <directionalLight position={[3.5, 5.5, 2.5]} intensity={1.05} color="#ffffff" castShadow />
+      <pointLight position={[-2.5, 2.2, -1.5]} intensity={0.55} color="#c44a9a" />
+      <pointLight position={[2.8, 1.2, 2]} intensity={0.65} color="#5b8da8" />
       <spotLight
         position={[0, 4.5, 2]}
         angle={0.45}
         penumbra={0.6}
-        intensity={0.85}
+        intensity={0.55}
         color="#90c4d8"
       />
 
@@ -154,7 +154,7 @@ export function MovementStage({
         </Suspense>
       </Canvas>
       {showCaption ? (
-        <p className="pointer-events-none absolute bottom-2 left-2 bg-black/55 px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-[#90C4D8]">
+        <p className="pointer-events-none absolute bottom-2 left-2 rounded-lg border border-border/40 bg-white/55 px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-primary backdrop-blur-md">
           {caption}
         </p>
       ) : null}

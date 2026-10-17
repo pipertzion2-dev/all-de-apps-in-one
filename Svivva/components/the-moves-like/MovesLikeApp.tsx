@@ -41,9 +41,9 @@ function ScreenBody({ screen }: { screen: MovesLikeScreen }) {
 
 function WebGLFallback() {
   return (
-    <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3 bg-[#071014] px-6 text-center">
+    <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3 bg-[#F7FBFC] px-6 text-center">
       <BrandMark size="inline" />
-      <p className="tml-glass max-w-md p-4 text-sm text-[#C8D8DE]">
+      <p className="tml-glass max-w-md p-4 text-sm text-muted-foreground">
         WebGL is unavailable. Front-camera Learn and Create still work — 3D stages are skipped.
       </p>
     </div>
@@ -75,16 +75,16 @@ export function MovesLikeApp() {
     <div
       data-the-moves-like
       data-page-shell
-      className="relative min-h-[100dvh] bg-[#071014] text-foreground"
+      className="relative min-h-[100dvh] bg-[#F7FBFC] text-foreground"
       style={{ fontFamily: '"Zc", sans-serif' }}
     >
-      {/* Soft site-like atmosphere wash */}
+      {/* Soft teal / magenta wash on white paper */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-50"
+        className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 70% 45% at 15% 0%, hsl(197 45% 50% / 0.22), transparent 55%), radial-gradient(ellipse 55% 40% at 90% 8%, hsl(315 60% 45% / 0.16), transparent 50%)",
+            "radial-gradient(ellipse 75% 50% at 12% 0%, hsl(197 55% 78% / 0.35), transparent 55%), radial-gradient(ellipse 55% 42% at 92% 6%, hsl(315 70% 88% / 0.32), transparent 52%), linear-gradient(180deg, #ffffff 0%, #F7FBFC 40%, #eef6f8 100%)",
         }}
       />
 
@@ -92,14 +92,14 @@ export function MovesLikeApp() {
         className={cn(
           "z-30 flex items-center justify-between gap-3 px-3 py-2 sm:px-6 sm:py-3",
           hideChromeOnDiscover || cameraMode
-            ? "absolute inset-x-0 top-0 bg-gradient-to-b from-black/60 to-transparent pt-[max(0.5rem,env(safe-area-inset-top))]"
-            : "relative border-b border-border/30 bg-card/25 pt-[max(0.25rem,env(safe-area-inset-top))] backdrop-blur-xl",
+            ? "absolute inset-x-0 top-0 bg-gradient-to-b from-white/80 to-transparent pt-[max(0.5rem,env(safe-area-inset-top))]"
+            : "relative border-b border-border/40 bg-white/55 pt-[max(0.25rem,env(safe-area-inset-top))] backdrop-blur-xl",
         )}
       >
         <div className="flex min-w-0 items-center gap-3">
           <Link
             href="/"
-            className="shrink-0 rounded-full border border-border/40 bg-card/40 px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground backdrop-blur-md hover:border-primary/40 hover:text-foreground"
+            className="shrink-0 rounded-full border border-border/50 bg-white/50 px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground backdrop-blur-md hover:border-primary/40 hover:text-foreground"
           >
             ZZAI
           </Link>
@@ -113,7 +113,7 @@ export function MovesLikeApp() {
               <BrandMark size="header" priority={screen === "discover"} />
             </button>
           ) : (
-            <span className="tml-glass-teal px-3 py-1 text-xs font-semibold tracking-wide text-[#d8eef6]">
+            <span className="tml-glass-teal px-3 py-1 text-xs font-semibold tracking-wide text-primary">
               {screen === "learn" ? "Practice" : "Record"}
             </span>
           )}
@@ -131,7 +131,7 @@ export function MovesLikeApp() {
           ) : null}
           <Link
             href="/play"
-            className="shrink-0 rounded-full border border-border/40 bg-card/30 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-muted-foreground backdrop-blur-md hover:border-primary/40 hover:text-[#90C4D8]"
+            className="shrink-0 rounded-full border border-border/50 bg-white/45 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-muted-foreground backdrop-blur-md hover:border-primary/40 hover:text-primary"
           >
             Play desk
           </Link>

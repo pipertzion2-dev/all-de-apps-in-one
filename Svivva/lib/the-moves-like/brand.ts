@@ -6,9 +6,9 @@ export const MOVES_LIKE = {
   shortName: "Moves Like",
   tagline: "Explore, learn, transform, play, and share movement.",
   path: "/the-moves-like",
-  /** Transparent PNG for OG/schema; prefer logoLightPath in the dark UI. */
+  /** Dark spray ink on transparent — default for light/white glass UI. */
   logoPath: "/the-moves-like/logo.png",
-  /** Light spray ink on transparent — use on dark stages (no white plate). */
+  /** Light spray ink — only for rare dark overlays. */
   logoLightPath: "/the-moves-like/logo-light.png",
   /** ZZAI site teal — matches homepage / explore accents */
   teal: "#5B8DA8",

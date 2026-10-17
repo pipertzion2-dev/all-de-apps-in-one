@@ -281,33 +281,33 @@
     box-shadow: 0 0 60px rgba(215, 130, 178, 0.12);
   }
 
-  /* THE MOVES LIKE — clear colored glass (ZZAI teal / magenta tints) */
+  /* THE MOVES LIKE — clear frosted glass on light shell (teal / magenta tints) */
   .tml-glass {
-    @apply rounded-2xl border border-white/20 backdrop-blur-2xl;
-    background: hsl(180 20% 12% / 0.22);
+    @apply rounded-2xl border border-border/35 backdrop-blur-2xl;
+    background: hsl(0 0% 100% / 0.42);
     -webkit-backdrop-filter: blur(24px);
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.22);
+    box-shadow: 0 8px 32px rgba(15, 26, 28, 0.06);
   }
   .tml-glass-teal {
     @apply rounded-2xl border backdrop-blur-2xl;
-    background: hsl(197 45% 55% / 0.18);
-    border-color: hsl(197 55% 60% / 0.45);
+    background: hsl(197 55% 92% / 0.38);
+    border-color: hsl(197 45% 55% / 0.35);
     -webkit-backdrop-filter: blur(24px);
-    box-shadow: 0 8px 36px rgba(91, 141, 168, 0.22);
+    box-shadow: 0 8px 28px rgba(91, 141, 168, 0.1);
   }
   .tml-glass-magenta {
     @apply rounded-2xl border backdrop-blur-2xl;
-    background: hsl(315 55% 50% / 0.18);
-    border-color: hsl(315 70% 65% / 0.4);
+    background: hsl(315 90% 96% / 0.4);
+    border-color: hsl(315 55% 60% / 0.35);
     -webkit-backdrop-filter: blur(24px);
-    box-shadow: 0 8px 36px rgba(196, 74, 154, 0.22);
+    box-shadow: 0 8px 28px rgba(196, 74, 154, 0.1);
   }
   .tml-glass-nav {
-    background: hsl(197 25% 10% / 0.42);
-    border-color: hsl(197 45% 55% / 0.22);
+    background: hsl(0 0% 100% / 0.72);
+    border-color: hsl(197 30% 80% / 0.55);
     @apply backdrop-blur-2xl;
     -webkit-backdrop-filter: blur(28px);
-    box-shadow: 0 -4px 32px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 -6px 28px rgba(15, 26, 28, 0.08);
   }
 }
 

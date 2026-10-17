@@ -153,15 +153,15 @@ export function PlayScreen() {
   return (
     <div className="space-y-8 px-4 py-6 sm:px-8">
       <header>
-        <h2 className="text-2xl font-bold text-white">Play</h2>
-        <p className="mt-1 text-sm text-[#9BB0B8]">
+        <h2 className="text-2xl font-bold text-foreground">Play</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
           Rhythm Portal reacts to real audio analysis. Style Clash is asynchronous — no fake live
           opponents.
         </p>
       </header>
 
       <section className="space-y-4">
-        <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#90C4D8]">
+        <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-primary">
           Rhythm Portal
         </h3>
         <div className="min-h-[260px] overflow-hidden tml-glass">
@@ -173,20 +173,20 @@ export function PlayScreen() {
         </div>
         <div className="grid gap-3 tml-glass p-4 lg:grid-cols-2">
           <div className="space-y-3">
-            <label className="block text-xs uppercase tracking-[0.14em] text-[#9BB0B8]">
+            <label className="block text-xs uppercase tracking-[0.14em] text-muted-foreground">
               Music file
               <input
                 type="file"
                 accept="audio/*,video/*"
-                className="mt-2 block w-full text-sm text-[#C8D8DE]"
+                className="mt-2 block w-full text-sm text-foreground/80"
                 onChange={(e) => void onFile(e.target.files?.[0] ?? null)}
               />
             </label>
             <audio ref={audioRef} controls className="w-full" playsInline />
-            <p className="text-xs text-[#C8D8DE]">{tempoNote}</p>
+            <p className="text-xs text-foreground/80">{tempoNote}</p>
           </div>
           <div className="space-y-3">
-            <label className="block text-xs text-[#9BB0B8]">
+            <label className="block text-xs text-muted-foreground">
               Manual BPM ({bpmManual})
               <input
                 type="range"
@@ -200,27 +200,27 @@ export function PlayScreen() {
             <button
               type="button"
               onClick={applyManualBpm}
-              className="rounded-md border border-border/40 bg-white/5 backdrop-blur-md px-3 py-2 text-xs uppercase tracking-[0.12em] text-white"
+              className="rounded-md border border-border/40 bg-white/55 backdrop-blur-md px-3 py-2 text-xs uppercase tracking-[0.12em] text-foreground"
             >
               Lock beat grid
             </button>
-            <dl className="grid grid-cols-2 gap-2 text-xs text-[#C8D8DE]">
+            <dl className="grid grid-cols-2 gap-2 text-xs text-foreground/80">
               <div>
-                <dt className="text-[#9BB0B8]">Energy</dt>
+                <dt className="text-muted-foreground">Energy</dt>
                 <dd>{audio.energy.toFixed(2)}</dd>
               </div>
               <div>
-                <dt className="text-[#9BB0B8]">Bass</dt>
+                <dt className="text-muted-foreground">Bass</dt>
                 <dd>{audio.bass.toFixed(2)}</dd>
               </div>
               <div>
-                <dt className="text-[#9BB0B8]">Tempo</dt>
+                <dt className="text-muted-foreground">Tempo</dt>
                 <dd>
                   {audio.bpm ?? "—"} {audio.reliableTempo ? "(reliable)" : "(unreliable / manual)"}
                 </dd>
               </div>
               <div>
-                <dt className="text-[#9BB0B8]">Beats mapped</dt>
+                <dt className="text-muted-foreground">Beats mapped</dt>
                 <dd>{audio.beatGrid.length}</dd>
               </div>
             </dl>
@@ -229,26 +229,26 @@ export function PlayScreen() {
       </section>
 
       <section className="space-y-4">
-        <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#90C4D8]">
+        <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-primary">
           Style Clash · async
         </h3>
         <div className="grid gap-4 lg:grid-cols-2">
           <div className="space-y-3 tml-glass p-4">
-            <label className="block text-xs text-[#9BB0B8]">
+            <label className="block text-xs text-muted-foreground">
               Challenge prompt
               <textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 rows={3}
-                className="mt-2 w-full rounded-xl border border-border/40 bg-card/30 backdrop-blur-md px-3 py-2 text-sm text-white"
+                className="mt-2 w-full rounded-xl border border-border/40 bg-white/50 backdrop-blur-md px-3 py-2 text-sm text-foreground"
               />
             </label>
-            <label className="block text-xs text-[#9BB0B8]">
+            <label className="block text-xs text-muted-foreground">
               Reference move
               <select
                 value={challengeMoveId}
                 onChange={(e) => setChallengeMoveId(e.target.value)}
-                className="mt-2 w-full rounded-xl border border-border/40 bg-card/30 backdrop-blur-md px-3 py-2 text-sm text-white"
+                className="mt-2 w-full rounded-xl border border-border/40 bg-white/50 backdrop-blur-md px-3 py-2 text-sm text-foreground"
               >
                 {MOVES_LIBRARY.map((m) => (
                   <option key={m.id} value={m.id}>
@@ -260,14 +260,14 @@ export function PlayScreen() {
             <button
               type="button"
               onClick={startChallenge}
-              className="rounded-md bg-[#5B8DA8] px-4 py-2 text-sm font-semibold text-[#071014]"
+              className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
             >
               Create challenge
             </button>
             <div className="h-40 overflow-hidden tml-glass">
               <MovementStage moveIds={[challengeMoveId]} mode="dna" interactive={false} />
             </div>
-            <p className="text-xs text-[#9BB0B8]">
+            <p className="text-xs text-muted-foreground">
               Reference: {getMove(challengeMoveId)?.name}. Invite a friend by sharing the prompt —
               they respond when ready. Architecture is local-first for now; real-time multiplayer
               can plug into the same challenge model later.
@@ -275,31 +275,31 @@ export function PlayScreen() {
           </div>
 
           <div className="space-y-3 tml-glass p-4">
-            <h4 className="text-xs font-semibold uppercase tracking-[0.14em] text-[#C44A9A]">
+            <h4 className="text-xs font-semibold uppercase tracking-[0.14em] text-[#9a3a78]">
               Respond
             </h4>
-            <label className="block text-xs text-[#9BB0B8]">
+            <label className="block text-xs text-muted-foreground">
               Name
               <input
                 value={author}
                 onChange={(e) => setAuthor(e.target.value)}
-                className="mt-2 w-full rounded-xl border border-border/40 bg-card/30 backdrop-blur-md px-3 py-2 text-sm text-white"
+                className="mt-2 w-full rounded-xl border border-border/40 bg-white/50 backdrop-blur-md px-3 py-2 text-sm text-foreground"
               />
             </label>
-            <label className="block text-xs text-[#9BB0B8]">
+            <label className="block text-xs text-muted-foreground">
               Note
               <input
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                className="mt-2 w-full rounded-xl border border-border/40 bg-card/30 backdrop-blur-md px-3 py-2 text-sm text-white"
+                className="mt-2 w-full rounded-xl border border-border/40 bg-white/50 backdrop-blur-md px-3 py-2 text-sm text-foreground"
               />
             </label>
-            <label className="block text-xs text-[#9BB0B8]">
+            <label className="block text-xs text-muted-foreground">
               Upload interpretation
               <input
                 type="file"
                 accept="video/*"
-                className="mt-2 block w-full text-sm text-[#C8D8DE]"
+                className="mt-2 block w-full text-sm text-foreground/80"
                 onChange={(e) => onResponseVideo(e.target.files?.[0] ?? null)}
               />
             </label>
@@ -324,15 +324,15 @@ export function PlayScreen() {
 
         {active ? (
           <div className="tml-glass p-4">
-            <h4 className="text-sm font-semibold text-white">{active.prompt}</h4>
-            <p className="mt-1 text-xs text-[#9BB0B8]">
+            <h4 className="text-sm font-semibold text-foreground">{active.prompt}</h4>
+            <p className="mt-1 text-xs text-muted-foreground">
               Move: {getMove(active.moveId)?.name} · {active.responses.length} responses
             </p>
             <ul className="mt-4 grid gap-3 sm:grid-cols-2">
               {active.responses.map((r) => (
-                <li key={r.id} className="tml-glass bg-black/30 p-3">
-                  <p className="text-sm font-semibold text-white">{r.authorLabel}</p>
-                  <p className="text-xs text-[#9BB0B8]">{r.note}</p>
+                <li key={r.id} className="tml-glass bg-white/40 p-3">
+                  <p className="text-sm font-semibold text-foreground">{r.authorLabel}</p>
+                  <p className="text-xs text-muted-foreground">{r.note}</p>
                   {r.videoObjectUrl ? (
                     <video
                       src={r.videoObjectUrl}
@@ -341,7 +341,7 @@ export function PlayScreen() {
                       playsInline
                     />
                   ) : (
-                    <p className="mt-2 text-xs text-[#9BB0B8]">
+                    <p className="mt-2 text-xs text-muted-foreground">
                       No video attached (text response).
                     </p>
                   )}
@@ -349,19 +349,19 @@ export function PlayScreen() {
                     <button
                       type="button"
                       onClick={() => voteResponse(active.id, r.id, "creativity")}
-                      className="rounded border border-white/15 px-2 py-1 text-[10px] uppercase text-[#90C4D8]"
+                      className="rounded border border-border/50 px-2 py-1 text-[10px] uppercase text-primary"
                     >
                       Creativity {r.votesCreativity}
                     </button>
                     <button
                       type="button"
                       onClick={() => voteResponse(active.id, r.id, "style")}
-                      className="rounded border border-white/15 px-2 py-1 text-[10px] uppercase text-[#E8A0D0]"
+                      className="rounded border border-border/50 px-2 py-1 text-[10px] uppercase text-[#9a3a78]"
                     >
                       Style {r.votesStyle}
                     </button>
                   </div>
-                  <p className="mt-2 text-[10px] text-[#9BB0B8]">
+                  <p className="mt-2 text-[10px] text-muted-foreground">
                     Voting is subjective — no objective match score without pose analysis.
                   </p>
                 </li>
@@ -369,7 +369,7 @@ export function PlayScreen() {
             </ul>
           </div>
         ) : (
-          <p className="text-sm text-[#9BB0B8]">Create a challenge to start Style Clash.</p>
+          <p className="text-sm text-muted-foreground">Create a challenge to start Style Clash.</p>
         )}
       </section>
     </div>

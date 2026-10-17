@@ -4,10 +4,11 @@ import Image from "next/image";
 import { MOVES_LIKE } from "@/lib/the-moves-like/brand";
 
 type Props = {
-  /** header | hero | inline */
   size?: "header" | "hero" | "inline";
   className?: string;
   priority?: boolean;
+  /** dark = black spray on clear (light UI). light = inverted for rare dark overlays. */
+  tone?: "dark" | "light";
 };
 
 const SIZES = {
@@ -16,12 +17,17 @@ const SIZES = {
   inline: { width: 240, height: 120, className: "h-12 w-auto" },
 } as const;
 
-/** Transparent spray-paint mark (no white plate) for dark stages. */
-export function BrandMark({ size = "header", className = "", priority = false }: Props) {
+/** Transparent spray-paint mark — dark ink on light/white glass UI. */
+export function BrandMark({
+  size = "header",
+  className = "",
+  priority = false,
+  tone = "dark",
+}: Props) {
   const s = SIZES[size];
   return (
     <Image
-      src={MOVES_LIKE.logoLightPath}
+      src={tone === "light" ? MOVES_LIKE.logoLightPath : MOVES_LIKE.logoPath}
       alt={MOVES_LIKE.name}
       width={s.width}
       height={s.height}

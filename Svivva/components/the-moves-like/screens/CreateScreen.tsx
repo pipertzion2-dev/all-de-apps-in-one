@@ -88,22 +88,22 @@ export function CreateScreen() {
           <>
             <div className="absolute inset-x-0 top-0 flex items-start justify-between p-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
               <GlassPanel tint="teal" className="px-3 py-2" padding={false}>
-                <p className="text-[10px] uppercase tracking-[0.18em] text-[#90C4D8]">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-primary">
                   Create · Front camera
                 </p>
                 <input
                   value={label}
                   onChange={(e) => setLabel(e.target.value)}
-                  className="mt-1 w-[min(60vw,220px)] border-b border-white/30 bg-transparent text-lg font-semibold text-white outline-none"
+                  className="mt-1 w-[min(60vw,220px)] border-b border-border/60 bg-transparent text-lg font-semibold text-foreground outline-none"
                   aria-label="Take label"
                 />
               </GlassPanel>
               {recording ? (
-                <span className="tml-glass-magenta px-3 py-1.5 text-xs font-semibold text-white">
+                <span className="tml-glass-magenta px-3 py-1.5 text-xs font-semibold text-[#9a3a78]">
                   REC {elapsed}s
                 </span>
               ) : (
-                <span className="tml-glass-teal px-3 py-1.5 text-[10px] uppercase tracking-[0.12em] text-[#d8eef6]">
+                <span className="tml-glass-teal px-3 py-1.5 text-[10px] uppercase tracking-[0.12em] text-primary">
                   {camera.active ? "Ready" : "Camera"}
                 </span>
               )}
@@ -111,7 +111,7 @@ export function CreateScreen() {
 
             <div className="absolute inset-x-0 bottom-0 p-4 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
               <GlassDock className="flex flex-col items-center gap-4">
-                <p className="max-w-xs text-center text-xs text-white/85">
+                <p className="max-w-xs text-center text-xs text-muted-foreground">
                   Hold your phone like a selfie video. Front camera stays mirrored for framing.
                 </p>
 
@@ -149,7 +149,7 @@ export function CreateScreen() {
                   <GlassButton
                     type="button"
                     variant="ghost"
-                    className="text-[#E8A0D0]"
+                    className="text-[#9a3a78]"
                     onClick={() => setScreen("play")}
                   >
                     Clash
@@ -175,20 +175,20 @@ export function CreateScreen() {
       />
 
       {previewUrl ? (
-        <section className="border-t border-white/10 bg-[#071014] px-4 py-6 sm:px-8">
-          <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#90C4D8]">
+        <section className="border-t border-border/40 bg-white/60 px-4 py-6 sm:px-8">
+          <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-primary">
             Last take
           </h3>
           <video
             src={previewUrl}
             controls
             playsInline
-            className="mt-3 aspect-[9/16] max-h-[50vh] w-full bg-black object-contain sm:max-w-sm"
+            className="mt-3 aspect-[9/16] max-h-[50vh] w-full rounded-xl bg-muted object-contain sm:max-w-sm"
           />
           <a
             href={previewUrl}
             download={`${label.replace(/\s+/g, "-").toLowerCase() || "take"}.webm`}
-            className="mt-3 inline-block min-h-[44px] text-sm text-[#5B8DA8] underline-offset-2 hover:underline"
+            className="mt-3 inline-block min-h-[44px] text-sm text-primary underline-offset-2 hover:underline"
           >
             Download take
           </a>
@@ -197,12 +197,12 @@ export function CreateScreen() {
 
       {recordingsMeta.length > 0 ? (
         <section className="px-4 pb-8 sm:px-8">
-          <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-[#9BB0B8]">
+          <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
             Saved takes
           </h3>
           <ul className="mt-2 space-y-1">
             {recordingsMeta.slice(0, 6).map((r) => (
-              <li key={r.id} className="text-sm text-[#C8D8DE]">
+              <li key={r.id} className="text-sm text-foreground/80">
                 {r.label} · {new Date(r.createdAt).toLocaleString()}
               </li>
             ))}

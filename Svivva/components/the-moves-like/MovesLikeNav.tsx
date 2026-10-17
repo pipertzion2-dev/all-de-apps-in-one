@@ -28,7 +28,7 @@ export function MovesLikeNav({
         aria-label="THE MOVES LIKE"
         className={cn(
           "hidden gap-1 overflow-x-auto px-3 py-2 sm:flex sm:px-6",
-          overlay ? "bg-transparent" : "border-b border-border/30 bg-card/30 backdrop-blur-xl",
+          overlay ? "bg-transparent" : "border-b border-border/35 bg-white/45 backdrop-blur-xl",
         )}
       >
         {ITEMS.map((item) => {
@@ -41,8 +41,8 @@ export function MovesLikeNav({
               className={cn(
                 "shrink-0 rounded-full px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] transition",
                 active
-                  ? "border border-primary/40 bg-primary/20 text-[#d8eef6]"
-                  : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
+                  ? "border border-primary/40 bg-primary/15 text-foreground"
+                  : "text-muted-foreground hover:bg-primary/8 hover:text-foreground",
               )}
               aria-current={active ? "page" : undefined}
             >
@@ -68,9 +68,9 @@ export function MovesLikeNav({
                 "flex min-h-[52px] flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-0.5 text-[9px] font-semibold uppercase tracking-[0.08em] transition",
                 active
                   ? cameraTab
-                    ? "bg-[hsl(315_60%_45%/0.22)] text-[#E8A0D0]"
-                    : "bg-primary/20 text-[#90C4D8]"
-                  : "text-[#7A9098]",
+                    ? "bg-[hsl(315_70%_92%/0.85)] text-[#9a3a78]"
+                    : "bg-primary/15 text-primary"
+                  : "text-muted-foreground",
               )}
               aria-current={active ? "page" : undefined}
             >

@@ -149,7 +149,7 @@ export function DancerFigure({
       {/* Ground contact shadow disc */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.02, 0]}>
         <circleGeometry args={[0.55, 32]} />
-        <meshStandardMaterial color="#050a0c" transparent opacity={0.55} />
+        <meshStandardMaterial color="#5B8DA8" transparent opacity={0.18} />
       </mesh>
 
       <group ref={root} position={[0, 0, 0]}>

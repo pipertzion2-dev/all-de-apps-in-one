@@ -112,8 +112,8 @@ export function StudioScreen() {
   return (
     <div className="space-y-6 px-4 py-6 sm:px-8">
       <header>
-        <h2 className="text-2xl font-bold text-white">Studio · Move Reactor</h2>
-        <p className="mt-1 max-w-2xl text-sm text-[#9BB0B8]">
+        <h2 className="text-2xl font-bold text-foreground">Studio · Move Reactor</h2>
+        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
           Build routines from the movement library, preview transitions on the 3D stage, and save
           Motion DNA combinations. Library-assembled sequences are labeled clearly — not AI
           choreography.
@@ -131,14 +131,14 @@ export function StudioScreen() {
         </div>
 
         <div className="tml-glass space-y-3 p-4">
-          <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-[#90C4D8]">
+          <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
             Sequence brief
           </h3>
           <div className="grid grid-cols-2 gap-2 text-xs">
-            <label className="text-[#9BB0B8]">
+            <label className="text-muted-foreground">
               Style
               <select
-                className="mt-1 w-full rounded-xl border border-border/40 bg-card/30 backdrop-blur-md px-2 py-2 text-white"
+                className="mt-1 w-full rounded-xl border border-border/40 bg-white/50 backdrop-blur-md px-2 py-2 text-foreground"
                 value={style}
                 onChange={(e) => setStyle(e.target.value as DanceStyle)}
               >
@@ -149,10 +149,10 @@ export function StudioScreen() {
                 ))}
               </select>
             </label>
-            <label className="text-[#9BB0B8]">
+            <label className="text-muted-foreground">
               Level
               <select
-                className="mt-1 w-full rounded-xl border border-border/40 bg-card/30 backdrop-blur-md px-2 py-2 text-white"
+                className="mt-1 w-full rounded-xl border border-border/40 bg-white/50 backdrop-blur-md px-2 py-2 text-foreground"
                 value={level}
                 onChange={(e) => setLevel(e.target.value as SkillLevel)}
               >
@@ -163,10 +163,10 @@ export function StudioScreen() {
                 ))}
               </select>
             </label>
-            <label className="text-[#9BB0B8]">
+            <label className="text-muted-foreground">
               Mood
               <select
-                className="mt-1 w-full rounded-xl border border-border/40 bg-card/30 backdrop-blur-md px-2 py-2 text-white"
+                className="mt-1 w-full rounded-xl border border-border/40 bg-white/50 backdrop-blur-md px-2 py-2 text-foreground"
                 value={mood}
                 onChange={(e) => setMood(e.target.value as MusicalMood)}
               >
@@ -177,10 +177,10 @@ export function StudioScreen() {
                 ))}
               </select>
             </label>
-            <label className="text-[#9BB0B8]">
+            <label className="text-muted-foreground">
               Energy
               <select
-                className="mt-1 w-full rounded-xl border border-border/40 bg-card/30 backdrop-blur-md px-2 py-2 text-white"
+                className="mt-1 w-full rounded-xl border border-border/40 bg-white/50 backdrop-blur-md px-2 py-2 text-foreground"
                 value={energy}
                 onChange={(e) => setEnergy(e.target.value as EnergyLevel)}
               >
@@ -192,7 +192,7 @@ export function StudioScreen() {
               </select>
             </label>
           </div>
-          <label className="block text-xs text-[#9BB0B8]">
+          <label className="block text-xs text-muted-foreground">
             Duration {durationSec}s
             <input
               type="range"
@@ -208,19 +208,19 @@ export function StudioScreen() {
             <button
               type="button"
               onClick={assemble}
-              className="rounded-md bg-[#5B8DA8] px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#071014]"
+              className="rounded-md bg-primary px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-primary-foreground"
             >
               Assemble from library
             </button>
             <button
               type="button"
               onClick={() => newBlankRoutine()}
-              className="rounded-md border border-border/40 bg-white/5 backdrop-blur-md px-3 py-2 text-xs uppercase tracking-[0.12em] text-white"
+              className="rounded-md border border-border/40 bg-white/55 backdrop-blur-md px-3 py-2 text-xs uppercase tracking-[0.12em] text-foreground"
             >
               Blank routine
             </button>
           </div>
-          <p className="text-[11px] leading-relaxed text-[#9BB0B8]">
+          <p className="text-[11px] leading-relaxed text-muted-foreground">
             {aiStatus.available
               ? aiStatus.note
               : `AI choreography: unavailable — ${aiStatus.reason}`}
@@ -230,10 +230,10 @@ export function StudioScreen() {
 
       <section className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#90C4D8]">
+          <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-primary">
             Timeline {activeRoutine ? `· ${activeRoutine.name}` : ""}
             {activeRoutine ? (
-              <span className="ml-2 text-[10px] text-[#C44A9A]">
+              <span className="ml-2 text-[10px] text-[#9a3a78]">
                 {activeRoutine.origin === "library-assembled" ? "library-assembled" : "manual"}
               </span>
             ) : null}
@@ -251,7 +251,7 @@ export function StudioScreen() {
               type="button"
               disabled={!activeRoutine}
               onClick={() => activeRoutine && saveRoutine(activeRoutine)}
-              className="rounded-md border border-border/40 bg-white/5 backdrop-blur-md px-3 py-1.5 text-xs text-white disabled:opacity-40"
+              className="rounded-md border border-border/40 bg-white/55 backdrop-blur-md px-3 py-1.5 text-xs text-foreground disabled:opacity-40"
             >
               Save
             </button>
@@ -259,19 +259,19 @@ export function StudioScreen() {
               type="button"
               disabled={!activeRoutine}
               onClick={() => void share()}
-              className="rounded-md border border-border/40 bg-white/5 backdrop-blur-md px-3 py-1.5 text-xs text-white disabled:opacity-40"
+              className="rounded-md border border-border/40 bg-white/55 backdrop-blur-md px-3 py-1.5 text-xs text-foreground disabled:opacity-40"
             >
               Export / share text
             </button>
           </div>
         </div>
         {shareMsg ? (
-          <pre className="overflow-x-auto whitespace-pre-wrap tml-glass bg-black/40 p-3 text-xs text-[#C8D8DE]">
+          <pre className="overflow-x-auto whitespace-pre-wrap tml-glass bg-white/50 p-3 text-xs text-foreground/80">
             {shareMsg}
           </pre>
         ) : null}
         {!activeRoutine?.clips.length ? (
-          <p className="text-sm text-[#9BB0B8]">
+          <p className="text-sm text-muted-foreground">
             Add moves from the library below, or assemble a library sequence.
           </p>
         ) : (
@@ -281,16 +281,16 @@ export function StudioScreen() {
               return (
                 <li
                   key={clip.id}
-                  className="flex flex-wrap items-center gap-2 tml-glass bg-black/30 px-3 py-2"
+                  className="flex flex-wrap items-center gap-2 tml-glass bg-white/40 px-3 py-2"
                 >
-                  <span className="w-6 text-xs text-[#9BB0B8]">{index + 1}</span>
-                  <span className="min-w-[8rem] flex-1 text-sm text-white">
+                  <span className="w-6 text-xs text-muted-foreground">{index + 1}</span>
+                  <span className="min-w-[8rem] flex-1 text-sm text-foreground">
                     {m?.name ?? clip.moveId}
                   </span>
-                  <span className="text-[10px] uppercase tracking-[0.12em] text-[#90C4D8]">
+                  <span className="text-[10px] uppercase tracking-[0.12em] text-primary">
                     beat {clip.startBeat}
                   </span>
-                  <label className="flex items-center gap-1 text-[10px] text-[#9BB0B8]">
+                  <label className="flex items-center gap-1 text-[10px] text-muted-foreground">
                     beats
                     <input
                       type="number"
@@ -298,14 +298,14 @@ export function StudioScreen() {
                       max={32}
                       value={clip.durationBeats}
                       onChange={(e) => updateClipDuration(clip.id, Number(e.target.value))}
-                      className="w-14 rounded-xl border border-border/40 bg-card/30 backdrop-blur-md px-1 py-0.5 text-white"
+                      className="w-14 rounded-xl border border-border/40 bg-white/50 backdrop-blur-md px-1 py-0.5 text-foreground"
                     />
                   </label>
                   <button
                     type="button"
                     disabled={index === 0}
                     onClick={() => reorderClips(index, index - 1)}
-                    className="rounded border border-white/15 px-2 py-1 text-xs disabled:opacity-30"
+                    className="rounded border border-border/50 px-2 py-1 text-xs disabled:opacity-30"
                   >
                     ↑
                   </button>
@@ -313,14 +313,14 @@ export function StudioScreen() {
                     type="button"
                     disabled={index === activeRoutine.clips.length - 1}
                     onClick={() => reorderClips(index, index + 1)}
-                    className="rounded border border-white/15 px-2 py-1 text-xs disabled:opacity-30"
+                    className="rounded border border-border/50 px-2 py-1 text-xs disabled:opacity-30"
                   >
                     ↓
                   </button>
                   <button
                     type="button"
                     onClick={() => removeClip(clip.id)}
-                    className="rounded border border-[#C44A9A]/40 px-2 py-1 text-xs text-[#E8A0D0]"
+                    className="rounded border border-[#C44A9A]/45 px-2 py-1 text-xs text-[#9a3a78]"
                   >
                     Remove
                   </button>
@@ -332,7 +332,7 @@ export function StudioScreen() {
       </section>
 
       <section>
-        <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#90C4D8]">
+        <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-primary">
           Movement library
         </h3>
         <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -344,10 +344,10 @@ export function StudioScreen() {
                   if (!activeRoutine) newBlankRoutine();
                   addClip(m.id);
                 }}
-                className="flex-1 text-left text-sm text-white hover:text-[#90C4D8]"
+                className="flex-1 text-left text-sm text-foreground hover:text-primary"
               >
                 {m.name}
-                <span className="mt-0.5 block text-[10px] uppercase tracking-[0.12em] text-[#9BB0B8]">
+                <span className="mt-0.5 block text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
                   {m.style} · {m.beats} beats
                 </span>
               </button>
@@ -356,8 +356,8 @@ export function StudioScreen() {
                 onClick={() => toggleMove(m.id)}
                 className={`rounded px-2 py-1 text-[10px] uppercase ${
                   selectedMoveIds.includes(m.id)
-                    ? "bg-[#5B8DA8] text-[#071014]"
-                    : "border border-white/15 text-[#C8D8DE]"
+                    ? "bg-primary text-primary-foreground"
+                    : "border border-border/50 text-foreground/80"
                 }`}
               >
                 DNA
@@ -369,17 +369,17 @@ export function StudioScreen() {
 
       <section className="grid gap-4 lg:grid-cols-2">
         <div className="tml-glass p-4">
-          <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#90C4D8]">
+          <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-primary">
             Motion DNA compare
           </h3>
-          <p className="mt-1 text-xs text-[#9BB0B8]">
+          <p className="mt-1 text-xs text-muted-foreground">
             Illustrative fingerprints only — not measured body tracking.
           </p>
           <div className="mt-3 grid grid-cols-2 gap-2">
             {[0, 1].map((slot) => (
               <select
                 key={slot}
-                className="rounded-xl border border-border/40 bg-card/30 backdrop-blur-md px-2 py-2 text-sm text-white"
+                className="rounded-xl border border-border/40 bg-white/50 backdrop-blur-md px-2 py-2 text-sm text-foreground"
                 value={compareMoveIds[slot as 0 | 1] ?? ""}
                 onChange={(e) => setCompareSlot(slot as 0 | 1, e.target.value || null)}
               >
@@ -404,13 +404,13 @@ export function StudioScreen() {
                 compareIds,
               )
             }
-            className="mt-3 rounded-md border border-border/40 bg-white/5 backdrop-blur-md px-3 py-2 text-xs text-white disabled:opacity-40"
+            className="mt-3 rounded-md border border-border/40 bg-white/55 backdrop-blur-md px-3 py-2 text-xs text-foreground disabled:opacity-40"
           >
             Save combination
           </button>
         </div>
         <div className="tml-glass p-4">
-          <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#90C4D8]">
+          <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-primary">
             Saved routines & favorites
           </h3>
           <ul className="mt-3 max-h-56 space-y-2 overflow-y-auto">
@@ -419,22 +419,22 @@ export function StudioScreen() {
                 <button
                   type="button"
                   onClick={() => setActiveRoutine(r)}
-                  className="w-full tml-glass px-3 py-2 text-left text-sm text-[#C8D8DE] hover:border-[#5B8DA8]/40"
+                  className="w-full tml-glass px-3 py-2 text-left text-sm text-foreground/80 hover:border-primary/40"
                 >
                   {r.name}
-                  <span className="mt-0.5 block text-[10px] text-[#9BB0B8]">
+                  <span className="mt-0.5 block text-[10px] text-muted-foreground">
                     {r.clips.length} clips · {r.origin}
                   </span>
                 </button>
               </li>
             ))}
             {favorites.map((f) => (
-              <li key={f.id} className="tml-glass px-3 py-2 text-sm text-[#C8D8DE]">
+              <li key={f.id} className="tml-glass px-3 py-2 text-sm text-foreground/80">
                 ★ {f.name}
               </li>
             ))}
             {!routines.length && !favorites.length ? (
-              <li className="text-sm text-[#9BB0B8]">Nothing saved yet.</li>
+              <li className="text-sm text-muted-foreground">Nothing saved yet.</li>
             ) : null}
           </ul>
         </div>
