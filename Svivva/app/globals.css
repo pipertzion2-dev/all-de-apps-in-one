@@ -280,6 +280,30 @@
   .glow-rose {
     box-shadow: 0 0 60px rgba(215, 130, 178, 0.12);
   }
+
+  /* THE MOVES LIKE — clear colored glass (ZZAI teal / magenta tints) */
+  .tml-glass {
+    @apply rounded-2xl border border-border/40 bg-card/35 backdrop-blur-xl;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.22);
+  }
+  .tml-glass-teal {
+    @apply rounded-2xl border backdrop-blur-xl;
+    background: hsl(197 45% 50% / 0.14);
+    border-color: hsl(197 45% 50% / 0.35);
+    box-shadow: 0 8px 36px rgba(91, 141, 168, 0.18);
+  }
+  .tml-glass-magenta {
+    @apply rounded-2xl border backdrop-blur-xl;
+    background: hsl(315 60% 45% / 0.16);
+    border-color: hsl(315 70% 55% / 0.35);
+    box-shadow: 0 8px 36px rgba(196, 74, 154, 0.2);
+  }
+  .tml-glass-nav {
+    background: hsl(180 15% 6% / 0.55);
+    border-color: hsl(189 20% 88% / 0.12);
+    @apply backdrop-blur-2xl;
+    box-shadow: 0 -4px 32px rgba(0, 0, 0, 0.35);
+  }
 }
 
 @keyframes subtle-tilt {

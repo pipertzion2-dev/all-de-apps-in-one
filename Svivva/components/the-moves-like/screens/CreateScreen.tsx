@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { FrontCameraViewport } from "@/components/the-moves-like/FrontCameraViewport";
+import { GlassButton, GlassDock, GlassPanel } from "@/components/the-moves-like/ui/Glass";
 import { useFrontCamera } from "@/lib/the-moves-like/use-front-camera";
 import { useMovesLikeStore } from "@/lib/the-moves-like/store";
 
@@ -86,7 +87,7 @@ export function CreateScreen() {
         overlay={
           <>
             <div className="absolute inset-x-0 top-0 flex items-start justify-between p-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
-              <div>
+              <GlassPanel tint="teal" className="px-3 py-2" padding={false}>
                 <p className="text-[10px] uppercase tracking-[0.18em] text-[#90C4D8]">
                   Create · Front camera
                 </p>
@@ -96,74 +97,78 @@ export function CreateScreen() {
                   className="mt-1 w-[min(60vw,220px)] border-b border-white/30 bg-transparent text-lg font-semibold text-white outline-none"
                   aria-label="Take label"
                 />
-              </div>
+              </GlassPanel>
               {recording ? (
-                <span className="rounded-full bg-[#C44A9A] px-3 py-1 text-xs font-semibold text-white">
+                <span className="tml-glass-magenta px-3 py-1.5 text-xs font-semibold text-white">
                   REC {elapsed}s
                 </span>
               ) : (
-                <span className="rounded-full bg-black/50 px-3 py-1 text-[10px] uppercase tracking-[0.12em] text-[#90C4D8]">
+                <span className="tml-glass-teal px-3 py-1.5 text-[10px] uppercase tracking-[0.12em] text-[#d8eef6]">
                   {camera.active ? "Ready" : "Camera"}
                 </span>
               )}
             </div>
 
-            <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-4 p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
-              <p className="max-w-xs text-center text-xs text-white/80">
-                Hold your phone like a selfie video. Front camera stays mirrored for framing.
-              </p>
+            <div className="absolute inset-x-0 bottom-0 p-4 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+              <GlassDock className="flex flex-col items-center gap-4">
+                <p className="max-w-xs text-center text-xs text-white/85">
+                  Hold your phone like a selfie video. Front camera stays mirrored for framing.
+                </p>
 
-              <div className="flex items-center gap-6">
-                <button
-                  type="button"
-                  onClick={() => setScreen("learn")}
-                  className="min-h-[44px] text-xs uppercase tracking-[0.14em] text-[#90C4D8]"
-                >
-                  Practice
-                </button>
-
-                {!recording ? (
-                  <button
+                <div className="flex items-center gap-6">
+                  <GlassButton
                     type="button"
-                    disabled={!camera.active}
-                    onClick={startRecording}
-                    className="flex h-[72px] w-[72px] items-center justify-center rounded-full border-4 border-white bg-[#C44A9A] disabled:opacity-40"
-                    aria-label="Start recording"
+                    variant="ghost"
+                    className="text-primary"
+                    onClick={() => setScreen("learn")}
                   >
-                    <span className="h-14 w-14 rounded-full bg-[#C44A9A]" />
-                  </button>
-                ) : (
-                  <button
+                    Practice
+                  </GlassButton>
+
+                  {!recording ? (
+                    <button
+                      type="button"
+                      disabled={!camera.active}
+                      onClick={startRecording}
+                      className="flex h-[72px] w-[72px] items-center justify-center rounded-full border-4 border-white/80 bg-[hsl(315_70%_42%/0.75)] shadow-[0_0_32px_rgba(196,74,154,0.45)] backdrop-blur-md disabled:opacity-40"
+                      aria-label="Start recording"
+                    >
+                      <span className="h-14 w-14 rounded-full bg-[hsl(315_70%_48%/0.95)]" />
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={stopRecording}
+                      className="flex h-[72px] w-[72px] items-center justify-center rounded-full border-4 border-white/80 bg-white/15 backdrop-blur-md"
+                      aria-label="Stop recording"
+                    >
+                      <span className="h-7 w-7 rounded-sm bg-[hsl(315_70%_48%)]" />
+                    </button>
+                  )}
+
+                  <GlassButton
                     type="button"
-                    onClick={stopRecording}
-                    className="flex h-[72px] w-[72px] items-center justify-center rounded-full border-4 border-white bg-white/20"
-                    aria-label="Stop recording"
+                    variant="ghost"
+                    className="text-[#E8A0D0]"
+                    onClick={() => setScreen("play")}
                   >
-                    <span className="h-7 w-7 rounded-sm bg-[#C44A9A]" />
-                  </button>
-                )}
+                    Clash
+                  </GlassButton>
+                </div>
 
-                <button
-                  type="button"
-                  onClick={() => setScreen("play")}
-                  className="min-h-[44px] text-xs uppercase tracking-[0.14em] text-[#E8A0D0]"
-                >
-                  Clash
-                </button>
-              </div>
-
-              {!camera.active && !camera.starting ? (
-                <button
-                  type="button"
-                  onClick={() => void camera.start()}
-                  className="w-full max-w-sm min-h-[48px] bg-[#5B8DA8] text-sm font-semibold text-[#071014]"
-                >
-                  Enable front camera
-                </button>
-              ) : null}
-              {camera.error ? (
-                <p className="text-center text-xs text-[#E07070]">{camera.error}</p>
-              ) : null}
+                {!camera.active && !camera.starting ? (
+                  <GlassButton
+                    type="button"
+                    className="w-full max-w-sm"
+                    onClick={() => void camera.start()}
+                  >
+                    Enable front camera
+                  </GlassButton>
+                ) : null}
+                {camera.error ? (
+                  <p className="text-center text-xs text-destructive">{camera.error}</p>
+                ) : null}
+              </GlassDock>
             </div>
           </>
         }

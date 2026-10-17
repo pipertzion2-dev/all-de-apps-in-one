@@ -121,7 +121,7 @@ export function StudioScreen() {
       </header>
 
       <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
-        <div className="min-h-[280px] overflow-hidden border border-white/10">
+        <div className="min-h-[280px] overflow-hidden tml-glass">
           <MovementStage
             moveIds={stageMoves.slice(0, 4)}
             mode="choreo"
@@ -130,7 +130,7 @@ export function StudioScreen() {
           />
         </div>
 
-        <div className="space-y-3 border border-white/10 bg-white/[0.03] p-4">
+        <div className="tml-glass space-y-3 p-4">
           <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-[#90C4D8]">
             Sequence brief
           </h3>
@@ -138,7 +138,7 @@ export function StudioScreen() {
             <label className="text-[#9BB0B8]">
               Style
               <select
-                className="mt-1 w-full border border-white/15 bg-black/50 px-2 py-2 text-white"
+                className="mt-1 w-full rounded-xl border border-border/40 bg-card/30 backdrop-blur-md px-2 py-2 text-white"
                 value={style}
                 onChange={(e) => setStyle(e.target.value as DanceStyle)}
               >
@@ -152,7 +152,7 @@ export function StudioScreen() {
             <label className="text-[#9BB0B8]">
               Level
               <select
-                className="mt-1 w-full border border-white/15 bg-black/50 px-2 py-2 text-white"
+                className="mt-1 w-full rounded-xl border border-border/40 bg-card/30 backdrop-blur-md px-2 py-2 text-white"
                 value={level}
                 onChange={(e) => setLevel(e.target.value as SkillLevel)}
               >
@@ -166,7 +166,7 @@ export function StudioScreen() {
             <label className="text-[#9BB0B8]">
               Mood
               <select
-                className="mt-1 w-full border border-white/15 bg-black/50 px-2 py-2 text-white"
+                className="mt-1 w-full rounded-xl border border-border/40 bg-card/30 backdrop-blur-md px-2 py-2 text-white"
                 value={mood}
                 onChange={(e) => setMood(e.target.value as MusicalMood)}
               >
@@ -180,7 +180,7 @@ export function StudioScreen() {
             <label className="text-[#9BB0B8]">
               Energy
               <select
-                className="mt-1 w-full border border-white/15 bg-black/50 px-2 py-2 text-white"
+                className="mt-1 w-full rounded-xl border border-border/40 bg-card/30 backdrop-blur-md px-2 py-2 text-white"
                 value={energy}
                 onChange={(e) => setEnergy(e.target.value as EnergyLevel)}
               >
@@ -215,7 +215,7 @@ export function StudioScreen() {
             <button
               type="button"
               onClick={() => newBlankRoutine()}
-              className="rounded-md border border-white/20 px-3 py-2 text-xs uppercase tracking-[0.12em] text-white"
+              className="rounded-md border border-border/40 bg-white/5 backdrop-blur-md px-3 py-2 text-xs uppercase tracking-[0.12em] text-white"
             >
               Blank routine
             </button>
@@ -251,7 +251,7 @@ export function StudioScreen() {
               type="button"
               disabled={!activeRoutine}
               onClick={() => activeRoutine && saveRoutine(activeRoutine)}
-              className="rounded-md border border-white/20 px-3 py-1.5 text-xs text-white disabled:opacity-40"
+              className="rounded-md border border-border/40 bg-white/5 backdrop-blur-md px-3 py-1.5 text-xs text-white disabled:opacity-40"
             >
               Save
             </button>
@@ -259,14 +259,14 @@ export function StudioScreen() {
               type="button"
               disabled={!activeRoutine}
               onClick={() => void share()}
-              className="rounded-md border border-white/20 px-3 py-1.5 text-xs text-white disabled:opacity-40"
+              className="rounded-md border border-border/40 bg-white/5 backdrop-blur-md px-3 py-1.5 text-xs text-white disabled:opacity-40"
             >
               Export / share text
             </button>
           </div>
         </div>
         {shareMsg ? (
-          <pre className="overflow-x-auto whitespace-pre-wrap border border-white/10 bg-black/40 p-3 text-xs text-[#C8D8DE]">
+          <pre className="overflow-x-auto whitespace-pre-wrap tml-glass bg-black/40 p-3 text-xs text-[#C8D8DE]">
             {shareMsg}
           </pre>
         ) : null}
@@ -281,7 +281,7 @@ export function StudioScreen() {
               return (
                 <li
                   key={clip.id}
-                  className="flex flex-wrap items-center gap-2 border border-white/10 bg-black/30 px-3 py-2"
+                  className="flex flex-wrap items-center gap-2 tml-glass bg-black/30 px-3 py-2"
                 >
                   <span className="w-6 text-xs text-[#9BB0B8]">{index + 1}</span>
                   <span className="min-w-[8rem] flex-1 text-sm text-white">
@@ -298,7 +298,7 @@ export function StudioScreen() {
                       max={32}
                       value={clip.durationBeats}
                       onChange={(e) => updateClipDuration(clip.id, Number(e.target.value))}
-                      className="w-14 border border-white/15 bg-black/50 px-1 py-0.5 text-white"
+                      className="w-14 rounded-xl border border-border/40 bg-card/30 backdrop-blur-md px-1 py-0.5 text-white"
                     />
                   </label>
                   <button
@@ -337,7 +337,7 @@ export function StudioScreen() {
         </h3>
         <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {MOVES_LIBRARY.map((m) => (
-            <li key={m.id} className="flex items-center gap-2 border border-white/10 px-3 py-2">
+            <li key={m.id} className="flex items-center gap-2 tml-glass px-3 py-2">
               <button
                 type="button"
                 onClick={() => {
@@ -368,7 +368,7 @@ export function StudioScreen() {
       </section>
 
       <section className="grid gap-4 lg:grid-cols-2">
-        <div className="border border-white/10 p-4">
+        <div className="tml-glass p-4">
           <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#90C4D8]">
             Motion DNA compare
           </h3>
@@ -379,7 +379,7 @@ export function StudioScreen() {
             {[0, 1].map((slot) => (
               <select
                 key={slot}
-                className="border border-white/15 bg-black/50 px-2 py-2 text-sm text-white"
+                className="rounded-xl border border-border/40 bg-card/30 backdrop-blur-md px-2 py-2 text-sm text-white"
                 value={compareMoveIds[slot as 0 | 1] ?? ""}
                 onChange={(e) => setCompareSlot(slot as 0 | 1, e.target.value || null)}
               >
@@ -392,7 +392,7 @@ export function StudioScreen() {
               </select>
             ))}
           </div>
-          <div className="mt-3 h-48 overflow-hidden border border-white/10">
+          <div className="mt-3 h-48 overflow-hidden tml-glass">
             <MovementStage moveIds={compareIds} mode="dna" interactive />
           </div>
           <button
@@ -404,12 +404,12 @@ export function StudioScreen() {
                 compareIds,
               )
             }
-            className="mt-3 rounded-md border border-white/20 px-3 py-2 text-xs text-white disabled:opacity-40"
+            className="mt-3 rounded-md border border-border/40 bg-white/5 backdrop-blur-md px-3 py-2 text-xs text-white disabled:opacity-40"
           >
             Save combination
           </button>
         </div>
-        <div className="border border-white/10 p-4">
+        <div className="tml-glass p-4">
           <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#90C4D8]">
             Saved routines & favorites
           </h3>
@@ -419,7 +419,7 @@ export function StudioScreen() {
                 <button
                   type="button"
                   onClick={() => setActiveRoutine(r)}
-                  className="w-full border border-white/10 px-3 py-2 text-left text-sm text-[#C8D8DE] hover:border-[#5B8DA8]/40"
+                  className="w-full tml-glass px-3 py-2 text-left text-sm text-[#C8D8DE] hover:border-[#5B8DA8]/40"
                 >
                   {r.name}
                   <span className="mt-0.5 block text-[10px] text-[#9BB0B8]">
@@ -429,7 +429,7 @@ export function StudioScreen() {
               </li>
             ))}
             {favorites.map((f) => (
-              <li key={f.id} className="border border-white/10 px-3 py-2 text-sm text-[#C8D8DE]">
+              <li key={f.id} className="tml-glass px-3 py-2 text-sm text-[#C8D8DE]">
                 ★ {f.name}
               </li>
             ))}

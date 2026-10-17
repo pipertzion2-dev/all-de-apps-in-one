@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { BrandMark } from "@/components/the-moves-like/BrandMark";
 import { MovesLikeNav } from "@/components/the-moves-like/MovesLikeNav";
+import { GlassMagentaButton } from "@/components/the-moves-like/ui/Glass";
 import { DiscoverScreen } from "@/components/the-moves-like/screens/DiscoverScreen";
 import { LearnScreen } from "@/components/the-moves-like/screens/LearnScreen";
 import { CreateScreen } from "@/components/the-moves-like/screens/CreateScreen";
@@ -15,6 +16,7 @@ import { MOVES_LIKE } from "@/lib/the-moves-like/brand";
 import { useMovesLikeStore } from "@/lib/the-moves-like/store";
 import type { MovesLikeScreen } from "@/lib/the-moves-like/types";
 import { prefersReducedMotion } from "@/lib/the-moves-like/performance";
+import { cn } from "@/lib/utils";
 
 function ScreenBody({ screen }: { screen: MovesLikeScreen }) {
   switch (screen) {
@@ -41,7 +43,7 @@ function WebGLFallback() {
   return (
     <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3 bg-[#071014] px-6 text-center">
       <BrandMark size="inline" />
-      <p className="max-w-md text-sm text-[#C8D8DE]">
+      <p className="tml-glass max-w-md p-4 text-sm text-[#C8D8DE]">
         WebGL is unavailable. Front-camera Learn and Create still work — 3D stages are skipped.
       </p>
     </div>
@@ -73,21 +75,31 @@ export function MovesLikeApp() {
     <div
       data-the-moves-like
       data-page-shell
-      className="relative min-h-[100dvh] bg-[#071014] text-white"
-      style={{ fontFamily: '"Zc", "Segoe UI", sans-serif' }}
+      className="relative min-h-[100dvh] bg-[#071014] text-foreground"
+      style={{ fontFamily: '"Zc", sans-serif' }}
     >
-      {/* Compact header — stays out of the way in camera modes */}
+      {/* Soft site-like atmosphere wash */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-50"
+        style={{
+          background:
+            "radial-gradient(ellipse 70% 45% at 15% 0%, hsl(197 45% 50% / 0.22), transparent 55%), radial-gradient(ellipse 55% 40% at 90% 8%, hsl(315 60% 45% / 0.16), transparent 50%)",
+        }}
+      />
+
       <header
-        className={`z-30 flex items-center justify-between gap-3 px-3 py-2 sm:px-6 sm:py-3 ${
+        className={cn(
+          "z-30 flex items-center justify-between gap-3 px-3 py-2 sm:px-6 sm:py-3",
           hideChromeOnDiscover || cameraMode
-            ? "absolute inset-x-0 top-0 bg-gradient-to-b from-black/75 to-transparent pt-[max(0.5rem,env(safe-area-inset-top))]"
-            : "relative border-b border-white/10 bg-black/60 pt-[max(0.25rem,env(safe-area-inset-top))] backdrop-blur-md"
-        }`}
+            ? "absolute inset-x-0 top-0 bg-gradient-to-b from-black/60 to-transparent pt-[max(0.5rem,env(safe-area-inset-top))]"
+            : "relative border-b border-border/30 bg-card/25 pt-[max(0.25rem,env(safe-area-inset-top))] backdrop-blur-xl",
+        )}
       >
         <div className="flex min-w-0 items-center gap-3">
           <Link
             href="/"
-            className="shrink-0 text-[10px] uppercase tracking-[0.2em] text-[#9BB0B8] hover:text-white"
+            className="shrink-0 rounded-full border border-border/40 bg-card/40 px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground backdrop-blur-md hover:border-primary/40 hover:text-foreground"
           >
             ZZAI
           </Link>
@@ -101,49 +113,50 @@ export function MovesLikeApp() {
               <BrandMark size="header" priority={screen === "discover"} />
             </button>
           ) : (
-            <p className="truncate text-xs font-semibold tracking-wide text-white/90">
+            <span className="tml-glass-teal px-3 py-1 text-xs font-semibold tracking-wide text-[#d8eef6]">
               {screen === "learn" ? "Practice" : "Record"}
-            </p>
+            </span>
           )}
         </div>
         <div className="flex items-center gap-2">
           {!cameraMode ? (
-            <button
+            <GlassMagentaButton
               type="button"
+              size="sm"
+              className="hidden sm:inline-flex"
               onClick={() => setScreen("learn")}
-              className="hidden min-h-[40px] rounded-full bg-[#C44A9A] px-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-white sm:inline-flex sm:items-center"
             >
               Front cam
-            </button>
+            </GlassMagentaButton>
           ) : null}
           <Link
             href="/play"
-            className="shrink-0 text-[10px] uppercase tracking-[0.16em] text-[#9BB0B8] hover:text-[#90C4D8]"
+            className="shrink-0 rounded-full border border-border/40 bg-card/30 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-muted-foreground backdrop-blur-md hover:border-primary/40 hover:text-[#90C4D8]"
           >
             Play desk
           </Link>
         </div>
       </header>
 
-      {/* Top nav desktop only; mobile uses fixed bottom tabs inside MovesLikeNav */}
       <div
-        className={`z-30 hidden sm:block ${
-          hideChromeOnDiscover ? "absolute inset-x-0 top-14" : "sticky top-0"
-        }`}
+        className={cn(
+          "z-30 hidden sm:block",
+          hideChromeOnDiscover ? "absolute inset-x-0 top-14" : "sticky top-0",
+        )}
       >
         <MovesLikeNav screen={screen} onChange={setScreen} overlay={hideChromeOnDiscover} />
       </div>
-      {/* Mobile bottom nav always mounted */}
       <div className="sm:hidden">
         <MovesLikeNav screen={screen} onChange={setScreen} />
       </div>
 
       <main
-        className={`relative z-10 ${
+        className={cn(
+          "relative z-10",
           cameraMode || hideChromeOnDiscover
             ? ""
-            : "pb-[calc(3.75rem+env(safe-area-inset-bottom))] sm:pb-8"
-        }`}
+            : "pb-[calc(3.75rem+env(safe-area-inset-bottom))] sm:pb-8",
+        )}
       >
         {!webgl && (screen === "discover" || screen === "studio" || screen === "play") ? (
           <WebGLFallback />

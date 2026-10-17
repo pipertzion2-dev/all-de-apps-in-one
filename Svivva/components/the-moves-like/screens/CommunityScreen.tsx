@@ -30,7 +30,7 @@ export function CommunityScreen() {
         </h3>
         <ul className="mt-3 grid gap-3 sm:grid-cols-3">
           {CREATORS.map((c) => (
-            <li key={c.name} className="border border-white/10 bg-white/[0.03] p-4">
+            <li key={c.name} className="tml-glass p-4">
               <p className="font-semibold text-white">{c.name}</p>
               <p className="mt-1 text-xs text-[#9BB0B8]">{c.focus}</p>
               <p className="mt-2 text-[10px] uppercase tracking-[0.14em] text-[#C44A9A]">
@@ -60,7 +60,7 @@ export function CommunityScreen() {
         ) : (
           <ul className="mt-3 space-y-2">
             {challenges.map((c) => (
-              <li key={c.id} className="border border-white/10 px-4 py-3">
+              <li key={c.id} className="tml-glass px-4 py-3">
                 <p className="text-sm text-white">{c.prompt}</p>
                 <p className="mt-1 text-xs text-[#9BB0B8]">
                   {MOVES_LIBRARY.find((m) => m.id === c.moveId)?.name} · {c.responses.length}{" "}
@@ -90,7 +90,7 @@ export function CommunityScreen() {
         ) : (
           <ul className="mt-3 grid gap-2 sm:grid-cols-2">
             {favorites.map((f) => (
-              <li key={f.id} className="border border-white/10 px-3 py-2 text-sm text-[#C8D8DE]">
+              <li key={f.id} className="tml-glass px-3 py-2 text-sm text-[#C8D8DE]">
                 {f.name}
               </li>
             ))}

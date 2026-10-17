@@ -23,15 +23,15 @@ export function ProfileScreen() {
       </header>
 
       <section className="grid gap-4 sm:grid-cols-3">
-        <div className="border border-white/10 bg-white/[0.03] p-4">
+        <div className="tml-glass p-4">
           <p className="text-[10px] uppercase tracking-[0.16em] text-[#90C4D8]">Routines</p>
           <p className="mt-2 text-3xl font-bold text-white">{routines.length}</p>
         </div>
-        <div className="border border-white/10 bg-white/[0.03] p-4">
+        <div className="tml-glass p-4">
           <p className="text-[10px] uppercase tracking-[0.16em] text-[#90C4D8]">Favorites</p>
           <p className="mt-2 text-3xl font-bold text-white">{favorites.length}</p>
         </div>
-        <div className="border border-white/10 bg-white/[0.03] p-4">
+        <div className="tml-glass p-4">
           <p className="text-[10px] uppercase tracking-[0.16em] text-[#90C4D8]">Practice logs</p>
           <p className="mt-2 text-3xl font-bold text-white">{practiceHistory.length}</p>
         </div>
@@ -62,10 +62,7 @@ export function ProfileScreen() {
         </h3>
         <ul className="mt-3 space-y-2">
           {routines.map((r) => (
-            <li
-              key={r.id}
-              className="flex items-center justify-between border border-white/10 px-3 py-2"
-            >
+            <li key={r.id} className="flex items-center justify-between tml-glass px-3 py-2">
               <div>
                 <p className="text-sm text-white">{r.name}</p>
                 <p className="text-[10px] text-[#9BB0B8]">

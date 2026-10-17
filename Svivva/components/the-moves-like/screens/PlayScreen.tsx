@@ -164,14 +164,14 @@ export function PlayScreen() {
         <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#90C4D8]">
           Rhythm Portal
         </h3>
-        <div className="min-h-[260px] overflow-hidden border border-white/10">
+        <div className="min-h-[260px] overflow-hidden tml-glass">
           <MovementStage
             moveIds={selectedMoveIds.length ? selectedMoveIds : ["afro-bounce", "jack-in"]}
             mode="rhythm"
             audio={audio}
           />
         </div>
-        <div className="grid gap-3 border border-white/10 bg-white/[0.03] p-4 lg:grid-cols-2">
+        <div className="grid gap-3 tml-glass p-4 lg:grid-cols-2">
           <div className="space-y-3">
             <label className="block text-xs uppercase tracking-[0.14em] text-[#9BB0B8]">
               Music file
@@ -200,7 +200,7 @@ export function PlayScreen() {
             <button
               type="button"
               onClick={applyManualBpm}
-              className="rounded-md border border-white/20 px-3 py-2 text-xs uppercase tracking-[0.12em] text-white"
+              className="rounded-md border border-border/40 bg-white/5 backdrop-blur-md px-3 py-2 text-xs uppercase tracking-[0.12em] text-white"
             >
               Lock beat grid
             </button>
@@ -233,14 +233,14 @@ export function PlayScreen() {
           Style Clash · async
         </h3>
         <div className="grid gap-4 lg:grid-cols-2">
-          <div className="space-y-3 border border-white/10 bg-white/[0.03] p-4">
+          <div className="space-y-3 tml-glass p-4">
             <label className="block text-xs text-[#9BB0B8]">
               Challenge prompt
               <textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 rows={3}
-                className="mt-2 w-full border border-white/15 bg-black/40 px-3 py-2 text-sm text-white"
+                className="mt-2 w-full rounded-xl border border-border/40 bg-card/30 backdrop-blur-md px-3 py-2 text-sm text-white"
               />
             </label>
             <label className="block text-xs text-[#9BB0B8]">
@@ -248,7 +248,7 @@ export function PlayScreen() {
               <select
                 value={challengeMoveId}
                 onChange={(e) => setChallengeMoveId(e.target.value)}
-                className="mt-2 w-full border border-white/15 bg-black/40 px-3 py-2 text-sm text-white"
+                className="mt-2 w-full rounded-xl border border-border/40 bg-card/30 backdrop-blur-md px-3 py-2 text-sm text-white"
               >
                 {MOVES_LIBRARY.map((m) => (
                   <option key={m.id} value={m.id}>
@@ -264,7 +264,7 @@ export function PlayScreen() {
             >
               Create challenge
             </button>
-            <div className="h-40 overflow-hidden border border-white/10">
+            <div className="h-40 overflow-hidden tml-glass">
               <MovementStage moveIds={[challengeMoveId]} mode="dna" interactive={false} />
             </div>
             <p className="text-xs text-[#9BB0B8]">
@@ -274,7 +274,7 @@ export function PlayScreen() {
             </p>
           </div>
 
-          <div className="space-y-3 border border-white/10 bg-white/[0.03] p-4">
+          <div className="space-y-3 tml-glass p-4">
             <h4 className="text-xs font-semibold uppercase tracking-[0.14em] text-[#C44A9A]">
               Respond
             </h4>
@@ -283,7 +283,7 @@ export function PlayScreen() {
               <input
                 value={author}
                 onChange={(e) => setAuthor(e.target.value)}
-                className="mt-2 w-full border border-white/15 bg-black/40 px-3 py-2 text-sm text-white"
+                className="mt-2 w-full rounded-xl border border-border/40 bg-card/30 backdrop-blur-md px-3 py-2 text-sm text-white"
               />
             </label>
             <label className="block text-xs text-[#9BB0B8]">
@@ -291,7 +291,7 @@ export function PlayScreen() {
               <input
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                className="mt-2 w-full border border-white/15 bg-black/40 px-3 py-2 text-sm text-white"
+                className="mt-2 w-full rounded-xl border border-border/40 bg-card/30 backdrop-blur-md px-3 py-2 text-sm text-white"
               />
             </label>
             <label className="block text-xs text-[#9BB0B8]">
@@ -323,14 +323,14 @@ export function PlayScreen() {
         </div>
 
         {active ? (
-          <div className="border border-white/10 p-4">
+          <div className="tml-glass p-4">
             <h4 className="text-sm font-semibold text-white">{active.prompt}</h4>
             <p className="mt-1 text-xs text-[#9BB0B8]">
               Move: {getMove(active.moveId)?.name} · {active.responses.length} responses
             </p>
             <ul className="mt-4 grid gap-3 sm:grid-cols-2">
               {active.responses.map((r) => (
-                <li key={r.id} className="border border-white/10 bg-black/30 p-3">
+                <li key={r.id} className="tml-glass bg-black/30 p-3">
                   <p className="text-sm font-semibold text-white">{r.authorLabel}</p>
                   <p className="text-xs text-[#9BB0B8]">{r.note}</p>
                   {r.videoObjectUrl ? (

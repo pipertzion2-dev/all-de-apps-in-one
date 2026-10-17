@@ -1,19 +1,26 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
 import { BrandMark } from "@/components/the-moves-like/BrandMark";
+import {
+  GlassButton,
+  GlassChip,
+  GlassMagentaButton,
+  GlassPanel,
+} from "@/components/the-moves-like/ui/Glass";
 import { MOVES_LIKE } from "@/lib/the-moves-like/brand";
 import { MOVES_LIBRARY } from "@/lib/the-moves-like/moves-library";
 import { useMovesLikeStore } from "@/lib/the-moves-like/store";
-import { useEffect, useState } from "react";
 import { preferMobileCameraUi } from "@/lib/the-moves-like/use-front-camera";
+import { cn } from "@/lib/utils";
 
 const MovementStage = dynamic(
   () => import("@/components/the-moves-like/scenes/MovementStage").then((m) => m.MovementStage),
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-full min-h-[280px] items-center justify-center bg-[#071014] text-sm text-[#90C4D8]">
+      <div className="flex h-full min-h-[280px] items-center justify-center bg-[#071014] text-sm text-primary">
         Loading stage…
       </div>
     ),
@@ -43,56 +50,68 @@ export function DiscoverScreen() {
           />
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#071014] via-[#071014]/50 to-black/40 sm:bg-gradient-to-r sm:from-[#071014]/95 sm:via-[#071014]/55 sm:to-transparent"
+            className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#071014] via-[#071014]/45 to-black/30 sm:bg-gradient-to-r sm:from-[#071014]/90 sm:via-[#071014]/50 sm:to-transparent"
           />
         </div>
 
-        <div className="relative z-10 flex min-h-[100dvh] flex-col justify-end px-5 pb-24 pt-28 sm:px-10 sm:pb-20">
-          <BrandMark
-            size="hero"
-            priority
-            className="mb-4 max-w-[min(92vw,420px)] drop-shadow-[0_12px_40px_rgba(0,0,0,0.55)] sm:mb-5 sm:max-w-none"
-          />
-          <p className="max-w-md text-base leading-relaxed text-[#D5E4EA] sm:text-lg">
-            {mobileCam
-              ? "Built for your front camera — practice, record, and clash from your phone."
-              : MOVES_LIKE.tagline}
-          </p>
-          <div className="mt-6 flex flex-col gap-3 sm:mt-7 sm:flex-row sm:flex-wrap">
-            <button
-              type="button"
-              onClick={() => setScreen("learn")}
-              className="min-h-[52px] bg-[#C44A9A] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#E8A0D0] hover:text-[#071014]"
-            >
-              Open front camera · Practice
-            </button>
-            <button
-              type="button"
-              onClick={() => setScreen("create")}
-              className="min-h-[52px] border border-white/30 bg-black/30 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition hover:border-[#5B8DA8]"
-            >
-              Record a take
-            </button>
-            <button
-              type="button"
-              onClick={() => setScreen("studio")}
-              className="min-h-[48px] text-sm font-semibold text-[#90C4D8] underline-offset-4 hover:underline sm:min-h-[52px] sm:border sm:border-white/20 sm:px-6 sm:no-underline"
-            >
-              Studio
-            </button>
-          </div>
-          <p className="mt-6 text-[10px] uppercase tracking-[0.18em] text-[#7A949C] sm:mt-8 sm:tracking-[0.22em]">
-            iPhone & Android · selfie camera first · hold phone upright
-          </p>
+        <div className="relative z-10 flex min-h-[100dvh] flex-col justify-end px-4 pb-24 pt-28 sm:px-10 sm:pb-20">
+          <GlassPanel
+            tint="ink"
+            className="max-w-xl border-white/10 bg-[hsl(180_20%_6%/0.42)] p-5 sm:p-7"
+          >
+            <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.28em] text-primary">
+              ZZAI · Front camera dance
+            </p>
+            <BrandMark
+              size="hero"
+              priority
+              className="mb-4 max-w-[min(86vw,400px)] drop-shadow-[0_12px_40px_rgba(0,0,0,0.45)]"
+            />
+            <p className="max-w-md text-sm leading-relaxed text-[#D5E4EA] sm:text-base">
+              {mobileCam
+                ? "Built for your front camera — practice, record, and clash from your phone."
+                : MOVES_LIKE.tagline}
+            </p>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <GlassMagentaButton
+                type="button"
+                className="min-h-12"
+                onClick={() => setScreen("learn")}
+              >
+                Open front camera · Practice
+              </GlassMagentaButton>
+              <GlassButton
+                type="button"
+                variant="outline"
+                className="min-h-12"
+                onClick={() => setScreen("create")}
+              >
+                Record a take
+              </GlassButton>
+              <GlassButton
+                type="button"
+                variant="ghost"
+                className="min-h-11 text-primary"
+                onClick={() => setScreen("studio")}
+              >
+                Studio
+              </GlassButton>
+            </div>
+            <p className="mt-5 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              iPhone & Android · selfie camera first · clear glass UI
+            </p>
+          </GlassPanel>
         </div>
       </section>
 
-      <section className="border-t border-white/10 px-5 py-10 sm:px-10 sm:py-12">
-        <h2 className="text-xl font-semibold tracking-tight text-white">Pick a move</h2>
-        <p className="mt-2 max-w-xl text-sm text-[#9BB0B8]">
-          Tap a move, then Practice with your front camera — or drop it into Studio.
+      <section className="relative border-t border-border/30 px-4 py-10 sm:px-10 sm:py-12">
+        <GlassPanel tint="teal" className="mb-6 inline-block px-4 py-2">
+          <h2 className="text-lg font-semibold tracking-tight text-[#e8f4f8]">Pick a move</h2>
+        </GlassPanel>
+        <p className="mb-6 max-w-xl text-sm text-muted-foreground">
+          Tap a move, then Practice with your front camera — or open Studio.
         </p>
-        <ul className="mt-6 grid gap-3 sm:mt-8 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-6 lg:grid-cols-3">
+        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {MOVES_LIBRARY.map((move) => {
             const on = selectedMoveIds.includes(move.id);
             return (
@@ -100,34 +119,36 @@ export function DiscoverScreen() {
                 <button
                   type="button"
                   onClick={() => toggleMove(move.id)}
-                  className={`min-h-[56px] flex-1 border-b pb-3 text-left transition ${
-                    on ? "border-[#5B8DA8]" : "border-white/15"
-                  }`}
+                  className={cn(
+                    "min-h-[64px] flex-1 rounded-2xl border p-3 text-left backdrop-blur-xl transition",
+                    on
+                      ? "border-primary/45 bg-primary/15"
+                      : "border-border/40 bg-card/25 hover:border-primary/30 hover:bg-card/40",
+                  )}
                 >
                   <div className="flex items-baseline justify-between gap-3">
                     <h3
-                      className={`text-base font-semibold ${on ? "text-[#90C4D8]" : "text-white"}`}
+                      className={cn("text-base font-semibold", on ? "text-primary" : "text-white")}
                     >
                       {move.name}
                     </h3>
-                    <span className="text-[10px] uppercase tracking-[0.14em] text-[#C44A9A]">
+                    <span className="text-[10px] uppercase tracking-[0.14em] text-accent-foreground">
                       {move.style}
                     </span>
                   </div>
-                  <p className="mt-1 text-xs text-[#9BB0B8]">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     {move.level} · {move.beats} beats
                   </p>
                 </button>
-                <button
-                  type="button"
+                <GlassChip
+                  className="self-stretch rounded-2xl px-3"
                   onClick={() => {
                     if (!selectedMoveIds.includes(move.id)) toggleMove(move.id);
                     setScreen("learn");
                   }}
-                  className="min-h-[56px] shrink-0 self-stretch border border-[#C44A9A]/40 px-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#E8A0D0]"
                 >
                   Cam
-                </button>
+                </GlassChip>
               </li>
             );
           })}

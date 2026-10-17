@@ -12,6 +12,13 @@ import {
 } from "@/lib/the-moves-like/pose-tracker";
 import type { PoseFrame } from "@/lib/the-moves-like/types";
 import { FrontCameraViewport } from "@/components/the-moves-like/FrontCameraViewport";
+import {
+  GlassButton,
+  GlassChip,
+  GlassDock,
+  GlassMagentaButton,
+  GlassPanel,
+} from "@/components/the-moves-like/ui/Glass";
 import { useFrontCamera } from "@/lib/the-moves-like/use-front-camera";
 
 export function LearnScreen() {
@@ -178,15 +185,14 @@ export function LearnScreen() {
               }`}
             />
 
-            {/* Top: move chip + camera status */}
             <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-3 pt-[max(0.75rem,env(safe-area-inset-top))] sm:p-4">
-              <div>
+              <GlassPanel tint="magenta" className="px-3 py-2" padding={false}>
                 <p className="text-[10px] uppercase tracking-[0.18em] text-[#E8A0D0]">
                   Ghost Mode · Front camera
                 </p>
-                <h2 className="text-lg font-bold text-white drop-shadow">{move.name}</h2>
-              </div>
-              <div className="rounded-full bg-black/50 px-3 py-1 text-[10px] uppercase tracking-[0.12em] text-[#90C4D8] backdrop-blur">
+                <h2 className="text-lg font-bold text-white">{move.name}</h2>
+              </GlassPanel>
+              <span className="tml-glass-teal px-3 py-1.5 text-[10px] uppercase tracking-[0.12em] text-[#d8eef6]">
                 {camera.starting
                   ? "Opening…"
                   : camera.active
@@ -194,16 +200,15 @@ export function LearnScreen() {
                       ? "Tracking"
                       : "Live"
                     : "Camera off"}
-              </div>
+              </span>
             </div>
 
-            {/* Reference PIP — ghost overlay for phones */}
             {showRef ? (
               <div
-                className="absolute right-3 top-20 w-[32vw] max-w-[140px] overflow-hidden rounded-lg border border-white/25 bg-black/60 shadow-lg sm:right-6 sm:top-24 sm:max-w-[180px]"
+                className="tml-glass absolute right-3 top-24 w-[32vw] max-w-[140px] overflow-hidden p-0 sm:right-6 sm:top-28 sm:max-w-[180px]"
                 style={{ opacity }}
               >
-                <p className="bg-black/50 px-2 py-0.5 text-[9px] uppercase tracking-[0.14em] text-[#C44A9A]">
+                <p className="bg-[hsl(315_60%_45%/0.35)] px-2 py-0.5 text-[9px] uppercase tracking-[0.14em] text-[#E8A0D0]">
                   Reference
                 </p>
                 <video
@@ -218,68 +223,54 @@ export function LearnScreen() {
               </div>
             ) : null}
 
-            {/* Bottom control dock — thumb reach */}
-            <div className="absolute inset-x-0 bottom-0 space-y-3 p-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-5">
-              <p className="text-center text-sm text-white/90 drop-shadow">
-                {move.tutorialSteps[step]}
-              </p>
+            <div className="absolute inset-x-0 bottom-0 p-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-5">
+              <GlassDock className="space-y-3">
+                <p className="text-center text-sm text-white/95">{move.tutorialSteps[step]}</p>
 
-              <div className="flex items-center justify-center gap-2 overflow-x-auto pb-1">
-                {MOVES_LIBRARY.slice(0, 8).map((m) => (
-                  <button
-                    key={m.id}
+                <div className="flex items-center justify-center gap-2 overflow-x-auto pb-1">
+                  {MOVES_LIBRARY.slice(0, 8).map((m) => (
+                    <GlassChip
+                      key={m.id}
+                      active={moveId === m.id}
+                      onClick={() => {
+                        setMoveId(m.id);
+                        setStep(0);
+                      }}
+                    >
+                      {m.name}
+                    </GlassChip>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-4 gap-2">
+                  <GlassMagentaButton
                     type="button"
-                    onClick={() => {
-                      setMoveId(m.id);
-                      setStep(0);
-                    }}
-                    className={`shrink-0 rounded-full px-3 py-2 text-[11px] font-semibold ${
-                      moveId === m.id
-                        ? "bg-[#5B8DA8] text-[#071014]"
-                        : "bg-white/15 text-white backdrop-blur"
-                    }`}
+                    className="col-span-2"
+                    onClick={() => void syncPlay()}
                   >
-                    {m.name}
-                  </button>
-                ))}
-              </div>
+                    Practice
+                  </GlassMagentaButton>
+                  <GlassButton
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowRef((v) => !v)}
+                  >
+                    {showRef ? "Hide ref" : "Show ref"}
+                  </GlassButton>
+                  <GlassButton type="button" variant="outline" onClick={() => setSheetOpen(true)}>
+                    Controls
+                  </GlassButton>
+                </div>
 
-              <div className="grid grid-cols-4 gap-2">
-                <button
-                  type="button"
-                  onClick={() => void syncPlay()}
-                  className="col-span-2 min-h-[48px] bg-[#C44A9A] text-sm font-semibold text-white"
-                >
-                  Practice
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowRef((v) => !v)}
-                  className="min-h-[48px] border border-white/25 bg-black/40 text-xs text-white"
-                >
-                  {showRef ? "Hide ref" : "Show ref"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSheetOpen(true)}
-                  className="min-h-[48px] border border-white/25 bg-black/40 text-xs text-white"
-                >
-                  Controls
-                </button>
-              </div>
-
-              {!camera.active && !camera.starting ? (
-                <button
-                  type="button"
-                  onClick={() => void camera.start()}
-                  className="w-full min-h-[52px] bg-[#5B8DA8] text-sm font-semibold text-[#071014]"
-                >
-                  Enable front camera
-                </button>
-              ) : null}
-              {camera.error ? (
-                <p className="text-center text-xs text-[#E07070]">{camera.error}</p>
-              ) : null}
+                {!camera.active && !camera.starting ? (
+                  <GlassButton type="button" className="w-full" onClick={() => void camera.start()}>
+                    Enable front camera
+                  </GlassButton>
+                ) : null}
+                {camera.error ? (
+                  <p className="text-center text-xs text-destructive">{camera.error}</p>
+                ) : null}
+              </GlassDock>
             </div>
           </>
         }
@@ -287,19 +278,23 @@ export function LearnScreen() {
 
       {/* Controls sheet */}
       {sheetOpen ? (
-        <div className="fixed inset-0 z-50 flex items-end bg-black/60 sm:items-center sm:justify-center">
-          <div className="max-h-[80dvh] w-full overflow-y-auto border-t border-white/15 bg-[#0c1619] p-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:max-w-md sm:rounded-xl sm:border">
+        <div className="fixed inset-0 z-50 flex items-end bg-black/55 backdrop-blur-sm sm:items-center sm:justify-center">
+          <GlassPanel
+            tint="ink"
+            className="max-h-[80dvh] w-full overflow-y-auto rounded-t-3xl border-white/15 bg-[hsl(180_15%_7%/0.82)] p-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:max-w-md sm:rounded-3xl"
+          >
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-[#90C4D8]">
+              <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-primary">
                 Practice controls
               </h3>
-              <button
+              <GlassButton
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={() => setSheetOpen(false)}
-                className="text-sm text-white"
               >
                 Done
-              </button>
+              </GlassButton>
             </div>
             <label className="block text-xs text-[#9BB0B8]">
               Ghost opacity ({Math.round(opacity * 100)}%)
@@ -329,21 +324,21 @@ export function LearnScreen() {
               <button
                 type="button"
                 onClick={() => stepFrame(-1)}
-                className="min-h-[44px] border border-white/20 px-3 text-xs text-white"
+                className="min-h-[44px] border border-border/40 bg-white/5 backdrop-blur-md px-3 text-xs text-white"
               >
                 −1 frame
               </button>
               <button
                 type="button"
                 onClick={() => stepFrame(1)}
-                className="min-h-[44px] border border-white/20 px-3 text-xs text-white"
+                className="min-h-[44px] border border-border/40 bg-white/5 backdrop-blur-md px-3 text-xs text-white"
               >
                 +1 frame
               </button>
               <button
                 type="button"
                 onClick={() => setShowSkeleton((v) => !v)}
-                className="min-h-[44px] border border-white/20 px-3 text-xs text-white"
+                className="min-h-[44px] border border-border/40 bg-white/5 backdrop-blur-md px-3 text-xs text-white"
               >
                 Skeleton {showSkeleton ? "on" : "off"}
               </button>
@@ -366,7 +361,7 @@ export function LearnScreen() {
                 type="button"
                 disabled={step === 0}
                 onClick={() => setStep((s) => Math.max(0, s - 1))}
-                className="min-h-[44px] flex-1 border border-white/20 text-xs disabled:opacity-40"
+                className="min-h-[44px] flex-1 border border-border/40 bg-white/5 backdrop-blur-md text-xs disabled:opacity-40"
               >
                 Prev step
               </button>
@@ -379,7 +374,7 @@ export function LearnScreen() {
                 Next step
               </button>
             </div>
-            <p className="mt-4 text-[11px] leading-relaxed text-[#9BB0B8]">
+            <p className="mt-4 text-[11px] leading-relaxed text-muted-foreground">
               Pose:{" "}
               {poseStatus === "ready"
                 ? "MediaPipe active (measured landmarks)"
@@ -392,7 +387,7 @@ export function LearnScreen() {
                 ? jointDist.value.toFixed(3)
                 : (jointDist.reason ?? "Not measured")}
             </p>
-          </div>
+          </GlassPanel>
         </div>
       ) : null}
     </div>
