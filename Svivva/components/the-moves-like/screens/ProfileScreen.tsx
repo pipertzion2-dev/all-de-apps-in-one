@@ -1,131 +1,154 @@
 "use client";
 
-import { getMove } from "@/lib/the-moves-like/moves-library";
+import {
+  TmlButton,
+  TmlInput,
+  TmlLabel,
+  TmlPanel,
+  TmlTextarea,
+} from "@/components/the-moves-like/ui/tml";
 import { useMovesLikeStore } from "@/lib/the-moves-like/store";
+import { MOVE_CATEGORIES } from "@/lib/the-moves-like/types";
 
 export function ProfileScreen() {
+  const profile = useMovesLikeStore((s) => s.profile);
+  const setProfile = useMovesLikeStore((s) => s.setProfile);
+  const movements = useMovesLikeStore((s) => s.movements);
   const routines = useMovesLikeStore((s) => s.routines);
-  const favorites = useMovesLikeStore((s) => s.favorites);
-  const practiceHistory = useMovesLikeStore((s) => s.practiceHistory);
-  const recordingsMeta = useMovesLikeStore((s) => s.recordingsMeta);
-  const selectedMoveIds = useMovesLikeStore((s) => s.selectedMoveIds);
   const setScreen = useMovesLikeStore((s) => s.setScreen);
-  const setActiveRoutine = useMovesLikeStore((s) => s.setActiveRoutine);
+
+  const userMoves = movements.filter((m) => m.source === "user");
+  const favorites = movements.filter((m) => m.favorite);
 
   return (
-    <div className="space-y-8 px-4 py-6 sm:px-8">
-      <header>
-        <h2 className="text-2xl font-bold text-foreground">Profile</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Local practice history, saved routines, recordings, and Motion DNA collection — stored in
-          this browser.
-        </p>
-      </header>
+    <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
+      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#C6FF00]">Profile</p>
+      <h1 className="mt-1 text-3xl font-black tracking-tight sm:text-4xl">Dancer portfolio</h1>
+      <p className="mt-2 text-sm text-[#8B919A]">
+        Creative identity, not a generic social profile. Data stays local until auth + cloud storage
+        ship.
+      </p>
 
-      <section className="grid gap-4 sm:grid-cols-3">
-        <div className="tml-glass p-4">
-          <p className="text-[10px] uppercase tracking-[0.16em] text-primary">Routines</p>
-          <p className="mt-2 text-3xl font-bold text-foreground">{routines.length}</p>
-        </div>
-        <div className="tml-glass p-4">
-          <p className="text-[10px] uppercase tracking-[0.16em] text-primary">Favorites</p>
-          <p className="mt-2 text-3xl font-bold text-foreground">{favorites.length}</p>
-        </div>
-        <div className="tml-glass p-4">
-          <p className="text-[10px] uppercase tracking-[0.16em] text-primary">Practice logs</p>
-          <p className="mt-2 text-3xl font-bold text-foreground">{practiceHistory.length}</p>
-        </div>
-      </section>
+      <div className="mt-6 grid gap-4 sm:grid-cols-[160px_1fr]">
+        <TmlPanel className="flex aspect-square items-center justify-center bg-[#1A1D24] text-4xl font-black text-[#C6FF00]">
+          {(profile.displayName || "?").slice(0, 1).toUpperCase()}
+        </TmlPanel>
+        <TmlPanel className="space-y-3 p-4">
+          <div>
+            <TmlLabel className="mb-1">Display name</TmlLabel>
+            <TmlInput
+              value={profile.displayName}
+              onChange={(e) => setProfile({ displayName: e.target.value })}
+            />
+          </div>
+          <div>
+            <TmlLabel className="mb-1">Username</TmlLabel>
+            <TmlInput
+              value={profile.username}
+              onChange={(e) =>
+                setProfile({ username: e.target.value.replace(/\s+/g, "").toLowerCase() })
+              }
+            />
+          </div>
+          <div>
+            <TmlLabel className="mb-1">Styles (comma separated)</TmlLabel>
+            <TmlInput
+              value={profile.styles.join(", ")}
+              onChange={(e) =>
+                setProfile({
+                  styles: e.target.value
+                    .split(",")
+                    .map((s) => s.trim())
+                    .filter(Boolean),
+                })
+              }
+            />
+          </div>
+          <div>
+            <TmlLabel className="mb-1">Bio</TmlLabel>
+            <TmlTextarea
+              value={profile.bio}
+              onChange={(e) => setProfile({ bio: e.target.value })}
+            />
+          </div>
+        </TmlPanel>
+      </div>
 
-      <section>
-        <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-primary">
-          Movement collection
-        </h3>
-        <ul className="mt-3 flex flex-wrap gap-2">
-          {selectedMoveIds.map((id) => (
-            <li
-              key={id}
-              className="border border-primary/40 bg-primary/10 px-3 py-1 text-xs text-primary"
-            >
-              {getMove(id)?.name ?? id}
-            </li>
-          ))}
-          {!selectedMoveIds.length ? (
-            <li className="text-sm text-muted-foreground">Pick moves on Discover or Studio.</li>
-          ) : null}
-        </ul>
-      </section>
+      <div className="mt-6 grid gap-3 sm:grid-cols-3">
+        <TmlPanel className="p-4">
+          <TmlLabel>Your moves</TmlLabel>
+          <p className="mt-2 text-3xl font-black text-[#C6FF00]">{userMoves.length}</p>
+        </TmlPanel>
+        <TmlPanel className="p-4">
+          <TmlLabel>Routines</TmlLabel>
+          <p className="mt-2 text-3xl font-black text-[#3D8BFF]">{routines.length}</p>
+        </TmlPanel>
+        <TmlPanel className="p-4">
+          <TmlLabel>Favorites</TmlLabel>
+          <p className="mt-2 text-3xl font-black text-[#8B5CFF]">{favorites.length}</p>
+        </TmlPanel>
+      </div>
 
-      <section>
-        <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-primary">
-          Saved routines
-        </h3>
-        <ul className="mt-3 space-y-2">
-          {routines.map((r) => (
-            <li key={r.id} className="flex items-center justify-between tml-glass px-3 py-2">
-              <div>
-                <p className="text-sm text-foreground">{r.name}</p>
-                <p className="text-[10px] text-muted-foreground">
-                  {r.clips.length} clips · {r.origin}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveRoutine(r);
-                  setScreen("studio");
-                }}
-                className="text-xs uppercase tracking-[0.12em] text-primary"
+      <TmlPanel className="mt-6 p-4">
+        <div className="flex items-center justify-between gap-2">
+          <TmlLabel>Signature movements</TmlLabel>
+          <TmlButton
+            type="button"
+            variant="ghost"
+            className="min-h-8 text-xs"
+            onClick={() => setScreen("moves")}
+          >
+            Open library
+          </TmlButton>
+        </div>
+        {!favorites.length ? (
+          <p className="mt-3 text-sm text-[#8B919A]">
+            Star moves in your library to feature them here.
+          </p>
+        ) : (
+          <ul className="mt-3 space-y-2">
+            {favorites.slice(0, 8).map((m) => (
+              <li
+                key={m.id}
+                className="flex items-center justify-between rounded-lg border border-[#2A2E38] px-3 py-2"
               >
-                Open
-              </button>
-            </li>
-          ))}
-          {!routines.length ? (
-            <li className="text-sm text-muted-foreground">No saved routines.</li>
-          ) : null}
-        </ul>
-      </section>
+                <span className="font-semibold">{m.name}</span>
+                <span className="text-[10px] uppercase tracking-[0.12em] text-[#8B919A]">
+                  {MOVE_CATEGORIES.find((c) => c.id === m.category)?.label}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </TmlPanel>
 
-      <section>
-        <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-primary">
-          Practice history
-        </h3>
-        <ul className="mt-3 max-h-48 space-y-1 overflow-y-auto">
-          {practiceHistory.map((p, i) => (
-            <li key={`${p.moveId}-${p.at}-${i}`} className="text-xs text-foreground/80">
-              {getMove(p.moveId)?.name ?? p.moveId} · {new Date(p.at).toLocaleString()}
-            </li>
-          ))}
-          {!practiceHistory.length ? (
-            <li className="text-sm text-muted-foreground">
-              Practice in Learn · Ghost Mode to log sessions.
-            </li>
-          ) : null}
-        </ul>
-      </section>
-
-      <section>
-        <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-primary">
-          Recordings
-        </h3>
-        <ul className="mt-3 space-y-1">
-          {recordingsMeta.map((r) => (
-            <li key={r.id} className="text-sm text-foreground/80">
-              {r.label} · {new Date(r.createdAt).toLocaleString()}
-            </li>
-          ))}
-          {!recordingsMeta.length ? (
-            <li className="text-sm text-muted-foreground">
-              Capture takes in{" "}
-              <button type="button" className="text-primary" onClick={() => setScreen("create")}>
-                Create
-              </button>
-              .
-            </li>
-          ) : null}
-        </ul>
-      </section>
+      <TmlPanel className="mt-4 p-4">
+        <div className="flex items-center justify-between gap-2">
+          <TmlLabel>Saved routines</TmlLabel>
+          <TmlButton
+            type="button"
+            variant="ghost"
+            className="min-h-8 text-xs"
+            onClick={() => setScreen("studio")}
+          >
+            Open Studio
+          </TmlButton>
+        </div>
+        {!routines.length ? (
+          <p className="mt-3 text-sm text-[#8B919A]">Build a set in Studio to showcase it here.</p>
+        ) : (
+          <ul className="mt-3 space-y-2">
+            {routines.map((r) => (
+              <li key={r.id} className="rounded-lg border border-[#2A2E38] px-3 py-2">
+                <p className="font-semibold">{r.name}</p>
+                <p className="text-[10px] uppercase tracking-[0.12em] text-[#8B919A]">
+                  {r.clips.length} clips · private (local)
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </TmlPanel>
     </div>
   );
 }

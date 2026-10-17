@@ -1,166 +1,76 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { BrandMark } from "@/components/the-moves-like/BrandMark";
 import { MovesLikeNav } from "@/components/the-moves-like/MovesLikeNav";
-import { GlassMagentaButton } from "@/components/the-moves-like/ui/Glass";
-import { DiscoverScreen } from "@/components/the-moves-like/screens/DiscoverScreen";
-import { LearnScreen } from "@/components/the-moves-like/screens/LearnScreen";
-import { CreateScreen } from "@/components/the-moves-like/screens/CreateScreen";
+import { TrainScreen } from "@/components/the-moves-like/screens/TrainScreen";
+import { MovesScreen } from "@/components/the-moves-like/screens/MovesScreen";
 import { StudioScreen } from "@/components/the-moves-like/screens/StudioScreen";
-import { PlayScreen } from "@/components/the-moves-like/screens/PlayScreen";
-import { CommunityScreen } from "@/components/the-moves-like/screens/CommunityScreen";
+import { CypherScreen } from "@/components/the-moves-like/screens/CypherScreen";
 import { ProfileScreen } from "@/components/the-moves-like/screens/ProfileScreen";
-import { MOVES_LIKE } from "@/lib/the-moves-like/brand";
 import { useMovesLikeStore } from "@/lib/the-moves-like/store";
 import type { MovesLikeScreen } from "@/lib/the-moves-like/types";
-import { prefersReducedMotion } from "@/lib/the-moves-like/performance";
-import { cn } from "@/lib/utils";
+import { MOVES_LIKE } from "@/lib/the-moves-like/brand";
 
 function ScreenBody({ screen }: { screen: MovesLikeScreen }) {
   switch (screen) {
-    case "discover":
-      return <DiscoverScreen />;
-    case "learn":
-      return <LearnScreen />;
-    case "create":
-      return <CreateScreen />;
+    case "train":
+      return <TrainScreen />;
+    case "moves":
+      return <MovesScreen />;
     case "studio":
       return <StudioScreen />;
-    case "play":
-      return <PlayScreen />;
-    case "community":
-      return <CommunityScreen />;
+    case "cypher":
+      return <CypherScreen />;
     case "profile":
       return <ProfileScreen />;
     default:
-      return <DiscoverScreen />;
+      return <TrainScreen />;
   }
 }
-
-function WebGLFallback() {
-  return (
-    <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3 bg-[#F7FBFC] px-6 text-center">
-      <BrandMark size="inline" />
-      <p className="tml-glass max-w-md p-4 text-sm text-muted-foreground">
-        WebGL is unavailable. Front-camera Learn and Create still work — 3D stages are skipped.
-      </p>
-    </div>
-  );
-}
-
-const CAMERA_SCREENS: MovesLikeScreen[] = ["learn", "create"];
 
 export function MovesLikeApp() {
   const screen = useMovesLikeStore((s) => s.screen);
   const setScreen = useMovesLikeStore((s) => s.setScreen);
-  const [webgl, setWebgl] = useState(true);
-
-  useEffect(() => {
-    try {
-      const canvas = document.createElement("canvas");
-      const ok = Boolean(canvas.getContext("webgl") || canvas.getContext("experimental-webgl"));
-      setWebgl(ok);
-    } catch {
-      setWebgl(false);
-    }
-    void prefersReducedMotion();
-  }, []);
-
-  const cameraMode = CAMERA_SCREENS.includes(screen);
-  const hideChromeOnDiscover = screen === "discover";
 
   return (
     <div
       data-the-moves-like
       data-page-shell
-      className="relative min-h-[100dvh] bg-[#F7FBFC] text-foreground"
-      style={{ fontFamily: '"Zc", sans-serif' }}
+      className="relative min-h-[100dvh] bg-[#08090B] text-white"
+      style={{ fontFamily: '"Zc", Inter, system-ui, sans-serif' }}
     >
-      {/* Soft glass-blue / purple wash on white paper */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0"
+        className="pointer-events-none absolute inset-0 opacity-40"
         style={{
           background:
-            "radial-gradient(ellipse 75% 50% at 12% 0%, rgba(109,145,179,0.22), transparent 55%), radial-gradient(ellipse 55% 42% at 92% 6%, rgba(172,129,175,0.2), transparent 52%), linear-gradient(180deg, #ffffff 0%, #F7FBFC 40%, #eef2f6 100%)",
+            "radial-gradient(ellipse 60% 40% at 10% 0%, rgba(198,255,0,0.08), transparent 55%), radial-gradient(ellipse 50% 35% at 90% 10%, rgba(61,139,255,0.1), transparent 50%)",
         }}
       />
 
-      <header
-        className={cn(
-          "z-30 flex items-center justify-between gap-3 px-3 py-2 sm:px-6 sm:py-3",
-          hideChromeOnDiscover || cameraMode
-            ? "absolute inset-x-0 top-0 bg-gradient-to-b from-white/80 to-transparent pt-[max(0.5rem,env(safe-area-inset-top))]"
-            : "relative border-b border-white/50 bg-[linear-gradient(180deg,rgba(255,255,255,0.55)_0%,rgba(255,255,255,0.22)_100%)] pt-[max(0.25rem,env(safe-area-inset-top))] backdrop-blur-xl backdrop-saturate-150",
-        )}
-      >
+      <header className="relative z-30 flex items-center justify-between gap-3 border-b border-[#2A2E38] px-3 py-2.5 pt-[max(0.5rem,env(safe-area-inset-top))] sm:px-6">
         <div className="flex min-w-0 items-center gap-3">
           <Link
             href="/"
-            className="shrink-0 rounded-full border border-border/50 bg-white/50 px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground backdrop-blur-md hover:border-primary/40 hover:text-foreground"
+            className="shrink-0 rounded-md border border-[#2A2E38] px-2 py-1 text-[10px] uppercase tracking-[0.2em] text-[#8B919A] hover:border-[#C6FF00]/40 hover:text-[#C6FF00]"
           >
             ZZAI
           </Link>
-          {!cameraMode ? (
-            <button
-              type="button"
-              onClick={() => setScreen("discover")}
-              className="min-w-0"
-              aria-label={MOVES_LIKE.name}
-            >
-              <BrandMark size="header" priority={screen === "discover"} />
-            </button>
-          ) : (
-            <span className="tml-glass-teal px-3 py-1 text-xs font-semibold tracking-wide text-primary">
-              {screen === "learn" ? "Practice" : "Record"}
-            </span>
-          )}
+          <button type="button" onClick={() => setScreen("train")} className="min-w-0 text-left">
+            <BrandMark size="header" />
+          </button>
         </div>
-        <div className="flex items-center gap-2">
-          {!cameraMode ? (
-            <GlassMagentaButton
-              type="button"
-              size="sm"
-              className="hidden sm:inline-flex"
-              onClick={() => setScreen("learn")}
-            >
-              Front cam
-            </GlassMagentaButton>
-          ) : null}
-          <Link
-            href="/play"
-            className="shrink-0 rounded-full border border-border/50 bg-white/45 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-muted-foreground backdrop-blur-md hover:border-primary/40 hover:text-primary"
-          >
-            Play desk
-          </Link>
-        </div>
+        <p className="hidden max-w-xs truncate text-[10px] uppercase tracking-[0.14em] text-[#8B919A] md:block">
+          {MOVES_LIKE.tagline}
+        </p>
       </header>
 
-      <div
-        className={cn(
-          "z-30 hidden sm:block",
-          hideChromeOnDiscover ? "absolute inset-x-0 top-14" : "sticky top-0",
-        )}
-      >
-        <MovesLikeNav screen={screen} onChange={setScreen} overlay={hideChromeOnDiscover} />
-      </div>
-      <div className="sm:hidden">
+      <div className="relative z-30">
         <MovesLikeNav screen={screen} onChange={setScreen} />
       </div>
 
-      <main
-        className={cn(
-          "relative z-10",
-          cameraMode || hideChromeOnDiscover
-            ? ""
-            : "pb-[calc(3.75rem+env(safe-area-inset-bottom))] sm:pb-8",
-        )}
-      >
-        {!webgl && (screen === "discover" || screen === "studio" || screen === "play") ? (
-          <WebGLFallback />
-        ) : null}
+      <main className="relative z-10 pb-[calc(3.75rem+env(safe-area-inset-bottom))] sm:pb-10">
         <ScreenBody screen={screen} />
       </main>
     </div>
