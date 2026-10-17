@@ -14,7 +14,7 @@ type Props = {
 /**
  * Full-bleed portrait front-camera frame.
  * Video is mirrored for natural selfie framing; recording can still be unmirrored separately.
- * Empty state uses a light teal wash so chrome stays frosted-white (not black).
+ * Empty state uses a light blue/purple wash so chrome stays frosted-white (not black).
  */
 export const FrontCameraViewport = forwardRef<HTMLVideoElement, Props>(function FrontCameraViewport(
   { mirror = true, className = "", children, overlay },
@@ -22,11 +22,11 @@ export const FrontCameraViewport = forwardRef<HTMLVideoElement, Props>(function 
 ) {
   return (
     <div
-      className={`relative overflow-hidden bg-[#eef6f8] ${className}`}
+      className={`relative overflow-hidden bg-[#eef2f6] ${className}`}
       style={{
         minHeight: "min(100dvh, 100svh)",
         backgroundImage:
-          "radial-gradient(ellipse 70% 50% at 50% 35%, rgba(144,196,216,0.35), transparent 60%), radial-gradient(ellipse 55% 40% at 85% 15%, rgba(232,160,208,0.22), transparent 55%), linear-gradient(180deg, #ffffff 0%, #eef6f8 55%, #e4eef2 100%)",
+          "radial-gradient(ellipse 70% 50% at 50% 35%, rgba(109,145,179,0.28), transparent 60%), radial-gradient(ellipse 55% 40% at 85% 15%, rgba(172,129,175,0.2), transparent 55%), linear-gradient(180deg, #ffffff 0%, #eef2f6 55%, #e4eaf0 100%)",
       }}
     >
       <video

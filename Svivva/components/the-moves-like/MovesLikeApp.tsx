@@ -78,13 +78,13 @@ export function MovesLikeApp() {
       className="relative min-h-[100dvh] bg-[#F7FBFC] text-foreground"
       style={{ fontFamily: '"Zc", sans-serif' }}
     >
-      {/* Soft teal / magenta wash on white paper */}
+      {/* Soft glass-blue / purple wash on white paper */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 75% 50% at 12% 0%, hsl(197 55% 78% / 0.35), transparent 55%), radial-gradient(ellipse 55% 42% at 92% 6%, hsl(315 70% 88% / 0.32), transparent 52%), linear-gradient(180deg, #ffffff 0%, #F7FBFC 40%, #eef6f8 100%)",
+            "radial-gradient(ellipse 75% 50% at 12% 0%, rgba(109,145,179,0.22), transparent 55%), radial-gradient(ellipse 55% 42% at 92% 6%, rgba(172,129,175,0.2), transparent 52%), linear-gradient(180deg, #ffffff 0%, #F7FBFC 40%, #eef2f6 100%)",
         }}
       />
 

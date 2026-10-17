@@ -132,7 +132,7 @@ export function LearnScreen() {
       if (showSkeleton && userCanvas.current) {
         userCanvas.current.width = userV.videoWidth || 720;
         userCanvas.current.height = userV.videoHeight || 1280;
-        drawSkeleton(userCanvas.current, userFrame, "#5B8DA8");
+        drawSkeleton(userCanvas.current, userFrame, "#6D91B3");
       }
       setCoverage(poseCoverage(userFrame));
 
@@ -187,7 +187,7 @@ export function LearnScreen() {
 
             <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-3 pt-[max(0.75rem,env(safe-area-inset-top))] sm:p-4">
               <GlassPanel tint="ink" className="px-3 py-2" padding={false}>
-                <p className="text-[10px] uppercase tracking-[0.18em] text-[#9a3a78]">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-[#AC81AF]">
                   Ghost Mode · Front camera
                 </p>
                 <h2 className="text-lg font-bold text-[hsl(180_20%_12%)]">{move.name}</h2>
@@ -208,7 +208,7 @@ export function LearnScreen() {
                 className="tml-glass absolute right-3 top-24 w-[32vw] max-w-[140px] overflow-hidden p-0 sm:right-6 sm:top-28 sm:max-w-[180px]"
                 style={{ opacity }}
               >
-                <p className="bg-[hsl(315_70%_92%/0.9)] px-2 py-0.5 text-[9px] uppercase tracking-[0.14em] text-[#9a3a78]">
+                <p className="bg-[rgba(172,129,175,0.22)] px-2 py-0.5 text-[9px] uppercase tracking-[0.14em] text-[#AC81AF]">
                   Reference
                 </p>
                 <video

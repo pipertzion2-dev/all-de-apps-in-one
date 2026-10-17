@@ -99,7 +99,7 @@ export function CreateScreen() {
                 />
               </GlassPanel>
               {recording ? (
-                <span className="tml-glass-magenta px-3 py-1.5 text-xs font-semibold text-[#9a3a78]">
+                <span className="tml-glass-magenta px-3 py-1.5 text-xs font-semibold text-[#AC81AF]">
                   REC {elapsed}s
                 </span>
               ) : (
@@ -130,10 +130,10 @@ export function CreateScreen() {
                       type="button"
                       disabled={!camera.active}
                       onClick={startRecording}
-                      className="flex h-[72px] w-[72px] items-center justify-center rounded-full border-4 border-white/80 bg-[hsl(315_70%_42%/0.75)] shadow-[0_0_32px_rgba(196,74,154,0.45)] backdrop-blur-md disabled:opacity-40"
+                      className="flex h-[72px] w-[72px] items-center justify-center rounded-full border-4 border-white/80 bg-[rgba(172,129,175,0.75)] shadow-[0_0_32px_rgba(172,129,175,0.45)] backdrop-blur-md disabled:opacity-40"
                       aria-label="Start recording"
                     >
-                      <span className="h-14 w-14 rounded-full bg-[hsl(315_70%_48%/0.95)]" />
+                      <span className="h-14 w-14 rounded-full bg-[rgba(172,129,175,0.95)]" />
                     </button>
                   ) : (
                     <button
@@ -142,14 +142,14 @@ export function CreateScreen() {
                       className="flex h-[72px] w-[72px] items-center justify-center rounded-full border-4 border-white/80 bg-white/15 backdrop-blur-md"
                       aria-label="Stop recording"
                     >
-                      <span className="h-7 w-7 rounded-sm bg-[hsl(315_70%_48%)]" />
+                      <span className="h-7 w-7 rounded-sm bg-[#AC81AF]" />
                     </button>
                   )}
 
                   <GlassButton
                     type="button"
                     variant="ghost"
-                    className="text-[#9a3a78]"
+                    className="text-[#AC81AF]"
                     onClick={() => setScreen("play")}
                   >
                     Clash

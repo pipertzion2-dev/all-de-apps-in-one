@@ -275,7 +275,7 @@ export function PlayScreen() {
           </div>
 
           <div className="space-y-3 tml-glass p-4">
-            <h4 className="text-xs font-semibold uppercase tracking-[0.14em] text-[#9a3a78]">
+            <h4 className="text-xs font-semibold uppercase tracking-[0.14em] text-[#AC81AF]">
               Respond
             </h4>
             <label className="block text-xs text-muted-foreground">
@@ -315,7 +315,7 @@ export function PlayScreen() {
               type="button"
               onClick={submitResponse}
               disabled={!challenges.length}
-              className="rounded-md bg-[#C44A9A] px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
+              className="rounded-md bg-[#AC81AF] px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
             >
               Submit response
             </button>
@@ -356,7 +356,7 @@ export function PlayScreen() {
                     <button
                       type="button"
                       onClick={() => voteResponse(active.id, r.id, "style")}
-                      className="rounded border border-border/50 px-2 py-1 text-[10px] uppercase text-[#9a3a78]"
+                      className="rounded border border-border/50 px-2 py-1 text-[10px] uppercase text-[#AC81AF]"
                     >
                       Style {r.votesStyle}
                     </button>

@@ -1,4 +1,4 @@
-/** THE MOVES LIKE — product brand tokens (uses ZZAI palette, not a neon rewrite). */
+/** THE MOVES LIKE — product brand tokens (glass blue / purple accents). */
 
 export const MOVES_LIKE = {
   id: "the-moves-like",
@@ -10,13 +10,13 @@ export const MOVES_LIKE = {
   logoPath: "/the-moves-like/logo.png",
   /** Light spray ink — only for rare dark overlays. */
   logoLightPath: "/the-moves-like/logo-light.png",
-  /** ZZAI site teal — matches homepage / explore accents */
-  teal: "#5B8DA8",
-  tealDeep: "#3A6F88",
-  tealSoft: "#90C4D8",
-  /** ZZAI magenta accent family from CSS --accent */
-  magenta: "#C44A9A",
-  magentaSoft: "#E8A0D0",
+  /** Glass transparent blue */
+  teal: "#6D91B3",
+  tealDeep: "#4F7396",
+  tealSoft: "#A8C0D4",
+  /** Soft purple accent */
+  magenta: "#AC81AF",
+  magentaSoft: "#D4C0D6",
   mauve: "#C090A8",
   ink: "#0F1A1C",
   paper: "#F7FBFC",
@@ -24,10 +24,10 @@ export const MOVES_LIKE = {
 } as const;
 
 export const MOVES_LIKE_HEX = {
-  primary: 0x5b8da8,
-  secondary: 0xc44a9a,
+  primary: 0x6d91b3,
+  secondary: 0xac81af,
   tertiary: 0xc090a8,
-  highlight: 0x60c8d8,
+  highlight: 0xa8c0d4,
   ink: 0x0f1a1c,
   paper: 0xf7fbfc,
 } as const;

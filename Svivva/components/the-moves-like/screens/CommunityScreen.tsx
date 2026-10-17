@@ -33,7 +33,7 @@ export function CommunityScreen() {
             <li key={c.name} className="tml-glass p-4">
               <p className="font-semibold text-foreground">{c.name}</p>
               <p className="mt-1 text-xs text-muted-foreground">{c.focus}</p>
-              <p className="mt-2 text-[10px] uppercase tracking-[0.14em] text-[#9a3a78]">
+              <p className="mt-2 text-[10px] uppercase tracking-[0.14em] text-[#AC81AF]">
                 {c.crew}
               </p>
             </li>

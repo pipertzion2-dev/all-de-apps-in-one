@@ -68,14 +68,14 @@ function StageContent({
       <fog attach="fog" args={["#e8f3f7", 8, 20]} />
       <ambientLight intensity={0.78} />
       <directionalLight position={[3.5, 5.5, 2.5]} intensity={1.05} color="#ffffff" castShadow />
-      <pointLight position={[-2.5, 2.2, -1.5]} intensity={0.55} color="#c44a9a" />
-      <pointLight position={[2.8, 1.2, 2]} intensity={0.65} color="#5b8da8" />
+      <pointLight position={[-2.5, 2.2, -1.5]} intensity={0.55} color="#ac81af" />
+      <pointLight position={[2.8, 1.2, 2]} intensity={0.65} color="#6d91b3" />
       <spotLight
         position={[0, 4.5, 2]}
         angle={0.45}
         penumbra={0.6}
         intensity={0.55}
-        color="#90c4d8"
+        color="#A8C0D4"
       />
 
       <StageFloor />

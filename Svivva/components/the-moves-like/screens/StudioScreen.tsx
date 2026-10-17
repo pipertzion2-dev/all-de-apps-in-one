@@ -233,7 +233,7 @@ export function StudioScreen() {
           <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-primary">
             Timeline {activeRoutine ? `· ${activeRoutine.name}` : ""}
             {activeRoutine ? (
-              <span className="ml-2 text-[10px] text-[#9a3a78]">
+              <span className="ml-2 text-[10px] text-[#AC81AF]">
                 {activeRoutine.origin === "library-assembled" ? "library-assembled" : "manual"}
               </span>
             ) : null}
@@ -243,7 +243,7 @@ export function StudioScreen() {
               type="button"
               disabled={!activeRoutine?.clips.length || playing}
               onClick={() => playPreview()}
-              className="rounded-md bg-[#C44A9A] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-40"
+              className="rounded-md bg-[#AC81AF] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-40"
             >
               {playing ? "Playing…" : "Preview on stage"}
             </button>
@@ -320,7 +320,7 @@ export function StudioScreen() {
                   <button
                     type="button"
                     onClick={() => removeClip(clip.id)}
-                    className="rounded border border-[#C44A9A]/45 px-2 py-1 text-xs text-[#9a3a78]"
+                    className="rounded border border-[#AC81AF]/45 px-2 py-1 text-xs text-[#AC81AF]"
                   >
                     Remove
                   </button>

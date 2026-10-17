@@ -68,8 +68,8 @@ export function MovesLikeNav({
                 "flex min-h-[52px] flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-0.5 text-[9px] font-semibold uppercase tracking-[0.08em] transition",
                 active
                   ? cameraTab
-                    ? "bg-[hsl(315_70%_92%/0.85)] text-[#9a3a78]"
-                    : "bg-primary/15 text-primary"
+                    ? "bg-[rgba(172,129,175,0.2)] text-[#AC81AF]"
+                    : "bg-[rgba(109,145,179,0.18)] text-[#6D91B3]"
                   : "text-muted-foreground",
               )}
               aria-current={active ? "page" : undefined}
@@ -77,7 +77,7 @@ export function MovesLikeNav({
               <span
                 className={cn(
                   "mb-0.5 h-1 w-4 rounded-full",
-                  active ? (cameraTab ? "bg-[#C44A9A]" : "bg-primary") : "bg-transparent",
+                  active ? (cameraTab ? "bg-[#AC81AF]" : "bg-[#6D91B3]") : "bg-transparent",
                 )}
               />
               {item.short}
