@@ -135,10 +135,13 @@
     z-index: 200;
   }
 
-  /* THE MOVES LIKE — immersive dance shell (scrollable app, not locked runner). */
+  /* THE MOVES LIKE — immersive dance shell (scrollable app, not locked runner).
+     Must beat [data-page-shell] min-height:0 so site .dark body doesn't show through. */
+  [data-the-moves-like][data-page-shell],
   [data-the-moves-like] {
     isolation: isolate;
     min-height: 100dvh;
+    height: auto;
     background: #f7fbfc;
   }
 
