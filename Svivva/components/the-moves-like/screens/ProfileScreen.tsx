@@ -81,7 +81,9 @@ export function ProfileScreen() {
               </button>
             </li>
           ))}
-          {!routines.length ? <li className="text-sm text-muted-foreground">No saved routines.</li> : null}
+          {!routines.length ? (
+            <li className="text-sm text-muted-foreground">No saved routines.</li>
+          ) : null}
         </ul>
       </section>
 

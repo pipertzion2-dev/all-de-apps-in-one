@@ -62,11 +62,7 @@ export function DiscoverScreen() {
             <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.28em] text-primary">
               ZZAI · Front camera dance
             </p>
-            <BrandMark
-              size="hero"
-              priority
-              className="mb-4 max-w-[min(86vw,400px)]"
-            />
+            <BrandMark size="hero" priority className="mb-4 max-w-[min(86vw,400px)]" />
             <p className="max-w-md text-sm leading-relaxed text-foreground/90 sm:text-base">
               {mobileCam
                 ? "Built for your front camera — practice, record, and clash from your phone."
