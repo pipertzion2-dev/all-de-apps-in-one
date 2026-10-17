@@ -7,7 +7,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   viewportFit: "cover",
-  themeColor: "#071014",
+  themeColor: "#F7FBFC",
 };
 
 export default function TheMovesLikeLayout({ children }: { children: ReactNode }) {
