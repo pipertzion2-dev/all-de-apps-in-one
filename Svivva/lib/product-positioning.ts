@@ -108,6 +108,7 @@ export function isBetaCubeFaceId(id: FeatureId): boolean {
 export function isBetaHref(href: string): boolean {
   const path = normalizePath(href);
   if (path === "/play") return true;
+  if (path.startsWith("/the-moves-like")) return true;
   if (path.startsWith("/tools")) return true;
   if (path.startsWith("/ai-tools-hub")) return true;
   if (path.startsWith("/cyber-security-mini-apps")) return true;

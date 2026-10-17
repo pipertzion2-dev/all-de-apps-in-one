@@ -31,8 +31,9 @@ export const SECURITY_HEADERS = [
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   {
     key: "Permissions-Policy",
+    // camera/microphone: self — required for THE MOVES LIKE Ghost Mode + Create recording
     value:
-      'camera=(), microphone=(), geolocation=(), payment=(self), fullscreen=(self "https://player.mediadelivery.net" "https://iframe.mediadelivery.net")',
+      'camera=(self), microphone=(self), geolocation=(), payment=(self), fullscreen=(self "https://player.mediadelivery.net" "https://iframe.mediadelivery.net")',
   },
   { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
   {
@@ -46,7 +47,8 @@ export const SECURITY_HEADERS = [
       "worker-src 'self' blob:",
       `connect-src 'self' https: wss: blob: ${GA_CONNECT} ${ADSENSE_CONNECT} ${SEARCHDOCK_SCRIPT}`,
       `frame-src 'self' https://js.stripe.com https://hooks.stripe.com ${ADSENSE_FRAME} ${BUNNY_STREAM_FRAME}`,
-      "media-src 'self' blob: https://*.mediadelivery.net https://*.b-cdn.net",
+      // storage.googleapis.com — MediaPipe pose models + Ghost Mode demo reference clips
+      "media-src 'self' blob: https://*.mediadelivery.net https://*.b-cdn.net https://storage.googleapis.com",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",

@@ -135,6 +135,13 @@
     z-index: 200;
   }
 
+  /* THE MOVES LIKE — immersive dance shell (scrollable app, not locked runner). */
+  [data-the-moves-like] {
+    isolation: isolate;
+    min-height: 100dvh;
+    background: #071014;
+  }
+
   [data-landing-page] > *:last-child {
     margin-bottom: 0;
   }

@@ -323,7 +323,20 @@ export const PLATFORM_FEATURES: PlatformFeature[] = [
     bus: "play",
     channel: 15,
     tags: ["play", "audio", "music", "hardware", "sampler", "aux", "channel"],
-    connectsTo: ["seeds", "hardware-builder", "zzai-show"],
+    connectsTo: ["seeds", "hardware-builder", "zzai-show", "the-moves-like"],
+    mainBus: "crest",
+  }),
+  feature({
+    id: "the-moves-like",
+    title: "THE MOVES LIKE",
+    shortTitle: "Moves Like",
+    href: "/the-moves-like",
+    description:
+      "Channel 26 — Aux dance game: Motion DNA, Ghost Mode, Move Reactor, Rhythm Portal, Style Clash.",
+    bus: "play",
+    channel: 26,
+    tags: ["dance", "three", "choreography", "motion", "rhythm", "play", "aux", "channel"],
+    connectsTo: ["play", "zzai-show"],
     mainBus: "crest",
   }),
   feature({
