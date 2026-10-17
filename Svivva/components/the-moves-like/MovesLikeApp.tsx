@@ -37,31 +37,36 @@ export function MovesLikeApp() {
     <div
       data-the-moves-like
       data-page-shell
-      className="relative min-h-[100dvh] bg-[#08090B] text-white"
-      style={{ fontFamily: '"Zc", Inter, system-ui, sans-serif' }}
+      className="relative min-h-[100dvh] bg-[#F7FBFC] text-foreground"
+      style={{ fontFamily: '"Zc", sans-serif' }}
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-40"
+        className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 60% 40% at 10% 0%, rgba(198,255,0,0.08), transparent 55%), radial-gradient(ellipse 50% 35% at 90% 10%, rgba(61,139,255,0.1), transparent 50%)",
+            "radial-gradient(ellipse 75% 50% at 12% 0%, rgba(109,145,179,0.22), transparent 55%), radial-gradient(ellipse 55% 42% at 92% 6%, rgba(172,129,175,0.2), transparent 52%), linear-gradient(180deg, #ffffff 0%, #F7FBFC 40%, #eef2f6 100%)",
         }}
       />
 
-      <header className="relative z-30 flex items-center justify-between gap-3 border-b border-[#2A2E38] px-3 py-2.5 pt-[max(0.5rem,env(safe-area-inset-top))] sm:px-6">
+      <header className="relative z-30 flex items-center justify-between gap-3 border-b border-white/50 bg-[linear-gradient(180deg,rgba(255,255,255,0.55)_0%,rgba(255,255,255,0.22)_100%)] px-3 py-2.5 pt-[max(0.5rem,env(safe-area-inset-top))] backdrop-blur-xl backdrop-saturate-150 sm:px-6">
         <div className="flex min-w-0 items-center gap-3">
           <Link
             href="/"
-            className="shrink-0 rounded-md border border-[#2A2E38] px-2 py-1 text-[10px] uppercase tracking-[0.2em] text-[#8B919A] hover:border-[#C6FF00]/40 hover:text-[#C6FF00]"
+            className="shrink-0 rounded-full border border-border/50 bg-white/50 px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground backdrop-blur-md hover:border-primary/40 hover:text-foreground"
           >
             ZZAI
           </Link>
-          <button type="button" onClick={() => setScreen("train")} className="min-w-0 text-left">
+          <button
+            type="button"
+            onClick={() => setScreen("train")}
+            className="min-w-0 text-left"
+            aria-label={MOVES_LIKE.name}
+          >
             <BrandMark size="header" />
           </button>
         </div>
-        <p className="hidden max-w-xs truncate text-[10px] uppercase tracking-[0.14em] text-[#8B919A] md:block">
+        <p className="hidden max-w-xs truncate text-[10px] uppercase tracking-[0.14em] text-muted-foreground md:block">
           {MOVES_LIKE.tagline}
         </p>
       </header>

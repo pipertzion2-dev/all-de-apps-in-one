@@ -23,9 +23,9 @@ export function CypherScreen() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
-      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#C6FF00]">Cypher</p>
+      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6D91B3]">Cypher</p>
       <h1 className="mt-1 text-3xl font-black tracking-tight sm:text-4xl">Community rounds</h1>
-      <p className="mt-2 max-w-2xl text-sm text-[#8B919A]">
+      <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
         Sample challenges only — not live users or engagement metrics. Local submissions stay on
         this device until a real backend is wired.
       </p>
@@ -39,20 +39,20 @@ export function CypherScreen() {
                 onClick={() => setActiveId(c.id)}
                 className={`w-full rounded-xl border p-4 text-left transition ${
                   c.id === active?.id
-                    ? "border-[#C6FF00]/45 bg-[#C6FF00]/10"
-                    : "border-[#2A2E38] bg-[#121419] hover:border-[#3D8BFF]/40"
+                    ? "border-[#6D91B3]/45 bg-[rgba(109,145,179,0.12)]"
+                    : "tml-glass hover:border-[#6D91B3]/40"
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <span className="rounded bg-[#8B5CFF]/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[#8B5CFF]">
+                  <span className="rounded bg-[rgba(172,129,175,0.18)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[#AC81AF]">
                     {c.kind} · sample
                   </span>
-                  <span className="text-[10px] uppercase tracking-[0.12em] text-[#8B919A]">
+                  <span className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
                     {c.focus}
                   </span>
                 </div>
                 <h2 className="mt-2 text-lg font-bold">{c.title}</h2>
-                <p className="mt-1 text-sm text-[#8B919A]">{c.prompt}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{c.prompt}</p>
               </button>
             </li>
           ))}
@@ -63,10 +63,10 @@ export function CypherScreen() {
             <div>
               <TmlLabel>Challenge detail</TmlLabel>
               <h2 className="text-2xl font-black">{active.title}</h2>
-              <p className="mt-2 text-sm text-[#8B919A]">{active.prompt}</p>
+              <p className="mt-2 text-sm text-muted-foreground">{active.prompt}</p>
             </div>
 
-            <div className="space-y-2 border-t border-[#2A2E38] pt-4">
+            <div className="space-y-2 border-t border-white/55 pt-4">
               <TmlLabel>Submit a response (local demo)</TmlLabel>
               <TmlInput
                 placeholder="Your cypher name"
@@ -78,7 +78,7 @@ export function CypherScreen() {
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
               />
-              <label className="inline-flex cursor-pointer text-xs font-semibold text-[#3D8BFF]">
+              <label className="inline-flex cursor-pointer text-xs font-semibold text-[#6D91B3]">
                 Attach video (optional)
                 <input
                   type="file"
@@ -119,16 +119,16 @@ export function CypherScreen() {
               </TmlButton>
             </div>
 
-            <div className="border-t border-[#2A2E38] pt-4">
+            <div className="border-t border-white/55 pt-4">
               <TmlLabel className="mb-2">Local responses</TmlLabel>
               {!related.length ? (
-                <p className="text-sm text-[#8B919A]">No local submissions yet.</p>
+                <p className="text-sm text-muted-foreground">No local submissions yet.</p>
               ) : (
                 <ul className="space-y-2">
                   {related.map((s) => (
-                    <li key={s.id} className="rounded-lg border border-[#2A2E38] bg-[#08090B] p-3">
+                    <li key={s.id} className="tml-glass p-3">
                       <p className="font-semibold">{s.authorLabel}</p>
-                      <p className="text-sm text-[#8B919A]">{s.note}</p>
+                      <p className="text-sm text-muted-foreground">{s.note}</p>
                       {s.videoObjectUrl ? (
                         <video
                           src={s.videoObjectUrl}

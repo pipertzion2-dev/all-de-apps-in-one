@@ -87,9 +87,9 @@ export function MovesScreen() {
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#C6FF00]">Moves</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6D91B3]">Moves</p>
           <h1 className="mt-1 text-3xl font-black tracking-tight sm:text-4xl">Movement library</h1>
-          <p className="mt-2 text-sm text-[#8B919A]">
+          <p className="mt-2 text-sm text-muted-foreground">
             Every movement is a reusable creative asset. Sample rows are labeled — your saves
             persist locally.
           </p>
@@ -150,7 +150,7 @@ export function MovesScreen() {
       {!filtered.length ? (
         <TmlPanel className="mt-8 p-8 text-center">
           <p className="text-lg font-semibold">No movements yet</p>
-          <p className="mt-2 text-sm text-[#8B919A]">
+          <p className="mt-2 text-sm text-muted-foreground">
             Head to Train, upload a clip, and save your first move.
           </p>
           <TmlButton type="button" className="mt-4" onClick={() => setScreen("train")}>
@@ -170,14 +170,14 @@ export function MovesScreen() {
                 type="button"
                 onClick={() => setActiveId(m.id)}
                 className={cn(
-                  "w-full rounded-xl border border-[#2A2E38] bg-[#121419] p-3 text-left transition hover:border-[#C6FF00]/35",
-                  activeId === m.id && "border-[#C6FF00]/50",
+                  "tml-glass w-full p-3 text-left transition hover:border-[#6D91B3]/45",
+                  activeId === m.id && "border-[#6D91B3]/55 tml-glass-teal",
                   view === "list" && "flex items-center gap-4",
                 )}
               >
                 <div
                   className={cn(
-                    "overflow-hidden rounded-lg bg-[#08090B]",
+                    "overflow-hidden rounded-xl bg-white/40",
                     view === "grid" ? "aspect-video" : "h-16 w-28 shrink-0",
                   )}
                 >
@@ -185,7 +185,7 @@ export function MovesScreen() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={m.thumbnailDataUrl} alt="" className="h-full w-full object-cover" />
                   ) : (
-                    <div className="flex h-full items-center justify-center text-[10px] uppercase tracking-[0.14em] text-[#8B919A]">
+                    <div className="flex h-full items-center justify-center text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                       {m.source === "sample" ? "Sample" : "No thumb"}
                     </div>
                   )}
@@ -193,9 +193,9 @@ export function MovesScreen() {
                 <div className="mt-2 min-w-0 flex-1 sm:mt-0">
                   <div className="flex items-center gap-2">
                     <h3 className="truncate font-semibold">{m.name}</h3>
-                    {m.favorite ? <span className="text-[#C6FF00]">★</span> : null}
+                    {m.favorite ? <span className="text-[#6D91B3]">★</span> : null}
                   </div>
-                  <p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-[#8B919A]">
+                  <p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
                     {MOVE_CATEGORIES.find((c) => c.id === m.category)?.label} ·{" "}
                     {m.durationSec ? `${m.durationSec.toFixed(1)}s` : "—"} · {m.source}
                   </p>
@@ -244,9 +244,9 @@ function MovementDetail({
   onEdit: (p: Partial<Movement>) => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end bg-black/70 p-0 backdrop-blur-sm sm:items-center sm:justify-center sm:p-6">
+    <div className="fixed inset-0 z-50 flex items-end bg-[rgba(15,26,28,0.35)] p-0 backdrop-blur-sm sm:items-center sm:justify-center sm:p-6">
       <TmlPanel className="max-h-[90dvh] w-full overflow-y-auto rounded-t-2xl sm:max-w-2xl sm:rounded-2xl">
-        <div className="flex items-center justify-between border-b border-[#2A2E38] px-4 py-3">
+        <div className="flex items-center justify-between border-b border-white/55 px-4 py-3">
           <div>
             <TmlLabel>Movement detail</TmlLabel>
             <h2 className="text-xl font-bold">{movement.name}</h2>
@@ -260,7 +260,7 @@ function MovementDetail({
             {playUrl ? (
               <video src={playUrl} controls playsInline className="h-full w-full object-contain" />
             ) : (
-              <div className="flex h-full items-center justify-center text-sm text-[#8B919A]">
+              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
                 {movement.source === "sample"
                   ? "Sample entry — no video attached. Capture your own in Train."
                   : "No video on this movement yet."}
@@ -291,7 +291,7 @@ function MovementDetail({
               </TmlSelect>
             </div>
           </div>
-          <p className="text-sm text-[#8B919A]">{movement.notes || "No notes."}</p>
+          <p className="text-sm text-muted-foreground">{movement.notes || "No notes."}</p>
           <div className="flex flex-wrap gap-2">
             <TmlButton type="button" variant="secondary" onClick={onFavorite}>
               {movement.favorite ? "Unfavorite" : "Favorite"}
@@ -304,7 +304,7 @@ function MovementDetail({
                 Delete
               </TmlButton>
             ) : (
-              <span className="self-center text-[10px] uppercase tracking-[0.14em] text-[#8B919A]">
+              <span className="self-center text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                 Sample content
               </span>
             )}

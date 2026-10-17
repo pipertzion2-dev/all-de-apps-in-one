@@ -182,9 +182,9 @@ export function TrainScreen() {
   return (
     <div className="mx-auto grid max-w-6xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[1.4fr_1fr]">
       <div>
-        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#C6FF00]">Train</p>
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6D91B3]">Train</p>
         <h1 className="mt-1 text-3xl font-black tracking-tight sm:text-4xl">Practice workspace</h1>
-        <p className="mt-2 max-w-xl text-sm text-[#8B919A]">
+        <p className="mt-2 max-w-xl text-sm text-muted-foreground">
           Upload or record a clip, scrub at any speed, then save it into your personal movement
           library.
         </p>
@@ -199,13 +199,13 @@ export function TrainScreen() {
               playsInline
             />
             {!previewUrl && !recording ? (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-center text-sm text-[#8B919A]">
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-center text-sm text-muted-foreground">
                 <p>No clip loaded</p>
                 <p className="text-xs">Upload a file or start a camera take</p>
               </div>
             ) : null}
           </div>
-          <div className="flex flex-wrap items-center gap-2 border-t border-[#2A2E38] p-3">
+          <div className="flex flex-wrap items-center gap-2 border-t border-white/55 p-3">
             <TmlButton type="button" variant="secondary" onClick={() => videoRef.current?.play()}>
               Play
             </TmlButton>
@@ -218,12 +218,12 @@ export function TrainScreen() {
             <TmlButton type="button" variant="ghost" onClick={() => stepFrame(1)}>
               + Frame
             </TmlButton>
-            <label className="ml-auto flex items-center gap-2 text-xs text-[#8B919A]">
+            <label className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
               Speed
               <select
                 value={rate}
                 onChange={(e) => setRate(Number(e.target.value))}
-                className="rounded border border-[#2A2E38] bg-[#08090B] px-2 py-1 text-white"
+                className="rounded border border-white/55 bg-white/50 px-2 py-1 text-foreground"
               >
                 {[0.25, 0.5, 0.75, 1, 1.25, 1.5].map((r) => (
                   <option key={r} value={r}>
@@ -241,7 +241,7 @@ export function TrainScreen() {
           <TmlLabel>Capture</TmlLabel>
           <div className="flex flex-wrap gap-2">
             <label className="inline-flex cursor-pointer">
-              <span className="inline-flex min-h-10 items-center rounded-lg bg-[#C6FF00] px-4 text-sm font-semibold text-[#08090B]">
+              <span className="relative isolate inline-flex min-h-10 items-center overflow-hidden rounded-2xl border border-white/50 bg-[linear-gradient(180deg,rgba(168,192,212,0.45)_0%,rgba(109,145,179,0.38)_100%)] px-4 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] backdrop-blur-[12px]">
                 Upload video
               </span>
               <input type="file" accept="video/*" className="hidden" onChange={onUpload} />
@@ -314,7 +314,7 @@ export function TrainScreen() {
           <TmlButton type="button" className="w-full" onClick={() => void saveMove()}>
             Save movement
           </TmlButton>
-          {status ? <p className="text-xs text-[#C6FF00]">{status}</p> : null}
+          {status ? <p className="text-xs text-[#6D91B3]">{status}</p> : null}
         </TmlPanel>
       </div>
     </div>

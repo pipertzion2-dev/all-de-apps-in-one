@@ -61,11 +61,11 @@ export function StudioScreen() {
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#C6FF00]">Studio</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6D91B3]">Studio</p>
           <h1 className="mt-1 text-3xl font-black tracking-tight sm:text-4xl">
             Choreography builder
           </h1>
-          <p className="mt-2 max-w-2xl text-sm text-[#8B919A]">
+          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
             Sequence-based timeline — arrange saved moves, set durations, add music. Full nonlinear
             compositing comes later; this prototype is reliable and expandable.
           </p>
@@ -84,7 +84,7 @@ export function StudioScreen() {
         <TmlPanel className="p-3">
           <TmlLabel className="mb-2">Routines</TmlLabel>
           {!routines.length ? (
-            <p className="text-xs text-[#8B919A]">No saved routines yet.</p>
+            <p className="text-xs text-muted-foreground">No saved routines yet.</p>
           ) : (
             <ul className="space-y-1">
               {routines.map((r) => (
@@ -95,8 +95,8 @@ export function StudioScreen() {
                     className={cn(
                       "w-full rounded-lg px-2 py-2 text-left text-sm",
                       r.id === activeRoutineId
-                        ? "bg-[#C6FF00]/15 text-[#C6FF00]"
-                        : "text-[#8B919A] hover:bg-white/5 hover:text-white",
+                        ? "bg-[rgba(109,145,179,0.18)] text-[#6D91B3]"
+                        : "text-muted-foreground hover:bg-white/40 hover:text-foreground",
                     )}
                   >
                     {r.name}
@@ -115,7 +115,7 @@ export function StudioScreen() {
           {!routine ? (
             <TmlPanel className="p-8 text-center">
               <p className="text-lg font-semibold">Start a routine</p>
-              <p className="mt-2 text-sm text-[#8B919A]">
+              <p className="mt-2 text-sm text-muted-foreground">
                 Create a blank timeline or add a move from your library.
               </p>
               <TmlButton type="button" className="mt-4" onClick={() => newRoutine("Cipher set")}>
@@ -157,7 +157,7 @@ export function StudioScreen() {
               <TmlPanel className="p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <TmlLabel>Music track</TmlLabel>
-                  <label className="cursor-pointer text-xs font-semibold text-[#3D8BFF] hover:underline">
+                  <label className="cursor-pointer text-xs font-semibold text-[#6D91B3] hover:underline">
                     {routine.musicName ? `Replace · ${routine.musicName}` : "Upload audio"}
                     <input
                       type="file"
@@ -178,22 +178,22 @@ export function StudioScreen() {
                     controls
                   />
                 ) : (
-                  <p className="mt-2 text-xs text-[#8B919A]">
+                  <p className="mt-2 text-xs text-muted-foreground">
                     Optional — sync later with beat tools.
                   </p>
                 )}
               </TmlPanel>
 
               <TmlPanel className="overflow-hidden">
-                <div className="flex items-center justify-between border-b border-[#2A2E38] px-4 py-2">
+                <div className="flex items-center justify-between border-b border-white/55 px-4 py-2">
                   <TmlLabel>Timeline · {totalSec.toFixed(1)}s</TmlLabel>
-                  <span className="text-[10px] text-[#8B919A]">
+                  <span className="text-[10px] text-muted-foreground">
                     Playhead {playhead.toFixed(1)}s · drag clips to reorder
                   </span>
                 </div>
-                <div className="relative min-h-[120px] overflow-x-auto bg-[#08090B] p-3">
+                <div className="relative min-h-[120px] overflow-x-auto bg-[linear-gradient(180deg,rgba(255,255,255,0.35)_0%,rgba(109,145,179,0.08)_100%)] p-3">
                   <div
-                    className="pointer-events-none absolute bottom-3 top-3 w-0.5 bg-[#C6FF00]"
+                    className="pointer-events-none absolute bottom-3 top-3 w-0.5 bg-[#6D91B3]"
                     style={{
                       left: totalSec
                         ? `calc(12px + ${(playhead / Math.max(totalSec, 0.01)) * 100}% - 12px)`
@@ -214,13 +214,13 @@ export function StudioScreen() {
                             reorderClips(dragFrom, index);
                             setDragFrom(null);
                           }}
-                          className="min-w-[140px] flex-1 cursor-grab rounded-lg border border-[#2A2E38] bg-[#1A1D24] p-2 active:cursor-grabbing"
+                          className="tml-glass-teal min-w-[140px] flex-1 cursor-grab p-2 active:cursor-grabbing"
                           style={{ flexGrow: clip.durationSec }}
                         >
-                          <p className="truncate text-xs font-semibold text-white">
+                          <p className="truncate text-xs font-semibold text-foreground">
                             {move?.name ?? "Missing move"}
                           </p>
-                          <p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-[#8B919A]">
+                          <p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
                             {clip.durationSec.toFixed(1)}s
                           </p>
                           <div className="mt-2 flex flex-wrap gap-1">
@@ -232,7 +232,7 @@ export function StudioScreen() {
                               onChange={(e) =>
                                 updateClip(clip.id, { durationSec: Number(e.target.value) || 0.25 })
                               }
-                              className="w-16 rounded border border-[#2A2E38] bg-[#08090B] px-1 py-0.5 text-[10px] text-white"
+                              className="w-16 rounded border border-white/55 bg-white/55 px-1 py-0.5 text-[10px] text-foreground"
                               aria-label="Duration seconds"
                             />
                             <button
@@ -244,7 +244,7 @@ export function StudioScreen() {
                             </button>
                           </div>
                           <input
-                            className="mt-2 w-full rounded border border-[#2A2E38] bg-[#08090B] px-1 py-0.5 text-[10px] text-white"
+                            className="mt-2 w-full rounded border border-white/55 bg-white/55 px-1 py-0.5 text-[10px] text-foreground"
                             placeholder="Transition note"
                             value={clip.note ?? ""}
                             onChange={(e) => updateClip(clip.id, { note: e.target.value })}
@@ -253,7 +253,7 @@ export function StudioScreen() {
                       );
                     })}
                     {!routine.clips.length ? (
-                      <p className="py-8 text-sm text-[#8B919A]">
+                      <p className="py-8 text-sm text-muted-foreground">
                         Add movements from the library below.
                       </p>
                     ) : null}

@@ -22,7 +22,7 @@ export function MovesLikeNav({
     <>
       <nav
         aria-label="THE MOVES LIKE"
-        className="hidden items-center gap-1 border-b border-[#2A2E38] px-4 py-2 sm:flex sm:px-6"
+        className="hidden items-center gap-1 overflow-x-auto border-b border-white/45 bg-[linear-gradient(180deg,rgba(255,255,255,0.4)_0%,rgba(255,255,255,0.12)_100%)] px-4 py-2 backdrop-blur-xl backdrop-saturate-150 sm:flex sm:px-6"
       >
         {ITEMS.map((item) => {
           const active = screen === item.id;
@@ -32,10 +32,10 @@ export function MovesLikeNav({
               type="button"
               onClick={() => onChange(item.id)}
               className={cn(
-                "rounded-lg px-3.5 py-2 text-[11px] font-bold uppercase tracking-[0.14em] transition",
+                "shrink-0 rounded-full px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] transition",
                 active
-                  ? "bg-[#C6FF00]/15 text-[#C6FF00]"
-                  : "text-[#8B919A] hover:bg-white/5 hover:text-white",
+                  ? "border border-white/55 bg-[linear-gradient(180deg,rgba(255,255,255,0.55)_0%,rgba(109,145,179,0.22)_100%)] text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] backdrop-blur-md"
+                  : "text-muted-foreground hover:bg-white/25 hover:text-foreground",
               )}
               aria-current={active ? "page" : undefined}
             >
@@ -47,25 +47,30 @@ export function MovesLikeNav({
 
       <nav
         aria-label="THE MOVES LIKE mobile"
-        className="fixed inset-x-0 bottom-0 z-40 flex border-t border-[#2A2E38] bg-[#08090B]/95 px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1 backdrop-blur-md sm:hidden"
+        className="tml-glass-nav fixed inset-x-0 bottom-0 z-40 flex border-t px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1 sm:hidden"
       >
         {ITEMS.map((item) => {
           const active = screen === item.id;
+          const accentPurple = item.id === "cypher" || item.id === "profile";
           return (
             <button
               key={item.id}
               type="button"
               onClick={() => onChange(item.id)}
               className={cn(
-                "flex min-h-[52px] flex-1 flex-col items-center justify-center gap-0.5 rounded-lg text-[9px] font-bold uppercase tracking-[0.1em]",
-                active ? "text-[#C6FF00]" : "text-[#8B919A]",
+                "flex min-h-[52px] flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-0.5 text-[9px] font-semibold uppercase tracking-[0.08em] transition",
+                active
+                  ? accentPurple
+                    ? "bg-[rgba(172,129,175,0.2)] text-[#AC81AF]"
+                    : "bg-[rgba(109,145,179,0.18)] text-[#6D91B3]"
+                  : "text-muted-foreground",
               )}
               aria-current={active ? "page" : undefined}
             >
               <span
                 className={cn(
-                  "mb-0.5 h-0.5 w-5 rounded-full",
-                  active ? "bg-[#C6FF00]" : "bg-transparent",
+                  "mb-0.5 h-1 w-4 rounded-full",
+                  active ? (accentPurple ? "bg-[#AC81AF]" : "bg-[#6D91B3]") : "bg-transparent",
                 )}
               />
               {item.short}

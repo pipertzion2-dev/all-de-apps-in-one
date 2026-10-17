@@ -1,6 +1,13 @@
 "use client";
 
+import {
+  GlassButton,
+  GlassMagentaButton,
+  GlassPanel,
+} from "@/components/the-moves-like/ui/Glass";
 import { cn } from "@/lib/utils";
+
+/** Thin wrappers so screens keep Tml* names while using glossy glass chrome. */
 
 export function TmlPanel({
   children,
@@ -10,39 +17,66 @@ export function TmlPanel({
   className?: string;
 }) {
   return (
-    <div
-      className={cn(
-        "rounded-xl border border-[#2A2E38] bg-[#121419] shadow-[0_0_0_1px_rgba(198,255,0,0.04)]",
-        className,
-      )}
-    >
+    <GlassPanel tint="clear" padding={false} className={className}>
       {children}
-    </div>
+    </GlassPanel>
   );
 }
 
 export function TmlButton({
   className,
   variant = "primary",
+  children,
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "primary" | "secondary" | "ghost" | "danger";
 }) {
+  if (variant === "danger") {
+    return (
+      <button
+        className={cn(
+          "inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border border-red-300/50 bg-[linear-gradient(180deg,rgba(255,255,255,0.45)_0%,rgba(248,113,113,0.18)_100%)] px-4 text-sm font-semibold tracking-wide text-red-700 backdrop-blur-[10px] transition hover:brightness-105 disabled:pointer-events-none disabled:opacity-40",
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </button>
+    );
+  }
+
+  if (variant === "ghost") {
+    return (
+      <GlassButton variant="ghost" className={cn("rounded-2xl", className)} {...props}>
+        {children}
+      </GlassButton>
+    );
+  }
+
+  if (variant === "secondary") {
+    return (
+      <GlassButton variant="outline" className={cn("rounded-2xl", className)} {...props}>
+        {children}
+      </GlassButton>
+    );
+  }
+
   return (
-    <button
-      className={cn(
-        "inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold tracking-wide transition disabled:pointer-events-none disabled:opacity-40",
-        variant === "primary" &&
-          "bg-[#C6FF00] text-[#08090B] hover:brightness-110 shadow-[0_0_24px_rgba(198,255,0,0.18)]",
-        variant === "secondary" &&
-          "border border-[#2A2E38] bg-[#1A1D24] text-white hover:border-[#3D8BFF]/50 hover:bg-[#1E2230]",
-        variant === "ghost" && "text-[#8B919A] hover:bg-white/5 hover:text-white",
-        variant === "danger" &&
-          "border border-red-500/30 bg-red-500/10 text-red-300 hover:bg-red-500/20",
-        className,
-      )}
-      {...props}
-    />
+    <GlassButton className={cn("rounded-2xl", className)} {...props}>
+      {children}
+    </GlassButton>
+  );
+}
+
+export function TmlMagentaButton({
+  className,
+  children,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  return (
+    <GlassMagentaButton className={cn("rounded-2xl", className)} {...props}>
+      {children}
+    </GlassMagentaButton>
   );
 }
 
@@ -50,7 +84,7 @@ export function TmlInput({ className, ...props }: React.InputHTMLAttributes<HTML
   return (
     <input
       className={cn(
-        "min-h-10 w-full rounded-lg border border-[#2A2E38] bg-[#08090B] px-3 text-sm text-white outline-none placeholder:text-[#8B919A] focus:border-[#C6FF00]/50",
+        "min-h-10 w-full rounded-xl border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.55)_0%,rgba(255,255,255,0.22)_100%)] px-3 text-sm text-[hsl(180_20%_12%)] outline-none placeholder:text-muted-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] backdrop-blur-md focus:border-[rgba(109,145,179,0.55)]",
         className,
       )}
       {...props}
@@ -65,7 +99,7 @@ export function TmlTextarea({
   return (
     <textarea
       className={cn(
-        "min-h-24 w-full rounded-lg border border-[#2A2E38] bg-[#08090B] px-3 py-2 text-sm text-white outline-none placeholder:text-[#8B919A] focus:border-[#C6FF00]/50",
+        "min-h-24 w-full rounded-xl border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.55)_0%,rgba(255,255,255,0.22)_100%)] px-3 py-2 text-sm text-[hsl(180_20%_12%)] outline-none placeholder:text-muted-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] backdrop-blur-md focus:border-[rgba(109,145,179,0.55)]",
         className,
       )}
       {...props}
@@ -77,7 +111,7 @@ export function TmlSelect({ className, ...props }: React.SelectHTMLAttributes<HT
   return (
     <select
       className={cn(
-        "min-h-10 w-full rounded-lg border border-[#2A2E38] bg-[#08090B] px-3 text-sm text-white outline-none focus:border-[#C6FF00]/50",
+        "min-h-10 w-full rounded-xl border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.55)_0%,rgba(255,255,255,0.22)_100%)] px-3 text-sm text-[hsl(180_20%_12%)] outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] backdrop-blur-md focus:border-[rgba(109,145,179,0.55)]",
         className,
       )}
       {...props}
@@ -95,7 +129,7 @@ export function TmlLabel({
   return (
     <label
       className={cn(
-        "block text-[10px] font-semibold uppercase tracking-[0.16em] text-[#8B919A]",
+        "block text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground",
         className,
       )}
     >

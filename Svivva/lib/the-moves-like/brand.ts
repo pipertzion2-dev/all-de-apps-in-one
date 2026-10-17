@@ -1,34 +1,33 @@
-/** THE MOVES LIKE — dark creative-workstation brand tokens. */
+/** THE MOVES LIKE — product brand tokens (glass blue / purple accents). */
 
 export const MOVES_LIKE = {
   id: "the-moves-like",
   name: "THE MOVES LIKE",
   shortName: "Moves Like",
-  tagline: "Capture a move. Save it. Combine it. Create something new.",
+  tagline: "Explore, learn, transform, play, and share movement.",
   path: "/the-moves-like",
+  /** Dark spray ink on transparent — default for light/white glass UI. */
   logoPath: "/the-moves-like/logo.png",
+  /** Light spray ink — only for rare dark overlays. */
   logoLightPath: "/the-moves-like/logo-light.png",
-  /** Near-black workstation shell */
-  bg: "#08090B",
-  surface: "#121419",
-  surfaceRaised: "#1A1D24",
-  border: "#2A2E38",
-  /** Neon lime primary accent */
-  lime: "#C6FF00",
-  limeDim: "#9ACC00",
-  /** Electric blue secondary */
-  blue: "#3D8BFF",
-  /** Ultraviolet tertiary */
-  uv: "#8B5CFF",
-  text: "#FFFFFF",
-  muted: "#8B919A",
-  ink: "#08090B",
+  /** Glass transparent blue */
+  teal: "#6D91B3",
+  tealDeep: "#4F7396",
+  tealSoft: "#A8C0D4",
+  /** Soft purple accent */
+  magenta: "#AC81AF",
+  magentaSoft: "#D4C0D6",
+  mauve: "#C090A8",
+  ink: "#0F1A1C",
+  paper: "#F7FBFC",
+  spray: "#1A2A2E",
 } as const;
 
 export const MOVES_LIKE_HEX = {
-  lime: 0xc6ff00,
-  blue: 0x3d8bff,
-  uv: 0x8b5cff,
-  bg: 0x08090b,
-  surface: 0x121419,
+  primary: 0x6d91b3,
+  secondary: 0xac81af,
+  tertiary: 0xc090a8,
+  highlight: 0xa8c0d4,
+  ink: 0x0f1a1c,
+  paper: 0xf7fbfc,
 } as const;

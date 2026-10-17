@@ -22,15 +22,15 @@ export function ProfileScreen() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
-      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#C6FF00]">Profile</p>
+      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6D91B3]">Profile</p>
       <h1 className="mt-1 text-3xl font-black tracking-tight sm:text-4xl">Dancer portfolio</h1>
-      <p className="mt-2 text-sm text-[#8B919A]">
+      <p className="mt-2 text-sm text-muted-foreground">
         Creative identity, not a generic social profile. Data stays local until auth + cloud storage
         ship.
       </p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-[160px_1fr]">
-        <TmlPanel className="flex aspect-square items-center justify-center bg-[#1A1D24] text-4xl font-black text-[#C6FF00]">
+        <TmlPanel className="flex aspect-square items-center justify-center bg-[linear-gradient(160deg,rgba(255,255,255,0.4)_0%,rgba(109,145,179,0.1)_100%)] text-4xl font-black text-[#6D91B3]">
           {(profile.displayName || "?").slice(0, 1).toUpperCase()}
         </TmlPanel>
         <TmlPanel className="space-y-3 p-4">
@@ -77,15 +77,15 @@ export function ProfileScreen() {
       <div className="mt-6 grid gap-3 sm:grid-cols-3">
         <TmlPanel className="p-4">
           <TmlLabel>Your moves</TmlLabel>
-          <p className="mt-2 text-3xl font-black text-[#C6FF00]">{userMoves.length}</p>
+          <p className="mt-2 text-3xl font-black text-[#6D91B3]">{userMoves.length}</p>
         </TmlPanel>
         <TmlPanel className="p-4">
           <TmlLabel>Routines</TmlLabel>
-          <p className="mt-2 text-3xl font-black text-[#3D8BFF]">{routines.length}</p>
+          <p className="mt-2 text-3xl font-black text-[#6D91B3]">{routines.length}</p>
         </TmlPanel>
         <TmlPanel className="p-4">
           <TmlLabel>Favorites</TmlLabel>
-          <p className="mt-2 text-3xl font-black text-[#8B5CFF]">{favorites.length}</p>
+          <p className="mt-2 text-3xl font-black text-[#AC81AF]">{favorites.length}</p>
         </TmlPanel>
       </div>
 
@@ -102,7 +102,7 @@ export function ProfileScreen() {
           </TmlButton>
         </div>
         {!favorites.length ? (
-          <p className="mt-3 text-sm text-[#8B919A]">
+          <p className="mt-3 text-sm text-muted-foreground">
             Star moves in your library to feature them here.
           </p>
         ) : (
@@ -110,10 +110,10 @@ export function ProfileScreen() {
             {favorites.slice(0, 8).map((m) => (
               <li
                 key={m.id}
-                className="flex items-center justify-between rounded-lg border border-[#2A2E38] px-3 py-2"
+                className="tml-glass flex items-center justify-between px-3 py-2"
               >
                 <span className="font-semibold">{m.name}</span>
-                <span className="text-[10px] uppercase tracking-[0.12em] text-[#8B919A]">
+                <span className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
                   {MOVE_CATEGORIES.find((c) => c.id === m.category)?.label}
                 </span>
               </li>
@@ -135,13 +135,13 @@ export function ProfileScreen() {
           </TmlButton>
         </div>
         {!routines.length ? (
-          <p className="mt-3 text-sm text-[#8B919A]">Build a set in Studio to showcase it here.</p>
+          <p className="mt-3 text-sm text-muted-foreground">Build a set in Studio to showcase it here.</p>
         ) : (
           <ul className="mt-3 space-y-2">
             {routines.map((r) => (
-              <li key={r.id} className="rounded-lg border border-[#2A2E38] px-3 py-2">
+              <li key={r.id} className="rounded-lg border border-white/55 px-3 py-2">
                 <p className="font-semibold">{r.name}</p>
-                <p className="text-[10px] uppercase tracking-[0.12em] text-[#8B919A]">
+                <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
                   {r.clips.length} clips · private (local)
                 </p>
               </li>
