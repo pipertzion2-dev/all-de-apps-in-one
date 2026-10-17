@@ -42,12 +42,13 @@ function WebGLFallback() {
     <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3 bg-[#071014] px-6 text-center">
       <BrandMark size="inline" />
       <p className="max-w-md text-sm text-[#C8D8DE]">
-        WebGL is unavailable in this browser. Navigation, Learn tutorials, Create recording, and
-        Studio timeline still work — 3D stages are skipped.
+        WebGL is unavailable. Front-camera Learn and Create still work — 3D stages are skipped.
       </p>
     </div>
   );
 }
+
+const CAMERA_SCREENS: MovesLikeScreen[] = ["learn", "create"];
 
 export function MovesLikeApp() {
   const screen = useMovesLikeStore((s) => s.screen);
@@ -62,10 +63,10 @@ export function MovesLikeApp() {
     } catch {
       setWebgl(false);
     }
-    // Touch reduced-motion path so quality helpers stay warm
     void prefersReducedMotion();
   }, []);
 
+  const cameraMode = CAMERA_SCREENS.includes(screen);
   const hideChromeOnDiscover = screen === "discover";
 
   return (
@@ -75,46 +76,75 @@ export function MovesLikeApp() {
       className="relative min-h-[100dvh] bg-[#071014] text-white"
       style={{ fontFamily: '"Zc", "Segoe UI", sans-serif' }}
     >
+      {/* Compact header — stays out of the way in camera modes */}
       <header
-        className={`relative z-30 flex items-center justify-between gap-3 px-4 py-3 sm:px-6 ${
-          hideChromeOnDiscover
-            ? "absolute inset-x-0 top-0 bg-gradient-to-b from-black/70 to-transparent"
-            : "border-b border-white/10 bg-black/60 backdrop-blur-md"
+        className={`z-30 flex items-center justify-between gap-3 px-3 py-2 sm:px-6 sm:py-3 ${
+          hideChromeOnDiscover || cameraMode
+            ? "absolute inset-x-0 top-0 bg-gradient-to-b from-black/75 to-transparent pt-[max(0.5rem,env(safe-area-inset-top))]"
+            : "relative border-b border-white/10 bg-black/60 pt-[max(0.25rem,env(safe-area-inset-top))] backdrop-blur-md"
         }`}
       >
-        <div className="flex min-w-0 items-center gap-4">
+        <div className="flex min-w-0 items-center gap-3">
           <Link
             href="/"
             className="shrink-0 text-[10px] uppercase tracking-[0.2em] text-[#9BB0B8] hover:text-white"
           >
             ZZAI
           </Link>
-          <button
-            type="button"
-            onClick={() => setScreen("discover")}
-            className="min-w-0"
-            aria-label={MOVES_LIKE.name}
-          >
-            <BrandMark size="header" priority={screen === "discover"} />
-          </button>
+          {!cameraMode ? (
+            <button
+              type="button"
+              onClick={() => setScreen("discover")}
+              className="min-w-0"
+              aria-label={MOVES_LIKE.name}
+            >
+              <BrandMark size="header" priority={screen === "discover"} />
+            </button>
+          ) : (
+            <p className="truncate text-xs font-semibold tracking-wide text-white/90">
+              {screen === "learn" ? "Practice" : "Record"}
+            </p>
+          )}
         </div>
-        <Link
-          href="/play"
-          className="shrink-0 text-[10px] uppercase tracking-[0.16em] text-[#9BB0B8] hover:text-[#90C4D8]"
-        >
-          ZZAI Play
-        </Link>
+        <div className="flex items-center gap-2">
+          {!cameraMode ? (
+            <button
+              type="button"
+              onClick={() => setScreen("learn")}
+              className="hidden min-h-[40px] rounded-full bg-[#C44A9A] px-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-white sm:inline-flex sm:items-center"
+            >
+              Front cam
+            </button>
+          ) : null}
+          <Link
+            href="/play"
+            className="shrink-0 text-[10px] uppercase tracking-[0.16em] text-[#9BB0B8] hover:text-[#90C4D8]"
+          >
+            Play desk
+          </Link>
+        </div>
       </header>
 
+      {/* Top nav desktop only; mobile uses fixed bottom tabs inside MovesLikeNav */}
       <div
-        className={`relative z-30 ${
+        className={`z-30 hidden sm:block ${
           hideChromeOnDiscover ? "absolute inset-x-0 top-14" : "sticky top-0"
         }`}
       >
         <MovesLikeNav screen={screen} onChange={setScreen} overlay={hideChromeOnDiscover} />
       </div>
+      {/* Mobile bottom nav always mounted */}
+      <div className="sm:hidden">
+        <MovesLikeNav screen={screen} onChange={setScreen} />
+      </div>
 
-      <main className="relative z-10">
+      <main
+        className={`relative z-10 ${
+          cameraMode || hideChromeOnDiscover
+            ? ""
+            : "pb-[calc(3.75rem+env(safe-area-inset-bottom))] sm:pb-8"
+        }`}
+      >
         {!webgl && (screen === "discover" || screen === "studio" || screen === "play") ? (
           <WebGLFallback />
         ) : null}
