@@ -28,7 +28,9 @@ export function MovesLikeNav({
         aria-label="THE MOVES LIKE"
         className={cn(
           "hidden gap-1 overflow-x-auto px-3 py-2 sm:flex sm:px-6",
-          overlay ? "bg-transparent" : "border-b border-border/35 bg-white/45 backdrop-blur-xl",
+          overlay
+            ? "bg-transparent"
+            : "border-b border-white/45 bg-[linear-gradient(180deg,rgba(255,255,255,0.4)_0%,rgba(255,255,255,0.12)_100%)] backdrop-blur-xl backdrop-saturate-150",
         )}
       >
         {ITEMS.map((item) => {
@@ -41,8 +43,8 @@ export function MovesLikeNav({
               className={cn(
                 "shrink-0 rounded-full px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] transition",
                 active
-                  ? "border border-primary/40 bg-primary/15 text-foreground"
-                  : "text-muted-foreground hover:bg-primary/8 hover:text-foreground",
+                  ? "border border-white/55 bg-[linear-gradient(180deg,rgba(255,255,255,0.55)_0%,rgba(109,145,179,0.22)_100%)] text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] backdrop-blur-md"
+                  : "text-muted-foreground hover:bg-white/25 hover:text-foreground",
               )}
               aria-current={active ? "page" : undefined}
             >

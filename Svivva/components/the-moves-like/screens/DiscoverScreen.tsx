@@ -55,10 +55,7 @@ export function DiscoverScreen() {
         </div>
 
         <div className="relative z-10 flex min-h-[100dvh] flex-col justify-end px-4 pb-24 pt-28 sm:px-10 sm:pb-20">
-          <GlassPanel
-            tint="clear"
-            className="max-w-xl border-[rgba(109,145,179,0.28)] bg-[rgba(255,255,255,0.22)] p-5 sm:p-7"
-          >
+          <GlassPanel tint="teal" className="max-w-xl p-5 sm:p-7">
             <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.28em] text-primary">
               ZZAI · Front camera dance
             </p>

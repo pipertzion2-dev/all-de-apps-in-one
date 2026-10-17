@@ -93,7 +93,7 @@ export function MovesLikeApp() {
           "z-30 flex items-center justify-between gap-3 px-3 py-2 sm:px-6 sm:py-3",
           hideChromeOnDiscover || cameraMode
             ? "absolute inset-x-0 top-0 bg-gradient-to-b from-white/80 to-transparent pt-[max(0.5rem,env(safe-area-inset-top))]"
-            : "relative border-b border-border/40 bg-white/55 pt-[max(0.25rem,env(safe-area-inset-top))] backdrop-blur-xl",
+            : "relative border-b border-white/50 bg-[linear-gradient(180deg,rgba(255,255,255,0.55)_0%,rgba(255,255,255,0.22)_100%)] pt-[max(0.25rem,env(safe-area-inset-top))] backdrop-blur-xl backdrop-saturate-150",
         )}
       >
         <div className="flex min-w-0 items-center gap-3">
