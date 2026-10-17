@@ -11,16 +11,16 @@ const MAX_ACTIVE = 6;
 type Tint = "blue" | "purple" | "mixed";
 
 function makePetal(color: number, w: number, h: number) {
-  const geo = new THREE.SphereGeometry(1, 10, 8);
-  geo.scale(w, h, 0.22);
+  const geo = new THREE.SphereGeometry(1, 12, 10);
+  geo.scale(w, h, 0.18);
   const mat = new THREE.MeshStandardMaterial({
     color,
-    roughness: 0.35,
-    metalness: 0.15,
+    roughness: 0.28,
+    metalness: 0.2,
     transparent: true,
-    opacity: 0.92,
+    opacity: 0.95,
     emissive: color,
-    emissiveIntensity: 0.18,
+    emissiveIntensity: 0.28,
   });
   return new THREE.Mesh(geo, mat);
 }
@@ -32,22 +32,22 @@ function makeFlower(tint: Tint, seed: number) {
   const primary =
     tint === "blue" ? blue : tint === "purple" ? purple : seed % 2 === 0 ? blue : purple;
   const secondary = primary === blue ? purple : blue;
-  const petals = 5 + (seed % 3);
+  const petals = 6;
   for (let i = 0; i < petals; i++) {
-    const petal = makePetal(i % 2 === 0 ? primary : secondary, 0.22, 0.42);
-    const a = (i / petals) * Math.PI * 2;
-    petal.position.set(Math.cos(a) * 0.28, Math.sin(a) * 0.28, 0);
-    petal.rotation.z = a;
-    petal.rotation.x = 0.35;
+    const petal = makePetal(i % 2 === 0 ? primary : secondary, 0.32, 0.7);
+    const a = (i / petals) * Math.PI * 2 + seed * 0.15;
+    petal.position.set(Math.cos(a) * 0.38, Math.sin(a) * 0.38, 0.02);
+    petal.rotation.z = a + Math.PI / 2;
+    petal.rotation.x = 0.55;
     group.add(petal);
   }
   const center = new THREE.Mesh(
-    new THREE.SphereGeometry(0.12, 10, 10),
+    new THREE.SphereGeometry(0.16, 12, 12),
     new THREE.MeshStandardMaterial({
-      color: 0xf7fbfc,
+      color: 0xfff8fc,
       emissive: secondary,
-      emissiveIntensity: 0.35,
-      roughness: 0.4,
+      emissiveIntensity: 0.45,
+      roughness: 0.35,
     }),
   );
   group.add(center);
