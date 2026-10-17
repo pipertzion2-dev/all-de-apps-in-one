@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useEffect, useState } from "react";
+import { BrandMark } from "@/components/the-moves-like/BrandMark";
 import { MovesLikeNav } from "@/components/the-moves-like/MovesLikeNav";
 import { DiscoverScreen } from "@/components/the-moves-like/screens/DiscoverScreen";
 import { LearnScreen } from "@/components/the-moves-like/screens/LearnScreen";
@@ -40,13 +40,7 @@ function ScreenBody({ screen }: { screen: MovesLikeScreen }) {
 function WebGLFallback() {
   return (
     <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3 bg-[#071014] px-6 text-center">
-      <Image
-        src={MOVES_LIKE.logoPath}
-        alt="THE MOVES LIKE"
-        width={280}
-        height={140}
-        className="opacity-90"
-      />
+      <BrandMark size="inline" />
       <p className="max-w-md text-sm text-[#C8D8DE]">
         WebGL is unavailable in this browser. Navigation, Learn tutorials, Create recording, and
         Studio timeline still work — 3D stages are skipped.
@@ -59,7 +53,6 @@ export function MovesLikeApp() {
   const screen = useMovesLikeStore((s) => s.screen);
   const setScreen = useMovesLikeStore((s) => s.setScreen);
   const [webgl, setWebgl] = useState(true);
-  const [reduced, setReduced] = useState(false);
 
   useEffect(() => {
     try {
@@ -69,71 +62,59 @@ export function MovesLikeApp() {
     } catch {
       setWebgl(false);
     }
-    setReduced(prefersReducedMotion());
+    // Touch reduced-motion path so quality helpers stay warm
+    void prefersReducedMotion();
   }, []);
+
+  const hideChromeOnDiscover = screen === "discover";
 
   return (
     <div
       data-the-moves-like
       data-page-shell
       className="relative min-h-[100dvh] bg-[#071014] text-white"
-      style={{
-        fontFamily: '"Zc", "Segoe UI", sans-serif',
-      }}
+      style={{ fontFamily: '"Zc", "Segoe UI", sans-serif' }}
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-40"
-        style={{
-          background:
-            "radial-gradient(ellipse 80% 50% at 20% 0%, rgba(91,141,168,0.35), transparent 55%), radial-gradient(ellipse 60% 40% at 90% 10%, rgba(196,74,154,0.22), transparent 50%), linear-gradient(180deg, #0a1518 0%, #071014 40%, #0c1214 100%)",
-        }}
-      />
-
-      <header className="relative z-20 flex items-center justify-between gap-3 border-b border-white/10 bg-black/50 px-3 py-2 backdrop-blur-md sm:px-5">
-        <div className="flex min-w-0 items-center gap-3">
+      <header
+        className={`relative z-30 flex items-center justify-between gap-3 px-4 py-3 sm:px-6 ${
+          hideChromeOnDiscover
+            ? "absolute inset-x-0 top-0 bg-gradient-to-b from-black/70 to-transparent"
+            : "border-b border-white/10 bg-black/60 backdrop-blur-md"
+        }`}
+      >
+        <div className="flex min-w-0 items-center gap-4">
           <Link
             href="/"
-            className="shrink-0 text-[10px] uppercase tracking-[0.18em] text-[#9BB0B8] hover:text-white"
+            className="shrink-0 text-[10px] uppercase tracking-[0.2em] text-[#9BB0B8] hover:text-white"
           >
             ZZAI
           </Link>
-          <Image
-            src={MOVES_LIKE.logoPath}
-            alt=""
-            width={120}
-            height={60}
-            className="h-8 w-auto object-contain sm:h-9"
-          />
-          <div className="min-w-0">
-            <p className="truncate text-sm font-bold tracking-wide text-white sm:text-base">
-              {MOVES_LIKE.name}
-            </p>
-            <p className="hidden truncate text-[10px] text-[#9BB0B8] sm:block">
-              {MOVES_LIKE.tagline}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          {reduced ? (
-            <span className="hidden text-[10px] uppercase tracking-[0.14em] text-[#9BB0B8] sm:inline">
-              Reduced motion
-            </span>
-          ) : null}
-          <Link
-            href="/play"
-            className="rounded-md border border-white/15 px-2 py-1 text-[10px] uppercase tracking-[0.12em] text-[#C8D8DE] hover:border-[#5B8DA8]/50"
+          <button
+            type="button"
+            onClick={() => setScreen("discover")}
+            className="min-w-0"
+            aria-label={MOVES_LIKE.name}
           >
-            ZZAI Play
-          </Link>
+            <BrandMark size="header" priority={screen === "discover"} />
+          </button>
         </div>
+        <Link
+          href="/play"
+          className="shrink-0 text-[10px] uppercase tracking-[0.16em] text-[#9BB0B8] hover:text-[#90C4D8]"
+        >
+          ZZAI Play
+        </Link>
       </header>
 
-      <div className="relative z-20 sticky top-0">
-        <MovesLikeNav screen={screen} onChange={setScreen} />
+      <div
+        className={`relative z-30 ${
+          hideChromeOnDiscover ? "absolute inset-x-0 top-14" : "sticky top-0"
+        }`}
+      >
+        <MovesLikeNav screen={screen} onChange={setScreen} overlay={hideChromeOnDiscover} />
       </div>
 
-      <main className="relative z-10 pb-16">
+      <main className="relative z-10">
         {!webgl && (screen === "discover" || screen === "studio" || screen === "play") ? (
           <WebGLFallback />
         ) : null}

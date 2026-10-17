@@ -24,6 +24,8 @@ type Props = {
   mode?: "freestyle" | "dna" | "rhythm" | "choreo";
   playbackProgress?: number;
   clipBoundaries?: number[];
+  /** Hide the DNA honesty caption (Discover shows it elsewhere). */
+  showCaption?: boolean;
 };
 
 function SprayBars({ pulse = 0 }: { pulse?: number }) {
@@ -270,6 +272,7 @@ export function MovementStage({
   mode = "freestyle",
   playbackProgress = 0,
   clipBoundaries = [],
+  showCaption = true,
 }: Props) {
   const quality = useMemo(() => detectRenderQuality(), []);
   const dpr = useMemo(() => dprCap(quality), [quality]);
@@ -300,9 +303,11 @@ export function MovementStage({
           ) : null}
         </Suspense>
       </Canvas>
-      <p className="pointer-events-none absolute bottom-2 left-2 rounded bg-black/50 px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-[#90C4D8]">
-        Illustrative Motion DNA · not measured tracking
-      </p>
+      {showCaption ? (
+        <p className="pointer-events-none absolute bottom-2 left-2 bg-black/50 px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-[#90C4D8]">
+          Illustrative Motion DNA · not measured tracking
+        </p>
+      ) : null}
     </div>
   );
 }
