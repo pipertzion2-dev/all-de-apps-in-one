@@ -1,21 +1,9 @@
 import type { Metadata } from "next";
-import dynamic from "next/dynamic";
 import { MOVES_LIKE } from "@/lib/the-moves-like/brand";
 import { buildSeoMetadata } from "@/lib/seo/metadata";
 import { JsonLd } from "@/components/seo/json-ld";
 import { faqPageSchema, videoGameSchema } from "@/lib/seo/schema/builders";
-
-const MovesLikeApp = dynamic(
-  () => import("@/components/the-moves-like/MovesLikeApp").then((m) => m.MovesLikeApp),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex min-h-[100dvh] items-center justify-center bg-[#071014] text-sm text-[#90C4D8]">
-        Loading THE MOVES LIKE…
-      </div>
-    ),
-  },
-);
+import TheMovesLikeAppClient from "./app-client";
 
 const FAQS = [
   {
@@ -55,8 +43,7 @@ export default function TheMovesLikePage() {
           ...(faq ? [faq] : []),
         ]}
       />
-      <MovesLikeApp />
-      {/* Crawlable fallback copy under the fixed app shell */}
+      <TheMovesLikeAppClient />
       <article className="sr-only">
         <h1>{MOVES_LIKE.name}</h1>
         <p>{MOVES_LIKE.tagline}</p>
