@@ -283,31 +283,31 @@
 
   /* THE MOVES LIKE — clear frosted glass on light shell (teal / magenta tints) */
   .tml-glass {
-    @apply rounded-2xl border border-border/35 backdrop-blur-2xl;
-    background: hsl(0 0% 100% / 0.42);
-    -webkit-backdrop-filter: blur(24px);
-    box-shadow: 0 8px 32px rgba(15, 26, 28, 0.06);
+    @apply rounded-2xl border border-border/30 backdrop-blur-xl;
+    background: hsl(0 0% 100% / 0.28);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 6px 24px rgba(15, 26, 28, 0.05);
   }
   .tml-glass-teal {
-    @apply rounded-2xl border backdrop-blur-2xl;
-    background: hsl(197 55% 92% / 0.38);
-    border-color: hsl(197 45% 55% / 0.35);
-    -webkit-backdrop-filter: blur(24px);
-    box-shadow: 0 8px 28px rgba(91, 141, 168, 0.1);
+    @apply rounded-2xl border backdrop-blur-xl;
+    background: hsl(197 55% 94% / 0.26);
+    border-color: hsl(197 45% 55% / 0.28);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 6px 22px rgba(91, 141, 168, 0.08);
   }
   .tml-glass-magenta {
-    @apply rounded-2xl border backdrop-blur-2xl;
-    background: hsl(315 90% 96% / 0.4);
-    border-color: hsl(315 55% 60% / 0.35);
-    -webkit-backdrop-filter: blur(24px);
-    box-shadow: 0 8px 28px rgba(196, 74, 154, 0.1);
+    @apply rounded-2xl border backdrop-blur-xl;
+    background: hsl(315 90% 97% / 0.28);
+    border-color: hsl(315 55% 60% / 0.28);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 6px 22px rgba(196, 74, 154, 0.08);
   }
   .tml-glass-nav {
-    background: hsl(0 0% 100% / 0.72);
-    border-color: hsl(197 30% 80% / 0.55);
-    @apply backdrop-blur-2xl;
-    -webkit-backdrop-filter: blur(28px);
-    box-shadow: 0 -6px 28px rgba(15, 26, 28, 0.08);
+    background: hsl(0 0% 100% / 0.58);
+    border-color: hsl(197 30% 80% / 0.45);
+    @apply backdrop-blur-xl;
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 -4px 22px rgba(15, 26, 28, 0.06);
   }
 }
 

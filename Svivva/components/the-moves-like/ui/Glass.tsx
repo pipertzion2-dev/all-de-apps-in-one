@@ -20,12 +20,12 @@ export function GlassPanel({
 }) {
   const tintClass =
     tint === "teal"
-      ? "border-primary/25 bg-[hsl(197_55%_94%/0.32)] shadow-[0_10px_36px_rgba(91,141,168,0.08)]"
+      ? "border-primary/20 bg-[hsl(197_55%_96%/0.22)] shadow-[0_8px_28px_rgba(91,141,168,0.06)]"
       : tint === "magenta"
-        ? "border-[hsl(315_55%_65%/0.35)] bg-[hsl(315_90%_97%/0.35)] shadow-[0_10px_36px_rgba(196,74,154,0.08)]"
+        ? "border-[hsl(315_55%_65%/0.28)] bg-[hsl(315_90%_98%/0.24)] shadow-[0_8px_28px_rgba(196,74,154,0.06)]"
         : tint === "ink"
-          ? "border-border/40 bg-white/40 shadow-[0_12px_40px_rgba(15,26,28,0.06)]"
-          : "border-border/30 bg-white/35 shadow-[0_10px_36px_rgba(15,26,28,0.05)]";
+          ? "border-border/35 bg-white/28 shadow-[0_10px_32px_rgba(15,26,28,0.05)]"
+          : "border-border/25 bg-white/22 shadow-[0_8px_28px_rgba(15,26,28,0.04)]";
 
   return (
     <div
@@ -123,8 +123,8 @@ export function GlassDock({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-white/80 bg-white/40 p-3 shadow-[0_16px_40px_rgba(15,26,28,0.1)] backdrop-blur-2xl [-webkit-backdrop-filter:blur(24px)] sm:p-4",
-        "ring-1 ring-inset ring-primary/12",
+        "rounded-2xl border border-white/75 bg-white/28 p-3 shadow-[0_12px_32px_rgba(15,26,28,0.08)] backdrop-blur-xl [-webkit-backdrop-filter:blur(18px)] sm:p-4",
+        "ring-1 ring-inset ring-primary/10",
         className,
       )}
     >

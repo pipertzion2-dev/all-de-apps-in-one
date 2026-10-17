@@ -64,7 +64,7 @@ export function DiscoverScreen() {
               priority
               className="mb-4 max-w-[min(86vw,400px)]"
             />
-            <p className="max-w-md text-sm leading-relaxed text-foreground/80 sm:text-base">
+            <p className="max-w-md text-sm leading-relaxed text-foreground/90 sm:text-base">
               {mobileCam
                 ? "Built for your front camera — practice, record, and clash from your phone."
                 : MOVES_LIKE.tagline}
