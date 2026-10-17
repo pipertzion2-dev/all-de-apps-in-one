@@ -186,11 +186,11 @@ export function LearnScreen() {
             />
 
             <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-3 pt-[max(0.75rem,env(safe-area-inset-top))] sm:p-4">
-              <GlassPanel tint="magenta" className="px-3 py-2" padding={false}>
+              <GlassPanel tint="ink" className="px-3 py-2" padding={false}>
                 <p className="text-[10px] uppercase tracking-[0.18em] text-[#9a3a78]">
                   Ghost Mode · Front camera
                 </p>
-                <h2 className="text-lg font-bold text-foreground">{move.name}</h2>
+                <h2 className="text-lg font-bold text-[hsl(180_20%_12%)]">{move.name}</h2>
               </GlassPanel>
               <span className="tml-glass-teal px-3 py-1.5 text-[10px] uppercase tracking-[0.12em] text-primary">
                 {camera.starting

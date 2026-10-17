@@ -14,6 +14,7 @@ type Props = {
 /**
  * Full-bleed portrait front-camera frame.
  * Video is mirrored for natural selfie framing; recording can still be unmirrored separately.
+ * Empty state uses a light teal wash so chrome stays frosted-white (not black).
  */
 export const FrontCameraViewport = forwardRef<HTMLVideoElement, Props>(function FrontCameraViewport(
   { mirror = true, className = "", children, overlay },
@@ -21,10 +22,11 @@ export const FrontCameraViewport = forwardRef<HTMLVideoElement, Props>(function 
 ) {
   return (
     <div
-      className={`relative overflow-hidden bg-black ${className}`}
+      className={`relative overflow-hidden bg-[#eef6f8] ${className}`}
       style={{
-        // Fill usable phone viewport under chrome
         minHeight: "min(100dvh, 100svh)",
+        backgroundImage:
+          "radial-gradient(ellipse 70% 50% at 50% 35%, rgba(144,196,216,0.35), transparent 60%), radial-gradient(ellipse 55% 40% at 85% 15%, rgba(232,160,208,0.22), transparent 55%), linear-gradient(180deg, #ffffff 0%, #eef6f8 55%, #e4eef2 100%)",
       }}
     >
       <video
@@ -34,10 +36,10 @@ export const FrontCameraViewport = forwardRef<HTMLVideoElement, Props>(function 
         muted
         autoPlay
       />
-      {/* Soft vignette so controls stay readable on bright rooms */}
+      {/* Soft edge wash — keeps frosted docks readable without going black */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/35"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-white/55 via-transparent to-white/25"
       />
       {overlay ? <div className="absolute inset-0 z-10">{overlay}</div> : null}
       {children}

@@ -6,6 +6,7 @@ import { Button, type ButtonProps } from "@/components/ui/button";
 /**
  * Clear colored glass for light ZZAI UI —
  * mostly transparent white frost with soft teal / magenta tint.
+ * Always reads light even when the rest of the site is .dark.
  */
 export function GlassPanel({
   children,
@@ -20,17 +21,17 @@ export function GlassPanel({
 }) {
   const tintClass =
     tint === "teal"
-      ? "border-primary/20 bg-[hsl(197_55%_96%/0.22)] shadow-[0_8px_28px_rgba(91,141,168,0.06)]"
+      ? "border-[rgba(91,141,168,0.28)] bg-[rgba(232,244,248,0.55)] shadow-[0_8px_28px_rgba(91,141,168,0.08)]"
       : tint === "magenta"
-        ? "border-[hsl(315_55%_65%/0.28)] bg-[hsl(315_90%_98%/0.24)] shadow-[0_8px_28px_rgba(196,74,154,0.06)]"
+        ? "border-[rgba(196,74,154,0.3)] bg-[rgba(252,240,248,0.58)] shadow-[0_8px_28px_rgba(196,74,154,0.08)]"
         : tint === "ink"
-          ? "border-border/35 bg-white/28 shadow-[0_10px_32px_rgba(15,26,28,0.05)]"
-          : "border-border/25 bg-white/22 shadow-[0_8px_28px_rgba(15,26,28,0.04)]";
+          ? "border-[rgba(15,26,28,0.12)] bg-[rgba(255,255,255,0.72)] shadow-[0_10px_32px_rgba(15,26,28,0.06)]"
+          : "border-[rgba(15,26,28,0.1)] bg-[rgba(255,255,255,0.48)] shadow-[0_8px_28px_rgba(15,26,28,0.05)]";
 
   return (
     <div
       className={cn(
-        "rounded-2xl border backdrop-blur-xl [-webkit-backdrop-filter:blur(20px)]",
+        "rounded-2xl border text-[hsl(180_20%_10%)] backdrop-blur-xl [-webkit-backdrop-filter:blur(18px)]",
         tintClass,
         padding && "p-4 sm:p-5",
         className,
@@ -61,8 +62,8 @@ export function GlassChip({
       className={cn(
         "min-h-10 shrink-0 rounded-full border px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] backdrop-blur-md [-webkit-backdrop-filter:blur(12px)] transition",
         active
-          ? "border-primary/45 bg-primary/15 text-foreground"
-          : "border-border/50 bg-white/40 text-muted-foreground hover:border-primary/35 hover:bg-primary/8 hover:text-foreground",
+          ? "border-[rgba(91,141,168,0.45)] bg-[rgba(91,141,168,0.18)] text-[hsl(180_20%_12%)]"
+          : "border-[rgba(15,26,28,0.14)] bg-[rgba(255,255,255,0.62)] text-[hsl(180_10%_38%)] hover:border-[rgba(91,141,168,0.4)] hover:bg-[rgba(91,141,168,0.1)] hover:text-[hsl(180_20%_12%)]",
         className,
       )}
     >
@@ -79,9 +80,10 @@ export function GlassButton({ className, variant = "default", ...props }: Button
         className={cn(
           "min-h-11 backdrop-blur-md [-webkit-backdrop-filter:blur(12px)]",
           variant === "outline" &&
-            "border-border/70 bg-white/45 text-foreground hover:bg-white/70 hover:text-foreground",
+            "border-[rgba(15,26,28,0.16)] bg-[rgba(255,255,255,0.7)] text-[hsl(180_20%_12%)] hover:bg-[rgba(255,255,255,0.88)] hover:text-[hsl(180_20%_12%)]",
           variant === "secondary" && "bg-secondary/90",
-          variant === "ghost" && "text-foreground hover:bg-primary/10",
+          variant === "ghost" &&
+            "text-[hsl(197_45%_38%)] hover:bg-[rgba(91,141,168,0.1)] hover:text-[hsl(180_20%_12%)]",
           className,
         )}
         {...props}
@@ -112,7 +114,7 @@ export function GlassMagentaButton({ className, ...props }: ButtonProps) {
   );
 }
 
-/** Frosted white dock over camera / stage — stays readable without going black. */
+/** Frosted white dock over camera / stage — stays light even over a black video feed. */
 export function GlassDock({
   children,
   className,
@@ -123,8 +125,8 @@ export function GlassDock({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-white/75 bg-white/28 p-3 shadow-[0_12px_32px_rgba(15,26,28,0.08)] backdrop-blur-xl [-webkit-backdrop-filter:blur(18px)] sm:p-4",
-        "ring-1 ring-inset ring-primary/10",
+        "rounded-2xl border border-[rgba(255,255,255,0.85)] bg-[rgba(255,255,255,0.78)] p-3 text-[hsl(180_20%_10%)] shadow-[0_14px_36px_rgba(15,26,28,0.14)] backdrop-blur-xl [-webkit-backdrop-filter:blur(20px)] sm:p-4",
+        "ring-1 ring-inset ring-[rgba(91,141,168,0.14)]",
         className,
       )}
     >
