@@ -12,6 +12,7 @@ import {
 import { assembleFromLibrary, aiChoreographyStatus } from "@/lib/the-moves-like/choreo-assemble";
 import { exportRoutineShareText, useMovesLikeStore } from "@/lib/the-moves-like/store";
 import type { DanceStyle, EnergyLevel, MusicalMood, SkillLevel } from "@/lib/the-moves-like/types";
+import { GlassButton, GlassMagentaButton } from "@/components/the-moves-like/ui/Glass";
 
 const MovementStage = dynamic(
   () => import("@/components/the-moves-like/scenes/MovementStage").then((m) => m.MovementStage),
@@ -205,20 +206,23 @@ export function StudioScreen() {
             />
           </label>
           <div className="flex flex-wrap gap-2">
-            <button
+            <GlassButton
               type="button"
+              size="sm"
               onClick={assemble}
-              className="rounded-md bg-primary px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-primary-foreground"
+              className="min-h-9 text-xs uppercase tracking-[0.12em]"
             >
               Assemble from library
-            </button>
-            <button
+            </GlassButton>
+            <GlassButton
               type="button"
+              size="sm"
+              variant="outline"
               onClick={() => newBlankRoutine()}
-              className="rounded-md border border-border/40 bg-white/55 backdrop-blur-md px-3 py-2 text-xs uppercase tracking-[0.12em] text-foreground"
+              className="min-h-9 text-xs uppercase tracking-[0.12em]"
             >
               Blank routine
-            </button>
+            </GlassButton>
           </div>
           <p className="text-[11px] leading-relaxed text-muted-foreground">
             {aiStatus.available
@@ -239,30 +243,35 @@ export function StudioScreen() {
             ) : null}
           </h3>
           <div className="flex flex-wrap gap-2">
-            <button
+            <GlassMagentaButton
               type="button"
+              size="sm"
               disabled={!activeRoutine?.clips.length || playing}
               onClick={() => playPreview()}
-              className="rounded-md bg-[#AC81AF] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-40"
+              className="min-h-9 text-xs"
             >
               {playing ? "Playing…" : "Preview on stage"}
-            </button>
-            <button
+            </GlassMagentaButton>
+            <GlassButton
               type="button"
+              size="sm"
+              variant="outline"
               disabled={!activeRoutine}
               onClick={() => activeRoutine && saveRoutine(activeRoutine)}
-              className="rounded-md border border-border/40 bg-white/55 backdrop-blur-md px-3 py-1.5 text-xs text-foreground disabled:opacity-40"
+              className="min-h-9 text-xs"
             >
               Save
-            </button>
-            <button
+            </GlassButton>
+            <GlassButton
               type="button"
+              size="sm"
+              variant="outline"
               disabled={!activeRoutine}
               onClick={() => void share()}
-              className="rounded-md border border-border/40 bg-white/55 backdrop-blur-md px-3 py-1.5 text-xs text-foreground disabled:opacity-40"
+              className="min-h-9 text-xs"
             >
               Export / share text
-            </button>
+            </GlassButton>
           </div>
         </div>
         {shareMsg ? (

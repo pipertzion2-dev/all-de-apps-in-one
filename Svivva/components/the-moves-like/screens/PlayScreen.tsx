@@ -14,6 +14,7 @@ import {
   type AudioSession,
 } from "@/lib/the-moves-like/audio-analysis";
 import type { AudioAnalysisSnapshot } from "@/lib/the-moves-like/types";
+import { GlassButton, GlassMagentaButton } from "@/components/the-moves-like/ui/Glass";
 
 const MovementStage = dynamic(
   () => import("@/components/the-moves-like/scenes/MovementStage").then((m) => m.MovementStage),
@@ -257,13 +258,9 @@ export function PlayScreen() {
                 ))}
               </select>
             </label>
-            <button
-              type="button"
-              onClick={startChallenge}
-              className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
-            >
+            <GlassButton type="button" onClick={startChallenge}>
               Create challenge
-            </button>
+            </GlassButton>
             <div className="h-40 overflow-hidden tml-glass">
               <MovementStage moveIds={[challengeMoveId]} mode="dna" interactive={false} />
             </div>
@@ -311,14 +308,13 @@ export function PlayScreen() {
                 playsInline
               />
             ) : null}
-            <button
+            <GlassMagentaButton
               type="button"
               onClick={submitResponse}
               disabled={!challenges.length}
-              className="rounded-md bg-[#AC81AF] px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
             >
               Submit response
-            </button>
+            </GlassMagentaButton>
           </div>
         </div>
 
