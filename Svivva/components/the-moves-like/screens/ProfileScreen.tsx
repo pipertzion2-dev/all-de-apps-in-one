@@ -108,10 +108,7 @@ export function ProfileScreen() {
         ) : (
           <ul className="mt-3 space-y-2">
             {favorites.slice(0, 8).map((m) => (
-              <li
-                key={m.id}
-                className="tml-glass flex items-center justify-between px-3 py-2"
-              >
+              <li key={m.id} className="tml-glass flex items-center justify-between px-3 py-2">
                 <span className="font-semibold">{m.name}</span>
                 <span className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
                   {MOVE_CATEGORIES.find((c) => c.id === m.category)?.label}
@@ -135,11 +132,13 @@ export function ProfileScreen() {
           </TmlButton>
         </div>
         {!routines.length ? (
-          <p className="mt-3 text-sm text-muted-foreground">Build a set in Studio to showcase it here.</p>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Build a set in Studio to showcase it here.
+          </p>
         ) : (
           <ul className="mt-3 space-y-2">
             {routines.map((r) => (
-              <li key={r.id} className="rounded-lg border border-white/55 px-3 py-2">
+              <li key={r.id} className="tml-glass px-3 py-2">
                 <p className="font-semibold">{r.name}</p>
                 <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
                   {r.clips.length} clips · private (local)

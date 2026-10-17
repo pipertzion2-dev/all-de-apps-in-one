@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  GlassButton,
-  GlassMagentaButton,
-  GlassPanel,
-} from "@/components/the-moves-like/ui/Glass";
+import { GlassButton, GlassMagentaButton, GlassPanel } from "@/components/the-moves-like/ui/Glass";
 import { cn } from "@/lib/utils";
 
 /** Thin wrappers so screens keep Tml* names while using glossy glass chrome. */
