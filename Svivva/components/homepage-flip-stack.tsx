@@ -83,10 +83,15 @@ export function HomepageFlipStack({
 
         if (!scrollEnabled) {
           scroller.scrollTop = 0;
-        } else if (!overlayScrollWasEnabledRef.current) {
-          scroller.scrollTop = 0;
-          platformWheelLockUntilRef.current = performance.now() + PLATFORM_WHEEL_LOCK_MS;
+        } else {
+          // Keep body locked whenever the overlay owns scroll. The interactive
+          // effect cleanup clears overflow on re-run; without re-applying here,
+          // mobile scroll gets stuck on the platform face after parent re-renders.
           document.body.style.overflow = "hidden";
+          if (!overlayScrollWasEnabledRef.current) {
+            scroller.scrollTop = 0;
+            platformWheelLockUntilRef.current = performance.now() + PLATFORM_WHEEL_LOCK_MS;
+          }
         }
         overlayScrollWasEnabledRef.current = scrollEnabled;
       }
@@ -292,6 +297,10 @@ export function HomepageFlipStack({
   useEffect(() => {
     if (!interactive) return;
 
+    // Effect re-attach clears body overflow in cleanup — re-sync so the platform
+    // overlay keeps owning scroll instead of leaving the page stuck.
+    syncOverlayVisuals(displayedIndexRef.current, activePanelRef.current);
+
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const mobile = window.matchMedia("(max-width: 767px)").matches;
     const scrollGain = mobile ? 0.0028 : 0.0022;
@@ -302,7 +311,7 @@ export function HomepageFlipStack({
     const panelIdForInput = () =>
       scrubbingRef.current
         ? activePanelRef.current
-        : (panels[settledPanelIndex()]?.id ?? "home-game");
+        : flipPanelFromIndex(settledPanelIndex());
 
     const scrollSurfaceFor = () => scrollRef.current;
 
@@ -547,9 +556,9 @@ export function HomepageFlipStack({
     ensureTick,
     goToPanel,
     paintDirect,
-    panels,
     scheduleSnap,
     snapToNearestPanel,
+    syncOverlayVisuals,
   ]);
 
   return (
