@@ -113,10 +113,10 @@ export function DiscoverScreen() {
                   type="button"
                   onClick={() => toggleMove(move.id)}
                   className={cn(
-                    "min-h-[64px] flex-1 rounded-2xl border p-3 text-left backdrop-blur-xl transition",
+                    "min-h-[64px] flex-1 rounded-2xl border p-3 text-left backdrop-blur-xl backdrop-saturate-150 transition shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]",
                     on
-                      ? "border-primary/45 bg-primary/12"
-                      : "border-border/40 bg-white/40 hover:border-primary/30 hover:bg-white/60",
+                      ? "border-white/55 bg-[linear-gradient(145deg,rgba(255,255,255,0.55)_0%,rgba(109,145,179,0.22)_100%)]"
+                      : "border-white/50 bg-[linear-gradient(160deg,rgba(255,255,255,0.42)_0%,rgba(255,255,255,0.12)_100%)] hover:border-[rgba(109,145,179,0.35)] hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.5)_0%,rgba(109,145,179,0.14)_100%)]",
                   )}
                 >
                   <div className="flex items-baseline justify-between gap-3">
