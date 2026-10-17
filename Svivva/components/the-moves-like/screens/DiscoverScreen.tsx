@@ -71,7 +71,7 @@ export function DiscoverScreen() {
             </button>
           </div>
           <p className="mt-8 text-[10px] uppercase tracking-[0.22em] text-[#7A949C]">
-            Illustrative Motion DNA on stage · not measured tracking
+            3D dancer preview of your selected move · illustrative, not motion-capture
           </p>
         </div>
       </section>
