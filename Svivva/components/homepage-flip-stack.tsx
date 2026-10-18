@@ -432,7 +432,10 @@ export function HomepageFlipStack({
       }
 
       overscrollAccumRef.current += -delta;
-      overscrollAccumRef.current = Math.min(overscrollAccumRef.current, WHEEL_OVERSCROLL_FLIP_PX * 2);
+      overscrollAccumRef.current = Math.min(
+        overscrollAccumRef.current,
+        WHEEL_OVERSCROLL_FLIP_PX * 2,
+      );
       overscrollEventsRef.current += 1;
       if (
         overscrollAccumRef.current < WHEEL_OVERSCROLL_FLIP_PX ||
