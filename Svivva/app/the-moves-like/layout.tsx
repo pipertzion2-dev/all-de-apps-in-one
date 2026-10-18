@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import type { Viewport } from "next";
 
-/** Phone-first safe areas for Train capture + Studio timeline. */
+/** Phone-first: fill notch / home-indicator safe areas for selfie camera UI. */
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,

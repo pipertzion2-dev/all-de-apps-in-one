@@ -3,305 +3,333 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type {
-  CypherSubmission,
-  DancerProfile,
-  Movement,
+  FavoriteCombo,
   MovesLikeScreen,
-  MoveCategory,
+  PracticeSection,
   Routine,
+  StyleClashChallenge,
   TimelineClip,
 } from "./types";
-import { SAMPLE_CHALLENGES, SAMPLE_MOVEMENTS } from "./sample-data";
-import { deleteMediaBlob, putMediaBlob, uid } from "./media-store";
+import { getMove } from "./moves-library";
+
+function uid(prefix: string): string {
+  return `${prefix}_${Math.random().toString(36).slice(2, 10)}`;
+}
 
 type MovesLikeState = {
   screen: MovesLikeScreen;
   setScreen: (s: MovesLikeScreen) => void;
 
-  movements: Movement[];
-  upsertMovement: (m: Movement) => void;
-  deleteMovement: (id: string) => Promise<void>;
-  toggleFavorite: (id: string) => void;
-  attachVideo: (
-    movementId: string,
-    blob: Blob,
-    meta: { durationSec: number; thumbnailDataUrl?: string },
-  ) => Promise<void>;
+  selectedMoveIds: string[];
+  toggleMove: (id: string) => void;
+  setSelectedMoves: (ids: string[]) => void;
 
+  compareMoveIds: [string | null, string | null];
+  setCompareSlot: (slot: 0 | 1, id: string | null) => void;
+
+  activeRoutine: Routine | null;
   routines: Routine[];
-  activeRoutineId: string | null;
-  setActiveRoutineId: (id: string | null) => void;
+  setActiveRoutine: (r: Routine | null) => void;
   saveRoutine: (r: Routine) => void;
   deleteRoutine: (id: string) => void;
-  newRoutine: (name?: string) => string;
-  addClipFromMovement: (movementId: string) => void;
+  addClip: (moveId: string) => void;
   removeClip: (clipId: string) => void;
   reorderClips: (from: number, to: number) => void;
-  updateClip: (clipId: string, patch: Partial<TimelineClip>) => void;
-  attachMusic: (blob: Blob, name: string) => Promise<void>;
+  updateClipDuration: (clipId: string, durationBeats: number) => void;
+  newBlankRoutine: (name?: string) => void;
 
-  profile: DancerProfile;
-  setProfile: (p: Partial<DancerProfile>) => void;
+  favorites: FavoriteCombo[];
+  saveFavorite: (name: string, moveIds: string[]) => void;
+  removeFavorite: (id: string) => void;
 
-  submissions: CypherSubmission[];
-  addSubmission: (s: Omit<CypherSubmission, "id" | "createdAt">) => void;
+  practiceHistory: { moveId: string; at: string }[];
+  recordPractice: (moveId: string) => void;
+  practiceLoop: PracticeSection | null;
+  setPracticeLoop: (s: PracticeSection | null) => void;
+
+  challenges: StyleClashChallenge[];
+  createChallenge: (prompt: string, moveId: string) => string;
+  addChallengeResponse: (
+    challengeId: string,
+    payload: { authorLabel: string; note: string; videoObjectUrl?: string },
+  ) => void;
+  voteResponse: (challengeId: string, responseId: string, kind: "creativity" | "style") => void;
+
+  recordingsMeta: { id: string; label: string; createdAt: string }[];
+  addRecordingMeta: (label: string) => string;
 };
 
-function nowIso() {
-  return new Date().toISOString();
-}
-
-function activeRoutine(state: MovesLikeState): Routine | null {
-  return state.routines.find((r) => r.id === state.activeRoutineId) ?? null;
+function ensureRoutine(state: MovesLikeState): Routine {
+  if (state.activeRoutine) return state.activeRoutine;
+  const now = new Date().toISOString();
+  return {
+    id: uid("routine"),
+    name: "Untitled routine",
+    bpm: 120,
+    clips: [],
+    createdAt: now,
+    updatedAt: now,
+    origin: "manual",
+  };
 }
 
 export const useMovesLikeStore = create<MovesLikeState>()(
   persist(
     (set, get) => ({
-      screen: "train",
+      screen: "discover",
       setScreen: (screen) => set({ screen }),
 
-      movements: SAMPLE_MOVEMENTS,
-      upsertMovement: (m) =>
-        set((s) => {
-          const i = s.movements.findIndex((x) => x.id === m.id);
-          if (i < 0) return { movements: [m, ...s.movements] };
-          const next = [...s.movements];
-          next[i] = m;
-          return { movements: next };
-        }),
-      deleteMovement: async (id) => {
-        const m = get().movements.find((x) => x.id === id);
-        if (m?.videoBlobId) {
-          try {
-            await deleteMediaBlob(m.videoBlobId);
-          } catch {
-            /* ignore */
-          }
-        }
+      selectedMoveIds: ["two-step", "body-roll"],
+      toggleMove: (id) =>
         set((s) => ({
-          movements: s.movements.filter((x) => x.id !== id || x.source === "sample"),
-        }));
-      },
-      toggleFavorite: (id) =>
-        set((s) => ({
-          movements: s.movements.map((m) =>
-            m.id === id ? { ...m, favorite: !m.favorite, updatedAt: nowIso() } : m,
-          ),
+          selectedMoveIds: s.selectedMoveIds.includes(id)
+            ? s.selectedMoveIds.filter((x) => x !== id)
+            : [...s.selectedMoveIds, id].slice(-6),
         })),
-      attachVideo: async (movementId, blob, meta) => {
-        const blobId = uid("vid");
-        await putMediaBlob(blobId, blob);
-        const objectUrl = URL.createObjectURL(blob);
-        set((s) => ({
-          movements: s.movements.map((m) =>
-            m.id === movementId
-              ? {
-                  ...m,
-                  videoBlobId: blobId,
-                  videoObjectUrl: objectUrl,
-                  durationSec: meta.durationSec || m.durationSec,
-                  thumbnailDataUrl: meta.thumbnailDataUrl ?? m.thumbnailDataUrl,
-                  updatedAt: nowIso(),
-                  source: "user",
-                }
-              : m,
-          ),
-        }));
-      },
+      setSelectedMoves: (ids) => set({ selectedMoveIds: ids.slice(0, 6) }),
 
+      compareMoveIds: ["two-step", "body-roll"],
+      setCompareSlot: (slot, id) =>
+        set((s) => {
+          const next: [string | null, string | null] = [...s.compareMoveIds];
+          next[slot] = id;
+          return { compareMoveIds: next };
+        }),
+
+      activeRoutine: null,
       routines: [],
-      activeRoutineId: null,
-      setActiveRoutineId: (id) => set({ activeRoutineId: id }),
+      setActiveRoutine: (r) => set({ activeRoutine: r }),
       saveRoutine: (r) =>
         set((s) => {
-          const i = s.routines.findIndex((x) => x.id === r.id);
-          if (i < 0) return { routines: [r, ...s.routines], activeRoutineId: r.id };
-          const next = [...s.routines];
-          next[i] = { ...r, updatedAt: nowIso() };
-          return { routines: next };
+          const updated = { ...r, updatedAt: new Date().toISOString() };
+          const others = s.routines.filter((x) => x.id !== updated.id);
+          return {
+            activeRoutine: updated,
+            routines: [updated, ...others].slice(0, 40),
+          };
         }),
       deleteRoutine: (id) =>
         set((s) => ({
           routines: s.routines.filter((r) => r.id !== id),
-          activeRoutineId: s.activeRoutineId === id ? null : s.activeRoutineId,
+          activeRoutine: s.activeRoutine?.id === id ? null : s.activeRoutine,
         })),
-      newRoutine: (name) => {
-        const id = uid("routine");
-        const stamp = nowIso();
-        const r: Routine = {
-          id,
-          name: name?.trim() || "Untitled routine",
-          clips: [],
-          createdAt: stamp,
-          updatedAt: stamp,
-        };
-        set((s) => ({ routines: [r, ...s.routines], activeRoutineId: id }));
-        return id;
-      },
-      addClipFromMovement: (movementId) => {
-        const m = get().movements.find((x) => x.id === movementId);
-        if (!m) return;
+      addClip: (moveId) => {
+        const move = getMove(moveId);
+        if (!move) return;
         set((s) => {
-          let routine = activeRoutine(s);
-          if (!routine) {
-            const stamp = nowIso();
-            routine = {
-              id: uid("routine"),
-              name: "Untitled routine",
-              clips: [],
-              createdAt: stamp,
-              updatedAt: stamp,
-            };
-          }
-          const startSec = routine.clips.reduce(
-            (acc, c) => Math.max(acc, c.startSec + c.durationSec),
-            0,
-          );
+          const routine = ensureRoutine(s);
+          const last = routine.clips[routine.clips.length - 1];
+          const startBeat = last ? last.startBeat + last.durationBeats : 0;
           const clip: TimelineClip = {
             id: uid("clip"),
-            movementId,
-            startSec,
-            durationSec: Math.max(0.5, m.durationSec || 2),
-            playbackRate: 1,
+            moveId,
+            startBeat,
+            durationBeats: move.beats,
           };
-          const next: Routine = {
+          const next = {
             ...routine,
             clips: [...routine.clips, clip],
-            updatedAt: nowIso(),
+            updatedAt: new Date().toISOString(),
           };
-          const routines = s.routines.some((r) => r.id === next.id)
-            ? s.routines.map((r) => (r.id === next.id ? next : r))
-            : [next, ...s.routines];
-          return { routines, activeRoutineId: next.id };
+          return { activeRoutine: next };
         });
       },
       removeClip: (clipId) =>
         set((s) => {
-          const routine = activeRoutine(s);
-          if (!routine) return s;
-          const clips = routine.clips.filter((c) => c.id !== clipId);
-          let t = 0;
-          const reflow = clips.map((c) => {
-            const next = { ...c, startSec: t };
-            t += c.durationSec;
-            return next;
-          });
-          const next = { ...routine, clips: reflow, updatedAt: nowIso() };
-          return { routines: s.routines.map((r) => (r.id === next.id ? next : r)) };
+          if (!s.activeRoutine) return s;
+          let beat = 0;
+          const clips = s.activeRoutine.clips
+            .filter((c) => c.id !== clipId)
+            .map((c) => {
+              const next = { ...c, startBeat: beat };
+              beat += c.durationBeats;
+              return next;
+            });
+          return {
+            activeRoutine: {
+              ...s.activeRoutine,
+              clips,
+              updatedAt: new Date().toISOString(),
+            },
+          };
         }),
       reorderClips: (from, to) =>
         set((s) => {
-          const routine = activeRoutine(s);
-          if (!routine) return s;
-          const clips = [...routine.clips];
+          if (!s.activeRoutine) return s;
+          const clips = [...s.activeRoutine.clips];
           if (from < 0 || to < 0 || from >= clips.length || to >= clips.length) return s;
           const [item] = clips.splice(from, 1);
-          clips.splice(to, 0, item!);
-          let t = 0;
-          const reflow = clips.map((c) => {
-            const next = { ...c, startSec: t };
-            t += c.durationSec;
+          if (!item) return s;
+          clips.splice(to, 0, item);
+          let beat = 0;
+          const reindexed = clips.map((c) => {
+            const next = { ...c, startBeat: beat };
+            beat += c.durationBeats;
             return next;
           });
-          const next = { ...routine, clips: reflow, updatedAt: nowIso() };
-          return { routines: s.routines.map((r) => (r.id === next.id ? next : r)) };
-        }),
-      updateClip: (clipId, patch) =>
-        set((s) => {
-          const routine = activeRoutine(s);
-          if (!routine) return s;
-          const clips = routine.clips.map((c) => (c.id === clipId ? { ...c, ...patch } : c));
-          let t = 0;
-          const reflow = clips.map((c) => {
-            const next = { ...c, startSec: t, durationSec: Math.max(0.25, c.durationSec) };
-            t += next.durationSec;
-            return next;
-          });
-          const next = { ...routine, clips: reflow, updatedAt: nowIso() };
-          return { routines: s.routines.map((r) => (r.id === next.id ? next : r)) };
-        }),
-      attachMusic: async (blob, name) => {
-        const routine = activeRoutine(get());
-        if (!routine) return;
-        const blobId = uid("audio");
-        await putMediaBlob(blobId, blob);
-        const objectUrl = URL.createObjectURL(blob);
-        const next = {
-          ...routine,
-          musicBlobId: blobId,
-          musicObjectUrl: objectUrl,
-          musicName: name,
-          updatedAt: nowIso(),
-        };
-        set((s) => ({
-          routines: s.routines.map((r) => (r.id === next.id ? next : r)),
-        }));
-      },
-
-      profile: {
-        displayName: "Your name",
-        username: "bboy",
-        bio: "Break · footwork · freezes. Building my movement library.",
-        styles: ["Breaking", "Freestyle"],
-        signatureMoveIds: [],
-      },
-      setProfile: (p) => set((s) => ({ profile: { ...s.profile, ...p } })),
-
-      submissions: [],
-      addSubmission: (payload) =>
-        set((s) => ({
-          submissions: [
-            {
-              ...payload,
-              id: uid("sub"),
-              createdAt: nowIso(),
+          return {
+            activeRoutine: {
+              ...s.activeRoutine,
+              clips: reindexed,
+              updatedAt: new Date().toISOString(),
             },
-            ...s.submissions,
-          ],
+          };
+        }),
+      updateClipDuration: (clipId, durationBeats) =>
+        set((s) => {
+          if (!s.activeRoutine) return s;
+          let beat = 0;
+          const clips = s.activeRoutine.clips.map((c) => {
+            const dur = c.id === clipId ? Math.max(1, durationBeats) : c.durationBeats;
+            const next = { ...c, startBeat: beat, durationBeats: dur };
+            beat += dur;
+            return next;
+          });
+          return {
+            activeRoutine: {
+              ...s.activeRoutine,
+              clips,
+              updatedAt: new Date().toISOString(),
+            },
+          };
+        }),
+      newBlankRoutine: (name) => {
+        const now = new Date().toISOString();
+        set({
+          activeRoutine: {
+            id: uid("routine"),
+            name: name ?? "Untitled routine",
+            bpm: 120,
+            clips: [],
+            createdAt: now,
+            updatedAt: now,
+            origin: "manual",
+          },
+        });
+      },
+
+      favorites: [],
+      saveFavorite: (name, moveIds) =>
+        set((s) => ({
+          favorites: [
+            { id: uid("fav"), name, moveIds, createdAt: new Date().toISOString() },
+            ...s.favorites,
+          ].slice(0, 50),
         })),
+      removeFavorite: (id) => set((s) => ({ favorites: s.favorites.filter((f) => f.id !== id) })),
+
+      practiceHistory: [],
+      recordPractice: (moveId) =>
+        set((s) => ({
+          practiceHistory: [{ moveId, at: new Date().toISOString() }, ...s.practiceHistory].slice(
+            0,
+            100,
+          ),
+        })),
+      practiceLoop: null,
+      setPracticeLoop: (practiceLoop) => set({ practiceLoop }),
+
+      challenges: [],
+      createChallenge: (prompt, moveId) => {
+        const id = uid("clash");
+        set((s) => ({
+          challenges: [
+            {
+              id,
+              prompt,
+              moveId,
+              createdAt: new Date().toISOString(),
+              responses: [],
+            },
+            ...s.challenges,
+          ].slice(0, 30),
+        }));
+        return id;
+      },
+      addChallengeResponse: (challengeId, payload) =>
+        set((s) => ({
+          challenges: s.challenges.map((c) =>
+            c.id !== challengeId
+              ? c
+              : {
+                  ...c,
+                  responses: [
+                    {
+                      id: uid("resp"),
+                      authorLabel: payload.authorLabel,
+                      note: payload.note,
+                      createdAt: new Date().toISOString(),
+                      videoObjectUrl: payload.videoObjectUrl,
+                      votesCreativity: 0,
+                      votesStyle: 0,
+                    },
+                    ...c.responses,
+                  ],
+                },
+          ),
+        })),
+      voteResponse: (challengeId, responseId, kind) =>
+        set((s) => ({
+          challenges: s.challenges.map((c) =>
+            c.id !== challengeId
+              ? c
+              : {
+                  ...c,
+                  responses: c.responses.map((r) =>
+                    r.id !== responseId
+                      ? r
+                      : {
+                          ...r,
+                          votesCreativity:
+                            kind === "creativity" ? r.votesCreativity + 1 : r.votesCreativity,
+                          votesStyle: kind === "style" ? r.votesStyle + 1 : r.votesStyle,
+                        },
+                  ),
+                },
+          ),
+        })),
+
+      recordingsMeta: [],
+      addRecordingMeta: (label) => {
+        const id = uid("rec");
+        set((s) => ({
+          recordingsMeta: [
+            { id, label, createdAt: new Date().toISOString() },
+            ...s.recordingsMeta,
+          ].slice(0, 40),
+        }));
+        return id;
+      },
     }),
     {
-      name: "the-moves-like-v2",
+      name: "zzai-the-moves-like-v1",
       partialize: (s) => ({
-        screen: s.screen,
-        movements: s.movements.map((m) => ({
-          ...m,
-          videoObjectUrl: undefined,
+        selectedMoveIds: s.selectedMoveIds,
+        compareMoveIds: s.compareMoveIds,
+        routines: s.routines,
+        activeRoutine: s.activeRoutine,
+        favorites: s.favorites,
+        practiceHistory: s.practiceHistory,
+        challenges: s.challenges.map((c) => ({
+          ...c,
+          // Drop ephemeral blob URLs from persistence
+          responses: c.responses.map(({ videoObjectUrl: _v, ...rest }) => rest),
         })),
-        routines: s.routines.map((r) => ({
-          ...r,
-          musicObjectUrl: undefined,
-        })),
-        activeRoutineId: s.activeRoutineId,
-        profile: s.profile,
-        submissions: s.submissions.map((x) => ({ ...x, videoObjectUrl: undefined })),
+        recordingsMeta: s.recordingsMeta,
       }),
     },
   ),
 );
 
-export { SAMPLE_CHALLENGES };
-
-export function createEmptyMovement(partial?: Partial<Movement>): Movement {
-  const stamp = nowIso();
-  const id = partial?.id ?? uid("move");
-  return {
-    id,
-    name: partial?.name ?? "Untitled move",
-    category: partial?.category ?? "other",
-    tags: partial?.tags ?? [],
-    notes: partial?.notes ?? "",
-    difficulty: partial?.difficulty,
-    techniqueNotes: partial?.techniqueNotes ?? "",
-    durationSec: partial?.durationSec ?? 0,
-    favorite: partial?.favorite ?? false,
-    source: "user",
-    createdAt: partial?.createdAt ?? stamp,
-    updatedAt: stamp,
-    videoBlobId: partial?.videoBlobId,
-    videoObjectUrl: partial?.videoObjectUrl,
-    videoUrl: partial?.videoUrl,
-    thumbnailDataUrl: partial?.thumbnailDataUrl,
-  };
+export function exportRoutineShareText(routine: Routine): string {
+  const lines = [
+    `THE MOVES LIKE — ${routine.name}`,
+    `BPM ${routine.bpm} · ${routine.origin}`,
+    ...routine.clips.map((c, i) => {
+      const move = getMove(c.moveId);
+      return `${i + 1}. ${move?.name ?? c.moveId} @ beat ${c.startBeat} (${c.durationBeats} beats)`;
+    }),
+    `zzaizzai.com/the-moves-like`,
+  ];
+  return lines.join("\n");
 }

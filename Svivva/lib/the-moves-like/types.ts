@@ -1,96 +1,145 @@
-export type MovesLikeScreen = "train" | "moves" | "studio" | "cypher" | "profile";
+export type MovesLikeScreen =
+  | "discover"
+  | "learn"
+  | "create"
+  | "studio"
+  | "play"
+  | "community"
+  | "profile";
 
-export type MoveCategory =
-  | "toprock"
-  | "footwork"
-  | "freezes"
-  | "power"
-  | "transitions"
-  | "combos"
-  | "other";
+export type DanceStyle =
+  | "hip-hop"
+  | "house"
+  | "popping"
+  | "locking"
+  | "contemporary"
+  | "freestyle"
+  | "afrobeats"
+  | "vogue";
 
-export type MoveDifficulty = "beginner" | "intermediate" | "advanced" | "pro";
+export type SkillLevel = "beginner" | "intermediate" | "advanced" | "pro";
 
-/** User-captured or sample movement asset. */
-export type Movement = {
-  id: string;
+export type EnergyLevel = "low" | "medium" | "high" | "explosive";
+
+export type MusicalMood = "groovy" | "energetic" | "smooth" | "aggressive" | "playful";
+
+export type MoveId = string;
+
+export type DanceMove = {
+  id: MoveId;
   name: string;
-  category: MoveCategory;
-  tags: string[];
-  notes: string;
-  difficulty?: MoveDifficulty;
-  techniqueNotes?: string;
-  /** IndexedDB key for local video blob (when user-uploaded) */
-  videoBlobId?: string;
-  /** Object URL session cache — not persisted */
-  videoObjectUrl?: string;
-  /** Optional remote / sample clip URL */
-  videoUrl?: string;
-  thumbnailDataUrl?: string;
+  style: DanceStyle;
+  level: SkillLevel;
+  energy: EnergyLevel;
   durationSec: number;
-  favorite: boolean;
-  /** Distinguish seeded demo rows from user content */
-  source: "user" | "sample";
-  createdAt: string;
-  updatedAt: string;
+  beats: number;
+  tags: string[];
+  tutorialSteps: string[];
+  /** Seeded illustrative DNA params — not measured tracking data */
+  dna: MotionDnaParams;
+  /** Optional reference video URL (public demo clips) */
+  referenceVideoUrl?: string;
+};
+
+export type MotionDnaParams = {
+  /** Deterministic seed for procedural sculpture */
+  seed: number;
+  amplitude: number;
+  frequency: number;
+  twist: number;
+  asymmetry: number;
+  jointEmphasis: ("hips" | "shoulders" | "arms" | "legs" | "spine" | "head")[];
+  rhythmAccent: number[];
+  colorBias: "teal" | "magenta" | "mauve" | "cyan";
+  measured: false;
+  label: "illustrative";
 };
 
 export type TimelineClip = {
   id: string;
-  movementId: string;
-  /** Start offset in the routine timeline (seconds) */
-  startSec: number;
-  durationSec: number;
-  note?: string;
-  playbackRate?: number;
+  moveId: MoveId;
+  startBeat: number;
+  durationBeats: number;
 };
 
 export type Routine = {
   id: string;
   name: string;
+  bpm: number;
   clips: TimelineClip[];
-  /** Optional local music blob id / object URL */
-  musicBlobId?: string;
-  musicObjectUrl?: string;
-  musicName?: string;
-  bpm?: number;
   createdAt: string;
   updatedAt: string;
+  /** "manual" | "library-assembled" — never claim AI without a real model */
+  origin: "manual" | "library-assembled";
+  style?: DanceStyle;
+  mood?: MusicalMood;
+  energy?: EnergyLevel;
+  level?: SkillLevel;
 };
 
-export type CypherChallenge = {
+export type FavoriteCombo = {
   id: string;
-  title: string;
-  prompt: string;
-  kind: "challenge" | "round" | "combo";
-  sample: true;
-  focus: string;
+  name: string;
+  moveIds: MoveId[];
   createdAt: string;
 };
 
-export type CypherSubmission = {
+export type StyleClashChallenge = {
   id: string;
-  challengeId: string;
+  prompt: string;
+  moveId: MoveId;
+  createdAt: string;
+  /** Local-only response recordings as object URLs / metadata */
+  responses: StyleClashResponse[];
+};
+
+export type StyleClashResponse = {
+  id: string;
   authorLabel: string;
   note: string;
-  videoObjectUrl?: string;
   createdAt: string;
+  /** Blob URL when recorded in-browser */
+  videoObjectUrl?: string;
+  votesCreativity: number;
+  votesStyle: number;
 };
 
-export type DancerProfile = {
-  displayName: string;
-  username: string;
-  bio: string;
-  styles: string[];
-  signatureMoveIds: string[];
+export type PracticeSection = {
+  moveId: MoveId;
+  loopStartSec: number;
+  loopEndSec: number;
 };
 
-export const MOVE_CATEGORIES: { id: MoveCategory; label: string }[] = [
-  { id: "toprock", label: "Toprock" },
-  { id: "footwork", label: "Footwork" },
-  { id: "freezes", label: "Freezes" },
-  { id: "power", label: "Power moves" },
-  { id: "transitions", label: "Transitions" },
-  { id: "combos", label: "Combos" },
-  { id: "other", label: "Other" },
-];
+export type ChoreoBrief = {
+  style: DanceStyle;
+  level: SkillLevel;
+  mood: MusicalMood;
+  energy: EnergyLevel;
+  durationSec: number;
+  preferredMoveIds: MoveId[];
+  challenge?: string;
+};
+
+export type AudioAnalysisSnapshot = {
+  bpm: number | null;
+  energy: number;
+  bass: number;
+  mid: number;
+  treble: number;
+  waveform: Float32Array;
+  beatGrid: number[];
+  reliableTempo: boolean;
+};
+
+export type PoseLandmark = {
+  x: number;
+  y: number;
+  z: number;
+  visibility?: number;
+};
+
+export type PoseFrame = {
+  timestampMs: number;
+  landmarks: PoseLandmark[];
+  source: "mediapipe" | "none";
+};
