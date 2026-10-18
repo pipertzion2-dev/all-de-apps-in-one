@@ -373,17 +373,14 @@ export default function LandingPage() {
     }
     if (scrollHintRef.current) scrollHintRef.current.style.opacity = "1";
 
-    const isOverIntroVideo = (target: EventTarget | null) => {
-      const videoEl = introVideoRef.current;
-      if (!videoEl || !(target instanceof Node)) return false;
-      return videoEl.contains(target);
-    };
-
-    // Scroll / swipe up outside the player enters the site (no flip RAF).
+    // Scroll / swipe up enters the site (no flip RAF). Do not ignore events over
+    // the player — the video block is most of the viewport, and play/pause is
+    // click-only (iframe is pointer-events-none), so gating on the video target
+    // made "Scroll up to enter" effectively dead.
     const handleWheel = (e: WheelEvent) => {
       if (finishingIntroRef.current) return;
-      if (isOverIntroVideo(e.target)) return;
       if (e.deltaY < 0) {
+        finishingIntroRef.current = true;
         finishIntro();
       }
     };
@@ -393,9 +390,9 @@ export default function LandingPage() {
     };
     const handleTouchEnd = (e: TouchEvent) => {
       if (finishingIntroRef.current) return;
-      if (isOverIntroVideo(e.target)) return;
       const y = e.changedTouches[0]?.clientY ?? touchStartY;
       if (touchStartY - y > 48) {
+        finishingIntroRef.current = true;
         finishIntro();
       }
     };

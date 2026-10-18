@@ -12,6 +12,10 @@ describe("homepage intro scroll", () => {
     expect(pageSrc).not.toContain('window.addEventListener("touchmove", handleTouchMove');
     expect(pageSrc).toContain("skipIntroRef");
     expect(pageSrc).toContain("Skip intro");
+    // Wheel/swipe up must enter even over the player (play/pause is click-only).
+    expect(pageSrc).not.toContain("isOverIntroVideo");
+    expect(pageSrc).toContain("if (e.deltaY < 0)");
+    expect(pageSrc).toContain("touchStartY - y > 48");
   });
 
   it("defers heavy homepage 3D until intro completes", () => {
