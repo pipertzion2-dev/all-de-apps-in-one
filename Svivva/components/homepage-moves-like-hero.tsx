@@ -2,17 +2,18 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { BrandMark } from "@/components/the-moves-like/BrandMark";
 import { CamoThreeOverlay } from "@/components/camo-three-overlay";
+import { HomepageScrollHint } from "@/components/homepage-scroll-hint";
 import { Button } from "@/components/ui/button";
 import { MOVES_LIKE } from "@/lib/the-moves-like/brand";
+import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
 import {
+  HOMEPAGE_SCROLL_TO_GAME,
   PRODUCT_HERO_HEADLINE,
   PRODUCT_HERO_SUBLINE,
   PRODUCT_NAME_LINE,
 } from "@/lib/product-positioning";
-import { preferMobileCameraUi } from "@/lib/the-moves-like/use-front-camera";
 
 const MovementStage = dynamic(
   () => import("@/components/the-moves-like/scenes/MovementStage").then((m) => m.MovementStage),
@@ -28,22 +29,16 @@ const MovementStage = dynamic(
 
 /**
  * Homepage first composition: THE MOVES LIKE as the brand signal,
- * Three.js CRT flowers as the atmosphere, interactive dancer stage underneath.
+ * Three.js CRT flowers as the atmosphere, dancer stage underneath.
+ * WebGL layers are pointer-events-none so homepage flip / scroll stays smooth.
  */
 export function HomepageMovesLikeHero() {
-  const [mobile, setMobile] = useState(false);
-
-  useEffect(() => {
-    setMobile(preferMobileCameraUi());
-  }, []);
-
   return (
     <section
       className="relative isolate min-h-[100svh] overflow-hidden border-b border-border/30"
       data-testid="homepage-moves-like-hero"
       aria-labelledby="homepage-moves-like-heading"
     >
-      {/* Full-bleed Three.js flower bed — kept as the atmospheric plane */}
       <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
         <CamoThreeOverlay
           preset="oaas"
@@ -53,12 +48,12 @@ export function HomepageMovesLikeHero() {
         />
       </div>
 
-      {/* Interactive dancer stage — sits in the flower field */}
-      <div className="absolute inset-0 z-[1]">
+      {/* Decorative only — never steal wheel / touch from the flip scroller */}
+      <div className="pointer-events-none absolute inset-0 z-[1]" aria-hidden>
         <MovementStage
           moveIds={["body-roll", "afro-bounce", "two-step"]}
           mode="freestyle"
-          interactive={!mobile}
+          interactive={false}
           className="h-full min-h-[100svh]"
           showCaption={false}
         />
@@ -69,7 +64,7 @@ export function HomepageMovesLikeHero() {
         className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-t from-[#e8f0f6] via-[#F7FBFC]/40 to-white/20 sm:bg-gradient-to-r sm:from-white/82 sm:via-[rgba(247,251,252,0.45)] sm:to-transparent"
       />
 
-      <div className="relative z-10 flex min-h-[100svh] flex-col justify-end px-4 pb-16 pt-28 sm:justify-center sm:px-10 sm:pb-24 sm:pt-24">
+      <div className="relative z-10 flex min-h-[100svh] flex-col justify-end px-4 pb-20 pt-28 sm:justify-center sm:px-10 sm:pb-24 sm:pt-24">
         <div className="max-w-xl space-y-5 rounded-3xl border border-white/75 bg-[linear-gradient(160deg,rgba(255,255,255,0.72)_0%,rgba(255,255,255,0.22)_100%)] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,1),0_18px_48px_rgba(109,145,179,0.18)] backdrop-blur-[20px] backdrop-saturate-[1.85] sm:p-8">
           <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#6D91B3]">
             zzai zzai · {PRODUCT_NAME_LINE}
@@ -90,18 +85,31 @@ export function HomepageMovesLikeHero() {
                 Open {MOVES_LIKE.shortName}
               </Link>
             </Button>
-            <Button asChild variant="outline" className="min-h-12 border-white/80 bg-white/50">
-              <Link href="/the-moves-like">Practice with front camera</Link>
+            <Button
+              type="button"
+              variant="outline"
+              className="min-h-12 border-white/80 bg-white/50"
+              data-testid="button-hero-klean-sneaks"
+              onClick={() => scrollToHomepagePanel("home-game")}
+            >
+              Play Klean Sneaks
             </Button>
             <Button asChild variant="ghost" className="min-h-11 text-[#6D91B3]">
-              <Link href="/dashboard/poor-man-protection">Poor Man Protection desk</Link>
+              <Link href="/the-moves-like">Practice with front camera</Link>
             </Button>
           </div>
           <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-            Tilt · drag · dance — flowers + stage stay live on this page
+            At the top · pull down or tap ↑ for Klean Sneaks · scroll down for more
           </p>
         </div>
       </div>
+
+      <HomepageScrollHint
+        label={HOMEPAGE_SCROLL_TO_GAME}
+        direction="up"
+        prominent
+        onActivate={() => scrollToHomepagePanel("home-game")}
+      />
     </section>
   );
 }

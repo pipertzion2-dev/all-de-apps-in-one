@@ -18,9 +18,9 @@ type HomepageFlipStackProps = {
 
 const FLIP_SETTLE_EPSILON = 0.02;
 const WHEEL_SNAP_MS = 320;
-const SWIPE_THRESHOLD_PX = 40;
+const SWIPE_THRESHOLD_PX = 36;
 const MAX_PANEL_INDEX = 1;
-const SCROLL_EDGE_THRESHOLD = 8;
+const SCROLL_EDGE_THRESHOLD = 24;
 /** Platform content fades in only as the game → home flip finishes (avoids clipping mid-rotation). */
 const OVERLAY_FADE_START = 0.88;
 const OVERLAY_FADE_END = 1;
@@ -420,8 +420,10 @@ export function HomepageFlipStack({
 
       const face = scrollSurfaceFor();
       const { atTop } = faceScrollState(face);
-      if (atTop && applyDelta(delta)) {
+      // Wheel / trackpad scroll-up at the top of The Moves Like → Klean Sneaks.
+      if (atTop && activePanelRef.current === "nav-cube") {
         e.preventDefault();
+        goToPanel("home-game");
       }
     };
 
@@ -508,8 +510,9 @@ export function HomepageFlipStack({
       const face = scrollSurfaceFor();
       if (!face || face.scrollTop > SCROLL_EDGE_THRESHOLD) return;
       const y = e.touches[0]?.clientY ?? platformTouchStartY;
-      const pullDown = y - platformTouchStartY;
-      if (pullDown > SWIPE_THRESHOLD_PX) {
+      const dy = y - platformTouchStartY;
+      // At the top of The Moves Like face, overscroll pull-down opens Klean Sneaks (panel above).
+      if (dy > SWIPE_THRESHOLD_PX) {
         platformPullTracking = false;
         e.preventDefault();
         goToPanel("home-game");
