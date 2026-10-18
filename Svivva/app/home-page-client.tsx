@@ -185,7 +185,7 @@ export default function LandingPage() {
     apiCalls: number;
   } | null>(null);
   const [canMountHeavy3d, setCanMountHeavy3d] = useState(false);
-  const [flipInitialPanel, setFlipInitialPanel] = useState<HomepageFlipPanelId>("home-game");
+  const [flipInitialPanel, setFlipInitialPanel] = useState<HomepageFlipPanelId>("nav-cube");
   const skipIntroRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
@@ -278,7 +278,7 @@ export default function LandingPage() {
     const flipPanel = flipPanelFromHash(hash);
     const sectionId = homepageSectionFromHash(hash);
 
-    const nextPanel = flipPanel ?? "home-game";
+    const nextPanel = flipPanel ?? "nav-cube";
     setFlipInitialPanel((current) => (current === nextPanel ? current : nextPanel));
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
 
@@ -1288,20 +1288,18 @@ export default function LandingPage() {
                     <div className="space-y-4 text-muted-foreground leading-relaxed">
                       <p>
                         The photo is my son at the computer — the same session where he helped shape
-                        the zzai zzai logo. The product story on this site is not hype; it is Poor
-                        Man Protection: seal a file, keep custody notes, and export a pack a lawyer
-                        can read.
+                        the zzai zzai logo. The center of zzai zzai is The Moves Like: explore,
+                        practice, create, and share movement from your phone.
                       </p>
                       <p>
-                        That workflow is for designers, musicians, and builders who need a
-                        timestamped record before formal patent or copyright filings. We also
-                        partner with Bed Stuy Vybez in Brooklyn for fashion and storefront creators
-                        who want the same discipline on early sketches.
+                        Poor Man Protection stays on the desk for designers and builders who need a
+                        timestamped record before formal filings. We also partner with Bed Stuy
+                        Vybez in Brooklyn for fashion and storefront creators.
                       </p>
                       <p>
                         Klean Sneaks and Hybrid² Lab stay available as demos and beta tools. The
-                        homepage leads with Poor Man Protection because that is the clearest promise
-                        we can keep in plain language.
+                        homepage leads with The Moves Like because that is the product you open
+                        first.
                       </p>
                     </div>
                   </div>

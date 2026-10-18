@@ -9,36 +9,43 @@ import {
   HOMEPAGE_APPLICATIONS_TITLE,
   PRODUCT_NAME_LINE,
 } from "@/lib/product-positioning";
-import { FileCheck, Scale, Shield, Stamp } from "lucide-react";
+import { Camera, Clapperboard, Music2, Shield } from "lucide-react";
 import { FeatureBetaBadge } from "@/components/feature-beta-badge";
 
 const HIGHLIGHTS = [
   {
+    icon: Music2,
+    title: "The Moves Like",
+    description:
+      "Interactive dance workstation — Discover, Learn, Create, Studio, Play, and Style Clash.",
+    href: "/the-moves-like",
+    beta: false,
+  },
+  {
+    icon: Camera,
+    title: "Front-camera practice",
+    description: "Ghost Mode mirrors your selfie camera so you can learn against a reference take.",
+    href: "/the-moves-like",
+    beta: false,
+  },
+  {
+    icon: Clapperboard,
+    title: "Create & Studio",
+    description: "Record takes, assemble routines, and keep the glass UI tuned for phones.",
+    href: "/the-moves-like",
+    beta: false,
+  },
+  {
     icon: Shield,
     title: "Poor Man Protection",
     description:
-      "Seal uploads with hashes and timestamps. Download a structured court pack — supporting evidence, not a government filing.",
-  },
-  {
-    icon: FileCheck,
-    title: "Public verify",
-    description: "Anyone can check a seal at /protect/verify without signing in.",
-  },
-  {
-    icon: Scale,
-    title: "Anteriority record",
-    description:
-      "Custody logs and dual-axis metadata document possession and creation order when disputes arise.",
-  },
-  {
-    icon: Stamp,
-    title: "Free Sneaks demo",
-    description:
-      "Klean Sneaks illustrates the same “protect what you made” idea in a game — optional, not the core product.",
+      "Still on the desk — seal uploads with hashes and export a court pack when priority matters.",
+    href: "/dashboard/poor-man-protection",
+    beta: false,
   },
 ] as const;
 
-/** Brief product overview below the nav cube on the homepage. */
+/** Brief product overview below The Moves Like hero. */
 export function HomepageAboutSection() {
   return (
     <section
@@ -47,7 +54,7 @@ export function HomepageAboutSection() {
     >
       <div className="mx-auto max-w-3xl space-y-8 text-center">
         <div className="space-y-3">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#5B8DA8]">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#6D91B3]">
             Applications
           </p>
           <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
@@ -61,41 +68,36 @@ export function HomepageAboutSection() {
           </Badge>
         </div>
 
-        <div className="grid gap-4 text-left sm:grid-cols-2">
-          {HIGHLIGHTS.map(({ icon: Icon, title, description }) => (
-            <div
-              key={title}
-              className="rounded-xl border border-border/50 bg-card/80 p-4 backdrop-blur-sm"
-            >
-              <div className="mb-2 flex items-center gap-2">
-                <Icon className="h-4 w-4 text-[#5B8DA8]" aria-hidden />
-                <h3 className="text-sm font-semibold">{title}</h3>
-              </div>
-              <p className="text-sm text-muted-foreground">{description}</p>
-            </div>
-          ))}
-        </div>
+        <ul className="grid gap-3 text-left sm:grid-cols-2">
+          {HIGHLIGHTS.map((item) => {
+            const Icon = item.icon;
+            return (
+              <li key={item.title}>
+                <Link
+                  href={item.href}
+                  className="block h-full rounded-xl border border-border/50 bg-card/80 p-4 transition-colors hover:border-[#6D91B3]/50"
+                >
+                  <div className="mb-2 flex items-center gap-2">
+                    <Icon className="h-4 w-4 text-[#6D91B3]" aria-hidden />
+                    <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                      {item.title}
+                      {item.beta ? <FeatureBetaBadge compact /> : null}
+                    </h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{item.description}</p>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
 
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          <Link href="/dashboard/poor-man-protection">
-            <Button className="bg-[#5B8DA8] text-white">Poor Man Protection</Button>
-          </Link>
-          <Link href="/protect/verify">
-            <Button variant="outline">Verify evidence</Button>
-          </Link>
-          <Link href="/signup">
-            <Button variant="outline">Create account</Button>
-          </Link>
-          <Link href="/clean-sneaks">
-            <Button variant="ghost" className="text-muted-foreground">
-              Klean Sneaks demo
-            </Button>
-          </Link>
-          <Link href="/dashboard/hybrid-lab" className="inline-flex items-center gap-2">
-            <Button variant="outline" className="gap-2">
-              Hybrid² Lab <FeatureBetaBadge compact />
-            </Button>
-          </Link>
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+          <Button asChild className="bg-[#AC81AF] text-white hover:bg-[#9a6f9d]">
+            <Link href="/the-moves-like">Open The Moves Like</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/clean-sneaks">Klean Sneaks demo</Link>
+          </Button>
         </div>
       </div>
     </section>
