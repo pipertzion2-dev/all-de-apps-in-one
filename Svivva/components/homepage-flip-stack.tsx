@@ -17,15 +17,17 @@ type HomepageFlipStackProps = {
 };
 
 const FLIP_SETTLE_EPSILON = 0.02;
-const WHEEL_SNAP_MS = 320;
-const SWIPE_THRESHOLD_PX = 36;
+const NUDGE_DEBOUNCE_MS = 420;
+const SWIPE_THRESHOLD_PX = 48;
 const MAX_PANEL_INDEX = 1;
-const SCROLL_EDGE_THRESHOLD = 24;
+const SCROLL_EDGE_THRESHOLD = 12;
 /** Platform content fades in only as the game → home flip finishes (avoids clipping mid-rotation). */
 const OVERLAY_FADE_START = 0.88;
 const OVERLAY_FADE_END = 1;
 /** Absorb flip-wheel momentum so the platform overlay does not shoot to the footer. */
-const PLATFORM_WHEEL_LOCK_MS = 480;
+const PLATFORM_WHEEL_LOCK_MS = 520;
+/** Intentional overscroll distance (wheel px / touch px) before leaving The Moves Like. */
+const OVERSCROLL_FLIP_PX = 72;
 
 function overlayOpacityForIndex(index: number): number {
   return Math.min(
@@ -34,8 +36,8 @@ function overlayOpacityForIndex(index: number): number {
   );
 }
 
-function overlayScrollEnabled(index: number, panel: HomepageFlipPanelId): boolean {
-  return panel === "nav-cube" && index >= OVERLAY_FADE_END - FLIP_SETTLE_EPSILON;
+function overlayScrollEnabled(index: number): boolean {
+  return index >= OVERLAY_FADE_END - FLIP_SETTLE_EPSILON;
 }
 
 /** Two full-viewport faces — game above, The Moves Like homepage below (land on homepage). */
@@ -50,28 +52,22 @@ export function HomepageFlipStack({
   const faceRefs = useRef<(HTMLDivElement | null)[]>([]);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const halfHRef = useRef(400);
-  const virtualIndexRef = useRef(flipPanelIndex(initialPanel));
   const targetIndexRef = useRef(flipPanelIndex(initialPanel));
   const displayedIndexRef = useRef(flipPanelIndex(initialPanel));
   const activePanelRef = useRef<HomepageFlipPanelId>(initialPanel);
-  const scrubbingRef = useRef(false);
   const animRef = useRef(0);
-  const wheelSnapTimerRef = useRef(0);
+  const lastNudgeAtRef = useRef(0);
   const overlayScrollWasEnabledRef = useRef(false);
   const platformWheelLockUntilRef = useRef(0);
+  const overscrollAccumRef = useRef(0);
   const [activePanel, setActivePanel] = useState<HomepageFlipPanelId>(initialPanel);
 
-  const panels = [
-    { id: "home-game" as const, node: game },
-    { id: "nav-cube" as const, node: begin },
-  ];
-
   const syncOverlayVisuals = useCallback(
-    (index: number, panel: HomepageFlipPanelId) => {
+    (index: number) => {
       const scroller = scrollRef.current;
       const shell = shellRef.current;
       const opacity = overlayOpacityForIndex(index);
-      const scrollEnabled = overlayScrollEnabled(index, panel);
+      const scrollEnabled = overlayScrollEnabled(index);
       const shellHidden = scrollEnabled;
 
       if (scroller) {
@@ -82,10 +78,11 @@ export function HomepageFlipStack({
         scroller.setAttribute("aria-hidden", scrollEnabled ? "false" : "true");
 
         if (!scrollEnabled) {
-          scroller.scrollTop = 0;
+          if (scroller.scrollTop !== 0) scroller.scrollTop = 0;
         } else if (!overlayScrollWasEnabledRef.current) {
           scroller.scrollTop = 0;
           platformWheelLockUntilRef.current = performance.now() + PLATFORM_WHEEL_LOCK_MS;
+          overscrollAccumRef.current = 0;
           document.body.style.overflow = "hidden";
         }
         overlayScrollWasEnabledRef.current = scrollEnabled;
@@ -119,24 +116,12 @@ export function HomepageFlipStack({
     halfHRef.current = (shellRef.current?.clientHeight ?? window.innerHeight) / 2;
     paintFaces();
     paintRotor(displayedIndexRef.current);
-    syncOverlayVisuals(displayedIndexRef.current, activePanelRef.current);
+    syncOverlayVisuals(displayedIndexRef.current);
   }, [paintFaces, paintRotor, syncOverlayVisuals]);
 
-  const stopAnim = useCallback(() => {
-    if (animRef.current) {
-      cancelAnimationFrame(animRef.current);
-      animRef.current = 0;
-    }
-  }, []);
-
-  const paintDirect = useCallback(
-    (index: number) => {
-      stopAnim();
-      displayedIndexRef.current = index;
-      paintRotor(index);
-      syncOverlayVisuals(index, activePanelRef.current);
-    },
-    [paintRotor, stopAnim, syncOverlayVisuals],
+  const isAnimating = useCallback(
+    () => Math.abs(displayedIndexRef.current - targetIndexRef.current) > FLIP_SETTLE_EPSILON,
+    [],
   );
 
   const ensureTick = useCallback(() => {
@@ -156,19 +141,23 @@ export function HomepageFlipStack({
         if (current !== target) {
           displayedIndexRef.current = target;
           paintRotor(target);
-          syncOverlayVisuals(target, activePanelRef.current);
+          syncOverlayVisuals(target);
+        } else {
+          syncOverlayVisuals(target);
         }
+        lastNudgeAtRef.current = performance.now();
         return;
       }
 
-      const smoothing = 1 - Math.exp(-20 * dt);
+      // Slightly softer settle than scrub-era easing — fewer mid-flip opacity pops.
+      const smoothing = 1 - Math.exp(-14 * dt);
       current += delta * smoothing;
       if ((delta > 0 && current > target) || (delta < 0 && current < target)) {
         current = target;
       }
       displayedIndexRef.current = current;
       paintRotor(current);
-      syncOverlayVisuals(current, activePanelRef.current);
+      syncOverlayVisuals(current);
       animRef.current = requestAnimationFrame(tick);
     };
 
@@ -189,21 +178,15 @@ export function HomepageFlipStack({
       if (panel === "nav-cube") {
         resetPlatformScroll();
         platformWheelLockUntilRef.current = performance.now() + PLATFORM_WHEEL_LOCK_MS;
+        overscrollAccumRef.current = 0;
       } else {
         resetPlatformScroll();
         document.body.style.overflow = "";
+        overscrollAccumRef.current = 0;
       }
-      syncOverlayVisuals(displayedIndexRef.current, panel);
     },
-    [resetPlatformScroll, syncOverlayVisuals],
+    [resetPlatformScroll],
   );
-
-  const clearSnapTimer = useCallback(() => {
-    if (wheelSnapTimerRef.current) {
-      window.clearTimeout(wheelSnapTimerRef.current);
-      wheelSnapTimerRef.current = 0;
-    }
-  }, []);
 
   const goToPanel = useCallback(
     (panel: HomepageFlipPanelId) => {
@@ -213,42 +196,14 @@ export function HomepageFlipStack({
         Math.abs(targetIndexRef.current - next) <= FLIP_SETTLE_EPSILON;
       if (settled) return;
 
-      scrubbingRef.current = false;
-      clearSnapTimer();
-      virtualIndexRef.current = next;
+      lastNudgeAtRef.current = performance.now();
+      overscrollAccumRef.current = 0;
       targetIndexRef.current = next;
       commitPanel(panel);
       ensureTick();
     },
-    [clearSnapTimer, commitPanel, ensureTick],
+    [commitPanel, ensureTick],
   );
-
-  const snapToNearestPanel = useCallback(() => {
-    scrubbingRef.current = false;
-    const snapped = Math.min(MAX_PANEL_INDEX, Math.max(0, Math.round(virtualIndexRef.current)));
-    if (
-      snapped === Math.round(targetIndexRef.current) &&
-      Math.abs(displayedIndexRef.current - snapped) <= FLIP_SETTLE_EPSILON
-    ) {
-      virtualIndexRef.current = snapped;
-      targetIndexRef.current = snapped;
-      return;
-    }
-    virtualIndexRef.current = snapped;
-    targetIndexRef.current = snapped;
-    commitPanel(flipPanelFromIndex(snapped));
-    ensureTick();
-  }, [commitPanel, ensureTick, resetPlatformScroll]);
-
-  const scheduleSnap = useCallback(() => {
-    if (wheelSnapTimerRef.current) {
-      window.clearTimeout(wheelSnapTimerRef.current);
-    }
-    wheelSnapTimerRef.current = window.setTimeout(() => {
-      wheelSnapTimerRef.current = 0;
-      snapToNearestPanel();
-    }, WHEEL_SNAP_MS);
-  }, [snapToNearestPanel]);
 
   useLayoutEffect(() => {
     syncDepth();
@@ -265,7 +220,6 @@ export function HomepageFlipStack({
     ) {
       return;
     }
-    virtualIndexRef.current = index;
     targetIndexRef.current = index;
     displayedIndexRef.current = index;
     activePanelRef.current = initialPanel;
@@ -275,10 +229,10 @@ export function HomepageFlipStack({
 
   useEffect(() => {
     return () => {
-      stopAnim();
-      if (wheelSnapTimerRef.current) window.clearTimeout(wheelSnapTimerRef.current);
+      if (animRef.current) cancelAnimationFrame(animRef.current);
+      document.body.style.overflow = "";
     };
-  }, [stopAnim]);
+  }, []);
 
   useEffect(() => {
     const onFlip = (event: Event) => {
@@ -292,27 +246,12 @@ export function HomepageFlipStack({
   useEffect(() => {
     if (!interactive) return;
 
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const mobile = window.matchMedia("(max-width: 767px)").matches;
-    const scrollGain = mobile ? 0.0028 : 0.0022;
-
     const settledPanelIndex = () =>
       Math.min(MAX_PANEL_INDEX, Math.max(0, Math.round(targetIndexRef.current)));
 
-    const panelIdForInput = () =>
-      scrubbingRef.current
-        ? activePanelRef.current
-        : (panels[settledPanelIndex()]?.id ?? "home-game");
-
-    const scrollSurfaceFor = () => scrollRef.current;
-
-    const isNavCubeScrollActive = () =>
-      overlayScrollEnabled(displayedIndexRef.current, activePanelRef.current);
-
     /** Settled on platform face — use native overlay scroll, not flip scrubbing. */
     const platformScrollMode = () =>
-      activePanelRef.current === "nav-cube" &&
-      displayedIndexRef.current >= OVERLAY_FADE_END - FLIP_SETTLE_EPSILON;
+      activePanelRef.current === "nav-cube" && overlayScrollEnabled(displayedIndexRef.current);
 
     const faceScrollState = (face: HTMLDivElement | null) => {
       if (!face) {
@@ -320,71 +259,43 @@ export function HomepageFlipStack({
           scrollable: false,
           atTop: true,
           atBottom: true,
-          canScrollDown: false,
-          canScrollUp: false,
         };
       }
       const threshold = SCROLL_EDGE_THRESHOLD;
       const scrollable = face.scrollHeight > face.clientHeight + threshold;
       const atTop = face.scrollTop <= threshold;
       const atBottom = face.scrollTop + face.clientHeight >= face.scrollHeight - threshold;
-      return {
-        scrollable,
-        atTop,
-        atBottom,
-        canScrollDown: scrollable && !atBottom,
-        canScrollUp: scrollable && !atTop,
-      };
+      return { scrollable, atTop, atBottom };
     };
 
-    const canFlipFromFace = (
-      face: HTMLDivElement | null,
-      direction: 1 | -1,
-      panelId: HomepageFlipPanelId,
-    ) => {
+    const canFlipFromPanel = (direction: 1 | -1, panelId: HomepageFlipPanelId) => {
       // Rotor: home-game (0) above → nav-cube (1) below. Land on nav-cube.
-      // From game: always allow swipe/scroll down into The Moves Like.
       if (panelId === "home-game" && direction > 0) return true;
-      // From Moves Like: only flip back up to the game when scrolled to the top.
       if (panelId === "nav-cube") {
-        const { scrollable, atTop } = faceScrollState(face);
         if (direction > 0) return false;
+        const face = scrollRef.current;
+        const { scrollable, atTop } = faceScrollState(face);
         return scrollable ? atTop : true;
       }
-      const { scrollable, atTop, atBottom } = faceScrollState(face);
-      if (!scrollable) return true;
-      if (direction > 0) return atTop || atBottom;
-      return atTop || atBottom;
+      return false;
     };
 
-    const applyDelta = (deltaY: number) => {
-      if (Math.abs(deltaY) < 0.5) return false;
+    const nudge = (direction: 1 | -1) => {
+      if (isAnimating()) return false;
 
-      const direction: 1 | -1 = deltaY > 0 ? 1 : -1;
-      const panelId = panelIdForInput();
-      const face = isNavCubeScrollActive() ? scrollSurfaceFor() : null;
-      if (!canFlipFromFace(face, direction, panelId)) return false;
+      const now = performance.now();
+      if (now - lastNudgeAtRef.current < NUDGE_DEBOUNCE_MS) return false;
 
-      const atMin = virtualIndexRef.current <= FLIP_SETTLE_EPSILON && direction < 0;
-      const atMax =
-        virtualIndexRef.current >= MAX_PANEL_INDEX - FLIP_SETTLE_EPSILON && direction > 0;
-      if (atMin || atMax) return false;
+      const current = settledPanelIndex();
+      const panelId = flipPanelFromIndex(current);
+      if (!canFlipFromPanel(direction, panelId)) return false;
 
-      if (reducedMotion) {
-        const next = Math.min(MAX_PANEL_INDEX, Math.max(0, settledPanelIndex() + direction));
-        if (next === settledPanelIndex()) return false;
-        goToPanel(flipPanelFromIndex(next));
-        return true;
-      }
+      const next = Math.min(MAX_PANEL_INDEX, Math.max(0, current + direction));
+      if (next === current) return false;
 
-      scrubbingRef.current = true;
-      virtualIndexRef.current = Math.min(
-        MAX_PANEL_INDEX,
-        Math.max(0, virtualIndexRef.current + deltaY * scrollGain),
-      );
-      targetIndexRef.current = virtualIndexRef.current;
-      paintDirect(virtualIndexRef.current);
-      scheduleSnap();
+      lastNudgeAtRef.current = now;
+      overscrollAccumRef.current = 0;
+      goToPanel(flipPanelFromIndex(next));
       return true;
     };
 
@@ -404,87 +315,80 @@ export function HomepageFlipStack({
         return;
       }
 
-      const delta = normalizeWheelDelta(e);
-      if (Math.abs(delta) < 4) return;
+      if (isAnimating()) {
+        e.preventDefault();
+        return;
+      }
 
-      if (applyDelta(delta)) {
+      const delta = normalizeWheelDelta(e);
+      if (Math.abs(delta) < 8) return;
+
+      const direction: 1 | -1 = delta > 0 ? 1 : -1;
+      if (nudge(direction)) {
         e.preventDefault();
       }
     };
 
     const onPlatformWheel = (e: WheelEvent) => {
       if (!platformScrollMode()) return;
+      if (performance.now() < platformWheelLockUntilRef.current) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
 
       const delta = normalizeWheelDelta(e);
-      if (Math.abs(delta) < 4 || delta >= 0) return;
-
-      const face = scrollSurfaceFor();
+      const face = scrollRef.current;
       const { atTop } = faceScrollState(face);
-      // Wheel / trackpad scroll-up at the top of The Moves Like → Klean Sneaks.
-      if (atTop && activePanelRef.current === "nav-cube") {
-        e.preventDefault();
-        goToPanel("home-game");
+
+      // Native scroll down / mid-page — do not interfere.
+      if (delta >= 0 || !atTop) {
+        overscrollAccumRef.current = 0;
+        return;
       }
+
+      // At top: accumulate intentional upward overscroll before flipping to Klean Sneaks.
+      overscrollAccumRef.current += -delta;
+      if (overscrollAccumRef.current < OVERSCROLL_FLIP_PX) {
+        e.preventDefault();
+        return;
+      }
+
+      overscrollAccumRef.current = 0;
+      e.preventDefault();
+      nudge(-1);
     };
 
     let touchStartY = 0;
-    let touchScrubbing = false;
+    let touchMoved = false;
 
     const onTouchStart = (e: TouchEvent) => {
       if (platformScrollMode()) return;
       touchStartY = e.touches[0]?.clientY ?? 0;
-      touchScrubbing = false;
-      if (wheelSnapTimerRef.current) {
-        window.clearTimeout(wheelSnapTimerRef.current);
-        wheelSnapTimerRef.current = 0;
-      }
+      touchMoved = false;
     };
 
     const onTouchMove = (e: TouchEvent) => {
       if (platformScrollMode()) return;
-
-      const y = e.touches[0]?.clientY ?? touchStartY;
-      const delta = touchStartY - y;
-      if (Math.abs(delta) < 6) return;
-
-      touchScrubbing = true;
-      touchStartY = y;
-      if (applyDelta(delta)) {
+      if (isAnimating()) {
         e.preventDefault();
+        return;
       }
+      const y = e.touches[0]?.clientY ?? touchStartY;
+      if (Math.abs(touchStartY - y) > 10) touchMoved = true;
     };
 
     const onTouchEnd = (e: TouchEvent) => {
       if (platformScrollMode()) return;
-
-      if (touchScrubbing) {
-        snapToNearestPanel();
-        return;
-      }
+      if (isAnimating()) return;
 
       const endY = e.changedTouches[0]?.clientY ?? touchStartY;
       const delta = touchStartY - endY;
       if (Math.abs(delta) < SWIPE_THRESHOLD_PX) return;
+      if (!touchMoved && Math.abs(delta) < SWIPE_THRESHOLD_PX * 1.5) return;
 
       const direction: 1 | -1 = delta > 0 ? 1 : -1;
-      const current = settledPanelIndex();
-      const panelId = activePanelRef.current;
-      const face = isNavCubeScrollActive() ? scrollSurfaceFor() : null;
-      if (!canFlipFromFace(face, direction, panelId)) return;
-
-      if (reducedMotion) {
-        const next = Math.min(MAX_PANEL_INDEX, Math.max(0, current + direction));
-        if (next !== current) goToPanel(flipPanelFromIndex(next));
-        return;
-      }
-
-      const next = Math.min(MAX_PANEL_INDEX, Math.max(0, current + direction));
-      if (next === current) return;
-      scrubbingRef.current = false;
-      virtualIndexRef.current = next;
-      targetIndexRef.current = next;
-      commitPanel(flipPanelFromIndex(next));
-      ensureTick();
+      nudge(direction);
     };
 
     window.addEventListener("wheel", onWheel, { passive: false });
@@ -503,24 +407,34 @@ export function HomepageFlipStack({
       }
       platformTouchStartY = e.touches[0]?.clientY ?? 0;
       platformPullTracking = true;
+      overscrollAccumRef.current = 0;
     };
 
     const onPlatformTouchMove = (e: TouchEvent) => {
       if (!platformPullTracking || !platformScrollMode()) return;
-      const face = scrollSurfaceFor();
-      if (!face || face.scrollTop > SCROLL_EDGE_THRESHOLD) return;
+      if (isAnimating()) {
+        e.preventDefault();
+        return;
+      }
+      const face = scrollRef.current;
+      if (!face || face.scrollTop > SCROLL_EDGE_THRESHOLD) {
+        overscrollAccumRef.current = 0;
+        return;
+      }
       const y = e.touches[0]?.clientY ?? platformTouchStartY;
       const dy = y - platformTouchStartY;
-      // At the top of The Moves Like face, overscroll pull-down opens Klean Sneaks (panel above).
-      if (dy > SWIPE_THRESHOLD_PX) {
+      // At the top of The Moves Like face, overscroll pull-down opens Klean Sneaks.
+      if (dy > OVERSCROLL_FLIP_PX) {
         platformPullTracking = false;
+        overscrollAccumRef.current = 0;
         e.preventDefault();
-        goToPanel("home-game");
+        nudge(-1);
       }
     };
 
     const onPlatformTouchEnd = () => {
       platformPullTracking = false;
+      overscrollAccumRef.current = 0;
     };
 
     const onScrollerWheelCapture = (e: WheelEvent) => {
@@ -547,16 +461,7 @@ export function HomepageFlipStack({
       scroller?.removeEventListener("touchmove", onPlatformTouchMove);
       scroller?.removeEventListener("touchend", onPlatformTouchEnd);
     };
-  }, [
-    interactive,
-    commitPanel,
-    ensureTick,
-    goToPanel,
-    paintDirect,
-    panels,
-    scheduleSnap,
-    snapToNearestPanel,
-  ]);
+  }, [interactive, goToPanel, isAnimating]);
 
   return (
     <>
@@ -587,32 +492,44 @@ export function HomepageFlipStack({
             willChange: "transform",
           }}
         >
-          {panels.map((panel, i) => (
-            <div
-              key={panel.id}
-              id={panel.id}
-              ref={(el) => {
-                faceRefs.current[i] = el;
-              }}
-              data-homepage-flip-face=""
-              data-flip-index={i}
-              className="bg-background"
-              style={{
-                position: "absolute",
-                inset: 0,
-                overflow: "hidden",
-                backfaceVisibility: "hidden",
-                WebkitBackfaceVisibility: "hidden",
-                willChange: "transform",
-              }}
-            >
-              {panel.id === "nav-cube" ? (
-                <div className="h-full w-full bg-background" aria-hidden />
-              ) : (
-                panel.node
-              )}
-            </div>
-          ))}
+          <div
+            id="home-game"
+            ref={(el) => {
+              faceRefs.current[0] = el;
+            }}
+            data-homepage-flip-face=""
+            data-flip-index={0}
+            className="bg-background"
+            style={{
+              position: "absolute",
+              inset: 0,
+              overflow: "hidden",
+              backfaceVisibility: "hidden",
+              WebkitBackfaceVisibility: "hidden",
+              willChange: "transform",
+            }}
+          >
+            {game}
+          </div>
+          <div
+            id="nav-cube"
+            ref={(el) => {
+              faceRefs.current[1] = el;
+            }}
+            data-homepage-flip-face=""
+            data-flip-index={1}
+            className="bg-background"
+            style={{
+              position: "absolute",
+              inset: 0,
+              overflow: "hidden",
+              backfaceVisibility: "hidden",
+              WebkitBackfaceVisibility: "hidden",
+              willChange: "transform",
+            }}
+          >
+            <div className="h-full w-full bg-background" aria-hidden />
+          </div>
         </div>
       </div>
 
@@ -626,10 +543,8 @@ export function HomepageFlipStack({
           opacity: overlayOpacityForIndex(flipPanelIndex(initialPanel)),
           visibility:
             flipPanelIndex(initialPanel) >= OVERLAY_FADE_START - 0.02 ? "visible" : "hidden",
-          pointerEvents: overlayScrollEnabled(flipPanelIndex(initialPanel), initialPanel)
-            ? "auto"
-            : "none",
-          overscrollBehavior: "contain",
+          pointerEvents: overlayScrollEnabled(flipPanelIndex(initialPanel)) ? "auto" : "none",
+          overscrollBehaviorY: "contain",
           WebkitOverflowScrolling: "touch",
           transform: "translateZ(0)",
         }}

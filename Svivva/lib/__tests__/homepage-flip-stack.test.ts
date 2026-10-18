@@ -24,15 +24,16 @@ describe("homepage flip stack", () => {
     expect(flipPanelIndex("nav-cube")).toBe(1);
   });
 
-  it("uses continuous virtual scroll with direct scrub paint and RAF settling", () => {
+  it("uses discrete nudge flips with RAF settle (no continuous wheel scrub)", () => {
     const flipSrc = readFileSync(
       resolve(__dirname, "../../components/homepage-flip-stack.tsx"),
       "utf8",
     );
     expect(flipSrc).toContain("ensureTick");
-    expect(flipSrc).toContain("virtualIndexRef");
-    expect(flipSrc).toContain("scheduleSnap");
-    expect(flipSrc).toContain("paintDirect");
+    expect(flipSrc).toContain("NUDGE_DEBOUNCE_MS");
+    expect(flipSrc).toContain("const nudge = ");
+    expect(flipSrc).toContain("isAnimating");
+    expect(flipSrc).toContain("OVERSCROLL_FLIP_PX");
     expect(flipSrc).toContain("onPlatformWheel");
     expect(flipSrc).toContain("scroll-auto");
     expect(flipSrc).toContain("PLATFORM_WHEEL_LOCK_MS");
@@ -48,6 +49,20 @@ describe("homepage flip stack", () => {
     expect(flipSrc).toContain('panelId === "nav-cube"');
     expect(flipSrc).toMatch(/panelId === "nav-cube"[\s\S]*direction > 0[\s\S]*return false/);
     expect(flipSrc).toMatch(/const tick = \(now: number\) => \{[\s\S]*animRef\.current = 0/);
+    // Continuous scrub path removed — it fought trackpad inertia and re-bound listeners.
+    expect(flipSrc).not.toContain("paintDirect");
+    expect(flipSrc).not.toContain("scheduleSnap");
+    expect(flipSrc).not.toContain("virtualIndexRef");
+    expect(flipSrc).not.toContain("scrubbingRef");
+  });
+
+  it("keeps gesture effect deps stable (no per-render panels array)", () => {
+    const flipSrc = readFileSync(
+      resolve(__dirname, "../../components/homepage-flip-stack.tsx"),
+      "utf8",
+    );
+    expect(flipSrc).toContain("[interactive, goToPanel, isAnimating]");
+    expect(flipSrc).not.toContain("panels,");
   });
 
   it("rotates forward like the intro reveal (positive rotor, negative face hinge)", () => {
