@@ -17,7 +17,7 @@ type HomepageFlipStackProps = {
 };
 
 const FLIP_SETTLE_EPSILON = 0.02;
-const NUDGE_DEBOUNCE_MS = 720;
+const NUDGE_DEBOUNCE_MS = 1200;
 const SWIPE_THRESHOLD_PX = 52;
 const SWIPE_THRESHOLD_MOBILE_PX = 64;
 const MAX_PANEL_INDEX = 1;
@@ -26,13 +26,13 @@ const SCROLL_EDGE_THRESHOLD = 8;
 const FLIP_DURATION_MS = 720;
 const FLIP_DURATION_MOBILE_MS = 820;
 /** Absorb leftover wheel momentum after landing on The Moves Like. */
-const PLATFORM_WHEEL_LOCK_MS = 700;
-const WHEEL_OVERSCROLL_FLIP_PX = 420;
-const WHEEL_OVERSCROLL_MIN_EVENTS = 4;
-const AT_TOP_DWELL_MS = 420;
-const AT_TOP_INERTIA_LOCK_MS = 380;
+const PLATFORM_WHEEL_LOCK_MS = 1000;
+const WHEEL_OVERSCROLL_FLIP_PX = 800;
+const WHEEL_OVERSCROLL_MIN_EVENTS = 8;
+const AT_TOP_DWELL_MS = 800;
+const AT_TOP_INERTIA_LOCK_MS = 600;
 /** Mobile pull-down at scroll top → Klean Sneaks (touchend only; never touchmove preventDefault). */
-const TOUCH_LEAVE_PX = 80;
+const TOUCH_LEAVE_PX = 100;
 
 type ContentHost = "face" | "overlay";
 
@@ -380,7 +380,7 @@ export function HomepageFlipStack({
         return;
       }
       const delta = normalizeWheelDelta(e);
-      if (Math.abs(delta) < 8) return;
+      if (Math.abs(delta) < 20) return;
       const direction: 1 | -1 = delta > 0 ? 1 : -1;
       if (nudge(direction)) e.preventDefault();
     };
@@ -419,7 +419,7 @@ export function HomepageFlipStack({
         return;
       }
 
-      if (delta >= 0) {
+      if (delta > 20) {
         overscrollAccumRef.current = 0;
         overscrollEventsRef.current = 0;
         return;
@@ -432,6 +432,10 @@ export function HomepageFlipStack({
       }
 
       overscrollAccumRef.current += -delta;
+      overscrollAccumRef.current = Math.min(
+        overscrollAccumRef.current,
+        WHEEL_OVERSCROLL_FLIP_PX * 2,
+      );
       overscrollEventsRef.current += 1;
       if (
         overscrollAccumRef.current < WHEEL_OVERSCROLL_FLIP_PX ||
