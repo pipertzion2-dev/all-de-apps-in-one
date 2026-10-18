@@ -34,12 +34,14 @@ describe("homepage scroll panels", () => {
       resolve(__dirname, "../../components/homepage-cube-panel.tsx"),
       "utf8",
     );
-    expect(stackSrc).toMatch(/HOMEPAGE_FLIP_PANELS[\s\S]*"home-game"[\s\S]*"nav-cube"/);
-    expect(pageSrc).toContain('useState<HomepageFlipPanelId>("home-game")');
+    expect(stackSrc).toMatch(/HOMEPAGE_FLIP_PANELS[\s\S]*"nav-cube"[\s\S]*"home-game"/);
+    expect(pageSrc).toContain('useState<HomepageFlipPanelId>("nav-cube")');
     expect(pageSrc).toContain("HomepageCubePanel");
+    expect(cubeSrc).toContain("HomepageMovesLikeHero");
     expect(cubeSrc).toContain("HomepageAboutSection");
     expect(cubeSrc).toContain("HomepageFounderSonSection");
     expect(cubeSrc).toMatch(/HomepageFounderSonSection[\s\S]*HomepagePricingSection/);
+    expect(cubeSrc).not.toContain("HomepageProtectionHero");
     const founderSrc = readFileSync(
       resolve(__dirname, "../../components/homepage-founder-son-section.tsx"),
       "utf8",

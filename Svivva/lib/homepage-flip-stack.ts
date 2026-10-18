@@ -1,10 +1,10 @@
 /** Full-viewport homepage panels flipped like the intro Dune cube. */
 export type HomepageFlipPanelId = "nav-cube" | "home-game";
 
-/** Flip order: game → product-cube homepage (with pricing). */
+/** Flip order: The Moves Like product face → Klean Sneaks demo. */
 export const HOMEPAGE_FLIP_PANELS: readonly HomepageFlipPanelId[] = [
-  "home-game",
   "nav-cube",
+  "home-game",
 ] as const;
 
 export function flipPanelIndex(id: HomepageFlipPanelId): number {
@@ -33,10 +33,10 @@ export function homepageSectionFromHash(hash: string): string | null {
 
 export function flipPanelFromHash(hash: string): HomepageFlipPanelId | null {
   const id = hash.replace(/^#/, "").trim();
-  if (!id) return "home-game";
+  if (!id) return "nav-cube";
   if (id === "nav-cube") return "nav-cube";
   if (id === "home-game" || id === "clean-sneaks") return "home-game";
-  // Retired explore face — land on the cube homepage instead.
+  // Retired explore face — land on The Moves Like homepage instead.
   if (id === "home-explore") return "nav-cube";
   if (homepageSectionFromHash(id)) return "nav-cube";
   return null;

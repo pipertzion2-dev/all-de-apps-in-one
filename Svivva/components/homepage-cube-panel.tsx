@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { HomepageAboutSection } from "@/components/homepage-about-section";
-import { HomepageProtectionHero } from "@/components/homepage-protection-hero";
+import { HomepageMovesLikeHero } from "@/components/homepage-moves-like-hero";
 import { HomepageExploreLinks } from "@/components/homepage-explore-links";
 import { HomepageFaqSection } from "@/components/homepage-faq-section";
 import { HomepageHeroBlock } from "@/components/homepage-hero-block";
@@ -34,7 +34,7 @@ type HomepageCubePanelProps = {
   interactive?: boolean;
 };
 
-/** Product-cube homepage: nav cube, about, OaaS mixing console, and pricing. */
+/** Product homepage: The Moves Like center + flowers, cube desk, pricing. */
 export function HomepageCubePanel({
   mountCanvas = true,
   interactive = true,
@@ -42,12 +42,15 @@ export function HomepageCubePanel({
   return (
     <div className="relative bg-background pb-8">
       {interactive ? <HomepageCubeFaceHint /> : null}
-      {interactive ? <HomepageProtectionHero /> : null}
+
+      {/* Center of the app — The Moves Like over Three.js flowers */}
+      {interactive ? <HomepageMovesLikeHero /> : null}
 
       <div className="relative z-20 px-4 pt-4 sm:hidden">
         <HomepageMainGoal variant="light" density="compact" surface="platform" />
       </div>
 
+      {/* Keep flower-backed cube for desk navigation */}
       <HomepageHeroBlock
         mountCanvas={mountCanvas}
         interactive={interactive}
@@ -60,7 +63,7 @@ export function HomepageCubePanel({
           <button
             type="button"
             onClick={() => scrollPlatformSection("about")}
-            className="rounded-full border border-[#5B8DA8]/40 bg-background/90 px-5 py-2 text-xs font-medium tracking-wide text-foreground shadow-sm backdrop-blur-sm transition-transform active:scale-95"
+            className="rounded-full border border-[#6D91B3]/40 bg-background/90 px-5 py-2 text-xs font-medium tracking-wide text-foreground shadow-sm backdrop-blur-sm transition-transform active:scale-95"
           >
             Scroll ↓
           </button>
@@ -71,7 +74,6 @@ export function HomepageCubePanel({
       <HomepageHowToSection />
       <HomepageExploreLinks />
 
-      {/* OaaS lives on the scrollSnap face so /#oaas works with the flip stack. */}
       <div className="relative z-10 border-t border-border/40">
         <PlatformFeatureHub hideBackground hideChannelStrips />
       </div>

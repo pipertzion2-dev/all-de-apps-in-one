@@ -22,6 +22,7 @@ describe("product-positioning", () => {
     expect(isBetaHref("/seeds")).toBe(true);
     expect(isBetaHref("/orbit")).toBe(true);
     expect(isBetaHref("/play")).toBe(true);
+    expect(isBetaHref("/the-moves-like")).toBe(false);
     expect(isBetaHref("/clean-sneaks")).toBe(false);
     expect(isBetaHref("/dashboard/hybrid-lab")).toBe(true);
     expect(isBetaHref("/dashboard/api-builder")).toBe(true);
@@ -33,18 +34,19 @@ describe("product-positioning", () => {
   it("shows beta banner on desk modules but not homepage or game", () => {
     expect(isBetaSurfacePath("/")).toBe(false);
     expect(isBetaSurfacePath("/clean-sneaks")).toBe(false);
+    expect(isBetaSurfacePath("/the-moves-like")).toBe(false);
     expect(isBetaSurfacePath("/dashboard/hybrid-lab")).toBe(true);
     expect(isBetaSurfacePath("/dashboard/projects/abc")).toBe(true);
     expect(isBetaSurfacePath("/dashboard/orbit")).toBe(true);
     expect(isBetaSurfacePath("/seeds")).toBe(true);
   });
 
-  it("uses the Poor Man Protection tagline", () => {
-    expect(PRODUCT_TAGLINE).toMatch(/Poor Man Protection/i);
+  it("uses The Moves Like tagline", () => {
+    expect(PRODUCT_TAGLINE).toMatch(/The Moves Like/i);
   });
 
   it("leads the homepage with a single focused thesis", () => {
     expect(PRODUCT_HERO_HEADLINE.length).toBeGreaterThan(20);
-    expect(PRODUCT_HERO_HEADLINE).toMatch(/who had it first/i);
+    expect(PRODUCT_HERO_HEADLINE).toMatch(/movement/i);
   });
 });

@@ -1,67 +1,68 @@
 /**
  * Canonical product story for zzai zzai — homepage, metadata, and beta labeling.
+ * Homepage leads with The Moves Like; Poor Man Protection remains a desk tool.
  */
 
 import type { FeatureId } from "@/components/svivva-artifact/feature-defs";
 
 /** Scale-style homepage thesis — one clear job for the whole page. */
-export const PRODUCT_HERO_HEADLINE =
-  "Every creative dispute starts with one question: who had it first.";
+export const PRODUCT_HERO_HEADLINE = "Explore, learn, and play movement — on your phone.";
 
 /** Product name — eyebrows, metadata suffix, and compact labels. */
-export const PRODUCT_NAME_LINE = "Poor Man Protection";
+export const PRODUCT_NAME_LINE = "The Moves Like";
 
 /** Brand slogan — metadata and secondary hero line. */
-export const PRODUCT_TAGLINE = "Poor Man Protection — prove what you created, and when.";
+export const PRODUCT_TAGLINE =
+  "The Moves Like — explore, learn, transform, play, and share movement.";
 
-/** Court-ready protection — plain language for homepage and meta. */
+/** Desk tool pitch — still available, no longer the homepage lead. */
 export const PRODUCT_PROTECTION_PITCH =
   "Timestamp your files, seal them with cryptographic hashes, and export a court-ready pack. Supporting evidence of anteriority — not a USPTO patent or Copyright Office registration.";
 
-/** Applications block (below the hero) — Scale-style focused section intro. */
-export const HOMEPAGE_APPLICATIONS_TITLE = "The proof layer for what you create.";
+/** Applications block (below the hero) — focused section intro. */
+export const HOMEPAGE_APPLICATIONS_TITLE = "Movement first. Desk tools when you need them.";
 export const HOMEPAGE_APPLICATIONS_SUBLINE =
-  "Upload once, seal with hashes, verify at a public link, and download a structured court pack when priority matters.";
+  "The Moves Like is the center of zzai zzai — practice with your front camera, build routines, and clash styles. Poor Man Protection and the rest of the desk stay one tap away.";
 
 /** Sap / tree metaphor — quiet work under the surface while you rest and grow. */
 export const PRODUCT_SAP_METAPHOR =
-  "Like sap in a tree, zzai zzai keeps protection and guardrails flowing underneath — so you can rest, focus on design, and grow.";
+  "Like sap in a tree, zzai zzai keeps creation and guardrails flowing underneath — so you can move, rest, and grow.";
 
 /** One-sentence pitch (YC / hero / meta). */
 export const PRODUCT_ONE_LINER =
-  "zzai zzai leads with Poor Man Protection — timestamped seals, public verify links, and court-ready packs for sketches, designs, and code. Klean Sneaks is the free demo; other desk tools are beta.";
+  "zzai zzai leads with The Moves Like — an interactive dance creation workstation for explore, learn, create, and play. Poor Man Protection, Klean Sneaks, and the builder desk stay on the same domain.";
 
 /** Plain-language main goal (homepage game + product faces). */
 export const PRODUCT_MAIN_GOAL =
-  "Seal work in Poor Man Protection, verify hashes in the browser, and download a court pack when you need to show priority — before you spend on formal registration.";
+  "Open The Moves Like, practice with your front camera, and build routines — then use Poor Man Protection when you need a sealed record of what you made.";
 
 /** Shorter hero subline. */
 export const PRODUCT_HERO_SUBLINE =
-  "Upload, seal, verify — an evidentiary workflow for creators who need a defensible record.";
+  "Front-camera practice, a 3D stage, and Style Clash — the dance desk at the heart of zzai zzai.";
 
 /** Max ~12 words — mobile homepage faces only. */
-export const PRODUCT_HOOK_SHORT = "Seal work. Verify anywhere. Export a court pack.";
+export const PRODUCT_HOOK_SHORT = "Dance. Practice. Play. Share the move.";
 
 /** HowTo section — keep in sync with `HOMEPAGE_HOWTO_STEPS` in seo/schema/builders.ts */
-export const HOMEPAGE_HOWTO_TITLE = "How Poor Man Protection works";
+export const HOMEPAGE_HOWTO_TITLE = "How The Moves Like works";
 export const HOMEPAGE_HOWTO_SUBLINE =
-  "Four steps from upload to a verify link — no lawyer required to start a defensible record.";
+  "Four steps from Discover to a shared take — built for your phone’s front camera.";
 
 /** Literal game ↔ product bridge (BALOON8 car×sneaker, Jordan 14 × Ferrari). */
 export const PRODUCT_GAME_HYBRID_METAPHOR =
   "One car×sneaker chassis (BALOON8), many unlockable colorways — the same H¹ silhouette, different finishes, like Hybrid² on the desk.";
 
-/** First homepage panel — Klean Sneaks (demo of the same protection story). */
-export const HOMEPAGE_GAME_FACE_TITLE = "Play the demo";
+/** First homepage panel — Klean Sneaks (demo). */
+export const HOMEPAGE_GAME_FACE_TITLE = "Play the sneaker demo";
 export const HOMEPAGE_GAME_FACE_SUBLINE =
-  "Klean Sneaks — free on the walk. Same “protect what you made” idea as Poor Man Protection.";
+  "Klean Sneaks — free on the walk. Swipe to The Moves Like, the center of zzai zzai.";
 
 /** Shown under the headline on the platform homepage face (mobile compact). */
 export const HOMEPAGE_PLATFORM_FACE_SUBLINE =
-  "Seal uploads, verify hashes in the browser, export a court pack when you need proof.";
+  "Open The Moves Like — practice, record, and clash from your phone.";
 
-export const HOMEPAGE_SCROLL_TO_PLATFORM = "Swipe ↓ Poor Man Protection";
-export const HOMEPAGE_SCROLL_TO_GAME = "Swipe ↑ Klean Sneaks demo";
+export const HOMEPAGE_SCROLL_TO_PLATFORM = "Swipe ↑ The Moves Like";
+export const HOMEPAGE_SCROLL_TO_GAME = "Swipe ↓ Klean Sneaks demo";
 
 /** Platform desk modules — Klean Sneaks ships; Hybrid² / API / Pulse stay beta. */
 export const CORE_PLATFORM_FEATURE_IDS = new Set<string>();
@@ -85,6 +86,7 @@ function isCoreProductPath(path: string): boolean {
     "/privacy",
     "/terms",
     "/clean-sneaks",
+    "/the-moves-like",
     "/dashboard/settings",
     "/dashboard/billing",
     "/dashboard/finish-setup",
@@ -108,7 +110,8 @@ export function isBetaCubeFaceId(id: FeatureId): boolean {
 export function isBetaHref(href: string): boolean {
   const path = normalizePath(href);
   if (path === "/play") return true;
-  if (path.startsWith("/the-moves-like")) return true;
+  // The Moves Like is the homepage lead product — not beta.
+  if (path.startsWith("/the-moves-like")) return false;
   if (path.startsWith("/tools")) return true;
   if (path.startsWith("/ai-tools-hub")) return true;
   if (path.startsWith("/cyber-security-mini-apps")) return true;

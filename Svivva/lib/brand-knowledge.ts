@@ -198,6 +198,14 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
           "BALOON8 car×sneaker demo — one hybrid chassis, colorways, Sneak Vision ≈ hazard preview.",
       },
       {
+        id: "the-moves-like",
+        name: "The Moves Like",
+        path: "/the-moves-like",
+        oneLiner:
+          "Interactive dance creation workstation — explore, learn, create, studio, play, and share movement.",
+        audience: "dancers, creators, and phone-first players",
+      },
+      {
         id: "klean-sneaks",
         name: "Klean Sneaks",
         path: "/clean-sneaks",
@@ -221,7 +229,7 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
         id: "protect",
         name: "Poor Man Protection",
         path: "/dashboard/poor-man-protection",
-        oneLiner: "Beta — timestamped evidentiary seals and court-ready packs.",
+        oneLiner: "Desk tool — timestamped evidentiary seals and court-ready packs.",
       },
       {
         id: "oaas",
@@ -414,11 +422,15 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       },
       {
         q: "Is ZZAI only an AI API builder?",
-        a: "No — the public story leads with Poor Man Protection: timestamped seals and court-ready exports for sketches, designs, and code. Klean Sneaks is a free demo; Hybrid² Lab, API Builder, Projects, Pulse, Seeds, Orbit, and the rest of the desk are beta on zzaizzai.com.",
+        a: "No — the public story leads with The Moves Like: an interactive dance creation workstation for explore, learn, create, and play. Poor Man Protection and Klean Sneaks stay on the same domain; Hybrid² Lab, Seeds, Orbit, and the rest of the desk are beta.",
       },
       {
         q: `What does “${PRODUCT_TAGLINE}” mean?`,
-        a: "Poor Man Protection gives you a defensible record of what you created and when — hashes, custody, and verify links — as supporting evidence of anteriority. It is not a USPTO patent or Copyright Office registration. Use /protect/verify to check a seal without signing in.",
+        a: "The Moves Like is zzai zzai’s movement desk — practice with your front camera, assemble routines, and share Style Clash takes. Open /the-moves-like. Poor Man Protection remains available when you need sealed proof of what you made.",
+      },
+      {
+        q: "What is The Moves Like?",
+        a: "The Moves Like is the center of zzai zzai — Discover, Learn (Ghost Mode), Create, Studio, Play, Community, and Profile for dance creation on your phone.",
       },
       {
         q: "How long does it take to ship with ZZAI?",

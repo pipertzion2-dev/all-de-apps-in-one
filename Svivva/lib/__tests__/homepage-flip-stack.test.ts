@@ -5,7 +5,7 @@ import { flipPanelFromHash, flipPanelIndex, hashForFlipPanel } from "../homepage
 
 describe("homepage flip stack", () => {
   it("maps legacy hash ids to flip panels", () => {
-    expect(flipPanelFromHash("")).toBe("home-game");
+    expect(flipPanelFromHash("")).toBe("nav-cube");
     expect(flipPanelFromHash("nav-cube")).toBe("nav-cube");
     expect(flipPanelFromHash("home-game")).toBe("home-game");
     expect(flipPanelFromHash("clean-sneaks")).toBe("home-game");
@@ -19,9 +19,9 @@ describe("homepage flip stack", () => {
     expect(hashForFlipPanel("home-game")).toBe("home-game");
   });
 
-  it("orders game then nav cube (two faces)", () => {
-    expect(flipPanelIndex("home-game")).toBe(0);
-    expect(flipPanelIndex("nav-cube")).toBe(1);
+  it("orders The Moves Like face then game (two faces)", () => {
+    expect(flipPanelIndex("nav-cube")).toBe(0);
+    expect(flipPanelIndex("home-game")).toBe(1);
   });
 
   it("uses continuous virtual scroll with direct scrub paint and RAF settling", () => {
@@ -44,9 +44,9 @@ describe("homepage flip stack", () => {
     expect(flipSrc).toContain("overlayScrollEnabled");
     expect(flipSrc).toContain("OVERLAY_FADE_START = 0.88");
     expect(flipSrc).toContain("resetPlatformScroll");
-    expect(flipSrc).toContain('panelId === "home-game" && direction > 0');
     expect(flipSrc).toContain('panelId === "nav-cube"');
-    expect(flipSrc).toMatch(/panelId === "nav-cube"[\s\S]*direction > 0[\s\S]*return false/);
+    expect(flipSrc).toContain('panelId === "home-game"');
+    expect(flipSrc).toMatch(/panelId === "home-game"[\s\S]*direction > 0[\s\S]*return false/);
     expect(flipSrc).toMatch(/const tick = \(now: number\) => \{[\s\S]*animRef\.current = 0/);
   });
 

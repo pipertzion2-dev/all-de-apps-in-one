@@ -211,20 +211,20 @@ export function eventSeriesSchema(input?: { name?: string; description?: string;
 /** Shared HowTo steps — keep in sync with homepage HowTo HTML. */
 export const HOMEPAGE_HOWTO_STEPS = [
   {
-    name: "Upload your work",
-    text: "Add sketches, designs, lyrics, code, or any file you may need to prove you created first.",
+    name: "Open The Moves Like",
+    text: "Start on Discover — pick a move, tilt the stage, and step into the dance desk.",
   },
   {
-    name: "Seal with hashes and timestamps",
-    text: "Poor Man Protection records custody and binds a cryptographic seal to each upload.",
+    name: "Practice with your front camera",
+    text: "Ghost Mode mirrors your selfie camera so you can learn steps against a reference take.",
   },
   {
-    name: "Share a public verify link",
-    text: "Anyone can check the seal at /protect/verify — no account required for verification.",
+    name: "Create and assemble",
+    text: "Record a take, drop moves into Studio, and shape a routine that feels like you.",
   },
   {
-    name: "Download a court pack",
-    text: "When a dispute arises, export a structured pack with hashes, logs, and metadata for counsel.",
+    name: "Play and share",
+    text: "Clash styles, share with crew, and keep Poor Man Protection nearby when you need a sealed record.",
   },
 ] as const;
 
@@ -253,7 +253,7 @@ export function homepageJsonLdGraph() {
     howToSchema({
       name: HOMEPAGE_HOWTO_TITLE,
       description:
-        "Seal creative work with timestamped hashes, verify at a public link, and export a court-ready pack with zzai zzai.",
+        "Explore The Moves Like on zzai zzai — practice with your front camera, build routines, and share movement.",
       steps: [...HOMEPAGE_HOWTO_STEPS],
     }),
   ];

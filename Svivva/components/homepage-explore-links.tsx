@@ -4,14 +4,10 @@ import { isBetaHref } from "@/lib/product-positioning";
 
 const LINKS = [
   {
-    href: "/dashboard/hybrid-lab",
-    title: "Hybrid² Lab",
-    description: "Fuse two ZZAI modules (H¹), then hybridize listed blends (H²) into one product.",
-  },
-  {
-    href: "/lp/ai-api-builder",
-    title: "Keep fusions Klean",
-    description: "After Hybrid², guardrails enforce schema, preview hazards, and roll back fast.",
+    href: "/the-moves-like",
+    title: "The Moves Like",
+    description:
+      "Interactive dance game — Motion DNA, Ghost Mode, Move Reactor, Rhythm Portal, Style Clash.",
   },
   {
     href: "/clean-sneaks",
@@ -19,15 +15,14 @@ const LINKS = [
     description: "BALOON8 car×sneaker — one chassis, colorway unlocks, Sneak Vision hazards.",
   },
   {
-    href: "/the-moves-like",
-    title: "THE MOVES LIKE",
-    description:
-      "Interactive dance game — Motion DNA, Ghost Mode, Move Reactor, Rhythm Portal, Style Clash.",
+    href: "/dashboard/poor-man-protection",
+    title: "Poor Man Protection",
+    description: "Seal uploads with hashes and timestamps — court-ready packs when you need proof.",
   },
   {
-    href: "/dashboard/pulse",
-    title: "Pulse metrics",
-    description: "Live latency, success rate, and spend across your guarded endpoints.",
+    href: "/dashboard/hybrid-lab",
+    title: "Hybrid² Lab",
+    description: "Fuse two ZZAI modules (H¹), then hybridize listed blends (H²) into one product.",
   },
   {
     href: "/seeds",
@@ -56,15 +51,15 @@ export function HomepageExploreLinks() {
     >
       <div className="mx-auto max-w-3xl space-y-8">
         <div className="space-y-3 text-center">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#5B8DA8]">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#6D91B3]">
             Also on zzai zzai
           </p>
           <h2 id="homepage-explore-heading" className="text-2xl font-bold sm:text-3xl">
-            Demo game &amp; beta builder desk
+            The Moves Like &amp; the desk
           </h2>
           <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-base">
-            Poor Man Protection is the core product. Klean Sneaks is the free demo; Hybrid², Seeds,
-            Orbit, and the rest of the desk stay in beta on the same domain.
+            The Moves Like is the center of the site. Klean Sneaks, Poor Man Protection, and the
+            builder desk stay on the same domain.
           </p>
         </div>
 
@@ -73,7 +68,7 @@ export function HomepageExploreLinks() {
             <li key={link.href}>
               <Link
                 href={link.href}
-                className="block h-full rounded-xl border border-border/50 bg-card/80 p-4 transition-colors hover:border-[#5B8DA8]/50"
+                className="block h-full rounded-xl border border-border/50 bg-card/80 p-4 transition-colors hover:border-[#6D91B3]/50"
               >
                 <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
                   {link.title}

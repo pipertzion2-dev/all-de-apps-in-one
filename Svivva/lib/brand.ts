@@ -10,7 +10,7 @@ export const BRAND = {
   shortDescription: PRODUCT_ONE_LINER,
   /** Longer entity blurb for AEO / SearchDock / Schema.org (see also lib/brand-knowledge.ts). */
   longDescription:
-    "zzai zzai (ZZAI / zzaizzai.com) is Hybrid² for AI products — fuse modules on the FX bus, keep every fusion Klean on Signal with schema and rollback, and prove the car×sneaker metaphor in Klean Sneaks (BALOON8 colorways). Seeds, Orbit, and the full desk patch bay ship in beta.",
+    "zzai zzai (ZZAI / zzaizzai.com) leads with The Moves Like — an interactive dance creation workstation. Hybrid², Klean Sneaks (BALOON8), Poor Man Protection, Seeds, Orbit, and the desk patch bay stay on the same domain.",
   contactEmail: "hello@zzaizzai.com",
   /** Strings answer engines and SearchDock should treat as the same entity */
   aliases: ["zzai zzai", "ZZAI", "zzaizzai", "zzaizzai.com", "zzai", "Svivva"] as const,

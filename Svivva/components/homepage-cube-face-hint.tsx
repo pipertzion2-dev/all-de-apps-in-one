@@ -6,7 +6,7 @@ import { HOMEPAGE_SCROLL_TO_GAME } from "@/lib/product-positioning";
 
 const SCROLL_TOP_THRESHOLD = 48;
 
-/** In-flow hint at the top of the platform face — swipe up to return to the game panel. */
+/** Hint on The Moves Like face — swipe down to the Klean Sneaks demo panel. */
 export function HomepageCubeFaceHint() {
   const [atTop, setAtTop] = useState(true);
 
@@ -45,10 +45,10 @@ export function HomepageCubeFaceHint() {
           stroke="currentColor"
           strokeWidth="2"
           className="text-muted-foreground"
-          style={{ animation: "scrollBounce 1.5s ease-in-out infinite reverse" }}
+          style={{ animation: "scrollBounce 1.5s ease-in-out infinite" }}
           aria-hidden
         >
-          <path d="M10 16V4M5 9l5-5 5 5" />
+          <path d="M10 4v12M6 12l4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
     </div>
