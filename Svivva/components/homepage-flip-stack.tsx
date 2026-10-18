@@ -17,61 +17,52 @@ type HomepageFlipStackProps = {
 };
 
 const FLIP_SETTLE_EPSILON = 0.02;
-const NUDGE_DEBOUNCE_MS = 650;
-const NUDGE_DEBOUNCE_MOBILE_MS = 900;
-const SWIPE_THRESHOLD_PX = 48;
-const SWIPE_THRESHOLD_MOBILE_PX = 72;
+const NUDGE_DEBOUNCE_MS = 720;
+const SWIPE_THRESHOLD_PX = 52;
+const SWIPE_THRESHOLD_MOBILE_PX = 64;
 const MAX_PANEL_INDEX = 1;
 const SCROLL_EDGE_THRESHOLD = 8;
-/** Platform content fades in only as the game → home flip finishes (avoids clipping mid-rotation). */
-const OVERLAY_FADE_START = 0.88;
-/** On phones, keep the game face visible longer during the flip so it does not “skip”. */
-const OVERLAY_FADE_START_MOBILE = 0.94;
-const OVERLAY_FADE_END = 1;
-/** Absorb flip-wheel momentum so the platform overlay does not shoot to the footer. */
+/** Timed 3D cube rotation — exponential settle looked like an instant cut on mobile. */
+const FLIP_DURATION_MS = 720;
+const FLIP_DURATION_MOBILE_MS = 820;
+/** Absorb leftover wheel momentum after landing on The Moves Like. */
 const PLATFORM_WHEEL_LOCK_MS = 700;
-const PLATFORM_WHEEL_LOCK_MOBILE_MS = 1000;
-/** Desktop wheel: intentional overscroll distance before leaving The Moves Like. */
 const WHEEL_OVERSCROLL_FLIP_PX = 420;
-/** Desktop wheel: require several upward ticks — one/two notches must not flip. */
 const WHEEL_OVERSCROLL_MIN_EVENTS = 4;
-/** Must sit at the top briefly before upward wheel counts as leave-gesture (trackpad inertia). */
 const AT_TOP_DWELL_MS = 420;
-/** Absorb leftover trackpad inertia when the overlay first hits scrollTop ≈ 0. */
 const AT_TOP_INERTIA_LOCK_MS = 380;
-/**
- * Mobile pull-down at scroll top to open Klean Sneaks.
- * Keep this modest — large desktop wheel thresholds freeze/feel broken on phones.
- * Flip on touchend only (never touchmove preventDefault — that froze iPhone).
- */
-const TOUCH_LEAVE_PX = 88;
-/** RAF exponential rates — lower = slower, smoother flip on mobile. */
-const FLIP_SMOOTHING_DESKTOP = 14;
-const FLIP_SMOOTHING_MOBILE = 7;
+/** Mobile pull-down at scroll top → Klean Sneaks (touchend only; never touchmove preventDefault). */
+const TOUCH_LEAVE_PX = 80;
 
-function overlayFadeStart(touchPrimary: boolean): number {
-  return touchPrimary ? OVERLAY_FADE_START_MOBILE : OVERLAY_FADE_START;
-}
+type ContentHost = "face" | "overlay";
 
-function overlayOpacityForIndex(index: number, touchPrimary = false): number {
-  const start = overlayFadeStart(touchPrimary);
-  return Math.min(1, Math.max(0, (index - start) / (OVERLAY_FADE_END - start)));
-}
-
-function overlayScrollEnabled(index: number): boolean {
-  return index >= OVERLAY_FADE_END - FLIP_SETTLE_EPSILON;
+function easeInOutCubic(t: number): number {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
 function isTouchPrimaryDevice(): boolean {
   if (typeof window === "undefined") return false;
   return (
     window.matchMedia("(pointer: coarse)").matches ||
-    window.matchMedia("(hover: none)").matches ||
-    (navigator.maxTouchPoints ?? 0) > 0
+    window.matchMedia("(max-width: 767px)").matches
   );
 }
 
-/** Two full-viewport faces — game above, The Moves Like below (land on game, swipe to main). */
+function settledOnPlatform(index: number, target: number, panel: HomepageFlipPanelId): boolean {
+  return (
+    panel === "nav-cube" &&
+    Math.abs(index - MAX_PANEL_INDEX) <= FLIP_SETTLE_EPSILON &&
+    Math.abs(target - MAX_PANEL_INDEX) <= FLIP_SETTLE_EPSILON
+  );
+}
+
+/**
+ * Two full-viewport Dune-style rotateX faces:
+ * Klean Sneaks (0) → The Moves Like (1).
+ *
+ * Product content lives on the 3D face during the flip (so the cube is visible),
+ * then hands off to a fixed overlay for native iOS scrolling when settled.
+ */
 export function HomepageFlipStack({
   begin,
   game,
@@ -87,57 +78,20 @@ export function HomepageFlipStack({
   const displayedIndexRef = useRef(flipPanelIndex(initialPanel));
   const activePanelRef = useRef<HomepageFlipPanelId>(initialPanel);
   const animRef = useRef(0);
+  const animFromRef = useRef(flipPanelIndex(initialPanel));
+  const animToRef = useRef(flipPanelIndex(initialPanel));
+  const animStartRef = useRef(0);
+  const animDurationRef = useRef(FLIP_DURATION_MS);
   const lastNudgeAtRef = useRef(0);
-  const overlayScrollWasEnabledRef = useRef(false);
   const platformWheelLockUntilRef = useRef(0);
   const overscrollAccumRef = useRef(0);
   const overscrollEventsRef = useRef(0);
   const atTopSinceRef = useRef(0);
-  const wasAtTopRef = useRef(true);
+  const wasAtTopRef = useRef(false);
   const touchPrimaryRef = useRef(false);
   const [activePanel, setActivePanel] = useState<HomepageFlipPanelId>(initialPanel);
-
-  const syncOverlayVisuals = useCallback(
-    (index: number) => {
-      const scroller = scrollRef.current;
-      const shell = shellRef.current;
-      const touchPrimary = touchPrimaryRef.current;
-      const fadeStart = overlayFadeStart(touchPrimary);
-      const opacity = overlayOpacityForIndex(index, touchPrimary);
-      const scrollEnabled = overlayScrollEnabled(index);
-      const shellHidden = scrollEnabled;
-      const lockMs = touchPrimary ? PLATFORM_WHEEL_LOCK_MOBILE_MS : PLATFORM_WHEEL_LOCK_MS;
-
-      if (scroller) {
-        scroller.style.opacity = scrollEnabled ? "1" : String(opacity);
-        scroller.style.visibility = index >= fadeStart - 0.02 ? "visible" : "hidden";
-        scroller.style.pointerEvents = scrollEnabled ? "auto" : "none";
-        scroller.style.touchAction = scrollEnabled ? "pan-y" : "none";
-        scroller.setAttribute("aria-hidden", scrollEnabled ? "false" : "true");
-
-        if (!scrollEnabled) {
-          if (scroller.scrollTop !== 0) scroller.scrollTop = 0;
-        } else if (!overlayScrollWasEnabledRef.current) {
-          scroller.scrollTop = 0;
-          platformWheelLockUntilRef.current = performance.now() + lockMs;
-          overscrollAccumRef.current = 0;
-          overscrollEventsRef.current = 0;
-          atTopSinceRef.current = performance.now();
-          wasAtTopRef.current = true;
-          // body overflow:hidden breaks fixed-overlay scrolling on iOS Safari.
-          if (!touchPrimary) {
-            document.body.style.overflow = "hidden";
-          }
-        }
-        overlayScrollWasEnabledRef.current = scrollEnabled;
-      }
-
-      if (shell) {
-        shell.style.opacity = shellHidden ? "0" : "1";
-        shell.style.pointerEvents = interactive && !shellHidden ? "auto" : "none";
-      }
-    },
-    [interactive],
+  const [contentHost, setContentHost] = useState<ContentHost>(
+    initialPanel === "nav-cube" ? "overlay" : "face",
   );
 
   const paintFaces = useCallback(() => {
@@ -156,12 +110,36 @@ export function HomepageFlipStack({
     }
   }, []);
 
+  const syncShellAndOverlay = useCallback(
+    (index: number) => {
+      const scroller = scrollRef.current;
+      const shell = shellRef.current;
+      const onPlatform = settledOnPlatform(index, targetIndexRef.current, activePanelRef.current);
+
+      if (shell) {
+        // Keep the 3D cube visible for the entire rotation — never hide mid-flip.
+        shell.style.opacity = onPlatform ? "0" : "1";
+        shell.style.pointerEvents = interactive && !onPlatform ? "auto" : "none";
+      }
+
+      if (scroller) {
+        scroller.style.opacity = onPlatform ? "1" : "0";
+        scroller.style.visibility = onPlatform ? "visible" : "hidden";
+        scroller.style.pointerEvents = onPlatform ? "auto" : "none";
+        scroller.style.touchAction = onPlatform ? "pan-y" : "none";
+        scroller.setAttribute("aria-hidden", onPlatform ? "false" : "true");
+        if (!onPlatform && scroller.scrollTop !== 0) scroller.scrollTop = 0;
+      }
+    },
+    [interactive],
+  );
+
   const syncDepth = useCallback(() => {
     halfHRef.current = (shellRef.current?.clientHeight ?? window.innerHeight) / 2;
     paintFaces();
     paintRotor(displayedIndexRef.current);
-    syncOverlayVisuals(displayedIndexRef.current);
-  }, [paintFaces, paintRotor, syncOverlayVisuals]);
+    syncShellAndOverlay(displayedIndexRef.current);
+  }, [paintFaces, paintRotor, syncShellAndOverlay]);
 
   const isAnimating = useCallback(
     () => Math.abs(displayedIndexRef.current - targetIndexRef.current) > FLIP_SETTLE_EPSILON,
@@ -171,42 +149,46 @@ export function HomepageFlipStack({
   const ensureTick = useCallback(() => {
     if (animRef.current) return;
 
-    let last = performance.now();
     const tick = (now: number) => {
       animRef.current = 0;
-      const dt = Math.min((now - last) / 1000, 0.032);
-      last = now;
+      const duration = Math.max(1, animDurationRef.current);
+      const u = Math.min(1, (now - animStartRef.current) / duration);
+      const eased = easeInOutCubic(u);
+      const from = animFromRef.current;
+      const to = animToRef.current;
+      const current = from + (to - from) * eased;
 
-      const target = targetIndexRef.current;
-      let current = displayedIndexRef.current;
-      const delta = target - current;
+      displayedIndexRef.current = current;
+      paintRotor(current);
+      syncShellAndOverlay(current);
 
-      if (Math.abs(delta) <= FLIP_SETTLE_EPSILON) {
-        if (current !== target) {
-          displayedIndexRef.current = target;
-          paintRotor(target);
-          syncOverlayVisuals(target);
-        } else {
-          syncOverlayVisuals(target);
-        }
-        lastNudgeAtRef.current = performance.now();
+      if (u < 1) {
+        animRef.current = requestAnimationFrame(tick);
         return;
       }
 
-      const rate = touchPrimaryRef.current ? FLIP_SMOOTHING_MOBILE : FLIP_SMOOTHING_DESKTOP;
-      const smoothing = 1 - Math.exp(-rate * dt);
-      current += delta * smoothing;
-      if ((delta > 0 && current > target) || (delta < 0 && current < target)) {
-        current = target;
+      displayedIndexRef.current = to;
+      targetIndexRef.current = to;
+      paintRotor(to);
+      syncShellAndOverlay(to);
+      lastNudgeAtRef.current = performance.now();
+
+      // Hand product content to the scroll overlay only after the cube lands.
+      if (to >= MAX_PANEL_INDEX - FLIP_SETTLE_EPSILON && activePanelRef.current === "nav-cube") {
+        setContentHost("overlay");
+        platformWheelLockUntilRef.current = performance.now() + PLATFORM_WHEEL_LOCK_MS;
+        wasAtTopRef.current = true;
+        atTopSinceRef.current = performance.now();
+        overscrollAccumRef.current = 0;
+        overscrollEventsRef.current = 0;
+        if (!touchPrimaryRef.current) {
+          document.body.style.overflow = "hidden";
+        }
       }
-      displayedIndexRef.current = current;
-      paintRotor(current);
-      syncOverlayVisuals(current);
-      animRef.current = requestAnimationFrame(tick);
     };
 
     animRef.current = requestAnimationFrame(tick);
-  }, [paintRotor, syncOverlayVisuals]);
+  }, [paintRotor, syncShellAndOverlay]);
 
   const resetPlatformScroll = useCallback(() => {
     const scroller = scrollRef.current;
@@ -219,23 +201,17 @@ export function HomepageFlipStack({
       activePanelRef.current = panel;
       setActivePanel(panel);
       window.history.replaceState(null, "", `/#${hashForFlipPanel(panel)}`);
-      if (panel === "nav-cube") {
-        resetPlatformScroll();
-        const lockMs = touchPrimaryRef.current
-          ? PLATFORM_WHEEL_LOCK_MOBILE_MS
-          : PLATFORM_WHEEL_LOCK_MS;
-        platformWheelLockUntilRef.current = performance.now() + lockMs;
-        overscrollAccumRef.current = 0;
-        overscrollEventsRef.current = 0;
-        atTopSinceRef.current = performance.now();
-        wasAtTopRef.current = true;
-      } else {
+      if (panel === "home-game") {
+        // Content must be on the cube face before the reverse flip starts.
+        setContentHost("face");
         resetPlatformScroll();
         document.body.style.overflow = "";
         overscrollAccumRef.current = 0;
         overscrollEventsRef.current = 0;
         wasAtTopRef.current = false;
         atTopSinceRef.current = 0;
+      } else {
+        resetPlatformScroll();
       }
     },
     [resetPlatformScroll],
@@ -249,14 +225,40 @@ export function HomepageFlipStack({
         Math.abs(targetIndexRef.current - next) <= FLIP_SETTLE_EPSILON;
       if (settled) return;
 
+      if (animRef.current) {
+        cancelAnimationFrame(animRef.current);
+        animRef.current = 0;
+      }
+
+      // Leaving the platform: put content back on the face, show the cube, then rotate.
+      if (panel === "home-game") {
+        setContentHost("face");
+      }
+
       lastNudgeAtRef.current = performance.now();
       overscrollAccumRef.current = 0;
       overscrollEventsRef.current = 0;
+      animFromRef.current = displayedIndexRef.current;
+      animToRef.current = next;
+      animStartRef.current = performance.now();
+      animDurationRef.current = touchPrimaryRef.current
+        ? FLIP_DURATION_MOBILE_MS
+        : FLIP_DURATION_MS;
       targetIndexRef.current = next;
       commitPanel(panel);
+      // Force shell visible for the whole rotation.
+      if (shellRef.current) {
+        shellRef.current.style.opacity = "1";
+        shellRef.current.style.pointerEvents = interactive ? "auto" : "none";
+      }
+      if (scrollRef.current) {
+        scrollRef.current.style.opacity = "0";
+        scrollRef.current.style.visibility = "hidden";
+        scrollRef.current.style.pointerEvents = "none";
+      }
       ensureTick();
     },
-    [commitPanel, ensureTick],
+    [commitPanel, ensureTick, interactive],
   );
 
   useLayoutEffect(() => {
@@ -280,8 +282,11 @@ export function HomepageFlipStack({
     }
     targetIndexRef.current = index;
     displayedIndexRef.current = index;
+    animFromRef.current = index;
+    animToRef.current = index;
     activePanelRef.current = initialPanel;
     setActivePanel(initialPanel);
+    setContentHost(initialPanel === "nav-cube" ? "overlay" : "face");
     syncDepth();
   }, [initialPanel, syncDepth]);
 
@@ -310,17 +315,16 @@ export function HomepageFlipStack({
     const settledPanelIndex = () =>
       Math.min(MAX_PANEL_INDEX, Math.max(0, Math.round(targetIndexRef.current)));
 
-    /** Settled on platform face — use native overlay scroll, not flip scrubbing. */
     const platformScrollMode = () =>
-      activePanelRef.current === "nav-cube" && overlayScrollEnabled(displayedIndexRef.current);
+      settledOnPlatform(
+        displayedIndexRef.current,
+        targetIndexRef.current,
+        activePanelRef.current,
+      ) && contentHost === "overlay";
 
     const faceScrollState = (face: HTMLDivElement | null) => {
       if (!face) {
-        return {
-          scrollable: false,
-          atTop: true,
-          atBottom: true,
-        };
+        return { scrollable: false, atTop: true, atBottom: true };
       }
       const threshold = SCROLL_EDGE_THRESHOLD;
       const scrollable = face.scrollHeight > face.clientHeight + threshold;
@@ -330,7 +334,6 @@ export function HomepageFlipStack({
     };
 
     const canFlipFromPanel = (direction: 1 | -1, panelId: HomepageFlipPanelId) => {
-      // Rotor: home-game (0) above → nav-cube (1) below. Land on nav-cube.
       if (panelId === "home-game" && direction > 0) return true;
       if (panelId === "nav-cube") {
         if (direction > 0) return false;
@@ -345,8 +348,7 @@ export function HomepageFlipStack({
       if (isAnimating()) return false;
 
       const now = performance.now();
-      const debounceMs = touchPrimary ? NUDGE_DEBOUNCE_MOBILE_MS : NUDGE_DEBOUNCE_MS;
-      if (now - lastNudgeAtRef.current < debounceMs) return false;
+      if (now - lastNudgeAtRef.current < NUDGE_DEBOUNCE_MS) return false;
 
       const current = settledPanelIndex();
       const panelId = flipPanelFromIndex(current);
@@ -356,8 +358,6 @@ export function HomepageFlipStack({
       if (next === current) return false;
 
       lastNudgeAtRef.current = now;
-      overscrollAccumRef.current = 0;
-      overscrollEventsRef.current = 0;
       goToPanel(flipPanelFromIndex(next));
       return true;
     };
@@ -372,24 +372,17 @@ export function HomepageFlipStack({
     const onWheel = (e: WheelEvent) => {
       if (platformScrollMode()) {
         const scroller = scrollRef.current;
-        if (scroller && !scroller.contains(e.target as Node)) {
-          e.preventDefault();
-        }
+        if (scroller && !scroller.contains(e.target as Node)) e.preventDefault();
         return;
       }
-
       if (isAnimating()) {
         e.preventDefault();
         return;
       }
-
       const delta = normalizeWheelDelta(e);
       if (Math.abs(delta) < 8) return;
-
       const direction: 1 | -1 = delta > 0 ? 1 : -1;
-      if (nudge(direction)) {
-        e.preventDefault();
-      }
+      if (nudge(direction)) e.preventDefault();
     };
 
     const onPlatformWheel = (e: WheelEvent) => {
@@ -454,8 +447,6 @@ export function HomepageFlipStack({
       nudge(-1);
     };
 
-    // —— Game face (not platform): swipe on touchend only. Never touchmove preventDefault
-    // (that combination with RAF flip froze iPhone Safari historically).
     let gameTouchStartY = 0;
 
     const onGameTouchStart = (e: TouchEvent) => {
@@ -466,12 +457,10 @@ export function HomepageFlipStack({
     const onGameTouchEnd = (e: TouchEvent) => {
       if (platformScrollMode()) return;
       if (isAnimating()) return;
-
       const endY = e.changedTouches[0]?.clientY ?? gameTouchStartY;
       const delta = gameTouchStartY - endY;
       const threshold = touchPrimary ? SWIPE_THRESHOLD_MOBILE_PX : SWIPE_THRESHOLD_PX;
       if (Math.abs(delta) < threshold) return;
-
       const direction: 1 | -1 = delta > 0 ? 1 : -1;
       nudge(direction);
     };
@@ -493,15 +482,12 @@ export function HomepageFlipStack({
       platformTouchStartY = e.touches[0]?.clientY ?? 0;
       platformTouchStartScrollTop = scrollRef.current?.scrollTop ?? 0;
       platformPullTracking = true;
-      overscrollAccumRef.current = 0;
     };
 
-    // Passive only — never preventDefault. Native overflow scroll must win on iOS.
-    const onPlatformTouchMove = (e: TouchEvent) => {
+    const onPlatformTouchMove = () => {
       if (!platformPullTracking || !platformScrollMode()) return;
       const face = scrollRef.current;
-      if (!face) return;
-      if (face.scrollTop > SCROLL_EDGE_THRESHOLD) {
+      if (face && face.scrollTop > SCROLL_EDGE_THRESHOLD) {
         wasAtTopRef.current = false;
       }
     };
@@ -510,19 +496,13 @@ export function HomepageFlipStack({
       if (!platformPullTracking) return;
       platformPullTracking = false;
       if (!platformScrollMode() || isAnimating()) return;
-
       const face = scrollRef.current;
       if (!face) return;
-
-      // Only leave when the gesture began at the top (or nearly) and pulled down.
       if (platformTouchStartScrollTop > SCROLL_EDGE_THRESHOLD) return;
       if (face.scrollTop > SCROLL_EDGE_THRESHOLD) return;
-
       const endY = e.changedTouches[0]?.clientY ?? platformTouchStartY;
       const dy = endY - platformTouchStartY;
-      if (dy > TOUCH_LEAVE_PX) {
-        nudge(-1);
-      }
+      if (dy > TOUCH_LEAVE_PX) nudge(-1);
     };
 
     const onScrollerWheelCapture = (e: WheelEvent) => {
@@ -537,9 +517,6 @@ export function HomepageFlipStack({
     scroller?.addEventListener("touchmove", onPlatformTouchMove, { passive: true });
     scroller?.addEventListener("touchend", onPlatformTouchEnd, { passive: true });
 
-    // Silence unused on touch-primary desktops that still get wheel.
-    void touchPrimary;
-
     return () => {
       document.body.style.overflow = "";
       window.removeEventListener("wheel", onWheel);
@@ -551,7 +528,9 @@ export function HomepageFlipStack({
       scroller?.removeEventListener("touchmove", onPlatformTouchMove);
       scroller?.removeEventListener("touchend", onPlatformTouchEnd);
     };
-  }, [interactive, goToPanel, isAnimating]);
+  }, [interactive, goToPanel, isAnimating, contentHost]);
+
+  const onPlatform = initialPanel === "nav-cube";
 
   return (
     <>
@@ -559,6 +538,7 @@ export function HomepageFlipStack({
         ref={shellRef}
         data-homepage-flip-stack=""
         data-active-panel={activePanel}
+        data-content-host={contentHost}
         className="relative w-full"
         style={{
           height: "100svh",
@@ -618,7 +598,12 @@ export function HomepageFlipStack({
               willChange: "transform",
             }}
           >
-            <div className="h-full w-full bg-background" aria-hidden />
+            {/* Product content on the cube face during the 3D flip */}
+            {contentHost === "face" ? (
+              begin
+            ) : (
+              <div className="h-full w-full bg-background" aria-hidden />
+            )}
           </div>
         </div>
       </div>
@@ -626,21 +611,18 @@ export function HomepageFlipStack({
       <div
         ref={scrollRef}
         data-homepage-flip-scroll=""
-        aria-hidden="true"
+        aria-hidden={contentHost === "overlay" ? "false" : "true"}
         className="fixed inset-x-0 bottom-0 top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-[15] overflow-x-hidden overflow-y-auto scroll-auto bg-background sm:top-[calc(4rem+env(safe-area-inset-top,0px))]"
         style={{
           scrollPaddingTop: "0.75rem",
-          opacity: overlayOpacityForIndex(flipPanelIndex(initialPanel), false),
-          visibility:
-            flipPanelIndex(initialPanel) >= OVERLAY_FADE_START - 0.02 ? "visible" : "hidden",
-          pointerEvents: overlayScrollEnabled(flipPanelIndex(initialPanel)) ? "auto" : "none",
+          opacity: onPlatform && contentHost === "overlay" ? 1 : 0,
+          visibility: onPlatform && contentHost === "overlay" ? "visible" : "hidden",
+          pointerEvents: onPlatform && contentHost === "overlay" ? "auto" : "none",
           overscrollBehaviorY: "contain",
           WebkitOverflowScrolling: "touch",
-          // Avoid translateZ(0) on the scroller — it can create a containing
-          // layer that fights iOS momentum scrolling inside fixed overlays.
         }}
       >
-        {begin}
+        {contentHost === "overlay" ? begin : null}
       </div>
     </>
   );
