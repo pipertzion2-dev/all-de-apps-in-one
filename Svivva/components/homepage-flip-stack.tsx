@@ -18,7 +18,7 @@ type HomepageFlipStackProps = {
 
 const FLIP_SETTLE_EPSILON = 0.02;
 const NUDGE_DEBOUNCE_MS = 650;
-const SWIPE_THRESHOLD_PX = 56;
+const SWIPE_THRESHOLD_PX = 48;
 const MAX_PANEL_INDEX = 1;
 const SCROLL_EDGE_THRESHOLD = 8;
 /** Platform content fades in only as the game → home flip finishes (avoids clipping mid-rotation). */
@@ -26,14 +26,20 @@ const OVERLAY_FADE_START = 0.88;
 const OVERLAY_FADE_END = 1;
 /** Absorb flip-wheel momentum so the platform overlay does not shoot to the footer. */
 const PLATFORM_WHEEL_LOCK_MS = 700;
-/** Intentional overscroll distance (wheel px / touch px) before leaving The Moves Like. */
-const OVERSCROLL_FLIP_PX = 420;
-/** Require several upward wheel ticks at top — one/two gentle notches must not flip. */
-const OVERSCROLL_MIN_EVENTS = 4;
+/** Desktop wheel: intentional overscroll distance before leaving The Moves Like. */
+const WHEEL_OVERSCROLL_FLIP_PX = 420;
+/** Desktop wheel: require several upward ticks — one/two notches must not flip. */
+const WHEEL_OVERSCROLL_MIN_EVENTS = 4;
 /** Must sit at the top briefly before upward wheel counts as leave-gesture (trackpad inertia). */
 const AT_TOP_DWELL_MS = 420;
 /** Absorb leftover trackpad inertia when the overlay first hits scrollTop ≈ 0. */
 const AT_TOP_INERTIA_LOCK_MS = 380;
+/**
+ * Mobile pull-down at scroll top to open Klean Sneaks.
+ * Keep this modest — large desktop wheel thresholds freeze/feel broken on phones.
+ * Flip on touchend only (never touchmove preventDefault — that froze iPhone).
+ */
+const TOUCH_LEAVE_PX = 72;
 
 function overlayOpacityForIndex(index: number): number {
   return Math.min(
@@ -44,6 +50,15 @@ function overlayOpacityForIndex(index: number): number {
 
 function overlayScrollEnabled(index: number): boolean {
   return index >= OVERLAY_FADE_END - FLIP_SETTLE_EPSILON;
+}
+
+function isTouchPrimaryDevice(): boolean {
+  if (typeof window === "undefined") return false;
+  return (
+    window.matchMedia("(pointer: coarse)").matches ||
+    window.matchMedia("(hover: none)").matches ||
+    (navigator.maxTouchPoints ?? 0) > 0
+  );
 }
 
 /** Two full-viewport faces — game above, The Moves Like homepage below (land on homepage). */
@@ -69,6 +84,7 @@ export function HomepageFlipStack({
   const overscrollEventsRef = useRef(0);
   const atTopSinceRef = useRef(0);
   const wasAtTopRef = useRef(true);
+  const touchPrimaryRef = useRef(false);
   const [activePanel, setActivePanel] = useState<HomepageFlipPanelId>(initialPanel);
 
   const syncOverlayVisuals = useCallback(
@@ -95,7 +111,10 @@ export function HomepageFlipStack({
           overscrollEventsRef.current = 0;
           atTopSinceRef.current = performance.now();
           wasAtTopRef.current = true;
-          document.body.style.overflow = "hidden";
+          // body overflow:hidden breaks fixed-overlay scrolling on iOS Safari.
+          if (!touchPrimaryRef.current) {
+            document.body.style.overflow = "hidden";
+          }
         }
         overlayScrollWasEnabledRef.current = scrollEnabled;
       }
@@ -161,7 +180,6 @@ export function HomepageFlipStack({
         return;
       }
 
-      // Slightly softer settle than scrub-era easing — fewer mid-flip opacity pops.
       const smoothing = 1 - Math.exp(-14 * dt);
       current += delta * smoothing;
       if ((delta > 0 && current > target) || (delta < 0 && current < target)) {
@@ -225,8 +243,12 @@ export function HomepageFlipStack({
   );
 
   useLayoutEffect(() => {
+    touchPrimaryRef.current = isTouchPrimaryDevice();
     syncDepth();
-    const onResize = () => syncDepth();
+    const onResize = () => {
+      touchPrimaryRef.current = isTouchPrimaryDevice();
+      syncDepth();
+    };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, [syncDepth]);
@@ -264,6 +286,9 @@ export function HomepageFlipStack({
 
   useEffect(() => {
     if (!interactive) return;
+
+    touchPrimaryRef.current = isTouchPrimaryDevice();
+    const touchPrimary = touchPrimaryRef.current;
 
     const settledPanelIndex = () =>
       Math.min(MAX_PANEL_INDEX, Math.max(0, Math.round(targetIndexRef.current)));
@@ -314,6 +339,7 @@ export function HomepageFlipStack({
 
       lastNudgeAtRef.current = now;
       overscrollAccumRef.current = 0;
+      overscrollEventsRef.current = 0;
       goToPanel(flipPanelFromIndex(next));
       return true;
     };
@@ -369,7 +395,6 @@ export function HomepageFlipStack({
         return;
       }
 
-      // Just arrived at top — absorb leftover trackpad inertia before leave-gestures count.
       if (!wasAtTopRef.current) {
         wasAtTopRef.current = true;
         atTopSinceRef.current = now;
@@ -383,7 +408,6 @@ export function HomepageFlipStack({
         return;
       }
 
-      // Native scroll down at top — clear leave intent.
       if (delta >= 0) {
         overscrollAccumRef.current = 0;
         overscrollEventsRef.current = 0;
@@ -396,12 +420,11 @@ export function HomepageFlipStack({
         return;
       }
 
-      // At top after dwell: accumulate intentional upward overscroll → Klean Sneaks.
       overscrollAccumRef.current += -delta;
       overscrollEventsRef.current += 1;
       if (
-        overscrollAccumRef.current < OVERSCROLL_FLIP_PX ||
-        overscrollEventsRef.current < OVERSCROLL_MIN_EVENTS
+        overscrollAccumRef.current < WHEEL_OVERSCROLL_FLIP_PX ||
+        overscrollEventsRef.current < WHEEL_OVERSCROLL_MIN_EVENTS
       ) {
         e.preventDefault();
         return;
@@ -413,45 +436,34 @@ export function HomepageFlipStack({
       nudge(-1);
     };
 
-    let touchStartY = 0;
-    let touchMoved = false;
+    // —— Game face (not platform): swipe on touchend only. Never touchmove preventDefault
+    // (that combination with RAF flip froze iPhone Safari historically).
+    let gameTouchStartY = 0;
 
-    const onTouchStart = (e: TouchEvent) => {
+    const onGameTouchStart = (e: TouchEvent) => {
       if (platformScrollMode()) return;
-      touchStartY = e.touches[0]?.clientY ?? 0;
-      touchMoved = false;
+      gameTouchStartY = e.touches[0]?.clientY ?? 0;
     };
 
-    const onTouchMove = (e: TouchEvent) => {
-      if (platformScrollMode()) return;
-      if (isAnimating()) {
-        e.preventDefault();
-        return;
-      }
-      const y = e.touches[0]?.clientY ?? touchStartY;
-      if (Math.abs(touchStartY - y) > 10) touchMoved = true;
-    };
-
-    const onTouchEnd = (e: TouchEvent) => {
+    const onGameTouchEnd = (e: TouchEvent) => {
       if (platformScrollMode()) return;
       if (isAnimating()) return;
 
-      const endY = e.changedTouches[0]?.clientY ?? touchStartY;
-      const delta = touchStartY - endY;
+      const endY = e.changedTouches[0]?.clientY ?? gameTouchStartY;
+      const delta = gameTouchStartY - endY;
       if (Math.abs(delta) < SWIPE_THRESHOLD_PX) return;
-      if (!touchMoved && Math.abs(delta) < SWIPE_THRESHOLD_PX * 1.5) return;
 
       const direction: 1 | -1 = delta > 0 ? 1 : -1;
       nudge(direction);
     };
 
     window.addEventListener("wheel", onWheel, { passive: false });
-    window.addEventListener("touchstart", onTouchStart, { passive: true });
-    window.addEventListener("touchmove", onTouchMove, { passive: false });
-    window.addEventListener("touchend", onTouchEnd, { passive: true });
+    window.addEventListener("touchstart", onGameTouchStart, { passive: true });
+    window.addEventListener("touchend", onGameTouchEnd, { passive: true });
 
     const scroller = scrollRef.current;
     let platformTouchStartY = 0;
+    let platformTouchStartScrollTop = 0;
     let platformPullTracking = false;
 
     const onPlatformTouchStart = (e: TouchEvent) => {
@@ -460,36 +472,38 @@ export function HomepageFlipStack({
         return;
       }
       platformTouchStartY = e.touches[0]?.clientY ?? 0;
+      platformTouchStartScrollTop = scrollRef.current?.scrollTop ?? 0;
       platformPullTracking = true;
       overscrollAccumRef.current = 0;
     };
 
+    // Passive only — never preventDefault. Native overflow scroll must win on iOS.
     const onPlatformTouchMove = (e: TouchEvent) => {
       if (!platformPullTracking || !platformScrollMode()) return;
-      if (isAnimating()) {
-        e.preventDefault();
-        return;
-      }
       const face = scrollRef.current;
-      if (!face || face.scrollTop > SCROLL_EDGE_THRESHOLD) {
-        overscrollAccumRef.current = 0;
+      if (!face) return;
+      if (face.scrollTop > SCROLL_EDGE_THRESHOLD) {
         wasAtTopRef.current = false;
-        return;
-      }
-      const y = e.touches[0]?.clientY ?? platformTouchStartY;
-      const dy = y - platformTouchStartY;
-      // At the top of The Moves Like face, overscroll pull-down opens Klean Sneaks.
-      if (dy > OVERSCROLL_FLIP_PX) {
-        platformPullTracking = false;
-        overscrollAccumRef.current = 0;
-        e.preventDefault();
-        nudge(-1);
       }
     };
 
-    const onPlatformTouchEnd = () => {
+    const onPlatformTouchEnd = (e: TouchEvent) => {
+      if (!platformPullTracking) return;
       platformPullTracking = false;
-      overscrollAccumRef.current = 0;
+      if (!platformScrollMode() || isAnimating()) return;
+
+      const face = scrollRef.current;
+      if (!face) return;
+
+      // Only leave when the gesture began at the top (or nearly) and pulled down.
+      if (platformTouchStartScrollTop > SCROLL_EDGE_THRESHOLD) return;
+      if (face.scrollTop > SCROLL_EDGE_THRESHOLD) return;
+
+      const endY = e.changedTouches[0]?.clientY ?? platformTouchStartY;
+      const dy = endY - platformTouchStartY;
+      if (dy > TOUCH_LEAVE_PX) {
+        nudge(-1);
+      }
     };
 
     const onScrollerWheelCapture = (e: WheelEvent) => {
@@ -501,15 +515,17 @@ export function HomepageFlipStack({
     scroller?.addEventListener("wheel", onScrollerWheelCapture, { passive: false, capture: true });
     scroller?.addEventListener("wheel", onPlatformWheel, { passive: false });
     scroller?.addEventListener("touchstart", onPlatformTouchStart, { passive: true });
-    scroller?.addEventListener("touchmove", onPlatformTouchMove, { passive: false });
+    scroller?.addEventListener("touchmove", onPlatformTouchMove, { passive: true });
     scroller?.addEventListener("touchend", onPlatformTouchEnd, { passive: true });
+
+    // Silence unused on touch-primary desktops that still get wheel.
+    void touchPrimary;
 
     return () => {
       document.body.style.overflow = "";
       window.removeEventListener("wheel", onWheel);
-      window.removeEventListener("touchstart", onTouchStart);
-      window.removeEventListener("touchmove", onTouchMove);
-      window.removeEventListener("touchend", onTouchEnd);
+      window.removeEventListener("touchstart", onGameTouchStart);
+      window.removeEventListener("touchend", onGameTouchEnd);
       scroller?.removeEventListener("wheel", onScrollerWheelCapture, true);
       scroller?.removeEventListener("wheel", onPlatformWheel);
       scroller?.removeEventListener("touchstart", onPlatformTouchStart);
@@ -601,7 +617,8 @@ export function HomepageFlipStack({
           pointerEvents: overlayScrollEnabled(flipPanelIndex(initialPanel)) ? "auto" : "none",
           overscrollBehaviorY: "contain",
           WebkitOverflowScrolling: "touch",
-          transform: "translateZ(0)",
+          // Avoid translateZ(0) on the scroller — it can create a containing
+          // layer that fights iOS momentum scrolling inside fixed overlays.
         }}
       >
         {begin}
