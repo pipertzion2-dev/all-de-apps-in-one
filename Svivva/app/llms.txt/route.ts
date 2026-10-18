@@ -105,7 +105,7 @@ export async function GET() {
     `- [ZZAI Face Chooser](${base}/tools/zzai-face-chooser): Pick a job, open one cube face. The homepage cube is the six-face navigator.`,
   );
   lines.push(
-    `- [Sketch Hash Stamp](${base}/tools/sketch-hash-stamp): SHA-256 in the browser. Poor Man Protection seals and court-packs.`,
+    `- [Sketch Hash Stamp](${base}/tools/sketch-hash-stamp): SHA-256 in the browser. The moves like seals and court-packs.`,
   );
   lines.push("");
 

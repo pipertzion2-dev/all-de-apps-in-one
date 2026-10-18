@@ -11,7 +11,7 @@ import {
 } from "@/lib/product-positioning";
 import { Button } from "@/components/ui/button";
 
-/** Homepage hero — Poor Man Protection copy only (shirt photo is on the intro flip). */
+/** Homepage hero — The moves like copy only (shirt photo is on the intro flip). */
 export function HomepageProtectionHero() {
   return (
     <section
@@ -20,7 +20,7 @@ export function HomepageProtectionHero() {
     >
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-8 lg:max-w-6xl lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-5 text-center lg:max-w-xl lg:text-left">
-          <p className="text-[10px] font-medium uppercase tracking-[0.35em] text-[#5B8DA8]">
+          <p className="text-[10px] font-medium tracking-[0.18em] text-[#5B8DA8]">
             {PRODUCT_NAME_LINE}
           </p>
           <h1 className="text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-[2.75rem] lg:leading-[1.12]">
@@ -33,7 +33,7 @@ export function HomepageProtectionHero() {
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3 lg:justify-start">
             <Button asChild className="bg-[#5B8DA8] text-white">
-              <Link href="/dashboard/poor-man-protection">Open Poor Man Protection</Link>
+              <Link href="/dashboard/poor-man-protection">Open {PRODUCT_NAME_LINE}</Link>
             </Button>
             <Button asChild variant="outline">
               <Link href="/protect/verify">Verify a seal</Link>

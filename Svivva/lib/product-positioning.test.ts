@@ -6,6 +6,7 @@ import {
   isBetaSurfacePath,
   isCorePlatformFeatureId,
   PRODUCT_HERO_HEADLINE,
+  PRODUCT_NAME_LINE,
   PRODUCT_TAGLINE,
 } from "./product-positioning";
 
@@ -39,8 +40,9 @@ describe("product-positioning", () => {
     expect(isBetaSurfacePath("/seeds")).toBe(true);
   });
 
-  it("uses the Poor Man Protection tagline", () => {
-    expect(PRODUCT_TAGLINE).toMatch(/Poor Man Protection/i);
+  it("uses The moves like tagline", () => {
+    expect(PRODUCT_NAME_LINE).toBe("The moves like");
+    expect(PRODUCT_TAGLINE).toMatch(/^The moves like/);
   });
 
   it("leads the homepage with a single focused thesis", () => {

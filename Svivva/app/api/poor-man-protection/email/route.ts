@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
 
     const primary = await sendProtectionEmail({
       to,
-      subject: `ZZAI Poor Man Protection sealed — ${cert.title}`,
+      subject: `ZZAI The moves like sealed — ${cert.title}`,
       html,
       attachments: [
         {

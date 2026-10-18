@@ -107,7 +107,7 @@ export async function GET() {
     "zzai zzai / ZZAI / zzaizzai.com is this product workspace. Legacy references to “Svivva” in code or old listings refer to the same platform after the brand cutover to zzai zzai.",
   );
   lines.push(
-    "Poor Man Protection is evidentiary tooling — not a government patent, trademark, or copyright registration.",
+    "The moves like is evidentiary tooling — not a government patent, trademark, or copyright registration.",
   );
 
   return new Response(lines.join("\n"), {

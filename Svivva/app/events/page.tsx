@@ -28,7 +28,7 @@ const EVENT_FAQS = [
   },
   {
     q: "How does ZZAI Show relate to the product?",
-    a: "Show sessions highlight the same workspace Google should understand: prompt-to-API shipping, Seeds, Orbit SEO/AEO, Poor Man Protection, and ZZAI Play games.",
+    a: "Show sessions highlight the same workspace Google should understand: prompt-to-API shipping, Seeds, Orbit SEO/AEO, The moves like, and ZZAI Play games.",
   },
   {
     q: "Is there a game or entertainment experience?",
@@ -138,7 +138,7 @@ export default function EventsPage() {
               },
               {
                 title: "Community showcase",
-                body: "Builders sharing Seeds apps, hybrid builds, and Poor Man Protection workflows.",
+                body: "Builders sharing Seeds apps, hybrid builds, and The moves like workflows.",
               },
               {
                 title: "Talent & casting desk",

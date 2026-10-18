@@ -105,7 +105,7 @@ export function ReferenceUiRemixPanel({
   const sealTheme = useCallback(
     async (next: KleanReferenceUiTheme) => {
       if (!autoPatent) return;
-      setStatus({ kind: "working", step: "Auto-sealing with Poor Man Protection…" });
+      setStatus({ kind: "working", step: "Auto-sealing with The moves like…" });
       const result = await autoSealReferenceUiTheme(next, mediaRef.current);
       if (result.status === "sealed") {
         onThemeApplied(result.theme);
@@ -392,7 +392,7 @@ export function ReferenceUiRemixPanel({
           className="rounded border-white/30"
           data-testid="checkbox-auto-patent"
         />
-        Automatically patent this UI with Poor Man Protection
+        Automatically patent this UI with The moves like
       </label>
 
       <Button
@@ -582,7 +582,7 @@ export function ReferenceUiRemixPanel({
         <p className="text-[11px] text-emerald-300/90" data-testid="text-reference-ui-sealed">
           Sealed automatically.{" "}
           <Link href="/dashboard/poor-man-protection" className="underline underline-offset-2">
-            Open Poor Man Protection
+            Open The moves like
           </Link>{" "}
           <span className="text-white/40">({status.hash.slice(0, 12)}…)</span>
         </p>
