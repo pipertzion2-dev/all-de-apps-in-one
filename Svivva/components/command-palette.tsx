@@ -119,6 +119,22 @@ const digitalCommands: CommandItem[] = [
     section: "Build",
   },
   {
+    title: "THE MOVES LIKE",
+    href: "/the-moves-like",
+    icon: Sparkles,
+    keywords: [
+      "dance",
+      "moves",
+      "moves like",
+      "choreography",
+      "motion dna",
+      "ghost mode",
+      "rhythm",
+      "style clash",
+    ],
+    section: "Build",
+  },
+  {
     title: "Idea Engine",
     href: "/dashboard/idea-engine",
     icon: Lightbulb,

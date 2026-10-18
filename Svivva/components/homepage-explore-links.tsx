@@ -19,6 +19,12 @@ const LINKS = [
     description: "BALOON8 car×sneaker — one chassis, colorway unlocks, Sneak Vision hazards.",
   },
   {
+    href: "/the-moves-like",
+    title: "THE MOVES LIKE",
+    description:
+      "Interactive dance game — Motion DNA, Ghost Mode, Move Reactor, Rhythm Portal, Style Clash.",
+  },
+  {
     href: "/dashboard/pulse",
     title: "Pulse metrics",
     description: "Live latency, success rate, and spend across your guarded endpoints.",

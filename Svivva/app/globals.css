@@ -135,6 +135,16 @@
     z-index: 200;
   }
 
+  /* THE MOVES LIKE — immersive dance shell (scrollable app, not locked runner).
+     Must beat [data-page-shell] min-height:0 so site .dark body doesn't show through. */
+  [data-the-moves-like][data-page-shell],
+  [data-the-moves-like] {
+    isolation: isolate;
+    min-height: 100dvh;
+    height: auto;
+    background: #f7fbfc;
+  }
+
   [data-landing-page] > *:last-child {
     margin-bottom: 0;
   }
@@ -272,6 +282,126 @@
   }
   .glow-rose {
     box-shadow: 0 0 60px rgba(215, 130, 178, 0.12);
+  }
+
+  /* THE MOVES LIKE — always light tokens; glass blue #6D91B3 · purple #AC81AF */
+  [data-the-moves-like] {
+    --background: 0 0% 100%;
+    --foreground: 180 20% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 180 20% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 180 20% 10%;
+    --primary: 209 32% 56%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 209 28% 94%;
+    --secondary-foreground: 209 28% 22%;
+    --muted: 209 20% 94%;
+    --muted-foreground: 200 10% 38%;
+    --accent: 296 22% 92%;
+    --accent-foreground: 296 22% 32%;
+    --destructive: 340 65% 35%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 209 18% 82%;
+    --input: 209 18% 88%;
+    --ring: 209 32% 56%;
+    --button-outline: hsl(209 20% 72%);
+    --primary-border: hsl(209 32% 48%);
+    color: hsl(var(--foreground));
+    color-scheme: light;
+  }
+
+  /* Liquid glossy glass — blue #6D91B3 / purple #AC81AF (wet rim, clear body) */
+  .tml-glass {
+    @apply relative isolate overflow-hidden rounded-2xl border;
+    border-color: rgba(255, 255, 255, 0.8);
+    background: linear-gradient(
+      160deg,
+      rgba(255, 255, 255, 0.62) 0%,
+      rgba(255, 255, 255, 0.18) 55%,
+      rgba(109, 145, 179, 0.08) 100%
+    );
+    color: hsl(180 20% 10%);
+    backdrop-filter: blur(18px) saturate(1.9);
+    -webkit-backdrop-filter: blur(18px) saturate(1.9);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 1),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.35),
+      inset 1px 0 0 rgba(255, 255, 255, 0.45),
+      0 8px 32px rgba(109, 145, 179, 0.14),
+      0 20px 56px rgba(15, 26, 28, 0.08);
+  }
+  .tml-glass-teal {
+    @apply relative isolate overflow-hidden rounded-2xl border;
+    border-color: rgba(168, 192, 212, 0.75);
+    background: linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.72) 0%,
+      rgba(168, 192, 212, 0.28) 42%,
+      rgba(109, 145, 179, 0.12) 100%
+    );
+    color: hsl(209 28% 28%);
+    backdrop-filter: blur(18px) saturate(1.9);
+    -webkit-backdrop-filter: blur(18px) saturate(1.9);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 1),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.3),
+      0 10px 36px rgba(109, 145, 179, 0.18);
+  }
+  .tml-glass-magenta {
+    @apply relative isolate overflow-hidden rounded-2xl border;
+    border-color: rgba(212, 192, 214, 0.75);
+    background: linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.72) 0%,
+      rgba(212, 192, 214, 0.3) 42%,
+      rgba(172, 129, 175, 0.14) 100%
+    );
+    color: hsl(296 22% 32%);
+    backdrop-filter: blur(18px) saturate(1.9);
+    -webkit-backdrop-filter: blur(18px) saturate(1.9);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 1),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.3),
+      0 10px 36px rgba(172, 129, 175, 0.18);
+  }
+  .tml-glass-nav {
+    border-color: rgba(255, 255, 255, 0.8);
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.7) 0%,
+      rgba(255, 255, 255, 0.28) 100%
+    );
+    color: hsl(180 20% 12%);
+    backdrop-filter: blur(18px) saturate(1.8);
+    -webkit-backdrop-filter: blur(18px) saturate(1.8);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 1),
+      0 -8px 28px rgba(109, 145, 179, 0.1);
+  }
+
+  /* Slow liquid highlight sweep across glass chrome */
+  @keyframes tml-liquid-sheen {
+    0% {
+      transform: translateX(-35%) skewX(-12deg);
+      opacity: 0.35;
+    }
+    40% {
+      opacity: 0.75;
+    }
+    100% {
+      transform: translateX(35%) skewX(-12deg);
+      opacity: 0.35;
+    }
+  }
+  .tml-liquid-sheen {
+    animation: tml-liquid-sheen 5.5s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tml-liquid-sheen {
+      animation: none;
+      opacity: 0.45;
+    }
   }
 }
 
