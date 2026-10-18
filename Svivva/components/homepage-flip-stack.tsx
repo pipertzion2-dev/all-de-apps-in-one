@@ -17,24 +17,33 @@ type HomepageFlipStackProps = {
 };
 
 const FLIP_SETTLE_EPSILON = 0.02;
-const NUDGE_DEBOUNCE_MS = 1200;
-const SWIPE_THRESHOLD_PX = 52;
-const SWIPE_THRESHOLD_MOBILE_PX = 64;
+const NUDGE_DEBOUNCE_MS = 1400;
+const SWIPE_THRESHOLD_PX = 72;
+const SWIPE_THRESHOLD_MOBILE_PX = 88;
 const MAX_PANEL_INDEX = 1;
 const SCROLL_EDGE_THRESHOLD = 8;
 /** Timed 3D cube rotation — exponential settle looked like an instant cut on mobile. */
 const FLIP_DURATION_MS = 720;
 const FLIP_DURATION_MOBILE_MS = 820;
 /** Absorb leftover wheel momentum after landing on The Moves Like. */
-const PLATFORM_WHEEL_LOCK_MS = 1000;
-const WHEEL_OVERSCROLL_FLIP_PX = 800;
-const WHEEL_OVERSCROLL_MIN_EVENTS = 8;
-const AT_TOP_DWELL_MS = 800;
-const AT_TOP_INERTIA_LOCK_MS = 600;
+const PLATFORM_WHEEL_LOCK_MS = 1200;
+const WHEEL_OVERSCROLL_FLIP_PX = 900;
+const WHEEL_OVERSCROLL_MIN_EVENTS = 10;
+const AT_TOP_DWELL_MS = 900;
+const AT_TOP_INERTIA_LOCK_MS = 700;
 /** Mobile pull-down at scroll top → Klean Sneaks (touchend only; never touchmove preventDefault). */
-const TOUCH_LEAVE_PX = 100;
+const TOUCH_LEAVE_PX = 120;
+/** Intentional downward scroll on Klean Sneaks before flipping to The Moves Like. */
+const GAME_WHEEL_FLIP_PX = 320;
+const GAME_WHEEL_MIN_EVENTS = 4;
+const GAME_WHEEL_IDLE_RESET_MS = 280;
 
-type ContentHost = "face" | "overlay";
+/**
+ * face — product content on the rotating cube face
+ * handoff — mount overlay copy while face stays visible (avoids blank frame)
+ * overlay — fixed scroll layer owns content; cube shell hidden
+ */
+type ContentHost = "face" | "handoff" | "overlay";
 
 function easeInOutCubic(t: number): number {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -62,6 +71,7 @@ function settledOnPlatform(index: number, target: number, panel: HomepageFlipPan
  *
  * Product content lives on the 3D face during the flip (so the cube is visible),
  * then hands off to a fixed overlay for native iOS scrolling when settled.
+ * Handoff mounts the overlay copy before hiding the cube so we never flash black.
  */
 export function HomepageFlipStack({
   begin,
@@ -89,10 +99,19 @@ export function HomepageFlipStack({
   const atTopSinceRef = useRef(0);
   const wasAtTopRef = useRef(false);
   const touchPrimaryRef = useRef(false);
+  const gameWheelAccumRef = useRef(0);
+  const gameWheelEventsRef = useRef(0);
+  const gameWheelLastAtRef = useRef(0);
+  const contentHostRef = useRef<ContentHost>(initialPanel === "nav-cube" ? "overlay" : "face");
   const [activePanel, setActivePanel] = useState<HomepageFlipPanelId>(initialPanel);
   const [contentHost, setContentHost] = useState<ContentHost>(
     initialPanel === "nav-cube" ? "overlay" : "face",
   );
+
+  const updateContentHost = useCallback((next: ContentHost) => {
+    contentHostRef.current = next;
+    setContentHost(next);
+  }, []);
 
   const paintFaces = useCallback(() => {
     const halfH = halfHRef.current;
@@ -114,10 +133,12 @@ export function HomepageFlipStack({
     (index: number) => {
       const scroller = scrollRef.current;
       const shell = shellRef.current;
-      const onPlatform = settledOnPlatform(index, targetIndexRef.current, activePanelRef.current);
+      // Only hide the cube once the overlay owns content — never during handoff.
+      const onPlatform =
+        settledOnPlatform(index, targetIndexRef.current, activePanelRef.current) &&
+        contentHostRef.current === "overlay";
 
       if (shell) {
-        // Keep the 3D cube visible for the entire rotation — never hide mid-flip.
         shell.style.opacity = onPlatform ? "0" : "1";
         shell.style.pointerEvents = interactive && !onPlatform ? "auto" : "none";
       }
@@ -146,6 +167,12 @@ export function HomepageFlipStack({
     [],
   );
 
+  const resetGameWheelAccum = useCallback(() => {
+    gameWheelAccumRef.current = 0;
+    gameWheelEventsRef.current = 0;
+    gameWheelLastAtRef.current = 0;
+  }, []);
+
   const ensureTick = useCallback(() => {
     if (animRef.current) return;
 
@@ -170,25 +197,35 @@ export function HomepageFlipStack({
       displayedIndexRef.current = to;
       targetIndexRef.current = to;
       paintRotor(to);
-      syncShellAndOverlay(to);
       lastNudgeAtRef.current = performance.now();
+      resetGameWheelAccum();
 
-      // Hand product content to the scroll overlay only after the cube lands.
+      // Land on The Moves Like: mount overlay while cube face stays visible,
+      // then promote in useLayoutEffect so we never flash an empty scroller.
       if (to >= MAX_PANEL_INDEX - FLIP_SETTLE_EPSILON && activePanelRef.current === "nav-cube") {
-        setContentHost("overlay");
+        if (shellRef.current) {
+          shellRef.current.style.opacity = "1";
+          shellRef.current.style.pointerEvents = "none";
+        }
+        if (scrollRef.current) {
+          scrollRef.current.style.opacity = "0";
+          scrollRef.current.style.visibility = "hidden";
+          scrollRef.current.style.pointerEvents = "none";
+        }
+        updateContentHost("handoff");
         platformWheelLockUntilRef.current = performance.now() + PLATFORM_WHEEL_LOCK_MS;
         wasAtTopRef.current = true;
         atTopSinceRef.current = performance.now();
         overscrollAccumRef.current = 0;
         overscrollEventsRef.current = 0;
-        if (!touchPrimaryRef.current) {
-          document.body.style.overflow = "hidden";
-        }
+        return;
       }
+
+      syncShellAndOverlay(to);
     };
 
     animRef.current = requestAnimationFrame(tick);
-  }, [paintRotor, syncShellAndOverlay]);
+  }, [paintRotor, resetGameWheelAccum, syncShellAndOverlay, updateContentHost]);
 
   const resetPlatformScroll = useCallback(() => {
     const scroller = scrollRef.current;
@@ -203,18 +240,19 @@ export function HomepageFlipStack({
       window.history.replaceState(null, "", `/#${hashForFlipPanel(panel)}`);
       if (panel === "home-game") {
         // Content must be on the cube face before the reverse flip starts.
-        setContentHost("face");
+        updateContentHost("face");
         resetPlatformScroll();
         document.body.style.overflow = "";
         overscrollAccumRef.current = 0;
         overscrollEventsRef.current = 0;
         wasAtTopRef.current = false;
         atTopSinceRef.current = 0;
+        resetGameWheelAccum();
       } else {
         resetPlatformScroll();
       }
     },
-    [resetPlatformScroll],
+    [resetGameWheelAccum, resetPlatformScroll, updateContentHost],
   );
 
   const goToPanel = useCallback(
@@ -232,12 +270,13 @@ export function HomepageFlipStack({
 
       // Leaving the platform: put content back on the face, show the cube, then rotate.
       if (panel === "home-game") {
-        setContentHost("face");
+        updateContentHost("face");
       }
 
       lastNudgeAtRef.current = performance.now();
       overscrollAccumRef.current = 0;
       overscrollEventsRef.current = 0;
+      resetGameWheelAccum();
       animFromRef.current = displayedIndexRef.current;
       animToRef.current = next;
       animStartRef.current = performance.now();
@@ -258,7 +297,7 @@ export function HomepageFlipStack({
       }
       ensureTick();
     },
-    [commitPanel, ensureTick, interactive],
+    [commitPanel, ensureTick, interactive, resetGameWheelAccum, updateContentHost],
   );
 
   useLayoutEffect(() => {
@@ -271,6 +310,35 @@ export function HomepageFlipStack({
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, [syncDepth]);
+
+  // Promote handoff → overlay only after the overlay tree is in the DOM (same frame paint).
+  useLayoutEffect(() => {
+    if (contentHost !== "handoff") {
+      if (contentHost === "overlay") {
+        syncShellAndOverlay(displayedIndexRef.current);
+        if (!touchPrimaryRef.current) {
+          document.body.style.overflow = "hidden";
+        }
+      }
+      return;
+    }
+
+    let cancelled = false;
+    let raf2 = 0;
+    // Double rAF: first commit paints overlay children, second reveals them.
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => {
+        if (cancelled) return;
+        updateContentHost("overlay");
+      });
+    });
+
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(raf1);
+      if (raf2) cancelAnimationFrame(raf2);
+    };
+  }, [contentHost, syncShellAndOverlay, updateContentHost]);
 
   useEffect(() => {
     const index = flipPanelIndex(initialPanel);
@@ -286,9 +354,9 @@ export function HomepageFlipStack({
     animToRef.current = index;
     activePanelRef.current = initialPanel;
     setActivePanel(initialPanel);
-    setContentHost(initialPanel === "nav-cube" ? "overlay" : "face");
+    updateContentHost(initialPanel === "nav-cube" ? "overlay" : "face");
     syncDepth();
-  }, [initialPanel, syncDepth]);
+  }, [initialPanel, syncDepth, updateContentHost]);
 
   useEffect(() => {
     return () => {
@@ -320,7 +388,7 @@ export function HomepageFlipStack({
         displayedIndexRef.current,
         targetIndexRef.current,
         activePanelRef.current,
-      ) && contentHost === "overlay";
+      ) && contentHostRef.current === "overlay";
 
     const faceScrollState = (face: HTMLDivElement | null) => {
       if (!face) {
@@ -346,6 +414,7 @@ export function HomepageFlipStack({
 
     const nudge = (direction: 1 | -1) => {
       if (isAnimating()) return false;
+      if (contentHostRef.current === "handoff") return false;
 
       const now = performance.now();
       if (now - lastNudgeAtRef.current < NUDGE_DEBOUNCE_MS) return false;
@@ -358,6 +427,7 @@ export function HomepageFlipStack({
       if (next === current) return false;
 
       lastNudgeAtRef.current = now;
+      resetGameWheelAccum();
       goToPanel(flipPanelFromIndex(next));
       return true;
     };
@@ -375,13 +445,40 @@ export function HomepageFlipStack({
         if (scroller && !scroller.contains(e.target as Node)) e.preventDefault();
         return;
       }
-      if (isAnimating()) {
+      if (isAnimating() || contentHostRef.current === "handoff") {
         e.preventDefault();
         return;
       }
       const delta = normalizeWheelDelta(e);
-      if (Math.abs(delta) < 20) return;
+      if (Math.abs(delta) < 24) return;
+
       const direction: 1 | -1 = delta > 0 ? 1 : -1;
+      const current = settledPanelIndex();
+
+      // Klean Sneaks → Moves Like: require sustained intentional scroll, not one tick.
+      if (current === 0 && direction > 0) {
+        const now = performance.now();
+        if (
+          gameWheelLastAtRef.current &&
+          now - gameWheelLastAtRef.current > GAME_WHEEL_IDLE_RESET_MS
+        ) {
+          resetGameWheelAccum();
+        }
+        gameWheelLastAtRef.current = now;
+        gameWheelAccumRef.current += delta;
+        gameWheelEventsRef.current += 1;
+        e.preventDefault();
+        if (
+          gameWheelAccumRef.current >= GAME_WHEEL_FLIP_PX &&
+          gameWheelEventsRef.current >= GAME_WHEEL_MIN_EVENTS
+        ) {
+          resetGameWheelAccum();
+          nudge(1);
+        }
+        return;
+      }
+
+      resetGameWheelAccum();
       if (nudge(direction)) e.preventDefault();
     };
 
@@ -419,7 +516,7 @@ export function HomepageFlipStack({
         return;
       }
 
-      if (delta > 20) {
+      if (delta > 24) {
         overscrollAccumRef.current = 0;
         overscrollEventsRef.current = 0;
         return;
@@ -460,7 +557,7 @@ export function HomepageFlipStack({
 
     const onGameTouchEnd = (e: TouchEvent) => {
       if (platformScrollMode()) return;
-      if (isAnimating()) return;
+      if (isAnimating() || contentHostRef.current === "handoff") return;
       const endY = e.changedTouches[0]?.clientY ?? gameTouchStartY;
       const delta = gameTouchStartY - endY;
       const threshold = touchPrimary ? SWIPE_THRESHOLD_MOBILE_PX : SWIPE_THRESHOLD_PX;
@@ -532,11 +629,11 @@ export function HomepageFlipStack({
       scroller?.removeEventListener("touchmove", onPlatformTouchMove);
       scroller?.removeEventListener("touchend", onPlatformTouchEnd);
     };
-  }, [interactive, goToPanel, isAnimating, contentHost]);
+  }, [interactive, goToPanel, isAnimating, resetGameWheelAccum]);
 
-  // Must follow live state — not initialPanel. Landing on home-game then flipping
-  // to Moves Like sets contentHost="overlay"; gating on initialPanel left the
-  // scroll layer opacity:0 / pointer-events:none after the cube handed off.
+  // Live state — not initialPanel. Handoff keeps face content until overlay is ready.
+  const showFaceContent = contentHost === "face" || contentHost === "handoff";
+  const showOverlayContent = contentHost === "handoff" || contentHost === "overlay";
   const showOverlay = contentHost === "overlay" && activePanel === "nav-cube";
 
   return (
@@ -608,12 +705,8 @@ export function HomepageFlipStack({
               willChange: "transform",
             }}
           >
-            {/* Product content on the cube face during the 3D flip */}
-            {contentHost === "face" ? (
-              begin
-            ) : (
-              <div className="h-full w-full bg-background" aria-hidden />
-            )}
+            {/* Product content on the cube face during the 3D flip + handoff */}
+            {showFaceContent ? begin : <div className="h-full w-full bg-background" aria-hidden />}
           </div>
         </div>
       </div>
@@ -633,7 +726,8 @@ export function HomepageFlipStack({
           WebkitOverflowScrolling: "touch",
         }}
       >
-        {showOverlay ? begin : null}
+        {/* Mount during handoff so the tree is warm before we hide the cube */}
+        {showOverlayContent ? begin : null}
       </div>
     </>
   );

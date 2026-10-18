@@ -34,8 +34,9 @@ describe("homepage flip stack", () => {
     expect(flipSrc).toContain("easeInOutCubic");
     expect(flipSrc).toContain("ensureTick");
     expect(flipSrc).toContain("contentHost");
-    expect(flipSrc).toContain('setContentHost("face")');
-    expect(flipSrc).toContain('setContentHost("overlay")');
+    expect(flipSrc).toContain('updateContentHost("face")');
+    expect(flipSrc).toContain('updateContentHost("overlay")');
+    expect(flipSrc).toContain('updateContentHost("handoff")');
     expect(flipSrc).toContain("data-homepage-flip-scroll");
     expect(flipSrc).toContain("data-homepage-flip-stack");
     expect(flipSrc).toContain("settledOnPlatform");
@@ -48,6 +49,20 @@ describe("homepage flip stack", () => {
     expect(flipSrc).not.toContain("paintDirect");
     expect(flipSrc).not.toContain("scheduleSnap");
     expect(flipSrc).not.toContain("virtualIndexRef");
+  });
+
+  it("hands off face → overlay without blanking the scroller", () => {
+    const flipSrc = readFileSync(
+      resolve(__dirname, "../../components/homepage-flip-stack.tsx"),
+      "utf8",
+    );
+    // face stays visible while overlay mounts; only "overlay" hides the cube.
+    expect(flipSrc).toContain('"face" | "handoff" | "overlay"');
+    expect(flipSrc).toContain("showFaceContent");
+    expect(flipSrc).toContain("showOverlayContent");
+    expect(flipSrc).toContain('contentHostRef.current === "overlay"');
+    expect(flipSrc).toContain("GAME_WHEEL_FLIP_PX");
+    expect(flipSrc).toContain("GAME_WHEEL_MIN_EVENTS");
   });
 
   it("shows the scroll overlay from live contentHost, not initialPanel", () => {
