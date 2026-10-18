@@ -24,15 +24,20 @@ describe("homepage flip stack", () => {
     expect(flipPanelIndex("nav-cube")).toBe(1);
   });
 
-  it("uses continuous virtual scroll with direct scrub paint and RAF settling", () => {
+  it("uses discrete nudge flips with RAF settle (no continuous wheel scrub)", () => {
     const flipSrc = readFileSync(
       resolve(__dirname, "../../components/homepage-flip-stack.tsx"),
       "utf8",
     );
     expect(flipSrc).toContain("ensureTick");
-    expect(flipSrc).toContain("virtualIndexRef");
-    expect(flipSrc).toContain("scheduleSnap");
-    expect(flipSrc).toContain("paintDirect");
+    expect(flipSrc).toContain("NUDGE_DEBOUNCE_MS");
+    expect(flipSrc).toContain("const nudge = ");
+    expect(flipSrc).toContain("isAnimating");
+    expect(flipSrc).toContain("WHEEL_OVERSCROLL_FLIP_PX");
+    expect(flipSrc).toContain("WHEEL_OVERSCROLL_MIN_EVENTS");
+    expect(flipSrc).toContain("AT_TOP_DWELL_MS");
+    expect(flipSrc).toContain("AT_TOP_INERTIA_LOCK_MS");
+    expect(flipSrc).toContain("TOUCH_LEAVE_PX");
     expect(flipSrc).toContain("onPlatformWheel");
     expect(flipSrc).toContain("scroll-auto");
     expect(flipSrc).toContain("PLATFORM_WHEEL_LOCK_MS");
@@ -48,6 +53,37 @@ describe("homepage flip stack", () => {
     expect(flipSrc).toContain('panelId === "nav-cube"');
     expect(flipSrc).toMatch(/panelId === "nav-cube"[\s\S]*direction > 0[\s\S]*return false/);
     expect(flipSrc).toMatch(/const tick = \(now: number\) => \{[\s\S]*animRef\.current = 0/);
+    expect(flipSrc).not.toContain("paintDirect");
+    expect(flipSrc).not.toContain("scheduleSnap");
+    expect(flipSrc).not.toContain("virtualIndexRef");
+    expect(flipSrc).not.toContain("scrubbingRef");
+  });
+
+  it("keeps mobile scroll native (no touchmove preventDefault, passive platform touch)", () => {
+    const flipSrc = readFileSync(
+      resolve(__dirname, "../../components/homepage-flip-stack.tsx"),
+      "utf8",
+    );
+    // iPhone froze when flip RAF + touchmove preventDefault ran together.
+    expect(flipSrc).not.toContain('addEventListener("touchmove", onTouchMove');
+    expect(flipSrc).toContain(
+      'addEventListener("touchmove", onPlatformTouchMove, { passive: true })',
+    );
+    expect(flipSrc).toContain("TOUCH_LEAVE_PX");
+    expect(flipSrc).toContain("isTouchPrimaryDevice");
+    expect(flipSrc).toContain("touchPrimaryRef");
+    // body overflow:hidden only on non-touch — it breaks iOS fixed overlay scroll.
+    expect(flipSrc).toContain("if (!touchPrimaryRef.current)");
+    expect(flipSrc).toContain('document.body.style.overflow = "hidden"');
+  });
+
+  it("keeps gesture effect deps stable (no per-render panels array)", () => {
+    const flipSrc = readFileSync(
+      resolve(__dirname, "../../components/homepage-flip-stack.tsx"),
+      "utf8",
+    );
+    expect(flipSrc).toContain("[interactive, goToPanel, isAnimating]");
+    expect(flipSrc).not.toContain("panels,");
   });
 
   it("rotates forward like the intro reveal (positive rotor, negative face hinge)", () => {
@@ -66,8 +102,8 @@ describe("homepage flip stack", () => {
       "utf8",
     );
     expect(flipSrc).toContain('addEventListener("touchstart"');
-    expect(flipSrc).toContain('addEventListener("touchmove"');
     expect(flipSrc).toContain('addEventListener("touchend"');
     expect(flipSrc).toContain("SWIPE_THRESHOLD_PX");
+    expect(flipSrc).toContain("onGameTouchEnd");
   });
 });
