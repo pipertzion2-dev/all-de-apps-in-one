@@ -185,7 +185,7 @@ export default function LandingPage() {
     apiCalls: number;
   } | null>(null);
   const [canMountHeavy3d, setCanMountHeavy3d] = useState(false);
-  const [flipInitialPanel, setFlipInitialPanel] = useState<HomepageFlipPanelId>("nav-cube");
+  const [flipInitialPanel, setFlipInitialPanel] = useState<HomepageFlipPanelId>("home-game");
   const skipIntroRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
@@ -278,7 +278,7 @@ export default function LandingPage() {
     const flipPanel = flipPanelFromHash(hash);
     const sectionId = homepageSectionFromHash(hash);
 
-    const nextPanel = flipPanel ?? "nav-cube";
+    const nextPanel = flipPanel ?? "home-game";
     setFlipInitialPanel((current) => (current === nextPanel ? current : nextPanel));
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
 

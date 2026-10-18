@@ -18,14 +18,19 @@ type HomepageFlipStackProps = {
 
 const FLIP_SETTLE_EPSILON = 0.02;
 const NUDGE_DEBOUNCE_MS = 650;
+const NUDGE_DEBOUNCE_MOBILE_MS = 900;
 const SWIPE_THRESHOLD_PX = 48;
+const SWIPE_THRESHOLD_MOBILE_PX = 72;
 const MAX_PANEL_INDEX = 1;
 const SCROLL_EDGE_THRESHOLD = 8;
 /** Platform content fades in only as the game → home flip finishes (avoids clipping mid-rotation). */
 const OVERLAY_FADE_START = 0.88;
+/** On phones, keep the game face visible longer during the flip so it does not “skip”. */
+const OVERLAY_FADE_START_MOBILE = 0.94;
 const OVERLAY_FADE_END = 1;
 /** Absorb flip-wheel momentum so the platform overlay does not shoot to the footer. */
 const PLATFORM_WHEEL_LOCK_MS = 700;
+const PLATFORM_WHEEL_LOCK_MOBILE_MS = 1000;
 /** Desktop wheel: intentional overscroll distance before leaving The Moves Like. */
 const WHEEL_OVERSCROLL_FLIP_PX = 420;
 /** Desktop wheel: require several upward ticks — one/two notches must not flip. */
@@ -39,13 +44,18 @@ const AT_TOP_INERTIA_LOCK_MS = 380;
  * Keep this modest — large desktop wheel thresholds freeze/feel broken on phones.
  * Flip on touchend only (never touchmove preventDefault — that froze iPhone).
  */
-const TOUCH_LEAVE_PX = 72;
+const TOUCH_LEAVE_PX = 88;
+/** RAF exponential rates — lower = slower, smoother flip on mobile. */
+const FLIP_SMOOTHING_DESKTOP = 14;
+const FLIP_SMOOTHING_MOBILE = 7;
 
-function overlayOpacityForIndex(index: number): number {
-  return Math.min(
-    1,
-    Math.max(0, (index - OVERLAY_FADE_START) / (OVERLAY_FADE_END - OVERLAY_FADE_START)),
-  );
+function overlayFadeStart(touchPrimary: boolean): number {
+  return touchPrimary ? OVERLAY_FADE_START_MOBILE : OVERLAY_FADE_START;
+}
+
+function overlayOpacityForIndex(index: number, touchPrimary = false): number {
+  const start = overlayFadeStart(touchPrimary);
+  return Math.min(1, Math.max(0, (index - start) / (OVERLAY_FADE_END - start)));
 }
 
 function overlayScrollEnabled(index: number): boolean {
@@ -61,11 +71,11 @@ function isTouchPrimaryDevice(): boolean {
   );
 }
 
-/** Two full-viewport faces — game above, The Moves Like homepage below (land on homepage). */
+/** Two full-viewport faces — game above, The Moves Like below (land on game, swipe to main). */
 export function HomepageFlipStack({
   begin,
   game,
-  initialPanel = "nav-cube",
+  initialPanel = "home-game",
   interactive = true,
 }: HomepageFlipStackProps) {
   const shellRef = useRef<HTMLDivElement>(null);
@@ -91,13 +101,16 @@ export function HomepageFlipStack({
     (index: number) => {
       const scroller = scrollRef.current;
       const shell = shellRef.current;
-      const opacity = overlayOpacityForIndex(index);
+      const touchPrimary = touchPrimaryRef.current;
+      const fadeStart = overlayFadeStart(touchPrimary);
+      const opacity = overlayOpacityForIndex(index, touchPrimary);
       const scrollEnabled = overlayScrollEnabled(index);
       const shellHidden = scrollEnabled;
+      const lockMs = touchPrimary ? PLATFORM_WHEEL_LOCK_MOBILE_MS : PLATFORM_WHEEL_LOCK_MS;
 
       if (scroller) {
         scroller.style.opacity = scrollEnabled ? "1" : String(opacity);
-        scroller.style.visibility = index >= OVERLAY_FADE_START - 0.02 ? "visible" : "hidden";
+        scroller.style.visibility = index >= fadeStart - 0.02 ? "visible" : "hidden";
         scroller.style.pointerEvents = scrollEnabled ? "auto" : "none";
         scroller.style.touchAction = scrollEnabled ? "pan-y" : "none";
         scroller.setAttribute("aria-hidden", scrollEnabled ? "false" : "true");
@@ -106,13 +119,13 @@ export function HomepageFlipStack({
           if (scroller.scrollTop !== 0) scroller.scrollTop = 0;
         } else if (!overlayScrollWasEnabledRef.current) {
           scroller.scrollTop = 0;
-          platformWheelLockUntilRef.current = performance.now() + PLATFORM_WHEEL_LOCK_MS;
+          platformWheelLockUntilRef.current = performance.now() + lockMs;
           overscrollAccumRef.current = 0;
           overscrollEventsRef.current = 0;
           atTopSinceRef.current = performance.now();
           wasAtTopRef.current = true;
           // body overflow:hidden breaks fixed-overlay scrolling on iOS Safari.
-          if (!touchPrimaryRef.current) {
+          if (!touchPrimary) {
             document.body.style.overflow = "hidden";
           }
         }
@@ -180,7 +193,8 @@ export function HomepageFlipStack({
         return;
       }
 
-      const smoothing = 1 - Math.exp(-14 * dt);
+      const rate = touchPrimaryRef.current ? FLIP_SMOOTHING_MOBILE : FLIP_SMOOTHING_DESKTOP;
+      const smoothing = 1 - Math.exp(-rate * dt);
       current += delta * smoothing;
       if ((delta > 0 && current > target) || (delta < 0 && current < target)) {
         current = target;
@@ -207,7 +221,10 @@ export function HomepageFlipStack({
       window.history.replaceState(null, "", `/#${hashForFlipPanel(panel)}`);
       if (panel === "nav-cube") {
         resetPlatformScroll();
-        platformWheelLockUntilRef.current = performance.now() + PLATFORM_WHEEL_LOCK_MS;
+        const lockMs = touchPrimaryRef.current
+          ? PLATFORM_WHEEL_LOCK_MOBILE_MS
+          : PLATFORM_WHEEL_LOCK_MS;
+        platformWheelLockUntilRef.current = performance.now() + lockMs;
         overscrollAccumRef.current = 0;
         overscrollEventsRef.current = 0;
         atTopSinceRef.current = performance.now();
@@ -328,7 +345,8 @@ export function HomepageFlipStack({
       if (isAnimating()) return false;
 
       const now = performance.now();
-      if (now - lastNudgeAtRef.current < NUDGE_DEBOUNCE_MS) return false;
+      const debounceMs = touchPrimary ? NUDGE_DEBOUNCE_MOBILE_MS : NUDGE_DEBOUNCE_MS;
+      if (now - lastNudgeAtRef.current < debounceMs) return false;
 
       const current = settledPanelIndex();
       const panelId = flipPanelFromIndex(current);
@@ -451,7 +469,8 @@ export function HomepageFlipStack({
 
       const endY = e.changedTouches[0]?.clientY ?? gameTouchStartY;
       const delta = gameTouchStartY - endY;
-      if (Math.abs(delta) < SWIPE_THRESHOLD_PX) return;
+      const threshold = touchPrimary ? SWIPE_THRESHOLD_MOBILE_PX : SWIPE_THRESHOLD_PX;
+      if (Math.abs(delta) < threshold) return;
 
       const direction: 1 | -1 = delta > 0 ? 1 : -1;
       nudge(direction);
@@ -611,7 +630,7 @@ export function HomepageFlipStack({
         className="fixed inset-x-0 bottom-0 top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-[15] overflow-x-hidden overflow-y-auto scroll-auto bg-background sm:top-[calc(4rem+env(safe-area-inset-top,0px))]"
         style={{
           scrollPaddingTop: "0.75rem",
-          opacity: overlayOpacityForIndex(flipPanelIndex(initialPanel)),
+          opacity: overlayOpacityForIndex(flipPanelIndex(initialPanel), false),
           visibility:
             flipPanelIndex(initialPanel) >= OVERLAY_FADE_START - 0.02 ? "visible" : "hidden",
           pointerEvents: overlayScrollEnabled(flipPanelIndex(initialPanel)) ? "auto" : "none",
