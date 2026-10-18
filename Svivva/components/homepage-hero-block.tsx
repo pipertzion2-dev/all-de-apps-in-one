@@ -58,7 +58,7 @@ export function HomepageHeroBlock({
       {interactive && showFlipHint ? (
         <HomepageScrollHint
           label={HOMEPAGE_SCROLL_TO_GAME}
-          direction="down"
+          direction="up"
           onActivate={() => scrollToHomepagePanel("home-game")}
         />
       ) : null}

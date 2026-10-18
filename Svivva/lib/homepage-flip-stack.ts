@@ -1,10 +1,14 @@
 /** Full-viewport homepage panels flipped like the intro Dune cube. */
 export type HomepageFlipPanelId = "nav-cube" | "home-game";
 
-/** Flip order: The Moves Like product face → Klean Sneaks demo. */
+/**
+ * Flip order in the rotor (index 0 = “above”):
+ * Klean Sneaks demo → The Moves Like product face.
+ * We still *land* on nav-cube; swipe ↑ from product returns to the game.
+ */
 export const HOMEPAGE_FLIP_PANELS: readonly HomepageFlipPanelId[] = [
-  "nav-cube",
   "home-game",
+  "nav-cube",
 ] as const;
 
 export function flipPanelIndex(id: HomepageFlipPanelId): number {

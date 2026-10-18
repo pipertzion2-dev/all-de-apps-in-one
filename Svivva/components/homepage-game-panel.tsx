@@ -60,7 +60,7 @@ export function HomepageGamePanel() {
 
       <HomepageScrollHint
         label={HOMEPAGE_SCROLL_TO_PLATFORM}
-        direction="up"
+        direction="down"
         prominent={false}
         onActivate={() => scrollToHomepagePanel("nav-cube")}
       />

@@ -18,9 +18,9 @@ type HomepageFlipStackProps = {
 
 const FLIP_SETTLE_EPSILON = 0.02;
 const WHEEL_SNAP_MS = 320;
-const SWIPE_THRESHOLD_PX = 40;
+const SWIPE_THRESHOLD_PX = 36;
 const MAX_PANEL_INDEX = 1;
-const SCROLL_EDGE_THRESHOLD = 8;
+const SCROLL_EDGE_THRESHOLD = 24;
 /** Platform content fades in only as the game → home flip finishes (avoids clipping mid-rotation). */
 const OVERLAY_FADE_START = 0.88;
 const OVERLAY_FADE_END = 1;
@@ -38,7 +38,7 @@ function overlayScrollEnabled(index: number, panel: HomepageFlipPanelId): boolea
   return panel === "nav-cube" && index >= OVERLAY_FADE_END - FLIP_SETTLE_EPSILON;
 }
 
-/** Two full-viewport faces — The Moves Like homepage, then Klean Sneaks demo. */
+/** Two full-viewport faces — game above, The Moves Like homepage below (land on homepage). */
 export function HomepageFlipStack({
   begin,
   game,
@@ -62,8 +62,8 @@ export function HomepageFlipStack({
   const [activePanel, setActivePanel] = useState<HomepageFlipPanelId>(initialPanel);
 
   const panels = [
-    { id: "nav-cube" as const, node: begin },
     { id: "home-game" as const, node: game },
+    { id: "nav-cube" as const, node: begin },
   ];
 
   const syncOverlayVisuals = useCallback(
@@ -342,15 +342,14 @@ export function HomepageFlipStack({
       direction: 1 | -1,
       panelId: HomepageFlipPanelId,
     ) => {
-      // Panel order: nav-cube (The Moves Like) → home-game (Klean Sneaks)
+      // Rotor: home-game (0) above → nav-cube (1) below. Land on nav-cube.
+      // From game: always allow swipe/scroll down into The Moves Like.
+      if (panelId === "home-game" && direction > 0) return true;
+      // From Moves Like: only flip back up to the game when scrolled to the top.
       if (panelId === "nav-cube") {
-        const { scrollable, atTop, atBottom } = faceScrollState(face);
-        if (direction > 0) return scrollable ? atBottom : true;
-        return scrollable ? atTop : true;
-      }
-      if (panelId === "home-game") {
+        const { scrollable, atTop } = faceScrollState(face);
         if (direction > 0) return false;
-        return true;
+        return scrollable ? atTop : true;
       }
       const { scrollable, atTop, atBottom } = faceScrollState(face);
       if (!scrollable) return true;
@@ -421,8 +420,10 @@ export function HomepageFlipStack({
 
       const face = scrollSurfaceFor();
       const { atTop } = faceScrollState(face);
-      if (atTop && applyDelta(delta)) {
+      // Wheel / trackpad scroll-up at the top of The Moves Like → Klean Sneaks.
+      if (atTop && activePanelRef.current === "nav-cube") {
         e.preventDefault();
+        goToPanel("home-game");
       }
     };
 
@@ -509,8 +510,9 @@ export function HomepageFlipStack({
       const face = scrollSurfaceFor();
       if (!face || face.scrollTop > SCROLL_EDGE_THRESHOLD) return;
       const y = e.touches[0]?.clientY ?? platformTouchStartY;
-      const pullDown = y - platformTouchStartY;
-      if (pullDown > SWIPE_THRESHOLD_PX) {
+      const dy = y - platformTouchStartY;
+      // At the top of The Moves Like face, overscroll pull-down opens Klean Sneaks (panel above).
+      if (dy > SWIPE_THRESHOLD_PX) {
         platformPullTracking = false;
         e.preventDefault();
         goToPanel("home-game");

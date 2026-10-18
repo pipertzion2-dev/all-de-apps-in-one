@@ -34,7 +34,7 @@ describe("homepage scroll panels", () => {
       resolve(__dirname, "../../components/homepage-cube-panel.tsx"),
       "utf8",
     );
-    expect(stackSrc).toMatch(/HOMEPAGE_FLIP_PANELS[\s\S]*"nav-cube"[\s\S]*"home-game"/);
+    expect(stackSrc).toMatch(/HOMEPAGE_FLIP_PANELS[\s\S]*"home-game"[\s\S]*"nav-cube"/);
     expect(pageSrc).toContain('useState<HomepageFlipPanelId>("nav-cube")');
     expect(pageSrc).toContain("HomepageCubePanel");
     expect(cubeSrc).toContain("HomepageMovesLikeHero");
