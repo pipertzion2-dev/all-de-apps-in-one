@@ -70,7 +70,37 @@ jobs:
           node scripts/disconnect-deprecated-vercel-git.mjs
         continue-on-error: true
 
+      - name: Warn when Actions cannot auto-resume
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const token = process.env.VERCEL_TOKEN?.trim();
+            const hook = process.env.VERCEL_DEPLOY_HOOK?.trim();
+            if (token || hook) {
+              core.info("Vercel Actions credentials present — auto-resume available.");
+              return;
+            }
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: "pending",
+              context: "Production deploy (Vercel Actions)",
+              description: "No VERCEL_TOKEN — cannot auto-resume if Account is blocked",
+              target_url: "https://github.com/pipertzion2-dev/all-de-apps-in-one/blob/main/docs/VERCEL_ACCOUNT.md",
+            });
+            await core.summary
+              .addHeading("Missing Vercel Actions secrets")
+              .addRaw(
+                "Add **`VERCEL_TOKEN`** (preferred) or **`VERCEL_DEPLOY_HOOK`** so production can Resume + redeploy when Vercel shows **Account is blocked** (spend-cap pause). See `docs/VERCEL_ACCOUNT.md`."
+              )
+              .write();
+
       - name: Clear queue and deploy latest
+        id: deploy
         working-directory: Svivva
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -92,17 +122,23 @@ jobs:
         working-directory: Svivva
         run: node scripts/verify-production-live.mjs
 
-      - name: Report deploy status (when Vercel Git is paused)
+      - name: Report deploy status
         if: success()
         uses: actions/github-script@v7
         with:
           script: |
+            const mode = "${{ steps.deploy.outputs.deploy_mode }}" || "unknown";
+            const descriptions = {
+              cli: "zzaizzai.com live — CLI resume + deploy",
+              hook: "zzaizzai.com live — deploy hook",
+              "git-wait": "zzaizzai.com live — Vercel Git (no Actions token)",
+            };
             await github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: context.sha,
               state: "success",
               context: "Production deploy (Vercel Actions)",
-              description: "zzaizzai.com live — resume + CLI deploy",
+              description: (descriptions[mode] || "zzaizzai.com live").slice(0, 140),
               target_url: "https://zzaizzai.com",
             });

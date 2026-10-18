@@ -7,7 +7,10 @@
  *   2. VERCEL_DEPLOY_HOOK → POST hook
  *
  * push without credentials → wait for Vercel Git status on this commit.
+ *
+ * Writes `deploy_mode` to GITHUB_OUTPUT when present: cli | hook | git-wait
  */
+import { appendFileSync } from "fs";
 import { spawnSync } from "child_process";
 import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
@@ -37,7 +40,34 @@ function fail(message, code = 1) {
   process.exit(code);
 }
 
+/** @param {"cli" | "hook" | "git-wait"} mode */
+function setDeployMode(mode) {
+  const out = process.env.GITHUB_OUTPUT?.trim();
+  if (out) {
+    appendFileSync(out, `deploy_mode=${mode}\n`);
+  }
+  const summary = process.env.GITHUB_STEP_SUMMARY?.trim();
+  if (summary) {
+    const lines = {
+      cli: "## Deploy mode: CLI (resume + queue clear + prebuilt)\n\n`VERCEL_TOKEN` is set — Actions can unpause a spend-cap pause.",
+      hook: "## Deploy mode: Deploy Hook\n\n`VERCEL_DEPLOY_HOOK` is set — production rebuild triggered via hook.",
+      "git-wait":
+        "## Deploy mode: Vercel Git wait (no Actions secrets)\n\n" +
+        "**`VERCEL_TOKEN` and `VERCEL_DEPLOY_HOOK` are missing.**\n\n" +
+        "If GitHub shows **Account is blocked**, that usually means the project is **paused** (spend cap), not a banned account. " +
+        "Actions cannot Resume without secrets — either:\n\n" +
+        "1. Add repo secret **`VERCEL_TOKEN`** (from `ziontpiper@icloud.com` / team `zzai-zzai`), or\n" +
+        "2. Add **`VERCEL_DEPLOY_HOOK`**, or\n" +
+        "3. Open [all-de-apps-in-one](https://vercel.com/zzai-zzai/all-de-apps-in-one) → **Resume**, then redeploy.\n\n" +
+        "See `docs/VERCEL_ACCOUNT.md`.",
+    };
+    appendFileSync(summary, `${lines[mode]}\n`);
+  }
+  console.log(`deploy_mode=${mode}`);
+}
+
 async function deployViaHook() {
+  setDeployMode("hook");
   console.log("Triggering Vercel deploy hook…");
   const res = await fetch(hook, { method: "POST" });
   const text = await res.text();
@@ -56,6 +86,7 @@ async function resumeIfPaused() {
 }
 
 async function deployViaCli() {
+  setDeployMode("cli");
   await resumeIfPaused();
   console.log("Clearing queued / in-progress Vercel deployments…");
   const clearStatus = run("node", ["scripts/clear-vercel-queue.mjs"]);
@@ -81,7 +112,14 @@ async function deployViaCli() {
 }
 
 async function waitForGitDeploy() {
+  setDeployMode("git-wait");
   console.log("No Actions Vercel secrets — waiting for Vercel Git integration on this commit…");
+  console.warn(
+    "WARN: Without VERCEL_TOKEN, Actions cannot Resume when GitHub shows Account is blocked.",
+  );
+  console.warn(
+    "Fix: add VERCEL_TOKEN (or VERCEL_DEPLOY_HOOK) — see docs/VERCEL_ACCOUNT.md — or Resume in the Vercel dashboard.",
+  );
   const status = run("node", ["scripts/wait-github-vercel-status.mjs"]);
   process.exit(status);
 }

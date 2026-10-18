@@ -112,6 +112,7 @@ Requires `VERCEL_TOKEN` (and optional `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID`). Or
 
 - Push to **`main`** with changes under **`Svivva/`** → Vercel Git deploy.
 - If GitHub shows **Account is blocked**, open the dashboard and **Resume**, or add **`VERCEL_TOKEN`** so Actions can unpause automatically (see Path B).
+- **Current gap:** if neither `VERCEL_TOKEN` nor `VERCEL_DEPLOY_HOOK` is in GitHub Actions secrets, the **Deploy latest** workflow cannot Resume a paused project. It only waits on Vercel Git (and may succeed after a few minutes if Vercel unpauses itself). The commit status will say **Vercel Git (no Actions token)** — that is intentional, not “CLI resume”.
 
 **Path B — GitHub Actions only (requires secrets)**
 

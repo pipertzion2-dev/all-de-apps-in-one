@@ -38,6 +38,11 @@ export function HomepageProtectionHero() {
             <Button asChild variant="outline">
               <Link href="/protect/verify">Verify a seal</Link>
             </Button>
+            <Button asChild variant="outline">
+              <Link href="/the-moves-like" data-testid="link-hero-the-moves-like">
+                THE MOVES LIKE
+              </Link>
+            </Button>
             <Button asChild variant="ghost" className="text-muted-foreground">
               <Link href="/clean-sneaks">Klean Sneaks demo</Link>
             </Button>
