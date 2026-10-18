@@ -12,6 +12,7 @@ import {
 import { MOVES_LIKE } from "@/lib/the-moves-like/brand";
 import { MOVES_LIBRARY } from "@/lib/the-moves-like/moves-library";
 import { useMovesLikeStore } from "@/lib/the-moves-like/store";
+import { useMovesLikeGyro } from "@/components/the-moves-like/GyroProvider";
 import { preferMobileCameraUi } from "@/lib/the-moves-like/use-front-camera";
 import { cn } from "@/lib/utils";
 
@@ -32,10 +33,17 @@ export function DiscoverScreen() {
   const selectedMoveIds = useMovesLikeStore((s) => s.selectedMoveIds);
   const toggleMove = useMovesLikeStore((s) => s.toggleMove);
   const [mobileCam, setMobileCam] = useState(false);
+  const gyro = useMovesLikeGyro();
 
   useEffect(() => {
     setMobileCam(preferMobileCameraUi());
   }, []);
+
+  const openPractice = async () => {
+    // iPhone: request motion permission in the same tap as navigation.
+    await gyro.ensurePermission();
+    setScreen("learn");
+  };
 
   return (
     <div className="pb-[calc(3.75rem+env(safe-area-inset-bottom))] sm:pb-0">
@@ -45,6 +53,7 @@ export function DiscoverScreen() {
             moveIds={selectedMoveIds.length ? selectedMoveIds : ["body-roll", "afro-bounce"]}
             mode="freestyle"
             interactive={!mobileCam}
+            gyroParallax={mobileCam || gyro.status === "listening"}
             className="h-full min-h-[100dvh]"
             showCaption={false}
           />
@@ -62,14 +71,14 @@ export function DiscoverScreen() {
             <BrandMark size="hero" priority className="mb-4 max-w-[min(86vw,400px)]" />
             <p className="max-w-md text-sm leading-relaxed text-foreground/90 sm:text-base">
               {mobileCam
-                ? "Built for your front camera — practice, record, and clash from your phone."
+                ? "Built for your front camera — practice, record, and clash from your phone. Tilt the phone to look around the stage when Motion access is on."
                 : MOVES_LIKE.tagline}
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <GlassMagentaButton
                 type="button"
                 className="min-h-12"
-                onClick={() => setScreen("learn")}
+                onClick={() => void openPractice()}
               >
                 Open front camera · Practice
               </GlassMagentaButton>
@@ -91,7 +100,12 @@ export function DiscoverScreen() {
               </GlassButton>
             </div>
             <p className="mt-5 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-              iPhone & Android · selfie camera first · clear glass UI
+              iPhone & Android · selfie camera · gyro tilt
+              {gyro.status === "listening"
+                ? " · motion on"
+                : gyro.status === "prompt"
+                  ? " · tap once to enable motion"
+                  : ""}
             </p>
           </GlassPanel>
         </div>
