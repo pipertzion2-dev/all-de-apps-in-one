@@ -50,6 +50,21 @@ describe("homepage flip stack", () => {
     expect(flipSrc).not.toContain("virtualIndexRef");
   });
 
+  it("shows the scroll overlay from live contentHost, not initialPanel", () => {
+    const flipSrc = readFileSync(
+      resolve(__dirname, "../../components/homepage-flip-stack.tsx"),
+      "utf8",
+    );
+    // Regression: initialPanel === "nav-cube" left Moves Like opacity:0 after a
+    // flip from the default home-game land.
+    expect(flipSrc).toContain(
+      'const showOverlay = contentHost === "overlay" && activePanel === "nav-cube"',
+    );
+    expect(flipSrc).not.toContain('const onPlatform = initialPanel === "nav-cube"');
+    expect(flipSrc).toContain("opacity: showOverlay ? 1 : 0");
+    expect(flipSrc).toContain('pointerEvents: showOverlay ? "auto" : "none"');
+  });
+
   it("keeps mobile scroll native (no touchmove preventDefault on window)", () => {
     const flipSrc = readFileSync(
       resolve(__dirname, "../../components/homepage-flip-stack.tsx"),

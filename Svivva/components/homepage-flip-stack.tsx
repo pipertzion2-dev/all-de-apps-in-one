@@ -530,7 +530,10 @@ export function HomepageFlipStack({
     };
   }, [interactive, goToPanel, isAnimating, contentHost]);
 
-  const onPlatform = initialPanel === "nav-cube";
+  // Must follow live state — not initialPanel. Landing on home-game then flipping
+  // to Moves Like sets contentHost="overlay"; gating on initialPanel left the
+  // scroll layer opacity:0 / pointer-events:none after the cube handed off.
+  const showOverlay = contentHost === "overlay" && activePanel === "nav-cube";
 
   return (
     <>
@@ -545,7 +548,10 @@ export function HomepageFlipStack({
           perspective: "2400px",
           perspectiveOrigin: "50% 50%",
           overflow: "hidden",
-          pointerEvents: interactive ? "auto" : "none",
+          // When the overlay owns scroll, keep the cube shell out of the hit path
+          // so React re-renders do not revive pointer-events on a faded shell.
+          opacity: showOverlay ? 0 : undefined,
+          pointerEvents: interactive && !showOverlay ? "auto" : "none",
           transformStyle: "preserve-3d",
           WebkitTransformStyle: "preserve-3d",
         }}
@@ -611,18 +617,19 @@ export function HomepageFlipStack({
       <div
         ref={scrollRef}
         data-homepage-flip-scroll=""
-        aria-hidden={contentHost === "overlay" ? "false" : "true"}
+        aria-hidden={showOverlay ? "false" : "true"}
         className="fixed inset-x-0 bottom-0 top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-[15] overflow-x-hidden overflow-y-auto scroll-auto bg-background sm:top-[calc(4rem+env(safe-area-inset-top,0px))]"
         style={{
           scrollPaddingTop: "0.75rem",
-          opacity: onPlatform && contentHost === "overlay" ? 1 : 0,
-          visibility: onPlatform && contentHost === "overlay" ? "visible" : "hidden",
-          pointerEvents: onPlatform && contentHost === "overlay" ? "auto" : "none",
+          opacity: showOverlay ? 1 : 0,
+          visibility: showOverlay ? "visible" : "hidden",
+          pointerEvents: showOverlay ? "auto" : "none",
+          touchAction: showOverlay ? "pan-y" : "none",
           overscrollBehaviorY: "contain",
           WebkitOverflowScrolling: "touch",
         }}
       >
-        {contentHost === "overlay" ? begin : null}
+        {showOverlay ? begin : null}
       </div>
     </>
   );
