@@ -152,7 +152,7 @@ while (Date.now() - started < timeoutMs) {
       if (blockedSince === null) {
         blockedSince = Date.now();
         console.warn(
-          "  Note: \"Account is blocked\" usually means the project is paused (spend cap), not a banned account.",
+          '  Note: "Account is blocked" usually means the project is paused (spend cap), not a banned account.',
         );
         console.warn(
           "  Without VERCEL_TOKEN, Actions cannot Resume — open https://vercel.com/zzai-zzai/all-de-apps-in-one or add the secret.",

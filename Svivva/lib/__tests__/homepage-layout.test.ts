@@ -23,4 +23,10 @@ describe("homepage-layout", () => {
     expect(pageSrc).toContain("button-home-intro-admin-orbit");
     expect(pageSrc).toContain("button-home-nav-admin-orbit");
   });
+
+  it("exposes THE MOVES LIKE in the main homepage nav", () => {
+    const pageSrc = readFileSync(resolve(__dirname, "../../app/home-page-client.tsx"), "utf8");
+    expect(pageSrc).toContain('href="/the-moves-like"');
+    expect(pageSrc).toContain("link-nav-the-moves-like");
+  });
 });

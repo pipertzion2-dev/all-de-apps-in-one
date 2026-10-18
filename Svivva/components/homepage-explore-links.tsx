@@ -4,6 +4,17 @@ import { isBetaHref } from "@/lib/product-positioning";
 
 const LINKS = [
   {
+    href: "/the-moves-like",
+    title: "THE MOVES LIKE",
+    description:
+      "Interactive dance game — Motion DNA, Ghost Mode, Move Reactor, Rhythm Portal, Style Clash.",
+  },
+  {
+    href: "/clean-sneaks",
+    title: "Klean Sneaks demo",
+    description: "BALOON8 car×sneaker — one chassis, colorway unlocks, Sneak Vision hazards.",
+  },
+  {
     href: "/dashboard/hybrid-lab",
     title: "Hybrid² Lab",
     description: "Fuse two ZZAI modules (H¹), then hybridize listed blends (H²) into one product.",
@@ -12,17 +23,6 @@ const LINKS = [
     href: "/lp/ai-api-builder",
     title: "Keep fusions Klean",
     description: "After Hybrid², guardrails enforce schema, preview hazards, and roll back fast.",
-  },
-  {
-    href: "/clean-sneaks",
-    title: "Klean Sneaks demo",
-    description: "BALOON8 car×sneaker — one chassis, colorway unlocks, Sneak Vision hazards.",
-  },
-  {
-    href: "/the-moves-like",
-    title: "THE MOVES LIKE",
-    description:
-      "Interactive dance game — Motion DNA, Ghost Mode, Move Reactor, Rhythm Portal, Style Clash.",
   },
   {
     href: "/dashboard/pulse",

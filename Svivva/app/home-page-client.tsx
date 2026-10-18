@@ -691,6 +691,20 @@ export default function LandingPage() {
 
               <div className="flex min-w-0 items-center justify-end gap-1 sm:gap-2">
                 <Link
+                  href="/the-moves-like"
+                  className="flex h-8 items-center gap-1 rounded-md px-1.5 hover:bg-muted/50 transition-colors sm:px-2"
+                  data-testid="link-nav-the-moves-like"
+                  title="THE MOVES LIKE — dance creation"
+                  aria-label="THE MOVES LIKE"
+                >
+                  <span className="text-base leading-none" aria-hidden>
+                    ♪
+                  </span>
+                  <span className="hidden text-xs font-bold tracking-wide text-foreground/90 min-[380px]:inline">
+                    Moves Like
+                  </span>
+                </Link>
+                <Link
                   href="/play"
                   className="flex h-8 items-center gap-1 rounded-md px-1.5 hover:bg-muted/50 transition-colors sm:px-2"
                   data-testid="link-svivva-play-mobile"

@@ -67,9 +67,9 @@ export function HomepageCubePanel({
         </div>
       ) : null}
 
+      <HomepageExploreLinks />
       <HomepageAboutSection />
       <HomepageHowToSection />
-      <HomepageExploreLinks />
 
       {/* OaaS lives on the scrollSnap face so /#oaas works with the flip stack. */}
       <div className="relative z-10 border-t border-border/40">
