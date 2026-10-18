@@ -17,17 +17,21 @@ type HomepageFlipStackProps = {
 };
 
 const FLIP_SETTLE_EPSILON = 0.02;
-const NUDGE_DEBOUNCE_MS = 420;
-const SWIPE_THRESHOLD_PX = 48;
+const NUDGE_DEBOUNCE_MS = 650;
+const SWIPE_THRESHOLD_PX = 56;
 const MAX_PANEL_INDEX = 1;
-const SCROLL_EDGE_THRESHOLD = 12;
+const SCROLL_EDGE_THRESHOLD = 8;
 /** Platform content fades in only as the game → home flip finishes (avoids clipping mid-rotation). */
 const OVERLAY_FADE_START = 0.88;
 const OVERLAY_FADE_END = 1;
 /** Absorb flip-wheel momentum so the platform overlay does not shoot to the footer. */
-const PLATFORM_WHEEL_LOCK_MS = 520;
+const PLATFORM_WHEEL_LOCK_MS = 700;
 /** Intentional overscroll distance (wheel px / touch px) before leaving The Moves Like. */
-const OVERSCROLL_FLIP_PX = 72;
+const OVERSCROLL_FLIP_PX = 220;
+/** Must sit at the top briefly before upward wheel counts as leave-gesture (trackpad inertia). */
+const AT_TOP_DWELL_MS = 420;
+/** Absorb leftover trackpad inertia when the overlay first hits scrollTop ≈ 0. */
+const AT_TOP_INERTIA_LOCK_MS = 380;
 
 function overlayOpacityForIndex(index: number): number {
   return Math.min(
@@ -60,6 +64,8 @@ export function HomepageFlipStack({
   const overlayScrollWasEnabledRef = useRef(false);
   const platformWheelLockUntilRef = useRef(0);
   const overscrollAccumRef = useRef(0);
+  const atTopSinceRef = useRef(0);
+  const wasAtTopRef = useRef(true);
   const [activePanel, setActivePanel] = useState<HomepageFlipPanelId>(initialPanel);
 
   const syncOverlayVisuals = useCallback(
@@ -83,6 +89,8 @@ export function HomepageFlipStack({
           scroller.scrollTop = 0;
           platformWheelLockUntilRef.current = performance.now() + PLATFORM_WHEEL_LOCK_MS;
           overscrollAccumRef.current = 0;
+          atTopSinceRef.current = performance.now();
+          wasAtTopRef.current = true;
           document.body.style.overflow = "hidden";
         }
         overlayScrollWasEnabledRef.current = scrollEnabled;
@@ -179,10 +187,14 @@ export function HomepageFlipStack({
         resetPlatformScroll();
         platformWheelLockUntilRef.current = performance.now() + PLATFORM_WHEEL_LOCK_MS;
         overscrollAccumRef.current = 0;
+        atTopSinceRef.current = performance.now();
+        wasAtTopRef.current = true;
       } else {
         resetPlatformScroll();
         document.body.style.overflow = "";
         overscrollAccumRef.current = 0;
+        wasAtTopRef.current = false;
+        atTopSinceRef.current = 0;
       }
     },
     [resetPlatformScroll],
@@ -340,14 +352,40 @@ export function HomepageFlipStack({
       const delta = normalizeWheelDelta(e);
       const face = scrollRef.current;
       const { atTop } = faceScrollState(face);
+      const now = performance.now();
 
-      // Native scroll down / mid-page — do not interfere.
-      if (delta >= 0 || !atTop) {
+      if (!atTop) {
+        overscrollAccumRef.current = 0;
+        wasAtTopRef.current = false;
+        atTopSinceRef.current = 0;
+        return;
+      }
+
+      // Just arrived at top — absorb leftover trackpad inertia before leave-gestures count.
+      if (!wasAtTopRef.current) {
+        wasAtTopRef.current = true;
+        atTopSinceRef.current = now;
+        overscrollAccumRef.current = 0;
+        platformWheelLockUntilRef.current = Math.max(
+          platformWheelLockUntilRef.current,
+          now + AT_TOP_INERTIA_LOCK_MS,
+        );
+        e.preventDefault();
+        return;
+      }
+
+      // Native scroll down at top — clear leave intent.
+      if (delta >= 0) {
         overscrollAccumRef.current = 0;
         return;
       }
 
-      // At top: accumulate intentional upward overscroll before flipping to Klean Sneaks.
+      if (now - atTopSinceRef.current < AT_TOP_DWELL_MS) {
+        overscrollAccumRef.current = 0;
+        return;
+      }
+
+      // At top after dwell: accumulate intentional upward overscroll → Klean Sneaks.
       overscrollAccumRef.current += -delta;
       if (overscrollAccumRef.current < OVERSCROLL_FLIP_PX) {
         e.preventDefault();
@@ -419,6 +457,7 @@ export function HomepageFlipStack({
       const face = scrollRef.current;
       if (!face || face.scrollTop > SCROLL_EDGE_THRESHOLD) {
         overscrollAccumRef.current = 0;
+        wasAtTopRef.current = false;
         return;
       }
       const y = e.touches[0]?.clientY ?? platformTouchStartY;
