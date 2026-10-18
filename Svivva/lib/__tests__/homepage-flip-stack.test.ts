@@ -5,7 +5,7 @@ import { flipPanelFromHash, flipPanelIndex, hashForFlipPanel } from "../homepage
 
 describe("homepage flip stack", () => {
   it("maps legacy hash ids to flip panels", () => {
-    expect(flipPanelFromHash("")).toBe("nav-cube");
+    expect(flipPanelFromHash("")).toBe("home-game");
     expect(flipPanelFromHash("nav-cube")).toBe("nav-cube");
     expect(flipPanelFromHash("home-game")).toBe("home-game");
     expect(flipPanelFromHash("clean-sneaks")).toBe("home-game");
@@ -19,7 +19,7 @@ describe("homepage flip stack", () => {
     expect(hashForFlipPanel("home-game")).toBe("home-game");
   });
 
-  it("orders game above The Moves Like face (land on nav-cube)", () => {
+  it("orders game above The Moves Like face (land on home-game)", () => {
     expect(flipPanelIndex("home-game")).toBe(0);
     expect(flipPanelIndex("nav-cube")).toBe(1);
   });
@@ -38,6 +38,9 @@ describe("homepage flip stack", () => {
     expect(flipSrc).toContain("AT_TOP_DWELL_MS");
     expect(flipSrc).toContain("AT_TOP_INERTIA_LOCK_MS");
     expect(flipSrc).toContain("TOUCH_LEAVE_PX");
+    expect(flipSrc).toContain("FLIP_SMOOTHING_MOBILE");
+    expect(flipSrc).toContain("OVERLAY_FADE_START_MOBILE");
+    expect(flipSrc).toContain("SWIPE_THRESHOLD_MOBILE_PX");
     expect(flipSrc).toContain("onPlatformWheel");
     expect(flipSrc).toContain("scroll-auto");
     expect(flipSrc).toContain("PLATFORM_WHEEL_LOCK_MS");
@@ -48,6 +51,7 @@ describe("homepage flip stack", () => {
     expect(flipSrc).toContain("syncOverlayVisuals");
     expect(flipSrc).toContain("overlayScrollEnabled");
     expect(flipSrc).toContain("OVERLAY_FADE_START = 0.88");
+    expect(flipSrc).toContain('initialPanel = "home-game"');
     expect(flipSrc).toContain("resetPlatformScroll");
     expect(flipSrc).toContain('panelId === "home-game" && direction > 0');
     expect(flipSrc).toContain('panelId === "nav-cube"');
@@ -73,7 +77,7 @@ describe("homepage flip stack", () => {
     expect(flipSrc).toContain("isTouchPrimaryDevice");
     expect(flipSrc).toContain("touchPrimaryRef");
     // body overflow:hidden only on non-touch — it breaks iOS fixed overlay scroll.
-    expect(flipSrc).toContain("if (!touchPrimaryRef.current)");
+    expect(flipSrc).toContain("if (!touchPrimary)");
     expect(flipSrc).toContain('document.body.style.overflow = "hidden"');
   });
 

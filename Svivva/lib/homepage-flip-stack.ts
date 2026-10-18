@@ -4,7 +4,8 @@ export type HomepageFlipPanelId = "nav-cube" | "home-game";
 /**
  * Flip order in the rotor (index 0 = “above”):
  * Klean Sneaks demo → The Moves Like product face.
- * We still *land* on nav-cube; swipe ↑ from product returns to the game.
+ * Default land is home-game so mobile scroll goes game → main (does not skip the game).
+ * From The Moves Like, pull-down / swipe ↑ returns to the game.
  */
 export const HOMEPAGE_FLIP_PANELS: readonly HomepageFlipPanelId[] = [
   "home-game",
@@ -37,10 +38,11 @@ export function homepageSectionFromHash(hash: string): string | null {
 
 export function flipPanelFromHash(hash: string): HomepageFlipPanelId | null {
   const id = hash.replace(/^#/, "").trim();
-  if (!id) return "nav-cube";
+  // Bare `/` lands on the game so swipe-down reaches The Moves Like (does not skip).
+  if (!id) return "home-game";
   if (id === "nav-cube") return "nav-cube";
   if (id === "home-game" || id === "clean-sneaks") return "home-game";
-  // Retired explore face — land on The Moves Like homepage instead.
+  // Retired explore face — open The Moves Like homepage instead.
   if (id === "home-explore") return "nav-cube";
   if (homepageSectionFromHash(id)) return "nav-cube";
   return null;
