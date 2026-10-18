@@ -50,7 +50,7 @@ export function DiscoverScreen() {
           />
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#F7FBFC] via-[#F7FBFC]/55 to-white/25 sm:bg-gradient-to-r sm:from-white/90 sm:via-white/55 sm:to-transparent"
+            className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#e8f0f6] via-[#F7FBFC]/45 to-white/15 sm:bg-gradient-to-r sm:from-white/78 sm:via-[rgba(168,192,212,0.22)] sm:to-transparent"
           />
         </div>
 
@@ -113,10 +113,10 @@ export function DiscoverScreen() {
                   type="button"
                   onClick={() => toggleMove(move.id)}
                   className={cn(
-                    "min-h-[64px] flex-1 rounded-2xl border p-3 text-left backdrop-blur-xl backdrop-saturate-150 transition shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]",
+                    "min-h-[64px] flex-1 rounded-2xl border p-3 text-left backdrop-blur-[18px] backdrop-saturate-[1.9] transition shadow-[inset_0_1px_0_rgba(255,255,255,1),0_10px_28px_rgba(109,145,179,0.12)]",
                     on
-                      ? "border-white/55 bg-[linear-gradient(145deg,rgba(255,255,255,0.55)_0%,rgba(109,145,179,0.22)_100%)]"
-                      : "border-white/50 bg-[linear-gradient(160deg,rgba(255,255,255,0.42)_0%,rgba(255,255,255,0.12)_100%)] hover:border-[rgba(109,145,179,0.35)] hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.5)_0%,rgba(109,145,179,0.14)_100%)]",
+                      ? "border-white/85 bg-[linear-gradient(145deg,rgba(255,255,255,0.78)_0%,rgba(109,145,179,0.32)_100%)]"
+                      : "border-white/75 bg-[linear-gradient(160deg,rgba(255,255,255,0.62)_0%,rgba(255,255,255,0.16)_100%)] hover:border-[rgba(168,192,212,0.85)] hover:bg-[linear-gradient(145deg,rgba(255,255,255,0.72)_0%,rgba(109,145,179,0.2)_100%)]",
                   )}
                 >
                   <div className="flex items-baseline justify-between gap-3">

@@ -12,7 +12,6 @@ import {
 } from "@/lib/the-moves-like/performance";
 import type { AudioAnalysisSnapshot } from "@/lib/the-moves-like/types";
 import { DancerFigure } from "@/components/the-moves-like/scenes/DancerFigure";
-import { GlassFlowerField } from "@/components/the-moves-like/scenes/GlassFlowerField";
 import { BassPulseRings, SoundWaveBars } from "@/components/the-moves-like/scenes/SoundWaves";
 
 type Props = {
@@ -31,7 +30,7 @@ function StageFloor() {
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.2, 0]} receiveShadow>
       <circleGeometry args={[3.4, 64]} />
-      <meshStandardMaterial color="#d8e8ee" metalness={0.12} roughness={0.72} />
+      <meshStandardMaterial color="#c5dce8" metalness={0.35} roughness={0.28} />
     </mesh>
   );
 }
@@ -65,24 +64,21 @@ function StageContent({
 
   return (
     <>
-      <color attach="background" args={["#f4fafc"]} />
-      <fog attach="fog" args={["#e8f3f7", 8, 20]} />
-      <ambientLight intensity={0.78} />
-      <directionalLight position={[3.5, 5.5, 2.5]} intensity={1.05} color="#ffffff" castShadow />
-      <pointLight position={[-2.5, 2.2, -1.5]} intensity={0.55} color="#ac81af" />
-      <pointLight position={[2.8, 1.2, 2]} intensity={0.65} color="#6d91b3" />
+      <color attach="background" args={["#eef6fa"]} />
+      <fog attach="fog" args={["#dceaf1", 7, 18]} />
+      <ambientLight intensity={0.88} />
+      <directionalLight position={[3.5, 5.5, 2.5]} intensity={1.2} color="#ffffff" castShadow />
+      <pointLight position={[-2.5, 2.2, -1.5]} intensity={0.7} color="#ac81af" />
+      <pointLight position={[2.8, 1.2, 2]} intensity={0.85} color="#6d91b3" />
       <spotLight
         position={[0, 4.5, 2]}
         angle={0.45}
-        penumbra={0.6}
-        intensity={0.55}
+        penumbra={0.55}
+        intensity={0.75}
         color="#A8C0D4"
       />
 
       <StageFloor />
-
-      {/* Home-screen style 3D flowers — glass blue #6D91B3 / purple #AC81AF */}
-      <GlassFlowerField density={mode === "freestyle" ? "normal" : "sparse"} />
 
       {/* Rhythm / freestyle: sound-wave bars */}
       {(mode === "rhythm" || mode === "freestyle") && (

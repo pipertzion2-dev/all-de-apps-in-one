@@ -78,13 +78,13 @@ export function MovesLikeApp() {
       className="relative min-h-[100dvh] bg-[#F7FBFC] text-foreground"
       style={{ fontFamily: '"Zc", sans-serif' }}
     >
-      {/* Soft glass-blue / purple wash on white paper */}
+      {/* Brighter liquid wash — more chroma under glass so panels feel wet */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 75% 50% at 12% 0%, rgba(109,145,179,0.22), transparent 55%), radial-gradient(ellipse 55% 42% at 92% 6%, rgba(172,129,175,0.2), transparent 52%), linear-gradient(180deg, #ffffff 0%, #F7FBFC 40%, #eef2f6 100%)",
+            "radial-gradient(ellipse 70% 48% at 8% 0%, rgba(109,145,179,0.38), transparent 58%), radial-gradient(ellipse 55% 42% at 94% 4%, rgba(172,129,175,0.34), transparent 55%), radial-gradient(ellipse 40% 30% at 50% 100%, rgba(168,192,212,0.22), transparent 60%), linear-gradient(180deg, #ffffff 0%, #F7FBFC 35%, #e8f0f6 100%)",
         }}
       />
 
@@ -92,14 +92,14 @@ export function MovesLikeApp() {
         className={cn(
           "z-30 flex items-center justify-between gap-3 px-3 py-2 sm:px-6 sm:py-3",
           hideChromeOnDiscover || cameraMode
-            ? "absolute inset-x-0 top-0 bg-gradient-to-b from-white/80 to-transparent pt-[max(0.5rem,env(safe-area-inset-top))]"
-            : "relative border-b border-white/50 bg-[linear-gradient(180deg,rgba(255,255,255,0.55)_0%,rgba(255,255,255,0.22)_100%)] pt-[max(0.25rem,env(safe-area-inset-top))] backdrop-blur-xl backdrop-saturate-150",
+            ? "absolute inset-x-0 top-0 bg-gradient-to-b from-white/85 to-transparent pt-[max(0.5rem,env(safe-area-inset-top))]"
+            : "relative border-b border-white/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.72)_0%,rgba(255,255,255,0.28)_100%)] pt-[max(0.25rem,env(safe-area-inset-top))] shadow-[inset_0_1px_0_rgba(255,255,255,1)] backdrop-blur-[18px] backdrop-saturate-[1.85]",
         )}
       >
         <div className="flex min-w-0 items-center gap-3">
           <Link
             href="/"
-            className="shrink-0 rounded-full border border-border/50 bg-white/50 px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground backdrop-blur-md hover:border-primary/40 hover:text-foreground"
+            className="shrink-0 rounded-full border border-white/75 bg-[linear-gradient(180deg,rgba(255,255,255,0.7)_0%,rgba(255,255,255,0.25)_100%)] px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-md hover:border-[rgba(109,145,179,0.55)] hover:text-foreground"
           >
             ZZAI
           </Link>
@@ -131,7 +131,7 @@ export function MovesLikeApp() {
           ) : null}
           <Link
             href="/play"
-            className="shrink-0 rounded-full border border-border/50 bg-white/45 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-muted-foreground backdrop-blur-md hover:border-primary/40 hover:text-primary"
+            className="shrink-0 rounded-full border border-white/75 bg-[linear-gradient(180deg,rgba(255,255,255,0.65)_0%,rgba(172,129,175,0.18)_100%)] px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-muted-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-md hover:border-[rgba(172,129,175,0.55)] hover:text-primary"
           >
             Play desk
           </Link>
