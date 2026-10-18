@@ -27,7 +27,9 @@ const OVERLAY_FADE_END = 1;
 /** Absorb flip-wheel momentum so the platform overlay does not shoot to the footer. */
 const PLATFORM_WHEEL_LOCK_MS = 700;
 /** Intentional overscroll distance (wheel px / touch px) before leaving The Moves Like. */
-const OVERSCROLL_FLIP_PX = 220;
+const OVERSCROLL_FLIP_PX = 420;
+/** Require several upward wheel ticks at top — one/two gentle notches must not flip. */
+const OVERSCROLL_MIN_EVENTS = 4;
 /** Must sit at the top briefly before upward wheel counts as leave-gesture (trackpad inertia). */
 const AT_TOP_DWELL_MS = 420;
 /** Absorb leftover trackpad inertia when the overlay first hits scrollTop ≈ 0. */
@@ -64,6 +66,7 @@ export function HomepageFlipStack({
   const overlayScrollWasEnabledRef = useRef(false);
   const platformWheelLockUntilRef = useRef(0);
   const overscrollAccumRef = useRef(0);
+  const overscrollEventsRef = useRef(0);
   const atTopSinceRef = useRef(0);
   const wasAtTopRef = useRef(true);
   const [activePanel, setActivePanel] = useState<HomepageFlipPanelId>(initialPanel);
@@ -89,6 +92,7 @@ export function HomepageFlipStack({
           scroller.scrollTop = 0;
           platformWheelLockUntilRef.current = performance.now() + PLATFORM_WHEEL_LOCK_MS;
           overscrollAccumRef.current = 0;
+          overscrollEventsRef.current = 0;
           atTopSinceRef.current = performance.now();
           wasAtTopRef.current = true;
           document.body.style.overflow = "hidden";
@@ -187,12 +191,14 @@ export function HomepageFlipStack({
         resetPlatformScroll();
         platformWheelLockUntilRef.current = performance.now() + PLATFORM_WHEEL_LOCK_MS;
         overscrollAccumRef.current = 0;
+        overscrollEventsRef.current = 0;
         atTopSinceRef.current = performance.now();
         wasAtTopRef.current = true;
       } else {
         resetPlatformScroll();
         document.body.style.overflow = "";
         overscrollAccumRef.current = 0;
+        overscrollEventsRef.current = 0;
         wasAtTopRef.current = false;
         atTopSinceRef.current = 0;
       }
@@ -210,6 +216,7 @@ export function HomepageFlipStack({
 
       lastNudgeAtRef.current = performance.now();
       overscrollAccumRef.current = 0;
+      overscrollEventsRef.current = 0;
       targetIndexRef.current = next;
       commitPanel(panel);
       ensureTick();
@@ -356,6 +363,7 @@ export function HomepageFlipStack({
 
       if (!atTop) {
         overscrollAccumRef.current = 0;
+        overscrollEventsRef.current = 0;
         wasAtTopRef.current = false;
         atTopSinceRef.current = 0;
         return;
@@ -366,6 +374,7 @@ export function HomepageFlipStack({
         wasAtTopRef.current = true;
         atTopSinceRef.current = now;
         overscrollAccumRef.current = 0;
+        overscrollEventsRef.current = 0;
         platformWheelLockUntilRef.current = Math.max(
           platformWheelLockUntilRef.current,
           now + AT_TOP_INERTIA_LOCK_MS,
@@ -377,22 +386,29 @@ export function HomepageFlipStack({
       // Native scroll down at top — clear leave intent.
       if (delta >= 0) {
         overscrollAccumRef.current = 0;
+        overscrollEventsRef.current = 0;
         return;
       }
 
       if (now - atTopSinceRef.current < AT_TOP_DWELL_MS) {
         overscrollAccumRef.current = 0;
+        overscrollEventsRef.current = 0;
         return;
       }
 
       // At top after dwell: accumulate intentional upward overscroll → Klean Sneaks.
       overscrollAccumRef.current += -delta;
-      if (overscrollAccumRef.current < OVERSCROLL_FLIP_PX) {
+      overscrollEventsRef.current += 1;
+      if (
+        overscrollAccumRef.current < OVERSCROLL_FLIP_PX ||
+        overscrollEventsRef.current < OVERSCROLL_MIN_EVENTS
+      ) {
         e.preventDefault();
         return;
       }
 
       overscrollAccumRef.current = 0;
+      overscrollEventsRef.current = 0;
       e.preventDefault();
       nudge(-1);
     };

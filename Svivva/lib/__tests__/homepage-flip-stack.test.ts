@@ -34,6 +34,7 @@ describe("homepage flip stack", () => {
     expect(flipSrc).toContain("const nudge = ");
     expect(flipSrc).toContain("isAnimating");
     expect(flipSrc).toContain("OVERSCROLL_FLIP_PX");
+    expect(flipSrc).toContain("OVERSCROLL_MIN_EVENTS");
     expect(flipSrc).toContain("AT_TOP_DWELL_MS");
     expect(flipSrc).toContain("AT_TOP_INERTIA_LOCK_MS");
     expect(flipSrc).toContain("onPlatformWheel");
