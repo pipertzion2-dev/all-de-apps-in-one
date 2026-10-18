@@ -24,70 +24,42 @@ describe("homepage flip stack", () => {
     expect(flipPanelIndex("nav-cube")).toBe(1);
   });
 
-  it("uses discrete nudge flips with RAF settle (no continuous wheel scrub)", () => {
+  it("runs a timed 3D cube flip with content on the rotating face", () => {
     const flipSrc = readFileSync(
       resolve(__dirname, "../../components/homepage-flip-stack.tsx"),
       "utf8",
     );
+    expect(flipSrc).toContain("FLIP_DURATION_MS");
+    expect(flipSrc).toContain("FLIP_DURATION_MOBILE_MS");
+    expect(flipSrc).toContain("easeInOutCubic");
     expect(flipSrc).toContain("ensureTick");
-    expect(flipSrc).toContain("NUDGE_DEBOUNCE_MS");
-    expect(flipSrc).toContain("const nudge = ");
-    expect(flipSrc).toContain("isAnimating");
-    expect(flipSrc).toContain("WHEEL_OVERSCROLL_FLIP_PX");
-    expect(flipSrc).toContain("WHEEL_OVERSCROLL_MIN_EVENTS");
-    expect(flipSrc).toContain("AT_TOP_DWELL_MS");
-    expect(flipSrc).toContain("AT_TOP_INERTIA_LOCK_MS");
-    expect(flipSrc).toContain("TOUCH_LEAVE_PX");
-    expect(flipSrc).toContain("FLIP_SMOOTHING_MOBILE");
-    expect(flipSrc).toContain("OVERLAY_FADE_START_MOBILE");
-    expect(flipSrc).toContain("SWIPE_THRESHOLD_MOBILE_PX");
-    expect(flipSrc).toContain("onPlatformWheel");
-    expect(flipSrc).toContain("scroll-auto");
-    expect(flipSrc).toContain("PLATFORM_WHEEL_LOCK_MS");
-    expect(flipSrc).toContain("onScrollerWheelCapture");
-    expect(flipSrc).toContain("platformScrollMode");
+    expect(flipSrc).toContain("contentHost");
+    expect(flipSrc).toContain('setContentHost("face")');
+    expect(flipSrc).toContain('setContentHost("overlay")');
     expect(flipSrc).toContain("data-homepage-flip-scroll");
-    expect(flipSrc).toContain("scrollRef");
-    expect(flipSrc).toContain("syncOverlayVisuals");
-    expect(flipSrc).toContain("overlayScrollEnabled");
-    expect(flipSrc).toContain("OVERLAY_FADE_START = 0.88");
+    expect(flipSrc).toContain("data-homepage-flip-stack");
+    expect(flipSrc).toContain("settledOnPlatform");
+    expect(flipSrc).toContain("TOUCH_LEAVE_PX");
+    expect(flipSrc).toContain("platformScrollMode");
     expect(flipSrc).toContain('initialPanel = "home-game"');
-    expect(flipSrc).toContain("resetPlatformScroll");
     expect(flipSrc).toContain('panelId === "home-game" && direction > 0');
-    expect(flipSrc).toContain('panelId === "nav-cube"');
     expect(flipSrc).toMatch(/panelId === "nav-cube"[\s\S]*direction > 0[\s\S]*return false/);
-    expect(flipSrc).toMatch(/const tick = \(now: number\) => \{[\s\S]*animRef\.current = 0/);
+    // No continuous scrub — timed cube rotation only.
     expect(flipSrc).not.toContain("paintDirect");
     expect(flipSrc).not.toContain("scheduleSnap");
     expect(flipSrc).not.toContain("virtualIndexRef");
-    expect(flipSrc).not.toContain("scrubbingRef");
   });
 
-  it("keeps mobile scroll native (no touchmove preventDefault, passive platform touch)", () => {
+  it("keeps mobile scroll native (no touchmove preventDefault on window)", () => {
     const flipSrc = readFileSync(
       resolve(__dirname, "../../components/homepage-flip-stack.tsx"),
       "utf8",
     );
-    // iPhone froze when flip RAF + touchmove preventDefault ran together.
     expect(flipSrc).not.toContain('addEventListener("touchmove", onTouchMove');
     expect(flipSrc).toContain(
       'addEventListener("touchmove", onPlatformTouchMove, { passive: true })',
     );
-    expect(flipSrc).toContain("TOUCH_LEAVE_PX");
     expect(flipSrc).toContain("isTouchPrimaryDevice");
-    expect(flipSrc).toContain("touchPrimaryRef");
-    // body overflow:hidden only on non-touch — it breaks iOS fixed overlay scroll.
-    expect(flipSrc).toContain("if (!touchPrimary)");
-    expect(flipSrc).toContain('document.body.style.overflow = "hidden"');
-  });
-
-  it("keeps gesture effect deps stable (no per-render panels array)", () => {
-    const flipSrc = readFileSync(
-      resolve(__dirname, "../../components/homepage-flip-stack.tsx"),
-      "utf8",
-    );
-    expect(flipSrc).toContain("[interactive, goToPanel, isAnimating]");
-    expect(flipSrc).not.toContain("panels,");
   });
 
   it("rotates forward like the intro reveal (positive rotor, negative face hinge)", () => {
