@@ -38,7 +38,7 @@ function overlayScrollEnabled(index: number, panel: HomepageFlipPanelId): boolea
   return panel === "nav-cube" && index >= OVERLAY_FADE_END - FLIP_SETTLE_EPSILON;
 }
 
-/** Two full-viewport faces — The Moves Like homepage, then Klean Sneaks demo. */
+/** Two full-viewport faces — game above, The Moves Like homepage below (land on homepage). */
 export function HomepageFlipStack({
   begin,
   game,
@@ -62,8 +62,8 @@ export function HomepageFlipStack({
   const [activePanel, setActivePanel] = useState<HomepageFlipPanelId>(initialPanel);
 
   const panels = [
-    { id: "nav-cube" as const, node: begin },
     { id: "home-game" as const, node: game },
+    { id: "nav-cube" as const, node: begin },
   ];
 
   const syncOverlayVisuals = useCallback(
@@ -342,15 +342,14 @@ export function HomepageFlipStack({
       direction: 1 | -1,
       panelId: HomepageFlipPanelId,
     ) => {
-      // Panel order: nav-cube (The Moves Like) → home-game (Klean Sneaks)
+      // Rotor: home-game (0) above → nav-cube (1) below. Land on nav-cube.
+      // From game: always allow swipe/scroll down into The Moves Like.
+      if (panelId === "home-game" && direction > 0) return true;
+      // From Moves Like: only flip back up to the game when scrolled to the top.
       if (panelId === "nav-cube") {
-        const { scrollable, atTop, atBottom } = faceScrollState(face);
-        if (direction > 0) return scrollable ? atBottom : true;
-        return scrollable ? atTop : true;
-      }
-      if (panelId === "home-game") {
+        const { scrollable, atTop } = faceScrollState(face);
         if (direction > 0) return false;
-        return true;
+        return scrollable ? atTop : true;
       }
       const { scrollable, atTop, atBottom } = faceScrollState(face);
       if (!scrollable) return true;
