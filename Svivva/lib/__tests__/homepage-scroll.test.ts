@@ -28,10 +28,10 @@ describe("homepage scroll panels", () => {
     expect(cubeSrc).toContain("CleanSneaksLogoCube");
     expect(cubeSrc).toContain('router.push("/clean-sneaks")');
     expect(cubeSrc).toContain('id="home-game"');
-    expect(cubeSrc).toContain('scrollToHomepagePanel("home-moves")');
+    expect(cubeSrc).toContain('scrollToHomepagePanel("nav-cube")');
   });
 
-  it("splits four cube faces: game, Moves Like, beta apps, combined", () => {
+  it("splits four cube faces: Moves Like, beta apps, combined, Klean Sneaks last", () => {
     const stackSrc = readFileSync(resolve(__dirname, "../../lib/homepage-flip-stack.ts"), "utf8");
     const pageSrc = readFileSync(resolve(__dirname, "../../app/home-page-client.tsx"), "utf8");
     const movesSrc = readFileSync(
@@ -46,10 +46,17 @@ describe("homepage scroll panels", () => {
       resolve(__dirname, "../../components/homepage-cube-panel.tsx"),
       "utf8",
     );
-    expect(stackSrc).toMatch(
-      /HOMEPAGE_FLIP_PANELS[\s\S]*"home-game"[\s\S]*"home-moves"[\s\S]*"home-beta"[\s\S]*"nav-cube"/,
+    const gameSrc = readFileSync(
+      resolve(__dirname, "../../components/homepage-game-panel.tsx"),
+      "utf8",
     );
-    expect(pageSrc).toContain('useState<HomepageFlipPanelId>("home-game")');
+    expect(stackSrc).toMatch(
+      /HOMEPAGE_FLIP_PANELS[\s\S]*"home-moves"[\s\S]*"home-beta"[\s\S]*"nav-cube"[\s\S]*"home-game"/,
+    );
+    expect(pageSrc).toContain('useState<HomepageFlipPanelId>("home-moves")');
+    expect(pageSrc).toMatch(
+      /HomepageMovesPanel[\s\S]*HomepageBetaPanel[\s\S]*HomepageCubePanel[\s\S]*HomepageGamePanel/,
+    );
     expect(movesSrc).toContain('id="home-moves"');
     expect(movesSrc).toContain("HomepageMovesLikeHero");
     expect(betaSrc).toContain('id="home-beta"');
@@ -60,10 +67,20 @@ describe("homepage scroll panels", () => {
     expect(cubeSrc).toContain("HomepageAboutSection");
     expect(cubeSrc).toContain("HomepageFounderSonSection");
     expect(cubeSrc).toMatch(/HomepageFounderSonSection[\s\S]*HomepagePricingSection/);
+    expect(cubeSrc).toContain('scrollToHomepagePanel("home-game")');
     expect(cubeSrc).not.toContain("HomepageProtectionHero");
     expect(cubeSrc).not.toContain("HomepageMovesLikeHero");
     expect(cubeSrc).not.toContain("HomepageHeroBlock");
     expect(cubeSrc).not.toContain("PlatformFeatureHub");
+    expect(gameSrc).toContain('surface="game"');
+    expect(gameSrc).toContain("KLEAN_HOMEPAGE_TAGLINE");
+    const positioningSrc = readFileSync(
+      resolve(__dirname, "../product-positioning.ts"),
+      "utf8",
+    );
+    expect(positioningSrc).toMatch(/god moves/i);
+    expect(positioningSrc).toContain("HOMEPAGE_GAME_FACE_TITLE");
+    expect(positioningSrc).toMatch(/Make god moves on the walk/);
     const founderSrc = readFileSync(
       resolve(__dirname, "../../components/homepage-founder-son-section.tsx"),
       "utf8",

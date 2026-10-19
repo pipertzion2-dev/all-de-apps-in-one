@@ -22,7 +22,8 @@ describe("Klean Sneaks game copy", () => {
     expect(KLEAN_DISCOVER_PERFECT_UI).toBe("Discover your perfect UI");
   });
 
-  it("states homepage protection from cameras and wear", () => {
+  it("states homepage god moves plus protection from cameras and wear", () => {
+    expect(KLEAN_HOMEPAGE_TAGLINE).toMatch(/god moves/i);
     expect(KLEAN_HOMEPAGE_TAGLINE).toMatch(/cameras/i);
     expect(KLEAN_HOMEPAGE_TAGLINE).toMatch(/everyday wear/i);
   });

@@ -10,7 +10,7 @@ import {
 
 describe("homepage flip stack", () => {
   it("maps legacy hash ids to flip panels", () => {
-    expect(flipPanelFromHash("")).toBe("home-game");
+    expect(flipPanelFromHash("")).toBe("home-moves");
     expect(flipPanelFromHash("nav-cube")).toBe("nav-cube");
     expect(flipPanelFromHash("home-game")).toBe("home-game");
     expect(flipPanelFromHash("clean-sneaks")).toBe("home-game");
@@ -31,12 +31,12 @@ describe("homepage flip stack", () => {
     expect(hashForFlipPanel("home-beta")).toBe("home-beta");
   });
 
-  it("orders four cube faces: game → Moves Like → beta → combined", () => {
-    expect(HOMEPAGE_FLIP_PANELS).toEqual(["home-game", "home-moves", "home-beta", "nav-cube"]);
-    expect(flipPanelIndex("home-game")).toBe(0);
-    expect(flipPanelIndex("home-moves")).toBe(1);
-    expect(flipPanelIndex("home-beta")).toBe(2);
-    expect(flipPanelIndex("nav-cube")).toBe(3);
+  it("orders four cube faces: Moves Like → beta → combined → Klean Sneaks", () => {
+    expect(HOMEPAGE_FLIP_PANELS).toEqual(["home-moves", "home-beta", "nav-cube", "home-game"]);
+    expect(flipPanelIndex("home-moves")).toBe(0);
+    expect(flipPanelIndex("home-beta")).toBe(1);
+    expect(flipPanelIndex("nav-cube")).toBe(2);
+    expect(flipPanelIndex("home-game")).toBe(3);
   });
 
   it("runs a timed 3D cube flip with button-only panel changes", () => {
@@ -58,7 +58,6 @@ describe("homepage flip stack", () => {
     expect(flipSrc).toContain("settledOnPlatform");
     expect(flipSrc).toContain('initialPanel = "home-game"');
     expect(flipSrc).toContain("HOMEPAGE_FLIP_EVENT");
-    // No wheel/scroll hijacking — site stays usable.
     expect(flipSrc).not.toContain('addEventListener("wheel"');
     expect(flipSrc).not.toContain("onWheel");
     expect(flipSrc).not.toContain("onPlatformWheel");

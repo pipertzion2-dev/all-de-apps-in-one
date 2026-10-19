@@ -200,7 +200,7 @@ export default function LandingPage() {
     apiCalls: number;
   } | null>(null);
   const [canMountHeavy3d, setCanMountHeavy3d] = useState(false);
-  const [flipInitialPanel, setFlipInitialPanel] = useState<HomepageFlipPanelId>("home-game");
+  const [flipInitialPanel, setFlipInitialPanel] = useState<HomepageFlipPanelId>("home-moves");
   const skipIntroRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
@@ -293,7 +293,7 @@ export default function LandingPage() {
     const flipPanel = flipPanelFromHash(hash);
     const sectionId = homepageSectionFromHash(hash);
 
-    const nextPanel = flipPanel ?? "home-game";
+    const nextPanel = flipPanel ?? "home-moves";
     setFlipInitialPanel((current) => (current === nextPanel ? current : nextPanel));
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
 
@@ -371,11 +371,12 @@ export default function LandingPage() {
         pageFaceRef.current.style.transformOrigin = "";
         pageFaceRef.current.style.willChange = "";
       }
-      // Land on Klean Sneaks unless the URL deep-links a Moves Like section.
+      // Land on The Moves Like (or preserve a deep-linked face). Klean Sneaks is last.
       const hash = window.location.hash.replace(/^#/, "");
       if (!homepageSectionFromHash(hash)) {
-        window.history.replaceState(null, "", "/#home-game");
-        setFlipInitialPanel("home-game");
+        const panel = flipPanelFromHash(hash) ?? "home-moves";
+        window.history.replaceState(null, "", `/#${panel}`);
+        setFlipInitialPanel(panel);
       }
       try {
         sessionStorage.setItem("svivva:homepageIntroComplete", "1");
@@ -782,7 +783,7 @@ export default function LandingPage() {
           </nav>
 
           {showHomepageSection("scrollSnap") ? (
-            /* Four cube faces via native document scroll: game → Moves Like → beta → combined. */
+            /* Four cube faces: Moves Like → beta → combined → Klean Sneaks (god moves arena). */
             <div
               className="relative w-full bg-background"
               data-homepage-native-scroll=""
@@ -790,7 +791,6 @@ export default function LandingPage() {
               data-active-panel={flipInitialPanel}
               style={{ scrollSnapType: "y proximity" }}
             >
-              <HomepageGamePanel />
               <HomepageMovesPanel />
               <ClientErrorBoundary
                 fallback={
@@ -806,6 +806,7 @@ export default function LandingPage() {
                 <HomepageBetaPanel mountCanvas={canMountHeavy3d} interactive={flipComplete} />
                 <HomepageCubePanel mountCanvas={canMountHeavy3d} interactive={flipComplete} />
               </ClientErrorBoundary>
+              <HomepageGamePanel />
             </div>
           ) : (
             <div className="relative overflow-x-hidden">

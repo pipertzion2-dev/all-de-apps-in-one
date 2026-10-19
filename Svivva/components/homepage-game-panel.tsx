@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
-import { HOMEPAGE_SCROLL_TO_PLATFORM } from "@/lib/product-positioning";
+import { HOMEPAGE_SCROLL_TO_COMBINED_UP } from "@/lib/product-positioning";
 import { HomepageScrollHint } from "@/components/homepage-scroll-hint";
 import { HomepageMainGoal } from "@/components/homepage-main-goal";
 import { KLEAN_HOMEPAGE_TAGLINE } from "@/lib/clean-sneaks/game-copy";
@@ -13,7 +13,7 @@ const CleanSneaksLogoCube = dynamic(
   { ssr: false },
 );
 
-/** Game face — first panel after the intro flip. */
+/** Last cube face — Klean Sneaks, the street arena for the same god moves. */
 export function HomepageGamePanel() {
   const router = useRouter();
 
@@ -35,6 +35,12 @@ export function HomepageGamePanel() {
           backgroundImage:
             "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E\")",
         }}
+      />
+
+      <HomepageScrollHint
+        label={HOMEPAGE_SCROLL_TO_COMBINED_UP}
+        direction="up"
+        onActivate={() => scrollToHomepagePanel("nav-cube")}
       />
 
       <div className="relative z-10 flex min-h-0 flex-1 flex-col px-3 pb-[5.5rem] pt-[4.5rem] sm:px-6 sm:pb-28 sm:pt-20">
@@ -59,16 +65,9 @@ export function HomepageGamePanel() {
           className="mt-2 shrink-0 text-center text-[10px] uppercase tracking-[0.25em] text-white/50 sm:text-[11px]"
           data-testid="text-clean-sneaks-goal"
         >
-          {KLEAN_HOMEPAGE_TAGLINE} — tap to play Klean Sneaks free
+          {KLEAN_HOMEPAGE_TAGLINE} — tap to play free
         </p>
       </div>
-
-      <HomepageScrollHint
-        label={HOMEPAGE_SCROLL_TO_PLATFORM}
-        direction="down"
-        prominent
-        onActivate={() => scrollToHomepagePanel("home-moves")}
-      />
     </section>
   );
 }

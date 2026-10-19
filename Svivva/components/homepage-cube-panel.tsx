@@ -7,6 +7,8 @@ import { HomepageHowToSection } from "@/components/homepage-howto-section";
 import { HomepageFounderSonSection } from "@/components/homepage-founder-son-section";
 import { HomepagePricingSection } from "@/components/homepage-pricing-section";
 import { HomepageCubeFaceHint } from "@/components/homepage-cube-face-hint";
+import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
+import { HOMEPAGE_SCROLL_TO_GAME } from "@/lib/product-positioning";
 
 type HomepageCubePanelProps = {
   mountCanvas?: boolean;
@@ -14,8 +16,8 @@ type HomepageCubePanelProps = {
 };
 
 /**
- * Fourth cube face — combined story section (about, how-to, explore, founder, pricing, FAQ).
- * The Moves Like and beta apps live on their own faces above this panel.
+ * Combined story face — about, how-to, explore, founder, pricing, FAQ.
+ * Scroll down from here into Klean Sneaks (last face / god-moves on the walk).
  */
 export function HomepageCubePanel({
   mountCanvas: _mountCanvas = true,
@@ -35,7 +37,7 @@ export function HomepageCubePanel({
           Story, plans, and answers
         </h2>
         <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-          How zzai zzai fits together — then pricing and FAQ.
+          How zzai zzai fits together — then take god moves to the street in Klean Sneaks.
         </p>
       </div>
 
@@ -45,6 +47,19 @@ export function HomepageCubePanel({
       <HomepageFounderSonSection />
       <HomepagePricingSection />
       <HomepageFaqSection />
+
+      {interactive ? (
+        <div className="relative z-20 flex justify-center px-4 py-8">
+          <button
+            type="button"
+            onClick={() => scrollToHomepagePanel("home-game")}
+            className="rounded-full border border-[#5B8DA8]/50 bg-[#5B8DA8] px-6 py-2.5 text-xs font-semibold tracking-wide text-white shadow-sm transition-transform active:scale-95"
+            data-testid="button-scroll-to-klean-sneaks"
+          >
+            {HOMEPAGE_SCROLL_TO_GAME}
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }
