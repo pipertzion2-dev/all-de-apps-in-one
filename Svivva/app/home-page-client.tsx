@@ -545,7 +545,7 @@ export default function LandingPage() {
                     />
                   </div>
 
-                  {/* Bunny Stream video — replaces the previous intro still */}
+                  {/* TEMPORARILY HIDDEN — Bunny Stream video section
                   <div
                     ref={introVideoRef}
                     data-intro-video
@@ -566,7 +566,6 @@ export default function LandingPage() {
                       </p>
                     </div>
 
-                    {/* 16:9 — muted Bunny autoplay; thumbnail covers large-play while paused */}
                     <div
                       className="relative w-full overflow-hidden rounded-xl bg-black"
                       style={{ paddingTop: "56.25%" }}
@@ -583,7 +582,6 @@ export default function LandingPage() {
                         tabIndex={-1}
                       />
                       {introVideoPlaying ? (
-                        // Transparent catcher: click pauses via player.js — Bunny large-play never shows.
                         <button
                           type="button"
                           className="absolute inset-0 z-10 cursor-pointer border-0 bg-transparent p-0"
@@ -595,7 +593,6 @@ export default function LandingPage() {
                           data-testid="button-intro-video-pause"
                         />
                       ) : (
-                        // Opaque thumbnail only — no play icon. Click resumes muted playback.
                         <button
                           type="button"
                           className="absolute inset-0 z-10 cursor-pointer border-0 bg-black p-0"
@@ -608,7 +605,6 @@ export default function LandingPage() {
                           aria-label="Watch intro video"
                           data-testid="button-intro-video-cover"
                         >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={INTRO_BUNNY_THUMBNAIL}
                             alt=""
@@ -621,6 +617,7 @@ export default function LandingPage() {
                       )}
                     </div>
                   </div>
+                  */}
                 </div>
               </div>
             </div>
@@ -644,7 +641,7 @@ export default function LandingPage() {
                 className="text-center text-sm font-medium leading-snug text-white/90 no-underline"
                 style={{ fontFamily: "'Zc', sans-serif", textDecoration: "none" }}
               >
-                The inspiration for the site in one episode
+                Welcome to ZZAI
               </span>
               <span className="text-[10px] uppercase tracking-[0.2em] text-white/55 no-underline">
                 Scroll up to enter
