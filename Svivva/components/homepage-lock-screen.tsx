@@ -22,7 +22,7 @@ export function HomepageLockScreen({ onUnlock }: HomepageLockScreenProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[80] overflow-hidden bg-white">
+    <div className="fixed inset-0 z-[80] overflow-hidden bg-black">
       {/* Denser / larger Three.js camo flowers behind the lock */}
       <div className="pointer-events-none absolute inset-0" aria-hidden>
         <CamoThreeOverlay preset="lock" isIntro eagerMount keepMounted className="h-full w-full" />
