@@ -6,7 +6,7 @@ import { HOMEPAGE_SCROLL_TO_GAME } from "@/lib/product-positioning";
 
 const SCROLL_TOP_THRESHOLD = 48;
 
-/** At the top of The Moves Like face — swipe up to return to the Klean Sneaks demo. */
+/** At the top of The Moves Like face — tap to return to the Klean Sneaks demo. */
 export function HomepageCubeFaceHint() {
   const [atTop, setAtTop] = useState(true);
 

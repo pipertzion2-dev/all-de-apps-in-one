@@ -41,4 +41,12 @@ describe("homepage intro scroll", () => {
     expect(pageSrc).toMatch(/pageFaceRef\.current\.style\.transform = ""/);
     expect(pageSrc).toMatch(/pageFaceRef\.current\.style\.transformOrigin = ""/);
   });
+
+  it("remembers intro completion and lands on Klean Sneaks", () => {
+    expect(pageSrc).toContain('sessionStorage.setItem("svivva:homepageIntroComplete", "1")');
+    expect(pageSrc).toContain('sessionStorage.getItem("svivva:homepageIntroComplete")');
+    expect(pageSrc).toContain("svivva:homepage-intro-complete");
+    expect(pageSrc).toContain('"/#home-game"');
+    expect(pageSrc).toContain('setFlipInitialPanel("home-game")');
+  });
 });

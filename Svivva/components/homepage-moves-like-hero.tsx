@@ -99,7 +99,7 @@ export function HomepageMovesLikeHero() {
             </Button>
           </div>
           <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-            At the top · pull down or tap ↑ for Klean Sneaks · scroll down for more
+            Scroll freely · tap ↑ for Klean Sneaks
           </p>
         </div>
       </div>

@@ -24,7 +24,7 @@ describe("homepage flip stack", () => {
     expect(flipPanelIndex("nav-cube")).toBe(1);
   });
 
-  it("runs a timed 3D cube flip with content on the rotating face", () => {
+  it("runs a timed 3D cube flip with button-only panel changes", () => {
     const flipSrc = readFileSync(
       resolve(__dirname, "../../components/homepage-flip-stack.tsx"),
       "utf8",
@@ -39,13 +39,17 @@ describe("homepage flip stack", () => {
     expect(flipSrc).toContain('updateContentHost("handoff")');
     expect(flipSrc).toContain("data-homepage-flip-scroll");
     expect(flipSrc).toContain("data-homepage-flip-stack");
+    expect(flipSrc).toContain('data-flip-input="buttons-only"');
     expect(flipSrc).toContain("settledOnPlatform");
-    expect(flipSrc).toContain("TOUCH_LEAVE_PX");
-    expect(flipSrc).toContain("platformScrollMode");
     expect(flipSrc).toContain('initialPanel = "home-game"');
-    expect(flipSrc).toContain('panelId === "home-game" && direction > 0');
-    expect(flipSrc).toMatch(/panelId === "nav-cube"[\s\S]*direction > 0[\s\S]*return false/);
-    // No continuous scrub — timed cube rotation only.
+    expect(flipSrc).toContain("HOMEPAGE_FLIP_EVENT");
+    // No wheel/scroll hijacking — site stays usable.
+    expect(flipSrc).not.toContain('addEventListener("wheel"');
+    expect(flipSrc).not.toContain("onWheel");
+    expect(flipSrc).not.toContain("onPlatformWheel");
+    expect(flipSrc).not.toContain("GAME_WHEEL_FLIP_PX");
+    expect(flipSrc).not.toContain("WHEEL_OVERSCROLL_FLIP_PX");
+    expect(flipSrc).not.toContain("nudge(");
     expect(flipSrc).not.toContain("paintDirect");
     expect(flipSrc).not.toContain("scheduleSnap");
     expect(flipSrc).not.toContain("virtualIndexRef");
@@ -56,13 +60,10 @@ describe("homepage flip stack", () => {
       resolve(__dirname, "../../components/homepage-flip-stack.tsx"),
       "utf8",
     );
-    // face stays visible while overlay mounts; only "overlay" hides the cube.
     expect(flipSrc).toContain('"face" | "handoff" | "overlay"');
     expect(flipSrc).toContain("showFaceContent");
     expect(flipSrc).toContain("showOverlayContent");
     expect(flipSrc).toContain('contentHostRef.current === "overlay"');
-    expect(flipSrc).toContain("GAME_WHEEL_FLIP_PX");
-    expect(flipSrc).toContain("GAME_WHEEL_MIN_EVENTS");
   });
 
   it("shows the scroll overlay from live contentHost, not initialPanel", () => {
@@ -70,8 +71,6 @@ describe("homepage flip stack", () => {
       resolve(__dirname, "../../components/homepage-flip-stack.tsx"),
       "utf8",
     );
-    // Regression: initialPanel === "nav-cube" left Moves Like opacity:0 after a
-    // flip from the default home-game land.
     expect(flipSrc).toContain(
       'const showOverlay = contentHost === "overlay" && activePanel === "nav-cube"',
     );
@@ -80,16 +79,16 @@ describe("homepage flip stack", () => {
     expect(flipSrc).toContain('pointerEvents: showOverlay ? "auto" : "none"');
   });
 
-  it("keeps mobile scroll native (no touchmove preventDefault on window)", () => {
+  it("keeps overlay scroll fully native (no touch leave flip)", () => {
     const flipSrc = readFileSync(
       resolve(__dirname, "../../components/homepage-flip-stack.tsx"),
       "utf8",
     );
-    expect(flipSrc).not.toContain('addEventListener("touchmove", onTouchMove');
-    expect(flipSrc).toContain(
-      'addEventListener("touchmove", onPlatformTouchMove, { passive: true })',
-    );
-    expect(flipSrc).toContain("isTouchPrimaryDevice");
+    expect(flipSrc).not.toContain('addEventListener("touchmove"');
+    expect(flipSrc).not.toContain("TOUCH_LEAVE_PX");
+    expect(flipSrc).not.toContain("onGameTouchEnd");
+    expect(flipSrc).not.toContain("onPlatformTouchEnd");
+    expect(flipSrc).toContain('overscrollBehaviorY: "none"');
   });
 
   it("rotates forward like the intro reveal (positive rotor, negative face hinge)", () => {
@@ -100,16 +99,5 @@ describe("homepage flip stack", () => {
     expect(flipSrc).toContain("rotateX(${index * 90}deg)");
     expect(flipSrc).toContain("rotateX(${-i * 90}deg)");
     expect(flipSrc).not.toContain("rotateX(${-index * 90}deg)");
-  });
-
-  it("supports touch swipes for mobile flip navigation", () => {
-    const flipSrc = readFileSync(
-      resolve(__dirname, "../../components/homepage-flip-stack.tsx"),
-      "utf8",
-    );
-    expect(flipSrc).toContain('addEventListener("touchstart"');
-    expect(flipSrc).toContain('addEventListener("touchend"');
-    expect(flipSrc).toContain("SWIPE_THRESHOLD_PX");
-    expect(flipSrc).toContain("onGameTouchEnd");
   });
 });

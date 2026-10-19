@@ -173,6 +173,17 @@ export default function LandingPage() {
    * never receives clicks / never needs to show.
    */
   const [introVideoPlaying, setIntroVideoPlaying] = useState(false);
+
+  // Returning visitors (and browser Back to /) skip the intro video once per tab.
+  useLayoutEffect(() => {
+    try {
+      if (sessionStorage.getItem("svivva:homepageIntroComplete") === "1") {
+        setFlipComplete(true);
+      }
+    } catch {
+      /* private mode */
+    }
+  }, []);
   const virtualScrollRef = useRef(0);
   const targetProgressRef = useRef(0);
   const displayedProgressRef = useRef(0);
@@ -347,6 +358,18 @@ export default function LandingPage() {
         pageFaceRef.current.style.transformOrigin = "";
         pageFaceRef.current.style.willChange = "";
       }
+      // Land on Klean Sneaks unless the URL deep-links a Moves Like section.
+      const hash = window.location.hash.replace(/^#/, "");
+      if (!homepageSectionFromHash(hash)) {
+        window.history.replaceState(null, "", "/#home-game");
+        setFlipInitialPanel("home-game");
+      }
+      try {
+        sessionStorage.setItem("svivva:homepageIntroComplete", "1");
+      } catch {
+        /* private mode */
+      }
+      window.dispatchEvent(new Event("svivva:homepage-intro-complete"));
       setFlipComplete(true);
       document.body.style.overflow = "";
       window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
