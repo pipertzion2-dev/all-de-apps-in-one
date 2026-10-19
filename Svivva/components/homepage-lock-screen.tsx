@@ -23,30 +23,35 @@ export function HomepageLockScreen({ onUnlock }: HomepageLockScreenProps) {
 
   return (
     <div className="fixed inset-0 z-[80] overflow-hidden bg-white">
-      {/* Three.js camo flowers background with white bg */}
+      {/* Three.js camo flowers behind the lock */}
       <div className="pointer-events-none absolute inset-0" aria-hidden>
         <CamoThreeOverlay preset="hero" isIntro eagerMount keepMounted className="h-full w-full" />
       </div>
 
-      {/* Lock image and text - clickable */}
-      <div className="relative z-10 flex h-full w-full flex-col items-center justify-center">
-        <div className="mb-8 text-center">
+      <div className="relative z-10 flex h-full w-full flex-col items-center justify-center px-4">
+        <div className="mb-6 text-center sm:mb-8">
           <h1
-            className="mb-4 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl md:text-6xl"
+            className="mb-3 text-4xl tracking-tight text-gray-900 sm:text-5xl md:text-6xl"
             style={{
-              fontFamily: "system-ui, -apple-system, sans-serif",
-              textShadow: "0 2px 10px rgba(255,255,255,0.8)",
+              fontFamily: '"Zc", sans-serif',
+              textShadow: "0 2px 10px rgba(255,255,255,0.85)",
             }}
           >
             pop the lock
           </h1>
-          <p className="text-lg text-gray-700 sm:text-xl md:text-2xl">Tap to enter</p>
+          <p
+            className="text-lg text-gray-700 sm:text-xl md:text-2xl"
+            style={{ fontFamily: '"Zc", sans-serif' }}
+          >
+            Tap to enter
+          </p>
         </div>
 
         <button
           ref={lockRef}
+          type="button"
           onClick={handleClick}
-          className="group relative cursor-pointer border-0 bg-transparent p-0 transition-all duration-300 hover:scale-105 active:scale-95"
+          className="group relative cursor-pointer border-0 bg-transparent p-0 transition-transform duration-300 hover:scale-105 active:scale-95"
           aria-label="Pop the lock to enter"
           style={{
             width: "min(80vw, 500px)",
@@ -54,49 +59,19 @@ export function HomepageLockScreen({ onUnlock }: HomepageLockScreenProps) {
             transition: "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease-out",
           }}
         >
-          <div className="relative overflow-hidden rounded-2xl shadow-2xl">
-            <Image
-              src="/assets/lock-image.jpg"
-              alt="Lock to enter site"
-              width={500}
-              height={500}
-              priority
-              className="h-auto w-full"
-              style={{
-                filter: "drop-shadow(0 20px 40px rgba(0,0,0,0.3))",
-              }}
-            />
-            {/* Shimmer effect on hover */}
-            <div
-              className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-              style={{
-                background:
-                  "linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)",
-                animation: "shimmer 2s infinite",
-              }}
-            />
-          </div>
-
-          {/* Pulsing glow */}
-          <div
-            className="pointer-events-none absolute inset-0 -z-10 animate-pulse rounded-2xl"
+          {/* No white card — lock PNG has transparent edges over camo */}
+          <Image
+            src="/assets/lock-image.png"
+            alt="Lock to enter site"
+            width={1254}
+            height={1254}
+            priority
+            className="h-auto w-full bg-transparent"
             style={{
-              background: "radial-gradient(circle, rgba(139,92,246,0.2) 0%, transparent 70%)",
-              filter: "blur(20px)",
+              filter: "drop-shadow(0 16px 28px rgba(0,0,0,0.35))",
             }}
           />
         </button>
-
-        <style jsx>{`
-          @keyframes shimmer {
-            0% {
-              transform: translateX(-100%);
-            }
-            100% {
-              transform: translateX(100%);
-            }
-          }
-        `}</style>
       </div>
     </div>
   );
