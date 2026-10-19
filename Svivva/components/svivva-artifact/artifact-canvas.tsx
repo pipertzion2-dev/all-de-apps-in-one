@@ -199,6 +199,9 @@ export function ArtifactCanvas({ active, onSelect }: Props) {
         if (fId === "security" && MEDIA.cubeFaceGraphics?.protect) {
           return MEDIA.cubeFaceGraphics.protect;
         }
+        if (fId === "orbit" && MEDIA.cubeFaceGraphics?.orbit) {
+          return MEDIA.cubeFaceGraphics.orbit;
+        }
         return feature.artworkSrc;
       })();
 

@@ -25,5 +25,6 @@ export const MEDIA = {
     digital: "/assets/cube-graphics/digital-camo.jpg",
     seeds: "/assets/cube-graphics/seeds-leaves.jpg",
     protect: "/assets/cube-graphics/protect-collage.jpg",
+    orbit: "/assets/cube-graphics/orbit-paisley.jpg",
   },
 } as const;
