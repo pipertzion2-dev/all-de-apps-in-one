@@ -175,16 +175,17 @@ export default function LandingPage() {
   const [introVideoPlaying, setIntroVideoPlaying] = useState(false);
 
   // Returning visitors (and browser Back to /) skip the intro video once per tab.
-  useLayoutEffect(() => {
-    try {
-      if (sessionStorage.getItem("svivva:homepageIntroComplete") === "1") {
-        setLockComplete(true);
-        setFlipComplete(true);
-      }
-    } catch {
-      /* private mode */
-    }
-  }, []);
+  // DISABLED: Always show lock screen
+  // useLayoutEffect(() => {
+  //   try {
+  //     if (sessionStorage.getItem("svivva:homepageIntroComplete") === "1") {
+  //       setLockComplete(true);
+  //       setFlipComplete(true);
+  //     }
+  //   } catch {
+  //     /* private mode */
+  //   }
+  // }, []);
   const virtualScrollRef = useRef(0);
   const targetProgressRef = useRef(0);
   const displayedProgressRef = useRef(0);
