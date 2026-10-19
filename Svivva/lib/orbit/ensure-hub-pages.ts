@@ -18,7 +18,7 @@ const ORBIT_HUBS: { slug: HubSlug; title: string; keyword: string; blurb: string
     title: "Cyber Security Mini Apps",
     keyword: "cybersecurity tools",
     blurb:
-      "Security scanners and hardening tools — Clutety for device protection, ZZAI for AI backends.",
+      "Security scanners and hardening tools — ZZAI Security for device protection, ZZAI for AI backends.",
   },
   {
     slug: "seo-pack",
