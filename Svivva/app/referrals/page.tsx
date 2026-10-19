@@ -195,11 +195,6 @@ export default function ReferralsPage() {
                 description: "Eye-catching banners for your website or blog",
                 icon: TrendingUp,
               },
-              {
-                title: "Video Scripts",
-                description: "Short video scripts for TikTok, Instagram Reels, and YouTube Shorts",
-                icon: Zap,
-              },
             ].map((material) => (
               <div
                 key={material.title}
