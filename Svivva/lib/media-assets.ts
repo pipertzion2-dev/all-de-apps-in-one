@@ -23,5 +23,6 @@ export const MEDIA = {
   },
   cubeFaceGraphics: {
     digital: "/assets/cube-graphics/digital-camo.jpg",
+    seeds: "/assets/cube-graphics/seeds-leaves.jpg",
   },
 } as const;
