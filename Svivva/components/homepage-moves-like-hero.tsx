@@ -4,12 +4,10 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { BrandMark } from "@/components/the-moves-like/BrandMark";
 import { CamoThreeOverlay } from "@/components/camo-three-overlay";
-import { HomepageScrollHint } from "@/components/homepage-scroll-hint";
 import { Button } from "@/components/ui/button";
 import { MOVES_LIKE } from "@/lib/the-moves-like/brand";
 import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
 import {
-  HOMEPAGE_SCROLL_TO_GAME,
   PRODUCT_HERO_HEADLINE,
   PRODUCT_HERO_SUBLINE,
   PRODUCT_NAME_LINE,
@@ -99,17 +97,10 @@ export function HomepageMovesLikeHero() {
             </Button>
           </div>
           <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-            Scroll freely · tap ↑ for Klean Sneaks
+            Scroll the page · use ↑ for Klean Sneaks
           </p>
         </div>
       </div>
-
-      <HomepageScrollHint
-        label={HOMEPAGE_SCROLL_TO_GAME}
-        direction="up"
-        prominent
-        onActivate={() => scrollToHomepagePanel("home-game")}
-      />
     </section>
   );
 }

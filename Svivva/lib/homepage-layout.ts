@@ -1,6 +1,6 @@
 /** Which below-the-fold homepage sections render. Cube + nav + footer always show. */
 export const HOMEPAGE_SECTIONS = {
-  /** Full-viewport Dune-style cube flip: game → product cube homepage (with pricing). */
+  /** Compact homepage: native scroll from Klean Sneaks into The Moves Like + pricing. */
   scrollSnap: true,
   oaasIntro: false,
   eventTracker: false,

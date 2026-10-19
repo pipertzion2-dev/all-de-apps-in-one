@@ -3,19 +3,18 @@ import { readFileSync } from "fs";
 import { resolve } from "path";
 
 describe("homepage scroll panels", () => {
-  it("uses a Dune-style flip stack instead of a journey cube widget", () => {
-    const flipSrc = readFileSync(
-      resolve(__dirname, "../../components/homepage-flip-stack.tsx"),
-      "utf8",
-    );
+  it("uses native document scroll instead of a fixed flip overlay", () => {
     const pageSrc = readFileSync(resolve(__dirname, "../../app/home-page-client.tsx"), "utf8");
-    expect(flipSrc).toContain("data-homepage-flip-stack");
-    expect(flipSrc).toContain("rotateX");
-    expect(pageSrc).toContain("HomepageFlipStack");
+    const scrollSrc = readFileSync(resolve(__dirname, "../homepage-scroll.ts"), "utf8");
+    expect(pageSrc).toContain("data-homepage-native-scroll");
+    expect(pageSrc).toContain("HomepageGamePanel");
+    expect(pageSrc).toContain("HomepageCubePanel");
+    expect(pageSrc).not.toContain("HomepageFlipStack");
     expect(pageSrc).not.toContain("HomepageCubeJourney");
     expect(pageSrc).not.toContain("JourneyCubeCanvas");
-    expect(pageSrc).toContain("HomepageCubePanel");
     expect(pageSrc).not.toContain("HomepageExplorePanel");
+    expect(scrollSrc).toContain("scrollIntoView");
+    expect(scrollSrc).toContain("scrollToHomepagePanel");
   });
 
   it("bundle cube panel opens the game route directly", () => {
@@ -25,6 +24,7 @@ describe("homepage scroll panels", () => {
     );
     expect(cubeSrc).toContain("CleanSneaksLogoCube");
     expect(cubeSrc).toContain('router.push("/clean-sneaks")');
+    expect(cubeSrc).toContain('id="home-game"');
   });
 
   it("lands on the game panel first, then homepage cube with pricing", () => {
@@ -37,6 +37,7 @@ describe("homepage scroll panels", () => {
     expect(stackSrc).toMatch(/HOMEPAGE_FLIP_PANELS[\s\S]*"home-game"[\s\S]*"nav-cube"/);
     expect(pageSrc).toContain('useState<HomepageFlipPanelId>("home-game")');
     expect(pageSrc).toContain("HomepageCubePanel");
+    expect(cubeSrc).toContain('id="nav-cube"');
     expect(cubeSrc).toContain("HomepageMovesLikeHero");
     expect(cubeSrc).toContain("HomepageAboutSection");
     expect(cubeSrc).toContain("HomepageFounderSonSection");
@@ -57,6 +58,17 @@ describe("homepage scroll panels", () => {
     expect(cubeSrc).toContain("PlatformFeatureHub");
     expect(cubeSrc).toContain('id="oaas"');
     expect(cubeSrc).not.toContain("Flip down · game");
+  });
+
+  it("keeps the cube-face hint in document flow (not sticky overlay)", () => {
+    const hintSrc = readFileSync(
+      resolve(__dirname, "../../components/homepage-cube-face-hint.tsx"),
+      "utf8",
+    );
+    expect(hintSrc).not.toMatch(/\bsticky\b/);
+    expect(hintSrc).not.toContain("position: fixed");
+    expect(hintSrc).not.toContain("sticky top-0");
+    expect(hintSrc).toContain("scrollToHomepagePanel");
   });
 
   it("mounts the OaaS mixing console on the scrollSnap cube face", () => {

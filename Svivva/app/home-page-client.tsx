@@ -12,12 +12,10 @@ import { runBodyLayerHygiene } from "@/lib/body-layer-cleanup";
 import { showHomepageSection } from "@/lib/homepage-layout";
 import {
   flipPanelFromHash,
-  getHomepageFlipScroller,
   homepageSectionFromHash,
   scrollPlatformSection,
   scrollToHomepagePanel,
 } from "@/lib/homepage-scroll";
-import { HomepageFlipStack } from "@/components/homepage-flip-stack";
 import { HomepageCubePanel } from "@/components/homepage-cube-panel";
 import { HomepageGamePanel } from "@/components/homepage-game-panel";
 import { HomepageHeroBlock } from "@/components/homepage-hero-block";
@@ -296,7 +294,8 @@ export default function LandingPage() {
     let sectionTimer: number | undefined;
     if (sectionId) {
       const scrollSection = () => {
-        if (!getHomepageFlipScroller()) return false;
+        const target = document.getElementById(sectionId);
+        if (!target) return false;
         scrollPlatformSection(sectionId, { behavior: "instant", block: "start" });
         return true;
       };
@@ -306,6 +305,8 @@ export default function LandingPage() {
           sectionTimer = window.setTimeout(scrollSection, 520);
         }
       });
+    } else if (nextPanel === "nav-cube") {
+      requestAnimationFrame(() => scrollToHomepagePanel("nav-cube"));
     }
 
     return () => {
@@ -768,26 +769,27 @@ export default function LandingPage() {
           </nav>
 
           {showHomepageSection("scrollSnap") ? (
-            <HomepageFlipStack
-              interactive={flipComplete}
-              initialPanel={flipInitialPanel}
-              begin={
-                <ClientErrorBoundary
-                  fallback={
-                    <p className="text-center text-sm text-muted-foreground py-12 px-4 min-h-[100svh]">
-                      Cube navigation is temporarily unavailable.{" "}
-                      <Link href="/dashboard" className="text-[#5B8DA8] underline">
-                        Open the dashboard
-                      </Link>
-                      .
-                    </p>
-                  }
-                >
-                  <HomepageCubePanel mountCanvas={canMountHeavy3d} interactive={flipComplete} />
-                </ClientErrorBoundary>
-              }
-              game={<HomepageGamePanel />}
-            />
+            /* Native document scroll — no 3D flip stack / fixed overlay (those made browsing unusable). */
+            <div
+              className="relative w-full bg-background"
+              data-homepage-native-scroll=""
+              data-active-panel={flipInitialPanel}
+            >
+              <HomepageGamePanel />
+              <ClientErrorBoundary
+                fallback={
+                  <p className="text-center text-sm text-muted-foreground py-12 px-4 min-h-[100svh]">
+                    Cube navigation is temporarily unavailable.{" "}
+                    <Link href="/dashboard" className="text-[#5B8DA8] underline">
+                      Open the dashboard
+                    </Link>
+                    .
+                  </p>
+                }
+              >
+                <HomepageCubePanel mountCanvas={canMountHeavy3d} interactive={flipComplete} />
+              </ClientErrorBoundary>
+            </div>
           ) : (
             <div className="relative overflow-x-hidden">
               <ClientErrorBoundary

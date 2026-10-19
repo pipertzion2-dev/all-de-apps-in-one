@@ -1,36 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getHomepageFlipScroller, scrollToHomepagePanel } from "@/lib/homepage-scroll";
+import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
 import { HOMEPAGE_SCROLL_TO_GAME } from "@/lib/product-positioning";
 
-const SCROLL_TOP_THRESHOLD = 48;
-
-/** At the top of The Moves Like face — tap to return to the Klean Sneaks demo. */
+/** Compact in-flow control — stays in document flow so it cannot cover scrolled content. */
 export function HomepageCubeFaceHint() {
-  const [atTop, setAtTop] = useState(true);
-
-  useEffect(() => {
-    const scroller = getHomepageFlipScroller();
-    if (!scroller) return;
-
-    const onScroll = () => {
-      setAtTop(scroller.scrollTop <= SCROLL_TOP_THRESHOLD);
-    };
-
-    onScroll();
-    scroller.addEventListener("scroll", onScroll, { passive: true });
-    return () => scroller.removeEventListener("scroll", onScroll);
-  }, []);
-
-  if (!atTop) return null;
-
   return (
-    <div className="pointer-events-none sticky top-0 z-20 flex justify-center border-b border-border/30 bg-background/95 px-3 py-2 backdrop-blur-md">
+    <div className="relative z-20 flex justify-center border-b border-border/30 bg-background px-3 py-2">
       <button
         type="button"
         onClick={() => scrollToHomepagePanel("home-game")}
-        className="pointer-events-auto flex cursor-pointer flex-col items-center gap-1 transition-opacity duration-200 active:scale-95"
+        className="flex cursor-pointer flex-col items-center gap-1 transition-opacity duration-200 active:scale-95"
         aria-label={HOMEPAGE_SCROLL_TO_GAME}
         data-testid="homepage-cube-face-hint"
       >

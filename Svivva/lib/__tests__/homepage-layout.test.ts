@@ -13,8 +13,11 @@ describe("homepage-layout", () => {
     expect(HOMEPAGE_SECTIONS.founderStory).toBe(false);
   });
 
-  it("uses the Dune-style flip stack for begin, game, and home", () => {
+  it("keeps the compact scrollSnap homepage path enabled", () => {
     expect(showHomepageSection("scrollSnap")).toBe(true);
+    const pageSrc = readFileSync(resolve(__dirname, "../../app/home-page-client.tsx"), "utf8");
+    expect(pageSrc).toContain("data-homepage-native-scroll");
+    expect(pageSrc).not.toContain("HomepageFlipStack");
   });
 
   it("exposes Admin Orbit on the intro overlay and main nav", () => {

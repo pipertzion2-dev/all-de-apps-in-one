@@ -1,16 +1,24 @@
-import { dispatchHomepageFlip, type HomepageFlipPanelId } from "./homepage-flip-stack";
+import {
+  dispatchHomepageFlip,
+  hashForFlipPanel,
+  type HomepageFlipPanelId,
+} from "./homepage-flip-stack";
 
 export type HomepageScrollPanelId = HomepageFlipPanelId;
 
 export const HOMEPAGE_FLIP_SCROLL_SELECTOR = "[data-homepage-flip-scroll]" as const;
 
-/** Fixed overlay that scrolls the platform (page 3) face — not `window`. */
+/** Legacy fixed overlay scroller (flip stack). Prefer document scroll when absent. */
 export function getHomepageFlipScroller(): HTMLElement | null {
   if (typeof document === "undefined") return null;
   return document.querySelector<HTMLElement>(HOMEPAGE_FLIP_SCROLL_SELECTOR);
 }
 
-/** Scroll a section id inside the platform overlay (fallback: document scroll). */
+function panelElementId(id: HomepageScrollPanelId): string {
+  return id === "home-game" ? "home-game" : "nav-cube";
+}
+
+/** Scroll a section id — document scroll, or legacy flip overlay if still mounted. */
 export function scrollPlatformSection(
   id: string,
   options?: { behavior?: ScrollBehavior; block?: ScrollLogicalPosition },
@@ -40,8 +48,17 @@ export function scrollPlatformSection(
   scroller.scrollTo({ top: Math.max(0, nextTop), behavior });
 }
 
-/** Navigate between homepage flip faces (begin → game → home). */
+/**
+ * Navigate between homepage panels via native scrollIntoView.
+ * Falls back to the flip-stack custom event only if panel ids are missing.
+ */
 export function scrollToHomepagePanel(id: HomepageScrollPanelId) {
+  const el = document.getElementById(panelElementId(id));
+  if (el) {
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.history.replaceState(null, "", `/#${hashForFlipPanel(id)}`);
+    return;
+  }
   dispatchHomepageFlip(id);
 }
 

@@ -61,10 +61,10 @@ export const HOMEPAGE_GAME_FACE_SUBLINE =
 export const HOMEPAGE_PLATFORM_FACE_SUBLINE =
   "Open The Moves Like — practice, record, and clash from your phone.";
 
-/** From the game face — tap to open The Moves Like homepage (no scroll-to-flip). */
-export const HOMEPAGE_SCROLL_TO_PLATFORM = "Tap ↓ The Moves Like";
-/** From The Moves Like face (at top) — tap to open Klean Sneaks (no scroll-to-flip). */
-export const HOMEPAGE_SCROLL_TO_GAME = "↑ Tap for Klean Sneaks";
+/** From the game face — scroll/tap down to The Moves Like. */
+export const HOMEPAGE_SCROLL_TO_PLATFORM = "Scroll ↓ The Moves Like";
+/** From The Moves Like — jump back up to Klean Sneaks. */
+export const HOMEPAGE_SCROLL_TO_GAME = "↑ Back to Klean Sneaks";
 
 /** Platform desk modules — Klean Sneaks ships; Hybrid² / API / Pulse stay beta. */
 export const CORE_PLATFORM_FEATURE_IDS = new Set<string>();

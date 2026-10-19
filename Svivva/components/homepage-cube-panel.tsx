@@ -40,7 +40,10 @@ export function HomepageCubePanel({
   interactive = true,
 }: HomepageCubePanelProps) {
   return (
-    <div className="relative bg-background pb-8">
+    <div
+      id="nav-cube"
+      className="relative isolate bg-background pb-8 scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px))] sm:scroll-mt-[calc(4rem+env(safe-area-inset-top,0px))]"
+    >
       {interactive ? <HomepageCubeFaceHint /> : null}
 
       {/* Center of the app — The Moves Like over Three.js flowers */}

@@ -122,6 +122,23 @@
     overflow-x: hidden;
   }
 
+  /* Homepage native scroll: contain decorative WebGL inside sections (not fixed viewport). */
+  [data-landing-page] [data-svivva-feature-bg] {
+    position: absolute !important;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  [data-landing-page] [data-homepage-native-scroll] {
+    position: relative;
+    isolation: isolate;
+    background: hsl(var(--background));
+  }
+
   /* Full-screen game route — must stay fixed viewport (data-page-shell alone collapses height). */
   [data-clean-sneaks-fullscreen] {
     position: fixed !important;
