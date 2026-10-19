@@ -15,6 +15,7 @@ import { ProfileScreen } from "@/components/the-moves-like/screens/ProfileScreen
 import { MOVES_LIKE } from "@/lib/the-moves-like/brand";
 import { useMovesLikeStore } from "@/lib/the-moves-like/store";
 import type { MovesLikeScreen } from "@/lib/the-moves-like/types";
+import { GyroProvider, useMovesLikeGyro } from "@/components/the-moves-like/GyroProvider";
 import { prefersReducedMotion } from "@/lib/the-moves-like/performance";
 import { cn } from "@/lib/utils";
 
@@ -52,10 +53,11 @@ function WebGLFallback() {
 
 const CAMERA_SCREENS: MovesLikeScreen[] = ["learn", "create"];
 
-export function MovesLikeApp() {
+function MovesLikeShell() {
   const screen = useMovesLikeStore((s) => s.screen);
   const setScreen = useMovesLikeStore((s) => s.setScreen);
   const [webgl, setWebgl] = useState(true);
+  const gyro = useMovesLikeGyro();
 
   useEffect(() => {
     try {
@@ -75,6 +77,7 @@ export function MovesLikeApp() {
     <div
       data-the-moves-like
       data-page-shell
+      data-gyro-status={gyro.status}
       className="relative min-h-[100dvh] bg-[#F7FBFC] text-foreground"
       style={{ fontFamily: '"Zc", sans-serif' }}
     >
@@ -124,7 +127,10 @@ export function MovesLikeApp() {
               type="button"
               size="sm"
               className="hidden sm:inline-flex"
-              onClick={() => setScreen("learn")}
+              onClick={() => {
+                void gyro.ensurePermission();
+                setScreen("learn");
+              }}
             >
               Front cam
             </GlassMagentaButton>
@@ -164,5 +170,13 @@ export function MovesLikeApp() {
         <ScreenBody screen={screen} />
       </main>
     </div>
+  );
+}
+
+export function MovesLikeApp() {
+  return (
+    <GyroProvider>
+      <MovesLikeShell />
+    </GyroProvider>
   );
 }

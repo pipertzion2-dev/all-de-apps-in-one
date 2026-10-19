@@ -19,9 +19,11 @@ import {
   GlassMagentaButton,
   GlassPanel,
 } from "@/components/the-moves-like/ui/Glass";
+import { useMovesLikeGyro } from "@/components/the-moves-like/GyroProvider";
 import { useFrontCamera } from "@/lib/the-moves-like/use-front-camera";
 
 export function LearnScreen() {
+  const gyro = useMovesLikeGyro();
   const selectedMoveIds = useMovesLikeStore((s) => s.selectedMoveIds);
   const [moveId, setMoveId] = useState(() => selectedMoveIds[0] ?? "two-step");
   const [step, setStep] = useState(0);
@@ -192,15 +194,30 @@ export function LearnScreen() {
                 </p>
                 <h2 className="text-lg font-bold text-[hsl(180_20%_12%)]">{move.name}</h2>
               </GlassPanel>
-              <span className="tml-glass-teal px-3 py-1.5 text-[10px] uppercase tracking-[0.12em] text-primary">
-                {camera.starting
-                  ? "Opening…"
-                  : camera.active
-                    ? poseStatus === "ready"
-                      ? "Tracking"
-                      : "Live"
-                    : "Camera off"}
-              </span>
+              <div className="flex flex-col items-end gap-1">
+                <span className="tml-glass-teal px-3 py-1.5 text-[10px] uppercase tracking-[0.12em] text-primary">
+                  {camera.starting
+                    ? "Opening…"
+                    : camera.active
+                      ? poseStatus === "ready"
+                        ? "Tracking"
+                        : "Live"
+                      : "Camera off"}
+                </span>
+                {gyro.status === "listening" ? (
+                  <span className="tml-glass px-2.5 py-1 text-[9px] uppercase tracking-[0.14em] text-primary">
+                    Gyro {Math.round(gyro.energy * 100)}%
+                  </span>
+                ) : gyro.status === "prompt" || gyro.status === "granted" ? (
+                  <button
+                    type="button"
+                    className="tml-glass px-2.5 py-1 text-[9px] uppercase tracking-[0.14em] text-muted-foreground"
+                    onClick={() => void gyro.ensurePermission()}
+                  >
+                    Enable gyro
+                  </button>
+                ) : null}
+              </div>
             </div>
 
             {showRef ? (

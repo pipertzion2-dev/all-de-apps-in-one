@@ -12,6 +12,7 @@ import {
 } from "@/lib/the-moves-like/performance";
 import type { AudioAnalysisSnapshot } from "@/lib/the-moves-like/types";
 import { DancerFigure } from "@/components/the-moves-like/scenes/DancerFigure";
+import { GyroParallaxCamera } from "@/components/the-moves-like/scenes/GyroParallaxCamera";
 import { BassPulseRings, SoundWaveBars } from "@/components/the-moves-like/scenes/SoundWaves";
 
 type Props = {
@@ -24,6 +25,8 @@ type Props = {
   playbackProgress?: number;
   clipBoundaries?: number[];
   showCaption?: boolean;
+  /** Tilt the stage camera with the phone gyroscope when sensors are live */
+  gyroParallax?: boolean;
 };
 
 function StageFloor() {
@@ -111,19 +114,25 @@ export function MovementStage({
   playbackProgress = 0,
   clipBoundaries = [],
   showCaption = true,
+  gyroParallax = false,
 }: Props) {
   const quality = useMemo(() => detectRenderQuality(), []);
   const dpr = useMemo(() => dprCap(quality), [quality]);
   const moveName = getMove(moveIds[0] ?? "")?.name;
+  const useGyroCam = gyroParallax && !interactive && !prefersReducedMotion();
 
   const caption =
     mode === "rhythm"
       ? audio?.energy
         ? "Live sound waves · dancing to analysed audio"
         : "Sound-wave stage · upload a track in Play to drive the bars"
-      : moveName
-        ? `Illustrative dancer · ${moveName}`
-        : "Illustrative dancer preview";
+      : useGyroCam
+        ? moveName
+          ? `Tilt your phone · ${moveName}`
+          : "Tilt your phone · illustrative dancer"
+        : moveName
+          ? `Illustrative dancer · ${moveName}`
+          : "Illustrative dancer preview";
 
   return (
     <div className={`relative h-full min-h-[220px] w-full ${className}`}>
@@ -142,6 +151,7 @@ export function MovementStage({
             playbackProgress={playbackProgress}
             clipBoundaries={clipBoundaries}
           />
+          {useGyroCam ? <GyroParallaxCamera enabled /> : null}
           {interactive ? (
             <OrbitControls
               enablePan={false}
