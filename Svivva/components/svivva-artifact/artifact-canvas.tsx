@@ -189,9 +189,15 @@ export function ArtifactCanvas({ active, onSelect }: Props) {
         side: THREE.FrontSide,
       });
 
-      const artworkSrc = (fId === "api" && MEDIA.cubeFaceGraphics?.digital) 
-        ? MEDIA.cubeFaceGraphics.digital 
-        : feature.artworkSrc;
+      const artworkSrc = (() => {
+        if (fId === "api" && MEDIA.cubeFaceGraphics?.digital) {
+          return MEDIA.cubeFaceGraphics.digital;
+        }
+        if (fId === "seeds" && MEDIA.cubeFaceGraphics?.seeds) {
+          return MEDIA.cubeFaceGraphics.seeds;
+        }
+        return feature.artworkSrc;
+      })();
 
       new THREE.TextureLoader().load(
         artworkSrc,
