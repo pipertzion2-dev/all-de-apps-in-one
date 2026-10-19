@@ -3,7 +3,15 @@
 import { useEffect, useRef, useMemo, useState } from "react";
 import { ThreeCRTFlowers } from "./three-crt-flowers";
 
-type ScenePreset = "hero" | "features" | "howItWorks" | "evals" | "pricing" | "checkout" | "oaas";
+type ScenePreset =
+  | "hero"
+  | "lock"
+  | "features"
+  | "howItWorks"
+  | "evals"
+  | "pricing"
+  | "checkout"
+  | "oaas";
 
 const SECTION_CAMO_PRESETS = new Set<ScenePreset>(["features", "howItWorks", "evals", "pricing"]);
 
@@ -132,6 +140,7 @@ export function CamoThreeOverlay({
   const seed = useMemo(() => {
     const presetSeeds: Record<ScenePreset, number> = {
       hero: 42,
+      lock: 91,
       features: 137,
       howItWorks: 256,
       evals: 389,
@@ -197,7 +206,7 @@ export function CamoThreeOverlay({
       };
 
       const isCheckoutCamo = preset === "checkout";
-      const isIntroCamo = preset === "hero";
+      const isIntroCamo = preset === "hero" || preset === "lock";
       const isOaasCamo = preset === "oaas";
       const isSectionCamo = isSectionCamoPreset(preset);
       // OaaS keeps block digi camo; only lower sections use smooth camo on phones.

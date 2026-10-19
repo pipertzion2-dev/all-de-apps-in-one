@@ -15,7 +15,15 @@ function isWebGLAvailable() {
   }
 }
 
-type ScenePreset = "hero" | "features" | "howItWorks" | "evals" | "pricing" | "checkout" | "oaas";
+type ScenePreset =
+  | "hero"
+  | "lock"
+  | "features"
+  | "howItWorks"
+  | "evals"
+  | "pricing"
+  | "checkout"
+  | "oaas";
 
 const SECTION_CAMO_PRESETS = new Set<ScenePreset>(["features", "howItWorks", "evals", "pricing"]);
 
@@ -57,6 +65,24 @@ const PRESETS: Record<ScenePreset, PresetConfig> = {
     interactionStrength: 0.8,
     spreadX: 0.8,
     spreadZ: 0.85,
+  },
+  // Lock screen: denser field + larger blooms behind the lock art
+  lock: {
+    flowerCount: 320,
+    particleCount: 0,
+    waterSize: 34,
+    cameraZ: 7.2,
+    cameraY: 3.8,
+    cameraX: 0,
+    lookAtY: 0,
+    bloomSpeed: 0.028,
+    crtIntensity: 0.22,
+    pixelSize: 1,
+    scanlineIntensity: 0.015,
+    interactionStrength: 0.7,
+    spreadX: 0.92,
+    spreadZ: 0.95,
+    mobileScaleBoost: 1.35,
   },
   features: {
     flowerCount: 140,
@@ -1052,51 +1078,75 @@ export function ThreeCRTFlowers({
 
     const isCheckoutPreset = preset === "checkout";
     const isOaasPreset = preset === "oaas";
+    const isLockPreset = preset === "lock";
     const isSectionCamo = isSectionCamoPreset(preset);
     const isTightCamoMobile = isMediumMobile && (isOaasPreset || isSectionCamo);
 
     const config = isMediumMobile
       ? {
           ...baseConfig,
-          flowerCount: isOaasPreset
+          flowerCount: isLockPreset
             ? isSmallMobile
-              ? 28
-              : 36
-            : isSectionCamo
+              ? 110
+              : 140
+            : isOaasPreset
               ? isSmallMobile
-                ? Math.max(22, Math.floor(baseConfig.flowerCount * 0.42))
-                : Math.max(30, Math.floor(baseConfig.flowerCount * 0.48))
-              : isCheckoutPreset
-                ? Math.max(18, Math.floor(baseConfig.flowerCount * 0.55))
-                : isSmallMobile
-                  ? Math.max(36, Math.floor(baseConfig.flowerCount * 0.32))
-                  : Math.max(48, Math.floor(baseConfig.flowerCount * 0.4)),
+                ? 28
+                : 36
+              : isSectionCamo
+                ? isSmallMobile
+                  ? Math.max(22, Math.floor(baseConfig.flowerCount * 0.42))
+                  : Math.max(30, Math.floor(baseConfig.flowerCount * 0.48))
+                : isCheckoutPreset
+                  ? Math.max(18, Math.floor(baseConfig.flowerCount * 0.55))
+                  : isSmallMobile
+                    ? Math.max(36, Math.floor(baseConfig.flowerCount * 0.32))
+                    : Math.max(48, Math.floor(baseConfig.flowerCount * 0.4)),
           particleCount:
             isOaasPreset || isSectionCamo ? 0 : Math.floor(baseConfig.particleCount * 0.2),
-          cameraZ:
-            isOaasPreset || isSectionCamo
+          cameraZ: isLockPreset
+            ? baseConfig.cameraZ * (isSmallMobile ? 0.92 : 0.95)
+            : isOaasPreset || isSectionCamo
               ? baseConfig.cameraZ * (isSmallMobile ? 0.72 : 0.78)
               : baseConfig.cameraZ * (isSmallMobile ? 1.55 : 1.35),
-          cameraY: baseConfig.cameraY * (isOaasPreset || isSectionCamo ? 0.78 : 1.15),
+          cameraY: isLockPreset
+            ? baseConfig.cameraY * 1.05
+            : baseConfig.cameraY * (isOaasPreset || isSectionCamo ? 0.78 : 1.15),
           pixelSize: 1,
-          crtIntensity: isCheckoutPreset ? 0.06 : isOaasPreset || isSectionCamo ? 0.04 : 0.2,
-          scanlineIntensity: isCheckoutPreset ? 0.003 : isOaasPreset || isSectionCamo ? 0 : 0.012,
+          crtIntensity: isCheckoutPreset
+            ? 0.06
+            : isOaasPreset || isSectionCamo
+              ? 0.04
+              : isLockPreset
+                ? 0.18
+                : 0.2,
+          scanlineIntensity: isCheckoutPreset
+            ? 0.003
+            : isOaasPreset || isSectionCamo
+              ? 0
+              : isLockPreset
+                ? 0.01
+                : 0.012,
           bloomSpeed: baseConfig.bloomSpeed * (isOaasPreset || isSectionCamo ? 0.75 : 0.85),
-          mobileScaleBoost: isOaasPreset
+          mobileScaleBoost: isLockPreset
             ? isSmallMobile
-              ? 1.08
-              : 1.18
-            : isSectionCamo
+              ? 1.45
+              : 1.55
+            : isOaasPreset
               ? isSmallMobile
-                ? 0.72
-                : 0.78
-              : isSmallMobile
-                ? 0.28
-                : 0.36,
+                ? 1.08
+                : 1.18
+              : isSectionCamo
+                ? isSmallMobile
+                  ? 0.72
+                  : 0.78
+                : isSmallMobile
+                  ? 0.28
+                  : 0.36,
         }
       : {
           ...baseConfig,
-          mobileScaleBoost: isOaasPreset ? 1.08 : Math.max(0.85, scaleFactor),
+          mobileScaleBoost: isLockPreset ? 1.55 : isOaasPreset ? 1.08 : Math.max(0.85, scaleFactor),
         };
 
     const cameraAspect = resolveCameraAspect(rawW, rawH, preset, isMediumMobile);
@@ -1221,6 +1271,7 @@ export function ThreeCRTFlowers({
 
     const isCheckout = preset === "checkout";
     const isOaas = preset === "oaas";
+    const isLock = preset === "lock";
     const vivvaTextTex = isCheckout ? createVivvaTextTexture() : null;
     const sectionSeed = PRESETS[preset]?.flowerCount ?? 100;
     const rand =
@@ -1247,17 +1298,21 @@ export function ThreeCRTFlowers({
       const flowerConfig = activeConfigs[typeIndex];
 
       const sizeVariation = isOaas || (isSectionCamo && isMediumMobile) ? rand() : Math.random();
-      const sectionBoost = isIntro
-        ? 1
-        : isOaas
-          ? isMediumMobile
-            ? 1.12
-            : 1.32
-          : isSectionCamo && isMediumMobile
-            ? 1.0
-            : isMediumMobile
-              ? 0.72
-              : 1.4;
+      const sectionBoost = isLock
+        ? isMediumMobile
+          ? 1.4
+          : 1.65
+        : isIntro
+          ? 1
+          : isOaas
+            ? isMediumMobile
+              ? 1.12
+              : 1.32
+            : isSectionCamo && isMediumMobile
+              ? 1.0
+              : isMediumMobile
+                ? 0.72
+                : 1.4;
       const baseScale =
         sizeVariation < 0.2
           ? 0.9 + (isOaas || (isSectionCamo && isMediumMobile) ? rand() : Math.random()) * 0.5

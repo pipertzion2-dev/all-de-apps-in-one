@@ -23,25 +23,28 @@ export function HomepageLockScreen({ onUnlock }: HomepageLockScreenProps) {
 
   return (
     <div className="fixed inset-0 z-[80] overflow-hidden bg-white">
-      {/* Three.js camo flowers behind the lock */}
+      {/* Denser / larger Three.js camo flowers behind the lock */}
       <div className="pointer-events-none absolute inset-0" aria-hidden>
-        <CamoThreeOverlay preset="hero" isIntro eagerMount keepMounted className="h-full w-full" />
+        <CamoThreeOverlay preset="lock" isIntro eagerMount keepMounted className="h-full w-full" />
       </div>
 
       <div className="relative z-10 flex h-full w-full flex-col items-center justify-center px-4">
         <div className="mb-6 text-center sm:mb-8">
           <h1
-            className="mb-3 text-4xl tracking-tight text-gray-900 sm:text-5xl md:text-6xl"
+            className="mb-3 text-4xl tracking-tight text-white sm:text-5xl md:text-6xl"
             style={{
               fontFamily: '"Zc", sans-serif',
-              textShadow: "0 2px 10px rgba(255,255,255,0.85)",
+              textShadow: "0 2px 14px rgba(0,0,0,0.55)",
             }}
           >
             pop the lock
           </h1>
           <p
-            className="text-lg text-gray-700 sm:text-xl md:text-2xl"
-            style={{ fontFamily: '"Zc", sans-serif' }}
+            className="text-lg text-white/90 sm:text-xl md:text-2xl"
+            style={{
+              fontFamily: '"Zc", sans-serif',
+              textShadow: "0 2px 10px rgba(0,0,0,0.45)",
+            }}
           >
             Tap to enter
           </p>
@@ -59,7 +62,6 @@ export function HomepageLockScreen({ onUnlock }: HomepageLockScreenProps) {
             transition: "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease-out",
           }}
         >
-          {/* No white card — lock PNG has transparent edges over camo */}
           <Image
             src="/assets/lock-image.png"
             alt="Lock to enter site"
