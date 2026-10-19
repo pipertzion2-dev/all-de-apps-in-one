@@ -74,10 +74,7 @@ describe("homepage scroll panels", () => {
     expect(cubeSrc).not.toContain("PlatformFeatureHub");
     expect(gameSrc).toContain('surface="game"');
     expect(gameSrc).toContain("KLEAN_HOMEPAGE_TAGLINE");
-    const positioningSrc = readFileSync(
-      resolve(__dirname, "../product-positioning.ts"),
-      "utf8",
-    );
+    const positioningSrc = readFileSync(resolve(__dirname, "../product-positioning.ts"), "utf8");
     expect(positioningSrc).toMatch(/god moves/i);
     expect(positioningSrc).toContain("HOMEPAGE_GAME_FACE_TITLE");
     expect(positioningSrc).toMatch(/Make god moves on the walk/);
