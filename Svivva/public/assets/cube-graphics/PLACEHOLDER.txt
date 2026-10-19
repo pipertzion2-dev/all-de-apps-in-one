@@ -1,0 +1,6 @@
+// PLACEHOLDER: Add your digital camo graphic here
+// The actual graphic should be placed at this path:
+// /workspace/Svivva/public/assets/cube-graphics/digital-camo.jpg
+//
+// This placeholder exists so the build doesn't fail when the file is referenced.
+// Once you add the real digital-camo.jpg file, remove this placeholder.

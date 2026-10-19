@@ -189,8 +189,12 @@ export function ArtifactCanvas({ active, onSelect }: Props) {
         side: THREE.FrontSide,
       });
 
+      const artworkSrc = (fId === "api" && MEDIA.cubeFaceGraphics?.digital) 
+        ? MEDIA.cubeFaceGraphics.digital 
+        : feature.artworkSrc;
+
       new THREE.TextureLoader().load(
-        feature.artworkSrc,
+        artworkSrc,
         (tex) => {
           const img = tex.image as HTMLImageElement | undefined;
           void ensureZcFont().then(() => {

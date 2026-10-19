@@ -21,4 +21,7 @@ export const MEDIA = {
     apiBuilder: apiBuilderArt.src,
     hardware: hardwareArt.src,
   },
+  cubeFaceGraphics: {
+    digital: "/assets/cube-graphics/digital-camo.jpg",
+  },
 } as const;
