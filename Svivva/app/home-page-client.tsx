@@ -19,6 +19,7 @@ import {
 import { HomepageCubePanel } from "@/components/homepage-cube-panel";
 import { HomepageGamePanel } from "@/components/homepage-game-panel";
 import { HomepageHeroBlock } from "@/components/homepage-hero-block";
+import { HomepageLockScreen } from "@/components/homepage-lock-screen";
 import { HOMEPAGE_PRICING_TIERS } from "@/lib/homepage-pricing";
 import type { HomepageFlipPanelId } from "@/lib/homepage-flip-stack";
 import { usePlatform } from "@/lib/platform-context";
@@ -164,6 +165,7 @@ export default function LandingPage() {
   const scrollHintRef = useRef<HTMLDivElement>(null);
   const scrollHintBounceRef = useRef<HTMLDivElement>(null);
   const halfHRef = useRef(400);
+  const [lockComplete, setLockComplete] = useState(false);
   const [flipComplete, setFlipComplete] = useState(false);
   /**
    * When false, an opaque thumbnail covers the iframe (no play icon).
@@ -176,6 +178,7 @@ export default function LandingPage() {
   useLayoutEffect(() => {
     try {
       if (sessionStorage.getItem("svivva:homepageIntroComplete") === "1") {
+        setLockComplete(true);
         setFlipComplete(true);
       }
     } catch {
@@ -336,7 +339,7 @@ export default function LandingPage() {
   }, []);
 
   useLayoutEffect(() => {
-    if (flipComplete) return;
+    if (!lockComplete || flipComplete) return;
 
     const captureEl = introCaptureRef.current;
     if (!captureEl) return;
@@ -432,7 +435,7 @@ export default function LandingPage() {
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [flipComplete]);
+  }, [lockComplete, flipComplete]);
 
   return (
     <div
@@ -440,7 +443,10 @@ export default function LandingPage() {
       data-landing-page
       className="min-h-screen w-full bg-background overflow-x-hidden"
     >
-      {!flipComplete && (
+      {!lockComplete && (
+        <HomepageLockScreen onUnlock={() => setLockComplete(true)} />
+      )}
+      {lockComplete && !flipComplete && (
         <div
           ref={introCaptureRef}
           className="fixed inset-0"
