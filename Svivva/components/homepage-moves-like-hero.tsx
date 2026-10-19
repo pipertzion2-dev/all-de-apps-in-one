@@ -1,6 +1,5 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { BrandMark } from "@/components/the-moves-like/BrandMark";
 import { CamoThreeOverlay } from "@/components/camo-three-overlay";
@@ -13,21 +12,9 @@ import {
   PRODUCT_NAME_LINE,
 } from "@/lib/product-positioning";
 
-const MovementStage = dynamic(
-  () => import("@/components/the-moves-like/scenes/MovementStage").then((m) => m.MovementStage),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex h-full min-h-[50svh] items-center justify-center text-sm text-muted-foreground">
-        Loading stage…
-      </div>
-    ),
-  },
-);
-
 /**
  * Homepage first composition: THE MOVES LIKE as the brand signal,
- * Three.js CRT flowers as the atmosphere, dancer stage underneath.
+ * Three.js CRT flowers as subtle background atmosphere (much lighter opacity).
  * WebGL layers are pointer-events-none so homepage flip / scroll stays smooth.
  */
 export function HomepageMovesLikeHero() {
@@ -42,24 +29,13 @@ export function HomepageMovesLikeHero() {
           preset="oaas"
           eagerMount
           keepMounted
-          className="h-full w-full opacity-[0.72] md:opacity-[0.58]"
-        />
-      </div>
-
-      {/* Decorative only — never steal wheel / touch from the flip scroller */}
-      <div className="pointer-events-none absolute inset-0 z-[1]" aria-hidden>
-        <MovementStage
-          moveIds={["body-roll", "afro-bounce", "two-step"]}
-          mode="freestyle"
-          interactive={false}
-          className="h-full min-h-[100svh]"
-          showCaption={false}
+          className="h-full w-full opacity-[0.35] md:opacity-[0.25]"
         />
       </div>
 
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-t from-[#e8f0f6] via-[#F7FBFC]/40 to-white/20 sm:bg-gradient-to-r sm:from-white/82 sm:via-[rgba(247,251,252,0.45)] sm:to-transparent"
+        className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-[#e8f0f6] via-[#F7FBFC]/40 to-white/20 sm:bg-gradient-to-r sm:from-white/82 sm:via-[rgba(247,251,252,0.45)] sm:to-transparent"
       />
 
       <div className="relative z-10 flex min-h-[100svh] flex-col justify-end px-4 pb-20 pt-28 sm:justify-center sm:px-10 sm:pb-24 sm:pt-24">
