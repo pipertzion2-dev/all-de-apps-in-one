@@ -202,6 +202,9 @@ export function ArtifactCanvas({ active, onSelect }: Props) {
         if (fId === "orbit" && MEDIA.cubeFaceGraphics?.orbit) {
           return MEDIA.cubeFaceGraphics.orbit;
         }
+        if (fId === "hardware" && MEDIA.cubeFaceGraphics?.hardware) {
+          return MEDIA.cubeFaceGraphics.hardware;
+        }
         return feature.artworkSrc;
       })();
 
