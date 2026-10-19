@@ -196,6 +196,9 @@ export function ArtifactCanvas({ active, onSelect }: Props) {
         if (fId === "seeds" && MEDIA.cubeFaceGraphics?.seeds) {
           return MEDIA.cubeFaceGraphics.seeds;
         }
+        if (fId === "security" && MEDIA.cubeFaceGraphics?.protect) {
+          return MEDIA.cubeFaceGraphics.protect;
+        }
         return feature.artworkSrc;
       })();
 
