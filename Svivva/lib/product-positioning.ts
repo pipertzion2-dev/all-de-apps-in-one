@@ -65,6 +65,14 @@ export const HOMEPAGE_PLATFORM_FACE_SUBLINE =
 export const HOMEPAGE_SCROLL_TO_PLATFORM = "Scroll ↓ The Moves Like";
 /** From The Moves Like — jump back up to Klean Sneaks. */
 export const HOMEPAGE_SCROLL_TO_GAME = "↑ Back to Klean Sneaks";
+/** From The Moves Like — continue to beta desk apps. */
+export const HOMEPAGE_SCROLL_TO_BETA = "Scroll ↓ Beta apps";
+/** From beta apps — back to The Moves Like. */
+export const HOMEPAGE_SCROLL_TO_MOVES = "↑ Back to The Moves Like";
+/** From beta apps — continue to the combined story / pricing face. */
+export const HOMEPAGE_SCROLL_TO_COMBINED = "Scroll ↓ More";
+/** From the combined face — back to beta apps. */
+export const HOMEPAGE_SCROLL_TO_BETA_UP = "↑ Back to beta apps";
 
 /** Platform desk modules — Klean Sneaks ships; Hybrid² / API / Pulse stay beta. */
 export const CORE_PLATFORM_FEATURE_IDS = new Set<string>();

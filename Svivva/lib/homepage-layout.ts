@@ -1,6 +1,6 @@
 /** Which below-the-fold homepage sections render. Cube + nav + footer always show. */
 export const HOMEPAGE_SECTIONS = {
-  /** Compact homepage: native scroll from Klean Sneaks into The Moves Like + pricing. */
+  /** Compact homepage: four cube faces — game → Moves Like → beta → combined. */
   scrollSnap: true,
   oaasIntro: false,
   eventTracker: false,

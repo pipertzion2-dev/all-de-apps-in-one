@@ -24,7 +24,9 @@ export function HomepageGamePanel() {
   return (
     <section
       id="home-game"
+      data-homepage-cube-face="game"
       className="relative flex h-[100svh] min-h-0 flex-col overflow-hidden bg-black scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px))] sm:scroll-mt-[calc(4rem+env(safe-area-inset-top,0px))]"
+      style={{ scrollSnapAlign: "start" }}
     >
       <div
         className="pointer-events-none absolute inset-0 opacity-35 mix-blend-soft-light"
@@ -65,7 +67,7 @@ export function HomepageGamePanel() {
         label={HOMEPAGE_SCROLL_TO_PLATFORM}
         direction="down"
         prominent
-        onActivate={() => scrollToHomepagePanel("nav-cube")}
+        onActivate={() => scrollToHomepagePanel("home-moves")}
       />
     </section>
   );

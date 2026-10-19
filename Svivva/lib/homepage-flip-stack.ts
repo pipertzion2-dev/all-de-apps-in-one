@@ -1,14 +1,15 @@
-/** Full-viewport homepage panels flipped like the intro Dune cube. */
-export type HomepageFlipPanelId = "nav-cube" | "home-game";
+/** Full-viewport homepage panels — four cube faces you scroll through. */
+export type HomepageFlipPanelId = "home-game" | "home-moves" | "home-beta" | "nav-cube";
 
 /**
- * Flip order in the rotor (index 0 = “above”):
- * Klean Sneaks demo → The Moves Like product face.
- * Default land is home-game so mobile scroll goes game → main (does not skip the game).
- * From The Moves Like, pull-down / swipe ↑ returns to the game.
+ * Cube scroll order (index 0 = top):
+ * Klean Sneaks → The Moves Like → beta apps → combined (about / pricing / FAQ).
+ * Default land is home-game so the first swipe reaches The Moves Like.
  */
 export const HOMEPAGE_FLIP_PANELS: readonly HomepageFlipPanelId[] = [
   "home-game",
+  "home-moves",
+  "home-beta",
   "nav-cube",
 ] as const;
 
@@ -20,31 +21,41 @@ export function flipPanelFromIndex(index: number): HomepageFlipPanelId {
   return HOMEPAGE_FLIP_PANELS[Math.min(Math.max(index, 0), HOMEPAGE_FLIP_PANELS.length - 1)];
 }
 
-/** Section ids inside the platform scroll overlay (third homepage face). */
+/** Section ids inside the combined (fourth) homepage face. */
 export const HOMEPAGE_PLATFORM_SECTION_HASHES = new Set([
   "about",
   "explore",
   "faq",
   "founder-story",
   "how-it-works",
-  "oaas",
   "pricing",
 ]);
 
+/** Section ids that live on the beta apps (third) face. */
+export const HOMEPAGE_BETA_SECTION_HASHES = new Set(["oaas"]);
+
 export function homepageSectionFromHash(hash: string): string | null {
   const id = hash.replace(/^#/, "").trim();
-  return HOMEPAGE_PLATFORM_SECTION_HASHES.has(id) ? id : null;
+  if (HOMEPAGE_PLATFORM_SECTION_HASHES.has(id) || HOMEPAGE_BETA_SECTION_HASHES.has(id)) {
+    return id;
+  }
+  return null;
 }
 
 export function flipPanelFromHash(hash: string): HomepageFlipPanelId | null {
   const id = hash.replace(/^#/, "").trim();
-  // Bare `/` lands on the game so swipe-down reaches The Moves Like (does not skip).
+  // Bare `/` lands on the game so swipe-down reaches The Moves Like.
   if (!id) return "home-game";
-  if (id === "nav-cube") return "nav-cube";
   if (id === "home-game" || id === "clean-sneaks") return "home-game";
+  if (id === "home-moves" || id === "the-moves-like") return "home-moves";
+  if (id === "home-beta" || id === "beta-apps") return "home-beta";
+  if (id === "nav-cube") return "nav-cube";
   // Retired explore face — open The Moves Like homepage instead.
-  if (id === "home-explore") return "nav-cube";
-  if (homepageSectionFromHash(id)) return "nav-cube";
+  if (id === "home-explore") return "home-moves";
+  // Mixing console lives on the beta face.
+  if (HOMEPAGE_BETA_SECTION_HASHES.has(id)) return "home-beta";
+  // Deep-linked story / pricing sections live on the combined fourth face.
+  if (HOMEPAGE_PLATFORM_SECTION_HASHES.has(id)) return "nav-cube";
   return null;
 }
 

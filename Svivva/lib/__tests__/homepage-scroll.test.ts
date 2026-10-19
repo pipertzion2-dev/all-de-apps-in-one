@@ -7,7 +7,10 @@ describe("homepage scroll panels", () => {
     const pageSrc = readFileSync(resolve(__dirname, "../../app/home-page-client.tsx"), "utf8");
     const scrollSrc = readFileSync(resolve(__dirname, "../homepage-scroll.ts"), "utf8");
     expect(pageSrc).toContain("data-homepage-native-scroll");
+    expect(pageSrc).toContain('data-homepage-cube-faces="4"');
     expect(pageSrc).toContain("HomepageGamePanel");
+    expect(pageSrc).toContain("HomepageMovesPanel");
+    expect(pageSrc).toContain("HomepageBetaPanel");
     expect(pageSrc).toContain("HomepageCubePanel");
     expect(pageSrc).not.toContain("HomepageFlipStack");
     expect(pageSrc).not.toContain("HomepageCubeJourney");
@@ -25,24 +28,42 @@ describe("homepage scroll panels", () => {
     expect(cubeSrc).toContain("CleanSneaksLogoCube");
     expect(cubeSrc).toContain('router.push("/clean-sneaks")');
     expect(cubeSrc).toContain('id="home-game"');
+    expect(cubeSrc).toContain('scrollToHomepagePanel("home-moves")');
   });
 
-  it("lands on the game panel first, then homepage cube with pricing", () => {
+  it("splits four cube faces: game, Moves Like, beta apps, combined", () => {
     const stackSrc = readFileSync(resolve(__dirname, "../../lib/homepage-flip-stack.ts"), "utf8");
     const pageSrc = readFileSync(resolve(__dirname, "../../app/home-page-client.tsx"), "utf8");
+    const movesSrc = readFileSync(
+      resolve(__dirname, "../../components/homepage-moves-panel.tsx"),
+      "utf8",
+    );
+    const betaSrc = readFileSync(
+      resolve(__dirname, "../../components/homepage-beta-panel.tsx"),
+      "utf8",
+    );
     const cubeSrc = readFileSync(
       resolve(__dirname, "../../components/homepage-cube-panel.tsx"),
       "utf8",
     );
-    expect(stackSrc).toMatch(/HOMEPAGE_FLIP_PANELS[\s\S]*"home-game"[\s\S]*"nav-cube"/);
+    expect(stackSrc).toMatch(
+      /HOMEPAGE_FLIP_PANELS[\s\S]*"home-game"[\s\S]*"home-moves"[\s\S]*"home-beta"[\s\S]*"nav-cube"/,
+    );
     expect(pageSrc).toContain('useState<HomepageFlipPanelId>("home-game")');
-    expect(pageSrc).toContain("HomepageCubePanel");
+    expect(movesSrc).toContain('id="home-moves"');
+    expect(movesSrc).toContain("HomepageMovesLikeHero");
+    expect(betaSrc).toContain('id="home-beta"');
+    expect(betaSrc).toContain("HomepageHeroBlock");
+    expect(betaSrc).toContain("PlatformFeatureHub");
+    expect(betaSrc).toContain('id="oaas"');
     expect(cubeSrc).toContain('id="nav-cube"');
-    expect(cubeSrc).toContain("HomepageMovesLikeHero");
     expect(cubeSrc).toContain("HomepageAboutSection");
     expect(cubeSrc).toContain("HomepageFounderSonSection");
     expect(cubeSrc).toMatch(/HomepageFounderSonSection[\s\S]*HomepagePricingSection/);
     expect(cubeSrc).not.toContain("HomepageProtectionHero");
+    expect(cubeSrc).not.toContain("HomepageMovesLikeHero");
+    expect(cubeSrc).not.toContain("HomepageHeroBlock");
+    expect(cubeSrc).not.toContain("PlatformFeatureHub");
     const founderSrc = readFileSync(
       resolve(__dirname, "../../components/homepage-founder-son-section.tsx"),
       "utf8",
@@ -54,9 +75,6 @@ describe("homepage scroll panels", () => {
     expect(cubeSrc).toContain("HomepageHowToSection");
     expect(cubeSrc).toContain("HomepageExploreLinks");
     expect(cubeSrc).toContain("HomepageCubeFaceHint");
-    expect(cubeSrc).toContain("scrollPlatformSection");
-    expect(cubeSrc).toContain("PlatformFeatureHub");
-    expect(cubeSrc).toContain('id="oaas"');
     expect(cubeSrc).not.toContain("Flip down · game");
   });
 
@@ -69,19 +87,20 @@ describe("homepage scroll panels", () => {
     expect(hintSrc).not.toContain("position: fixed");
     expect(hintSrc).not.toContain("sticky top-0");
     expect(hintSrc).toContain("scrollToHomepagePanel");
+    expect(hintSrc).toContain('scrollToHomepagePanel("home-beta")');
   });
 
-  it("mounts the OaaS mixing console on the scrollSnap cube face", () => {
-    const cubeSrc = readFileSync(
-      resolve(__dirname, "../../components/homepage-cube-panel.tsx"),
+  it("mounts the OaaS mixing console on the beta cube face", () => {
+    const betaSrc = readFileSync(
+      resolve(__dirname, "../../components/homepage-beta-panel.tsx"),
       "utf8",
     );
     const hubSrc = readFileSync(
       resolve(__dirname, "../../components/platform-feature-hub.tsx"),
       "utf8",
     );
-    expect(cubeSrc).toContain("hideBackground");
-    expect(cubeSrc).toContain("hideChannelStrips");
+    expect(betaSrc).toContain("hideBackground");
+    expect(betaSrc).toContain("hideChannelStrips");
     expect(hubSrc).toContain("BusOverviewFilter");
     expect(hubSrc).toContain("onSubmit");
     expect(hubSrc).toContain("Patch route");

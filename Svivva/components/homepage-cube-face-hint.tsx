@@ -1,7 +1,7 @@
 "use client";
 
 import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
-import { HOMEPAGE_SCROLL_TO_GAME } from "@/lib/product-positioning";
+import { HOMEPAGE_SCROLL_TO_BETA_UP } from "@/lib/product-positioning";
 
 /** Compact in-flow control — stays in document flow so it cannot cover scrolled content. */
 export function HomepageCubeFaceHint() {
@@ -9,13 +9,13 @@ export function HomepageCubeFaceHint() {
     <div className="relative z-20 flex justify-center border-b border-border/30 bg-background px-3 py-2">
       <button
         type="button"
-        onClick={() => scrollToHomepagePanel("home-game")}
+        onClick={() => scrollToHomepagePanel("home-beta")}
         className="flex cursor-pointer flex-col items-center gap-1 transition-opacity duration-200 active:scale-95"
-        aria-label={HOMEPAGE_SCROLL_TO_GAME}
+        aria-label={HOMEPAGE_SCROLL_TO_BETA_UP}
         data-testid="homepage-cube-face-hint"
       >
         <span className="rounded-full bg-muted/80 px-4 py-1.5 text-[11px] font-medium tracking-wide text-muted-foreground shadow-sm ring-1 ring-border/40">
-          {HOMEPAGE_SCROLL_TO_GAME}
+          {HOMEPAGE_SCROLL_TO_BETA_UP}
         </span>
         <svg
           width="18"

@@ -15,7 +15,7 @@ export function getHomepageFlipScroller(): HTMLElement | null {
 }
 
 function panelElementId(id: HomepageScrollPanelId): string {
-  return id === "home-game" ? "home-game" : "nav-cube";
+  return id;
 }
 
 /** Scroll a section id — document scroll, or legacy flip overlay if still mounted. */

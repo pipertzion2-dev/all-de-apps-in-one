@@ -16,10 +16,12 @@ import {
   scrollPlatformSection,
   scrollToHomepagePanel,
 } from "@/lib/homepage-scroll";
+import { HomepageBetaPanel } from "@/components/homepage-beta-panel";
 import { HomepageCubePanel } from "@/components/homepage-cube-panel";
 import { HomepageGamePanel } from "@/components/homepage-game-panel";
 import { HomepageHeroBlock } from "@/components/homepage-hero-block";
 import { HomepageLockScreen } from "@/components/homepage-lock-screen";
+import { HomepageMovesPanel } from "@/components/homepage-moves-panel";
 import { HOMEPAGE_PRICING_TIERS } from "@/lib/homepage-pricing";
 import type { HomepageFlipPanelId } from "@/lib/homepage-flip-stack";
 import { usePlatform } from "@/lib/platform-context";
@@ -303,14 +305,18 @@ export default function LandingPage() {
         scrollPlatformSection(sectionId, { behavior: "instant", block: "start" });
         return true;
       };
-      scrollToHomepagePanel("nav-cube");
+      scrollToHomepagePanel(nextPanel);
       requestAnimationFrame(() => {
         if (!scrollSection()) {
           sectionTimer = window.setTimeout(scrollSection, 520);
         }
       });
-    } else if (nextPanel === "nav-cube") {
-      requestAnimationFrame(() => scrollToHomepagePanel("nav-cube"));
+    } else if (
+      nextPanel === "nav-cube" ||
+      nextPanel === "home-moves" ||
+      nextPanel === "home-beta"
+    ) {
+      requestAnimationFrame(() => scrollToHomepagePanel(nextPanel));
     }
 
     return () => {
@@ -323,9 +329,11 @@ export default function LandingPage() {
     if (!flipComplete || !showHomepageSection("scrollSnap")) return;
 
     const onHashChange = () => {
-      const sectionId = homepageSectionFromHash(window.location.hash);
+      const hash = window.location.hash;
+      const sectionId = homepageSectionFromHash(hash);
       if (!sectionId) return;
-      scrollToHomepagePanel("nav-cube");
+      const panel = flipPanelFromHash(hash) ?? "nav-cube";
+      scrollToHomepagePanel(panel);
       window.requestAnimationFrame(() => {
         scrollPlatformSection(sectionId, { behavior: "instant", block: "start" });
       });
@@ -774,13 +782,16 @@ export default function LandingPage() {
           </nav>
 
           {showHomepageSection("scrollSnap") ? (
-            /* Native document scroll — no 3D flip stack / fixed overlay (those made browsing unusable). */
+            /* Four cube faces via native document scroll: game → Moves Like → beta → combined. */
             <div
               className="relative w-full bg-background"
               data-homepage-native-scroll=""
+              data-homepage-cube-faces="4"
               data-active-panel={flipInitialPanel}
+              style={{ scrollSnapType: "y proximity" }}
             >
               <HomepageGamePanel />
+              <HomepageMovesPanel />
               <ClientErrorBoundary
                 fallback={
                   <p className="text-center text-sm text-muted-foreground py-12 px-4 min-h-[100svh]">
@@ -792,6 +803,7 @@ export default function LandingPage() {
                   </p>
                 }
               >
+                <HomepageBetaPanel mountCanvas={canMountHeavy3d} interactive={flipComplete} />
                 <HomepageCubePanel mountCanvas={canMountHeavy3d} interactive={flipComplete} />
               </ClientErrorBoundary>
             </div>

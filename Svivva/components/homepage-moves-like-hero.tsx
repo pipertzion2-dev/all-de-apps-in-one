@@ -92,12 +92,21 @@ export function HomepageMovesLikeHero() {
             >
               Play Klean Sneaks
             </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="min-h-12 border-white/80 bg-white/50"
+              data-testid="button-hero-beta-apps"
+              onClick={() => scrollToHomepagePanel("home-beta")}
+            >
+              Beta apps
+            </Button>
             <Button asChild variant="ghost" className="min-h-11 text-[#6D91B3]">
               <Link href="/the-moves-like">Practice with front camera</Link>
             </Button>
           </div>
           <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-            Scroll the page · use ↑ for Klean Sneaks
+            Scroll ↓ for beta apps · ↑ for Klean Sneaks
           </p>
         </div>
       </div>
