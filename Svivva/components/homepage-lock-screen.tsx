@@ -57,7 +57,7 @@ export function HomepageLockScreen({ onUnlock }: HomepageLockScreenProps) {
           className="group relative cursor-pointer border-0 bg-transparent p-0 transition-transform duration-300 hover:scale-105 active:scale-95"
           aria-label="Pop the lock to enter"
           style={{
-            width: "min(80vw, 500px)",
+            width: "min(60vw, 380px)",
             height: "auto",
             transition: "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease-out",
           }}
