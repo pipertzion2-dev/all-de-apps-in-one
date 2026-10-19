@@ -25,13 +25,7 @@ export function HomepageLockScreen({ onUnlock }: HomepageLockScreenProps) {
     <div className="fixed inset-0 z-[80] overflow-hidden bg-white">
       {/* Three.js camo flowers background with white bg */}
       <div className="pointer-events-none absolute inset-0" aria-hidden>
-        <CamoThreeOverlay
-          preset="hero"
-          isIntro
-          eagerMount
-          keepMounted
-          className="h-full w-full"
-        />
+        <CamoThreeOverlay preset="hero" isIntro eagerMount keepMounted className="h-full w-full" />
       </div>
 
       {/* Lock image and text - clickable */}
@@ -46,9 +40,7 @@ export function HomepageLockScreen({ onUnlock }: HomepageLockScreenProps) {
           >
             pop the lock
           </h1>
-          <p className="text-lg text-gray-700 sm:text-xl md:text-2xl">
-            Tap to enter
-          </p>
+          <p className="text-lg text-gray-700 sm:text-xl md:text-2xl">Tap to enter</p>
         </div>
 
         <button
@@ -89,8 +81,7 @@ export function HomepageLockScreen({ onUnlock }: HomepageLockScreenProps) {
           <div
             className="pointer-events-none absolute inset-0 -z-10 animate-pulse rounded-2xl"
             style={{
-              background:
-                "radial-gradient(circle, rgba(139,92,246,0.2) 0%, transparent 70%)",
+              background: "radial-gradient(circle, rgba(139,92,246,0.2) 0%, transparent 70%)",
               filter: "blur(20px)",
             }}
           />

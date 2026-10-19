@@ -443,9 +443,7 @@ export default function LandingPage() {
       data-landing-page
       className="min-h-screen w-full bg-background overflow-x-hidden"
     >
-      {!lockComplete && (
-        <HomepageLockScreen onUnlock={() => setLockComplete(true)} />
-      )}
+      {!lockComplete && <HomepageLockScreen onUnlock={() => setLockComplete(true)} />}
       {lockComplete && !flipComplete && (
         <div
           ref={introCaptureRef}
