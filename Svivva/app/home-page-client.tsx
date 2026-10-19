@@ -378,9 +378,9 @@ export default function LandingPage() {
 
     skipIntroRef.current = finishIntro;
 
-    // Bunny Stream intro: no 3D flip / no window touch capture — those froze iPhone
-    // while WebGL flowers + the video player ran together. Skip / Enter dismisses.
+    const mobile = window.matchMedia("(max-width: 767px)").matches;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
     if (reducedMotion) {
       finishIntro();
       return () => {
@@ -388,48 +388,217 @@ export default function LandingPage() {
       };
     }
 
-    // Keep the intro panel flat (identity transforms) — video + flowers only.
-    if (flipFrontRef.current) flipFrontRef.current.style.transform = "";
-    if (flipRotorRef.current) flipRotorRef.current.style.transform = "";
-    if (pageFaceRef.current) {
-      pageFaceRef.current.style.transform = "";
-      pageFaceRef.current.style.willChange = "";
-    }
-    if (scrollHintRef.current) scrollHintRef.current.style.opacity = "1";
+    const flipZone = Math.max(window.innerHeight * (mobile ? 0.72 : 0.85), mobile ? 340 : 420);
 
-    // Scroll / swipe up enters the site (no flip RAF). Do not ignore events over
-    // the player — the video block is most of the viewport, and play/pause is
-    // click-only (iframe is pointer-events-none), so gating on the video target
-    // made "Scroll up to enter" effectively dead.
+    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+
+    const progressToAngle = (progress: number) => {
+      const clamped = Math.min(Math.max(progress, 0), 1);
+      return easeOutCubic(clamped) * 90;
+    };
+
+    const paintPageFace = (angle: number) => {
+      if (!pageFaceRef.current) return;
+      pageFaceRef.current.style.transform = `rotateX(${angle - 90}deg)`;
+    };
+
+    const syncFlipDepth = () => {
+      const halfH = halfHRef.current;
+      const angle = progressToAngle(displayedProgressRef.current);
+
+      if (flipFrontRef.current) {
+        flipFrontRef.current.style.transform = `translate3d(0, 0, ${halfH}px)`;
+      }
+      if (flipRotorRef.current) {
+        flipRotorRef.current.style.transform = `translate3d(0, 0, ${-halfH}px) rotateX(${angle}deg)`;
+      }
+      paintPageFace(angle);
+    };
+
+    const paintFlip = (progress: number) => {
+      const halfH = halfHRef.current;
+      const clamped = Math.min(Math.max(progress, 0), 1);
+      displayedProgressRef.current = clamped;
+      const angle = progressToAngle(clamped);
+
+      if (flipRotorRef.current) {
+        flipRotorRef.current.style.transform = `translate3d(0, 0, ${-halfH}px) rotateX(${angle}deg)`;
+      }
+      paintPageFace(angle);
+
+      if (!finishingIntroRef.current) {
+        captureEl.style.opacity = "1";
+      }
+
+      if (scrollHintRef.current) {
+        scrollHintRef.current.style.opacity = String(Math.max(0, 1 - clamped * 8));
+      }
+
+      if (!scrollHintHiddenRef.current && clamped >= 0.02) {
+        scrollHintHiddenRef.current = true;
+        if (scrollHintBounceRef.current) {
+          scrollHintBounceRef.current.style.animation = "none";
+        }
+      }
+    };
+
+    const scheduleFinish = () => {
+      if (finishingIntroRef.current) return;
+      finishingIntroRef.current = true;
+      stopFlipAnim();
+      targetProgressRef.current = 1;
+      paintFlip(1);
+      document.body.style.overflow = "";
+      captureEl.style.pointerEvents = "none";
+      captureEl.style.transition = "opacity 420ms cubic-bezier(0.22, 1, 0.36, 1)";
+      captureEl.style.opacity = "0";
+      window.setTimeout(finishIntro, 440);
+    };
+
+    let lastFrameMs = performance.now();
+    const tickFlip = (now: number) => {
+      flipAnimRef.current = 0;
+      const dt = Math.min((now - lastFrameMs) / 1000, 0.032);
+      lastFrameMs = now;
+
+      const target = targetProgressRef.current;
+      let current = displayedProgressRef.current;
+      const delta = target - current;
+
+      if (Math.abs(delta) > 0.0004) {
+        const smoothing = 1 - Math.exp(-12 * dt);
+        current += delta * smoothing;
+        if ((delta > 0 && current > target) || (delta < 0 && current < target)) {
+          current = target;
+        }
+        paintFlip(current);
+        flipAnimRef.current = requestAnimationFrame(tickFlip);
+        return;
+      }
+
+      if (current !== target) paintFlip(target);
+
+      if (target >= 1 && displayedProgressRef.current >= 0.985) {
+        scheduleFinish();
+      }
+    };
+
+    const ensureTick = () => {
+      if (!flipAnimRef.current) {
+        lastFrameMs = performance.now();
+        flipAnimRef.current = requestAnimationFrame(tickFlip);
+      }
+    };
+
+    const snapToFinish = () => {
+      if (finishingIntroRef.current) return;
+      targetProgressRef.current = 1;
+      virtualScrollRef.current = flipZone;
+      ensureTick();
+    };
+
+    let idleCompleteTimer: number | undefined;
+    const bumpIdleComplete = () => {
+      if (idleCompleteTimer !== undefined) window.clearTimeout(idleCompleteTimer);
+      idleCompleteTimer = window.setTimeout(() => {
+        if (finishingIntroRef.current) return;
+        if (displayedProgressRef.current >= 0.68) {
+          snapToFinish();
+        }
+      }, 750);
+    };
+
+    const isOverIntroVideo = (target: EventTarget | null) => {
+      const videoEl = introVideoRef.current;
+      if (!videoEl || !(target instanceof Node)) return false;
+      return videoEl.contains(target);
+    };
+
+    const applyDelta = (delta: number) => {
+      if (finishingIntroRef.current) return;
+      const gain = mobile ? 1.05 : 0.9;
+      const clampedDelta = Math.sign(delta) * Math.min(Math.abs(delta) * gain, 36);
+      virtualScrollRef.current = Math.max(
+        0,
+        Math.min(flipZone, virtualScrollRef.current + clampedDelta),
+      );
+      targetProgressRef.current = virtualScrollRef.current / flipZone;
+      bumpIdleComplete();
+      ensureTick();
+    };
+
+    syncFlipDepth();
+    paintFlip(0);
+
+    const handleResize = () => {
+      halfHRef.current = window.innerHeight / 2;
+      syncFlipDepth();
+      paintFlip(displayedProgressRef.current);
+    };
+    window.addEventListener("resize", handleResize);
+
     const handleWheel = (e: WheelEvent) => {
       if (finishingIntroRef.current) return;
-      if (e.deltaY < 0) {
-        finishingIntroRef.current = true;
-        finishIntro();
-      }
+      if (isOverIntroVideo(e.target)) return;
+      e.preventDefault();
+      let delta = e.deltaY;
+      if (e.deltaMode === WheelEvent.DOM_DELTA_LINE) delta *= 16;
+      if (e.deltaMode === WheelEvent.DOM_DELTA_PAGE) delta *= window.innerHeight * 0.35;
+      applyDelta(delta);
     };
+
     let touchStartY = 0;
+    let touchStartedOnVideo = false;
     const handleTouchStart = (e: TouchEvent) => {
+      touchStartedOnVideo = isOverIntroVideo(e.target);
       touchStartY = e.touches[0]?.clientY ?? 0;
     };
-    const handleTouchEnd = (e: TouchEvent) => {
+    const handleTouchMove = (e: TouchEvent) => {
       if (finishingIntroRef.current) return;
-      const y = e.changedTouches[0]?.clientY ?? touchStartY;
-      if (touchStartY - y > 48) {
-        finishingIntroRef.current = true;
-        finishIntro();
+      if (touchStartedOnVideo || isOverIntroVideo(e.target)) return;
+      e.preventDefault();
+      const y = e.touches[0]?.clientY ?? touchStartY;
+      const delta = touchStartY - y;
+      touchStartY = y;
+      applyDelta(delta);
+    };
+
+    const handleTouchEnd = () => {
+      if (finishingIntroRef.current || touchStartedOnVideo) return;
+      if (displayedProgressRef.current >= 0.72) {
+        snapToFinish();
       }
     };
-    window.addEventListener("wheel", handleWheel, { passive: true });
+
+    let wheelEndTimer: number | undefined;
+    const handleWheelEnd = (e: WheelEvent) => {
+      if (isOverIntroVideo(e.target)) return;
+      if (wheelEndTimer !== undefined) window.clearTimeout(wheelEndTimer);
+      wheelEndTimer = window.setTimeout(() => {
+        if (finishingIntroRef.current) return;
+        if (displayedProgressRef.current >= 0.72) {
+          snapToFinish();
+        }
+      }, 120);
+    };
+
+    window.addEventListener("wheel", handleWheel, { passive: false });
     window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
     window.addEventListener("touchend", handleTouchEnd, { passive: true });
+    window.addEventListener("wheel", handleWheelEnd, { passive: true });
 
     return () => {
       skipIntroRef.current = null;
+      if (idleCompleteTimer !== undefined) window.clearTimeout(idleCompleteTimer);
+      if (wheelEndTimer !== undefined) window.clearTimeout(wheelEndTimer);
       stopFlipAnim();
+      window.removeEventListener("resize", handleResize);
       document.body.style.overflow = "";
       window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("wheel", handleWheelEnd);
       window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("touchend", handleTouchEnd);
     };
   }, [flipComplete]);
@@ -630,10 +799,10 @@ export default function LandingPage() {
                 className="text-center text-sm font-medium leading-snug text-white/90 no-underline"
                 style={{ fontFamily: "'Zc', sans-serif", textDecoration: "none" }}
               >
-                The inspiration for the site in one episode
+                Press the video to play · Scroll outside it to enter
               </span>
               <span className="text-[10px] uppercase tracking-[0.2em] text-white/55 no-underline">
-                Scroll up to enter
+                Or tap Skip intro
               </span>
               <svg
                 width="20"
