@@ -3,6 +3,7 @@ import { scorePageContent } from "@/lib/seo/content-quality/score";
 import {
   FEATURE_MINI_APPS,
   BLEND_PREVIEW_CHANNELS,
+  MAIN_PLATFORM_FEATURE_IDS,
   chooseCubeFace,
   featureMiniAppsPassQualityGate,
   generateFeatureMiniAppSeoPages,
@@ -10,11 +11,20 @@ import {
 
 describe("feature mini-apps", () => {
   it("ships one-job slices, not full products", () => {
-    expect(FEATURE_MINI_APPS.length).toBeGreaterThanOrEqual(6);
+    expect(FEATURE_MINI_APPS.length).toBeGreaterThanOrEqual(18);
     for (const app of FEATURE_MINI_APPS) {
       expect(app.path).toMatch(/^\/tools\//);
       expect(app.sliceNote.length).toBeGreaterThan(20);
       expect(app.parentHref.length).toBeGreaterThan(1);
+    }
+  });
+
+  it("covers every main platform feature with at least one indexable mini", () => {
+    const covered = new Set(
+      FEATURE_MINI_APPS.map((a) => a.platformFeatureId).filter(Boolean) as string[],
+    );
+    for (const id of MAIN_PLATFORM_FEATURE_IDS) {
+      expect(covered.has(id), `missing mini for ${id}`).toBe(true);
     }
   });
 
