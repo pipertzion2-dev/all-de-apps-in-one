@@ -52,7 +52,7 @@ export const FEATURES: FeatureDef[] = [
     description:
       "ZZAI Seeds — CH 01 on the mixing board. PDF blueprint or YouTube transcript in; full-stack app suites out.",
     cta: { label: "Open Seeds", href: FEATURE_PUBLIC_PATHS.seeds },
-    accentColor: "#9085c4",
+    accentColor: "#5a8c7a",
     motif: "branching",
     signatureMotion: "nodes branch outward from centre",
   }),
@@ -67,7 +67,7 @@ export const FEATURES: FeatureDef[] = [
     description:
       "Marketing Orbit — SEO, indexing, Channel Intel, and traffic automation while you sleep.",
     cta: { label: "Open Marketing Orbit", href: FEATURE_PUBLIC_PATHS.orbit },
-    accentColor: "#b85020",
+    accentColor: "#8ca840",
     motif: "web",
     signatureMotion: "web filaments pulse on scroll",
   }),
@@ -82,7 +82,7 @@ export const FEATURES: FeatureDef[] = [
     description:
       "Poor Man Protection — deposit sketches, mint a protection coin, and build a court-ready pack.",
     cta: { label: "Open Poor Man Protection", href: FEATURE_PUBLIC_PATHS.security },
-    accentColor: "#a888bc",
+    accentColor: "#4a9cac",
     motif: "seal",
     signatureMotion: "ornamental border traces and locks",
   }),
@@ -97,7 +97,7 @@ export const FEATURES: FeatureDef[] = [
     description:
       "Signal bus guardrails — preview deploy risks on fused endpoints, enforce JSON Schema on every response, and roll back in one click.",
     cta: { label: "Open API Builder", href: FEATURE_PUBLIC_PATHS.api },
-    accentColor: "#6880a0",
+    accentColor: "#a87080",
     motif: "packaging",
     signatureMotion: "panels fold and assemble",
   }),
@@ -112,7 +112,7 @@ export const FEATURES: FeatureDef[] = [
     description:
       "Hardware — the Crest path. AI schematics, material sourcing, and manufacturing from concept to part.",
     cta: { label: "Open Hardware Builder", href: FEATURE_PUBLIC_PATHS.hardware },
-    accentColor: "#d880b0",
+    accentColor: "#d070c0",
     motif: "crystal",
     signatureMotion: "diamonds rotate and refract light",
   }),
