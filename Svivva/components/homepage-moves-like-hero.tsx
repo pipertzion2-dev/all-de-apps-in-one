@@ -42,7 +42,7 @@ export function HomepageMovesLikeHero() {
           preset="oaas"
           eagerMount
           keepMounted
-          className="h-full w-full opacity-[0.72] md:opacity-[0.58]"
+          className="h-full w-full opacity-[0.88] md:opacity-[0.82]"
         />
       </div>
 
@@ -59,7 +59,7 @@ export function HomepageMovesLikeHero() {
 
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-t from-[#e8f0f6] via-[#F7FBFC]/40 to-white/20 sm:bg-gradient-to-r sm:from-white/82 sm:via-[rgba(247,251,252,0.45)] sm:to-transparent"
+        className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-t from-[#e8f0f6]/90 via-[#F7FBFC]/25 to-white/10 sm:bg-gradient-to-r sm:from-white/70 sm:via-[rgba(247,251,252,0.30)] sm:to-transparent"
       />
 
       <div className="relative z-10 flex min-h-[100svh] flex-col justify-end px-4 pb-20 pt-28 sm:justify-center sm:px-10 sm:pb-24 sm:pt-24">
