@@ -409,7 +409,7 @@ export function CamoThreeOverlay({
           filter: isCheckout
             ? "brightness(1.0) saturate(1.1)"
             : isOaas
-              ? "brightness(1.22) saturate(1.5) contrast(1.08)"
+              ? "brightness(1.32) saturate(1.7) contrast(1.12)"
               : useMobileSectionCamo
                 ? "brightness(1.14) saturate(1.28) contrast(1.04)"
                 : isIntro
@@ -428,7 +428,7 @@ export function CamoThreeOverlay({
           isCheckout
             ? "opacity-30"
             : isOaas
-              ? "opacity-38 md:opacity-48 blur-[1.2px]"
+              ? "opacity-[0.58] md:opacity-[0.68] blur-[0.8px]"
               : useMobileSectionCamo
                 ? "opacity-[0.36] md:opacity-[0.72] md:blur-0"
                 : isIntro
