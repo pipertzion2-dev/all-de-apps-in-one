@@ -24,5 +24,8 @@ describe("Bunny Stream CSP", () => {
     expect(page).toContain("eagerMount");
     expect(page).toContain("The inspiration for the site in one episode");
     expect(page).not.toMatch(/disableFlowers/);
+    // Never lift the poster on a timer — that exposed Bunny's large-play button.
+    expect(page).not.toContain("setTimeout(() => {\n      if (!cancelled) setIntroVideoPlaying(true);");
+    expect(page).not.toContain("2500");
   });
 });
