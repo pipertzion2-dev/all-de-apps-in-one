@@ -22,13 +22,13 @@ export function HomepageLockScreen({ onUnlock }: HomepageLockScreenProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[80] overflow-hidden bg-black">
+    <div className="fixed inset-0 z-[80] overflow-hidden bg-black" style={{ minHeight: '100svh', height: '100svh' }}>
       {/* Denser / larger Three.js camo flowers behind the lock */}
-      <div className="pointer-events-none absolute inset-0" aria-hidden>
+      <div className="pointer-events-none absolute inset-0" aria-hidden style={{ minHeight: '100svh', height: '100svh' }}>
         <CamoThreeOverlay preset="lock" isIntro eagerMount keepMounted className="h-full w-full" />
       </div>
 
-      <div className="relative z-10 flex h-full w-full flex-col items-center justify-center px-4">
+      <div className="relative z-10 flex h-full w-full flex-col items-center justify-center px-4" style={{ minHeight: '100svh' }}>
         <div className="mb-6 text-center sm:mb-8">
           <h1
             className="mb-3 text-4xl tracking-tight text-white sm:text-5xl md:text-6xl"

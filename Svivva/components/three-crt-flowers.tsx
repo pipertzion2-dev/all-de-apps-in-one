@@ -1631,8 +1631,9 @@ export function ThreeCRTFlowers({
       ref={containerRef}
       className="pointer-events-none absolute inset-0 h-full w-full"
       style={{
-        minHeight: "100%",
+        minHeight: "100svh",
         minWidth: "100%",
+        height: "100%",
       }}
     />
   );
