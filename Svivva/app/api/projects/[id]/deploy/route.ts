@@ -4,6 +4,12 @@ import { db } from "@/lib/db";
 import { projects, projectVersions, deployments } from "@/lib/schema";
 import { eq, desc } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
+import { assessGuardrails } from "@/lib/guardrails";
+import { z } from "zod";
+
+const DeployBodySchema = z.object({
+  force: z.boolean().optional(),
+});
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -13,6 +19,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     const { id } = await params;
+    const rawBody = await request.json().catch(() => ({}));
+    const deployOpts = DeployBodySchema.safeParse(rawBody);
+    const force = deployOpts.success ? deployOpts.data.force === true : false;
 
     const projectRows = await db.select().from(projects).where(eq(projects.id, id));
 
@@ -37,6 +46,21 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     const latestVersion = versions[0];
+
+    const guardrails = assessGuardrails({
+      systemPrompt: latestVersion.systemPrompt,
+      outputSchema: latestVersion.outputSchema as Record<string, unknown>,
+    });
+
+    if (!guardrails.ready && !force) {
+      return NextResponse.json(
+        {
+          error: "Deploy blocked by Klean guardrails — fix hazards or deploy with force.",
+          guardrails,
+        },
+        { status: 422 },
+      );
+    }
 
     // Upsert deployment (one per project/environment)
     const existing = await db
@@ -83,6 +107,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       cardUrl,
       slug: project.slug,
       versionDeployed: latestVersion.version,
+      guardrails,
+      forced: force && !guardrails.ready,
     });
   } catch (error) {
     console.error("Deploy error:", error);

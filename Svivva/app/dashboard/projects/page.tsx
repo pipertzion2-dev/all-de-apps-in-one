@@ -46,11 +46,23 @@ function DeployButton({ project }: { project: Project }) {
   const [cardUrl, setCardUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const handleDeploy = async () => {
+  const handleDeploy = async (force = false) => {
     setDeploying(true);
     try {
-      const res = await fetch(`/api/projects/${project.id}/deploy`, { method: "POST" });
+      const res = await fetch(`/api/projects/${project.id}/deploy`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ force }),
+      });
       const data = await res.json();
+      if (res.status === 422 && data.guardrails) {
+        const blockers = data.guardrails.blockers?.length ?? 0;
+        const proceed = window.confirm(
+          `Klean guardrails found ${blockers} blocking hazard(s). Deploy anyway?`,
+        );
+        if (proceed) return handleDeploy(true);
+        return;
+      }
       if (data.success) {
         setLiveUrl(data.liveUrl);
         setCardUrl(data.cardUrl);
@@ -112,7 +124,7 @@ function DeployButton({ project }: { project: Project }) {
     <Button
       size="sm"
       className="mt-3 w-full gap-1.5 bg-gradient-to-r from-[#5B8DA8] to-[#6B2C4E] text-white text-[11px] hover:opacity-90"
-      onClick={handleDeploy}
+      onClick={() => handleDeploy()}
       disabled={deploying}
       data-testid={`button-deploy-${project.id}`}
     >
