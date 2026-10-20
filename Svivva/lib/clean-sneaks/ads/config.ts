@@ -1,7 +1,12 @@
 import { readAdFreePass } from "@/lib/clean-sneaks/monetization/ad-free-pass";
 import type { AdPlacementId, HouseCreative } from "./types";
 import { kleanInGameUsesAdsense } from "./google-in-game";
-import { preferProgrammaticOverAdsense, programmaticNetwork } from "./programmatic";
+import {
+  configuredProgrammaticNetworks,
+  preferProgrammaticOverAdsense,
+  programmaticNetwork,
+} from "./programmatic";
+import { pickFromPaidCandidates, type PaidInGameNetwork } from "./paid-rotation";
 import {
   isValidAdsenseClientId,
   isValidAdsenseSlotId,
@@ -116,25 +121,44 @@ export function adsenseUnitReady(placement: AdPlacementId): boolean {
   return true;
 }
 
+/** Real paid networks available for a placement (excludes house fill). */
+export function paidAdCandidates(placement: AdPlacementId): PaidInGameNetwork[] {
+  const out: PaidInGameNetwork[] = [];
+  if (placement === "menu_banner") {
+    for (const network of configuredProgrammaticNetworks()) out.push(network);
+  }
+  if (kleanInGameUsesAdsense() && adsenseUnitReady(placement)) {
+    out.push("adsense");
+  }
+  return out;
+}
+
 /**
- * Prefer paid AdSense for the menu banner when a unit is ready.
- * Rewarded + interstitial always use house creatives first — Google Display
- * units rarely fill there and left players staring at blank boxes. Auto ads
- * still run sitewide from the layout script for paid inventory.
+ * Prefer paid inventory (AdSense + alt networks) with rotation when more than one
+ * is configured. House sponsors are fill only when nothing paid is wired or the
+ * UI falls back after an unfilled Google slot.
  */
 export function resolveAdNetwork(
   placement: AdPlacementId,
 ): "adsense" | "house" | "unconfigured" | "medianet" | "adsterra" | "monetag" {
   if (!adsEnabled()) return "unconfigured";
-  const programmatic = programmaticNetwork();
-  if (placement === "menu_banner" && programmatic && preferProgrammaticOverAdsense()) {
-    return programmatic;
+
+  const paid = paidAdCandidates(placement);
+  if (paid.length > 1) {
+    const picked = pickFromPaidCandidates(placement, paid);
+    if (picked) return picked;
   }
-  if (kleanInGameUsesAdsense() && placement === "menu_banner" && adsenseUnitReady(placement)) {
-    return "adsense";
+  if (paid.length === 1) return paid[0]!;
+
+  if (placement === "menu_banner") {
+    const programmatic = programmaticNetwork();
+    if (programmatic && preferProgrammaticOverAdsense()) return programmatic;
   }
+
   if (houseAdsAllowed()) return "house";
+
   if (kleanInGameUsesAdsense() && adsenseUnitReady(placement)) return "adsense";
+  const programmatic = programmaticNetwork();
   if (programmatic && placement === "menu_banner") return programmatic;
   return "unconfigured";
 }

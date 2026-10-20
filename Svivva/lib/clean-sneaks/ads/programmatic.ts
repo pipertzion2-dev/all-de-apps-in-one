@@ -5,12 +5,18 @@
 
 export type ProgrammaticNetwork = "monetag" | "adsterra" | "medianet";
 
+/** All configured alt networks (Monetag → Adsterra → Media.net). */
+export function configuredProgrammaticNetworks(): ProgrammaticNetwork[] {
+  const out: ProgrammaticNetwork[] = [];
+  if (process.env.NEXT_PUBLIC_MONETAG_ZONE_ID?.trim()) out.push("monetag");
+  if (process.env.NEXT_PUBLIC_ADSTERRA_INVOKE_URL?.trim()) out.push("adsterra");
+  if (process.env.NEXT_PUBLIC_MEDIANET_CID?.trim()) out.push("medianet");
+  return out;
+}
+
 /** First configured free network (Monetag is fastest signup for many publishers). */
 export function programmaticNetwork(): ProgrammaticNetwork | null {
-  if (process.env.NEXT_PUBLIC_MONETAG_ZONE_ID?.trim()) return "monetag";
-  if (process.env.NEXT_PUBLIC_ADSTERRA_INVOKE_URL?.trim()) return "adsterra";
-  if (process.env.NEXT_PUBLIC_MEDIANET_CID?.trim()) return "medianet";
-  return null;
+  return configuredProgrammaticNetworks()[0] ?? null;
 }
 
 export function monetagZoneId(): string | null {
@@ -20,7 +26,14 @@ export function monetagZoneId(): string | null {
 
 export function preferProgrammaticOverAdsense(): boolean {
   if (process.env.NEXT_PUBLIC_PREFER_PROGRAMMATIC_ADS === "1") return true;
-  if (programmaticNetwork() !== null) return true;
+  if (process.env.NEXT_PUBLIC_PREFER_PROGRAMMATIC_ADS === "0") return false;
+  const alts = configuredProgrammaticNetworks();
+  const adsenseBannerReady =
+    process.env.NEXT_PUBLIC_KLEAN_USE_ADSENSE?.trim() === "1" &&
+    Boolean(process.env.NEXT_PUBLIC_ADSENSE_SLOT_BANNER?.trim());
+  /** When both paid stacks are wired, rotate instead of hiding AdSense behind Monetag. */
+  if (adsenseBannerReady && alts.length > 0) return false;
+  if (alts.length > 0) return true;
   return !process.env.NEXT_PUBLIC_ADSENSE_SLOT_BANNER?.trim();
 }
 
