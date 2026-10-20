@@ -1413,8 +1413,8 @@ export default function LandingPage() {
                 </div>
 
                 {mode === "digital" ? (
-                  <div className="grid lg:grid-cols-3 gap-6 mb-12">
-                    <Card className="bg-slate-900/90 backdrop-blur-xl border-[#5B8DA8]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2">
+                  <div className="grid lg:grid-cols-3 gap-6 mb-12 auto-rows-fr">
+                    <Card className="bg-slate-900/90 backdrop-blur-xl border-[#5B8DA8]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2 flex flex-col h-full min-h-[400px] lg:min-h-0">
                       <div className="flex items-center gap-3 px-4 py-3 border-b border-[#5B8DA8]/20 bg-[#5B8DA8]/10">
                         <Terminal className="w-5 h-5 text-[#5B8DA8]" />
                         <span className="font-semibold text-[#5B8DA8]">1. Your Prompt</span>
@@ -1436,7 +1436,7 @@ export default function LandingPage() {
                       </div>
                     </Card>
 
-                    <Card className="bg-slate-900/90 backdrop-blur-xl border-[#D782B2]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2">
+                    <Card className="bg-slate-900/90 backdrop-blur-xl border-[#D782B2]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2 flex flex-col h-full min-h-[400px] lg:min-h-0">
                       <div className="flex items-center gap-3 px-4 py-3 border-b border-[#D782B2]/20 bg-[#D782B2]/10">
                         <Layers className="w-5 h-5 text-[#D782B2]" />
                         <span className="font-semibold text-[#D782B2]">2. Generated Schema</span>
@@ -1471,7 +1471,7 @@ export default function LandingPage() {
                       </div>
                     </Card>
 
-                    <Card className="bg-slate-900/90 backdrop-blur-xl border-[#63B3A6]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2">
+                    <Card className="bg-slate-900/90 backdrop-blur-xl border-[#63B3A6]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2 flex flex-col h-full min-h-[400px] lg:min-h-0">
                       <div className="flex items-center gap-3 px-4 py-3 border-b border-[#63B3A6]/20 bg-[#63B3A6]/10">
                         <Globe className="w-5 h-5 text-[#63B3A6]" />
                         <span className="font-semibold text-[#63B3A6]">3. Live API</span>
@@ -1504,8 +1504,8 @@ export default function LandingPage() {
                     </Card>
                   </div>
                 ) : (
-                  <div className="grid lg:grid-cols-3 gap-6 mb-12">
-                    <Card className="bg-slate-900/90 backdrop-blur-xl border-[#D94F9C]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2">
+                  <div className="grid lg:grid-cols-3 gap-6 mb-12 auto-rows-fr">
+                    <Card className="bg-slate-900/90 backdrop-blur-xl border-[#D94F9C]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2 flex flex-col h-full min-h-[400px] lg:min-h-0">
                       <div className="flex items-center gap-3 px-4 py-3 border-b border-[#D94F9C]/20 bg-[#D94F9C]/10">
                         <Layers className="w-5 h-5 text-[#D94F9C]" />
                         <span className="font-semibold text-[#D94F9C]">1. Your Vision</span>
@@ -1525,7 +1525,7 @@ export default function LandingPage() {
                       </div>
                     </Card>
 
-                    <Card className="bg-slate-900/90 backdrop-blur-xl border-[#D782B2]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2">
+                    <Card className="bg-slate-900/90 backdrop-blur-xl border-[#D782B2]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2 flex flex-col h-full min-h-[400px] lg:min-h-0">
                       <div className="flex items-center gap-3 px-4 py-3 border-b border-[#D782B2]/20 bg-[#D782B2]/10">
                         <Ruler className="w-5 h-5 text-[#D782B2]" />
                         <span className="font-semibold text-[#D782B2]">2. Layout preview</span>
@@ -1554,7 +1554,7 @@ export default function LandingPage() {
                       </div>
                     </Card>
 
-                    <Card className="bg-slate-900/90 backdrop-blur-xl border-[#63B3A6]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2">
+                    <Card className="bg-slate-900/90 backdrop-blur-xl border-[#63B3A6]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2 flex flex-col h-full min-h-[400px] lg:min-h-0">
                       <div className="flex items-center gap-3 px-4 py-3 border-b border-[#63B3A6]/20 bg-[#63B3A6]/10">
                         <Settings2 className="w-5 h-5 text-[#63B3A6]" />
                         <span className="font-semibold text-[#63B3A6]">3. Production Ready</span>
