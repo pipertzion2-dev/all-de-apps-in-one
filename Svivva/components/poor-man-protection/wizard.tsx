@@ -32,7 +32,10 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth, authFetch } from "@/hooks/use-auth";
+import { compressSketchImageFile } from "@/lib/hardware/compress-sketch-image";
+import type { DepositAnalysis } from "@/lib/poor-man-protection/deposit-analysis";
+import { buildDepositAnalysisFallback } from "@/lib/poor-man-protection/deposit-analysis-fallback";
 import { SealChamberScene } from "@/components/poor-man-protection/seal-chamber-scene";
 import {
   GroupDeposit,
@@ -169,6 +172,10 @@ export function PoorManProtectionWizard() {
   const [palette, setPalette] = useState<ColorSwatch[]>([]);
   const [contentHash, setContentHash] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [aiAnalyzing, setAiAnalyzing] = useState(false);
+  const [analyzeWarning, setAnalyzeWarning] = useState<string | null>(null);
+  const [imageAnalyzed, setImageAnalyzed] = useState(false);
+  const [depositNotes, setDepositNotes] = useState("");
   const [depositMode, setDepositMode] = useState<"single" | "group">("single");
   const [groupImages, setGroupImages] = useState<DepositedGroupImage[]>([]);
   const [organizedGroup, setOrganizedGroup] = useState<OrganizedGroupPatent | null>(null);
@@ -228,10 +235,108 @@ export function PoorManProtectionWizard() {
     [contrastStrategy, emotionalIntent, palette],
   );
 
+  const applyDepositAnalysis = useCallback((data: DepositAnalysis) => {
+    setTitle(data.title);
+    setDescription(data.description);
+    setMedium(data.chronology.medium);
+    setIterationNotes(data.chronology.iterationNotes);
+    if (data.chronology.priorDisclosure) setPriorDisclosure(data.chronology.priorDisclosure);
+    setSilhouette(data.formInterrogation.silhouette);
+    setHierarchy(data.formInterrogation.hierarchy);
+    setNegativeSpace(data.formInterrogation.negativeSpace);
+    setDistinctiveMarks(data.formInterrogation.distinctiveMarks);
+    setEmotionalIntent(data.paletteInterrogation.emotionalIntent);
+    setContrastStrategy(data.paletteInterrogation.contrastStrategy);
+    setForbiddenColors(data.paletteInterrogation.forbiddenColors);
+    setLightingContext(data.paletteInterrogation.lightingContext);
+    if (data.suggestedHybridMode) setHybridMode(data.suggestedHybridMode);
+    setImageAnalyzed(true);
+  }, []);
+
+  const runAnalyzeDeposit = useCallback(
+    async (f: File, colors: ColorSwatch[], notes = depositNotes) => {
+      setAiAnalyzing(true);
+      setAnalyzeWarning(null);
+      setImageAnalyzed(false);
+      try {
+        const compressed = await compressSketchImageFile(f);
+        const paletteHint = colors.map((c) => `${c.role}=${c.hex}`).join(", ");
+        const res = await authFetch("/api/poor-man-protection/analyze-deposit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            imageBase64: compressed.base64,
+            mimeType: compressed.mimeType,
+            fileName: f.name,
+            notes,
+            paletteHint,
+          }),
+        });
+
+        const raw = await res.text();
+        let data: DepositAnalysis & { warning?: string; error?: string; usedHeuristicFallback?: boolean } =
+          {};
+        try {
+          data = raw ? JSON.parse(raw) : {};
+        } catch {
+          /* non-JSON */
+        }
+
+        if (!res.ok) {
+          if (res.status === 401 || res.status === 403) {
+            const fallback = buildDepositAnalysisFallback(f.name, colors, notes);
+            applyDepositAnalysis(fallback);
+            setAnalyzeWarning(
+              "Starter analysis from your image fingerprint. Sign in for full AI vision read.",
+            );
+            setCustodyLog((log) => pushCustody(log, "deposit_analyzed_heuristic", f.name));
+            toast({
+              title: "Image analyzed",
+              description: "Chronology and scientific axes pre-filled — review or continue.",
+            });
+            return;
+          }
+          throw new Error(data.error || raw || "Analysis failed");
+        }
+
+        if (data.warning) setAnalyzeWarning(data.warning);
+        applyDepositAnalysis(data);
+        setCustodyLog((log) =>
+          pushCustody(
+            log,
+            data.usedHeuristicFallback ? "deposit_analyzed_heuristic" : "deposit_analyzed_ai",
+            f.name,
+          ),
+        );
+        toast({
+          title: "Image analyzed",
+          description: "Title, disclosure, chronology, and both axes filled automatically.",
+        });
+      } catch (e) {
+        const fallback = buildDepositAnalysisFallback(f.name, colors, notes);
+        applyDepositAnalysis(fallback);
+        setAnalyzeWarning(
+          e instanceof Error
+            ? `${e.message} — using palette-based starter analysis.`
+            : "Using palette-based starter analysis.",
+        );
+        toast({
+          title: "Image analyzed (offline mode)",
+          description: "Fields pre-filled from your image — edit anything before sealing.",
+        });
+      } finally {
+        setAiAnalyzing(false);
+      }
+    },
+    [applyDepositAnalysis, depositNotes, toast],
+  );
+
   const onFile = useCallback(
     async (f: File | null) => {
       setResult(null);
       setFile(f);
+      setImageAnalyzed(false);
+      setAnalyzeWarning(null);
       if (previewUrl) URL.revokeObjectURL(previewUrl);
       setPreviewUrl(f ? URL.createObjectURL(f) : null);
       setPalette([]);
@@ -248,7 +353,7 @@ export function PoorManProtectionWizard() {
         setCustodyLog((log) =>
           pushCustody(log, "work_hashed", `${f.name} · ${hash.slice(0, 16)}…`),
         );
-        toast({ title: "Work deposited", description: "Hash + spectral palette locked locally." });
+        void runAnalyzeDeposit(f, colors, depositNotes);
       } catch {
         toast({
           title: "Could not analyze file",
@@ -259,7 +364,7 @@ export function PoorManProtectionWizard() {
         setAnalyzing(false);
       }
     },
-    [previewUrl, title, toast],
+    [depositNotes, previewUrl, runAnalyzeDeposit, title, toast],
   );
 
   const applyOrganizedGroup = useCallback(
@@ -300,6 +405,7 @@ export function PoorManProtectionWizard() {
       setFirstFixedOn(withPalettes.chronologyHint.firstFixedOn || "");
       setMedium(withPalettes.chronologyHint.medium);
       setIterationNotes(withPalettes.chronologyHint.iterationNotes);
+      setImageAnalyzed(true);
       setCustodyLog((log) =>
         pushCustody(
           log,
@@ -642,13 +748,19 @@ export function PoorManProtectionWizard() {
                 {STEPS[step].id === "deposit" &&
                   (depositMode === "group"
                     ? "Drop every sketch. ZZAI clusters families, numbers figures, extracts palettes, and writes the disclosure."
-                    : "Your file never needs to leave this session for hashing; we fingerprint it in-browser.")}
+                    : "Upload your sketch or patent figure — we hash it locally, then AI reads the image and fills the rest.")}
                 {STEPS[step].id === "chronology" &&
-                  "Courts ask when the work was fixed. Build a creative timeline — this is unique to ZZAI’s interrogation."}
+                  (imageAnalyzed
+                    ? "Dates and timeline were inferred from your image — edit anything courts would care about."
+                    : "Courts ask when the work was fixed. Build a creative timeline — or upload an image to auto-fill.")}
                 {STEPS[step].id === "axisA" &&
-                  "Scientific variable A: form. Answer the guided questions — not a blank text box."}
+                  (imageAnalyzed
+                    ? "Form axis pre-filled from your image — tweak if needed, then continue."
+                    : "Scientific variable A: form. Upload and analyze an image to skip manual entry.")}
                 {STEPS[step].id === "axisB" &&
-                  "Scientific variable B: spectral intent. Couple emotion + measured palette."}
+                  (imageAnalyzed
+                    ? "Spectral axis pre-filled from palette + vision — review and continue."
+                    : "Scientific variable B: spectral intent. Couple emotion + measured palette.")}
                 {STEPS[step].id === "hybrid" &&
                   "Preview how ZZAI will hybridize your two axes before the seal."}
                 {STEPS[step].id === "seal" &&
@@ -793,9 +905,47 @@ export function PoorManProtectionWizard() {
                         accept="image/png,image/jpeg,image/webp"
                         onChange={(e) => void onFile(e.target.files?.[0] || null)}
                       />
-                      {analyzing && (
+                      {(analyzing || aiAnalyzing) && (
                         <p className="text-xs flex items-center gap-2 text-muted-foreground">
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" /> Fingerprinting…
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          {analyzing ? "Fingerprinting…" : "Analyzing your image…"}
+                        </p>
+                      )}
+                      <Textarea
+                        placeholder="Optional: label parts, materials, or context the image doesn't show…"
+                        value={depositNotes}
+                        onChange={(e) => setDepositNotes(e.target.value)}
+                        rows={2}
+                        className="text-sm"
+                      />
+                      {file && contentHash && (
+                        <Button
+                          type="button"
+                          disabled={analyzing || aiAnalyzing}
+                          onClick={() => void runAnalyzeDeposit(file, palette, depositNotes)}
+                          className="gap-2 w-full sm:w-auto min-h-11 shadow-md border border-[#5B8DA8]/30"
+                          style={{ background: "linear-gradient(135deg, #5B8DA8, #6B2C4E)" }}
+                        >
+                          {aiAnalyzing ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" /> Analyzing your image…
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="w-4 h-4" /> Analyze my image
+                            </>
+                          )}
+                        </Button>
+                      )}
+                      {analyzeWarning && (
+                        <p className="text-xs text-amber-400/95 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2">
+                          {analyzeWarning}
+                        </p>
+                      )}
+                      {imageAnalyzed && depositMode === "single" && (
+                        <p className="text-xs text-emerald-500/90 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2">
+                          Title, disclosure, chronology, and both scientific axes are filled — continue
+                          through the steps or edit below.
                         </p>
                       )}
                       {contentHash && depositMode === "single" && (
@@ -827,9 +977,9 @@ export function PoorManProtectionWizard() {
                   </div>
                   <div className="space-y-2">
                     <Label>
-                      {depositMode === "group"
-                        ? "Group disclosure (auto-written — edit if you want)"
-                        : "What is this work? (be specific — specificity strengthens claims)"}
+                      {depositMode === "group" || imageAnalyzed
+                        ? "Disclosure (auto-written — edit if you want)"
+                        : "What is this work? (upload + Analyze my image to auto-fill)"}
                     </Label>
                     <Textarea
                       rows={4}
@@ -843,10 +993,12 @@ export function PoorManProtectionWizard() {
 
               {STEPS[step].id === "chronology" && (
                 <>
-                  {depositMode === "group" && organizedGroup && (
+                  {imageAnalyzed && (
                     <p className="text-xs text-muted-foreground rounded-lg border border-[#5B8DA8]/20 bg-[#5B8DA8]/5 p-3">
-                      Dates and iteration notes were inferred from the image dump. Edit anything
-                      courts would care about, then continue.
+                      {depositMode === "group" && organizedGroup
+                        ? "Dates and iteration notes were inferred from the image dump."
+                        : "Chronology was inferred from your image analysis."}{" "}
+                      Edit anything courts would care about, then continue.
                     </p>
                   )}
                   <div className="grid sm:grid-cols-2 gap-3">
@@ -902,8 +1054,9 @@ export function PoorManProtectionWizard() {
               {STEPS[step].id === "axisA" && (
                 <>
                   <p className="text-sm text-muted-foreground">
-                    These questions force measurable form claims — the kind of specificity generic
-                    “upload & hash” tools skip.
+                    {imageAnalyzed
+                      ? "Form axis pre-filled from your image. Tweak anything, then continue."
+                      : "These questions force measurable form claims — upload and analyze an image to auto-fill."}
                   </p>
                   <div className="space-y-2">
                     <Label>Describe the silhouette / primary shape language</Label>
@@ -942,6 +1095,11 @@ export function PoorManProtectionWizard() {
 
               {STEPS[step].id === "axisB" && (
                 <>
+                  {imageAnalyzed && (
+                    <p className="text-xs text-muted-foreground rounded-lg border border-[#5B8DA8]/20 bg-[#5B8DA8]/5 p-3">
+                      Spectral axis pre-filled from palette + vision analysis. Review and continue.
+                    </p>
+                  )}
                   <div className="space-y-2">
                     <Label>Emotional / brand intent of the palette</Label>
                     <Textarea

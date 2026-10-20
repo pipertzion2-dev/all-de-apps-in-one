@@ -8,9 +8,12 @@ export type HardwareAiErrorHint = {
 };
 
 /** Short banner when heuristic fallback succeeded — not an error. */
-export function hardwareAiFallbackNotice(context: "sketch" | "suppliers"): string {
+export function hardwareAiFallbackNotice(context: "sketch" | "suppliers" | "deposit"): string {
   if (context === "sketch") {
     return "Starter brief loaded from your notes. Add a free Gemini key below for full sketch vision.";
+  }
+  if (context === "deposit") {
+    return "Starter analysis loaded from your image fingerprint. Add a free Gemini key for full vision read.";
   }
   return "Starter supplier list loaded. Add a free Gemini key below for AI-tailored manufacturer matches.";
 }
