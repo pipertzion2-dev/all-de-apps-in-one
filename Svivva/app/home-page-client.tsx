@@ -552,7 +552,7 @@ export default function LandingPage() {
                     />
                   </div>
 
-                  {/* Bunny Stream video — replaces the previous intro still */}
+                  {/* TEMPORARILY HIDDEN — Bunny Stream video section
                   <div
                     ref={introVideoRef}
                     data-intro-video
@@ -573,7 +573,6 @@ export default function LandingPage() {
                       </p>
                     </div>
 
-                    {/* 16:9 — muted Bunny autoplay; thumbnail covers large-play while paused */}
                     <div
                       className="relative w-full overflow-hidden rounded-xl bg-black"
                       style={{ paddingTop: "56.25%" }}
@@ -590,7 +589,6 @@ export default function LandingPage() {
                         tabIndex={-1}
                       />
                       {introVideoPlaying ? (
-                        // Transparent catcher: click pauses via player.js — Bunny large-play never shows.
                         <button
                           type="button"
                           className="absolute inset-0 z-10 cursor-pointer border-0 bg-transparent p-0"
@@ -602,7 +600,6 @@ export default function LandingPage() {
                           data-testid="button-intro-video-pause"
                         />
                       ) : (
-                        // Opaque thumbnail only — no play icon. Click resumes muted playback.
                         <button
                           type="button"
                           className="absolute inset-0 z-10 cursor-pointer border-0 bg-black p-0"
@@ -615,7 +612,6 @@ export default function LandingPage() {
                           aria-label="Watch intro video"
                           data-testid="button-intro-video-cover"
                         >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={INTRO_BUNNY_THUMBNAIL}
                             alt=""
@@ -628,6 +624,7 @@ export default function LandingPage() {
                       )}
                     </div>
                   </div>
+                  */}
                 </div>
               </div>
             </div>
@@ -651,7 +648,7 @@ export default function LandingPage() {
                 className="text-center text-sm font-medium leading-snug text-white/90 no-underline"
                 style={{ fontFamily: "'Zc', sans-serif", textDecoration: "none" }}
               >
-                The inspiration for the site in one episode
+                Welcome to ZZAI
               </span>
               <span className="text-[10px] uppercase tracking-[0.2em] text-white/55 no-underline">
                 Scroll up to enter
@@ -1423,8 +1420,8 @@ export default function LandingPage() {
                 </div>
 
                 {mode === "digital" ? (
-                  <div className="grid lg:grid-cols-3 gap-6 mb-12">
-                    <Card className="bg-slate-900/90 backdrop-blur-xl border-[#5B8DA8]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2">
+                  <div className="grid lg:grid-cols-3 gap-6 mb-12 auto-rows-fr">
+                    <Card className="bg-slate-900/90 backdrop-blur-xl border-[#5B8DA8]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2 flex flex-col h-full min-h-[400px] lg:min-h-0">
                       <div className="flex items-center gap-3 px-4 py-3 border-b border-[#5B8DA8]/20 bg-[#5B8DA8]/10">
                         <Terminal className="w-5 h-5 text-[#5B8DA8]" />
                         <span className="font-semibold text-[#5B8DA8]">1. Your Prompt</span>
@@ -1446,7 +1443,7 @@ export default function LandingPage() {
                       </div>
                     </Card>
 
-                    <Card className="bg-slate-900/90 backdrop-blur-xl border-[#D782B2]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2">
+                    <Card className="bg-slate-900/90 backdrop-blur-xl border-[#D782B2]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2 flex flex-col h-full min-h-[400px] lg:min-h-0">
                       <div className="flex items-center gap-3 px-4 py-3 border-b border-[#D782B2]/20 bg-[#D782B2]/10">
                         <Layers className="w-5 h-5 text-[#D782B2]" />
                         <span className="font-semibold text-[#D782B2]">2. Generated Schema</span>
@@ -1481,7 +1478,7 @@ export default function LandingPage() {
                       </div>
                     </Card>
 
-                    <Card className="bg-slate-900/90 backdrop-blur-xl border-[#63B3A6]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2">
+                    <Card className="bg-slate-900/90 backdrop-blur-xl border-[#63B3A6]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2 flex flex-col h-full min-h-[400px] lg:min-h-0">
                       <div className="flex items-center gap-3 px-4 py-3 border-b border-[#63B3A6]/20 bg-[#63B3A6]/10">
                         <Globe className="w-5 h-5 text-[#63B3A6]" />
                         <span className="font-semibold text-[#63B3A6]">3. Live API</span>
@@ -1514,8 +1511,8 @@ export default function LandingPage() {
                     </Card>
                   </div>
                 ) : (
-                  <div className="grid lg:grid-cols-3 gap-6 mb-12">
-                    <Card className="bg-slate-900/90 backdrop-blur-xl border-[#D94F9C]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2">
+                  <div className="grid lg:grid-cols-3 gap-6 mb-12 auto-rows-fr">
+                    <Card className="bg-slate-900/90 backdrop-blur-xl border-[#D94F9C]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2 flex flex-col h-full min-h-[400px] lg:min-h-0">
                       <div className="flex items-center gap-3 px-4 py-3 border-b border-[#D94F9C]/20 bg-[#D94F9C]/10">
                         <Layers className="w-5 h-5 text-[#D94F9C]" />
                         <span className="font-semibold text-[#D94F9C]">1. Your Vision</span>
@@ -1535,7 +1532,7 @@ export default function LandingPage() {
                       </div>
                     </Card>
 
-                    <Card className="bg-slate-900/90 backdrop-blur-xl border-[#D782B2]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2">
+                    <Card className="bg-slate-900/90 backdrop-blur-xl border-[#D782B2]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2 flex flex-col h-full min-h-[400px] lg:min-h-0">
                       <div className="flex items-center gap-3 px-4 py-3 border-b border-[#D782B2]/20 bg-[#D782B2]/10">
                         <Ruler className="w-5 h-5 text-[#D782B2]" />
                         <span className="font-semibold text-[#D782B2]">2. Layout preview</span>
@@ -1564,7 +1561,7 @@ export default function LandingPage() {
                       </div>
                     </Card>
 
-                    <Card className="bg-slate-900/90 backdrop-blur-xl border-[#63B3A6]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2">
+                    <Card className="bg-slate-900/90 backdrop-blur-xl border-[#63B3A6]/30 rounded-2xl overflow-visible hover-elevate active-elevate-2 flex flex-col h-full min-h-[400px] lg:min-h-0">
                       <div className="flex items-center gap-3 px-4 py-3 border-b border-[#63B3A6]/20 bg-[#63B3A6]/10">
                         <Settings2 className="w-5 h-5 text-[#63B3A6]" />
                         <span className="font-semibold text-[#63B3A6]">3. Production Ready</span>
