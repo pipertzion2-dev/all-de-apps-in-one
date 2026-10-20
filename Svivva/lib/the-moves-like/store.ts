@@ -329,7 +329,7 @@ export function exportRoutineShareText(routine: Routine): string {
       const move = getMove(c.moveId);
       return `${i + 1}. ${move?.name ?? c.moveId} @ beat ${c.startBeat} (${c.durationBeats} beats)`;
     }),
-    `zzaizzai.com/the-moves-like`,
+    `The moves like`,
   ];
   return lines.join("\n");
 }
