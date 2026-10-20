@@ -2,8 +2,12 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { ArrowRight, Sparkles, Target, TrendingUp } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
+import { authFetch } from "@/hooks/use-auth";
+import { ArrowRight, Sparkles, Target, TrendingUp, GitBranch, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { HYBRID_GTM_STRATEGIES, type HybridGtmMotion } from "@/lib/orbit/hybrid-gtm-strategies";
 import { ADMIN_DEFAULT_YOUTUBE_HANDLE } from "@/lib/marketing/youtube-defaults";
@@ -29,7 +33,26 @@ type Props = {
 };
 
 export function OrbitHybridGrowthPanel({ compact = false }: Props) {
+  const router = useRouter();
   const featured = useMemo(() => HYBRID_GTM_STRATEGIES.slice(0, compact ? 3 : 6), [compact]);
+
+  const createSceneRoute = useMutation({
+    mutationFn: async (hybridStrategyId: string) => {
+      const r = await authFetch("/api/orbit/routes/from-hybrid", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hybridStrategyId, status: "active" }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+      return data;
+    },
+    onSuccess: (data) => {
+      if (data.route?.id) {
+        router.push(`/dashboard/orbit/routes/${data.route.id}`);
+      }
+    },
+  });
 
   return (
     <Card className="border-2 border-[#5B8DA8]/30 bg-gradient-to-br from-[#5B8DA8]/5 to-[#6B2C4E]/5">
@@ -98,6 +121,20 @@ export function OrbitHybridGrowthPanel({ compact = false }: Props) {
                   </span>
                 ))}
               </div>
+              <Button
+                size="sm"
+                variant="outline"
+                className="mt-2 h-7 text-xs"
+                disabled={createSceneRoute.isPending}
+                onClick={() => createSceneRoute.mutate(strategy.id)}
+              >
+                {createSceneRoute.isPending ? (
+                  <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                ) : (
+                  <GitBranch className="mr-1 h-3 w-3" />
+                )}
+                Create OaaS scene
+              </Button>
             </div>
           ))}
         </div>
