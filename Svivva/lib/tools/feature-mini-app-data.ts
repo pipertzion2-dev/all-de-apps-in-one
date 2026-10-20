@@ -98,6 +98,65 @@ export const FEATURE_MINI_APPS: FeatureMiniApp[] = [
     sliceNote: "SHA-256 only — not dual-axis hybridization, coin mint, or court PDF.",
     keyword: "sketch file hash",
   },
+  {
+    slug: "klean-score-estimator",
+    path: "/tools/klean-score-estimator",
+    name: "Klean Score Estimator",
+    description:
+      "Estimate a Klean Sneaks run score from distance, cleanliness, and streak. The 3D Vegas runner is the full game.",
+    hub: "ai-tools-hub",
+    parentHref: "/clean-sneaks",
+    parentLabel: "Klean Sneaks",
+    sliceNote: "Ballpark math only — not 3D gameplay, Oh No saves, or Steal the Bundle.",
+    keyword: "sneaker runner score calculator",
+  },
+  {
+    slug: "bundle-unlock-checker",
+    path: "/tools/bundle-unlock-checker",
+    name: "Bundle Unlock Checker",
+    description:
+      "See whether a run score and distance would unlock Steal the Bundle in Klean Sneaks.",
+    hub: "ai-tools-hub",
+    parentHref: "/clean-sneaks",
+    parentLabel: "Klean Sneaks",
+    sliceNote: "Rules preview only — not the card game or saved unlock state on your device.",
+    keyword: "klean sneaks bundle unlock",
+  },
+  {
+    slug: "homepage-flip-guide",
+    path: "/tools/homepage-flip-guide",
+    name: "Homepage Flip Guide",
+    description:
+      "Preview the two-face homepage: game first, flip to about and pricing. The live site has the full 3D stack.",
+    hub: "ai-tools-hub",
+    parentHref: "/#clean-sneaks",
+    parentLabel: "ZZAI homepage",
+    sliceNote: "Static flip demo and scroll tips — not the production WebGL flip stack.",
+    keyword: "interactive homepage flip preview",
+  },
+  {
+    slug: "bpm-tap-tempo",
+    path: "/tools/bpm-tap-tempo",
+    name: "BPM Tap Tempo",
+    description: "Tap along to measure BPM. ZZAI Play is the full sampler studio and stem workflow.",
+    hub: "ai-tools-hub",
+    parentHref: "/play",
+    parentLabel: "ZZAI Play",
+    sliceNote: "Tap tempo only — not stems, patches, Melodyne export, or the hardware UI.",
+    keyword: "bpm tap tempo tool",
+  },
+  {
+    slug: "sneaker-clean-label",
+    path: "/tools/sneaker-clean-label",
+    name: "Sneaker Clean Label",
+    description:
+      "Turn a cleanliness percentage into the same label the Klean Sneaks HUD uses (Fresh, Grimey, Cooked, etc.).",
+    hub: "ai-tools-hub",
+    parentHref: "/clean-sneaks",
+    parentLabel: "Klean Sneaks",
+    sliceNote: "Label lookup only — not shoe-zone dirt, 3D splats, or run scoring.",
+    keyword: "sneaker cleanliness rating",
+  },
 ];
 
 export const FEATURE_MINI_APP_SLUGS = FEATURE_MINI_APPS.map((t) => t.slug);
