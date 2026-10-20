@@ -25,7 +25,13 @@ export default function ChatPage() {
   const { data: conversations, isLoading: loadingConvs } = useListOpenaiConversations();
   const { mutateAsync: createConv, isPending: creatingConv } = useCreateOpenaiConversation();
   const { mutateAsync: deleteConv } = useDeleteOpenaiConversation();
-  const { data: activeConv } = useGetOpenaiConversation(activeConvId!, { query: { enabled: !!activeConvId } });
+  const activeConvQueryId = activeConvId ?? 0;
+  const { data: activeConv } = useGetOpenaiConversation(activeConvQueryId, {
+    query: {
+      enabled: activeConvId != null,
+      queryKey: getGetOpenaiConversationQueryKey(activeConvQueryId),
+    },
+  });
   
   const { streamRequest, data: streamData, isLoading: isStreaming, reset: resetStream } = useStream();
   const messagesEndRef = useRef<HTMLDivElement>(null);
