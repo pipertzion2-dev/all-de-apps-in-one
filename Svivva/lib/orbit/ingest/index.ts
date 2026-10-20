@@ -10,6 +10,8 @@ export { assertIngestAccess, normalizeSourceRef } from "./access";
 export {
   listOrbitProjectsForUser,
   getOrbitProjectById,
+  getOrbitProjectByIdInternal,
+  listReadyOrbitProjectsForScheduler,
   getOrbitGraph,
   findOrbitProjectBySource,
 } from "./graph-repository";
