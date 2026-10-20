@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 import Link from "next/link";
 import {
   AlertTriangle,
@@ -48,6 +55,43 @@ function pickNewerRun(a: BurnsRunResult | null, b: BurnsRunResult | null): Burns
   if (!a) return b;
   if (!b) return a;
   return a.startedAt >= b.startedAt ? a : b;
+}
+
+const POLL_INTERVAL_MS = 2500;
+const POLL_DEADLINE_MS = 6 * 60_000;
+
+async function pollBurnsUntilDone(): Promise<BurnsRunResult> {
+  const deadline = Date.now() + POLL_DEADLINE_MS;
+  while (Date.now() < deadline) {
+    await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
+    const res = await authFetch("/api/burns");
+    if (!res.ok) continue;
+    const payload = (await res.json()) as BurnsPayload;
+    if (payload.progress?.status === "complete") return payload.progress.run;
+    if (payload.progress?.status === "failed") {
+      throw new Error(payload.progress.error || "Background run failed");
+    }
+  }
+  throw new Error("Run timed out — refresh to check progress or try again");
+}
+
+function applyRunToState(
+  run: BurnsRunResult,
+  isFullRun: boolean,
+  setLiveRun: Dispatch<SetStateAction<BurnsRunResult | null>>,
+  setData: Dispatch<SetStateAction<BurnsPayload | null>>,
+) {
+  setLiveRun(run);
+  setData((prev) =>
+    prev
+      ? {
+          ...prev,
+          lastRun: run,
+          progress: { status: "complete", run },
+          history: isFullRun ? [run, ...prev.history].slice(0, 7) : prev.history,
+        }
+      : prev,
+  );
 }
 
 /** Merge a partial run (single-node retry) into the last full run for the graph. */
@@ -118,13 +162,35 @@ export function BurnsSystemGraph() {
     void load();
   }, [load]);
 
+  useEffect(() => {
+    if (data?.progress?.status !== "running" || running !== null) return;
+    let cancelled = false;
+    setRunning("all");
+    setRunNotice("Resuming background run — keep this tab open…");
+    void (async () => {
+      try {
+        const run = await pollBurnsUntilDone();
+        if (cancelled) return;
+        applyRunToState(run, true, setLiveRun, setData);
+        setRunNotice(run.ok ? `Done — ${run.summary}` : `Finished with issues — ${run.summary}`);
+      } catch (e) {
+        if (!cancelled) setError(e instanceof Error ? e.message : "Run failed");
+      } finally {
+        if (!cancelled) setRunning(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [data?.progress?.status, running]);
+
   const run = useCallback(
     async (only?: string[]) => {
       const isFullRun = !only?.length;
       setRunning(only?.length === 1 ? only[0] : "all");
       setError(null);
       setRunNotice(
-        isFullRun ? "Running all nodes — keep this tab open. This can take several minutes." : null,
+        isFullRun ? "Starting full run — keep this tab open. This can take several minutes." : null,
       );
       try {
         const res = await authFetch("/api/burns/run", {
@@ -132,24 +198,25 @@ export function BurnsSystemGraph() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(only ? { only } : {}),
         });
-        const json = (await res.json()) as { run?: BurnsRunResult; error?: string };
+        const json = (await res.json()) as {
+          run?: BurnsRunResult;
+          error?: string;
+          started?: boolean;
+        };
         if (!res.ok) throw new Error(json.error || "Run failed");
-        if (!json.run?.nodes?.length) throw new Error("Run returned no node results");
 
-        const merged = isFullRun
-          ? json.run
-          : mergeBurnsRuns(liveRun ?? data?.lastRun ?? null, json.run, data?.order ?? []);
+        let merged: BurnsRunResult;
+        if (res.status === 202 && json.started) {
+          setRunNotice("Running in background — polling for results…");
+          merged = await pollBurnsUntilDone();
+        } else {
+          if (!json.run?.nodes?.length) throw new Error("Run returned no node results");
+          merged = isFullRun
+            ? json.run
+            : mergeBurnsRuns(liveRun ?? data?.lastRun ?? null, json.run, data?.order ?? []);
+        }
 
-        setLiveRun(merged);
-        setData((prev) =>
-          prev
-            ? {
-                ...prev,
-                lastRun: merged,
-                history: isFullRun ? [merged, ...prev.history].slice(0, 7) : prev.history,
-              }
-            : prev,
-        );
+        applyRunToState(merged, isFullRun, setLiveRun, setData);
         setRunNotice(
           merged.ok ? `Done — ${merged.summary}` : `Finished with issues — ${merged.summary}`,
         );
@@ -164,6 +231,13 @@ export function BurnsSystemGraph() {
   );
 
   const effectiveLastRun = liveRun ?? data?.lastRun ?? null;
+
+  const ownerResult = effectiveLastRun?.nodes.find((n) => n.id === "owner");
+  const showOwnerHint =
+    ownerResult?.status === "failed" ||
+    (ownerResult?.detail as { usedFallback?: boolean } | undefined)?.usedFallback;
+  const showBlockedHint =
+    (effectiveLastRun?.counts.blocked ?? 0) > 0 && ownerResult?.status !== "failed";
 
   const resultById = useMemo(() => {
     const map = new Map<string, BurnsNodeResult>();
@@ -292,6 +366,63 @@ export function BurnsSystemGraph() {
         {error && <p className="text-[11px] text-destructive">{error}</p>}
         {runNotice && !error && (
           <p className="text-[11px] text-[#5B8DA8] font-medium">{runNotice}</p>
+        )}
+
+        {effectiveLastRun?.truncated && (
+          <p className="text-[11px] text-slate-400">
+            Some nodes were skipped — the full graph needs ~
+            {Math.round((data?.estimatedSeconds ?? 0) / 60)} min but each run is capped at ~5 min on
+            Vercel. Press Run now again to continue where the time budget stopped.
+          </p>
+        )}
+
+        {(showOwnerHint || showBlockedHint) && (
+          <div
+            className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-[11px] space-y-1.5"
+            data-testid="burns-setup-hint"
+          >
+            {ownerResult?.status === "failed" ? (
+              <>
+                <p className="font-semibold text-amber-200">
+                  Owner node failed — most downstream nodes are blocked.
+                </p>
+                <p className="text-muted-foreground">
+                  Set <code className="bg-muted px-1 rounded">ADMIN_USER_ID</code> in Vercel to your
+                  user id, or save Orbit credentials once from{" "}
+                  <Link href="/dashboard/orbit" className="text-[#5B8DA8] underline">
+                    Orbit
+                  </Link>
+                  .
+                </p>
+              </>
+            ) : showOwnerHint ? (
+              <>
+                <p className="font-semibold text-amber-200">
+                  Running as orbit-admin fallback — credentials may not match your account.
+                </p>
+                <p className="text-muted-foreground">
+                  Set <code className="bg-muted px-1 rounded">ADMIN_USER_ID</code> in production for
+                  your signed-in user, or connect GSC at{" "}
+                  <Link href="/dashboard/gsc-connect" className="text-[#5B8DA8] underline">
+                    GSC Connect
+                  </Link>
+                  .
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="font-semibold text-amber-200">
+                  {effectiveLastRun?.counts.blocked} node
+                  {(effectiveLastRun?.counts.blocked ?? 0) === 1 ? "" : "s"} blocked by upstream
+                  failures.
+                </p>
+                <p className="text-muted-foreground">
+                  Click a red or amber node below for the error message, then fix the upstream node
+                  and run again.
+                </p>
+              </>
+            )}
+          </div>
         )}
       </div>
 

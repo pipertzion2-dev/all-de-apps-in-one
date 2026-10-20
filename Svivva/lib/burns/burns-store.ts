@@ -6,8 +6,7 @@
  */
 import { db } from "@/lib/db";
 import { sql } from "drizzle-orm";
-import { resolveOrbitInternalUserId } from "@/lib/orbit/internal-user";
-import { getPrimaryAdminUserId } from "@/lib/auth/admin";
+import { resolveOrbitOwnerUserId } from "@/lib/orbit/internal-user";
 import type { BurnsRunResult } from "@/lib/burns/burns-runner";
 
 const MAX_HISTORY = 14;
@@ -39,7 +38,7 @@ async function ensureColumn() {
 }
 
 async function ownerId(): Promise<string> {
-  return (await resolveOrbitInternalUserId()) || getPrimaryAdminUserId() || "orbit-admin";
+  return resolveOrbitOwnerUserId();
 }
 
 function parseRuns(raw: unknown): BurnsRunResult[] {
