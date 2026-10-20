@@ -62,6 +62,26 @@ export function HomepageLockScreen({ onUnlock }: HomepageLockScreenProps) {
             transition: "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease-out",
           }}
         >
+          <svg width="0" height="0" style={{ position: "absolute" }}>
+            <defs>
+              <filter id="water-distort">
+                <feTurbulence
+                  type="fractalNoise"
+                  baseFrequency="0.015 0.008"
+                  numOctaves="3"
+                  seed="42"
+                  result="turbulence"
+                />
+                <feDisplacementMap
+                  in="SourceGraphic"
+                  in2="turbulence"
+                  scale="8"
+                  xChannelSelector="R"
+                  yChannelSelector="G"
+                />
+              </filter>
+            </defs>
+          </svg>
           <Image
             src="/assets/lock-image.png"
             alt="Lock to enter site"
@@ -70,7 +90,7 @@ export function HomepageLockScreen({ onUnlock }: HomepageLockScreenProps) {
             priority
             className="h-auto w-full bg-transparent"
             style={{
-              filter: "drop-shadow(0 16px 28px rgba(0,0,0,0.35))",
+              filter: "drop-shadow(0 16px 28px rgba(0,0,0,0.35)) url(#water-distort)",
             }}
           />
         </button>
