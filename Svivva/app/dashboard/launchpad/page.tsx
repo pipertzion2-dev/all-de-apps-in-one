@@ -71,6 +71,7 @@ import { PlanActivationGate } from "@/components/plan-activation-gate";
 import { OrbitMarketingVision } from "@/components/orbit-marketing-vision";
 import { OrbitAdminMissionBoard } from "@/components/orbit-admin-mission-board";
 import { OrbitMissionControl } from "@/components/orbit-mission-control";
+import { OrbitRoutesPanel } from "@/components/orbit/orbit-routes-panel";
 import { OrbitTrafficFunnelDiagram } from "@/components/orbit-traffic-funnel-diagram";
 import { AdminCodeForm } from "@/components/admin-code-form";
 import { usePublicOrbitUrls } from "@/hooks/use-public-orbit-urls";
@@ -3593,6 +3594,12 @@ export default function LaunchpadPage() {
                 <p className="text-white/50 text-xs">
                   ZZAI + your deployed apps — maximum real traffic
                 </p>
+                <Link
+                  href="/dashboard/orbit/campaigns"
+                  className="mt-1 inline-block text-[11px] text-teal-200/90 underline-offset-2 hover:underline"
+                >
+                  Campaign approval queue →
+                </Link>
                 {orbitUrls.host.endsWith("zzaizzai.com") && (
                   <div className="mt-2 rounded-lg border border-white/15 bg-black/20 px-2.5 py-2 text-[10px] text-white/70 leading-snug space-y-1.5 max-w-md">
                     <p>
@@ -5002,6 +5009,7 @@ export default function LaunchpadPage() {
                   orbitStatus={orbitStatus as Record<string, unknown> | undefined}
                   stepStatuses={statuses}
                 />
+                <OrbitRoutesPanel />
                 <OrbitAdminMissionBoard
                   stepStatuses={statuses}
                   orbitStatus={orbitStatus as Record<string, unknown> | undefined}
