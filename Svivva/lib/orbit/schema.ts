@@ -298,6 +298,131 @@ export const orbitRoutes = pgTable(
   ],
 );
 
+// ============================================================================
+// ORBIT EVENTS — normalized analytics / outcome events
+// ============================================================================
+export const orbitEvents = pgTable(
+  "orbit_events",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    orbitProjectId: text("orbit_project_id")
+      .notNull()
+      .references(() => orbitProjects.id, { onDelete: "cascade" }),
+    orbitCampaignId: text("orbit_campaign_id").references(() => orbitCampaigns.id, {
+      onDelete: "set null",
+    }),
+    contentAssetId: text("content_asset_id").references(() => orbitContentAssets.id, {
+      onDelete: "set null",
+    }),
+    distributionJobId: text("distribution_job_id"),
+    indexRecordId: text("index_record_id"),
+    routeId: text("route_id"),
+    entityId: text("entity_id"),
+    eventType: text("event_type").notNull(),
+    source: text("source").notNull().default("internal"),
+    occurredAt: timestamp("occurred_at").notNull().defaultNow(),
+    idempotencyKey: text("idempotency_key").notNull(),
+    dimensions: jsonb("dimensions").$type<Record<string, unknown>>().default({}),
+    metrics: jsonb("metrics").$type<Record<string, unknown>>().default({}),
+    metadata: jsonb("metadata").$type<Record<string, unknown>>().default({}),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => [
+    unique("uq_orbit_events_idempotency").on(t.idempotencyKey),
+    index("idx_orbit_events_project").on(t.orbitProjectId),
+    index("idx_orbit_events_campaign").on(t.orbitCampaignId),
+    index("idx_orbit_events_type").on(t.eventType),
+    index("idx_orbit_events_occurred").on(t.occurredAt),
+  ],
+);
+
+// ============================================================================
+// ORBIT RECOMMENDATIONS — feedback loop actions from normalized events
+// ============================================================================
+export const orbitRecommendations = pgTable(
+  "orbit_recommendations",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    orbitProjectId: text("orbit_project_id")
+      .notNull()
+      .references(() => orbitProjects.id, { onDelete: "cascade" }),
+    orbitCampaignId: text("orbit_campaign_id").references(() => orbitCampaigns.id, {
+      onDelete: "set null",
+    }),
+    triggerEventId: text("trigger_event_id"),
+    kind: text("kind").notNull(),
+    priority: text("priority").notNull().default("medium"),
+    status: text("status").notNull().default("open"),
+    title: text("title").notNull(),
+    rationale: text("rationale").notNull(),
+    actionPayload: jsonb("action_payload").$type<Record<string, unknown>>().default({}),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+    appliedAt: timestamp("applied_at"),
+  },
+  (t) => [
+    index("idx_orbit_recommendations_project").on(t.orbitProjectId),
+    index("idx_orbit_recommendations_campaign").on(t.orbitCampaignId),
+    index("idx_orbit_recommendations_status").on(t.status),
+  ],
+);
+
+// ============================================================================
+// ORBIT AUTOPILOT RUNS — audit log for closed-loop execution (Phase 10)
+// ============================================================================
+export const orbitAutopilotRuns = pgTable(
+  "orbit_autopilot_runs",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    orbitProjectId: text("orbit_project_id")
+      .notNull()
+      .references(() => orbitProjects.id, { onDelete: "cascade" }),
+    userId: text("user_id").notNull(),
+    status: text("status").notNull().default("completed"),
+    recommendationsSeen: integer("recommendations_seen").notNull().default(0),
+    recommendationsApplied: integer("recommendations_applied").notNull().default(0),
+    recommendationsSkipped: integer("recommendations_skipped").notNull().default(0),
+    actions: jsonb("actions").$type<Array<Record<string, unknown>>>().default([]),
+    errorMessage: text("error_message"),
+    startedAt: timestamp("started_at").notNull().defaultNow(),
+    completedAt: timestamp("completed_at"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => [
+    index("idx_orbit_autopilot_runs_project").on(t.orbitProjectId),
+    index("idx_orbit_autopilot_runs_created").on(t.createdAt),
+  ],
+);
+
+// ============================================================================
+// ORBIT SCHEDULER RUNS — multi-project production orchestration (Phase 11)
+// ============================================================================
+export const orbitSchedulerRuns = pgTable(
+  "orbit_scheduler_runs",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    status: text("status").notNull().default("completed"),
+    projectsSeen: integer("projects_seen").notNull().default(0),
+    projectsProcessed: integer("projects_processed").notNull().default(0),
+    indexRecheck: jsonb("index_recheck").$type<Record<string, unknown>>().default({}),
+    distribution: jsonb("distribution").$type<Record<string, unknown>>().default({}),
+    projectResults: jsonb("project_results").$type<Array<Record<string, unknown>>>().default([]),
+    errorMessage: text("error_message"),
+    startedAt: timestamp("started_at").notNull().defaultNow(),
+    completedAt: timestamp("completed_at"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => [index("idx_orbit_scheduler_runs_created").on(t.createdAt)],
+);
+
 export type OrbitProject = typeof orbitProjects.$inferSelect;
 export type NewOrbitProject = typeof orbitProjects.$inferInsert;
 export type OrbitEntity = typeof orbitEntities.$inferSelect;
@@ -310,3 +435,7 @@ export type NewOrbitContentAsset = typeof orbitContentAssets.$inferInsert;
 export type OrbitDistributionJob = typeof orbitDistributionJobs.$inferSelect;
 export type OrbitIndexRecord = typeof orbitIndexRecords.$inferSelect;
 export type OrbitRoute = typeof orbitRoutes.$inferSelect;
+export type OrbitEvent = typeof orbitEvents.$inferSelect;
+export type OrbitRecommendation = typeof orbitRecommendations.$inferSelect;
+export type OrbitAutopilotRun = typeof orbitAutopilotRuns.$inferSelect;
+export type OrbitSchedulerRun = typeof orbitSchedulerRuns.$inferSelect;
