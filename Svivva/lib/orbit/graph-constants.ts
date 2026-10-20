@@ -123,6 +123,15 @@ export const ORBIT_PUBLISH_STATUSES = [
 ] as const;
 export type OrbitPublishStatus = (typeof ORBIT_PUBLISH_STATUSES)[number];
 
+export const ORBIT_VALIDATION_STATUSES = ["pending", "passed", "failed", "skipped"] as const;
+export type OrbitValidationStatus = (typeof ORBIT_VALIDATION_STATUSES)[number];
+
+export const ORBIT_APPROVAL_STATUSES = ["pending", "approved", "rejected"] as const;
+export type OrbitApprovalStatus = (typeof ORBIT_APPROVAL_STATUSES)[number];
+
+export const ORBIT_BODY_FORMATS = ["markdown", "html", "json", "plain"] as const;
+export type OrbitBodyFormat = (typeof ORBIT_BODY_FORMATS)[number];
+
 export const ORBIT_DISTRIBUTION_PROVIDERS = [
   "devto",
   "hashnode",
@@ -176,6 +185,137 @@ export const ORBIT_ROUTE_STATUSES = [
   "paused",
 ] as const;
 export type OrbitRouteStatus = (typeof ORBIT_ROUTE_STATUSES)[number];
+
+export const ORBIT_ROUTE_CHANNELS = [
+  "ingest",
+  "fusion",
+  "ifm",
+  "ifm_compound",
+  "bridge_ship",
+  "quality_gate",
+  "seo_ops_gate",
+  "plan",
+  "generate",
+  "approval",
+  "index_submit",
+  "distribute",
+  "analytics",
+  "autopilot",
+] as const;
+export type OrbitRouteChannel = (typeof ORBIT_ROUTE_CHANNELS)[number];
+
+export const ORBIT_EVENT_SOURCES = [
+  "internal",
+  "distribution",
+  "indexing",
+  "content",
+  "policy",
+  "ga4",
+  "webhook",
+] as const;
+export type OrbitEventSource = (typeof ORBIT_EVENT_SOURCES)[number];
+
+export const ORBIT_EVENT_TYPES = [
+  "distribution_succeeded",
+  "distribution_failed",
+  "distribution_manual_ready",
+  "distribution_policy_blocked",
+  "index_submitted",
+  "index_crawl_detected",
+  "index_indexed",
+  "index_failed",
+  "index_not_indexed",
+  "content_validation_passed",
+  "content_validation_failed",
+  "content_generated",
+  "campaign_planned",
+  "recommendation_applied",
+  "autopilot_run_completed",
+  "external_conversion",
+  "external_page_view",
+  "external_traffic_drop",
+  "scheduler_run_completed",
+  "route_run_completed",
+  "route_step_completed",
+  "route_awaiting_approval",
+  "fusion_scene_executed",
+  "ifm_pair_generated",
+  "ifm_bridge_planned",
+  "ifm_bridge_shipped",
+  "ifm_pair_scored",
+  "ifm_pair_pruned",
+  "ifm_winner_compounded",
+  "quality_gate_passed",
+  "quality_gate_failed",
+  "seo_ops_gate_passed",
+  "seo_ops_gate_failed",
+  "scene_matrix_completed",
+] as const;
+export type OrbitEventType = (typeof ORBIT_EVENT_TYPES)[number];
+
+export const ORBIT_RECOMMENDATION_KINDS = [
+  "retry_distribution",
+  "run_distribution",
+  "index_recheck",
+  "regenerate_content",
+  "replan_campaign",
+  "manual_publish_review",
+  "expand_content",
+  "expand_ifm_pair",
+  "prune_ifm_pair",
+] as const;
+export type OrbitRecommendationKind = (typeof ORBIT_RECOMMENDATION_KINDS)[number];
+
+export const ORBIT_RECOMMENDATION_STATUSES = [
+  "open",
+  "applied",
+  "dismissed",
+  "expired",
+] as const;
+export type OrbitRecommendationStatus = (typeof ORBIT_RECOMMENDATION_STATUSES)[number];
+
+export const ORBIT_RECOMMENDATION_PRIORITIES = ["high", "medium", "low"] as const;
+export type OrbitRecommendationPriority = (typeof ORBIT_RECOMMENDATION_PRIORITIES)[number];
+
+export type OrbitAutopilotConfig = {
+  enabled?: boolean;
+  maxActionsPerRun?: number;
+  /** Fallback when a recommendation has no linked campaign */
+  defaultMode?: OrbitCampaignMode;
+};
+
+export const DEFAULT_AUTOPILOT_CONFIG: OrbitAutopilotConfig = {
+  enabled: false,
+  maxActionsPerRun: 5,
+  defaultMode: "assisted",
+};
+
+export type OrbitExternalAnalyticsConfig = {
+  /** Rolling 7-day sessions (updated by webhook or metrics sync) */
+  sessions7d?: number;
+  /** Rolling 7-day conversions */
+  conversions7d?: number;
+  /** Previous period sessions for drop detection */
+  previousSessions7d?: number;
+  /** Optional per-project webhook HMAC secret */
+  webhookSecret?: string;
+  /** Optional GA4 property id for Data API sync (project + per-pair IFM attribution) */
+  ga4PropertyId?: string;
+  lastSyncedAt?: string;
+};
+
+export type OrbitSchedulerConfig = {
+  enabled?: boolean;
+  /** Run autopilot step for projects with autopilot.enabled */
+  runAutopilot?: boolean;
+  maxProjectsPerRun?: number;
+};
+
+export const DEFAULT_SCHEDULER_CONFIG: OrbitSchedulerConfig = {
+  enabled: true,
+  runAutopilot: true,
+  maxProjectsPerRun: 20,
+};
 
 export type OrbitApprovalPolicy = {
   allowedPlatforms?: OrbitContentPlatform[];
