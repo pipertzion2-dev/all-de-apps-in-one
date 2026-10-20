@@ -1,0 +1,69 @@
+import type { OrbitRouteChannel, OrbitRouteDestination } from "../graph-constants";
+
+/** Default growth pipeline for an existing ingested project. */
+export const GROWTH_PIPELINE_DESTINATIONS: OrbitRouteDestination[] = [
+  { channel: "plan", order: 1 },
+  { channel: "generate", order: 2, config: { templateOnly: true } },
+  { channel: "index_submit", order: 3 },
+  { channel: "distribute", order: 4, config: { processNow: false } },
+  { channel: "analytics", order: 5 },
+];
+
+/** Full pipeline including ingest for new sources. */
+export const FULL_PIPELINE_DESTINATIONS: OrbitRouteDestination[] = [
+  { channel: "ingest", order: 1 },
+  ...GROWTH_PIPELINE_DESTINATIONS.map((d) => ({ ...d, order: d.order + 1 })),
+  { channel: "autopilot", order: 7, config: { force: true } },
+];
+
+export type RouteTemplate = {
+  id: string;
+  name: string;
+  description: string;
+  sourceChannel: string;
+  destinations: OrbitRouteDestination[];
+};
+
+export const ROUTE_TEMPLATES: RouteTemplate[] = [
+  {
+    id: "growth_pipeline",
+    name: "Growth pipeline",
+    description: "Plan → generate → index → distribute → analytics for an ingested project",
+    sourceChannel: "url",
+    destinations: GROWTH_PIPELINE_DESTINATIONS,
+  },
+  {
+    id: "full_pipeline",
+    name: "Full pipeline",
+    description: "Ingest → growth pipeline → autopilot for a new source",
+    sourceChannel: "url",
+    destinations: FULL_PIPELINE_DESTINATIONS,
+  },
+  {
+    id: "index_and_distribute",
+    name: "Index and distribute",
+    description: "Submit indexing and enqueue distribution for an active campaign",
+    sourceChannel: "campaign",
+    destinations: [
+      { channel: "index_submit", order: 1 },
+      { channel: "distribute", order: 2, config: { processNow: true } },
+      { channel: "analytics", order: 3 },
+    ],
+  },
+];
+
+export function getRouteTemplate(templateId: string): RouteTemplate | undefined {
+  return ROUTE_TEMPLATES.find((t) => t.id === templateId);
+}
+
+export function isOrbitRouteChannel(value: string): value is OrbitRouteChannel {
+  return (
+    value === "ingest" ||
+    value === "plan" ||
+    value === "generate" ||
+    value === "index_submit" ||
+    value === "distribute" ||
+    value === "analytics" ||
+    value === "autopilot"
+  );
+}
