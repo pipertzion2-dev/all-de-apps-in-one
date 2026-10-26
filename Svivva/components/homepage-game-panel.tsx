@@ -13,7 +13,7 @@ const CleanSneaksLogoCube = dynamic(
   { ssr: false },
 );
 
-/** Last cube face — Klean Sneaks, the street arena for the same god moves. */
+/** Last cube face — Klean Sneaks, the street arena for the same heat moves. */
 export function HomepageGamePanel() {
   const router = useRouter();
 

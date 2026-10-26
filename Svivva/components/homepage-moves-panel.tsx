@@ -5,7 +5,7 @@ import { HomepageScrollHint } from "@/components/homepage-scroll-hint";
 import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
 import { HOMEPAGE_SCROLL_TO_BETA } from "@/lib/product-positioning";
 
-/** First cube face — The Moves Like (god moves on camera). */
+/** First cube face — The Moves Like (heat moves on camera). */
 export function HomepageMovesPanel() {
   return (
     <section

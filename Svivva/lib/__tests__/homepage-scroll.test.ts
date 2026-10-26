@@ -75,9 +75,9 @@ describe("homepage scroll panels", () => {
     expect(gameSrc).toContain('surface="game"');
     expect(gameSrc).toContain("KLEAN_HOMEPAGE_TAGLINE");
     const positioningSrc = readFileSync(resolve(__dirname, "../product-positioning.ts"), "utf8");
-    expect(positioningSrc).toMatch(/god moves/i);
+    expect(positioningSrc).toMatch(/heat moves/i);
     expect(positioningSrc).toContain("HOMEPAGE_GAME_FACE_TITLE");
-    expect(positioningSrc).toMatch(/Make god moves on the walk/);
+    expect(positioningSrc).toMatch(/Make heat moves on the walk/);
     const founderSrc = readFileSync(
       resolve(__dirname, "../../components/homepage-founder-son-section.tsx"),
       "utf8",
