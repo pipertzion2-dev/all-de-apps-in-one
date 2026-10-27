@@ -22,6 +22,19 @@ describe("homepage intro scroll", () => {
     expect(pageSrc).toContain("let delta = -e.deltaY");
   });
 
+  it("keeps the scroll-up cue on the intro face with high-contrast copy", () => {
+    const hintIdx = pageSrc.indexOf("Scroll up to enter");
+    const frontIdx = pageSrc.indexOf("flipFrontRef");
+    const panelIdx = pageSrc.indexOf("<HomepageGamePanel");
+    expect(hintIdx).toBeGreaterThan(panelIdx);
+    expect(panelIdx).toBeGreaterThan(frontIdx);
+    expect(pageSrc).toContain("text-intro-swipe-cube-twice");
+    expect(pageSrc).toContain("safe-area-inset-bottom");
+    expect(pageSrc).toMatch(/text-black[\s\S]{0,120}Scroll up to enter/);
+    expect(gameSrc).toContain("scroll up to enter");
+    expect(gameSrc).toMatch(/text-black[\s\S]{0,120}scroll up to enter/);
+  });
+
   it("defers heavy homepage 3D until intro completes", () => {
     expect(pageSrc).toContain("canMountHeavy3d");
     expect(pageSrc).toContain("if (!flipComplete) return");

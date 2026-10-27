@@ -577,49 +577,55 @@ export default function LandingPage() {
                       else skipIntroRef.current?.();
                     }}
                   />
+                  {/* Keep the cue on the intro face (above translateZ) so mobile
+                      flowers/camo and the 3D layer cannot bury the copy. */}
+                  <div
+                    ref={scrollHintRef}
+                    className="pointer-events-none absolute left-1/2 z-30 -translate-x-1/2"
+                    style={{
+                      opacity: 1,
+                      willChange: "opacity",
+                      bottom: "max(1.25rem, calc(env(safe-area-inset-bottom, 0px) + 0.75rem))",
+                    }}
+                  >
+                    <div
+                      ref={scrollHintBounceRef}
+                      className="flex max-w-[min(92vw,22rem)] flex-col items-center gap-1.5 rounded-full border border-black/20 bg-white px-5 py-2.5 shadow-md"
+                      style={{ animation: "scrollBounce 1.5s ease-in-out 0s infinite" }}
+                      data-testid="text-intro-swipe-cube-twice"
+                    >
+                      <span className="text-center text-xs font-semibold tracking-[0.14em] text-black sm:text-sm">
+                        Scroll up to enter
+                      </span>
+                      <svg
+                        width="22"
+                        height="22"
+                        viewBox="0 0 20 20"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.25"
+                        className="text-black"
+                        aria-hidden
+                      >
+                        <path d="M10 16V4M5 9l5-5 5 5" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="pointer-events-none absolute left-3 right-3 top-4 z-30 flex items-start justify-end gap-2 sm:left-4 sm:right-4">
+                    <button
+                      type="button"
+                      className="pointer-events-auto shrink-0 rounded-lg border border-black/20 bg-white px-2.5 py-1.5 text-[11px] font-medium text-black/80 shadow-sm hover:text-black sm:px-3 sm:text-xs"
+                      onClick={() => {
+                        skipIntroRef.current?.();
+                      }}
+                      data-testid="button-skip-intro"
+                    >
+                      Skip
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div
-            ref={scrollHintRef}
-            className="pointer-events-none absolute bottom-8 left-1/2 z-20 -translate-x-1/2"
-            style={{ opacity: 1, willChange: "opacity" }}
-          >
-            <div
-              ref={scrollHintBounceRef}
-              className="flex max-w-[min(92vw,22rem)] flex-col items-center gap-1 rounded-full border border-black/10 bg-white/85 px-5 py-2.5 shadow-sm backdrop-blur-sm"
-              style={{ animation: "scrollBounce 1.5s ease-in-out 0s infinite" }}
-              data-testid="text-intro-swipe-cube-twice"
-            >
-              <span className="text-[10px] uppercase tracking-[0.2em] text-foreground/55">
-                Scroll up to enter
-              </span>
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 20 20"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                className="text-foreground/70"
-                aria-hidden
-              >
-                <path d="M10 16V4M5 9l5-5 5 5" />
-              </svg>
-            </div>
-          </div>
-          <div className="pointer-events-none absolute left-3 right-3 top-4 z-20 flex items-start justify-end gap-2 sm:left-4 sm:right-4">
-            <button
-              type="button"
-              className="pointer-events-auto shrink-0 rounded-lg border border-black/15 bg-white/75 px-2.5 py-1.5 text-[11px] font-medium text-black/70 shadow-sm backdrop-blur-sm hover:text-black sm:px-3 sm:text-xs"
-              onClick={() => {
-                skipIntroRef.current?.();
-              }}
-              data-testid="button-skip-intro"
-            >
-              Skip
-            </button>
           </div>
         </div>
       )}
