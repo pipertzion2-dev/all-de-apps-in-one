@@ -3,7 +3,6 @@
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { CamoThreeOverlay } from "@/components/camo-three-overlay";
-import { HomepageScrollHint } from "@/components/homepage-scroll-hint";
 import { HomepageMainGoal } from "@/components/homepage-main-goal";
 import { KLEAN_HOMEPAGE_TAGLINE } from "@/lib/clean-sneaks/game-copy";
 
@@ -26,10 +25,6 @@ export function HomepageGamePanel({ asIntro = false, onEnterApp }: HomepageGameP
     router.push("/clean-sneaks");
   };
 
-  const enterApp = () => {
-    onEnterApp?.();
-  };
-
   return (
     <section
       id="home-game"
@@ -42,57 +37,55 @@ export function HomepageGamePanel({ asIntro = false, onEnterApp }: HomepageGameP
       }`}
       style={asIntro ? { minHeight: "100svh", height: "100svh" } : { scrollSnapAlign: "start" }}
     >
-      {/* Three.js flowers + digi camo water on white */}
+      {/* Flowers + digi camo water only — white CSS shows through clear gaps */}
       <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
         <CamoThreeOverlay preset="lock" isIntro eagerMount keepMounted className="h-full w-full" />
       </div>
 
-      {asIntro ? (
-        <HomepageScrollHint
-          label="Scroll up to enter zzai zzai"
-          direction="up"
-          prominent
-          onActivate={enterApp}
-        />
-      ) : null}
-
-      <div className="relative z-10 flex min-h-0 flex-1 flex-col px-3 pb-[5.5rem] pt-[4.5rem] sm:px-6 sm:pb-28 sm:pt-20">
+      <div
+        className={`relative z-10 flex min-h-0 flex-1 flex-col px-3 sm:px-6 ${
+          asIntro ? "pb-28 pt-16 sm:pb-32 sm:pt-20" : "pb-[5.5rem] pt-[4.5rem] sm:pb-28 sm:pt-20"
+        }`}
+      >
         <HomepageMainGoal
           variant="light"
           density="compact"
           surface="game"
-          className="shrink-0 px-1"
+          className="shrink-0 px-1 [&_p]:hidden"
         />
 
         <div
-          className="relative mx-auto mt-1 flex min-h-0 w-full max-w-lg flex-1 items-center justify-center"
+          className="relative mx-auto mt-2 flex min-h-0 w-full max-w-lg flex-1 items-center justify-center"
           data-testid="homepage-bundle-cube"
         >
           <CleanSneaksLogoCube
-            className="h-full max-h-[min(48svh,380px)] w-full"
+            className="h-full max-h-[min(52svh,400px)] w-full"
             onActivate={enterGame}
           />
         </div>
 
-        <p
-          className="mt-2 shrink-0 text-center text-[10px] uppercase tracking-[0.25em] text-foreground/55 sm:text-[11px]"
-          data-testid="text-clean-sneaks-goal"
-        >
-          {KLEAN_HOMEPAGE_TAGLINE} — tap to play free
-        </p>
-
-        {asIntro ? (
-          <div className="mt-4 flex shrink-0 justify-center">
+        {!asIntro ? (
+          <p
+            className="mt-2 shrink-0 text-center text-[10px] uppercase tracking-[0.25em] text-foreground/55 sm:text-[11px]"
+            data-testid="text-clean-sneaks-goal"
+          >
+            {KLEAN_HOMEPAGE_TAGLINE} — tap to play free
+          </p>
+        ) : (
+          <div className="mt-3 flex shrink-0 flex-col items-center gap-3">
+            <p className="text-center text-[10px] uppercase tracking-[0.22em] text-foreground/50">
+              Tap cube to play · scroll up to enter
+            </p>
             <button
               type="button"
-              onClick={enterApp}
-              className="rounded-full border border-[#5B8DA8]/45 bg-white/85 px-5 py-2 text-xs font-semibold tracking-wide text-foreground shadow-sm backdrop-blur-sm transition-transform active:scale-95"
+              onClick={() => onEnterApp?.()}
+              className="rounded-full border border-[#5B8DA8]/40 bg-white/90 px-6 py-2.5 text-xs font-semibold tracking-wide text-foreground shadow-sm backdrop-blur-sm transition-transform active:scale-95"
               data-testid="button-enter-main-app"
             >
               Enter zzai zzai
             </button>
           </div>
-        ) : null}
+        )}
       </div>
     </section>
   );

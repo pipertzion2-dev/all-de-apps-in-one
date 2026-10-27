@@ -206,11 +206,27 @@ export function CamoThreeOverlay({
       };
 
       const isCheckoutCamo = preset === "checkout";
-      const isIntroCamo = preset === "hero" || preset === "lock";
+      const isLockCamo = preset === "lock";
+      const isIntroCamo = preset === "hero" || isLockCamo;
       const isOaasCamo = preset === "oaas";
       const isSectionCamo = isSectionCamoPreset(preset);
       // OaaS keeps block digi camo; only lower sections use smooth camo on phones.
       const useSmoothSectionCamo = isSectionCamo && isMobileViewport;
+
+      // Lock first page: airy pastels + mostly transparent so white sky + flowers read.
+      const lockColors = [
+        null,
+        null,
+        "rgba(210, 180, 190, 0.16)",
+        null,
+        "rgba(175, 160, 195, 0.14)",
+        null,
+        "rgba(150, 185, 130, 0.15)",
+        null,
+        "rgba(200, 205, 160, 0.12)",
+        null,
+        "rgba(150, 175, 195, 0.14)",
+      ];
 
       const introColors = [
         "rgba(210, 170, 180, 0.38)", // 0: blush pink
@@ -266,11 +282,13 @@ export function CamoThreeOverlay({
 
       const toneCount = isCheckoutCamo
         ? checkoutColors.length
-        : isIntroCamo
-          ? introColors.length
-          : isOaasCamo
-            ? oaasColors.length
-            : 3;
+        : isLockCamo
+          ? lockColors.length
+          : isIntroCamo
+            ? introColors.length
+            : isOaasCamo
+              ? oaasColors.length
+              : 3;
 
       ctx.clearRect(0, 0, width, height);
 
@@ -360,6 +378,12 @@ export function CamoThreeOverlay({
               ctx.fillStyle = color;
               ctx.fillRect(px, py, blockSize, blockSize);
             }
+          } else if (isLockCamo) {
+            const color = lockColors[val];
+            if (color) {
+              ctx.fillStyle = color;
+              ctx.fillRect(px, py, blockSize, blockSize);
+            }
           } else if (isOaasCamo) {
             const color = oaasColors[val];
             if (color) {
@@ -394,6 +418,7 @@ export function CamoThreeOverlay({
   }, [seed, preset, isMobileViewport]);
 
   const isCheckout = preset === "checkout";
+  const isLock = preset === "lock";
   const isOaas = preset === "oaas";
   const isSectionCamo = isSectionCamoPreset(preset);
   const useMobileSectionCamo = isSectionCamo && isMobileViewport;
@@ -408,13 +433,15 @@ export function CamoThreeOverlay({
         style={{
           filter: isCheckout
             ? "brightness(1.0) saturate(1.1)"
-            : isOaas
-              ? "brightness(1.22) saturate(1.5) contrast(1.08)"
-              : useMobileSectionCamo
-                ? "brightness(1.14) saturate(1.28) contrast(1.04)"
-                : isIntro
-                  ? "brightness(1.05) saturate(1.35)"
-                  : "brightness(1.15) saturate(1.1)",
+            : isLock
+              ? "brightness(1.12) saturate(1.2) contrast(1.02)"
+              : isOaas
+                ? "brightness(1.22) saturate(1.5) contrast(1.08)"
+                : useMobileSectionCamo
+                  ? "brightness(1.14) saturate(1.28) contrast(1.04)"
+                  : isIntro
+                    ? "brightness(1.05) saturate(1.35)"
+                    : "brightness(1.15) saturate(1.1)",
         }}
       >
         {flowersActive ? (
@@ -427,13 +454,15 @@ export function CamoThreeOverlay({
         className={`absolute inset-0 w-full h-full pointer-events-none ${
           isCheckout
             ? "opacity-30"
-            : isOaas
-              ? "opacity-38 md:opacity-48 blur-[1.2px]"
-              : useMobileSectionCamo
-                ? "opacity-[0.36] md:opacity-[0.72] md:blur-0"
-                : isIntro
-                  ? "opacity-55 md:opacity-60"
-                  : "opacity-60 md:opacity-100"
+            : isLock
+              ? "opacity-[0.22] md:opacity-[0.28]"
+              : isOaas
+                ? "opacity-38 md:opacity-48 blur-[1.2px]"
+                : useMobileSectionCamo
+                  ? "opacity-[0.36] md:opacity-[0.72] md:blur-0"
+                  : isIntro
+                    ? "opacity-55 md:opacity-60"
+                    : "opacity-60 md:opacity-100"
         }`}
       />
     </div>

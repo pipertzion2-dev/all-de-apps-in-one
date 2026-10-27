@@ -68,21 +68,21 @@ const PRESETS: Record<ScenePreset, PresetConfig> = {
   },
   // Lock screen: denser field + larger blooms behind the lock art
   lock: {
-    flowerCount: 320,
+    flowerCount: 160,
     particleCount: 0,
-    waterSize: 34,
-    cameraZ: 7.2,
-    cameraY: 3.8,
+    waterSize: 22,
+    cameraZ: 9.0,
+    cameraY: 5.2,
     cameraX: 0,
-    lookAtY: 0,
+    lookAtY: -0.35,
     bloomSpeed: 0.028,
-    crtIntensity: 0.22,
+    crtIntensity: 0,
     pixelSize: 1,
-    scanlineIntensity: 0.015,
-    interactionStrength: 0.7,
-    spreadX: 0.92,
-    spreadZ: 0.95,
-    mobileScaleBoost: 1.35,
+    scanlineIntensity: 0,
+    interactionStrength: 0.45,
+    spreadX: 0.82,
+    spreadZ: 0.85,
+    mobileScaleBoost: 1.1,
   },
   features: {
     flowerCount: 140,
@@ -225,6 +225,7 @@ const WATER_VERTEX_SHADER = `
 
 const WATER_FRAGMENT_SHADER = `
   uniform float uTime;
+  uniform float uAlpha;
   uniform vec3 uColorTeal;
   uniform vec3 uColorTealLight;
   uniform vec3 uColorBurgundy;
@@ -254,7 +255,7 @@ const WATER_FRAGMENT_SHADER = `
     float fresnel = pow(1.0 - abs(vElevation), 2.5) * 0.2;
     color += fresnel * uColorTealLight;
     
-    gl_FragColor = vec4(color, 0.85);
+    gl_FragColor = vec4(color, uAlpha);
   }
 `;
 
@@ -1241,26 +1242,37 @@ export function ThreeCRTFlowers({
       waterSegments,
       waterSegments,
     );
+    // Lock first page: lighter camo water so white sky stays dominant.
+    const lockWaterTeal = new THREE.Color(0xa8c8d8);
+    const lockWaterTealLight = new THREE.Color(0xc5ddb8);
+    const lockWaterBurgundy = new THREE.Color(0xd8b0c0);
+    const lockWaterMint = new THREE.Color(0xd0e0a8);
     waterMaterial = new THREE.ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
         uMouse: { value: new THREE.Vector2(0, 0) },
         uInteraction: { value: config.interactionStrength },
-        uColorTeal: { value: VIVVA_COLORS.teal },
-        uColorTealLight: { value: VIVVA_COLORS.tealLight },
-        uColorBurgundy: { value: VIVVA_COLORS.burgundy },
-        uColorMint: { value: VIVVA_COLORS.mint },
+        uAlpha: { value: isLockPreset ? 0.28 : 0.85 },
+        uColorTeal: { value: isLockPreset ? lockWaterTeal : VIVVA_COLORS.teal },
+        uColorTealLight: { value: isLockPreset ? lockWaterTealLight : VIVVA_COLORS.tealLight },
+        uColorBurgundy: { value: isLockPreset ? lockWaterBurgundy : VIVVA_COLORS.burgundy },
+        uColorMint: { value: isLockPreset ? lockWaterMint : VIVVA_COLORS.mint },
       },
       vertexShader: WATER_VERTEX_SHADER,
       fragmentShader: WATER_FRAGMENT_SHADER,
       transparent: true,
       side: THREE.DoubleSide,
+      depthWrite: false,
     });
     disposables.push({ geometry: waterGeometry, material: waterMaterial });
 
     const water = new THREE.Mesh(waterGeometry, waterMaterial);
     water.rotation.x = -Math.PI / 2;
-    water.position.y = isOaasWater && isMediumMobile ? -1.05 : -1.4;
+    // Lock intro: keep camo water as a lower band so white sky dominates.
+    water.position.y = isLockPreset ? -2.15 : isOaasWater && isMediumMobile ? -1.05 : -1.4;
+    if (isLockPreset) {
+      water.scale.set(0.78, 0.78, 0.78);
+    }
     scene.add(water);
 
     // Create many exotic flowers spread evenly across scene

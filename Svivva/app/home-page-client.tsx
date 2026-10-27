@@ -378,52 +378,20 @@ export default function LandingPage() {
               />
             </div>
           </div>
-          <div
-            ref={scrollHintRef}
-            className="pointer-events-none absolute bottom-8 left-1/2 z-20 -translate-x-1/2"
-            style={{ opacity: 1, willChange: "opacity" }}
-          >
-            <div
-              ref={scrollHintBounceRef}
-              className="flex max-w-[min(92vw,22rem)] flex-col items-center gap-1 rounded-full border border-black/10 bg-white/85 px-5 py-2.5 shadow-sm backdrop-blur-sm"
-              style={{ animation: "scrollBounce 1.5s ease-in-out 0s infinite" }}
-              data-testid="text-intro-swipe-cube-twice"
-            >
-              <span
-                className="text-center text-sm font-medium leading-snug text-foreground no-underline"
-                style={{ fontFamily: "'Zc', sans-serif", textDecoration: "none" }}
-              >
-                Welcome to ZZAI
-              </span>
-              <span className="text-[10px] uppercase tracking-[0.2em] text-foreground/55 no-underline">
-                Scroll up to enter
-              </span>
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 20 20"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                className="text-foreground/70"
-              >
-                <path d="M10 16V4M5 9l5-5 5 5" />
-              </svg>
-            </div>
+          {/* Hidden refs kept for intro scroll RAF / reduced-motion cleanup */}
+          <div ref={scrollHintRef} className="hidden" aria-hidden>
+            <div ref={scrollHintBounceRef} data-testid="text-intro-swipe-cube-twice" />
           </div>
-          <div className="pointer-events-none absolute left-3 right-3 top-4 z-20 flex items-start justify-between gap-2 sm:left-4 sm:right-4">
-            <OrbitAdminAccessButton
-              data-testid="button-home-intro-admin-orbit"
-              className="pointer-events-auto h-8 max-w-[46vw] shrink border-[#5B8DA8]/50 bg-background/85 px-2 text-[10px] backdrop-blur-sm sm:max-w-none sm:px-3 sm:text-xs"
-            />
+          <div className="pointer-events-none absolute left-3 right-3 top-4 z-20 flex items-start justify-end gap-2 sm:left-4 sm:right-4">
             <button
               type="button"
-              className="pointer-events-auto shrink-0 rounded-lg border border-border/60 bg-background/80 px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground backdrop-blur-sm hover:text-foreground sm:px-3 sm:text-xs"
+              className="pointer-events-auto shrink-0 rounded-lg border border-black/10 bg-white/90 px-2.5 py-1.5 text-[11px] font-medium text-foreground/70 shadow-sm backdrop-blur-sm hover:text-foreground sm:px-3 sm:text-xs"
               onClick={() => {
                 skipIntroRef.current?.();
               }}
+              data-testid="button-skip-intro"
             >
-              Skip intro
+              Skip
             </button>
           </div>
         </div>

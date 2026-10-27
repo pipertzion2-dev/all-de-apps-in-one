@@ -10,11 +10,10 @@ describe("homepage intro scroll", () => {
   );
 
   it("enters on scroll up without touchmove preventDefault", () => {
-    expect(pageSrc).toContain("Scroll up to enter");
     expect(pageSrc).toContain('window.addEventListener("wheel", handleWheel');
     expect(pageSrc).not.toContain('window.addEventListener("touchmove", handleTouchMove');
     expect(pageSrc).toContain("skipIntroRef");
-    expect(pageSrc).toContain("Skip intro");
+    expect(pageSrc).toContain("button-skip-intro");
     expect(pageSrc).not.toContain("isOverIntroVideo");
     expect(pageSrc).toContain("if (e.deltaY < 0)");
     expect(pageSrc).toContain("touchStartY - y > 48");
