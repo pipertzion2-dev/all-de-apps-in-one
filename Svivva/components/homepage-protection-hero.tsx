@@ -1,8 +1,6 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import zzaiLogo from "@/attached_assets/ZZAI_OFFICIAL_LOGO.png";
 import {
   HOMEPAGE_SCROLL_TO_PROTECTION,
   PRODUCT_HERO_HEADLINE,
@@ -20,47 +18,30 @@ export function HomepageProtectionHero() {
       className="relative snap-start scroll-mt-4 border-b border-border/40 bg-gradient-to-b from-[#5B8DA8]/8 to-background px-4 pb-10 pt-8 sm:px-6 sm:pb-14 sm:pt-10"
       data-testid="homepage-protection-hero"
     >
-      <div className="mx-auto flex max-w-3xl flex-col items-center gap-8 lg:max-w-6xl lg:flex-row lg:items-center lg:justify-between">
-        <div className="space-y-5 text-center lg:max-w-xl lg:text-left">
-          <p className="text-[10px] font-medium uppercase tracking-[0.35em] text-[#5B8DA8]">
-            {PRODUCT_NAME_LINE}
-          </p>
-          <h1 className="text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-[2.75rem] lg:leading-[1.12]">
-            {PRODUCT_HERO_HEADLINE}
-          </h1>
-          <p className="text-base font-medium leading-snug text-foreground/90">{PRODUCT_TAGLINE}</p>
-          <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
-            {PRODUCT_PROTECTION_PITCH} Sketches, sneaker colorways, lyrics, API schemas — anything
-            you may need to prove you had first. The cube below is beta apps; The Moves Like opens
-            inside Play.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-3 lg:justify-start">
-            <Button asChild className="bg-[#5B8DA8] text-white">
-              <Link href={PRODUCT_PROTECTION_PATH} data-testid="link-open-poor-man-protection">
-                {HOMEPAGE_SCROLL_TO_PROTECTION}
-              </Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link href="/protect/verify">Verify a seal</Link>
-            </Button>
-            <Button asChild variant="ghost" className="text-muted-foreground">
-              <Link href="/clean-sneaks">Klean Sneaks demo</Link>
-            </Button>
-          </div>
-        </div>
-
-        <div className="flex shrink-0 flex-col items-center gap-3 rounded-2xl border border-border/60 bg-card/80 px-6 py-5 shadow-lg backdrop-blur-sm">
-          <Image
-            src={zzaiLogo}
-            alt="zzai zzai official logo"
-            width={96}
-            height={96}
-            className="h-20 w-20 rounded-md object-contain sm:h-24 sm:w-24"
-          />
-          <div className="text-center">
-            <p className="text-xs font-semibold leading-snug">Logo by my son</p>
-            <p className="text-[10px] text-muted-foreground">Designed at the computer · Age 6</p>
-          </div>
+      <div className="mx-auto max-w-3xl space-y-5 text-center">
+        <p className="text-[10px] font-medium uppercase tracking-[0.35em] text-[#5B8DA8]">
+          {PRODUCT_NAME_LINE}
+        </p>
+        <h1 className="text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-[2.75rem] lg:leading-[1.12]">
+          {PRODUCT_HERO_HEADLINE}
+        </h1>
+        <p className="text-base font-medium leading-snug text-foreground/90">{PRODUCT_TAGLINE}</p>
+        <p className="mx-auto max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+          {PRODUCT_PROTECTION_PITCH} Sketches, sneaker colorways, lyrics, API schemas — anything you
+          may need to prove you had first. The cube below is beta apps.
+        </p>
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
+          <Button asChild className="bg-[#5B8DA8] text-white">
+            <Link href={PRODUCT_PROTECTION_PATH} data-testid="link-open-poor-man-protection">
+              {HOMEPAGE_SCROLL_TO_PROTECTION}
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/protect/verify">Verify a seal</Link>
+          </Button>
+          <Button asChild variant="ghost" className="text-muted-foreground">
+            <Link href="/clean-sneaks">Klean Sneaks demo</Link>
+          </Button>
         </div>
       </div>
     </section>

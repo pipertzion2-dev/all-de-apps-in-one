@@ -687,10 +687,10 @@ export default function LandingPage() {
                   <span className="text-xs font-bold tracking-wide text-[#5B8DA8]">Protect</span>
                 </Link>
                 <Link
-                  href="/play"
+                  href="/clean-sneaks"
                   className="flex h-8 items-center gap-1 rounded-md px-1.5 hover:bg-muted/50 transition-colors sm:px-2"
                   data-testid="link-svivva-play-mobile"
-                  aria-label="Play — The Moves Like"
+                  aria-label="Klean Sneaks"
                 >
                   <span className="seeds-holo-text text-base leading-none">&#9835;</span>
                   <span className="seeds-holo-text hidden text-xs font-bold tracking-wide min-[420px]:inline">
@@ -810,9 +810,9 @@ export default function LandingPage() {
                           Poor Man Protection
                         </Button>
                       </Link>
-                      <Link href="/play">
+                      <Link href="/clean-sneaks">
                         <Button size="sm" variant="outline" className="border-[#5B8DA8]/40">
-                          Play · Moves Like
+                          Klean Sneaks
                         </Button>
                       </Link>
                       <Link href="/dashboard">
@@ -1292,17 +1292,17 @@ export default function LandingPage() {
                     <div className="space-y-4 text-muted-foreground leading-relaxed">
                       <p>
                         The photo is my son at the computer — the same session where he helped shape
-                        the zzai zzai logo. The center of zzai zzai is The Moves Like: explore,
-                        practice, create, and share movement from your phone.
+                        the zzai zzai logo. The center of zzai zzai is Poor Man Protection: seal
+                        what you made with hashes and a court-ready pack.
                       </p>
                       <p>
-                        Poor Man Protection stays on the desk for designers and builders who need a
-                        timestamped record before formal filings. We also partner with Bed Stuy
-                        Vybez in Brooklyn for fashion and storefront creators.
+                        Designers and builders use it when they need a timestamped record before
+                        formal filings. We also partner with Bed Stuy Vybez in Brooklyn for fashion
+                        and storefront creators.
                       </p>
                       <p>
                         Klean Sneaks and Hybrid² Lab stay available as demos and beta tools. The
-                        homepage leads with The Moves Like because that is the product you open
+                        homepage leads with Poor Man Protection because that is the product you open
                         first.
                       </p>
                     </div>
@@ -2056,8 +2056,11 @@ export default function LandingPage() {
                         </Link>
                       </li>
                       <li>
-                        <Link href="/play" className="hover:text-foreground transition-colors">
-                          ZZAI Play
+                        <Link
+                          href="/poor-man-protection"
+                          className="hover:text-foreground transition-colors"
+                        >
+                          Poor Man Protection
                         </Link>
                       </li>
                       <li>

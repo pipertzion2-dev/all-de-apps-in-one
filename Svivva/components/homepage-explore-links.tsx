@@ -9,12 +9,6 @@ const LINKS = [
     description: "Main focus — seal uploads with hashes and timestamps; court-ready packs.",
   },
   {
-    href: "/play",
-    title: "The Moves Like (in Play)",
-    description:
-      "Interactive dance game — Motion DNA, Ghost Mode, Move Reactor, Rhythm Portal, Style Clash.",
-  },
-  {
     href: "/clean-sneaks",
     title: "Klean Sneaks demo",
     description: "BALOON8 car×sneaker — one chassis, colorway unlocks, Sneak Vision hazards.",
@@ -58,8 +52,8 @@ export function HomepageExploreLinks() {
             Poor Man Protection &amp; the desk
           </h2>
           <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-base">
-            Poor Man Protection is the center of the site. The cube holds beta apps. The Moves Like
-            opens inside Play; Klean Sneaks stays free on the walk.
+            Poor Man Protection is the center of the site. The cube holds beta apps. Klean Sneaks
+            stays free on the walk.
           </p>
         </div>
 

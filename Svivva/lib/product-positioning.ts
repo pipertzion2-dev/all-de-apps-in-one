@@ -1,7 +1,6 @@
 /**
  * Canonical product story for zzai zzai — homepage, metadata, and beta labeling.
- * Homepage leads with Poor Man Protection; the desk cube is beta apps;
- * The Moves Like lives in /play.
+ * Homepage leads with Poor Man Protection; the desk cube is beta apps.
  */
 
 import type { FeatureId } from "@/components/svivva-artifact/feature-defs";
@@ -22,9 +21,9 @@ export const PRODUCT_PROTECTION_PITCH =
 
 /** Applications block (below the hero) — focused section intro. */
 export const HOMEPAGE_APPLICATIONS_TITLE =
-  "Protection first. Beta apps on the cube. Play when you want to move.";
+  "Protection first. Beta apps on the cube. Klean Sneaks on the walk.";
 export const HOMEPAGE_APPLICATIONS_SUBLINE =
-  "zzai zzai is mainly focused on Poor Man Protection. The spinning desk cube holds beta apps (Seeds, Orbit, Protect channels, and more). The Moves Like lives inside Play.";
+  "zzai zzai is mainly focused on Poor Man Protection. The spinning desk cube holds beta apps (Seeds, Orbit, Protect channels, and more). Klean Sneaks stays free as a walk demo.";
 
 /** Sap / tree metaphor — quiet work under the surface while you rest and grow. */
 export const PRODUCT_SAP_METAPHOR =
@@ -32,15 +31,15 @@ export const PRODUCT_SAP_METAPHOR =
 
 /** One-sentence pitch (YC / hero / meta). */
 export const PRODUCT_ONE_LINER =
-  "zzai zzai leads with Poor Man Protection — seal sketches, colorways, and files with hashes and court packs. The desk cube is beta apps; The Moves Like lives in Play; Klean Sneaks stays free on the walk.";
+  "zzai zzai leads with Poor Man Protection — seal sketches, colorways, and files with hashes and court packs. The desk cube is beta apps; Klean Sneaks stays free on the walk.";
 
 /** Plain-language main goal (homepage game + product faces). */
 export const PRODUCT_MAIN_GOAL =
-  "Open Poor Man Protection to seal what you made, spin the cube for beta desk apps, and open Play when you want The Moves Like.";
+  "Open Poor Man Protection to seal what you made, then spin the cube for beta desk apps.";
 
 /** Shorter hero subline. */
 export const PRODUCT_HERO_SUBLINE =
-  "Cryptographic seals and court packs for what you invent — then beta apps on the cube, and god moves in Play.";
+  "Cryptographic seals and court packs for what you invent — then beta apps on the cube.";
 
 /** Max ~12 words — mobile homepage faces only. */
 export const PRODUCT_HOOK_SHORT = "Seal it. Prove it. Protect it.";
@@ -52,9 +51,9 @@ export const HOMEPAGE_HOWTO_SUBLINE =
 
 /** Literal game ↔ product bridge (BALOON8 car×sneaker, Jordan 14 × Ferrari). */
 export const PRODUCT_GAME_HYBRID_METAPHOR =
-  "Protect first, then play — Poor Man Protection on the desk, The Moves Like in Play, Klean Sneaks on the BALOON8 walk.";
+  "Protect first, then play — Poor Man Protection on the desk, Klean Sneaks on the BALOON8 walk.";
 
-/** Last homepage panel — Klean Sneaks (after The Moves Like). */
+/** Last homepage panel — Klean Sneaks. */
 export const HOMEPAGE_GAME_FACE_TITLE = "Klean Sneaks on the walk";
 export const HOMEPAGE_GAME_FACE_SUBLINE = "Klean Sneaks — protect the BALOON8 while you play free.";
 
@@ -70,10 +69,10 @@ export const PRODUCT_PROTECTION_PATH = "/poor-man-protection";
 export const HOMEPAGE_SCROLL_TO_COMBINED = "Scroll ↓ More";
 /** From the combined face — back to beta apps. */
 export const HOMEPAGE_SCROLL_TO_BETA_UP = "↑ Back to beta apps";
-/** From The Moves Like — continue to beta desk apps. */
+/** Continue to beta desk apps. */
 export const HOMEPAGE_SCROLL_TO_BETA = "Scroll ↓ Beta apps";
-/** Moves Like lives in /play — use only inside Play or as a secondary desk link. */
-export const HOMEPAGE_SCROLL_TO_MOVES = "Open The Moves Like in Play";
+/** @deprecated Not used on homepage — kept for lingering imports. */
+export const HOMEPAGE_SCROLL_TO_MOVES = "Open Play";
 /** Open the free Klean Sneaks arena. */
 export const HOMEPAGE_SCROLL_TO_GAME = "Play Klean Sneaks free";
 /** From Klean Sneaks — back up to the combined story face. */
@@ -139,7 +138,6 @@ export function isBetaHref(href: string): boolean {
   if (path === "/poor-man-protection" || path.startsWith("/poor-man-protection/")) return false;
   if (path.startsWith("/dashboard/poor-man-protection")) return false;
   if (path.startsWith("/protect")) return false;
-  // Play hosts The Moves Like (GA) — MIDI Studio stays available under ?section=studio.
   if (path === "/play" || path.startsWith("/play/")) return false;
   if (path.startsWith("/the-moves-like")) return false;
   if (path.startsWith("/tools")) return true;

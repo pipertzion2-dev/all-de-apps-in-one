@@ -17,8 +17,7 @@ export function HomepageFaqSection() {
             Questions about Poor Man Protection
           </h2>
           <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-base">
-            Sealing, court packs, the beta apps cube, Play / The Moves Like, pricing, and what is
-            still in beta.
+            Sealing, court packs, the beta apps cube, pricing, and what is still in beta.
           </p>
         </div>
 

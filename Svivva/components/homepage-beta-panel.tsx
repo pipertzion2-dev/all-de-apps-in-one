@@ -33,7 +33,7 @@ type HomepageBetaPanelProps = {
 
 /**
  * First main-app face after intro — Poor Man Protection leads;
- * the desk cube below is beta apps. The Moves Like lives in /play.
+ * the desk cube below is beta apps.
  */
 export function HomepageBetaPanel({
   mountCanvas = true,
