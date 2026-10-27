@@ -40,25 +40,33 @@ export function AnimatedPonds() {
             width / 2
           );
 
-          const blueShift = Math.sin(time) * 0.3 + 0.5;
-          const greenShift = Math.cos(time * 1.3) * 0.3 + 0.5;
+          const blueShift = Math.sin(time) * 0.4 + 0.6;
+          const greenShift = Math.cos(time * 1.3) * 0.4 + 0.6;
 
-          gradient.addColorStop(0, `rgba(100, ${200 + greenShift * 55}, ${220 + blueShift * 35}, 0.9)`);
-          gradient.addColorStop(0.5, `rgba(70, ${170 + greenShift * 85}, ${200 + blueShift * 55}, 0.8)`);
-          gradient.addColorStop(1, `rgba(50, ${140 + greenShift * 115}, ${180 + blueShift * 75}, 0.7)`);
+          // Much brighter, more saturated colors
+          gradient.addColorStop(0, `rgba(150, ${220 + greenShift * 35}, 255, 1)`);
+          gradient.addColorStop(0.5, `rgba(100, ${200 + greenShift * 55}, ${230 + blueShift * 25}, 0.95)`);
+          gradient.addColorStop(1, `rgba(50, ${180 + greenShift * 75}, ${210 + blueShift * 45}, 0.85)`);
 
           ctx.fillStyle = gradient;
           ctx.beginPath();
           ctx.ellipse(width / 2, height / 2, width / 2, height / 2, 0, 0, Math.PI * 2);
           ctx.fill();
 
+          // Add a visible border around the pond
+          ctx.strokeStyle = `rgba(100, 255, 255, 0.6)`;
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.ellipse(width / 2, height / 2, width / 2 - 2, height / 2 - 2, 0, 0, Math.PI * 2);
+          ctx.stroke();
+
           for (let i = 0; i < 3; i++) {
             const waveTime = time + i * 2;
             const waveRadius = (width / 3) * (1 + Math.sin(waveTime) * 0.2);
-            const waveOpacity = 0.35 + Math.sin(waveTime) * 0.2;
+            const waveOpacity = 0.5 + Math.sin(waveTime) * 0.3;
 
-            ctx.strokeStyle = `rgba(150, 240, 255, ${waveOpacity})`;
-            ctx.lineWidth = 3;
+            ctx.strokeStyle = `rgba(180, 255, 255, ${waveOpacity})`;
+            ctx.lineWidth = 4;
             ctx.beginPath();
             ctx.ellipse(width / 2, height / 2, waveRadius, waveRadius * 0.9, 0, 0, Math.PI * 2);
             ctx.stroke();
@@ -69,8 +77,8 @@ export function AnimatedPonds() {
             const rippleTime = time * 0.8 + i * 0.5;
             const rippleX = width / 2 + Math.sin(rippleTime * 2) * 15;
             const rippleY = height / 2 + Math.cos(rippleTime * 1.5) * 12;
-            const rippleSize = 5 + Math.sin(rippleTime * 3) * 3;
-            const rippleOpacity = 0.5 + Math.sin(rippleTime * 4) * 0.3;
+            const rippleSize = 6 + Math.sin(rippleTime * 3) * 3;
+            const rippleOpacity = 0.7 + Math.sin(rippleTime * 4) * 0.3;
 
             const rippleGradient = ctx.createRadialGradient(
               rippleX,
@@ -80,8 +88,8 @@ export function AnimatedPonds() {
               rippleY,
               rippleSize
             );
-            rippleGradient.addColorStop(0, `rgba(200, 255, 255, ${rippleOpacity})`);
-            rippleGradient.addColorStop(1, "rgba(100, 220, 255, 0)");
+            rippleGradient.addColorStop(0, `rgba(220, 255, 255, ${rippleOpacity})`);
+            rippleGradient.addColorStop(1, "rgba(150, 240, 255, 0)");
 
             ctx.fillStyle = rippleGradient;
             ctx.beginPath();
@@ -114,7 +122,7 @@ export function AnimatedPonds() {
         className="absolute left-[2%] top-[8%] pointer-events-none"
         style={{
           mixBlendMode: "lighten",
-          opacity: 0.85,
+          opacity: 0.95,
         }}
       />
       <canvas
@@ -124,7 +132,7 @@ export function AnimatedPonds() {
         className="absolute right-[2%] top-[12%] pointer-events-none"
         style={{
           mixBlendMode: "lighten",
-          opacity: 0.85,
+          opacity: 0.95,
         }}
       />
       <canvas
@@ -134,7 +142,7 @@ export function AnimatedPonds() {
         className="absolute bottom-[10%] left-[5%] pointer-events-none"
         style={{
           mixBlendMode: "lighten",
-          opacity: 0.85,
+          opacity: 0.95,
         }}
       />
     </div>
