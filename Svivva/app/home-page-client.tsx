@@ -666,18 +666,18 @@ export default function LandingPage() {
             data-testid="homepage-main-nav"
           >
             <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-2 px-3 sm:h-16 sm:gap-3 sm:px-6">
-              <div className="flex min-w-0 shrink-0 items-center gap-2">
+              <div className="flex shrink-0 items-center gap-2">
                 <ZzaiModeToggle size="xs" />
                 <Link
                   href="/"
-                  className="min-w-0 truncate text-[10px] font-bold tracking-[0.18em] text-foreground/90 sm:text-xs sm:tracking-[0.2em]"
+                  className="hidden whitespace-nowrap text-xs font-semibold tracking-wide text-foreground/90 sm:inline"
                   data-testid="link-home-brand"
                 >
                   zzai zzai
                 </Link>
               </div>
 
-              <div className="flex min-w-0 items-center justify-end gap-1 sm:gap-2">
+              <div className="flex min-w-0 flex-1 items-center justify-end gap-0.5 sm:gap-2">
                 <Link
                   href="/poor-man-protection"
                   className="flex h-8 items-center gap-1 rounded-md px-1.5 hover:bg-muted/50 transition-colors sm:px-2"
@@ -693,7 +693,7 @@ export default function LandingPage() {
                   aria-label="Klean Sneaks"
                 >
                   <span className="seeds-holo-text text-base leading-none">&#9835;</span>
-                  <span className="seeds-holo-text hidden text-xs font-bold tracking-wide min-[420px]:inline">
+                  <span className="seeds-holo-text hidden text-xs font-bold tracking-wide sm:inline">
                     Play
                   </span>
                 </Link>
@@ -705,7 +705,7 @@ export default function LandingPage() {
                   aria-label="Events"
                 >
                   <Mic2 className="h-3.5 w-3.5 shrink-0 text-[#5B8DA8]" />
-                  <span className="hidden text-xs font-bold tracking-wide text-foreground/90 min-[420px]:inline">
+                  <span className="hidden text-xs font-bold tracking-wide text-foreground/90 sm:inline">
                     Events
                   </span>
                 </Link>

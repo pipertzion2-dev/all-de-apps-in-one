@@ -97,9 +97,6 @@ export function HomepageAboutSection() {
           <Button asChild className="bg-[#5B8DA8] text-white hover:bg-[#4a7a94]">
             <Link href={PRODUCT_PROTECTION_PATH}>{HOMEPAGE_SCROLL_TO_PROTECTION}</Link>
           </Button>
-          <Button asChild variant="outline">
-            <Link href="/clean-sneaks">Klean Sneaks demo</Link>
-          </Button>
         </div>
       </div>
     </section>
