@@ -114,7 +114,7 @@ export function AnimatedPonds() {
   }, []);
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-[3] overflow-hidden" aria-hidden>
+    <div className="pointer-events-none absolute inset-0 z-[8] overflow-hidden" aria-hidden>
       <canvas
         ref={canvasRef1}
         width={200}
