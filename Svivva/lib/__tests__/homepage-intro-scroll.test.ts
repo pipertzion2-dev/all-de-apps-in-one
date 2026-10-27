@@ -9,14 +9,17 @@ describe("homepage intro scroll", () => {
     "utf8",
   );
 
-  it("enters on scroll up without touchmove preventDefault", () => {
+  it("drives a vertical cube flip on scroll/swipe up", () => {
+    expect(pageSrc).toContain("Scroll up to enter");
     expect(pageSrc).toContain('window.addEventListener("wheel", handleWheel');
-    expect(pageSrc).not.toContain('window.addEventListener("touchmove", handleTouchMove');
+    expect(pageSrc).toContain('window.addEventListener("touchmove", handleTouchMove');
     expect(pageSrc).toContain("skipIntroRef");
+    expect(pageSrc).toContain("enterFlipRef");
     expect(pageSrc).toContain("button-skip-intro");
-    expect(pageSrc).not.toContain("isOverIntroVideo");
-    expect(pageSrc).toContain("if (e.deltaY < 0)");
-    expect(pageSrc).toContain("touchStartY - y > 48");
+    expect(pageSrc).toContain("rotateX(${angle}deg)");
+    expect(pageSrc).toContain("rotateX(${angle - 90}deg)");
+    expect(pageSrc).toContain("snapToFinish");
+    expect(pageSrc).toContain("let delta = -e.deltaY");
   });
 
   it("defers heavy homepage 3D until intro completes", () => {
