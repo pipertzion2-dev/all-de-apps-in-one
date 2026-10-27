@@ -44,13 +44,7 @@ export function HomepageGamePanel({ asIntro = false, onEnterApp }: HomepageGameP
     >
       {/* Three.js flowers + digi camo water on white */}
       <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
-        <CamoThreeOverlay
-          preset="lock"
-          isIntro
-          eagerMount
-          keepMounted
-          className="h-full w-full"
-        />
+        <CamoThreeOverlay preset="lock" isIntro eagerMount keepMounted className="h-full w-full" />
       </div>
 
       {asIntro ? (

@@ -14,13 +14,10 @@ const MovesLikeApp = dynamic(
   { ssr: false, loading: () => <PlaySectionLoading label={MOVES_LIKE.name} /> },
 );
 
-const PlayStudioClient = dynamic(
-  () => import("@/components/play/play-studio-client"),
-  {
-    ssr: false,
-    loading: () => <PlaySectionLoading label="Studio" />,
-  },
-);
+const PlayStudioClient = dynamic(() => import("@/components/play/play-studio-client"), {
+  ssr: false,
+  loading: () => <PlaySectionLoading label="Studio" />,
+});
 
 export type PlayHubSection = "moves" | "studio";
 

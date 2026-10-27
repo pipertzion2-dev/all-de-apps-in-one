@@ -1151,7 +1151,8 @@ export function ThreeCRTFlowers({
 
     const cameraAspect = resolveCameraAspect(rawW, rawH, preset, isMediumMobile);
     // CRT post (chromatic aberration, vignette) causes visible horizontal banding on mobile OaaS/sections.
-    const useCrtPost = !(isMediumMobile && (isOaasPreset || isSectionCamo));
+    // Skip CRT on lock too — vignette would muddy the white first-page sky.
+    const useCrtPost = !(isLockPreset || (isMediumMobile && (isOaasPreset || isSectionCamo)));
     const sceneLookAtY = isTightCamoMobile ? -0.35 : config.lookAtY;
 
     const scene = new THREE.Scene();

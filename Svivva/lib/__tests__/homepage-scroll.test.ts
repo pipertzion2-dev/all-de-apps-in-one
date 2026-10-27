@@ -74,8 +74,8 @@ describe("homepage scroll panels", () => {
     expect(gameSrc).toContain('surface="game"');
     expect(gameSrc).toContain("KLEAN_HOMEPAGE_TAGLINE");
     expect(playHubSrc).toContain("MovesLikeApp");
-    expect(playHubSrc).toContain('tab-play-moves');
-    expect(playHubSrc).toContain('tab-play-studio');
+    expect(playHubSrc).toContain("tab-play-moves");
+    expect(playHubSrc).toContain("tab-play-studio");
     const positioningSrc = readFileSync(resolve(__dirname, "../product-positioning.ts"), "utf8");
     expect(positioningSrc).toMatch(/god moves/i);
     expect(positioningSrc).toContain("HOMEPAGE_GAME_FACE_TITLE");
