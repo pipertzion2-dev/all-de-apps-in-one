@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-/** The Moves Like lives in Play — keep this path as a stable alias. */
+/** Legacy path — do not advertise; send visitors to the homepage. */
 export default function TheMovesLikePage() {
-  redirect("/play");
+  redirect("/");
 }

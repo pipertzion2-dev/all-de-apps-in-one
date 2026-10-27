@@ -10,7 +10,6 @@ import Link from "next/link";
 import { HomepageCubeFaceHint } from "@/components/homepage-cube-face-hint";
 import {
   HOMEPAGE_SCROLL_TO_GAME,
-  HOMEPAGE_SCROLL_TO_MOVES,
   HOMEPAGE_SCROLL_TO_PROTECTION,
   PRODUCT_PROTECTION_PATH,
 } from "@/lib/product-positioning";
@@ -22,8 +21,7 @@ type HomepageCubePanelProps = {
 
 /**
  * Combined story face — about, how-to, explore, founder, pricing, FAQ.
- * Poor Man Protection leads the product story; Moves Like is in /play;
- * Klean Sneaks opens from the intro or /clean-sneaks.
+ * Poor Man Protection leads; Klean Sneaks opens from the intro or /clean-sneaks.
  */
 export function HomepageCubePanel({
   mountCanvas: _mountCanvas = true,
@@ -43,8 +41,8 @@ export function HomepageCubePanel({
           Story, plans, and answers
         </h2>
         <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-          How zzai zzai fits together — Poor Man Protection first, beta apps on the cube, The Moves
-          Like in Play, Klean Sneaks on the walk.
+          How zzai zzai fits together — Poor Man Protection first, beta apps on the cube, Klean
+          Sneaks on the walk.
         </p>
       </div>
 
@@ -70,13 +68,6 @@ export function HomepageCubePanel({
             data-testid="button-scroll-to-klean-sneaks"
           >
             {HOMEPAGE_SCROLL_TO_GAME}
-          </Link>
-          <Link
-            href="/play"
-            className="rounded-full border border-[#AC81AF]/45 bg-background px-6 py-2.5 text-xs font-semibold tracking-wide text-foreground shadow-sm transition-transform active:scale-95"
-            data-testid="button-open-moves-in-play"
-          >
-            {HOMEPAGE_SCROLL_TO_MOVES}
           </Link>
         </div>
       ) : null}

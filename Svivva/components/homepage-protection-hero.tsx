@@ -31,8 +31,7 @@ export function HomepageProtectionHero() {
           <p className="text-base font-medium leading-snug text-foreground/90">{PRODUCT_TAGLINE}</p>
           <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
             {PRODUCT_PROTECTION_PITCH} Sketches, sneaker colorways, lyrics, API schemas — anything
-            you may need to prove you had first. The cube below is beta apps; The Moves Like opens
-            inside Play.
+            you may need to prove you had first. The cube below is beta apps.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3 lg:justify-start">
             <Button asChild className="bg-[#5B8DA8] text-white">

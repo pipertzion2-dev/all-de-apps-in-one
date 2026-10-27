@@ -35,7 +35,7 @@ describe("homepage scroll panels", () => {
     expect(cubeSrc).not.toContain("HomepageScrollHint");
   });
 
-  it("splits main app faces: beta apps then combined; game is intro; Moves Like in Play", () => {
+  it("splits main app faces: beta apps then combined; game is intro; no Moves Like ads", () => {
     const stackSrc = readFileSync(resolve(__dirname, "../../lib/homepage-flip-stack.ts"), "utf8");
     const pageSrc = readFileSync(resolve(__dirname, "../../app/home-page-client.tsx"), "utf8");
     const betaSrc = readFileSync(
@@ -66,12 +66,14 @@ describe("homepage scroll panels", () => {
     expect(betaSrc).toContain('id="oaas"');
     expect(betaSrc).toContain("HOMEPAGE_BETA_CUBE_TITLE");
     expect(betaSrc).not.toContain('href="/play"');
+    expect(betaSrc).not.toMatch(/Moves Like/i);
     expect(cubeSrc).toContain('id="nav-cube"');
     expect(cubeSrc).toContain("HomepageAboutSection");
     expect(cubeSrc).toContain("HomepageFounderSonSection");
     expect(cubeSrc).toMatch(/HomepageFounderSonSection[\s\S]*HomepagePricingSection/);
     expect(cubeSrc).toContain('href="/clean-sneaks"');
     expect(cubeSrc).toContain("PRODUCT_PROTECTION_PATH");
+    expect(cubeSrc).not.toContain('href="/play"');
     expect(cubeSrc).not.toContain("HomepageProtectionHero");
     expect(cubeSrc).not.toContain("HomepageMovesLikeHero");
     expect(cubeSrc).not.toContain("HomepageHeroBlock");
@@ -81,11 +83,24 @@ describe("homepage scroll panels", () => {
     expect(playHubSrc).toContain("MovesLikeApp");
     expect(playHubSrc).toContain("tab-play-moves");
     expect(playHubSrc).toContain("tab-play-studio");
-    expect(playHubSrc).toContain("Open The Moves Like");
+    expect(playHubSrc).not.toContain("Open The Moves Like");
     const positioningSrc = readFileSync(resolve(__dirname, "../product-positioning.ts"), "utf8");
     expect(positioningSrc).toContain("HOMEPAGE_GAME_FACE_TITLE");
     expect(positioningSrc).toContain('PRODUCT_NAME_LINE = "Poor Man Protection"');
     expect(positioningSrc).toContain('PRODUCT_PROTECTION_PATH = "/poor-man-protection"');
+    expect(positioningSrc).not.toMatch(/HOMEPAGE_APPLICATIONS_SUBLINE[\s\S]*Moves Like/);
+    const aboutSrc = readFileSync(
+      resolve(__dirname, "../../components/homepage-about-section.tsx"),
+      "utf8",
+    );
+    const exploreSrc = readFileSync(
+      resolve(__dirname, "../../components/homepage-explore-links.tsx"),
+      "utf8",
+    );
+    expect(aboutSrc).not.toMatch(/Moves Like/i);
+    expect(exploreSrc).not.toMatch(/Moves Like/i);
+    expect(aboutSrc).not.toContain('href="/play"');
+    expect(exploreSrc).not.toContain('href="/play"');
     const founderSrc = readFileSync(
       resolve(__dirname, "../../components/homepage-founder-son-section.tsx"),
       "utf8",

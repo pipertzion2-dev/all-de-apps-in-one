@@ -7,12 +7,11 @@ import { BRAND } from "@/lib/brand";
 import {
   HOMEPAGE_APPLICATIONS_SUBLINE,
   HOMEPAGE_APPLICATIONS_TITLE,
-  HOMEPAGE_SCROLL_TO_MOVES,
   HOMEPAGE_SCROLL_TO_PROTECTION,
   PRODUCT_NAME_LINE,
   PRODUCT_PROTECTION_PATH,
 } from "@/lib/product-positioning";
-import { Camera, Clapperboard, Music2, Shield } from "lucide-react";
+import { Footprints, Orbit, Shield, Sprout } from "lucide-react";
 import { FeatureBetaBadge } from "@/components/feature-beta-badge";
 
 const HIGHLIGHTS = [
@@ -25,30 +24,30 @@ const HIGHLIGHTS = [
     beta: false,
   },
   {
-    icon: Music2,
-    title: "The Moves Like",
+    icon: Footprints,
+    title: "Klean Sneaks",
     description:
-      "Inside Play — interactive dance workstation: Discover, Learn, Create, Studio, Play, Style Clash.",
-    href: "/play",
+      "Free walk demo — BALOON8 car×sneaker hybrid, colorways, and Sneak Vision hazards.",
+    href: "/clean-sneaks",
     beta: false,
   },
   {
-    icon: Camera,
-    title: "Front-camera practice",
-    description: "Ghost Mode in Play mirrors your selfie camera against a reference take.",
-    href: "/play",
-    beta: false,
+    icon: Sprout,
+    title: "ZZAI Seeds",
+    description: "Beta — turn a PDF or YouTube brief into deployable apps from the desk cube.",
+    href: "/seeds",
+    beta: true,
   },
   {
-    icon: Clapperboard,
-    title: "Create & Studio",
-    description: "Record takes and assemble routines in Play — glass UI tuned for phones.",
-    href: "/play",
-    beta: false,
+    icon: Orbit,
+    title: "Orbit",
+    description: "Beta — growth and indexing autopilot for search and answer engines.",
+    href: "/orbit",
+    beta: true,
   },
 ] as const;
 
-/** Brief product overview — Poor Man Protection first; Moves Like in Play. */
+/** Brief product overview — Poor Man Protection first; desk beta apps second. */
 export function HomepageAboutSection() {
   return (
     <section
@@ -99,9 +98,6 @@ export function HomepageAboutSection() {
             <Link href={PRODUCT_PROTECTION_PATH}>{HOMEPAGE_SCROLL_TO_PROTECTION}</Link>
           </Button>
           <Button asChild variant="outline">
-            <Link href="/play">{HOMEPAGE_SCROLL_TO_MOVES}</Link>
-          </Button>
-          <Button asChild variant="ghost">
             <Link href="/clean-sneaks">Klean Sneaks demo</Link>
           </Button>
         </div>

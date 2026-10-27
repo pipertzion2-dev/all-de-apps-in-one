@@ -6,12 +6,11 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { BrandMark } from "@/components/brand-mark";
 import { Button } from "@/components/ui/button";
-import { MOVES_LIKE } from "@/lib/the-moves-like/brand";
 import { cn } from "@/lib/utils";
 
 const MovesLikeApp = dynamic(
   () => import("@/components/the-moves-like/MovesLikeApp").then((m) => m.MovesLikeApp),
-  { ssr: false, loading: () => <PlaySectionLoading label={MOVES_LIKE.name} /> },
+  { ssr: false, loading: () => <PlaySectionLoading label="Moves" /> },
 );
 
 const PlayStudioClient = dynamic(() => import("@/components/play/play-studio-client"), {
@@ -34,8 +33,7 @@ function resolveSection(raw: string | null): PlayHubSection {
 }
 
 /**
- * Play hosts The Moves Like by default (Open The Moves Like lives here, not on the
- * homepage lead); MIDI Studio stays as a second section.
+ * Play hub — movement desk + MIDI Studio. Not advertised on the homepage.
  */
 export function PlayHubClient() {
   const router = useRouter();
@@ -67,14 +65,9 @@ export function PlayHubClient() {
         <div className="mx-auto flex h-12 max-w-[1400px] items-center justify-between gap-2 px-3 sm:px-4">
           <div className="flex min-w-0 items-center gap-2">
             <BrandMark size="sm" href="/" />
-            <div className="min-w-0">
-              <span className="block truncate text-xs font-semibold tracking-wide text-[#0F1A1C] sm:text-sm">
-                Play
-              </span>
-              <span className="hidden truncate text-[10px] text-[#0F1A1C]/55 sm:block">
-                Open The Moves Like
-              </span>
-            </div>
+            <span className="truncate text-xs font-semibold tracking-wide text-[#0F1A1C] sm:text-sm">
+              Play
+            </span>
           </div>
           <div
             className="flex items-center rounded-full border border-black/10 bg-white/80 p-0.5 shadow-sm"
@@ -94,7 +87,7 @@ export function PlayHubClient() {
               onClick={() => selectSection("moves")}
               data-testid="tab-play-moves"
             >
-              {MOVES_LIKE.shortName}
+              Moves
             </button>
             <button
               type="button"

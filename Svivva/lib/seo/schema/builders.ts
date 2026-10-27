@@ -223,8 +223,8 @@ export const HOMEPAGE_HOWTO_STEPS = [
     text: "Download a court-oriented pack and optional email delivery — supporting evidence of anteriority, not a USPTO filing.",
   },
   {
-    name: "Explore beta apps and Play",
-    text: "Spin the desk cube for beta apps. Open Play when you want The Moves Like; Klean Sneaks stays free on the walk.",
+    name: "Explore beta apps",
+    text: "Spin the desk cube for beta apps. Klean Sneaks stays free on the walk.",
   },
 ] as const;
 
@@ -253,7 +253,7 @@ export function homepageJsonLdGraph() {
     howToSchema({
       name: HOMEPAGE_HOWTO_TITLE,
       description:
-        "Seal work with Poor Man Protection on zzai zzai — hash, timestamp, and export a court-ready pack. The desk cube holds beta apps; The Moves Like lives in Play.",
+        "Seal work with Poor Man Protection on zzai zzai — hash, timestamp, and export a court-ready pack. The desk cube holds beta apps.",
       steps: [...HOMEPAGE_HOWTO_STEPS],
     }),
   ];

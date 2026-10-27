@@ -198,14 +198,6 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
           "BALOON8 car×sneaker demo — one hybrid chassis, colorways, Sneak Vision ≈ hazard preview.",
       },
       {
-        id: "the-moves-like",
-        name: "The Moves Like",
-        path: "/play",
-        oneLiner:
-          "Interactive dance creation workstation — explore, learn, create, studio, play, and share movement.",
-        audience: "dancers, creators, and phone-first players",
-      },
-      {
         id: "klean-sneaks",
         name: "Klean Sneaks",
         path: "/clean-sneaks",
@@ -428,15 +420,11 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       },
       {
         q: "Is ZZAI only an AI API builder?",
-        a: "No — the public story leads with Poor Man Protection: seal sketches, colorways, and files with cryptographic hashes and court packs. The desk cube holds beta apps; The Moves Like lives in Play; Klean Sneaks stays free on the walk.",
+        a: "No — the public story leads with Poor Man Protection: seal sketches, colorways, and files with cryptographic hashes and court packs. The desk cube holds beta apps; Klean Sneaks stays free on the walk.",
       },
       {
         q: `What does “${PRODUCT_TAGLINE}” mean?`,
-        a: "Poor Man Protection is zzai zzai’s main focus — timestamp your work, seal it with hashes, and export a court-ready pack. Open /poor-man-protection. The Moves Like is available inside /play when you want to move.",
-      },
-      {
-        q: "What is The Moves Like?",
-        a: "The Moves Like lives inside Play (/play) — Discover, Learn (Ghost Mode), Create, Studio, Play, Community, and Profile for dance creation on your phone. It is not the homepage lead; Poor Man Protection is.",
+        a: "Poor Man Protection is zzai zzai’s main focus — timestamp your work, seal it with hashes, and export a court-ready pack. Open /poor-man-protection.",
       },
       {
         q: "How long does it take to ship with ZZAI?",
