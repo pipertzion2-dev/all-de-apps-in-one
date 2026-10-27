@@ -106,7 +106,16 @@ describe("homepage scroll panels", () => {
       "utf8",
     );
     expect(founderSrc).toContain("He designed the logo at the computer");
+    expect(founderSrc).toContain("founder-son-logo-credit");
+    expect(founderSrc).toContain("Logo by my son");
+    expect(founderSrc).toContain("ZZAI_OFFICIAL_LOGO");
     expect(founderSrc).not.toMatch(/Poor Man Protection|Klean Sneaks|Hybrid² Lab|Bed Stuy/);
+    const protectionSrc = readFileSync(
+      resolve(__dirname, "../../components/homepage-protection-hero.tsx"),
+      "utf8",
+    );
+    expect(protectionSrc).not.toContain("Logo by my son");
+    expect(protectionSrc).not.toContain("ZZAI_OFFICIAL_LOGO");
     expect(cubeSrc).toContain("HomepagePricingSection");
     expect(cubeSrc).toContain("HomepageFaqSection");
     expect(cubeSrc).toContain("HomepageHowToSection");

@@ -1,9 +1,10 @@
 "use client";
 
 import Image from "next/image";
+import zzaiLogo from "@/attached_assets/ZZAI_OFFICIAL_LOGO.png";
 import { FOUNDER_SON_COMPUTER_ALT, FOUNDER_SON_COMPUTER_SRC } from "@/lib/brand/founder-media";
 
-/** Son at the computer — sits on the cube homepage immediately before pricing. */
+/** Son at the computer — logo credit sits beside his photo. */
 export function HomepageFounderSonSection() {
   return (
     <section
@@ -13,21 +14,38 @@ export function HomepageFounderSonSection() {
     >
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
-          <div className="relative order-2 pb-8 lg:order-1">
-            <div className="mx-auto max-w-sm overflow-hidden rounded-3xl shadow-2xl ring-1 ring-white/10 lg:max-w-none">
-              <Image
-                src={FOUNDER_SON_COMPUTER_SRC}
-                alt={FOUNDER_SON_COMPUTER_ALT}
-                width={1600}
-                height={2000}
-                className="block h-auto w-full object-cover object-center"
-              />
-            </div>
-            <div className="absolute bottom-0 right-2 max-w-[220px] rounded-2xl border border-border/60 bg-card px-4 py-3 shadow-xl backdrop-blur-xl sm:right-0">
-              <p className="text-xs font-semibold leading-snug text-foreground">
-                Logo designer at the computer
-              </p>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">Age 6 · zzai zzai mark</p>
+          <div className="relative order-2 space-y-4 lg:order-1">
+            <div className="mx-auto flex max-w-sm flex-col items-stretch gap-4 sm:max-w-none sm:flex-row sm:items-end">
+              <div className="min-w-0 flex-1 overflow-hidden rounded-3xl shadow-2xl ring-1 ring-white/10">
+                <Image
+                  src={FOUNDER_SON_COMPUTER_SRC}
+                  alt={FOUNDER_SON_COMPUTER_ALT}
+                  width={1600}
+                  height={2000}
+                  className="block h-auto w-full object-cover object-center"
+                />
+              </div>
+
+              <div
+                className="mx-auto flex w-full max-w-[11rem] shrink-0 flex-col items-center gap-3 rounded-2xl border border-border/60 bg-card/90 px-4 py-5 shadow-xl backdrop-blur-sm sm:mx-0 sm:mb-1"
+                data-testid="founder-son-logo-credit"
+              >
+                <Image
+                  src={zzaiLogo}
+                  alt="zzai zzai official logo"
+                  width={96}
+                  height={96}
+                  className="h-20 w-20 rounded-md object-contain sm:h-24 sm:w-24"
+                />
+                <div className="text-center">
+                  <p className="text-xs font-semibold leading-snug text-foreground">
+                    Logo by my son
+                  </p>
+                  <p className="mt-0.5 text-[10px] text-muted-foreground">
+                    Designed at the computer · Age 6
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -51,7 +69,7 @@ export function HomepageFounderSonSection() {
               </p>
               <p className="font-medium text-foreground/85">
                 We are building something he can point to and say he helped make — starting with the
-                logo in this photo.
+                logo beside this photo.
               </p>
             </div>
           </div>
