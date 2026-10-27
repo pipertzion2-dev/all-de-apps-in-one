@@ -17,7 +17,7 @@ type HomepageGamePanelProps = {
   onEnterApp?: () => void;
 };
 
-/** First page — Klean Sneaks cube on white with Three.js flowers + camo water. */
+/** First page — Klean Sneaks cube on black with Three.js flowers + translucent camo water. */
 export function HomepageGamePanel({ asIntro = false, onEnterApp }: HomepageGamePanelProps) {
   const router = useRouter();
 
@@ -30,14 +30,14 @@ export function HomepageGamePanel({ asIntro = false, onEnterApp }: HomepageGameP
       id="home-game"
       data-homepage-cube-face="game"
       data-homepage-game-intro={asIntro ? "true" : undefined}
-      className={`relative flex h-[100svh] min-h-0 flex-col overflow-hidden bg-white ${
+      className={`relative flex h-[100svh] min-h-0 flex-col overflow-hidden bg-black ${
         asIntro
           ? ""
           : "scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px))] sm:scroll-mt-[calc(4rem+env(safe-area-inset-top,0px))]"
       }`}
       style={asIntro ? { minHeight: "100svh", height: "100svh" } : { scrollSnapAlign: "start" }}
     >
-      {/* Flowers + digi camo water only — white CSS shows through clear gaps */}
+      {/* Flowers + translucent multi-color camo water over black */}
       <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
         <CamoThreeOverlay preset="lock" isIntro eagerMount keepMounted className="h-full w-full" />
       </div>
@@ -48,7 +48,7 @@ export function HomepageGamePanel({ asIntro = false, onEnterApp }: HomepageGameP
         }`}
       >
         <HomepageMainGoal
-          variant="light"
+          variant="dark"
           density="compact"
           surface="game"
           className="shrink-0 px-1 [&_p]:hidden"
@@ -66,20 +66,20 @@ export function HomepageGamePanel({ asIntro = false, onEnterApp }: HomepageGameP
 
         {!asIntro ? (
           <p
-            className="mt-2 shrink-0 text-center text-[10px] uppercase tracking-[0.25em] text-foreground/55 sm:text-[11px]"
+            className="mt-2 shrink-0 text-center text-[10px] uppercase tracking-[0.25em] text-white/50 sm:text-[11px]"
             data-testid="text-clean-sneaks-goal"
           >
             {KLEAN_HOMEPAGE_TAGLINE} — tap to play free
           </p>
         ) : (
           <div className="mt-3 flex shrink-0 flex-col items-center gap-3">
-            <p className="text-center text-[10px] uppercase tracking-[0.22em] text-foreground/50">
+            <p className="text-center text-[10px] uppercase tracking-[0.22em] text-white/55">
               Tap cube to play · scroll up to enter
             </p>
             <button
               type="button"
               onClick={() => onEnterApp?.()}
-              className="rounded-full border border-[#5B8DA8]/40 bg-white/90 px-6 py-2.5 text-xs font-semibold tracking-wide text-foreground shadow-sm backdrop-blur-sm transition-transform active:scale-95"
+              className="rounded-full border border-white/25 bg-black/50 px-6 py-2.5 text-xs font-semibold tracking-wide text-white shadow-sm backdrop-blur-sm transition-transform active:scale-95"
               data-testid="button-enter-main-app"
             >
               Enter zzai zzai

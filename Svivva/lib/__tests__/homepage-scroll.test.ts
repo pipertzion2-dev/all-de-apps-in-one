@@ -30,7 +30,7 @@ describe("homepage scroll panels", () => {
     expect(cubeSrc).toContain('id="home-game"');
     expect(cubeSrc).toContain("CamoThreeOverlay");
     expect(cubeSrc).toContain('preset="lock"');
-    expect(cubeSrc).toContain("bg-white");
+    expect(cubeSrc).toContain("bg-black");
     expect(cubeSrc).toContain("button-enter-main-app");
     expect(cubeSrc).not.toContain("HomepageScrollHint");
   });

@@ -68,21 +68,21 @@ const PRESETS: Record<ScenePreset, PresetConfig> = {
   },
   // Lock screen: denser field + larger blooms behind the lock art
   lock: {
-    flowerCount: 160,
+    flowerCount: 280,
     particleCount: 0,
-    waterSize: 22,
-    cameraZ: 9.0,
-    cameraY: 5.2,
+    waterSize: 32,
+    cameraZ: 7.6,
+    cameraY: 4.0,
     cameraX: 0,
-    lookAtY: -0.35,
+    lookAtY: 0,
     bloomSpeed: 0.028,
     crtIntensity: 0,
     pixelSize: 1,
     scanlineIntensity: 0,
-    interactionStrength: 0.45,
-    spreadX: 0.82,
-    spreadZ: 0.85,
-    mobileScaleBoost: 1.1,
+    interactionStrength: 0.65,
+    spreadX: 0.9,
+    spreadZ: 0.92,
+    mobileScaleBoost: 1.3,
   },
   features: {
     flowerCount: 140,
@@ -1172,9 +1172,9 @@ export function ThreeCRTFlowers({
       powerPreference: isMobile ? "low-power" : "high-performance",
     });
     renderer.setSize(width, height);
-    // Lock / first-page intro: opaque white clear so sky is white (CRT post forces alpha=1).
+    // Lock first page: opaque black clear; translucent camo water + flowers sit on top.
     if (isLockPreset) {
-      renderer.setClearColor(0xffffff, 1);
+      renderer.setClearColor(0x000000, 1);
     } else {
       renderer.setClearColor(0x000000, 0);
     }
@@ -1242,21 +1242,17 @@ export function ThreeCRTFlowers({
       waterSegments,
       waterSegments,
     );
-    // Lock first page: lighter camo water so white sky stays dominant.
-    const lockWaterTeal = new THREE.Color(0xa8c8d8);
-    const lockWaterTealLight = new THREE.Color(0xc5ddb8);
-    const lockWaterBurgundy = new THREE.Color(0xd8b0c0);
-    const lockWaterMint = new THREE.Color(0xd0e0a8);
+    // Lock: vivid multi-color camo water, translucent over black.
     waterMaterial = new THREE.ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
         uMouse: { value: new THREE.Vector2(0, 0) },
         uInteraction: { value: config.interactionStrength },
-        uAlpha: { value: isLockPreset ? 0.28 : 0.85 },
-        uColorTeal: { value: isLockPreset ? lockWaterTeal : VIVVA_COLORS.teal },
-        uColorTealLight: { value: isLockPreset ? lockWaterTealLight : VIVVA_COLORS.tealLight },
-        uColorBurgundy: { value: isLockPreset ? lockWaterBurgundy : VIVVA_COLORS.burgundy },
-        uColorMint: { value: isLockPreset ? lockWaterMint : VIVVA_COLORS.mint },
+        uAlpha: { value: isLockPreset ? 0.58 : 0.85 },
+        uColorTeal: { value: VIVVA_COLORS.teal },
+        uColorTealLight: { value: VIVVA_COLORS.tealLight },
+        uColorBurgundy: { value: VIVVA_COLORS.burgundy },
+        uColorMint: { value: VIVVA_COLORS.mint },
       },
       vertexShader: WATER_VERTEX_SHADER,
       fragmentShader: WATER_FRAGMENT_SHADER,
@@ -1268,11 +1264,7 @@ export function ThreeCRTFlowers({
 
     const water = new THREE.Mesh(waterGeometry, waterMaterial);
     water.rotation.x = -Math.PI / 2;
-    // Lock intro: keep camo water as a lower band so white sky dominates.
-    water.position.y = isLockPreset ? -2.15 : isOaasWater && isMediumMobile ? -1.05 : -1.4;
-    if (isLockPreset) {
-      water.scale.set(0.78, 0.78, 0.78);
-    }
+    water.position.y = isLockPreset ? -1.35 : isOaasWater && isMediumMobile ? -1.05 : -1.4;
     scene.add(water);
 
     // Create many exotic flowers spread evenly across scene
