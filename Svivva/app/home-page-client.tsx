@@ -787,7 +787,7 @@ export default function LandingPage() {
           </nav>
 
           {showHomepageSection("scrollSnap") ? (
-            /* Four cube faces: Moves Like → beta → combined → Klean Sneaks (god moves arena). */
+            /* Four cube faces: Moves Like → beta → combined → Klean Sneaks (heat moves arena). */
             <div
               className="relative w-full bg-background"
               data-homepage-native-scroll=""

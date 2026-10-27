@@ -47,6 +47,6 @@ describe("product-positioning", () => {
 
   it("leads the homepage with a single focused thesis", () => {
     expect(PRODUCT_HERO_HEADLINE.length).toBeGreaterThan(20);
-    expect(PRODUCT_HERO_HEADLINE).toMatch(/god moves/i);
+    expect(PRODUCT_HERO_HEADLINE).toMatch(/heat moves/i);
   });
 });

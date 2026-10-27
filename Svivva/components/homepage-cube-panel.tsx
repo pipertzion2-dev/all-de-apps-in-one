@@ -17,7 +17,7 @@ type HomepageCubePanelProps = {
 
 /**
  * Combined story face — about, how-to, explore, founder, pricing, FAQ.
- * Scroll down from here into Klean Sneaks (last face / god-moves on the walk).
+ * Scroll down from here into Klean Sneaks (last face / heat-moves on the walk).
  */
 export function HomepageCubePanel({
   mountCanvas: _mountCanvas = true,
@@ -37,7 +37,7 @@ export function HomepageCubePanel({
           Story, plans, and answers
         </h2>
         <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-          How zzai zzai fits together — then take god moves to the street in Klean Sneaks.
+          How zzai zzai fits together — then take heat moves to the street in Klean Sneaks.
         </p>
       </div>
 

@@ -3,9 +3,9 @@
 /** Shown on load + start cover before the runner. */
 export const KLEAN_RUNNER_INTRO_LINE = "Protect your shoes — keep them Klean…";
 
-/** Homepage game panel + marketing tagline — god moves bridge to The Moves Like. */
+/** Homepage game panel + marketing tagline — heat moves bridge to The Moves Like. */
 export const KLEAN_HOMEPAGE_TAGLINE =
-  "God moves on the walk — protect the sneaker design from cameras and everyday wear";
+  "Heat moves on the walk — protect the sneaker design from cameras and everyday wear";
 
 /** Card / casino table headline (bundle protection theme). */
 export const KLEAN_BUNDLE_CARD_HEADLINE = "Protect your bundle!";

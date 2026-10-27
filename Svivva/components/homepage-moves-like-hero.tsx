@@ -75,7 +75,7 @@ export function HomepageMovesLikeHero() {
               data-testid="button-hero-klean-sneaks"
               onClick={() => scrollToHomepagePanel("home-game")}
             >
-              God moves in Klean Sneaks
+              Heat moves in Klean Sneaks
             </Button>
             <Button asChild variant="ghost" className="min-h-11 text-[#6D91B3]">
               <Link href="/the-moves-like">Practice with front camera</Link>

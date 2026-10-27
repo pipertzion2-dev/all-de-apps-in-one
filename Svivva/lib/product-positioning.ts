@@ -6,14 +6,14 @@
 import type { FeatureId } from "@/components/svivva-artifact/feature-defs";
 
 /** Scale-style homepage thesis — one clear job for the whole page. */
-export const PRODUCT_HERO_HEADLINE = "Make god moves — explore, learn, and play on your phone.";
+export const PRODUCT_HERO_HEADLINE = "Make heat moves — explore, learn, and play on your phone.";
 
 /** Product name — eyebrows, metadata suffix, and compact labels. */
 export const PRODUCT_NAME_LINE = "The Moves Like";
 
 /** Brand slogan — metadata and secondary hero line. */
 export const PRODUCT_TAGLINE =
-  "The Moves Like — make god moves: explore, learn, transform, play, and share.";
+  "The Moves Like — make heat moves: explore, learn, transform, play, and share.";
 
 /** Desk tool pitch — still available, no longer the homepage lead. */
 export const PRODUCT_PROTECTION_PITCH =
@@ -30,18 +30,18 @@ export const PRODUCT_SAP_METAPHOR =
 
 /** One-sentence pitch (YC / hero / meta). */
 export const PRODUCT_ONE_LINER =
-  "zzai zzai leads with The Moves Like — make god moves on camera, then carry that same energy into Klean Sneaks on the walk. Poor Man Protection and the builder desk stay on the same domain.";
+  "zzai zzai leads with The Moves Like — make heat moves on camera, then carry that same energy into Klean Sneaks on the walk. Poor Man Protection and the builder desk stay on the same domain.";
 
 /** Plain-language main goal (homepage game + product faces). */
 export const PRODUCT_MAIN_GOAL =
-  "Open The Moves Like, practice god moves with your front camera, then take the same fire into Klean Sneaks — and seal what you made with Poor Man Protection when you need proof.";
+  "Open The Moves Like, practice heat moves with your front camera, then take the same fire into Klean Sneaks — and seal what you made with Poor Man Protection when you need proof.";
 
 /** Shorter hero subline. */
 export const PRODUCT_HERO_SUBLINE =
-  "Front-camera practice for god moves — then the same heat in Klean Sneaks on the street.";
+  "Front-camera practice for heat moves — then the same heat in Klean Sneaks on the street.";
 
 /** Max ~12 words — mobile homepage faces only. */
-export const PRODUCT_HOOK_SHORT = "Make god moves. Practice. Play. Share.";
+export const PRODUCT_HOOK_SHORT = "Make heat moves. Practice. Play. Share.";
 
 /** HowTo section — keep in sync with `HOMEPAGE_HOWTO_STEPS` in seo/schema/builders.ts */
 export const HOMEPAGE_HOWTO_TITLE = "How The Moves Like works";
@@ -50,16 +50,16 @@ export const HOMEPAGE_HOWTO_SUBLINE =
 
 /** Literal game ↔ product bridge (BALOON8 car×sneaker, Jordan 14 × Ferrari). */
 export const PRODUCT_GAME_HYBRID_METAPHOR =
-  "God moves in two arenas — The Moves Like on camera, Klean Sneaks on the BALOON8 walk. Same H¹ heat, different finishes.";
+  "Heat moves in two arenas — The Moves Like on camera, Klean Sneaks on the BALOON8 walk. Same H¹ heat, different finishes.";
 
-/** Last homepage panel — Klean Sneaks (god-moves playground after The Moves Like). */
-export const HOMEPAGE_GAME_FACE_TITLE = "Make god moves on the walk";
+/** Last homepage panel — Klean Sneaks (heat-moves playground after The Moves Like). */
+export const HOMEPAGE_GAME_FACE_TITLE = "Make heat moves on the walk";
 export const HOMEPAGE_GAME_FACE_SUBLINE =
-  "Klean Sneaks — same god-move energy as The Moves Like. Protect the BALOON8 while you play free.";
+  "Klean Sneaks — same heat-move energy as The Moves Like. Protect the BALOON8 while you play free.";
 
 /** Shown under the headline on the platform homepage face (mobile compact). */
 export const HOMEPAGE_PLATFORM_FACE_SUBLINE =
-  "Open The Moves Like — practice god moves, record, and clash from your phone.";
+  "Open The Moves Like — practice heat moves, record, and clash from your phone.";
 
 /** From The Moves Like — continue to beta desk apps. */
 export const HOMEPAGE_SCROLL_TO_BETA = "Scroll ↓ Beta apps";
