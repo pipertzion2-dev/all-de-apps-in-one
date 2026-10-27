@@ -106,9 +106,11 @@ export function CleanSneaksLogoCube({ className = "", cacheBust = "v2", onActiva
         }
 
         const faceMats = textures.map((tex) => {
+          // Skip mipmaps — six 1080² faces upload faster and hitch less on first paint.
           tex.colorSpace = THREE.SRGBColorSpace;
-          tex.anisotropy = maxAniso;
-          tex.minFilter = THREE.LinearMipmapLinearFilter;
+          tex.generateMipmaps = false;
+          tex.anisotropy = Math.min(maxAniso, 4);
+          tex.minFilter = THREE.LinearFilter;
           tex.magFilter = THREE.LinearFilter;
           tex.wrapS = THREE.ClampToEdgeWrapping;
           tex.wrapT = THREE.ClampToEdgeWrapping;
