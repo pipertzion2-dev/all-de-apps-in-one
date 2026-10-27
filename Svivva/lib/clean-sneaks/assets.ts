@@ -10,8 +10,24 @@ import {
 /** Main game logo — brand splash. */
 export const KAREN_THE_MUSCLE_LOGO_URL = "/assets/clean-sneaks/karen-the-muscle-logo.jpg";
 
-/** Homepage entry logo — same art on all faces of the rotating transparent cube. */
+/**
+ * Legacy single-face logo (kept for fallbacks / older references).
+ * Prefer {@link BUNDLE_CUBE_FACE_URLS} for the homepage entry cube.
+ */
 export const STIEHL_LOGO_CUBE_URL = "/assets/clean-sneaks/stiehl-logo-cube.jpg";
+
+/**
+ * Steal the Old Man's Bundle entry cube — one unique CD-jewel collage per face.
+ * Order matches Three.js BoxGeometry materials: +X, −X, +Y, −Y, +Z, −Z.
+ */
+export const BUNDLE_CUBE_FACE_URLS = [
+  "/assets/clean-sneaks/bundle-cube-faces/face-01.jpg",
+  "/assets/clean-sneaks/bundle-cube-faces/face-02.jpg",
+  "/assets/clean-sneaks/bundle-cube-faces/face-03.jpg",
+  "/assets/clean-sneaks/bundle-cube-faces/face-04.jpg",
+  "/assets/clean-sneaks/bundle-cube-faces/face-05.jpg",
+  "/assets/clean-sneaks/bundle-cube-faces/face-06.jpg",
+] as const;
 
 /** Main cover art — start screen after loading wheels. */
 export const MAIN_GAME_COVER_URL = "/assets/clean-sneaks/ipbw-main-cover.jpg";

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
-import { STIEHL_LOGO_CUBE_URL } from "@/lib/clean-sneaks/assets";
+import { BUNDLE_CUBE_FACE_URLS } from "@/lib/clean-sneaks/assets";
 import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
 
 type Props = {
@@ -14,10 +14,10 @@ type Props = {
 };
 
 /**
- * Six-sided transparent logo cube — the Klean Sneaks homepage entry brand.
+ * Six-sided Steal Bundle cube — each face is a unique CD-jewel collage.
  * Drag to spin (with momentum); idle auto-spin continues like the ZZAI artifact cube.
  */
-export function CleanSneaksLogoCube({ className = "", cacheBust = "v1", onActivate }: Props) {
+export function CleanSneaksLogoCube({ className = "", cacheBust = "v2", onActivate }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
   const onActivateRef = useRef(onActivate);
   onActivateRef.current = onActivate;
@@ -96,33 +96,35 @@ export function CleanSneaksLogoCube({ className = "", cacheBust = "v1", onActiva
     const loader = new THREE.TextureLoader();
     const maxAniso = renderer.capabilities.getMaxAnisotropy();
 
-    loader
-      .loadAsync(`${STIEHL_LOGO_CUBE_URL}?${cacheBust}`)
-      .then((tex) => {
+    Promise.all(
+      BUNDLE_CUBE_FACE_URLS.map((url) => loader.loadAsync(`${url}?${cacheBust}`)),
+    )
+      .then((textures) => {
         if (disposed) {
-          tex.dispose();
+          textures.forEach((tex) => tex.dispose());
           return;
         }
-        tex.colorSpace = THREE.SRGBColorSpace;
-        tex.anisotropy = maxAniso;
-        tex.minFilter = THREE.LinearMipmapLinearFilter;
-        tex.magFilter = THREE.LinearFilter;
-        tex.wrapS = THREE.ClampToEdgeWrapping;
-        tex.wrapT = THREE.ClampToEdgeWrapping;
-        tex.needsUpdate = true;
-        disposables.push(tex);
 
-        const faceMats = materials.map(() => {
+        const faceMats = textures.map((tex) => {
+          tex.colorSpace = THREE.SRGBColorSpace;
+          tex.anisotropy = maxAniso;
+          tex.minFilter = THREE.LinearMipmapLinearFilter;
+          tex.magFilter = THREE.LinearFilter;
+          tex.wrapS = THREE.ClampToEdgeWrapping;
+          tex.wrapT = THREE.ClampToEdgeWrapping;
+          tex.needsUpdate = true;
+          disposables.push(tex);
+
           const mat = new THREE.MeshBasicMaterial({
             map: tex,
-            transparent: true,
-            opacity: 0.72,
-            depthWrite: false,
+            transparent: false,
+            depthWrite: true,
             side: THREE.FrontSide,
           });
           disposables.push(mat);
           return mat;
         });
+
         materials.forEach((m) => m.dispose());
         cube.material = faceMats;
       })
@@ -240,7 +242,7 @@ export function CleanSneaksLogoCube({ className = "", cacheBust = "v1", onActiva
       className={className}
       data-testid="clean-sneaks-logo-cube"
       role="img"
-      aria-label={`${KLEAN_SNEAKS.title} logo — drag to spin, tap to enter`}
+      aria-label={`${KLEAN_SNEAKS.title} Steal Bundle cube — drag to spin, tap to enter`}
     />
   );
 }

@@ -10,13 +10,15 @@ public/assets/clean-sneaks/karen-the-muscle-logo.jpg
 
 Brand logo asset for Karen the Muscle (loading / splash).
 
-## Homepage entry cube logo
+## Homepage Steal Bundle cube faces
 
 ```
-public/assets/clean-sneaks/stiehl-logo-cube.jpg
+public/assets/clean-sneaks/bundle-cube-faces/face-01.jpg … face-06.jpg
 ```
 
-Exact artwork mapped to all six faces of the transparent rotating cube on the homepage Klean Sneaks entry.
+Six unique CD-jewel collages — one per face of the rotating entry cube (homepage Klean Sneaks / Steal the Old Man's Bundle). Order matches Three.js BoxGeometry: +X, −X, +Y, −Y, +Z, −Z.
+
+Legacy single-face asset (unused by the cube): `stiehl-logo-cube.jpg`.
 
 ## Loading wheels (pre-run splash)
 
