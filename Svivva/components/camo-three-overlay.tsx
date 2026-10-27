@@ -213,20 +213,20 @@ export function CamoThreeOverlay({
       // OaaS keeps block digi camo; only lower sections use smooth camo on phones.
       const useSmoothSectionCamo = isSectionCamo && isMobileViewport;
 
-      // Lock first page: translucent multi-color digi camo over black (no near-black fills).
+      // Lock first page: digi camo tuned for a white sky (readable pastel blocks).
       const lockColors = [
+        "rgba(200, 145, 160, 0.42)",
         null,
-        "rgba(210, 170, 180, 0.28)",
+        "rgba(155, 125, 175, 0.38)",
+        "rgba(110, 150, 85, 0.4)",
+        "rgba(175, 175, 110, 0.36)",
         null,
-        "rgba(175, 150, 185, 0.26)",
+        "rgba(120, 145, 170, 0.38)",
+        "rgba(165, 110, 130, 0.38)",
+        "rgba(130, 160, 120, 0.34)",
+        "rgba(100, 70, 120, 0.36)",
         null,
-        "rgba(140, 170, 110, 0.26)",
-        null,
-        "rgba(200, 200, 145, 0.22)",
-        null,
-        "rgba(150, 165, 180, 0.24)",
-        null,
-        "rgba(180, 135, 150, 0.24)",
+        "rgba(120, 40, 55, 0.32)",
       ];
 
       const introColors = [
@@ -408,26 +408,6 @@ export function CamoThreeOverlay({
           }
         }
       }
-
-      // Lock: clip digi camo to a soft oval pond so green/blue never reads as a full-width strip.
-      if (isLockCamo) {
-        const pondCx = width * 0.5;
-        const pondCy = height * (isMobileViewport ? 0.58 : 0.62);
-        const pondRx = width * (isMobileViewport ? 0.46 : 0.42);
-        const pondRy = height * (isMobileViewport ? 0.26 : 0.3);
-        ctx.save();
-        ctx.globalCompositeOperation = "destination-in";
-        ctx.translate(pondCx, pondCy);
-        ctx.scale(pondRx, pondRy);
-        const pondMask = ctx.createRadialGradient(0, 0, 0.28, 0, 0, 1);
-        pondMask.addColorStop(0, "rgba(0,0,0,1)");
-        pondMask.addColorStop(0.62, "rgba(0,0,0,0.88)");
-        pondMask.addColorStop(0.86, "rgba(0,0,0,0.35)");
-        pondMask.addColorStop(1, "rgba(0,0,0,0)");
-        ctx.fillStyle = pondMask;
-        ctx.fillRect(-1.05, -1.05, 2.1, 2.1);
-        ctx.restore();
-      }
     };
 
     renderCamo();
@@ -455,7 +435,7 @@ export function CamoThreeOverlay({
           filter: isCheckout
             ? "brightness(1.0) saturate(1.1)"
             : isLock
-              ? "brightness(1.08) saturate(1.35) contrast(1.04)"
+              ? "brightness(1.02) saturate(1.4) contrast(1.06)"
               : isOaas
                 ? "brightness(1.22) saturate(1.5) contrast(1.08)"
                 : useMobileSectionCamo
@@ -476,7 +456,7 @@ export function CamoThreeOverlay({
           isCheckout
             ? "opacity-30"
             : isLock
-              ? "opacity-[0.34] md:opacity-[0.4]"
+              ? "opacity-[0.52] md:opacity-[0.58]"
               : isOaas
                 ? "opacity-38 md:opacity-48 blur-[1.2px]"
                 : useMobileSectionCamo
