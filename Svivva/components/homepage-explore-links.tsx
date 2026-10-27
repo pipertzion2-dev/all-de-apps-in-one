@@ -1,11 +1,16 @@
 import Link from "next/link";
 import { FeatureBetaBadge } from "@/components/feature-beta-badge";
-import { isBetaHref } from "@/lib/product-positioning";
+import { isBetaHref, PRODUCT_PROTECTION_PATH } from "@/lib/product-positioning";
 
 const LINKS = [
   {
-    href: "/the-moves-like",
-    title: "The Moves Like",
+    href: PRODUCT_PROTECTION_PATH,
+    title: "Poor Man Protection",
+    description: "Main focus — seal uploads with hashes and timestamps; court-ready packs.",
+  },
+  {
+    href: "/play",
+    title: "The Moves Like (in Play)",
     description:
       "Interactive dance game — Motion DNA, Ghost Mode, Move Reactor, Rhythm Portal, Style Clash.",
   },
@@ -13,11 +18,6 @@ const LINKS = [
     href: "/clean-sneaks",
     title: "Klean Sneaks demo",
     description: "BALOON8 car×sneaker — one chassis, colorway unlocks, Sneak Vision hazards.",
-  },
-  {
-    href: "/dashboard/poor-man-protection",
-    title: "Poor Man Protection",
-    description: "Seal uploads with hashes and timestamps — court-ready packs when you need proof.",
   },
   {
     href: "/dashboard/hybrid-lab",
@@ -55,11 +55,11 @@ export function HomepageExploreLinks() {
             Also on zzai zzai
           </p>
           <h2 id="homepage-explore-heading" className="text-2xl font-bold sm:text-3xl">
-            The Moves Like &amp; the desk
+            Poor Man Protection &amp; the desk
           </h2>
           <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-base">
-            The Moves Like is the center of the site. Klean Sneaks, Poor Man Protection, and the
-            builder desk stay on the same domain.
+            Poor Man Protection is the center of the site. The cube holds beta apps. The Moves Like
+            opens inside Play; Klean Sneaks stays free on the walk.
           </p>
         </div>
 

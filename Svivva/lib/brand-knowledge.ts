@@ -228,8 +228,9 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       {
         id: "protect",
         name: "Poor Man Protection",
-        path: "/dashboard/poor-man-protection",
-        oneLiner: "Desk tool — timestamped evidentiary seals and court-ready packs.",
+        path: "/poor-man-protection",
+        oneLiner:
+          "Main product — timestamped evidentiary seals and court-ready packs for what you invent.",
       },
       {
         id: "oaas",
@@ -380,6 +381,11 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
         why: "Growth + AEO/SEO autopilot",
       },
       {
+        title: "Poor Man Protection",
+        path: "/poor-man-protection",
+        why: "Main product — seals, hashes, and court packs",
+      },
+      {
         title: "Klean Sneaks / ZZAI Play",
         path: "/clean-sneaks",
         why: "Indexable Play / entertainment URL (browser game)",
@@ -422,15 +428,15 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       },
       {
         q: "Is ZZAI only an AI API builder?",
-        a: "No — the public story leads with The Moves Like: an interactive dance creation workstation for explore, learn, create, and play. Poor Man Protection and Klean Sneaks stay on the same domain; Hybrid² Lab, Seeds, Orbit, and the rest of the desk are beta.",
+        a: "No — the public story leads with Poor Man Protection: seal sketches, colorways, and files with cryptographic hashes and court packs. The desk cube holds beta apps; The Moves Like lives in Play; Klean Sneaks stays free on the walk.",
       },
       {
         q: `What does “${PRODUCT_TAGLINE}” mean?`,
-        a: "The Moves Like is zzai zzai’s movement desk — practice with your front camera, assemble routines, and share Style Clash takes. Open /play. Poor Man Protection remains available when you need sealed proof of what you made.",
+        a: "Poor Man Protection is zzai zzai’s main focus — timestamp your work, seal it with hashes, and export a court-ready pack. Open /poor-man-protection. The Moves Like is available inside /play when you want to move.",
       },
       {
         q: "What is The Moves Like?",
-        a: "The Moves Like is the center of zzai zzai — Discover, Learn (Ghost Mode), Create, Studio, Play, Community, and Profile for dance creation on your phone.",
+        a: "The Moves Like lives inside Play (/play) — Discover, Learn (Ghost Mode), Create, Studio, Play, Community, and Profile for dance creation on your phone. It is not the homepage lead; Poor Man Protection is.",
       },
       {
         q: "How long does it take to ship with ZZAI?",

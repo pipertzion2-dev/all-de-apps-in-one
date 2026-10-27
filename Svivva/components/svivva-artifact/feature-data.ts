@@ -72,7 +72,7 @@ export const ARTIFACT_FEATURES: ArtworkFeature[] = [
     subtitle: "Sketch-to-seal group patents",
     description:
       "Deposit sketches, mint a protection coin, and build a court-ready pack for group patents.",
-    href: "/dashboard/poor-man-protection",
+    href: "/poor-man-protection",
     cta: "Open Protect",
     accentColor: "#4a9cac",
     accentColorRgb: "74,156,172",

@@ -211,20 +211,20 @@ export function eventSeriesSchema(input?: { name?: string; description?: string;
 /** Shared HowTo steps — keep in sync with homepage HowTo HTML. */
 export const HOMEPAGE_HOWTO_STEPS = [
   {
-    name: "Open The Moves Like",
-    text: "Start on Discover — pick a move, tilt the stage, and step into the dance desk.",
+    name: "Open Poor Man Protection",
+    text: "Start the sealing ceremony — upload a sketch, colorway, lyric sheet, or any file you need to prove you had first.",
   },
   {
-    name: "Practice with your front camera",
-    text: "Ghost Mode mirrors your selfie camera so you can learn steps against a reference take.",
+    name: "Hash and timestamp",
+    text: "Cryptographic hashes and dual-axis hybridization lock a timestamped evidentiary package.",
   },
   {
-    name: "Create and assemble",
-    text: "Record a take, drop moves into Studio, and shape a routine that feels like you.",
+    name: "Export a court pack",
+    text: "Download a court-oriented pack and optional email delivery — supporting evidence of anteriority, not a USPTO filing.",
   },
   {
-    name: "Play and share",
-    text: "Clash styles, share with crew, and keep Poor Man Protection nearby when you need a sealed record.",
+    name: "Explore beta apps and Play",
+    text: "Spin the desk cube for beta apps. Open Play when you want The Moves Like; Klean Sneaks stays free on the walk.",
   },
 ] as const;
 
@@ -253,7 +253,7 @@ export function homepageJsonLdGraph() {
     howToSchema({
       name: HOMEPAGE_HOWTO_TITLE,
       description:
-        "Explore The Moves Like on zzai zzai — practice with your front camera, build routines, and share movement.",
+        "Seal work with Poor Man Protection on zzai zzai — hash, timestamp, and export a court-ready pack. The desk cube holds beta apps; The Moves Like lives in Play.",
       steps: [...HOMEPAGE_HOWTO_STEPS],
     }),
   ];

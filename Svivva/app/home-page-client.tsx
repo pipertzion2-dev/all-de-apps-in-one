@@ -679,10 +679,18 @@ export default function LandingPage() {
 
               <div className="flex min-w-0 items-center justify-end gap-1 sm:gap-2">
                 <Link
+                  href="/poor-man-protection"
+                  className="flex h-8 items-center gap-1 rounded-md px-1.5 hover:bg-muted/50 transition-colors sm:px-2"
+                  data-testid="link-nav-poor-man-protection"
+                  aria-label="Poor Man Protection"
+                >
+                  <span className="text-xs font-bold tracking-wide text-[#5B8DA8]">Protect</span>
+                </Link>
+                <Link
                   href="/play"
                   className="flex h-8 items-center gap-1 rounded-md px-1.5 hover:bg-muted/50 transition-colors sm:px-2"
                   data-testid="link-svivva-play-mobile"
-                  aria-label="Play"
+                  aria-label="Play — The Moves Like"
                 >
                   <span className="seeds-holo-text text-base leading-none">&#9835;</span>
                   <span className="seeds-holo-text hidden text-xs font-bold tracking-wide min-[420px]:inline">
@@ -797,9 +805,14 @@ export default function LandingPage() {
                           ZZAI Seeds
                         </Button>
                       </Link>
+                      <Link href="/poor-man-protection">
+                        <Button size="sm" variant="outline" className="border-[#5B8DA8]/40">
+                          Poor Man Protection
+                        </Button>
+                      </Link>
                       <Link href="/play">
                         <Button size="sm" variant="outline" className="border-[#5B8DA8]/40">
-                          Play
+                          Play · Moves Like
                         </Button>
                       </Link>
                       <Link href="/dashboard">

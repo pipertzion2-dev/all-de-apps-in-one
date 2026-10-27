@@ -10,6 +10,7 @@ export const ADMIN_CODE_FIRST_PREFIXES = ["/dashboard/burns", "/dashboard/gsc-co
 export const DASHBOARD_PUBLIC_PREFIXES = [
   "/play",
   "/seeds",
+  "/poor-man-protection",
   "/dashboard/orbit",
   "/dashboard/launchpad",
   "/dashboard/billing",

@@ -1,11 +1,14 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { HomepageHeroBlock } from "@/components/homepage-hero-block";
-import { HomepageMainGoal } from "@/components/homepage-main-goal";
+import { HomepageProtectionHero } from "@/components/homepage-protection-hero";
 import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
-import { HOMEPAGE_SCROLL_TO_COMBINED, HOMEPAGE_SCROLL_TO_MOVES } from "@/lib/product-positioning";
+import {
+  HOMEPAGE_BETA_CUBE_SUBLINE,
+  HOMEPAGE_BETA_CUBE_TITLE,
+  HOMEPAGE_SCROLL_TO_COMBINED,
+} from "@/lib/product-positioning";
 
 const PlatformFeatureHub = dynamic(
   () => import("@/components/platform-feature-hub").then((m) => m.PlatformFeatureHub),
@@ -28,7 +31,10 @@ type HomepageBetaPanelProps = {
   interactive?: boolean;
 };
 
-/** First main-app cube face — beta desk apps (nav cube + mixing console). */
+/**
+ * First main-app face after intro — Poor Man Protection leads;
+ * the desk cube below is beta apps. The Moves Like lives in /play.
+ */
 export function HomepageBetaPanel({
   mountCanvas = true,
   interactive = true,
@@ -40,28 +46,14 @@ export function HomepageBetaPanel({
       className="relative isolate min-h-[100svh] bg-background scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px))] sm:scroll-mt-[calc(4rem+env(safe-area-inset-top,0px))]"
       style={{ scrollSnapAlign: "start" }}
     >
-      {interactive ? (
-        <div className="relative z-20 flex justify-center px-4 pt-16 sm:pt-4">
-          <Link
-            href="/play"
-            className="rounded-full border border-[#AC81AF]/40 bg-background/90 px-5 py-2 text-xs font-medium tracking-wide text-foreground shadow-sm backdrop-blur-sm transition-transform active:scale-95"
-            data-testid="link-beta-to-moves-play"
-          >
-            {HOMEPAGE_SCROLL_TO_MOVES}
-          </Link>
-        </div>
-      ) : null}
-
-      <div className="relative z-20 px-4 pt-6 sm:hidden">
-        <HomepageMainGoal variant="light" density="compact" surface="platform" />
-      </div>
+      <HomepageProtectionHero />
 
       <div className="px-4 pt-8 pb-2 text-center sm:pt-12">
         <h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-          Beta apps
+          {HOMEPAGE_BETA_CUBE_TITLE}
         </h2>
         <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-          Spin the desk cube — Seeds, Orbit, Protect, and the rest of the beta channels.
+          {HOMEPAGE_BETA_CUBE_SUBLINE}
         </p>
       </div>
 
