@@ -1170,6 +1170,12 @@ export function ThreeCRTFlowers({
       powerPreference: isMobile ? "low-power" : "high-performance",
     });
     renderer.setSize(width, height);
+    // Lock / first-page intro: opaque white clear so sky is white (CRT post forces alpha=1).
+    if (isLockPreset) {
+      renderer.setClearColor(0xffffff, 1);
+    } else {
+      renderer.setClearColor(0x000000, 0);
+    }
     // Intro + mobile: hard-cap DPR so WebGL does not freeze iPhone with the video.
     const maxDpr = isIntro ? 1 : isMobile ? 1.25 : 2;
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, maxDpr));
