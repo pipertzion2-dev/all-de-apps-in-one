@@ -70,11 +70,11 @@ const PRESETS: Record<ScenePreset, PresetConfig> = {
   lock: {
     flowerCount: 280,
     particleCount: 0,
-    waterSize: 32,
-    cameraZ: 7.6,
-    cameraY: 4.0,
+    waterSize: 26,
+    cameraZ: 7.2,
+    cameraY: 5.4,
     cameraX: 0,
-    lookAtY: 0,
+    lookAtY: -0.85,
     bloomSpeed: 0.028,
     crtIntensity: 0,
     pixelSize: 1,
@@ -226,6 +226,7 @@ const WATER_VERTEX_SHADER = `
 const WATER_FRAGMENT_SHADER = `
   uniform float uTime;
   uniform float uAlpha;
+  uniform float uPondEdge;
   uniform vec3 uColorTeal;
   uniform vec3 uColorTealLight;
   uniform vec3 uColorBurgundy;
@@ -254,8 +255,18 @@ const WATER_FRAGMENT_SHADER = `
     // Fresnel-like edge highlight
     float fresnel = pow(1.0 - abs(vElevation), 2.5) * 0.2;
     color += fresnel * uColorTealLight;
+
+    // Soft circular pond falloff (keeps shoreline organic instead of a hard strip)
+    float pondMask = 1.0;
+    if (uPondEdge > 0.5) {
+      vec2 centered = vUv - vec2(0.5);
+      // Slightly irregular shoreline
+      float wobble = sin(atan(centered.y, centered.x) * 5.0 + uTime * 0.35) * 0.04;
+      float r = length(centered * vec2(1.0, 1.12)) * 2.0 + wobble;
+      pondMask = 1.0 - smoothstep(0.52, 0.98, r);
+    }
     
-    gl_FragColor = vec4(color, uAlpha);
+    gl_FragColor = vec4(color, uAlpha * pondMask);
   }
 `;
 
@@ -1106,12 +1117,13 @@ export function ThreeCRTFlowers({
           particleCount:
             isOaasPreset || isSectionCamo ? 0 : Math.floor(baseConfig.particleCount * 0.2),
           cameraZ: isLockPreset
-            ? baseConfig.cameraZ * (isSmallMobile ? 0.92 : 0.95)
+            ? baseConfig.cameraZ * (isSmallMobile ? 0.78 : 0.84)
             : isOaasPreset || isSectionCamo
               ? baseConfig.cameraZ * (isSmallMobile ? 0.72 : 0.78)
               : baseConfig.cameraZ * (isSmallMobile ? 1.55 : 1.35),
+          // Lock mobile: look down into the pond so water reads as a pool, not a horizon strip.
           cameraY: isLockPreset
-            ? baseConfig.cameraY * 1.05
+            ? baseConfig.cameraY * (isSmallMobile ? 1.28 : 1.22)
             : baseConfig.cameraY * (isOaasPreset || isSectionCamo ? 0.78 : 1.15),
           pixelSize: 1,
           crtIntensity: isCheckoutPreset
@@ -1231,24 +1243,25 @@ export function ThreeCRTFlowers({
       disposables.push({ geometry: crtGeometry, material: crtMaterial });
     }
 
-    // Metallic water matching Vivva logo — sized so digi camo water reads on mobile OaaS.
+    // Metallic water matching Vivva logo — lock uses a circular pond instead of a strip.
     let waterMaterial: THREE.ShaderMaterial | null = null;
     const isOaasWater = preset === "oaas";
     const waterSegments = isTightCamoMobile ? 32 : 56;
     const waterPlaneSize = isTightCamoMobile ? config.waterSize * 1.4 : config.waterSize;
-    const waterGeometry = new THREE.PlaneGeometry(
-      waterPlaneSize,
-      waterPlaneSize,
-      waterSegments,
-      waterSegments,
-    );
-    // Lock: vivid multi-color camo water, translucent over black.
+    const waterGeometry = isLockPreset
+      ? new THREE.CircleGeometry(
+          waterPlaneSize * (isMediumMobile ? 0.58 : 0.52),
+          isMediumMobile ? 64 : 80,
+        )
+      : new THREE.PlaneGeometry(waterPlaneSize, waterPlaneSize, waterSegments, waterSegments);
+    // Lock: vivid multi-color camo water, translucent pond over black.
     waterMaterial = new THREE.ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
         uMouse: { value: new THREE.Vector2(0, 0) },
         uInteraction: { value: config.interactionStrength },
-        uAlpha: { value: isLockPreset ? 0.58 : 0.85 },
+        uAlpha: { value: isLockPreset ? 0.62 : 0.85 },
+        uPondEdge: { value: isLockPreset ? 1.0 : 0.0 },
         uColorTeal: { value: VIVVA_COLORS.teal },
         uColorTealLight: { value: VIVVA_COLORS.tealLight },
         uColorBurgundy: { value: VIVVA_COLORS.burgundy },
@@ -1264,7 +1277,12 @@ export function ThreeCRTFlowers({
 
     const water = new THREE.Mesh(waterGeometry, waterMaterial);
     water.rotation.x = -Math.PI / 2;
-    water.position.y = isLockPreset ? -1.35 : isOaasWater && isMediumMobile ? -1.05 : -1.4;
+    water.position.y = isLockPreset ? -1.15 : isOaasWater && isMediumMobile ? -1.05 : -1.4;
+    if (isLockPreset) {
+      // Oval pond — wider than deep so mobile portrait still reads as a pool.
+      water.scale.set(isMediumMobile ? 1.35 : 1.2, 1, isMediumMobile ? 0.92 : 1.0);
+      water.position.z = isMediumMobile ? 0.35 : 0.15;
+    }
     scene.add(water);
 
     // Create many exotic flowers spread evenly across scene
