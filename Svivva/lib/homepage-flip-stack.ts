@@ -1,20 +1,19 @@
-/** Full-viewport homepage panels — four cube faces you scroll through. */
+/** Full-viewport homepage panels — cube faces you scroll through after the game intro. */
 export type HomepageFlipPanelId = "home-game" | "home-moves" | "home-beta" | "nav-cube";
 
 /**
- * Cube scroll order (index 0 = top):
- * The Moves Like → beta apps → combined (about / pricing / FAQ) → Klean Sneaks.
- * Default land is home-moves so the lead product opens first; Klean Sneaks closes the cube.
+ * Cube scroll order (index 0 = top) after the Klean Sneaks intro flips away:
+ * beta apps → combined (about / pricing / FAQ).
+ * The Moves Like lives in /play; the game is the first-page intro, not a scroll face.
  */
 export const HOMEPAGE_FLIP_PANELS: readonly HomepageFlipPanelId[] = [
-  "home-moves",
   "home-beta",
   "nav-cube",
-  "home-game",
 ] as const;
 
 export function flipPanelIndex(id: HomepageFlipPanelId): number {
-  return HOMEPAGE_FLIP_PANELS.indexOf(id);
+  const idx = HOMEPAGE_FLIP_PANELS.indexOf(id);
+  return idx >= 0 ? idx : 0;
 }
 
 export function flipPanelFromIndex(index: number): HomepageFlipPanelId {
@@ -44,17 +43,15 @@ export function homepageSectionFromHash(hash: string): string | null {
 
 export function flipPanelFromHash(hash: string): HomepageFlipPanelId | null {
   const id = hash.replace(/^#/, "").trim();
-  // Bare `/` lands on The Moves Like — Klean Sneaks is the last face.
-  if (!id) return "home-moves";
+  // Bare `/` lands on beta apps after the game intro flips into the main app.
+  if (!id) return "home-beta";
   if (id === "home-game" || id === "clean-sneaks") return "home-game";
-  if (id === "home-moves" || id === "the-moves-like") return "home-moves";
+  // Moves Like moved into /play — homepage hashes fall through to beta.
+  if (id === "home-moves" || id === "the-moves-like") return "home-beta";
   if (id === "home-beta" || id === "beta-apps") return "home-beta";
   if (id === "nav-cube") return "nav-cube";
-  // Retired explore face — open The Moves Like homepage instead.
-  if (id === "home-explore") return "home-moves";
-  // Mixing console lives on the beta face.
+  if (id === "home-explore") return "home-beta";
   if (HOMEPAGE_BETA_SECTION_HASHES.has(id)) return "home-beta";
-  // Deep-linked story / pricing sections live on the combined face.
   if (HOMEPAGE_PLATFORM_SECTION_HASHES.has(id)) return "nav-cube";
   return null;
 }

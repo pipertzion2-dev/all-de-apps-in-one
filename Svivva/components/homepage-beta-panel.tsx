@@ -1,9 +1,9 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { HomepageHeroBlock } from "@/components/homepage-hero-block";
 import { HomepageMainGoal } from "@/components/homepage-main-goal";
-import { HomepageScrollHint } from "@/components/homepage-scroll-hint";
 import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
 import { HOMEPAGE_SCROLL_TO_COMBINED, HOMEPAGE_SCROLL_TO_MOVES } from "@/lib/product-positioning";
 
@@ -28,7 +28,7 @@ type HomepageBetaPanelProps = {
   interactive?: boolean;
 };
 
-/** Third cube face — beta desk apps (nav cube + mixing console). */
+/** First main-app cube face — beta desk apps (nav cube + mixing console). */
 export function HomepageBetaPanel({
   mountCanvas = true,
   interactive = true,
@@ -41,18 +41,22 @@ export function HomepageBetaPanel({
       style={{ scrollSnapAlign: "start" }}
     >
       {interactive ? (
-        <HomepageScrollHint
-          label={HOMEPAGE_SCROLL_TO_MOVES}
-          direction="up"
-          onActivate={() => scrollToHomepagePanel("home-moves")}
-        />
+        <div className="relative z-20 flex justify-center px-4 pt-16 sm:pt-4">
+          <Link
+            href="/play"
+            className="rounded-full border border-[#AC81AF]/40 bg-background/90 px-5 py-2 text-xs font-medium tracking-wide text-foreground shadow-sm backdrop-blur-sm transition-transform active:scale-95"
+            data-testid="link-beta-to-moves-play"
+          >
+            {HOMEPAGE_SCROLL_TO_MOVES}
+          </Link>
+        </div>
       ) : null}
 
-      <div className="relative z-20 px-4 pt-16 sm:hidden">
+      <div className="relative z-20 px-4 pt-6 sm:hidden">
         <HomepageMainGoal variant="light" density="compact" surface="platform" />
       </div>
 
-      <div className="px-4 pt-14 pb-2 text-center sm:pt-16">
+      <div className="px-4 pt-8 pb-2 text-center sm:pt-12">
         <h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
           Beta apps
         </h2>

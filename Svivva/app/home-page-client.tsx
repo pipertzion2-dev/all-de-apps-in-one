@@ -20,8 +20,6 @@ import { HomepageBetaPanel } from "@/components/homepage-beta-panel";
 import { HomepageCubePanel } from "@/components/homepage-cube-panel";
 import { HomepageGamePanel } from "@/components/homepage-game-panel";
 import { HomepageHeroBlock } from "@/components/homepage-hero-block";
-import { HomepageLockScreen } from "@/components/homepage-lock-screen";
-import { HomepageMovesPanel } from "@/components/homepage-moves-panel";
 import { HOMEPAGE_PRICING_TIERS } from "@/lib/homepage-pricing";
 import type { HomepageFlipPanelId } from "@/lib/homepage-flip-stack";
 import { usePlatform } from "@/lib/platform-context";
@@ -55,34 +53,6 @@ import {
   Users,
 } from "lucide-react";
 import dynamic from "next/dynamic";
-
-/** Bunny Stream — CDN embed + official thumbnail (not stored in this repo). */
-const INTRO_BUNNY_VIDEO_ID = "ed40154f-81ba-4c45-a955-5c80245bd342";
-const INTRO_BUNNY_LIBRARY_ID = "775492";
-const INTRO_BUNNY_THUMBNAIL =
-  "https://vz-2b70ed0c-5f4.b-cdn.net/ed40154f-81ba-4c45-a955-5c80245bd342/thumbnail_3cc784e7.jpg";
-/**
- * Muted autoplay so browsers allow playback without a visible play control.
- * Bunny's large orange play button only appears while the player is paused —
- * we keep our thumbnail cover over the iframe whenever it's paused.
- */
-const INTRO_BUNNY_STREAM_PLAY = `https://player.mediadelivery.net/embed/${INTRO_BUNNY_LIBRARY_ID}/${INTRO_BUNNY_VIDEO_ID}?autoplay=true&muted=true&loop=false&preload=true&responsive=true&playsinline=true`;
-const INTRO_BUNNY_PLAYERJS = "https://assets.mediadelivery.net/playerjs/playerjs-latest.min.js";
-
-type BunnyPlayerJs = {
-  on: (event: string, cb: (...args: unknown[]) => void) => void;
-  play: () => void;
-  pause: () => void;
-  mute: () => void;
-};
-
-declare global {
-  interface Window {
-    playerjs?: {
-      Player: new (el: HTMLIFrameElement | string) => BunnyPlayerJs;
-    };
-  }
-}
 
 const PlatformFeatureHub = dynamic(
   () => import("@/components/platform-feature-hub").then((m) => m.PlatformFeatureHub),
@@ -157,9 +127,6 @@ export default function LandingPage() {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const introCaptureRef = useRef<HTMLDivElement>(null);
-  const introVideoRef = useRef<HTMLDivElement>(null);
-  const introIframeRef = useRef<HTMLIFrameElement>(null);
-  const introPlayerRef = useRef<BunnyPlayerJs | null>(null);
   const flipRotorRef = useRef<HTMLDivElement>(null);
   const flipFrontRef = useRef<HTMLDivElement>(null);
   /** The page itself is the flip's second face, so it rotates in as a real surface. */
@@ -167,27 +134,18 @@ export default function LandingPage() {
   const scrollHintRef = useRef<HTMLDivElement>(null);
   const scrollHintBounceRef = useRef<HTMLDivElement>(null);
   const halfHRef = useRef(400);
-  const [lockComplete, setLockComplete] = useState(false);
   const [flipComplete, setFlipComplete] = useState(false);
-  /**
-   * When false, an opaque thumbnail covers the iframe (no play icon).
-   * When true, a transparent click-catcher sits on top so Bunny large-play
-   * never receives clicks / never needs to show.
-   */
-  const [introVideoPlaying, setIntroVideoPlaying] = useState(false);
 
-  // Returning visitors (and browser Back to /) skip the intro video once per tab.
-  // DISABLED: Always show lock screen
-  // useLayoutEffect(() => {
-  //   try {
-  //     if (sessionStorage.getItem("svivva:homepageIntroComplete") === "1") {
-  //       setLockComplete(true);
-  //       setFlipComplete(true);
-  //     }
-  //   } catch {
-  //     /* private mode */
-  //   }
-  // }, []);
+  // Returning visitors (and browser Back to /) skip the Klean Sneaks intro once per tab.
+  useLayoutEffect(() => {
+    try {
+      if (sessionStorage.getItem("svivva:homepageIntroComplete") === "1") {
+        setFlipComplete(true);
+      }
+    } catch {
+      /* private mode */
+    }
+  }, []);
   const virtualScrollRef = useRef(0);
   const targetProgressRef = useRef(0);
   const displayedProgressRef = useRef(0);
@@ -200,7 +158,7 @@ export default function LandingPage() {
     apiCalls: number;
   } | null>(null);
   const [canMountHeavy3d, setCanMountHeavy3d] = useState(false);
-  const [flipInitialPanel, setFlipInitialPanel] = useState<HomepageFlipPanelId>("home-moves");
+  const [flipInitialPanel, setFlipInitialPanel] = useState<HomepageFlipPanelId>("home-beta");
   const skipIntroRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
@@ -222,62 +180,6 @@ export default function LandingPage() {
     runBodyLayerHygiene();
   }, []);
 
-  // Drive muted autoplay. Our overlays always sit above the iframe so Bunny's
-  // large-play control is never the visible / clickable surface.
-  useEffect(() => {
-    let cancelled = false;
-    let player: BunnyPlayerJs | null = null;
-
-    const bindPlayer = () => {
-      const iframe = introIframeRef.current;
-      const PlayerCtor = window.playerjs?.Player;
-      if (!iframe || !PlayerCtor || cancelled) return;
-
-      player = new PlayerCtor(iframe);
-      introPlayerRef.current = player;
-      player.on("ready", () => {
-        if (cancelled || !player) return;
-        player.mute();
-        player.play();
-        player.on("play", () => {
-          if (!cancelled) setIntroVideoPlaying(true);
-        });
-        player.on("pause", () => {
-          if (!cancelled) setIntroVideoPlaying(false);
-        });
-        player.on("ended", () => {
-          if (!cancelled) setIntroVideoPlaying(false);
-        });
-      });
-    };
-
-    const existing = document.querySelector<HTMLScriptElement>(
-      `script[src="${INTRO_BUNNY_PLAYERJS}"]`,
-    );
-    if (window.playerjs?.Player) {
-      bindPlayer();
-    } else if (existing) {
-      existing.addEventListener("load", bindPlayer, { once: true });
-    } else {
-      const script = document.createElement("script");
-      script.src = INTRO_BUNNY_PLAYERJS;
-      script.async = true;
-      script.addEventListener("load", bindPlayer, { once: true });
-      document.head.appendChild(script);
-    }
-
-    // Fallback: assume muted autoplay started if player.js is slow.
-    const fallback = window.setTimeout(() => {
-      if (!cancelled) setIntroVideoPlaying(true);
-    }, 2500);
-
-    return () => {
-      cancelled = true;
-      window.clearTimeout(fallback);
-      introPlayerRef.current = null;
-    };
-  }, []);
-
   useEffect(() => {
     if (!flipComplete) return;
     runBodyLayerHygiene();
@@ -293,7 +195,7 @@ export default function LandingPage() {
     const flipPanel = flipPanelFromHash(hash);
     const sectionId = homepageSectionFromHash(hash);
 
-    const nextPanel = flipPanel ?? "home-moves";
+    const nextPanel = flipPanel ?? "home-beta";
     setFlipInitialPanel((current) => (current === nextPanel ? current : nextPanel));
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
 
@@ -311,11 +213,7 @@ export default function LandingPage() {
           sectionTimer = window.setTimeout(scrollSection, 520);
         }
       });
-    } else if (
-      nextPanel === "nav-cube" ||
-      nextPanel === "home-moves" ||
-      nextPanel === "home-beta"
-    ) {
+    } else if (nextPanel === "nav-cube" || nextPanel === "home-beta") {
       requestAnimationFrame(() => scrollToHomepagePanel(nextPanel));
     }
 
@@ -348,7 +246,7 @@ export default function LandingPage() {
   }, []);
 
   useLayoutEffect(() => {
-    if (!lockComplete || flipComplete) return;
+    if (flipComplete) return;
 
     const captureEl = introCaptureRef.current;
     if (!captureEl) return;
@@ -371,12 +269,14 @@ export default function LandingPage() {
         pageFaceRef.current.style.transformOrigin = "";
         pageFaceRef.current.style.willChange = "";
       }
-      // Land on The Moves Like (or preserve a deep-linked face). Klean Sneaks is last.
+      // Land on beta apps (main app) or preserve a deep-linked face.
       const hash = window.location.hash.replace(/^#/, "");
       if (!homepageSectionFromHash(hash)) {
-        const panel = flipPanelFromHash(hash) ?? "home-moves";
-        window.history.replaceState(null, "", `/#${panel}`);
-        setFlipInitialPanel(panel);
+        const panel = flipPanelFromHash(hash) ?? "home-beta";
+        // Game hash is intro-only — after flip, open the main app.
+        const landPanel = panel === "home-game" ? "home-beta" : panel;
+        window.history.replaceState(null, "", `/#${landPanel}`);
+        setFlipInitialPanel(landPanel);
       }
       try {
         sessionStorage.setItem("svivva:homepageIntroComplete", "1");
@@ -445,7 +345,7 @@ export default function LandingPage() {
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [lockComplete, flipComplete]);
+  }, [flipComplete]);
 
   return (
     <div
@@ -453,204 +353,49 @@ export default function LandingPage() {
       data-landing-page
       className="min-h-screen w-full bg-background overflow-x-hidden"
     >
-      {!lockComplete && (
-        <HomepageLockScreen
-          onUnlock={() => {
-            setLockComplete(true);
-            setFlipComplete(true);
-          }}
-        />
-      )}
-      {lockComplete && !flipComplete && (
+      {!flipComplete && (
         <div
           ref={introCaptureRef}
-          className="fixed inset-0"
+          className="fixed inset-0 z-[70] overflow-hidden bg-white"
           style={{
-            zIndex: 70,
-            // auto — touch-action:none on this full-screen layer freezes the
-            // Bunny iframe on iOS (play/scrub never receive gestures).
             touchAction: "auto",
-            overflow: "visible",
-            // Transparent on purpose: the receding corners now expose the page
-            // face rotating in behind, which is what reads as a solid box. An
-            // opaque backdrop here would hide the second face entirely.
-            backgroundColor: "transparent",
-            opacity: 1,
-            willChange: "opacity",
+            minHeight: "100svh",
+            height: "100svh",
           }}
+          data-testid="homepage-game-intro"
         >
           <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              zIndex: 1,
-              perspective: "2400px",
-              perspectiveOrigin: "50% 50%",
-              overflow: "visible",
-              transformStyle: "preserve-3d",
-              WebkitTransformStyle: "preserve-3d",
-            }}
+            ref={flipRotorRef}
+            className="absolute inset-0"
+            style={{ transformStyle: "preserve-3d" }}
           >
-            <div
-              ref={flipRotorRef}
-              style={{
-                width: "100%",
-                height: "100%",
-                position: "relative",
-                transformStyle: "preserve-3d",
-                willChange: "transform",
-                transformOrigin: "center center",
-                transform: "translate3d(0, 0, calc(-50vh)) rotateX(0deg)",
-              }}
-            >
-              <div
-                ref={flipFrontRef}
-                style={{
-                  position: "absolute",
-                  width: "100%",
-                  height: "100%",
-                  backfaceVisibility: "hidden",
-                  WebkitBackfaceVisibility: "hidden",
-                  willChange: "transform",
-                  transform: "translate3d(0, 0, 50vh)",
+            <div ref={flipFrontRef} className="absolute inset-0">
+              <HomepageGamePanel
+                asIntro
+                onEnterApp={() => {
+                  skipIntroRef.current?.();
                 }}
-              >
-                {/* Overscan bleed. Under perspective the panel's top corners
-                    pull inward as they recede, and neither face covers the gap
-                    mid-rotation, which showed as wedges. Extending the black
-                    past the top and sides keeps it covered; the bottom stays
-                    flush so it never hides the page face rising in. */}
-                <div
-                  aria-hidden
-                  style={{
-                    position: "absolute",
-                    top: "-45%",
-                    left: "-45%",
-                    right: "-45%",
-                    bottom: 0,
-                    backgroundColor: "#000000",
-                  }}
-                />
-                <div
-                  className="w-full h-full overflow-hidden relative"
-                  style={{
-                    backgroundColor: "#000000",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  {/* Three.js camo flowers — keep blooming behind the player */}
-                  <div className="pointer-events-none absolute inset-0 opacity-50" aria-hidden>
-                    <CamoThreeOverlay
-                      preset="oaas"
-                      isIntro
-                      eagerMount
-                      keepMounted
-                      className="h-full w-full"
-                    />
-                  </div>
-
-                  {/* TEMPORARILY HIDDEN — Bunny Stream video section
-                  <div
-                    ref={introVideoRef}
-                    data-intro-video
-                    className="relative z-10 w-full max-w-5xl px-4 sm:px-6 lg:px-8"
-                  >
-                    <div className="mb-4 space-y-2 text-center no-underline">
-                      <p
-                        className="text-lg font-semibold text-white no-underline decoration-transparent sm:text-xl md:text-2xl"
-                        style={{ textDecoration: "none", borderBottom: "none" }}
-                      >
-                        The inspiration for the site in one episode
-                      </p>
-                      <p
-                        className="text-sm text-white/80 no-underline decoration-transparent sm:text-base"
-                        style={{ textDecoration: "none", borderBottom: "none" }}
-                      >
-                        Foreword by Hank Shocklee · Featuring Lil Yachty
-                      </p>
-                    </div>
-
-                    <div
-                      className="relative w-full overflow-hidden rounded-xl bg-black"
-                      style={{ paddingTop: "56.25%" }}
-                    >
-                      <iframe
-                        ref={introIframeRef}
-                        src={INTRO_BUNNY_STREAM_PLAY}
-                        title="Svivva intro video — foreword by Hank Shocklee, featuring Lil Yachty"
-                        loading="eager"
-                        referrerPolicy="strict-origin-when-cross-origin"
-                        className="pointer-events-none absolute inset-0 z-[1] h-full w-full border-0 bg-black"
-                        allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
-                        allowFullScreen
-                        tabIndex={-1}
-                      />
-                      {introVideoPlaying ? (
-                        <button
-                          type="button"
-                          className="absolute inset-0 z-10 cursor-pointer border-0 bg-transparent p-0"
-                          onClick={() => {
-                            introPlayerRef.current?.pause();
-                            setIntroVideoPlaying(false);
-                          }}
-                          aria-label="Pause intro video"
-                          data-testid="button-intro-video-pause"
-                        />
-                      ) : (
-                        <button
-                          type="button"
-                          className="absolute inset-0 z-10 cursor-pointer border-0 bg-black p-0"
-                          onClick={() => {
-                            const player = introPlayerRef.current;
-                            player?.mute();
-                            player?.play();
-                            setIntroVideoPlaying(true);
-                          }}
-                          aria-label="Watch intro video"
-                          data-testid="button-intro-video-cover"
-                        >
-                          <img
-                            src={INTRO_BUNNY_THUMBNAIL}
-                            alt=""
-                            aria-hidden
-                            className="h-full w-full object-cover"
-                            decoding="async"
-                            fetchPriority="high"
-                          />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  */}
-                </div>
-              </div>
+              />
             </div>
           </div>
           <div
             ref={scrollHintRef}
-            className="absolute bottom-8 left-1/2 -translate-x-1/2 pointer-events-none"
-            style={{
-              zIndex: 10,
-              opacity: 1,
-              willChange: "opacity",
-            }}
+            className="pointer-events-none absolute bottom-8 left-1/2 z-20 -translate-x-1/2"
+            style={{ opacity: 1, willChange: "opacity" }}
           >
             <div
               ref={scrollHintBounceRef}
-              className="flex max-w-[min(92vw,22rem)] flex-col items-center gap-1 rounded-full bg-black/70 px-5 py-2.5 shadow-sm backdrop-blur-sm"
+              className="flex max-w-[min(92vw,22rem)] flex-col items-center gap-1 rounded-full border border-black/10 bg-white/85 px-5 py-2.5 shadow-sm backdrop-blur-sm"
               style={{ animation: "scrollBounce 1.5s ease-in-out 0s infinite" }}
               data-testid="text-intro-swipe-cube-twice"
             >
               <span
-                className="text-center text-sm font-medium leading-snug text-white/90 no-underline"
+                className="text-center text-sm font-medium leading-snug text-foreground no-underline"
                 style={{ fontFamily: "'Zc', sans-serif", textDecoration: "none" }}
               >
                 Welcome to ZZAI
               </span>
-              <span className="text-[10px] uppercase tracking-[0.2em] text-white/55 no-underline">
+              <span className="text-[10px] uppercase tracking-[0.2em] text-foreground/55 no-underline">
                 Scroll up to enter
               </span>
               <svg
@@ -660,20 +405,20 @@ export default function LandingPage() {
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
-                className="text-white/80"
+                className="text-foreground/70"
               >
                 <path d="M10 16V4M5 9l5-5 5 5" />
               </svg>
             </div>
           </div>
-          <div className="absolute top-4 left-3 right-3 z-20 flex items-start justify-between gap-2 pointer-events-none sm:left-4 sm:right-4">
+          <div className="pointer-events-none absolute left-3 right-3 top-4 z-20 flex items-start justify-between gap-2 sm:left-4 sm:right-4">
             <OrbitAdminAccessButton
               data-testid="button-home-intro-admin-orbit"
               className="pointer-events-auto h-8 max-w-[46vw] shrink border-[#5B8DA8]/50 bg-background/85 px-2 text-[10px] backdrop-blur-sm sm:max-w-none sm:px-3 sm:text-xs"
             />
             <button
               type="button"
-              className="pointer-events-auto shrink-0 rounded-lg border border-border/60 bg-background/80 px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground hover:text-foreground backdrop-blur-sm sm:px-3 sm:text-xs"
+              className="pointer-events-auto shrink-0 rounded-lg border border-border/60 bg-background/80 px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground backdrop-blur-sm hover:text-foreground sm:px-3 sm:text-xs"
               onClick={() => {
                 skipIntroRef.current?.();
               }}
@@ -787,15 +532,14 @@ export default function LandingPage() {
           </nav>
 
           {showHomepageSection("scrollSnap") ? (
-            /* Four cube faces: Moves Like → beta → combined → Klean Sneaks (god moves arena). */
+            /* Main app after game intro: beta apps → combined story / pricing. */
             <div
               className="relative w-full bg-background"
               data-homepage-native-scroll=""
-              data-homepage-cube-faces="4"
+              data-homepage-cube-faces="2"
               data-active-panel={flipInitialPanel}
               style={{ scrollSnapType: "y proximity" }}
             >
-              <HomepageMovesPanel />
               <ClientErrorBoundary
                 fallback={
                   <p className="text-center text-sm text-muted-foreground py-12 px-4 min-h-[100svh]">
@@ -810,7 +554,6 @@ export default function LandingPage() {
                 <HomepageBetaPanel mountCanvas={canMountHeavy3d} interactive={flipComplete} />
                 <HomepageCubePanel mountCanvas={canMountHeavy3d} interactive={flipComplete} />
               </ClientErrorBoundary>
-              <HomepageGamePanel />
             </div>
           ) : (
             <div className="relative overflow-x-hidden">

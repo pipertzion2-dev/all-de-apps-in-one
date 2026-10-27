@@ -6,7 +6,7 @@ import { homepageJsonLdGraph } from "@/lib/seo/schema/builders";
 
 export const metadata = buildSeoMetadata({
   title: `zzai zzai — ${PRODUCT_TAGLINE}`,
-  description: `${PRODUCT_ONE_LINER} Open /the-moves-like to practice.`,
+  description: `${PRODUCT_ONE_LINER} Open /play to practice The Moves Like.`,
   path: "/",
 });
 

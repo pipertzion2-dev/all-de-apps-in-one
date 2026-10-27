@@ -63,14 +63,14 @@ export const HOMEPAGE_PLATFORM_FACE_SUBLINE =
 
 /** From The Moves Like — continue to beta desk apps. */
 export const HOMEPAGE_SCROLL_TO_BETA = "Scroll ↓ Beta apps";
-/** From beta apps — back to The Moves Like. */
-export const HOMEPAGE_SCROLL_TO_MOVES = "↑ Back to The Moves Like";
+/** @deprecated Moves Like lives in /play — kept for lingering imports. */
+export const HOMEPAGE_SCROLL_TO_MOVES = "Open The Moves Like in Play";
 /** From beta apps — continue to the combined story / pricing face. */
 export const HOMEPAGE_SCROLL_TO_COMBINED = "Scroll ↓ More";
 /** From the combined face — back to beta apps. */
 export const HOMEPAGE_SCROLL_TO_BETA_UP = "↑ Back to beta apps";
-/** From the combined face — down to Klean Sneaks (last face). */
-export const HOMEPAGE_SCROLL_TO_GAME = "Scroll ↓ Klean Sneaks";
+/** Open the free Klean Sneaks arena. */
+export const HOMEPAGE_SCROLL_TO_GAME = "Play Klean Sneaks free";
 /** From Klean Sneaks — back up to the combined story face. */
 export const HOMEPAGE_SCROLL_TO_COMBINED_UP = "↑ Back to story";
 /** @deprecated Use HOMEPAGE_SCROLL_TO_MOVES — kept for any lingering imports. */
@@ -98,6 +98,7 @@ function isCoreProductPath(path: string): boolean {
     "/privacy",
     "/terms",
     "/clean-sneaks",
+    "/play",
     "/the-moves-like",
     "/dashboard/settings",
     "/dashboard/billing",
@@ -121,8 +122,8 @@ export function isBetaCubeFaceId(id: FeatureId): boolean {
 /** True when this href should show a Beta label (dashboard nav, explore links, etc.). */
 export function isBetaHref(href: string): boolean {
   const path = normalizePath(href);
-  if (path === "/play") return true;
-  // The Moves Like is the homepage lead product — not beta.
+  // Play hosts The Moves Like (GA) — MIDI Studio stays available under ?section=studio.
+  if (path === "/play" || path.startsWith("/play/")) return false;
   if (path.startsWith("/the-moves-like")) return false;
   if (path.startsWith("/tools")) return true;
   if (path.startsWith("/ai-tools-hub")) return true;

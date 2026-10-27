@@ -6,8 +6,8 @@ import { HomepageFaqSection } from "@/components/homepage-faq-section";
 import { HomepageHowToSection } from "@/components/homepage-howto-section";
 import { HomepageFounderSonSection } from "@/components/homepage-founder-son-section";
 import { HomepagePricingSection } from "@/components/homepage-pricing-section";
+import Link from "next/link";
 import { HomepageCubeFaceHint } from "@/components/homepage-cube-face-hint";
-import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
 import { HOMEPAGE_SCROLL_TO_GAME } from "@/lib/product-positioning";
 
 type HomepageCubePanelProps = {
@@ -17,7 +17,7 @@ type HomepageCubePanelProps = {
 
 /**
  * Combined story face — about, how-to, explore, founder, pricing, FAQ.
- * Scroll down from here into Klean Sneaks (last face / god-moves on the walk).
+ * Klean Sneaks opens from the first-page intro or /clean-sneaks; Moves Like is in /play.
  */
 export function HomepageCubePanel({
   mountCanvas: _mountCanvas = true,
@@ -37,7 +37,8 @@ export function HomepageCubePanel({
           Story, plans, and answers
         </h2>
         <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-          How zzai zzai fits together — then take god moves to the street in Klean Sneaks.
+          How zzai zzai fits together — The Moves Like in Play, god moves on the walk in Klean
+          Sneaks.
         </p>
       </div>
 
@@ -49,15 +50,21 @@ export function HomepageCubePanel({
       <HomepageFaqSection />
 
       {interactive ? (
-        <div className="relative z-20 flex justify-center px-4 py-8">
-          <button
-            type="button"
-            onClick={() => scrollToHomepagePanel("home-game")}
+        <div className="relative z-20 flex justify-center gap-3 px-4 py-8">
+          <Link
+            href="/clean-sneaks"
             className="rounded-full border border-[#5B8DA8]/50 bg-[#5B8DA8] px-6 py-2.5 text-xs font-semibold tracking-wide text-white shadow-sm transition-transform active:scale-95"
             data-testid="button-scroll-to-klean-sneaks"
           >
             {HOMEPAGE_SCROLL_TO_GAME}
-          </button>
+          </Link>
+          <Link
+            href="/play"
+            className="rounded-full border border-[#AC81AF]/45 bg-background px-6 py-2.5 text-xs font-semibold tracking-wide text-foreground shadow-sm transition-transform active:scale-95"
+            data-testid="button-open-moves-in-play"
+          >
+            Open The Moves Like
+          </Link>
         </div>
       ) : null}
     </div>

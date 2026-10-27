@@ -3,9 +3,9 @@ import { ProductBetaShell } from "@/components/product-beta-shell";
 import { buildSeoMetadata } from "@/lib/seo/metadata";
 
 export const metadata: Metadata = buildSeoMetadata({
-  title: "ZZAI Play — Beta",
+  title: "ZZAI Play — The Moves Like & Studio",
   description:
-    "Full ZZAI Play studio (beta). GA demo: Klean Sneaks at /clean-sneaks — BALOON8 car×sneaker colorways and the Hybrid² + Klean metaphor.",
+    "Play hosts The Moves Like (front-camera god moves) and the ZZAI MIDI Studio. Klean Sneaks remains free at /clean-sneaks.",
   path: "/play",
 });
 

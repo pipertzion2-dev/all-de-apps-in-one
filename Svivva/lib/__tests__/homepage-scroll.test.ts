@@ -7,9 +7,9 @@ describe("homepage scroll panels", () => {
     const pageSrc = readFileSync(resolve(__dirname, "../../app/home-page-client.tsx"), "utf8");
     const scrollSrc = readFileSync(resolve(__dirname, "../homepage-scroll.ts"), "utf8");
     expect(pageSrc).toContain("data-homepage-native-scroll");
-    expect(pageSrc).toContain('data-homepage-cube-faces="4"');
+    expect(pageSrc).toContain('data-homepage-cube-faces="2"');
     expect(pageSrc).toContain("HomepageGamePanel");
-    expect(pageSrc).toContain("HomepageMovesPanel");
+    expect(pageSrc).not.toContain("HomepageMovesPanel");
     expect(pageSrc).toContain("HomepageBetaPanel");
     expect(pageSrc).toContain("HomepageCubePanel");
     expect(pageSrc).not.toContain("HomepageFlipStack");
@@ -28,16 +28,14 @@ describe("homepage scroll panels", () => {
     expect(cubeSrc).toContain("CleanSneaksLogoCube");
     expect(cubeSrc).toContain('router.push("/clean-sneaks")');
     expect(cubeSrc).toContain('id="home-game"');
-    expect(cubeSrc).toContain('scrollToHomepagePanel("nav-cube")');
+    expect(cubeSrc).toContain("CamoThreeOverlay");
+    expect(cubeSrc).toContain('preset="lock"');
+    expect(cubeSrc).toContain("bg-white");
   });
 
-  it("splits four cube faces: Moves Like, beta apps, combined, Klean Sneaks last", () => {
+  it("splits main app faces: beta apps then combined; game is intro; Moves Like in Play", () => {
     const stackSrc = readFileSync(resolve(__dirname, "../../lib/homepage-flip-stack.ts"), "utf8");
     const pageSrc = readFileSync(resolve(__dirname, "../../app/home-page-client.tsx"), "utf8");
-    const movesSrc = readFileSync(
-      resolve(__dirname, "../../components/homepage-moves-panel.tsx"),
-      "utf8",
-    );
     const betaSrc = readFileSync(
       resolve(__dirname, "../../components/homepage-beta-panel.tsx"),
       "utf8",
@@ -50,30 +48,34 @@ describe("homepage scroll panels", () => {
       resolve(__dirname, "../../components/homepage-game-panel.tsx"),
       "utf8",
     );
-    expect(stackSrc).toMatch(
-      /HOMEPAGE_FLIP_PANELS[\s\S]*"home-moves"[\s\S]*"home-beta"[\s\S]*"nav-cube"[\s\S]*"home-game"/,
+    const playHubSrc = readFileSync(
+      resolve(__dirname, "../../components/play/play-hub-client.tsx"),
+      "utf8",
     );
-    expect(pageSrc).toContain('useState<HomepageFlipPanelId>("home-moves")');
-    expect(pageSrc).toMatch(
-      /HomepageMovesPanel[\s\S]*HomepageBetaPanel[\s\S]*HomepageCubePanel[\s\S]*HomepageGamePanel/,
-    );
-    expect(movesSrc).toContain('id="home-moves"');
-    expect(movesSrc).toContain("HomepageMovesLikeHero");
+    expect(stackSrc).toMatch(/HOMEPAGE_FLIP_PANELS[\s\S]*"home-beta"[\s\S]*"nav-cube"/);
+    expect(pageSrc).toContain('useState<HomepageFlipPanelId>("home-beta")');
+    expect(pageSrc).toMatch(/HomepageBetaPanel[\s\S]*HomepageCubePanel/);
+    expect(pageSrc).toContain("asIntro");
+    expect(pageSrc).toContain("homepage-game-intro");
     expect(betaSrc).toContain('id="home-beta"');
     expect(betaSrc).toContain("HomepageHeroBlock");
     expect(betaSrc).toContain("PlatformFeatureHub");
     expect(betaSrc).toContain('id="oaas"');
+    expect(betaSrc).toContain('href="/play"');
     expect(cubeSrc).toContain('id="nav-cube"');
     expect(cubeSrc).toContain("HomepageAboutSection");
     expect(cubeSrc).toContain("HomepageFounderSonSection");
     expect(cubeSrc).toMatch(/HomepageFounderSonSection[\s\S]*HomepagePricingSection/);
-    expect(cubeSrc).toContain('scrollToHomepagePanel("home-game")');
+    expect(cubeSrc).toContain('href="/clean-sneaks"');
     expect(cubeSrc).not.toContain("HomepageProtectionHero");
     expect(cubeSrc).not.toContain("HomepageMovesLikeHero");
     expect(cubeSrc).not.toContain("HomepageHeroBlock");
     expect(cubeSrc).not.toContain("PlatformFeatureHub");
     expect(gameSrc).toContain('surface="game"');
     expect(gameSrc).toContain("KLEAN_HOMEPAGE_TAGLINE");
+    expect(playHubSrc).toContain("MovesLikeApp");
+    expect(playHubSrc).toContain('tab-play-moves');
+    expect(playHubSrc).toContain('tab-play-studio');
     const positioningSrc = readFileSync(resolve(__dirname, "../product-positioning.ts"), "utf8");
     expect(positioningSrc).toMatch(/god moves/i);
     expect(positioningSrc).toContain("HOMEPAGE_GAME_FACE_TITLE");

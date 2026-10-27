@@ -55,7 +55,7 @@ export function HomepageMovesLikeHero() {
           </p>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Button asChild className="min-h-12 bg-[#AC81AF] px-6 text-white hover:bg-[#9a6f9d]">
-              <Link href="/the-moves-like" data-testid="link-hero-open-moves-like">
+              <Link href="/play" data-testid="link-hero-open-moves-like">
                 Open {MOVES_LIKE.shortName}
               </Link>
             </Button>
@@ -78,7 +78,7 @@ export function HomepageMovesLikeHero() {
               God moves in Klean Sneaks
             </Button>
             <Button asChild variant="ghost" className="min-h-11 text-[#6D91B3]">
-              <Link href="/the-moves-like">Practice with front camera</Link>
+              <Link href="/play">Practice with front camera</Link>
             </Button>
           </div>
           <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">

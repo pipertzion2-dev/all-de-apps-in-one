@@ -5,7 +5,7 @@ export const MOVES_LIKE = {
   name: "THE MOVES LIKE",
   shortName: "Moves Like",
   tagline: "Explore, learn, transform, play, and share movement.",
-  path: "/the-moves-like",
+  path: "/play",
   /** Dark spray ink on transparent — default for light/white glass UI. */
   logoPath: "/the-moves-like/logo.png",
   /** Light spray ink — only for rare dark overlays. */

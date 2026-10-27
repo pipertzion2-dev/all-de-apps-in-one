@@ -10,15 +10,15 @@ import {
 
 describe("homepage flip stack", () => {
   it("maps legacy hash ids to flip panels", () => {
-    expect(flipPanelFromHash("")).toBe("home-moves");
+    expect(flipPanelFromHash("")).toBe("home-beta");
     expect(flipPanelFromHash("nav-cube")).toBe("nav-cube");
     expect(flipPanelFromHash("home-game")).toBe("home-game");
     expect(flipPanelFromHash("clean-sneaks")).toBe("home-game");
-    expect(flipPanelFromHash("home-moves")).toBe("home-moves");
-    expect(flipPanelFromHash("the-moves-like")).toBe("home-moves");
+    expect(flipPanelFromHash("home-moves")).toBe("home-beta");
+    expect(flipPanelFromHash("the-moves-like")).toBe("home-beta");
     expect(flipPanelFromHash("home-beta")).toBe("home-beta");
     expect(flipPanelFromHash("beta-apps")).toBe("home-beta");
-    expect(flipPanelFromHash("home-explore")).toBe("home-moves");
+    expect(flipPanelFromHash("home-explore")).toBe("home-beta");
     expect(flipPanelFromHash("oaas")).toBe("home-beta");
     expect(flipPanelFromHash("pricing")).toBe("nav-cube");
     expect(flipPanelFromHash("about")).toBe("nav-cube");
@@ -27,16 +27,13 @@ describe("homepage flip stack", () => {
   it("round-trips hash helpers", () => {
     expect(hashForFlipPanel("nav-cube")).toBe("nav-cube");
     expect(hashForFlipPanel("home-game")).toBe("home-game");
-    expect(hashForFlipPanel("home-moves")).toBe("home-moves");
     expect(hashForFlipPanel("home-beta")).toBe("home-beta");
   });
 
-  it("orders four cube faces: Moves Like → beta → combined → Klean Sneaks", () => {
-    expect(HOMEPAGE_FLIP_PANELS).toEqual(["home-moves", "home-beta", "nav-cube", "home-game"]);
-    expect(flipPanelIndex("home-moves")).toBe(0);
-    expect(flipPanelIndex("home-beta")).toBe(1);
-    expect(flipPanelIndex("nav-cube")).toBe(2);
-    expect(flipPanelIndex("home-game")).toBe(3);
+  it("orders two main-app cube faces: beta → combined", () => {
+    expect(HOMEPAGE_FLIP_PANELS).toEqual(["home-beta", "nav-cube"]);
+    expect(flipPanelIndex("home-beta")).toBe(0);
+    expect(flipPanelIndex("nav-cube")).toBe(1);
   });
 
   it("runs a timed 3D cube flip with button-only panel changes", () => {

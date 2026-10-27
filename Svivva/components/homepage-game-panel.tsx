@@ -2,8 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
-import { HOMEPAGE_SCROLL_TO_COMBINED_UP } from "@/lib/product-positioning";
+import { CamoThreeOverlay } from "@/components/camo-three-overlay";
 import { HomepageScrollHint } from "@/components/homepage-scroll-hint";
 import { HomepageMainGoal } from "@/components/homepage-main-goal";
 import { KLEAN_HOMEPAGE_TAGLINE } from "@/lib/clean-sneaks/game-copy";
@@ -13,39 +12,59 @@ const CleanSneaksLogoCube = dynamic(
   { ssr: false },
 );
 
-/** Last cube face — Klean Sneaks, the street arena for the same god moves. */
-export function HomepageGamePanel() {
+type HomepageGamePanelProps = {
+  /** Full-screen first page that flips into the main app. */
+  asIntro?: boolean;
+  onEnterApp?: () => void;
+};
+
+/** First page — Klean Sneaks cube on white with Three.js flowers + camo water. */
+export function HomepageGamePanel({ asIntro = false, onEnterApp }: HomepageGamePanelProps) {
   const router = useRouter();
 
   const enterGame = () => {
     router.push("/clean-sneaks");
   };
 
+  const enterApp = () => {
+    onEnterApp?.();
+  };
+
   return (
     <section
       id="home-game"
       data-homepage-cube-face="game"
-      className="relative flex h-[100svh] min-h-0 flex-col overflow-hidden bg-black scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px))] sm:scroll-mt-[calc(4rem+env(safe-area-inset-top,0px))]"
-      style={{ scrollSnapAlign: "start" }}
+      data-homepage-game-intro={asIntro ? "true" : undefined}
+      className={`relative flex h-[100svh] min-h-0 flex-col overflow-hidden bg-white ${
+        asIntro
+          ? ""
+          : "scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px))] sm:scroll-mt-[calc(4rem+env(safe-area-inset-top,0px))]"
+      }`}
+      style={asIntro ? { minHeight: "100svh", height: "100svh" } : { scrollSnapAlign: "start" }}
     >
-      <div
-        className="pointer-events-none absolute inset-0 opacity-35 mix-blend-soft-light"
-        aria-hidden
-        style={{
-          backgroundImage:
-            "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E\")",
-        }}
-      />
+      {/* Three.js flowers + digi camo water on white */}
+      <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
+        <CamoThreeOverlay
+          preset="lock"
+          isIntro
+          eagerMount
+          keepMounted
+          className="h-full w-full"
+        />
+      </div>
 
-      <HomepageScrollHint
-        label={HOMEPAGE_SCROLL_TO_COMBINED_UP}
-        direction="up"
-        onActivate={() => scrollToHomepagePanel("nav-cube")}
-      />
+      {asIntro ? (
+        <HomepageScrollHint
+          label="Scroll up to enter zzai zzai"
+          direction="up"
+          prominent
+          onActivate={enterApp}
+        />
+      ) : null}
 
       <div className="relative z-10 flex min-h-0 flex-1 flex-col px-3 pb-[5.5rem] pt-[4.5rem] sm:px-6 sm:pb-28 sm:pt-20">
         <HomepageMainGoal
-          variant="dark"
+          variant="light"
           density="compact"
           surface="game"
           className="shrink-0 px-1"
@@ -62,11 +81,24 @@ export function HomepageGamePanel() {
         </div>
 
         <p
-          className="mt-2 shrink-0 text-center text-[10px] uppercase tracking-[0.25em] text-white/50 sm:text-[11px]"
+          className="mt-2 shrink-0 text-center text-[10px] uppercase tracking-[0.25em] text-foreground/55 sm:text-[11px]"
           data-testid="text-clean-sneaks-goal"
         >
           {KLEAN_HOMEPAGE_TAGLINE} — tap to play free
         </p>
+
+        {asIntro ? (
+          <div className="mt-4 flex shrink-0 justify-center">
+            <button
+              type="button"
+              onClick={enterApp}
+              className="rounded-full border border-[#5B8DA8]/45 bg-white/85 px-5 py-2 text-xs font-semibold tracking-wide text-foreground shadow-sm backdrop-blur-sm transition-transform active:scale-95"
+              data-testid="button-enter-main-app"
+            >
+              Enter zzai zzai
+            </button>
+          </div>
+        ) : null}
       </div>
     </section>
   );

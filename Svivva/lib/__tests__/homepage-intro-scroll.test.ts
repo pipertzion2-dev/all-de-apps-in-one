@@ -4,15 +4,17 @@ import { resolve } from "path";
 
 describe("homepage intro scroll", () => {
   const pageSrc = readFileSync(resolve(__dirname, "../../app/home-page-client.tsx"), "utf8");
+  const gameSrc = readFileSync(
+    resolve(__dirname, "../../components/homepage-game-panel.tsx"),
+    "utf8",
+  );
 
   it("enters on scroll up without touchmove preventDefault", () => {
-    // Passive scroll-up enter is OK; flip RAF + touchmove preventDefault froze iPhone.
     expect(pageSrc).toContain("Scroll up to enter");
     expect(pageSrc).toContain('window.addEventListener("wheel", handleWheel');
     expect(pageSrc).not.toContain('window.addEventListener("touchmove", handleTouchMove');
     expect(pageSrc).toContain("skipIntroRef");
     expect(pageSrc).toContain("Skip intro");
-    // Wheel/swipe up must enter even over the player (play/pause is click-only).
     expect(pageSrc).not.toContain("isOverIntroVideo");
     expect(pageSrc).toContain("if (e.deltaY < 0)");
     expect(pageSrc).toContain("touchStartY - y > 48");
@@ -23,18 +25,15 @@ describe("homepage intro scroll", () => {
     expect(pageSrc).toContain("if (!flipComplete) return");
   });
 
-  it("keeps Bunny Stream intro playable with thumbnail + flowers", () => {
-    expect(pageSrc).not.toContain("autoSkipTimer");
-    expect(pageSrc).toContain("INTRO_BUNNY_STREAM_PLAY");
-    expect(pageSrc).toContain("INTRO_BUNNY_THUMBNAIL");
-    expect(pageSrc).toContain("player.mediadelivery.net/embed/");
-    expect(pageSrc).toContain("muted=true");
-    expect(pageSrc).toContain("introVideoPlaying");
-    expect(pageSrc).toContain("pointer-events-none");
-    expect(pageSrc).toContain("The inspiration for the site in one episode");
-    expect(pageSrc).toContain("isIntro");
-    expect(pageSrc).not.toContain("button-intro-video-start");
-    expect(pageSrc).not.toContain("paused={introVideoStarted}");
+  it("opens with the Klean Sneaks game on white with Three.js flowers", () => {
+    expect(pageSrc).toContain("HomepageGamePanel");
+    expect(pageSrc).toContain("asIntro");
+    expect(pageSrc).toContain("homepage-game-intro");
+    expect(pageSrc).not.toContain("HomepageLockScreen");
+    expect(gameSrc).toContain("bg-white");
+    expect(gameSrc).toContain("CamoThreeOverlay");
+    expect(gameSrc).toContain('preset="lock"');
+    expect(gameSrc).toContain("CleanSneaksLogoCube");
   });
 
   it("releases the page from 3D when the intro finishes", () => {
@@ -42,11 +41,12 @@ describe("homepage intro scroll", () => {
     expect(pageSrc).toMatch(/pageFaceRef\.current\.style\.transformOrigin = ""/);
   });
 
-  it("remembers intro completion and lands on Klean Sneaks", () => {
+  it("remembers intro completion and lands on the main app", () => {
     expect(pageSrc).toContain('sessionStorage.setItem("svivva:homepageIntroComplete", "1")');
     expect(pageSrc).toContain('sessionStorage.getItem("svivva:homepageIntroComplete")');
     expect(pageSrc).toContain("svivva:homepage-intro-complete");
-    expect(pageSrc).toContain('"/#home-game"');
-    expect(pageSrc).toContain('setFlipInitialPanel("home-game")');
+    expect(pageSrc).toContain("/#${landPanel}");
+    expect(pageSrc).toContain('?? "home-beta"');
+    expect(pageSrc).toContain("setFlipInitialPanel(landPanel)");
   });
 });

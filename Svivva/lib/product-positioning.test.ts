@@ -21,7 +21,7 @@ describe("product-positioning", () => {
   it("marks public beta routes", () => {
     expect(isBetaHref("/seeds")).toBe(true);
     expect(isBetaHref("/orbit")).toBe(true);
-    expect(isBetaHref("/play")).toBe(true);
+    expect(isBetaHref("/play")).toBe(false);
     expect(isBetaHref("/the-moves-like")).toBe(false);
     expect(isBetaHref("/clean-sneaks")).toBe(false);
     expect(isBetaHref("/dashboard/hybrid-lab")).toBe(true);

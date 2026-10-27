@@ -330,7 +330,7 @@ export const PLATFORM_FEATURES: PlatformFeature[] = [
     id: "the-moves-like",
     title: "THE MOVES LIKE",
     shortTitle: "Moves Like",
-    href: "/the-moves-like",
+    href: "/play",
     description:
       "Channel 26 — Aux dance game: Motion DNA, Ghost Mode, Move Reactor, Rhythm Portal, Style Clash.",
     bus: "play",

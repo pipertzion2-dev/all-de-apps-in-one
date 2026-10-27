@@ -130,10 +130,10 @@ export function MovesLikeApp() {
             </GlassMagentaButton>
           ) : null}
           <Link
-            href="/play"
+            href="/play?section=studio"
             className="shrink-0 rounded-full border border-white/75 bg-[linear-gradient(180deg,rgba(255,255,255,0.65)_0%,rgba(172,129,175,0.18)_100%)] px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-muted-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-md hover:border-[rgba(172,129,175,0.55)] hover:text-primary"
           >
-            Play desk
+            MIDI Studio
           </Link>
         </div>
       </header>

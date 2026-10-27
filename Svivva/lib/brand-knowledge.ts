@@ -200,7 +200,7 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       {
         id: "the-moves-like",
         name: "The Moves Like",
-        path: "/the-moves-like",
+        path: "/play",
         oneLiner:
           "Interactive dance creation workstation — explore, learn, create, studio, play, and share movement.",
         audience: "dancers, creators, and phone-first players",
@@ -426,7 +426,7 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       },
       {
         q: `What does “${PRODUCT_TAGLINE}” mean?`,
-        a: "The Moves Like is zzai zzai’s movement desk — practice with your front camera, assemble routines, and share Style Clash takes. Open /the-moves-like. Poor Man Protection remains available when you need sealed proof of what you made.",
+        a: "The Moves Like is zzai zzai’s movement desk — practice with your front camera, assemble routines, and share Style Clash takes. Open /play. Poor Man Protection remains available when you need sealed proof of what you made.",
       },
       {
         q: "What is The Moves Like?",
