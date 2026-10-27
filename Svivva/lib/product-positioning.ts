@@ -52,10 +52,10 @@ export const HOMEPAGE_HOWTO_SUBLINE =
 export const PRODUCT_GAME_HYBRID_METAPHOR =
   "God moves in two arenas — The Moves Like on camera, Klean Sneaks on the BALOON8 walk. Same H¹ heat, different finishes.";
 
-/** Last homepage panel — Klean Sneaks (god-moves playground after The Moves Like). */
-export const HOMEPAGE_GAME_FACE_TITLE = "Make god moves on the walk";
+/** Last homepage panel — Klean Sneaks (after The Moves Like). */
+export const HOMEPAGE_GAME_FACE_TITLE = "Klean Sneaks on the walk";
 export const HOMEPAGE_GAME_FACE_SUBLINE =
-  "Klean Sneaks — same god-move energy as The Moves Like. Protect the BALOON8 while you play free.";
+  "Klean Sneaks — protect the BALOON8 while you play free.";
 
 /** Shown under the headline on the platform homepage face (mobile compact). */
 export const HOMEPAGE_PLATFORM_FACE_SUBLINE =

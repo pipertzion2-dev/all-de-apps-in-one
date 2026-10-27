@@ -3,7 +3,6 @@
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { CamoThreeOverlay } from "@/components/camo-three-overlay";
-import { HomepageMainGoal } from "@/components/homepage-main-goal";
 import { KLEAN_HOMEPAGE_TAGLINE } from "@/lib/clean-sneaks/game-copy";
 
 const CleanSneaksLogoCube = dynamic(
@@ -47,13 +46,6 @@ export function HomepageGamePanel({ asIntro = false, onEnterApp }: HomepageGameP
           asIntro ? "pb-28 pt-16 sm:pb-32 sm:pt-20" : "pb-[5.5rem] pt-[4.5rem] sm:pb-28 sm:pt-20"
         }`}
       >
-        <HomepageMainGoal
-          variant="light"
-          density="compact"
-          surface="game"
-          className="shrink-0 px-1 [&_p]:hidden"
-        />
-
         <div
           className="relative mx-auto mt-2 flex min-h-0 w-full max-w-lg flex-1 items-center justify-center"
           data-testid="homepage-bundle-cube"
