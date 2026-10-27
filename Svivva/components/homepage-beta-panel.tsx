@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { AnimatedPonds } from "@/components/animated-ponds";
 import { HomepageHeroBlock } from "@/components/homepage-hero-block";
 import { HomepageMainGoal } from "@/components/homepage-main-goal";
 import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
@@ -40,6 +41,9 @@ export function HomepageBetaPanel({
       className="relative isolate min-h-[100svh] bg-background scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px))] sm:scroll-mt-[calc(4rem+env(safe-area-inset-top,0px))]"
       style={{ scrollSnapAlign: "start" }}
     >
+      {/* Animated ponds with green and blue water */}
+      <AnimatedPonds />
+
       {interactive ? (
         <div className="relative z-20 flex justify-center px-4 pt-16 sm:pt-4">
           <Link

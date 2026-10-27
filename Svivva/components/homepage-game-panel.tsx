@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { CamoThreeOverlay } from "@/components/camo-three-overlay";
+import { AnimatedPonds } from "@/components/animated-ponds";
 import { HomepageMainGoal } from "@/components/homepage-main-goal";
 import { KLEAN_HOMEPAGE_TAGLINE } from "@/lib/clean-sneaks/game-copy";
 
@@ -41,6 +42,9 @@ export function HomepageGamePanel({ asIntro = false, onEnterApp }: HomepageGameP
       <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
         <CamoThreeOverlay preset="lock" isIntro eagerMount keepMounted className="h-full w-full" />
       </div>
+
+      {/* Animated ponds with green and blue water */}
+      <AnimatedPonds />
 
       <div
         className={`relative z-10 flex min-h-0 flex-1 flex-col px-3 sm:px-6 ${
