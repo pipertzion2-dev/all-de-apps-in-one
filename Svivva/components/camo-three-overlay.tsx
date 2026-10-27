@@ -408,7 +408,6 @@ export function CamoThreeOverlay({
           }
         }
       }
-
     };
 
     renderCamo();

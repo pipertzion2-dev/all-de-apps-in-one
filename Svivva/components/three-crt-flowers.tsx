@@ -620,11 +620,7 @@ function resolveCameraAspect(
   const containerAspect = width / Math.max(height, 1);
   if (!isMediumMobile) return containerAspect;
 
-  if (
-    scenePreset === "oaas" ||
-    scenePreset === "lock" ||
-    isSectionCamoPreset(scenePreset)
-  ) {
+  if (scenePreset === "oaas" || scenePreset === "lock" || isSectionCamoPreset(scenePreset)) {
     const vw = typeof window !== "undefined" ? window.innerWidth : width;
     const vh = typeof window !== "undefined" ? window.innerHeight : height;
     return Math.max(containerAspect, vw / Math.max(vh, 1), 0.62);
