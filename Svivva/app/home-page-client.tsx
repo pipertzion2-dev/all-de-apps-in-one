@@ -160,6 +160,8 @@ export default function LandingPage() {
   const [canMountHeavy3d, setCanMountHeavy3d] = useState(false);
   const [flipInitialPanel, setFlipInitialPanel] = useState<HomepageFlipPanelId>("home-beta");
   const skipIntroRef = useRef<(() => void) | null>(null);
+  /** Animated vertical cube flip into the main app (Enter / scroll). */
+  const enterFlipRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     if (!flipComplete) return;
@@ -291,58 +293,220 @@ export default function LandingPage() {
 
     skipIntroRef.current = finishIntro;
 
-    // Bunny Stream intro: no 3D flip / no window touch capture — those froze iPhone
-    // while WebGL flowers + the video player ran together. Skip / Enter dismisses.
+    const mobile = window.matchMedia("(max-width: 767px)").matches;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reducedMotion) {
       finishIntro();
       return () => {
         skipIntroRef.current = null;
+        enterFlipRef.current = null;
       };
     }
 
-    // Keep the intro panel flat (identity transforms) — video + flowers only.
-    if (flipFrontRef.current) flipFrontRef.current.style.transform = "";
-    if (flipRotorRef.current) flipRotorRef.current.style.transform = "";
-    if (pageFaceRef.current) {
-      pageFaceRef.current.style.transform = "";
-      pageFaceRef.current.style.willChange = "";
-    }
-    if (scrollHintRef.current) scrollHintRef.current.style.opacity = "1";
+    // Vertical cube flip: intro face rotates up/away; homepage rises from below.
+    const flipZone = Math.max(window.innerHeight * (mobile ? 0.72 : 0.85), mobile ? 340 : 420);
+    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+    const progressToAngle = (progress: number) => {
+      const clamped = Math.min(Math.max(progress, 0), 1);
+      return easeOutCubic(clamped) * 90;
+    };
 
-    // Scroll / swipe up enters the site (no flip RAF). Do not ignore events over
-    // the player — the video block is most of the viewport, and play/pause is
-    // click-only (iframe is pointer-events-none), so gating on the video target
-    // made "Scroll up to enter" effectively dead.
-    const handleWheel = (e: WheelEvent) => {
-      if (finishingIntroRef.current) return;
-      if (e.deltaY < 0) {
-        finishingIntroRef.current = true;
-        finishIntro();
+    const paintPageFace = (angle: number) => {
+      if (!pageFaceRef.current) return;
+      pageFaceRef.current.style.transform = `rotateX(${angle - 90}deg)`;
+    };
+
+    const syncFlipDepth = () => {
+      const halfH = halfHRef.current;
+      const angle = progressToAngle(displayedProgressRef.current);
+      if (flipFrontRef.current) {
+        flipFrontRef.current.style.transform = `translate3d(0, 0, ${halfH}px)`;
+      }
+      if (flipRotorRef.current) {
+        flipRotorRef.current.style.transform = `translate3d(0, 0, ${-halfH}px) rotateX(${angle}deg)`;
+      }
+      paintPageFace(angle);
+    };
+
+    const paintFlip = (progress: number) => {
+      const halfH = halfHRef.current;
+      const clamped = Math.min(Math.max(progress, 0), 1);
+      displayedProgressRef.current = clamped;
+      const angle = progressToAngle(clamped);
+
+      if (flipRotorRef.current) {
+        flipRotorRef.current.style.transform = `translate3d(0, 0, ${-halfH}px) rotateX(${angle}deg)`;
+      }
+      paintPageFace(angle);
+
+      if (!finishingIntroRef.current) {
+        captureEl.style.opacity = "1";
+      }
+
+      if (scrollHintRef.current) {
+        scrollHintRef.current.style.opacity = String(Math.max(0, 1 - clamped * 8));
+      }
+
+      if (!scrollHintHiddenRef.current && clamped >= 0.02) {
+        scrollHintHiddenRef.current = true;
+        if (scrollHintBounceRef.current) {
+          scrollHintBounceRef.current.style.animation = "none";
+        }
       }
     };
+
+    const scheduleFinish = () => {
+      if (finishingIntroRef.current) return;
+      finishingIntroRef.current = true;
+      stopFlipAnim();
+      targetProgressRef.current = 1;
+      paintFlip(1);
+      document.body.style.overflow = "";
+      captureEl.style.pointerEvents = "none";
+      captureEl.style.transition = "opacity 420ms cubic-bezier(0.22, 1, 0.36, 1)";
+      captureEl.style.opacity = "0";
+      window.setTimeout(finishIntro, 440);
+    };
+
+    let lastFrameMs = performance.now();
+    const tickFlip = (now: number) => {
+      flipAnimRef.current = 0;
+      const dt = Math.min((now - lastFrameMs) / 1000, 0.032);
+      lastFrameMs = now;
+
+      const target = targetProgressRef.current;
+      let current = displayedProgressRef.current;
+      const delta = target - current;
+
+      if (Math.abs(delta) > 0.0004) {
+        const smoothing = 1 - Math.exp(-12 * dt);
+        current += delta * smoothing;
+        if ((delta > 0 && current > target) || (delta < 0 && current < target)) {
+          current = target;
+        }
+        paintFlip(current);
+        flipAnimRef.current = requestAnimationFrame(tickFlip);
+        return;
+      }
+
+      if (current !== target) paintFlip(target);
+
+      if (target >= 1 && displayedProgressRef.current >= 0.985) {
+        scheduleFinish();
+      }
+    };
+
+    const ensureTick = () => {
+      if (!flipAnimRef.current) {
+        lastFrameMs = performance.now();
+        flipAnimRef.current = requestAnimationFrame(tickFlip);
+      }
+    };
+
+    const snapToFinish = () => {
+      if (finishingIntroRef.current) return;
+      targetProgressRef.current = 1;
+      virtualScrollRef.current = flipZone;
+      ensureTick();
+    };
+
+    enterFlipRef.current = snapToFinish;
+
+    let idleCompleteTimer: number | undefined;
+    const bumpIdleComplete = () => {
+      if (idleCompleteTimer !== undefined) window.clearTimeout(idleCompleteTimer);
+      idleCompleteTimer = window.setTimeout(() => {
+        if (finishingIntroRef.current) return;
+        if (displayedProgressRef.current >= 0.68) {
+          snapToFinish();
+        }
+      }, 750);
+    };
+
+    const applyDelta = (delta: number) => {
+      if (finishingIntroRef.current) return;
+      const gain = mobile ? 1.05 : 0.9;
+      const clampedDelta = Math.sign(delta) * Math.min(Math.abs(delta) * gain, 36);
+      virtualScrollRef.current = Math.max(
+        0,
+        Math.min(flipZone, virtualScrollRef.current + clampedDelta),
+      );
+      targetProgressRef.current = virtualScrollRef.current / flipZone;
+      bumpIdleComplete();
+      ensureTick();
+    };
+
+    halfHRef.current = window.innerHeight / 2;
+    syncFlipDepth();
+    paintFlip(0);
+    if (scrollHintRef.current) scrollHintRef.current.style.opacity = "1";
+
+    const handleResize = () => {
+      halfHRef.current = window.innerHeight / 2;
+      syncFlipDepth();
+      paintFlip(displayedProgressRef.current);
+    };
+    window.addEventListener("resize", handleResize);
+
+    // Scroll up / swipe up advances the vertical cube flip into the homepage.
+    const handleWheel = (e: WheelEvent) => {
+      if (finishingIntroRef.current) return;
+      e.preventDefault();
+      let delta = -e.deltaY;
+      if (e.deltaMode === WheelEvent.DOM_DELTA_LINE) delta *= 16;
+      if (e.deltaMode === WheelEvent.DOM_DELTA_PAGE) delta *= window.innerHeight * 0.35;
+      applyDelta(delta);
+    };
+
     let touchStartY = 0;
     const handleTouchStart = (e: TouchEvent) => {
       touchStartY = e.touches[0]?.clientY ?? 0;
     };
-    const handleTouchEnd = (e: TouchEvent) => {
+    const handleTouchMove = (e: TouchEvent) => {
       if (finishingIntroRef.current) return;
-      const y = e.changedTouches[0]?.clientY ?? touchStartY;
-      if (touchStartY - y > 48) {
-        finishingIntroRef.current = true;
-        finishIntro();
+      e.preventDefault();
+      const y = e.touches[0]?.clientY ?? touchStartY;
+      const delta = touchStartY - y;
+      touchStartY = y;
+      applyDelta(delta);
+    };
+
+    const handleTouchEnd = () => {
+      if (finishingIntroRef.current) return;
+      if (displayedProgressRef.current >= 0.72) {
+        snapToFinish();
       }
     };
-    window.addEventListener("wheel", handleWheel, { passive: true });
+
+    let wheelEndTimer: number | undefined;
+    const handleWheelEnd = () => {
+      if (wheelEndTimer !== undefined) window.clearTimeout(wheelEndTimer);
+      wheelEndTimer = window.setTimeout(() => {
+        if (finishingIntroRef.current) return;
+        if (displayedProgressRef.current >= 0.72) {
+          snapToFinish();
+        }
+      }, 120);
+    };
+
+    window.addEventListener("wheel", handleWheel, { passive: false });
+    window.addEventListener("wheel", handleWheelEnd, { passive: true });
     window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
     window.addEventListener("touchend", handleTouchEnd, { passive: true });
 
     return () => {
       skipIntroRef.current = null;
+      enterFlipRef.current = null;
+      if (idleCompleteTimer !== undefined) window.clearTimeout(idleCompleteTimer);
+      if (wheelEndTimer !== undefined) window.clearTimeout(wheelEndTimer);
       stopFlipAnim();
       document.body.style.overflow = "";
+      window.removeEventListener("resize", handleResize);
       window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("wheel", handleWheelEnd);
       window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("touchend", handleTouchEnd);
     };
   }, [flipComplete]);
@@ -356,31 +520,94 @@ export default function LandingPage() {
       {!flipComplete && (
         <div
           ref={introCaptureRef}
-          className="fixed inset-0 z-[70] overflow-hidden bg-white"
+          className="fixed inset-0 z-[70]"
           style={{
-            touchAction: "auto",
+            touchAction: "none",
             minHeight: "100svh",
             height: "100svh",
+            overflow: "visible",
+            // Transparent so the rising homepage face reads through mid-flip.
+            backgroundColor: "transparent",
+            opacity: 1,
+            willChange: "opacity",
           }}
           data-testid="homepage-game-intro"
         >
           <div
-            ref={flipRotorRef}
             className="absolute inset-0"
-            style={{ transformStyle: "preserve-3d" }}
+            style={{
+              zIndex: 1,
+              perspective: "2400px",
+              perspectiveOrigin: "50% 50%",
+              overflow: "visible",
+              transformStyle: "preserve-3d",
+              WebkitTransformStyle: "preserve-3d",
+            }}
           >
-            <div ref={flipFrontRef} className="absolute inset-0">
-              <HomepageGamePanel
-                asIntro
-                onEnterApp={() => {
-                  skipIntroRef.current?.();
+            <div
+              ref={flipRotorRef}
+              className="relative h-full w-full"
+              style={{
+                transformStyle: "preserve-3d",
+                willChange: "transform",
+                transformOrigin: "center center",
+                transform: "translate3d(0, 0, calc(-50vh)) rotateX(0deg)",
+              }}
+            >
+              <div
+                ref={flipFrontRef}
+                className="absolute inset-0 h-full w-full"
+                style={{
+                  backfaceVisibility: "hidden",
+                  WebkitBackfaceVisibility: "hidden",
+                  willChange: "transform",
+                  transform: "translate3d(0, 0, 50vh)",
                 }}
-              />
+              >
+                {/* Overscan so perspective corner gaps stay covered mid-flip. */}
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute bottom-0 left-[-45%] right-[-45%] top-[-45%] bg-white"
+                />
+                <div className="relative h-full w-full overflow-hidden bg-white">
+                  <HomepageGamePanel
+                    asIntro
+                    onEnterApp={() => {
+                      if (enterFlipRef.current) enterFlipRef.current();
+                      else skipIntroRef.current?.();
+                    }}
+                  />
+                </div>
+              </div>
             </div>
           </div>
-          {/* Hidden refs kept for intro scroll RAF / reduced-motion cleanup */}
-          <div ref={scrollHintRef} className="hidden" aria-hidden>
-            <div ref={scrollHintBounceRef} data-testid="text-intro-swipe-cube-twice" />
+          <div
+            ref={scrollHintRef}
+            className="pointer-events-none absolute bottom-8 left-1/2 z-20 -translate-x-1/2"
+            style={{ opacity: 1, willChange: "opacity" }}
+          >
+            <div
+              ref={scrollHintBounceRef}
+              className="flex max-w-[min(92vw,22rem)] flex-col items-center gap-1 rounded-full border border-black/10 bg-white/85 px-5 py-2.5 shadow-sm backdrop-blur-sm"
+              style={{ animation: "scrollBounce 1.5s ease-in-out 0s infinite" }}
+              data-testid="text-intro-swipe-cube-twice"
+            >
+              <span className="text-[10px] uppercase tracking-[0.2em] text-foreground/55">
+                Scroll up to enter
+              </span>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                className="text-foreground/70"
+                aria-hidden
+              >
+                <path d="M10 16V4M5 9l5-5 5 5" />
+              </svg>
+            </div>
           </div>
           <div className="pointer-events-none absolute left-3 right-3 top-4 z-20 flex items-start justify-end gap-2 sm:left-4 sm:right-4">
             <button
@@ -421,6 +648,9 @@ export default function LandingPage() {
                   overflow: "hidden",
                   transformOrigin: "50% 100%",
                   willChange: "transform",
+                  transform: "rotateX(-90deg)",
+                  backfaceVisibility: "hidden",
+                  WebkitBackfaceVisibility: "hidden",
                 }
           }
         >

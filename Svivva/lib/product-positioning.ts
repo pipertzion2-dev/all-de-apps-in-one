@@ -54,8 +54,7 @@ export const PRODUCT_GAME_HYBRID_METAPHOR =
 
 /** Last homepage panel — Klean Sneaks (after The Moves Like). */
 export const HOMEPAGE_GAME_FACE_TITLE = "Klean Sneaks on the walk";
-export const HOMEPAGE_GAME_FACE_SUBLINE =
-  "Klean Sneaks — protect the BALOON8 while you play free.";
+export const HOMEPAGE_GAME_FACE_SUBLINE = "Klean Sneaks — protect the BALOON8 while you play free.";
 
 /** Shown under the headline on the platform homepage face (mobile compact). */
 export const HOMEPAGE_PLATFORM_FACE_SUBLINE =
