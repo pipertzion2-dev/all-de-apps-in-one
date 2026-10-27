@@ -43,8 +43,8 @@ export function HomepageGamePanel({ asIntro = false, onEnterApp }: HomepageGameP
         <CamoThreeOverlay preset="lock" isIntro eagerMount keepMounted className="h-full w-full" />
       </div>
 
-      {/* Animated ponds with green and blue water - only show after intro or in non-intro mode */}
-      {!asIntro && <AnimatedPonds />}
+      {/* Animated ponds with green and blue water */}
+      <AnimatedPonds />
 
       <div
         className={`relative z-10 flex min-h-0 flex-1 flex-col px-3 sm:px-6 ${

@@ -111,7 +111,7 @@ export function AnimatedPonds() {
         ref={canvasRef1}
         width={120}
         height={100}
-        className="absolute left-[8%] top-[15%] opacity-80"
+        className="absolute left-[8%] top-[15%] opacity-80 pointer-events-none"
         style={{
           filter: "blur(0.5px)",
           mixBlendMode: "screen",
@@ -121,7 +121,7 @@ export function AnimatedPonds() {
         ref={canvasRef2}
         width={150}
         height={130}
-        className="absolute right-[12%] top-[25%] opacity-75"
+        className="absolute right-[12%] top-[25%] opacity-75 pointer-events-none"
         style={{
           filter: "blur(0.5px)",
           mixBlendMode: "screen",
@@ -131,7 +131,7 @@ export function AnimatedPonds() {
         ref={canvasRef3}
         width={100}
         height={85}
-        className="absolute bottom-[30%] left-[15%] opacity-70"
+        className="absolute bottom-[30%] left-[15%] opacity-70 pointer-events-none"
         style={{
           filter: "blur(0.5px)",
           mixBlendMode: "screen",
