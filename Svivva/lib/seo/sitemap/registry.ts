@@ -48,6 +48,7 @@ function staticPagesEntries(): SitemapEntry[] {
     { path: "/terms", priority: 0.3, changeFrequency: "yearly" },
     { path: "/orbit", priority: 0.8, changeFrequency: "weekly" },
     { path: "/seeds", priority: 0.7, changeFrequency: "weekly" },
+    { path: "/poor-man-protection", priority: 0.9, changeFrequency: "weekly" },
     { path: "/clean-sneaks", priority: 0.78, changeFrequency: "weekly" },
     { path: "/events", priority: 0.76, changeFrequency: "weekly" },
     { path: "/events/model-agency", priority: 0.72, changeFrequency: "weekly" },

@@ -14,11 +14,11 @@ export function HomepageFaqSection() {
         <div className="space-y-3 text-center">
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#6D91B3]">FAQ</p>
           <h2 id="homepage-faq-heading" className="text-2xl font-bold sm:text-3xl">
-            Questions about The Moves Like
+            Questions about Poor Man Protection
           </h2>
           <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-base">
-            Dance desk, front-camera practice, pricing, and which zzai zzai modules are still in
-            beta.
+            Sealing, court packs, the beta apps cube, Play / The Moves Like, pricing, and what is
+            still in beta.
           </p>
         </div>
 

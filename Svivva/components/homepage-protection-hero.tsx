@@ -4,14 +4,16 @@ import Image from "next/image";
 import Link from "next/link";
 import zzaiLogo from "@/attached_assets/ZZAI_OFFICIAL_LOGO.png";
 import {
+  HOMEPAGE_SCROLL_TO_PROTECTION,
   PRODUCT_HERO_HEADLINE,
   PRODUCT_NAME_LINE,
+  PRODUCT_PROTECTION_PATH,
   PRODUCT_PROTECTION_PITCH,
   PRODUCT_TAGLINE,
 } from "@/lib/product-positioning";
 import { Button } from "@/components/ui/button";
 
-/** Homepage hero — Poor Man Protection copy only (shirt photo is on the intro flip). */
+/** Second-home lead — Poor Man Protection is the main product focus. */
 export function HomepageProtectionHero() {
   return (
     <section
@@ -29,11 +31,14 @@ export function HomepageProtectionHero() {
           <p className="text-base font-medium leading-snug text-foreground/90">{PRODUCT_TAGLINE}</p>
           <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
             {PRODUCT_PROTECTION_PITCH} Sketches, sneaker colorways, lyrics, API schemas — anything
-            you may need to prove you had first.
+            you may need to prove you had first. The cube below is beta apps; The Moves Like opens
+            inside Play.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3 lg:justify-start">
             <Button asChild className="bg-[#5B8DA8] text-white">
-              <Link href="/dashboard/poor-man-protection">Open Poor Man Protection</Link>
+              <Link href={PRODUCT_PROTECTION_PATH} data-testid="link-open-poor-man-protection">
+                {HOMEPAGE_SCROLL_TO_PROTECTION}
+              </Link>
             </Button>
             <Button asChild variant="outline">
               <Link href="/protect/verify">Verify a seal</Link>

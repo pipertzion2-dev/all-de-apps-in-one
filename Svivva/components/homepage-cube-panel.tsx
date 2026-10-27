@@ -8,7 +8,12 @@ import { HomepageFounderSonSection } from "@/components/homepage-founder-son-sec
 import { HomepagePricingSection } from "@/components/homepage-pricing-section";
 import Link from "next/link";
 import { HomepageCubeFaceHint } from "@/components/homepage-cube-face-hint";
-import { HOMEPAGE_SCROLL_TO_GAME } from "@/lib/product-positioning";
+import {
+  HOMEPAGE_SCROLL_TO_GAME,
+  HOMEPAGE_SCROLL_TO_MOVES,
+  HOMEPAGE_SCROLL_TO_PROTECTION,
+  PRODUCT_PROTECTION_PATH,
+} from "@/lib/product-positioning";
 
 type HomepageCubePanelProps = {
   mountCanvas?: boolean;
@@ -17,7 +22,8 @@ type HomepageCubePanelProps = {
 
 /**
  * Combined story face — about, how-to, explore, founder, pricing, FAQ.
- * Klean Sneaks opens from the first-page intro or /clean-sneaks; Moves Like is in /play.
+ * Poor Man Protection leads the product story; Moves Like is in /play;
+ * Klean Sneaks opens from the intro or /clean-sneaks.
  */
 export function HomepageCubePanel({
   mountCanvas: _mountCanvas = true,
@@ -37,8 +43,8 @@ export function HomepageCubePanel({
           Story, plans, and answers
         </h2>
         <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-          How zzai zzai fits together — The Moves Like in Play, god moves on the walk in Klean
-          Sneaks.
+          How zzai zzai fits together — Poor Man Protection first, beta apps on the cube, The Moves
+          Like in Play, Klean Sneaks on the walk.
         </p>
       </div>
 
@@ -50,10 +56,17 @@ export function HomepageCubePanel({
       <HomepageFaqSection />
 
       {interactive ? (
-        <div className="relative z-20 flex justify-center gap-3 px-4 py-8">
+        <div className="relative z-20 flex flex-wrap justify-center gap-3 px-4 py-8">
+          <Link
+            href={PRODUCT_PROTECTION_PATH}
+            className="rounded-full border border-[#5B8DA8]/50 bg-[#5B8DA8] px-6 py-2.5 text-xs font-semibold tracking-wide text-white shadow-sm transition-transform active:scale-95"
+            data-testid="button-open-poor-man-protection"
+          >
+            {HOMEPAGE_SCROLL_TO_PROTECTION}
+          </Link>
           <Link
             href="/clean-sneaks"
-            className="rounded-full border border-[#5B8DA8]/50 bg-[#5B8DA8] px-6 py-2.5 text-xs font-semibold tracking-wide text-white shadow-sm transition-transform active:scale-95"
+            className="rounded-full border border-[#5B8DA8]/45 bg-background px-6 py-2.5 text-xs font-semibold tracking-wide text-foreground shadow-sm transition-transform active:scale-95"
             data-testid="button-scroll-to-klean-sneaks"
           >
             {HOMEPAGE_SCROLL_TO_GAME}
@@ -63,7 +76,7 @@ export function HomepageCubePanel({
             className="rounded-full border border-[#AC81AF]/45 bg-background px-6 py-2.5 text-xs font-semibold tracking-wide text-foreground shadow-sm transition-transform active:scale-95"
             data-testid="button-open-moves-in-play"
           >
-            Open The Moves Like
+            {HOMEPAGE_SCROLL_TO_MOVES}
           </Link>
         </div>
       ) : null}

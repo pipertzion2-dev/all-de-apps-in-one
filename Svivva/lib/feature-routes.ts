@@ -12,7 +12,7 @@ export const FEATURE_PUBLIC_PATHS: Record<FeatureId, string> = {
   play: "/clean-sneaks",
   seeds: "/seeds",
   orbit: "/orbit",
-  security: "/dashboard/poor-man-protection",
+  security: "/poor-man-protection",
   api: "/dashboard/api-builder",
   hardware: "/dashboard/hardware-builder",
 };
@@ -38,7 +38,12 @@ export function featureTitleFromPath(pathname: string): string {
   if (pathname.startsWith("/dashboard/burns")) return "Burns System";
   if (pathname.startsWith("/dashboard/gsc-connect")) return "Google Search Console";
   if (pathname.startsWith("/dashboard/security")) return "Security Center";
-  if (pathname.startsWith("/dashboard/poor-man-protection")) return "Poor Man Protection";
+  if (
+    pathname.startsWith("/poor-man-protection") ||
+    pathname.startsWith("/dashboard/poor-man-protection")
+  ) {
+    return "Poor Man Protection";
+  }
   if (pathname.startsWith("/dashboard/education-advocacy")) return "Education Advocacy";
   if (pathname.startsWith("/dashboard/zzai-show")) return "ZZAI ZZAI Show";
   if (pathname.startsWith("/education/verify")) return "Verify Education Proof";

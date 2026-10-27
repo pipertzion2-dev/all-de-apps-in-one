@@ -93,7 +93,7 @@ export const FEATURE_MINI_APPS: FeatureMiniApp[] = [
     description:
       "Hash a sketch in the browser. Poor Man Protection seals, timestamps, and builds a court pack.",
     hub: "cyber-security-mini-apps",
-    parentHref: "/dashboard/poor-man-protection",
+    parentHref: "/poor-man-protection",
     parentLabel: "Poor Man Protection",
     sliceNote: "SHA-256 only — not dual-axis hybridization, coin mint, or court PDF.",
     keyword: "sketch file hash",

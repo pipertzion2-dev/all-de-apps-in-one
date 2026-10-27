@@ -60,15 +60,18 @@ describe("homepage scroll panels", () => {
     expect(pageSrc).toContain("asIntro");
     expect(pageSrc).toContain("homepage-game-intro");
     expect(betaSrc).toContain('id="home-beta"');
+    expect(betaSrc).toContain("HomepageProtectionHero");
     expect(betaSrc).toContain("HomepageHeroBlock");
     expect(betaSrc).toContain("PlatformFeatureHub");
     expect(betaSrc).toContain('id="oaas"');
-    expect(betaSrc).toContain('href="/play"');
+    expect(betaSrc).toContain("HOMEPAGE_BETA_CUBE_TITLE");
+    expect(betaSrc).not.toContain('href="/play"');
     expect(cubeSrc).toContain('id="nav-cube"');
     expect(cubeSrc).toContain("HomepageAboutSection");
     expect(cubeSrc).toContain("HomepageFounderSonSection");
     expect(cubeSrc).toMatch(/HomepageFounderSonSection[\s\S]*HomepagePricingSection/);
     expect(cubeSrc).toContain('href="/clean-sneaks"');
+    expect(cubeSrc).toContain("PRODUCT_PROTECTION_PATH");
     expect(cubeSrc).not.toContain("HomepageProtectionHero");
     expect(cubeSrc).not.toContain("HomepageMovesLikeHero");
     expect(cubeSrc).not.toContain("HomepageHeroBlock");
@@ -78,8 +81,11 @@ describe("homepage scroll panels", () => {
     expect(playHubSrc).toContain("MovesLikeApp");
     expect(playHubSrc).toContain("tab-play-moves");
     expect(playHubSrc).toContain("tab-play-studio");
+    expect(playHubSrc).toContain("Open The Moves Like");
     const positioningSrc = readFileSync(resolve(__dirname, "../product-positioning.ts"), "utf8");
     expect(positioningSrc).toContain("HOMEPAGE_GAME_FACE_TITLE");
+    expect(positioningSrc).toContain('PRODUCT_NAME_LINE = "Poor Man Protection"');
+    expect(positioningSrc).toContain('PRODUCT_PROTECTION_PATH = "/poor-man-protection"');
     const founderSrc = readFileSync(
       resolve(__dirname, "../../components/homepage-founder-son-section.tsx"),
       "utf8",

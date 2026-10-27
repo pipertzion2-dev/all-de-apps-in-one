@@ -244,7 +244,7 @@ export const PLATFORM_FEATURES: PlatformFeature[] = [
     id: "poor-man-protection",
     title: "Poor Man Protection",
     shortTitle: "ProtectaaS",
-    href: "/dashboard/poor-man-protection",
+    href: "/poor-man-protection",
     description: "Channel 13 — limiter on the Protect bus: sketch-to-seal IP and court packs.",
     bus: "protect",
     channel: 13,

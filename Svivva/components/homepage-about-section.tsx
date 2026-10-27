@@ -7,45 +7,48 @@ import { BRAND } from "@/lib/brand";
 import {
   HOMEPAGE_APPLICATIONS_SUBLINE,
   HOMEPAGE_APPLICATIONS_TITLE,
+  HOMEPAGE_SCROLL_TO_MOVES,
+  HOMEPAGE_SCROLL_TO_PROTECTION,
   PRODUCT_NAME_LINE,
+  PRODUCT_PROTECTION_PATH,
 } from "@/lib/product-positioning";
 import { Camera, Clapperboard, Music2, Shield } from "lucide-react";
 import { FeatureBetaBadge } from "@/components/feature-beta-badge";
 
 const HIGHLIGHTS = [
   {
+    icon: Shield,
+    title: "Poor Man Protection",
+    description:
+      "Main focus — seal uploads with hashes and export a court pack when priority matters.",
+    href: PRODUCT_PROTECTION_PATH,
+    beta: false,
+  },
+  {
     icon: Music2,
     title: "The Moves Like",
     description:
-      "Interactive dance workstation — Discover, Learn, Create, Studio, Play, and Style Clash.",
-    href: "/the-moves-like",
+      "Inside Play — interactive dance workstation: Discover, Learn, Create, Studio, Play, Style Clash.",
+    href: "/play",
     beta: false,
   },
   {
     icon: Camera,
     title: "Front-camera practice",
-    description: "Ghost Mode mirrors your selfie camera so you can learn against a reference take.",
-    href: "/the-moves-like",
+    description: "Ghost Mode in Play mirrors your selfie camera against a reference take.",
+    href: "/play",
     beta: false,
   },
   {
     icon: Clapperboard,
     title: "Create & Studio",
-    description: "Record takes, assemble routines, and keep the glass UI tuned for phones.",
-    href: "/the-moves-like",
-    beta: false,
-  },
-  {
-    icon: Shield,
-    title: "Poor Man Protection",
-    description:
-      "Still on the desk — seal uploads with hashes and export a court pack when priority matters.",
-    href: "/dashboard/poor-man-protection",
+    description: "Record takes and assemble routines in Play — glass UI tuned for phones.",
+    href: "/play",
     beta: false,
   },
 ] as const;
 
-/** Brief product overview below The Moves Like hero. */
+/** Brief product overview — Poor Man Protection first; Moves Like in Play. */
 export function HomepageAboutSection() {
   return (
     <section
@@ -92,10 +95,13 @@ export function HomepageAboutSection() {
         </ul>
 
         <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-          <Button asChild className="bg-[#AC81AF] text-white hover:bg-[#9a6f9d]">
-            <Link href="/the-moves-like">Open The Moves Like</Link>
+          <Button asChild className="bg-[#5B8DA8] text-white hover:bg-[#4a7a94]">
+            <Link href={PRODUCT_PROTECTION_PATH}>{HOMEPAGE_SCROLL_TO_PROTECTION}</Link>
           </Button>
           <Button asChild variant="outline">
+            <Link href="/play">{HOMEPAGE_SCROLL_TO_MOVES}</Link>
+          </Button>
+          <Button asChild variant="ghost">
             <Link href="/clean-sneaks">Klean Sneaks demo</Link>
           </Button>
         </div>

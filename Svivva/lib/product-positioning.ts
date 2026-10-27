@@ -1,28 +1,30 @@
 /**
  * Canonical product story for zzai zzai — homepage, metadata, and beta labeling.
- * Homepage leads with The Moves Like; Poor Man Protection remains a desk tool.
+ * Homepage leads with Poor Man Protection; the desk cube is beta apps;
+ * The Moves Like lives in /play.
  */
 
 import type { FeatureId } from "@/components/svivva-artifact/feature-defs";
 
 /** Scale-style homepage thesis — one clear job for the whole page. */
-export const PRODUCT_HERO_HEADLINE = "Make god moves — explore, learn, and play on your phone.";
+export const PRODUCT_HERO_HEADLINE = "Seal what you made — Poor Man Protection first.";
 
 /** Product name — eyebrows, metadata suffix, and compact labels. */
-export const PRODUCT_NAME_LINE = "The Moves Like";
+export const PRODUCT_NAME_LINE = "Poor Man Protection";
 
 /** Brand slogan — metadata and secondary hero line. */
 export const PRODUCT_TAGLINE =
-  "The Moves Like — make god moves: explore, learn, transform, play, and share.";
+  "Poor Man Protection — timestamp, seal, and export a court-ready pack.";
 
-/** Desk tool pitch — still available, no longer the homepage lead. */
+/** Desk tool pitch — primary homepage product. */
 export const PRODUCT_PROTECTION_PITCH =
   "Timestamp your files, seal them with cryptographic hashes, and export a court-ready pack. Supporting evidence of anteriority — not a USPTO patent or Copyright Office registration.";
 
 /** Applications block (below the hero) — focused section intro. */
-export const HOMEPAGE_APPLICATIONS_TITLE = "Movement first. Desk tools when you need them.";
+export const HOMEPAGE_APPLICATIONS_TITLE =
+  "Protection first. Beta apps on the cube. Play when you want to move.";
 export const HOMEPAGE_APPLICATIONS_SUBLINE =
-  "The Moves Like is the center of zzai zzai — practice with your front camera, build routines, and clash styles. Poor Man Protection and the rest of the desk stay one tap away.";
+  "zzai zzai is mainly focused on Poor Man Protection. The spinning desk cube holds beta apps (Seeds, Orbit, Protect channels, and more). The Moves Like lives inside Play.";
 
 /** Sap / tree metaphor — quiet work under the surface while you rest and grow. */
 export const PRODUCT_SAP_METAPHOR =
@@ -30,27 +32,27 @@ export const PRODUCT_SAP_METAPHOR =
 
 /** One-sentence pitch (YC / hero / meta). */
 export const PRODUCT_ONE_LINER =
-  "zzai zzai leads with The Moves Like — make god moves on camera, then carry that same energy into Klean Sneaks on the walk. Poor Man Protection and the builder desk stay on the same domain.";
+  "zzai zzai leads with Poor Man Protection — seal sketches, colorways, and files with hashes and court packs. The desk cube is beta apps; The Moves Like lives in Play; Klean Sneaks stays free on the walk.";
 
 /** Plain-language main goal (homepage game + product faces). */
 export const PRODUCT_MAIN_GOAL =
-  "Open The Moves Like, practice god moves with your front camera, then take the same fire into Klean Sneaks — and seal what you made with Poor Man Protection when you need proof.";
+  "Open Poor Man Protection to seal what you made, spin the cube for beta desk apps, and open Play when you want The Moves Like.";
 
 /** Shorter hero subline. */
 export const PRODUCT_HERO_SUBLINE =
-  "Front-camera practice for god moves — then the same heat in Klean Sneaks on the street.";
+  "Cryptographic seals and court packs for what you invent — then beta apps on the cube, and god moves in Play.";
 
 /** Max ~12 words — mobile homepage faces only. */
-export const PRODUCT_HOOK_SHORT = "Make god moves. Practice. Play. Share.";
+export const PRODUCT_HOOK_SHORT = "Seal it. Prove it. Protect it.";
 
 /** HowTo section — keep in sync with `HOMEPAGE_HOWTO_STEPS` in seo/schema/builders.ts */
-export const HOMEPAGE_HOWTO_TITLE = "How The Moves Like works";
+export const HOMEPAGE_HOWTO_TITLE = "How Poor Man Protection works";
 export const HOMEPAGE_HOWTO_SUBLINE =
-  "Four steps from Discover to a shared take — built for your phone’s front camera.";
+  "Four steps from upload to a sealed, court-oriented pack — the main focus of zzai zzai.";
 
 /** Literal game ↔ product bridge (BALOON8 car×sneaker, Jordan 14 × Ferrari). */
 export const PRODUCT_GAME_HYBRID_METAPHOR =
-  "God moves in two arenas — The Moves Like on camera, Klean Sneaks on the BALOON8 walk. Same H¹ heat, different finishes.";
+  "Protect first, then play — Poor Man Protection on the desk, The Moves Like in Play, Klean Sneaks on the BALOON8 walk.";
 
 /** Last homepage panel — Klean Sneaks (after The Moves Like). */
 export const HOMEPAGE_GAME_FACE_TITLE = "Klean Sneaks on the walk";
@@ -58,22 +60,31 @@ export const HOMEPAGE_GAME_FACE_SUBLINE = "Klean Sneaks — protect the BALOON8 
 
 /** Shown under the headline on the platform homepage face (mobile compact). */
 export const HOMEPAGE_PLATFORM_FACE_SUBLINE =
-  "Open The Moves Like — practice god moves, record, and clash from your phone.";
+  "Open Poor Man Protection — seal your work, then explore beta apps on the cube.";
 
-/** From The Moves Like — continue to beta desk apps. */
-export const HOMEPAGE_SCROLL_TO_BETA = "Scroll ↓ Beta apps";
-/** @deprecated Moves Like lives in /play — kept for lingering imports. */
-export const HOMEPAGE_SCROLL_TO_MOVES = "Open The Moves Like in Play";
-/** From beta apps — continue to the combined story / pricing face. */
+/** Primary CTA — open the main product. */
+export const HOMEPAGE_SCROLL_TO_PROTECTION = "Open Poor Man Protection";
+/** Public path for Poor Man Protection (canonical marketing URL). */
+export const PRODUCT_PROTECTION_PATH = "/poor-man-protection";
+/** From protection / beta — continue to the combined story / pricing face. */
 export const HOMEPAGE_SCROLL_TO_COMBINED = "Scroll ↓ More";
 /** From the combined face — back to beta apps. */
 export const HOMEPAGE_SCROLL_TO_BETA_UP = "↑ Back to beta apps";
+/** From The Moves Like — continue to beta desk apps. */
+export const HOMEPAGE_SCROLL_TO_BETA = "Scroll ↓ Beta apps";
+/** Moves Like lives in /play — use only inside Play or as a secondary desk link. */
+export const HOMEPAGE_SCROLL_TO_MOVES = "Open The Moves Like in Play";
 /** Open the free Klean Sneaks arena. */
 export const HOMEPAGE_SCROLL_TO_GAME = "Play Klean Sneaks free";
 /** From Klean Sneaks — back up to the combined story face. */
 export const HOMEPAGE_SCROLL_TO_COMBINED_UP = "↑ Back to story";
-/** @deprecated Use HOMEPAGE_SCROLL_TO_MOVES — kept for any lingering imports. */
-export const HOMEPAGE_SCROLL_TO_PLATFORM = HOMEPAGE_SCROLL_TO_MOVES;
+/** @deprecated Use HOMEPAGE_SCROLL_TO_PROTECTION — kept for lingering imports. */
+export const HOMEPAGE_SCROLL_TO_PLATFORM = HOMEPAGE_SCROLL_TO_PROTECTION;
+
+/** Beta apps face — the cube is the beta desk, not the main product. */
+export const HOMEPAGE_BETA_CUBE_TITLE = "Beta apps";
+export const HOMEPAGE_BETA_CUBE_SUBLINE =
+  "This cube is the beta apps desk — Seeds, Orbit, Protect channels, and the rest. zzai zzai’s main focus is Poor Man Protection above.";
 
 /** Platform desk modules — Klean Sneaks ships; Hybrid² / API / Pulse stay beta. */
 export const CORE_PLATFORM_FEATURE_IDS = new Set<string>();
@@ -97,6 +108,9 @@ function isCoreProductPath(path: string): boolean {
     "/privacy",
     "/terms",
     "/clean-sneaks",
+    "/poor-man-protection",
+    "/dashboard/poor-man-protection",
+    "/protect",
     "/play",
     "/the-moves-like",
     "/dashboard/settings",
@@ -121,6 +135,10 @@ export function isBetaCubeFaceId(id: FeatureId): boolean {
 /** True when this href should show a Beta label (dashboard nav, explore links, etc.). */
 export function isBetaHref(href: string): boolean {
   const path = normalizePath(href);
+  // Main product — not beta.
+  if (path === "/poor-man-protection" || path.startsWith("/poor-man-protection/")) return false;
+  if (path.startsWith("/dashboard/poor-man-protection")) return false;
+  if (path.startsWith("/protect")) return false;
   // Play hosts The Moves Like (GA) — MIDI Studio stays available under ?section=studio.
   if (path === "/play" || path.startsWith("/play/")) return false;
   if (path.startsWith("/the-moves-like")) return false;
