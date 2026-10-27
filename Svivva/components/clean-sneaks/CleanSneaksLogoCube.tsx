@@ -96,9 +96,7 @@ export function CleanSneaksLogoCube({ className = "", cacheBust = "v2", onActiva
     const loader = new THREE.TextureLoader();
     const maxAniso = renderer.capabilities.getMaxAnisotropy();
 
-    Promise.all(
-      BUNDLE_CUBE_FACE_URLS.map((url) => loader.loadAsync(`${url}?${cacheBust}`)),
-    )
+    Promise.all(BUNDLE_CUBE_FACE_URLS.map((url) => loader.loadAsync(`${url}?${cacheBust}`)))
       .then((textures) => {
         if (disposed) {
           textures.forEach((tex) => tex.dispose());
