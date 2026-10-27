@@ -20,10 +20,11 @@ describe("homepage-layout", () => {
     expect(pageSrc).not.toContain("HomepageFlipStack");
   });
 
-  it("exposes Admin Orbit on the intro overlay and main nav", () => {
+  it("keeps intro minimal and Admin Orbit on main nav", () => {
     const pageSrc = readFileSync(resolve(__dirname, "../../app/home-page-client.tsx"), "utf8");
     expect(pageSrc).toContain("OrbitAdminAccessButton");
-    expect(pageSrc).toContain("button-home-intro-admin-orbit");
     expect(pageSrc).toContain("button-home-nav-admin-orbit");
+    expect(pageSrc).toContain("button-skip-intro");
+    expect(pageSrc).not.toContain("button-home-intro-admin-orbit");
   });
 });
