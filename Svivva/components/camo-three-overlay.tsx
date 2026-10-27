@@ -408,6 +408,26 @@ export function CamoThreeOverlay({
           }
         }
       }
+
+      // Lock: clip digi camo to a soft oval pond so green/blue never reads as a full-width strip.
+      if (isLockCamo) {
+        const pondCx = width * 0.5;
+        const pondCy = height * (isMobileViewport ? 0.58 : 0.62);
+        const pondRx = width * (isMobileViewport ? 0.46 : 0.42);
+        const pondRy = height * (isMobileViewport ? 0.26 : 0.3);
+        ctx.save();
+        ctx.globalCompositeOperation = "destination-in";
+        ctx.translate(pondCx, pondCy);
+        ctx.scale(pondRx, pondRy);
+        const pondMask = ctx.createRadialGradient(0, 0, 0.28, 0, 0, 1);
+        pondMask.addColorStop(0, "rgba(0,0,0,1)");
+        pondMask.addColorStop(0.62, "rgba(0,0,0,0.88)");
+        pondMask.addColorStop(0.86, "rgba(0,0,0,0.35)");
+        pondMask.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = pondMask;
+        ctx.fillRect(-1.05, -1.05, 2.1, 2.1);
+        ctx.restore();
+      }
     };
 
     renderCamo();

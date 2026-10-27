@@ -70,19 +70,19 @@ const PRESETS: Record<ScenePreset, PresetConfig> = {
   lock: {
     flowerCount: 280,
     particleCount: 0,
-    waterSize: 26,
-    cameraZ: 7.2,
-    cameraY: 5.4,
+    waterSize: 18,
+    cameraZ: 4.2,
+    cameraY: 8.6,
     cameraX: 0,
-    lookAtY: -0.85,
+    lookAtY: -1.05,
     bloomSpeed: 0.028,
     crtIntensity: 0,
     pixelSize: 1,
     scanlineIntensity: 0,
     interactionStrength: 0.65,
-    spreadX: 0.9,
-    spreadZ: 0.92,
-    mobileScaleBoost: 1.3,
+    spreadX: 0.55,
+    spreadZ: 0.48,
+    mobileScaleBoost: 1.15,
   },
   features: {
     flowerCount: 140,
@@ -256,14 +256,14 @@ const WATER_FRAGMENT_SHADER = `
     float fresnel = pow(1.0 - abs(vElevation), 2.5) * 0.2;
     color += fresnel * uColorTealLight;
 
-    // Soft circular pond falloff (keeps shoreline organic instead of a hard strip)
+    // Soft circular pond falloff (organic shoreline; transparent outside the pool)
     float pondMask = 1.0;
     if (uPondEdge > 0.5) {
       vec2 centered = vUv - vec2(0.5);
       // Slightly irregular shoreline
-      float wobble = sin(atan(centered.y, centered.x) * 5.0 + uTime * 0.35) * 0.04;
-      float r = length(centered * vec2(1.0, 1.12)) * 2.0 + wobble;
-      pondMask = 1.0 - smoothstep(0.52, 0.98, r);
+      float wobble = sin(atan(centered.y, centered.x) * 6.0 + uTime * 0.4) * 0.055;
+      float r = length(centered * vec2(1.0, 1.18)) * 2.0 + wobble;
+      pondMask = 1.0 - smoothstep(0.42, 0.96, r);
     }
     
     gl_FragColor = vec4(color, uAlpha * pondMask);
@@ -1117,13 +1117,13 @@ export function ThreeCRTFlowers({
           particleCount:
             isOaasPreset || isSectionCamo ? 0 : Math.floor(baseConfig.particleCount * 0.2),
           cameraZ: isLockPreset
-            ? baseConfig.cameraZ * (isSmallMobile ? 0.78 : 0.84)
+            ? baseConfig.cameraZ * (isSmallMobile ? 0.72 : 0.8)
             : isOaasPreset || isSectionCamo
               ? baseConfig.cameraZ * (isSmallMobile ? 0.72 : 0.78)
               : baseConfig.cameraZ * (isSmallMobile ? 1.55 : 1.35),
-          // Lock mobile: look down into the pond so water reads as a pool, not a horizon strip.
+          // Lock mobile: steep overhead so the pond silhouette reads as an oval pool.
           cameraY: isLockPreset
-            ? baseConfig.cameraY * (isSmallMobile ? 1.28 : 1.22)
+            ? baseConfig.cameraY * (isSmallMobile ? 1.18 : 1.12)
             : baseConfig.cameraY * (isOaasPreset || isSectionCamo ? 0.78 : 1.15),
           pixelSize: 1,
           crtIntensity: isCheckoutPreset
@@ -1166,11 +1166,15 @@ export function ThreeCRTFlowers({
     // CRT post (chromatic aberration, vignette) causes visible horizontal banding on mobile OaaS/sections.
     // Skip CRT on lock too — vignette would muddy the white first-page sky.
     const useCrtPost = !(isLockPreset || (isMediumMobile && (isOaasPreset || isSectionCamo)));
-    const sceneLookAtY = isTightCamoMobile ? -0.35 : config.lookAtY;
+    const sceneLookAtY = isTightCamoMobile
+      ? -0.35
+      : isLockPreset && isMediumMobile
+        ? -1.1
+        : config.lookAtY;
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(
-      isTightCamoMobile ? 62 : 55,
+      isLockPreset && isMediumMobile ? 58 : isTightCamoMobile ? 62 : 55,
       cameraAspect,
       0.1,
       1000,
@@ -1250,8 +1254,8 @@ export function ThreeCRTFlowers({
     const waterPlaneSize = isTightCamoMobile ? config.waterSize * 1.4 : config.waterSize;
     const waterGeometry = isLockPreset
       ? new THREE.CircleGeometry(
-          waterPlaneSize * (isMediumMobile ? 0.58 : 0.52),
-          isMediumMobile ? 64 : 80,
+          waterPlaneSize * (isMediumMobile ? 0.42 : 0.4),
+          isMediumMobile ? 72 : 80,
         )
       : new THREE.PlaneGeometry(waterPlaneSize, waterPlaneSize, waterSegments, waterSegments);
     // Lock: vivid multi-color camo water, translucent pond over black.
@@ -1260,7 +1264,7 @@ export function ThreeCRTFlowers({
         uTime: { value: 0 },
         uMouse: { value: new THREE.Vector2(0, 0) },
         uInteraction: { value: config.interactionStrength },
-        uAlpha: { value: isLockPreset ? 0.62 : 0.85 },
+        uAlpha: { value: isLockPreset ? 0.72 : 0.85 },
         uPondEdge: { value: isLockPreset ? 1.0 : 0.0 },
         uColorTeal: { value: VIVVA_COLORS.teal },
         uColorTealLight: { value: VIVVA_COLORS.tealLight },
@@ -1277,11 +1281,11 @@ export function ThreeCRTFlowers({
 
     const water = new THREE.Mesh(waterGeometry, waterMaterial);
     water.rotation.x = -Math.PI / 2;
-    water.position.y = isLockPreset ? -1.15 : isOaasWater && isMediumMobile ? -1.05 : -1.4;
+    water.position.y = isLockPreset ? -1.05 : isOaasWater && isMediumMobile ? -1.05 : -1.4;
     if (isLockPreset) {
-      // Oval pond — wider than deep so mobile portrait still reads as a pool.
-      water.scale.set(isMediumMobile ? 1.35 : 1.2, 1, isMediumMobile ? 0.92 : 1.0);
-      water.position.z = isMediumMobile ? 0.35 : 0.15;
+      // Compact oval pond — keep shoreline inside the portrait frame (not a full-width strip).
+      water.scale.set(isMediumMobile ? 1.18 : 1.1, 1, isMediumMobile ? 0.72 : 0.85);
+      water.position.z = isMediumMobile ? 0.55 : 0.2;
     }
     scene.add(water);
 
@@ -1292,9 +1296,21 @@ export function ThreeCRTFlowers({
     const gridCols = Math.ceil(Math.sqrt(config.flowerCount * 1.5));
     const gridRows = Math.ceil(config.flowerCount / gridCols);
 
-    // Spread flowers — keep camo-section mobile blooms in the visible frustum
-    const spreadMultX = isTightCamoMobile ? 0.68 : 1.5;
-    const spreadMultZ = isTightCamoMobile ? 0.72 : 2.0;
+    // Spread flowers — keep camo-section / lock-pond blooms in the visible frustum
+    const spreadMultX = isLockPreset
+      ? isMediumMobile
+        ? 0.55
+        : 0.7
+      : isTightCamoMobile
+        ? 0.68
+        : 1.5;
+    const spreadMultZ = isLockPreset
+      ? isMediumMobile
+        ? 0.42
+        : 0.55
+      : isTightCamoMobile
+        ? 0.72
+        : 2.0;
     const spreadX = config.waterSize * config.spreadX * spreadMultX;
     const spreadZ = config.waterSize * config.spreadZ * spreadMultZ;
 
