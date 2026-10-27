@@ -213,20 +213,20 @@ export function CamoThreeOverlay({
       // OaaS keeps block digi camo; only lower sections use smooth camo on phones.
       const useSmoothSectionCamo = isSectionCamo && isMobileViewport;
 
-      // Lock first page: denser digi camo across the full viewport (fewer empty gaps).
+      // Lock first page: digi camo tuned for a white sky (readable pastel blocks).
       const lockColors = [
-        "rgba(210, 170, 180, 0.38)",
+        "rgba(200, 145, 160, 0.42)",
         null,
-        "rgba(175, 150, 185, 0.34)",
-        "rgba(140, 170, 110, 0.36)",
-        "rgba(200, 200, 145, 0.32)",
+        "rgba(155, 125, 175, 0.38)",
+        "rgba(110, 150, 85, 0.4)",
+        "rgba(175, 175, 110, 0.36)",
         null,
-        "rgba(150, 165, 180, 0.34)",
-        "rgba(180, 135, 150, 0.34)",
-        "rgba(160, 180, 155, 0.3)",
-        "rgba(120, 90, 130, 0.32)",
+        "rgba(120, 145, 170, 0.38)",
+        "rgba(165, 110, 130, 0.38)",
+        "rgba(130, 160, 120, 0.34)",
+        "rgba(100, 70, 120, 0.36)",
         null,
-        "rgba(100, 30, 45, 0.28)",
+        "rgba(120, 40, 55, 0.32)",
       ];
 
       const introColors = [
@@ -435,7 +435,7 @@ export function CamoThreeOverlay({
           filter: isCheckout
             ? "brightness(1.0) saturate(1.1)"
             : isLock
-              ? "brightness(1.08) saturate(1.35) contrast(1.04)"
+              ? "brightness(1.02) saturate(1.4) contrast(1.06)"
               : isOaas
                 ? "brightness(1.22) saturate(1.5) contrast(1.08)"
                 : useMobileSectionCamo
@@ -456,7 +456,7 @@ export function CamoThreeOverlay({
           isCheckout
             ? "opacity-30"
             : isLock
-              ? "opacity-[0.58] md:opacity-[0.65]"
+              ? "opacity-[0.52] md:opacity-[0.58]"
               : isOaas
                 ? "opacity-38 md:opacity-48 blur-[1.2px]"
                 : useMobileSectionCamo

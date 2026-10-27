@@ -356,7 +356,7 @@ export default function LandingPage() {
       {!flipComplete && (
         <div
           ref={introCaptureRef}
-          className="fixed inset-0 z-[70] overflow-hidden bg-black"
+          className="fixed inset-0 z-[70] overflow-hidden bg-white"
           style={{
             touchAction: "auto",
             minHeight: "100svh",
@@ -385,7 +385,7 @@ export default function LandingPage() {
           <div className="pointer-events-none absolute left-3 right-3 top-4 z-20 flex items-start justify-end gap-2 sm:left-4 sm:right-4">
             <button
               type="button"
-              className="pointer-events-auto shrink-0 rounded-lg border border-white/20 bg-black/55 px-2.5 py-1.5 text-[11px] font-medium text-white/80 shadow-sm backdrop-blur-sm hover:text-white sm:px-3 sm:text-xs"
+              className="pointer-events-auto shrink-0 rounded-lg border border-black/15 bg-white/75 px-2.5 py-1.5 text-[11px] font-medium text-black/70 shadow-sm backdrop-blur-sm hover:text-black sm:px-3 sm:text-xs"
               onClick={() => {
                 skipIntroRef.current?.();
               }}

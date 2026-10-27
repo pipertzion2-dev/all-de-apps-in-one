@@ -1188,9 +1188,9 @@ export function ThreeCRTFlowers({
       powerPreference: isMobile ? "low-power" : "high-performance",
     });
     renderer.setSize(width, height);
-    // Lock first page: opaque black clear; flowers + digi camo fill the frame (no water).
+    // Lock first page: opaque white clear; flowers + digi camo fill the frame (no water).
     if (isLockPreset) {
-      renderer.setClearColor(0x000000, 1);
+      renderer.setClearColor(0xffffff, 1);
     } else {
       renderer.setClearColor(0x000000, 0);
     }
