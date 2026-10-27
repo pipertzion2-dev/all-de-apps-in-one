@@ -43,9 +43,9 @@ export function AnimatedPonds() {
           const blueShift = Math.sin(time) * 0.3 + 0.5;
           const greenShift = Math.cos(time * 1.3) * 0.3 + 0.5;
 
-          gradient.addColorStop(0, `rgba(80, ${150 + greenShift * 105}, ${200 + blueShift * 55}, 0.85)`);
-          gradient.addColorStop(0.5, `rgba(50, ${120 + greenShift * 100}, ${170 + blueShift * 50}, 0.75)`);
-          gradient.addColorStop(1, `rgba(30, ${90 + greenShift * 80}, ${140 + blueShift * 40}, 0.6)`);
+          gradient.addColorStop(0, `rgba(100, ${200 + greenShift * 55}, ${220 + blueShift * 35}, 0.9)`);
+          gradient.addColorStop(0.5, `rgba(70, ${170 + greenShift * 85}, ${200 + blueShift * 55}, 0.8)`);
+          gradient.addColorStop(1, `rgba(50, ${140 + greenShift * 115}, ${180 + blueShift * 75}, 0.7)`);
 
           ctx.fillStyle = gradient;
           ctx.beginPath();
@@ -55,10 +55,10 @@ export function AnimatedPonds() {
           for (let i = 0; i < 3; i++) {
             const waveTime = time + i * 2;
             const waveRadius = (width / 3) * (1 + Math.sin(waveTime) * 0.2);
-            const waveOpacity = 0.25 + Math.sin(waveTime) * 0.15;
+            const waveOpacity = 0.35 + Math.sin(waveTime) * 0.2;
 
-            ctx.strokeStyle = `rgba(120, 220, 255, ${waveOpacity})`;
-            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = `rgba(150, 240, 255, ${waveOpacity})`;
+            ctx.lineWidth = 3;
             ctx.beginPath();
             ctx.ellipse(width / 2, height / 2, waveRadius, waveRadius * 0.9, 0, 0, Math.PI * 2);
             ctx.stroke();
@@ -69,8 +69,8 @@ export function AnimatedPonds() {
             const rippleTime = time * 0.8 + i * 0.5;
             const rippleX = width / 2 + Math.sin(rippleTime * 2) * 15;
             const rippleY = height / 2 + Math.cos(rippleTime * 1.5) * 12;
-            const rippleSize = 4 + Math.sin(rippleTime * 3) * 2.5;
-            const rippleOpacity = 0.4 + Math.sin(rippleTime * 4) * 0.25;
+            const rippleSize = 5 + Math.sin(rippleTime * 3) * 3;
+            const rippleOpacity = 0.5 + Math.sin(rippleTime * 4) * 0.3;
 
             const rippleGradient = ctx.createRadialGradient(
               rippleX,
@@ -80,8 +80,8 @@ export function AnimatedPonds() {
               rippleY,
               rippleSize
             );
-            rippleGradient.addColorStop(0, `rgba(180, 255, 255, ${rippleOpacity})`);
-            rippleGradient.addColorStop(1, "rgba(180, 255, 255, 0)");
+            rippleGradient.addColorStop(0, `rgba(200, 255, 255, ${rippleOpacity})`);
+            rippleGradient.addColorStop(1, "rgba(100, 220, 255, 0)");
 
             ctx.fillStyle = rippleGradient;
             ctx.beginPath();
@@ -106,32 +106,35 @@ export function AnimatedPonds() {
   }, []);
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-[5] overflow-hidden" aria-hidden>
+    <div className="pointer-events-none absolute inset-0 z-[3] overflow-hidden" aria-hidden>
       <canvas
         ref={canvasRef1}
         width={200}
         height={180}
-        className="absolute left-[2%] top-[8%] opacity-95 pointer-events-none"
+        className="absolute left-[2%] top-[8%] pointer-events-none"
         style={{
-          mixBlendMode: "normal",
+          mixBlendMode: "lighten",
+          opacity: 0.85,
         }}
       />
       <canvas
         ref={canvasRef2}
         width={220}
         height={200}
-        className="absolute right-[2%] top-[12%] opacity-95 pointer-events-none"
+        className="absolute right-[2%] top-[12%] pointer-events-none"
         style={{
-          mixBlendMode: "normal",
+          mixBlendMode: "lighten",
+          opacity: 0.85,
         }}
       />
       <canvas
         ref={canvasRef3}
         width={180}
         height={160}
-        className="absolute bottom-[10%] left-[5%] opacity-95 pointer-events-none"
+        className="absolute bottom-[10%] left-[5%] pointer-events-none"
         style={{
-          mixBlendMode: "normal",
+          mixBlendMode: "lighten",
+          opacity: 0.85,
         }}
       />
     </div>
