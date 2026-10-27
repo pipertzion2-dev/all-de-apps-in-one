@@ -45,46 +45,83 @@ export function AnimatedPonds() {
           const redShift = Math.sin(time * 0.7) * 0.4 + 0.6;
           const purpleShift = Math.cos(time * 1.7) * 0.4 + 0.6;
 
-          // Camo multi-color gradient matching the flowers
-          gradient.addColorStop(0, `rgba(${150 + redShift * 100}, ${100 + greenShift * 80}, ${180 + blueShift * 75}, 0.6)`);
-          gradient.addColorStop(0.3, `rgba(${120 + purpleShift * 80}, ${80 + blueShift * 100}, ${200 + greenShift * 55}, 0.55)`);
-          gradient.addColorStop(0.6, `rgba(${90 + greenShift * 90}, ${150 + redShift * 70}, ${140 + purpleShift * 60}, 0.5)`);
-          gradient.addColorStop(1, `rgba(${100 + blueShift * 70}, ${130 + purpleShift * 60}, ${170 + redShift * 50}, 0.45)`);
+          // Solid camo gradient with depth - NOT transparent
+          gradient.addColorStop(0, `rgba(${180 + redShift * 50}, ${140 + greenShift * 60}, ${200 + blueShift * 40}, 0.95)`);
+          gradient.addColorStop(0.25, `rgba(${150 + purpleShift * 60}, ${100 + blueShift * 70}, ${220 + greenShift * 35}, 0.9)`);
+          gradient.addColorStop(0.5, `rgba(${120 + greenShift * 70}, ${180 + redShift * 50}, ${160 + purpleShift * 60}, 0.9)`);
+          gradient.addColorStop(0.75, `rgba(${140 + blueShift * 60}, ${160 + purpleShift * 50}, ${190 + redShift * 45}, 0.9)`);
+          gradient.addColorStop(1, `rgba(${110 + redShift * 60}, ${150 + greenShift * 55}, ${180 + blueShift * 50}, 0.85)`);
 
           ctx.fillStyle = gradient;
           ctx.beginPath();
           ctx.ellipse(width / 2, height / 2, width / 2, height / 2, 0, 0, Math.PI * 2);
           ctx.fill();
 
+          // Add camo texture patches for realistic look
+          for (let i = 0; i < 8; i++) {
+            const patchTime = time + i * 0.5;
+            const patchX = width / 2 + Math.sin(patchTime * 1.1 + i) * (width * 0.25);
+            const patchY = height / 2 + Math.cos(patchTime * 0.9 + i) * (height * 0.25);
+            const patchSize = 15 + Math.sin(patchTime * 0.7) * 8;
+            const patchOpacity = 0.3 + Math.sin(patchTime) * 0.15;
+            
+            const patchR = 100 + Math.sin(patchTime * 1.2) * 80;
+            const patchG = 120 + Math.cos(patchTime * 0.8) * 90;
+            const patchB = 150 + Math.sin(patchTime * 1.5) * 70;
+
+            const patchGradient = ctx.createRadialGradient(
+              patchX,
+              patchY,
+              0,
+              patchX,
+              patchY,
+              patchSize
+            );
+            patchGradient.addColorStop(0, `rgba(${patchR}, ${patchG}, ${patchB}, ${patchOpacity})`);
+            patchGradient.addColorStop(1, `rgba(${patchR * 0.6}, ${patchG * 0.6}, ${patchB * 0.6}, 0)`);
+
+            ctx.fillStyle = patchGradient;
+            ctx.beginPath();
+            ctx.arc(patchX, patchY, patchSize, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // Add darker edge for depth
+          ctx.strokeStyle = `rgba(80, 100, 120, 0.6)`;
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.ellipse(width / 2, height / 2, width / 2 - 1.5, height / 2 - 1.5, 0, 0, Math.PI * 2);
+          ctx.stroke();
+
           for (let i = 0; i < 3; i++) {
             const waveTime = time + i * 2;
             const waveRadius = (width / 3) * (1 + Math.sin(waveTime) * 0.2);
-            const waveOpacity = 0.25 + Math.sin(waveTime) * 0.15;
+            const waveOpacity = 0.4 + Math.sin(waveTime) * 0.2;
             
-            // Camo-colored waves
-            const waveR = 140 + Math.sin(waveTime * 1.1) * 60;
-            const waveG = 120 + Math.cos(waveTime * 0.9) * 80;
-            const waveB = 160 + Math.sin(waveTime * 1.3) * 70;
+            // Prominent camo-colored waves
+            const waveR = 130 + Math.sin(waveTime * 1.1) * 70;
+            const waveG = 110 + Math.cos(waveTime * 0.9) * 90;
+            const waveB = 150 + Math.sin(waveTime * 1.3) * 80;
 
             ctx.strokeStyle = `rgba(${waveR}, ${waveG}, ${waveB}, ${waveOpacity})`;
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 2.5;
             ctx.beginPath();
             ctx.ellipse(width / 2, height / 2, waveRadius, waveRadius * 0.9, 0, 0, Math.PI * 2);
             ctx.stroke();
           }
 
-          const rippleCount = 5;
+          const rippleCount = 7;
           for (let i = 0; i < rippleCount; i++) {
             const rippleTime = time * 0.8 + i * 0.5;
-            const rippleX = width / 2 + Math.sin(rippleTime * 2) * 15;
-            const rippleY = height / 2 + Math.cos(rippleTime * 1.5) * 12;
-            const rippleSize = 4 + Math.sin(rippleTime * 3) * 2;
-            const rippleOpacity = 0.3 + Math.sin(rippleTime * 4) * 0.2;
+            const rippleX = width / 2 + Math.sin(rippleTime * 2) * 20;
+            const rippleY = height / 2 + Math.cos(rippleTime * 1.5) * 18;
+            const rippleSize = 5 + Math.sin(rippleTime * 3) * 3;
+            const rippleOpacity = 0.5 + Math.sin(rippleTime * 4) * 0.3;
             
-            // Camo-colored ripples
-            const ripR = 150 + Math.cos(rippleTime * 1.2) * 70;
-            const ripG = 130 + Math.sin(rippleTime * 0.8) * 90;
-            const ripB = 170 + Math.cos(rippleTime * 1.5) * 60;
+            // Prominent camo-colored ripples
+            const ripR = 140 + Math.cos(rippleTime * 1.2) * 80;
+            const ripG = 120 + Math.sin(rippleTime * 0.8) * 100;
+            const ripB = 160 + Math.cos(rippleTime * 1.5) * 70;
 
             const rippleGradient = ctx.createRadialGradient(
               rippleX,
@@ -95,7 +132,7 @@ export function AnimatedPonds() {
               rippleSize
             );
             rippleGradient.addColorStop(0, `rgba(${ripR}, ${ripG}, ${ripB}, ${rippleOpacity})`);
-            rippleGradient.addColorStop(1, `rgba(${ripR * 0.7}, ${ripG * 0.7}, ${ripB * 0.7}, 0)`);
+            rippleGradient.addColorStop(1, `rgba(${ripR * 0.5}, ${ripG * 0.5}, ${ripB * 0.5}, 0)`);
 
             ctx.fillStyle = rippleGradient;
             ctx.beginPath();
@@ -127,8 +164,8 @@ export function AnimatedPonds() {
         height={180}
         className="absolute left-[2%] top-[8%] pointer-events-none"
         style={{
-          mixBlendMode: "screen",
-          opacity: 0.7,
+          mixBlendMode: "normal",
+          opacity: 0.85,
         }}
       />
       <canvas
@@ -137,8 +174,8 @@ export function AnimatedPonds() {
         height={200}
         className="absolute right-[2%] top-[12%] pointer-events-none"
         style={{
-          mixBlendMode: "screen",
-          opacity: 0.7,
+          mixBlendMode: "normal",
+          opacity: 0.85,
         }}
       />
       <canvas
@@ -147,8 +184,8 @@ export function AnimatedPonds() {
         height={160}
         className="absolute bottom-[10%] left-[5%] pointer-events-none"
         style={{
-          mixBlendMode: "screen",
-          opacity: 0.7,
+          mixBlendMode: "normal",
+          opacity: 0.85,
         }}
       />
     </div>
