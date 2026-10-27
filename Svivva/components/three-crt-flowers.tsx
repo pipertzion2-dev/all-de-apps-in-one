@@ -66,23 +66,23 @@ const PRESETS: Record<ScenePreset, PresetConfig> = {
     spreadX: 0.8,
     spreadZ: 0.85,
   },
-  // Lock screen: full-viewport flower + camo field (no water pond)
+  // Lock screen: overhead full-frame flower + camo field (no water pond)
   lock: {
-    flowerCount: 220,
+    flowerCount: 260,
     particleCount: 0,
-    waterSize: 28,
-    cameraZ: 7.2,
-    cameraY: 5.4,
+    waterSize: 32,
+    cameraZ: 4.0,
+    cameraY: 10.2,
     cameraX: 0,
-    lookAtY: -0.15,
+    lookAtY: -1.0,
     bloomSpeed: 0.028,
     crtIntensity: 0,
     pixelSize: 1,
     scanlineIntensity: 0,
-    interactionStrength: 0.65,
-    spreadX: 1.05,
-    spreadZ: 1.1,
-    mobileScaleBoost: 1.05,
+    interactionStrength: 0.55,
+    spreadX: 1.2,
+    spreadZ: 1.25,
+    mobileScaleBoost: 1.1,
   },
   features: {
     flowerCount: 140,
@@ -1099,8 +1099,8 @@ export function ThreeCRTFlowers({
           ...baseConfig,
           flowerCount: isLockPreset
             ? isSmallMobile
-              ? 96
-              : 128
+              ? 140
+              : 180
             : isOaasPreset
               ? isSmallMobile
                 ? 28
@@ -1117,13 +1117,13 @@ export function ThreeCRTFlowers({
           particleCount:
             isOaasPreset || isSectionCamo ? 0 : Math.floor(baseConfig.particleCount * 0.2),
           cameraZ: isLockPreset
-            ? baseConfig.cameraZ * (isSmallMobile ? 0.88 : 0.94)
+            ? baseConfig.cameraZ * (isSmallMobile ? 0.85 : 0.9)
             : isOaasPreset || isSectionCamo
               ? baseConfig.cameraZ * (isSmallMobile ? 0.72 : 0.78)
               : baseConfig.cameraZ * (isSmallMobile ? 1.55 : 1.35),
-          // Lock mobile: pull back enough to fill the whole phone frame with blooms.
+          // Lock mobile: steep overhead so the flower grid maps onto the full phone frame.
           cameraY: isLockPreset
-            ? baseConfig.cameraY * (isSmallMobile ? 0.92 : 0.96)
+            ? baseConfig.cameraY * (isSmallMobile ? 1.08 : 1.02)
             : baseConfig.cameraY * (isOaasPreset || isSectionCamo ? 0.78 : 1.15),
           pixelSize: 1,
           crtIntensity: isCheckoutPreset
@@ -1143,8 +1143,8 @@ export function ThreeCRTFlowers({
           bloomSpeed: baseConfig.bloomSpeed * (isOaasPreset || isSectionCamo ? 0.75 : 0.85),
           mobileScaleBoost: isLockPreset
             ? isSmallMobile
-              ? 0.95
-              : 1.05
+              ? 1.05
+              : 1.15
             : isOaasPreset
               ? isSmallMobile
                 ? 1.08
@@ -1159,7 +1159,7 @@ export function ThreeCRTFlowers({
         }
       : {
           ...baseConfig,
-          mobileScaleBoost: isLockPreset ? 1.12 : isOaasPreset ? 1.08 : Math.max(0.85, scaleFactor),
+          mobileScaleBoost: isLockPreset ? 1.2 : isOaasPreset ? 1.08 : Math.max(0.85, scaleFactor),
         };
 
     const cameraAspect = resolveCameraAspect(rawW, rawH, preset, isMediumMobile);
@@ -1169,12 +1169,12 @@ export function ThreeCRTFlowers({
     const sceneLookAtY = isTightCamoMobile
       ? -0.35
       : isLockPreset && isMediumMobile
-        ? -0.2
+        ? -1.05
         : config.lookAtY;
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(
-      isLockPreset && isMediumMobile ? 64 : isTightCamoMobile ? 62 : isLockPreset ? 58 : 55,
+      isLockPreset && isMediumMobile ? 68 : isTightCamoMobile ? 62 : isLockPreset ? 60 : 55,
       cameraAspect,
       0.1,
       1000,
@@ -1292,18 +1292,18 @@ export function ThreeCRTFlowers({
     const gridCols = Math.ceil(Math.sqrt(config.flowerCount * 1.5));
     const gridRows = Math.ceil(config.flowerCount / gridCols);
 
-    // Lock: stretch blooms across the full viewport; other presets keep prior framing
+    // Lock: wide overhead field so blooms cover edges on phones and desktop
     const spreadMultX = isLockPreset
       ? isMediumMobile
-        ? 1.2
-        : 1.35
+        ? 1.55
+        : 1.7
       : isTightCamoMobile
         ? 0.68
         : 1.5;
     const spreadMultZ = isLockPreset
       ? isMediumMobile
-        ? 1.35
-        : 1.5
+        ? 1.7
+        : 1.85
       : isTightCamoMobile
         ? 0.72
         : 2.0;
@@ -1342,8 +1342,8 @@ export function ThreeCRTFlowers({
       const sizeVariation = isOaas || (isSectionCamo && isMediumMobile) ? rand() : Math.random();
       const sectionBoost = isLock
         ? isMediumMobile
-          ? 1.05
-          : 1.2
+          ? 1.25
+          : 1.45
         : isIntro
           ? 1
           : isOaas
@@ -1412,10 +1412,13 @@ export function ThreeCRTFlowers({
 
       const jitterX = ((isOaas ? rand() : Math.random()) - 0.5) * (spreadX / gridCols) * 0.8;
       const jitterZ = ((isOaas ? rand() : Math.random()) - 0.5) * (spreadZ / gridRows) * 0.8;
+      const yJitter = isLock
+        ? ((isOaas ? rand() : Math.random()) - 0.5) * 0.9
+        : ((isOaas ? rand() : Math.random()) - 0.5) * 0.5;
 
       const pos = new THREE.Vector3(
         (gridX - 0.5) * spreadX + jitterX,
-        ((isOaas ? rand() : Math.random()) - 0.5) * 0.5,
+        yJitter,
         (gridZ - 0.5) * spreadZ + jitterZ,
       );
 
@@ -1425,7 +1428,7 @@ export function ThreeCRTFlowers({
     // Extra edge blooms — lock always fills edges; skip only on tight camo mobile sections
     const cornerCount = isTightCamoMobile
       ? 0
-      : Math.floor(config.flowerCount * (isLockPreset ? 0.42 : 0.3));
+      : Math.floor(config.flowerCount * (isLockPreset ? 0.55 : 0.3));
     const corners = [
       { x: -1, z: -1 },
       { x: 1, z: -1 },
@@ -1440,9 +1443,11 @@ export function ThreeCRTFlowers({
     for (let i = 0; i < cornerCount; i++) {
       const corner = corners[i % corners.length];
       const pos = new THREE.Vector3(
-        corner.x * spreadX * 0.45 + ((isOaas ? rand() : Math.random()) - 0.5) * spreadX * 0.25,
-        ((isOaas ? rand() : Math.random()) - 0.5) * 0.4,
-        corner.z * spreadZ * 0.45 + ((isOaas ? rand() : Math.random()) - 0.5) * spreadZ * 0.25,
+        corner.x * spreadX * (isLock ? 0.52 : 0.45) +
+          ((isOaas ? rand() : Math.random()) - 0.5) * spreadX * (isLock ? 0.35 : 0.25),
+        ((isOaas ? rand() : Math.random()) - 0.5) * (isLock ? 0.8 : 0.4),
+        corner.z * spreadZ * (isLock ? 0.52 : 0.45) +
+          ((isOaas ? rand() : Math.random()) - 0.5) * spreadZ * (isLock ? 0.35 : 0.25),
       );
 
       addFlower(pos, 0.6 + (isOaas ? rand() : Math.random()) * 0.3, config.flowerCount + i);
