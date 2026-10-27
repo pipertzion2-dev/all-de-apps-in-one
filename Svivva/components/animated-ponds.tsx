@@ -106,34 +106,31 @@ export function AnimatedPonds() {
   }, []);
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-[2] overflow-hidden" aria-hidden>
+    <div className="pointer-events-none absolute inset-0 z-[5] overflow-hidden" aria-hidden>
       <canvas
         ref={canvasRef1}
-        width={120}
-        height={100}
-        className="absolute left-[5%] top-[10%] opacity-90 pointer-events-none"
+        width={200}
+        height={180}
+        className="absolute left-[2%] top-[8%] opacity-95 pointer-events-none"
         style={{
-          filter: "blur(0.5px)",
           mixBlendMode: "normal",
         }}
       />
       <canvas
         ref={canvasRef2}
-        width={150}
-        height={130}
-        className="absolute right-[5%] top-[20%] opacity-85 pointer-events-none"
+        width={220}
+        height={200}
+        className="absolute right-[2%] top-[12%] opacity-95 pointer-events-none"
         style={{
-          filter: "blur(0.5px)",
           mixBlendMode: "normal",
         }}
       />
       <canvas
         ref={canvasRef3}
-        width={100}
-        height={85}
-        className="absolute bottom-[15%] left-[10%] opacity-85 pointer-events-none"
+        width={180}
+        height={160}
+        className="absolute bottom-[10%] left-[5%] opacity-95 pointer-events-none"
         style={{
-          filter: "blur(0.5px)",
           mixBlendMode: "normal",
         }}
       />
