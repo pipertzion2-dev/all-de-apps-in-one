@@ -5,6 +5,7 @@ This directory contains custom graphics that replace the default artwork on cube
 ## Digital Face Graphic
 
 Place your custom digital camouflage graphic here:
+
 - File: `digital-camo.jpg`
 - Purpose: Replaces the background image on the "Digital" cube face
 - The "Digital" text will still appear on top of this graphic
