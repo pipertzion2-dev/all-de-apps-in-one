@@ -22,7 +22,7 @@ describe("homepage intro scroll", () => {
     expect(pageSrc).toContain("let delta = -e.deltaY");
   });
 
-  it("keeps the scroll-up cue on the intro face with high-contrast copy", () => {
+  it("keeps a single scroll-up cue on the intro face with high-contrast copy", () => {
     const hintIdx = pageSrc.indexOf("Scroll up to enter");
     const frontIdx = pageSrc.indexOf("flipFrontRef");
     const panelIdx = pageSrc.indexOf("<HomepageGamePanel");
@@ -31,8 +31,11 @@ describe("homepage intro scroll", () => {
     expect(pageSrc).toContain("text-intro-swipe-cube-twice");
     expect(pageSrc).toContain("safe-area-inset-bottom");
     expect(pageSrc).toMatch(/text-black[\s\S]{0,120}Scroll up to enter/);
-    expect(gameSrc).toContain("scroll up to enter");
-    expect(gameSrc).toMatch(/text-black[\s\S]{0,120}scroll up to enter/);
+    // One CTA only — no stacked pills under the cube.
+    expect(gameSrc).not.toMatch(/Tap cube to play/i);
+    expect(gameSrc).not.toContain("Enter zzai zzai");
+    expect(gameSrc).not.toContain("button-enter-main-app");
+    expect(pageSrc).toMatch(/onClick[\s\S]{0,160}enterFlipRef/);
   });
 
   it("defers heavy homepage 3D until intro completes", () => {

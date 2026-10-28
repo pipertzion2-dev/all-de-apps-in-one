@@ -31,8 +31,9 @@ describe("homepage scroll panels", () => {
     expect(cubeSrc).toContain("CamoThreeOverlay");
     expect(cubeSrc).toContain('preset="lock"');
     expect(cubeSrc).toContain("bg-white");
-    expect(cubeSrc).toContain("button-enter-main-app");
+    expect(cubeSrc).not.toContain("button-enter-main-app");
     expect(cubeSrc).not.toContain("HomepageScrollHint");
+    expect(cubeSrc).not.toMatch(/Tap cube to play/i);
   });
 
   it("splits main app faces: beta apps then combined; game is intro; no Moves Like ads", () => {

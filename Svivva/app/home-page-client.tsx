@@ -132,7 +132,7 @@ export default function LandingPage() {
   /** The page itself is the flip's second face, so it rotates in as a real surface. */
   const pageFaceRef = useRef<HTMLDivElement>(null);
   const scrollHintRef = useRef<HTMLDivElement>(null);
-  const scrollHintBounceRef = useRef<HTMLDivElement>(null);
+  const scrollHintBounceRef = useRef<HTMLButtonElement>(null);
   const halfHRef = useRef(400);
   const [flipComplete, setFlipComplete] = useState(false);
 
@@ -577,22 +577,27 @@ export default function LandingPage() {
                       else skipIntroRef.current?.();
                     }}
                   />
-                  {/* Keep the cue on the intro face (above translateZ) so mobile
-                      flowers/camo and the 3D layer cannot bury the copy. */}
+                  {/* One intro CTA on the flip face — tap or scroll up to enter. */}
                   <div
                     ref={scrollHintRef}
-                    className="pointer-events-none absolute left-1/2 z-30 -translate-x-1/2"
+                    className="absolute left-1/2 z-30 -translate-x-1/2"
                     style={{
                       opacity: 1,
                       willChange: "opacity",
                       bottom: "max(1.25rem, calc(env(safe-area-inset-bottom, 0px) + 0.75rem))",
                     }}
                   >
-                    <div
+                    <button
+                      type="button"
                       ref={scrollHintBounceRef}
-                      className="flex max-w-[min(92vw,22rem)] flex-col items-center gap-1.5 rounded-full border border-black/20 bg-white px-5 py-2.5 shadow-md"
+                      className="flex max-w-[min(92vw,22rem)] flex-col items-center gap-1.5 rounded-full border border-black/20 bg-white px-5 py-2.5 shadow-md transition-transform active:scale-95"
                       style={{ animation: "scrollBounce 1.5s ease-in-out 0s infinite" }}
                       data-testid="text-intro-swipe-cube-twice"
+                      aria-label="Scroll up to enter"
+                      onClick={() => {
+                        if (enterFlipRef.current) enterFlipRef.current();
+                        else skipIntroRef.current?.();
+                      }}
                     >
                       <span className="text-center text-xs font-semibold tracking-[0.14em] text-black sm:text-sm">
                         Scroll up to enter
@@ -609,7 +614,7 @@ export default function LandingPage() {
                       >
                         <path d="M10 16V4M5 9l5-5 5 5" />
                       </svg>
-                    </div>
+                    </button>
                   </div>
                   <div className="pointer-events-none absolute left-3 right-3 top-4 z-30 flex items-start justify-end gap-2 sm:left-4 sm:right-4">
                     <button
