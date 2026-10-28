@@ -299,14 +299,14 @@ export function PyracryptBobwireSection() {
         <div className="flex justify-center mb-4">
           <Image
             src={CLUTETY_LOGO_PATH}
-            alt="Clutety"
+            alt="ZZAI Security"
             width={280}
             height={70}
             className="h-12 sm:h-14 w-auto object-contain"
           />
         </div>
         <p className="text-lg sm:text-xl text-white/60 max-w-xl mx-auto mb-4 leading-relaxed">
-          Block unwanted feed content on YouTube and more — same Pyracrypt-grade UI, embedded in
+          Block unwanted feed content on YouTube and more — same protection-grade UI, embedded in
           ZZAI. Nothing leaves your device without your control.
         </p>
         <p className="text-sm text-white/35 max-w-md mx-auto mb-10">
@@ -315,14 +315,14 @@ export function PyracryptBobwireSection() {
 
         <div className="flex flex-wrap gap-3 justify-center">
           <Link
-            href="/clutety"
+            href="/cyber-security-mini-apps"
             className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-white font-bold text-sm"
             style={{ background: TEAL, boxShadow: `0 0 28px ${TEAL}50` }}
           >
-            <Lock className="w-4 h-4" /> Open Clutety
+            <Lock className="w-4 h-4" /> Open security suite
           </Link>
           <Link
-            href="/clutety#pricing"
+            href="/cyber-security-mini-apps#pricing"
             className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-bold text-sm border text-white/60 hover:text-white transition-colors"
             style={{ borderColor: "rgba(255,255,255,0.12)", background: "rgba(255,255,255,0.04)" }}
           >

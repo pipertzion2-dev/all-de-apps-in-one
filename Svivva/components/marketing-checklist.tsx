@@ -529,7 +529,7 @@ export function MarketingChecklist({ orbitStatus, stepStatuses }: Props) {
           label: "Key pages requested for Google indexing",
           detail: isManualDone("manual-gsc-indexing")
             ? "Done ✓"
-            : "GSC → URL Inspection → paste each URL → Request Indexing. Do: /, /clutety, /blog, /tools, and 5-10 SEO pages.",
+            : "GSC → URL Inspection → paste each URL → Request Indexing. Do: /, /cyber-security-mini-apps, /blog, /tools, and 5-10 SEO pages.",
           status: isManualDone("manual-gsc-indexing") ? "done" : "missing",
           link: "https://search.google.com/search-console",
           linkLabel: "GSC →",

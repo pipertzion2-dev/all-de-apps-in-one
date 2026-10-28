@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { buildSeoMetadata } from "@/lib/seo/metadata";
 
 export const metadata: Metadata = buildSeoMetadata({
-  title: "Clutter",
+  title: "ZZAI Security",
   description: "This legacy path redirects to Cyber Security Mini Apps on ZZAI.",
   path: "/cyber-security-mini-apps",
   noindex: true,
