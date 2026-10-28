@@ -29,7 +29,7 @@ export const BUNDLE_CUBE_FACE_URLS = [
   "/assets/clean-sneaks/bundle-cube-faces/face-06.jpg",
 ] as const;
 
-/** Main cover art — start screen after loading wheels. */
+/** Legacy cover art (kept for references; start screen uses spinning hubcaps). */
 export const MAIN_GAME_COVER_URL = "/assets/clean-sneaks/ipbw-main-cover.jpg";
 
 /**

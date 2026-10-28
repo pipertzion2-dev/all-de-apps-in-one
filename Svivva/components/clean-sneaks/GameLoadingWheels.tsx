@@ -64,27 +64,32 @@ export function GameLoadingWheels({ fullscreen = false }: GameLoadingWheelsProps
         </p>
       ) : null}
 
-      {/* Hubcaps spin inside circular clips so square JPEG bounds never overlap.
-          Fullscreen load keeps the puzzle visible underneath — wheels only. */}
-      <div className="flex items-center justify-center gap-[min(3.5vw,14px)] px-4">
-        {LOADING_WHEEL_URLS.map((src, index) => (
-          <div
-            key={src}
-            className="size-[min(24vw,96px)] shrink-0 overflow-hidden rounded-full sm:size-[min(22vw,112px)]"
-            data-testid={`loading-wheel-${index}`}
-          >
-            <div className={`h-full w-full ${reducedMotion ? "" : WHEEL_SPINS[index]}`} aria-hidden>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={src}
-                alt=""
-                draggable={false}
-                className="block h-full w-full object-cover"
-              />
+      {/* Fullscreen load sits over the start wheel field — no extra hubcaps.
+          Compact mode (non-fullscreen) still shows three spinning wheels. */}
+      {!fullscreen ? (
+        <div className="flex items-center justify-center gap-[min(3.5vw,14px)] px-4">
+          {LOADING_WHEEL_URLS.map((src, index) => (
+            <div
+              key={src}
+              className="size-[min(24vw,96px)] shrink-0 overflow-hidden rounded-full sm:size-[min(22vw,112px)]"
+              data-testid={`loading-wheel-${index}`}
+            >
+              <div
+                className={`h-full w-full ${reducedMotion ? "" : WHEEL_SPINS[index]}`}
+                aria-hidden
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={src}
+                  alt=""
+                  draggable={false}
+                  className="block h-full w-full object-cover"
+                />
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : null}
 
       <p className="sr-only">Loading</p>
     </div>

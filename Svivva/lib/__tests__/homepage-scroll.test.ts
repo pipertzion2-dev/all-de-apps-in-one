@@ -44,11 +44,12 @@ describe("homepage scroll panels", () => {
     expect(cubeSrc).toContain("Tap cube to play free");
     expect(cubeSrc).not.toContain("button-enter-main-app");
     expect(cubeSrc).not.toContain("HomepageScrollHint");
-    expect(startSrc).toContain("HomepageBundlePuzzle");
-    expect(startSrc).toContain("game-start-puzzle-screen");
-    expect(startSrc).toContain("Tap puzzle to play");
+    expect(startSrc).not.toContain("HomepageBundlePuzzle");
+    expect(startSrc).toContain("game-start-wheels-screen");
+    expect(startSrc).toContain("LOADING_WHEEL_URLS");
+    expect(startSrc).toContain("Tap to play");
     expect(startSrc).not.toContain("fillScreen");
-    expect(startSrc).toMatch(/bg-\[#0a080e\]/);
+    expect(startSrc).toContain("bg-black");
   });
 
   it("splits main app faces: beta apps then combined; game is intro; no Moves Like ads", () => {
