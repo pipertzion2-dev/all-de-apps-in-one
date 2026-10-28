@@ -21,7 +21,7 @@ describe("feature mini-apps", () => {
   it("maps a job to a cube face without loading the 3D cube", () => {
     const face = chooseCubeFace("seeds");
     expect(face.href).toBe("/seeds");
-    expect(face.shortLabel).toBe("Seeds");
+    expect(face.shortLabel).toBe("Apps");
   });
 
   it("lists a small public channel set for H¹ preview", () => {

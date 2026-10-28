@@ -6,6 +6,7 @@ import {
   isBetaSurfacePath,
   isCorePlatformFeatureId,
   PRODUCT_HERO_HEADLINE,
+  PRODUCT_NAME_LINE,
   PRODUCT_TAGLINE,
 } from "./product-positioning";
 
@@ -52,6 +53,7 @@ describe("product-positioning", () => {
 
   it("leads the homepage with a single focused thesis", () => {
     expect(PRODUCT_HERO_HEADLINE.length).toBeGreaterThan(20);
-    expect(PRODUCT_HERO_HEADLINE).toMatch(/Poor Man Protection/i);
+    expect(PRODUCT_HERO_HEADLINE).toMatch(/seal|prove/i);
+    expect(PRODUCT_NAME_LINE).toMatch(/Poor Man Protection/i);
   });
 });
