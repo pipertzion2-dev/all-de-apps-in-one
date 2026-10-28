@@ -6,6 +6,7 @@ import {
   inventionEvidence,
   inventionInventors,
   inventionTimelineEvents,
+  inventionVerificationRecords,
   inventionVersions,
   inventions,
 } from "@/lib/schema";
@@ -182,6 +183,30 @@ export async function upsertInventionBundleForUser(
         prevHash: aud.prevHash || null,
         eventHash: aud.eventHash,
         createdAt: new Date(aud.at),
+        serverTimestamp: new Date(),
+      })
+      .onConflictDoNothing();
+  }
+
+  // Authorized public ProofChain certificates only — never private descriptions.
+  for (const cert of bundle.publicCerts || []) {
+    await db
+      .insert(inventionVerificationRecords)
+      .values({
+        id: cert.publicCertId,
+        inventionId: inv.id,
+        evidenceId: cert.evidenceId,
+        method: `public_cert:${cert.publicCertId}`,
+        status: "authorized",
+        detail: JSON.stringify({
+          inventionTitleAuthorized: cert.inventionTitleAuthorized,
+          inventionTitle: cert.inventionTitleAuthorized ? cert.inventionTitle : undefined,
+          originalFilename: cert.originalFilename,
+          methodsClaimed: cert.methodsClaimed,
+          issuedAt: cert.issuedAt,
+        }),
+        contentHash: cert.sha256,
+        createdAt: new Date(cert.issuedAt),
         serverTimestamp: new Date(),
       })
       .onConflictDoNothing();

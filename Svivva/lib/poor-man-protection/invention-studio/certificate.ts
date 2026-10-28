@@ -36,13 +36,19 @@ export const IMPLEMENTED_VERIFICATION_METHODS = [
     implemented: true as const,
     description: "JSON/PDF certificate embeds a verification payload string.",
   },
+  {
+    id: "proofchain_manifest",
+    label: "ProofChain evidence manifest",
+    implemented: true as const,
+    description: "Signed manifest hash over evidence metadata + SHA-256; public certs omit private descriptions.",
+  },
 ] as const;
 
-/** Explicitly not claimed unless wired later. */
+/** Explicitly not claimed unless env-configured and a real response is received. */
 export const NOT_IMPLEMENTED_VERIFICATION_METHODS = [
   "Digital signature integrations",
-  "Trusted timestamp authority (RFC 3161) integrations",
-  "Blockchain anchoring",
+  "Trusted timestamp authority (RFC 3161) — requires TSA_ENDPOINT and a successful TSA response",
+  "Blockchain anchoring — requires PROOFCHAIN_ANCHOR_URL and a real transaction id",
 ] as const;
 
 export function buildEvidenceCertificate(

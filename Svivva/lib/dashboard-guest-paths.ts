@@ -22,6 +22,7 @@ export const DASHBOARD_PUBLIC_PREFIXES = [
   "/dashboard/hardware-builder",
   "/education/verify",
   "/protect/verify",
+  "/protect/proofchain",
 ] as const;
 
 export const DASHBOARD_GUEST_PREFIXES = [

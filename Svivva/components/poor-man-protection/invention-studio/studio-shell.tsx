@@ -13,9 +13,11 @@ import {
   FileText,
   Fingerprint,
   FlaskConical,
+  GitBranch,
   Layers,
   Lightbulb,
   Plus,
+  Radar,
   Scale,
   Search,
   Shield,
@@ -23,6 +25,7 @@ import {
   History,
   Upload,
   Vault,
+  ClipboardCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,6 +68,14 @@ import {
   type InventionBundle,
   type StudioComponent,
 } from "@/lib/poor-man-protection/invention-studio/types";
+import {
+  MemoryGraphPanel,
+  PriorArtRadarPanel,
+  ProofChainPanel,
+  ReadinessAuditorPanel,
+  SketchTo3DCopilotPanel,
+} from "@/components/poor-man-protection/invention-studio/advanced-panels";
+import { DisclosureRiskBanner } from "@/components/poor-man-protection/invention-studio/disclosure-risk-banner";
 
 const Invention3DStudio = dynamic(
   () =>
@@ -85,7 +96,12 @@ type SectionId =
   | "patent"
   | "priorart"
   | "verify"
-  | "notebook";
+  | "notebook"
+  | "radar"
+  | "readiness"
+  | "copilot3d"
+  | "proofchain"
+  | "memory";
 
 const NAV: Array<{ id: SectionId; label: string; icon: typeof Shield; desc?: string }> = [
   { id: "dashboard", label: "Dashboard", icon: Layers },
@@ -94,7 +110,12 @@ const NAV: Array<{ id: SectionId; label: string; icon: typeof Shield; desc?: str
   { id: "notebook", label: "Inventor Notebook", icon: BookOpen },
   { id: "vault", label: "Evidence Vault", icon: Vault },
   { id: "timeline", label: "Development Timeline", icon: History },
+  { id: "radar", label: "Prior-Art Radar", icon: Radar },
+  { id: "readiness", label: "Patent-Readiness Auditor", icon: ClipboardCheck },
+  { id: "copilot3d", label: "3D Copilot", icon: Sparkles },
   { id: "studio3d", label: "3D Invention Studio", icon: Box },
+  { id: "proofchain", label: "ProofChain Verification", icon: Fingerprint },
+  { id: "memory", label: "Inventor Memory Graph", icon: GitBranch },
   { id: "ai", label: "AI Invention Assistant", icon: Sparkles },
   { id: "patent", label: "Patent Preparation", icon: FileText },
   { id: "priorart", label: "Prior Art Research", icon: Search },
@@ -490,6 +511,9 @@ export function InventionProtectionStudioShell() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
+                    <DisclosureRiskBanner
+                      text={`${form.description} ${form.problemSolved || ""} ${form.howItWorks || ""} ${form.developmentHistory || ""}`}
+                    />
                     <div className="grid sm:grid-cols-2 gap-3">
                       <div className="space-y-2 sm:col-span-2">
                         <Label>Invention title</Label>
@@ -1145,8 +1169,53 @@ export function InventionProtectionStudioShell() {
                         Open Protect verify desk
                       </Link>
                     </Button>
+                    <Button asChild variant="outline">
+                      <Link href="/protect/proofchain">Open ProofChain public desk</Link>
+                    </Button>
                   </CardContent>
                 </Card>
+              )}
+
+              {section === "radar" && (
+                <PriorArtRadarPanel
+                  active={active}
+                  onRefresh={refresh}
+                  busy={busy}
+                  setBusy={setBusy}
+                />
+              )}
+              {section === "readiness" && (
+                <ReadinessAuditorPanel
+                  active={active}
+                  onRefresh={refresh}
+                  busy={busy}
+                  setBusy={setBusy}
+                />
+              )}
+              {section === "copilot3d" && (
+                <SketchTo3DCopilotPanel
+                  active={active}
+                  onRefresh={refresh}
+                  busy={busy}
+                  setBusy={setBusy}
+                  onOpenStudio={() => setSection("studio3d")}
+                />
+              )}
+              {section === "proofchain" && (
+                <ProofChainPanel
+                  active={active}
+                  onRefresh={refresh}
+                  busy={busy}
+                  setBusy={setBusy}
+                />
+              )}
+              {section === "memory" && (
+                <MemoryGraphPanel
+                  active={active}
+                  onRefresh={refresh}
+                  busy={busy}
+                  setBusy={setBusy}
+                />
               )}
             </motion.div>
           </AnimatePresence>

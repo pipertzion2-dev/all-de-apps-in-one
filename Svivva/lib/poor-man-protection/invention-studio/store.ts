@@ -10,9 +10,16 @@ import type {
   InventionRecord,
   InventionStatus,
   InventionVaultState,
+  MemoryGraphSnapshot,
+  ModelRevisionMeta,
   NotebookEntry,
+  PriorArtReport,
+  ProofChainRecord,
+  PublicProofCertificate,
+  ReadinessAudit,
   StudioComponent,
   TimelineEvent,
+  VoiceJournalDraft,
 } from "./types";
 import {
   INVENTION_EVIDENCE_IDB,
@@ -516,4 +523,202 @@ export function exportVaultJson(): string {
 
 export function listInventions(): InventionRecord[] {
   return listInventionBundles().map((b) => b.invention);
+}
+
+function withBundleDefaults(bundle: InventionBundle): InventionBundle {
+  return {
+    ...bundle,
+    priorArtReports: bundle.priorArtReports || [],
+    readinessAudits: bundle.readinessAudits || [],
+    proofChain: bundle.proofChain || [],
+    publicCerts: bundle.publicCerts || [],
+    memorySnapshots: bundle.memorySnapshots || [],
+    voiceDrafts: bundle.voiceDrafts || [],
+    modelRevisions: bundle.modelRevisions || [],
+  };
+}
+
+export function savePriorArtReport(
+  inventionId: string,
+  report: PriorArtReport,
+): InventionBundle | null {
+  const existing = getInventionBundle(inventionId);
+  if (!existing) return null;
+  let bundle = withBundleDefaults(existing);
+  bundle = {
+    ...bundle,
+    priorArtReports: [report, ...(bundle.priorArtReports || [])],
+  };
+  bundle = appendTimeline(bundle, {
+    title: "Prior-Art Radar report saved",
+    detail: `${report.hits.length} results · ${report.generatedQueries[0] || ""}`,
+    kind: "prior_art",
+  });
+  return upsertBundle(bundle);
+}
+
+export function saveReadinessAudit(
+  inventionId: string,
+  audit: ReadinessAudit,
+): InventionBundle | null {
+  const existing = getInventionBundle(inventionId);
+  if (!existing) return null;
+  let bundle = withBundleDefaults(existing);
+  bundle = {
+    ...bundle,
+    readinessAudits: [audit, ...(bundle.readinessAudits || [])],
+  };
+  bundle = appendTimeline(bundle, {
+    title: "Patent-Readiness audit",
+    detail: `Score ${audit.completenessScore}% · ${audit.issues.length} findings`,
+    kind: "readiness",
+  });
+  return upsertBundle(bundle);
+}
+
+export function updateReadinessIssueResolved(
+  inventionId: string,
+  auditId: string,
+  issueId: string,
+  resolved: boolean,
+): InventionBundle | null {
+  const existing = getInventionBundle(inventionId);
+  if (!existing) return null;
+  let bundle = withBundleDefaults(existing);
+  bundle = {
+    ...bundle,
+    readinessAudits: (bundle.readinessAudits || []).map((a) =>
+      a.id !== auditId
+        ? a
+        : {
+            ...a,
+            issues: a.issues.map((i) => (i.id === issueId ? { ...i, resolved } : i)),
+          },
+    ),
+  };
+  return upsertBundle(bundle);
+}
+
+export async function saveProofChainRecord(
+  inventionId: string,
+  record: ProofChainRecord,
+  publicCert?: PublicProofCertificate,
+): Promise<InventionBundle | null> {
+  const existing = getInventionBundle(inventionId);
+  if (!existing) return null;
+  let bundle = withBundleDefaults(existing);
+  bundle = {
+    ...bundle,
+    proofChain: [record, ...(bundle.proofChain || [])],
+    publicCerts: publicCert
+      ? [publicCert, ...(bundle.publicCerts || [])]
+      : bundle.publicCerts,
+  };
+  bundle = appendTimeline(bundle, {
+    title: "ProofChain record",
+    detail: `${record.evidenceId} · ${record.sha256.slice(0, 12)}…`,
+    kind: "proofchain",
+    hash: record.sha256,
+  });
+  bundle = await appendAudit(bundle, "proofchain_recorded", record.id);
+  return upsertBundle(bundle);
+}
+
+export function saveMemorySnapshot(
+  inventionId: string,
+  snapshot: MemoryGraphSnapshot,
+): InventionBundle | null {
+  const existing = getInventionBundle(inventionId);
+  if (!existing) return null;
+  let bundle = withBundleDefaults(existing);
+  bundle = {
+    ...bundle,
+    memorySnapshots: [snapshot, ...(bundle.memorySnapshots || [])].slice(0, 20),
+  };
+  bundle = appendTimeline(bundle, {
+    title: "Memory graph snapshot",
+    detail: `${snapshot.nodes.length} nodes · ${snapshot.edges.length} links`,
+    kind: "memory",
+  });
+  return upsertBundle(bundle);
+}
+
+export function saveVoiceDraft(
+  inventionId: string,
+  draft: VoiceJournalDraft,
+): InventionBundle | null {
+  const existing = getInventionBundle(inventionId);
+  if (!existing) return null;
+  let bundle = withBundleDefaults(existing);
+  bundle = {
+    ...bundle,
+    voiceDrafts: [draft, ...(bundle.voiceDrafts || [])],
+  };
+  return upsertBundle(bundle);
+}
+
+export async function confirmVoiceDraft(
+  inventionId: string,
+  draftId: string,
+): Promise<InventionBundle | null> {
+  const existing = getInventionBundle(inventionId);
+  if (!existing) return null;
+  const bundle = withBundleDefaults(existing);
+  const draft = (bundle.voiceDrafts || []).find((d) => d.id === draftId);
+  if (!draft || draft.confirmed) return existing;
+  upsertBundle({
+    ...bundle,
+    voiceDrafts: (bundle.voiceDrafts || []).map((d) =>
+      d.id === draftId ? { ...d, confirmed: true } : d,
+    ),
+  });
+  return addNotebookEntry(inventionId, {
+    kind: draft.suggestedMilestone?.toLowerCase().includes("prototype")
+      ? "prototype"
+      : "note",
+    title: draft.structuredTitle,
+    body: `${draft.structuredBody}\n\n[Voice journal confirmed · source ${draft.source}]`,
+  });
+}
+
+export async function saveModelRevision(
+  inventionId: string,
+  revision: ModelRevisionMeta,
+): Promise<InventionBundle | null> {
+  const existing = getInventionBundle(inventionId);
+  if (!existing) return null;
+  let bundle = withBundleDefaults(existing);
+  bundle = {
+    ...bundle,
+    modelRevisions: [revision, ...(bundle.modelRevisions || [])],
+  };
+  bundle = appendTimeline(bundle, {
+    title: revision.preliminaryAiVisualization
+      ? "Preliminary 3D visualization saved"
+      : "3D model revision saved",
+    detail: revision.label,
+    kind: "studio",
+    hash: revision.contentHash,
+  });
+  bundle = await appendAudit(bundle, "model_revision", revision.id);
+  return upsertBundle(bundle);
+}
+
+export function setAiTrainingConsent(
+  inventionId: string,
+  consent: boolean,
+): InventionBundle | null {
+  const existing = getInventionBundle(inventionId);
+  if (!existing) return null;
+  return upsertBundle({ ...existing, aiTrainingConsent: consent });
+}
+
+export function findPublicCertAcrossVault(
+  publicCertId: string,
+): PublicProofCertificate | null {
+  for (const b of listInventionBundles()) {
+    const hit = b.publicCerts?.find((c) => c.publicCertId === publicCertId);
+    if (hit) return hit;
+  }
+  return null;
 }

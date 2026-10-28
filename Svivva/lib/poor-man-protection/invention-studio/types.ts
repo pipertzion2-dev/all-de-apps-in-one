@@ -145,7 +145,20 @@ export type TimelineEvent = {
   serverTimestamp?: string;
   title: string;
   detail: string;
-  kind: "created" | "updated" | "evidence" | "version" | "studio" | "export" | "verify" | "ai";
+  kind:
+    | "created"
+    | "updated"
+    | "evidence"
+    | "version"
+    | "studio"
+    | "export"
+    | "verify"
+    | "ai"
+    | "prior_art"
+    | "readiness"
+    | "proofchain"
+    | "memory"
+    | "voice";
   hash?: string;
 };
 
@@ -194,6 +207,175 @@ export type InventionRecord = {
   privacy: "private";
 };
 
+export type PriorArtHit = {
+  id: string;
+  source: "uspto_patentsview" | "google_patents_link" | "wipo_link" | "user_saved";
+  publicationNumber?: string;
+  title: string;
+  abstract?: string;
+  filingDate?: string;
+  publicationDate?: string;
+  similarityNotes: string;
+  differencesNotes: string;
+  sourceUrl: string;
+  queriedAt: string;
+  /** True only when returned by a live search API — never fabricated */
+  fromLiveApi: boolean;
+};
+
+export type PriorArtReport = {
+  id: string;
+  inventionId: string;
+  createdAt: string;
+  serverTimestamp?: string;
+  queryText: string;
+  generatedQueries: string[];
+  imageConcepts?: string[];
+  hits: PriorArtHit[];
+  reportMarkdown: string;
+  disclaimer: string;
+};
+
+export type ReadinessIssue = {
+  id: string;
+  severity: "critical" | "important" | "suggested";
+  category:
+    | "description"
+    | "components"
+    | "materials"
+    | "dimensions"
+    | "functionality"
+    | "mechanism"
+    | "embodiments"
+    | "drawings"
+    | "evidence"
+    | "history"
+    | "contradiction"
+    | "ai_assumption";
+  title: string;
+  detail: string;
+  followUpQuestion?: string;
+  suggestedAction: string;
+  resolved: boolean;
+};
+
+export type ReadinessAudit = {
+  id: string;
+  inventionId: string;
+  createdAt: string;
+  serverTimestamp?: string;
+  completenessScore: number;
+  issues: ReadinessIssue[];
+  checklist: Array<{ id: string; label: string; done: boolean }>;
+  disclaimer: string;
+};
+
+export type ProofChainRecord = {
+  id: string;
+  evidenceId: string;
+  inventionId: string;
+  version: number;
+  sha256: string;
+  localTimestamp: string;
+  serverTimestamp?: string;
+  verificationMethod: "sha256" | "server_timestamp" | "audit_chain" | "manifest";
+  integrityStatus: "pending" | "hashed" | "verified" | "failed";
+  /** Only set when a real TSA response is received */
+  trustedTimestampStatus: "not_configured" | "requested" | "anchored" | "failed";
+  trustedTimestampToken?: string;
+  /** Only set when a real on-chain tx exists */
+  blockchainStatus: "not_configured" | "requested" | "anchored" | "failed";
+  blockchainTxId?: string;
+  publicCertId?: string;
+  manifestHash: string;
+};
+
+export type PublicProofCertificate = {
+  protocol: typeof INVENTION_STUDIO_PROTOCOL;
+  publicCertId: string;
+  evidenceId: string;
+  inventionId: string;
+  /** Title only if user authorized public disclosure of title */
+  inventionTitleAuthorized: boolean;
+  inventionTitle?: string;
+  originalFilename: string;
+  sha256: string;
+  version: number;
+  issuedAt: string;
+  serverTimestamp?: string;
+  verificationPath: string;
+  qrPayload: string;
+  disclaimer: string;
+  methodsClaimed: string[];
+};
+
+export type MemoryGraphNode = {
+  id: string;
+  inventionId: string;
+  kind:
+    | "disclosure"
+    | "sketch"
+    | "description"
+    | "model3d"
+    | "component"
+    | "prototype"
+    | "test"
+    | "note"
+    | "document"
+    | "collaborator"
+    | "evidence"
+    | "prior_art"
+    | "readiness"
+    | "voice";
+  label: string;
+  detail: string;
+  at: string;
+  refId?: string;
+  version?: number;
+};
+
+export type MemoryGraphEdge = {
+  id: string;
+  from: string;
+  to: string;
+  relation: "derived_from" | "revises" | "supports" | "mentions" | "contributed" | "analyzed";
+};
+
+export type MemoryGraphSnapshot = {
+  id: string;
+  inventionId: string;
+  createdAt: string;
+  nodes: MemoryGraphNode[];
+  edges: MemoryGraphEdge[];
+};
+
+export type VoiceJournalDraft = {
+  id: string;
+  inventionId: string;
+  createdAt: string;
+  transcript: string;
+  structuredTitle: string;
+  structuredBody: string;
+  suggestedMilestone?: string;
+  relatedComponentHints: string[];
+  confirmed: boolean;
+  source: "web_speech" | "whisper_api" | "typed_fallback";
+  label: "ai_structured_pending_confirmation";
+};
+
+export type ModelRevisionMeta = {
+  id: string;
+  inventionId: string;
+  createdAt: string;
+  label: string;
+  componentCount: number;
+  /** AI-generated geometry is preliminary until user validates dimensions */
+  preliminaryAiVisualization: boolean;
+  validatedByUser: boolean;
+  evidenceId?: string;
+  contentHash: string;
+};
+
 export type InventionBundle = {
   invention: InventionRecord;
   versions: InventionVersion[];
@@ -203,6 +385,14 @@ export type InventionBundle = {
   timeline: TimelineEvent[];
   audit: AuditEvent[];
   aiSuggestions: AiSuggestion[];
+  priorArtReports?: PriorArtReport[];
+  readinessAudits?: ReadinessAudit[];
+  proofChain?: ProofChainRecord[];
+  publicCerts?: PublicProofCertificate[];
+  memorySnapshots?: MemoryGraphSnapshot[];
+  voiceDrafts?: VoiceJournalDraft[];
+  modelRevisions?: ModelRevisionMeta[];
+  aiTrainingConsent?: boolean;
 };
 
 export type InventionVaultState = {
