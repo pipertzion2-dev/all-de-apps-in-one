@@ -16,8 +16,8 @@ type HomepageGamePanelProps = {
   onEnterApp?: () => void;
 };
 
-/** First page — Klean Sneaks cube on white with flowers + digi camo across the full viewport. */
-export function HomepageGamePanel({ asIntro = false, onEnterApp }: HomepageGamePanelProps) {
+/** First page — walk-game cube on white with flowers + digi camo across the full viewport. */
+export function HomepageGamePanel({ asIntro = false }: HomepageGamePanelProps) {
   const router = useRouter();
 
   const enterGame = () => {
@@ -56,6 +56,7 @@ export function HomepageGamePanel({ asIntro = false, onEnterApp }: HomepageGameP
           />
         </div>
 
+        {/* Intro keeps a single bottom cue in home-page-client — no stacked pills here. */}
         {!asIntro ? (
           <p
             className="mt-2 shrink-0 text-center text-[10px] uppercase tracking-[0.25em] text-black/50 sm:text-[11px]"
@@ -63,21 +64,7 @@ export function HomepageGamePanel({ asIntro = false, onEnterApp }: HomepageGameP
           >
             {KLEAN_HOMEPAGE_TAGLINE} — tap to play free
           </p>
-        ) : (
-          <div className="mt-3 flex shrink-0 flex-col items-center gap-3">
-            <p className="rounded-full border border-black/15 bg-white px-4 py-1.5 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-black shadow-sm sm:text-xs">
-              Tap cube to play · scroll up to enter
-            </p>
-            <button
-              type="button"
-              onClick={() => onEnterApp?.()}
-              className="rounded-full border border-black/20 bg-white px-6 py-2.5 text-xs font-semibold tracking-wide text-black shadow-sm transition-transform active:scale-95"
-              data-testid="button-enter-main-app"
-            >
-              Enter zzai zzai
-            </button>
-          </div>
-        )}
+        ) : null}
       </div>
     </section>
   );
