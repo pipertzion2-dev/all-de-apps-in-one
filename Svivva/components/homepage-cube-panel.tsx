@@ -8,12 +8,7 @@ import { HomepageFounderSonSection } from "@/components/homepage-founder-son-sec
 import { HomepagePricingSection } from "@/components/homepage-pricing-section";
 import Link from "next/link";
 import { HomepageCubeFaceHint } from "@/components/homepage-cube-face-hint";
-import { flipToHomepagePanel } from "@/lib/homepage-scroll";
-import {
-  HOMEPAGE_SCROLL_TO_GAME,
-  HOMEPAGE_SCROLL_TO_PROTECTION,
-  PRODUCT_PROTECTION_PATH,
-} from "@/lib/product-positioning";
+import { HOMEPAGE_SCROLL_TO_PROTECTION, PRODUCT_PROTECTION_PATH } from "@/lib/product-positioning";
 
 type HomepageCubePanelProps = {
   mountCanvas?: boolean;
@@ -59,14 +54,6 @@ export function HomepageCubePanel({
           >
             {HOMEPAGE_SCROLL_TO_PROTECTION}
           </Link>
-          <button
-            type="button"
-            onClick={() => void flipToHomepagePanel("home-game", { direction: "forward" })}
-            className="text-xs font-medium tracking-wide text-muted-foreground underline-offset-4 transition-colors hover:text-[#5B8DA8] hover:underline"
-            data-testid="button-continue-to-game"
-          >
-            {HOMEPAGE_SCROLL_TO_GAME}
-          </button>
         </div>
       ) : null}
     </div>

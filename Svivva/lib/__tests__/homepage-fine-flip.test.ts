@@ -22,11 +22,10 @@ describe("homepage fine flip", () => {
     expect(fineFlipAngleProgress(0.2)).toBeLessThan(1);
   });
 
-  it("treats story and white game as adjacent (smooth scroll path)", () => {
-    expect(homepagePanelsAreAdjacent("nav-cube", "home-game")).toBe(true);
-    expect(homepagePanelsAreAdjacent("home-game", "nav-cube")).toBe(true);
+  it("treats beta and story as adjacent (smooth scroll path)", () => {
     expect(homepagePanelsAreAdjacent("home-beta", "nav-cube")).toBe(true);
+    expect(homepagePanelsAreAdjacent("nav-cube", "home-beta")).toBe(true);
+    expect(homepagePanelsAreAdjacent("nav-cube", "home-game")).toBe(false);
     expect(homepagePanelsAreAdjacent("home-game", "home-beta")).toBe(false);
-    expect(homepagePanelsAreAdjacent("home-beta", "home-game")).toBe(false);
   });
 });

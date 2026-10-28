@@ -11,20 +11,22 @@ export function homepageCubeLoopPanels(): readonly HomepageFlipPanelId[] {
   return HOMEPAGE_FLIP_PANELS;
 }
 
-/** Next face when scrolling forward (down): beta → story → game → beta … */
-export function nextCubeLoopPanel(current: HomepageFlipPanelId): HomepageFlipPanelId {
+/** Next face when scrolling forward (down). Does not wrap past the last face. */
+export function nextCubeLoopPanel(current: HomepageFlipPanelId): HomepageFlipPanelId | null {
   const panels = homepageCubeLoopPanels();
   const idx = panels.indexOf(current);
-  if (idx < 0) return panels[0];
-  return panels[(idx + 1) % panels.length];
+  if (idx < 0) return panels[0] ?? null;
+  if (idx >= panels.length - 1) return null;
+  return panels[idx + 1];
 }
 
-/** Previous face when scrolling backward (up). */
-export function prevCubeLoopPanel(current: HomepageFlipPanelId): HomepageFlipPanelId {
+/** Previous face when scrolling backward (up). Does not wrap past the first face. */
+export function prevCubeLoopPanel(current: HomepageFlipPanelId): HomepageFlipPanelId | null {
   const panels = homepageCubeLoopPanels();
   const idx = panels.indexOf(current);
-  if (idx < 0) return panels[panels.length - 1];
-  return panels[(idx - 1 + panels.length) % panels.length];
+  if (idx < 0) return panels[panels.length - 1] ?? null;
+  if (idx <= 0) return null;
+  return panels[idx - 1];
 }
 
 export function documentScrollMetrics(win: Window = window, doc: Document = document) {
@@ -106,11 +108,8 @@ export function isNearPanelTop(
 }
 
 /**
- * Panel-aware wrap:
- * - From the story face (nav-cube) scrolling down → white game (home-game)
- * - From the game face scrolling down → beta (home-beta)
- * - From beta scrolling up → game
- * - From game scrolling up → story
+ * Panel-aware navigation between beta and story only.
+ * After the story face (2nd page), scrolling down does not open another face.
  */
 export function cubeLoopWrapTarget(
   deltaY: number,
@@ -133,21 +132,12 @@ export function cubeLoopWrapTarget(
     if (active && (opts?.nearPanelBottom ?? false)) {
       return nextCubeLoopPanel(active);
     }
-    // Document-bottom fallback only when the last face is active / present.
-    if (opts?.nearBottom) {
-      const last = panels[panels.length - 1];
-      if (!active || active === last) return nextCubeLoopPanel(last);
-    }
     return null;
   }
 
   if (deltaY < 0) {
     if (active && (opts?.nearPanelTop ?? false)) {
       return prevCubeLoopPanel(active);
-    }
-    if (opts?.nearTop) {
-      const first = panels[0];
-      if (!active || active === first) return prevCubeLoopPanel(first);
     }
     return null;
   }

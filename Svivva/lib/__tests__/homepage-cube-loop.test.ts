@@ -5,34 +5,40 @@ import { cubeLoopWrapTarget, nextCubeLoopPanel, prevCubeLoopPanel } from "../hom
 import { HOMEPAGE_FLIP_PANELS } from "../homepage-flip-stack";
 
 describe("homepage cube loop", () => {
-  it("orders faces beta → story → white game", () => {
-    expect([...HOMEPAGE_FLIP_PANELS]).toEqual(["home-beta", "nav-cube", "home-game"]);
+  it("orders faces beta → story only (game is intro-only)", () => {
+    expect([...HOMEPAGE_FLIP_PANELS]).toEqual(["home-beta", "nav-cube"]);
   });
 
-  it("continues from the story face to the white game face", () => {
-    expect(nextCubeLoopPanel("nav-cube")).toBe("home-game");
-    expect(nextCubeLoopPanel("home-game")).toBe("home-beta");
+  it("stops after the story face instead of continuing to the game", () => {
     expect(nextCubeLoopPanel("home-beta")).toBe("nav-cube");
+    expect(nextCubeLoopPanel("nav-cube")).toBeNull();
   });
 
-  it("wraps backward from beta to the white game face", () => {
-    expect(prevCubeLoopPanel("home-beta")).toBe("home-game");
-    expect(prevCubeLoopPanel("home-game")).toBe("nav-cube");
+  it("does not wrap backward past beta into a third face", () => {
+    expect(prevCubeLoopPanel("nav-cube")).toBe("home-beta");
+    expect(prevCubeLoopPanel("home-beta")).toBeNull();
   });
 
-  it("maps wheel + active panel edges to the next continuous face", () => {
+  it("maps wheel + active panel edges without opening a page after story", () => {
+    expect(
+      cubeLoopWrapTarget(40, {
+        activePanel: "home-beta",
+        nearPanelBottom: true,
+        nearPanelTop: false,
+      }),
+    ).toBe("nav-cube");
     expect(
       cubeLoopWrapTarget(40, {
         activePanel: "nav-cube",
         nearPanelBottom: true,
         nearPanelTop: false,
       }),
-    ).toBe("home-game");
+    ).toBeNull();
     expect(
-      cubeLoopWrapTarget(40, {
-        activePanel: "home-game",
-        nearPanelBottom: true,
-        nearPanelTop: false,
+      cubeLoopWrapTarget(-40, {
+        activePanel: "nav-cube",
+        nearPanelBottom: false,
+        nearPanelTop: true,
       }),
     ).toBe("home-beta");
     expect(
@@ -41,18 +47,10 @@ describe("homepage cube loop", () => {
         nearPanelBottom: false,
         nearPanelTop: true,
       }),
-    ).toBe("home-game");
-    expect(
-      cubeLoopWrapTarget(40, {
-        activePanel: "nav-cube",
-        nearPanelBottom: false,
-        nearPanelTop: false,
-        nearBottom: false,
-      }),
     ).toBeNull();
   });
 
-  it("mounts the white game face after the story face and uses a fine flip wrap", () => {
+  it("mounts beta then story only after the intro — no scrolled game face", () => {
     const pageSrc = readFileSync(resolve(__dirname, "../../app/home-page-client.tsx"), "utf8");
     const loopSrc = readFileSync(
       resolve(__dirname, "../../components/homepage-cube-loop.tsx"),
@@ -64,15 +62,16 @@ describe("homepage cube loop", () => {
     );
     const scrollSrc = readFileSync(resolve(__dirname, "../homepage-scroll.ts"), "utf8");
     expect(pageSrc).toContain("HomepageCubeLoop");
-    expect(pageSrc).toContain('data-homepage-cube-faces="3"');
+    expect(pageSrc).toContain('data-homepage-cube-faces="2"');
     expect(pageSrc).toMatch(
-      /HomepageBetaPanel[\s\S]*HomepageCubePanel[\s\S]*HomepageGamePanel[\s\S]*HomepageCubeLoop/,
+      /data-homepage-native-scroll[\s\S]*HomepageBetaPanel[\s\S]*HomepageCubePanel[\s\S]*HomepageCubeLoop/,
     );
+    expect(pageSrc).not.toMatch(/data-homepage-native-scroll[\s\S]*<HomepageGamePanel/);
     expect(loopSrc).toContain("flipToHomepagePanel");
     expect(loopSrc).toContain("nearestHomepagePanel");
     expect(loopSrc).not.toContain("IntersectionObserver");
-    expect(cubeSrc).toContain("button-continue-to-game");
-    expect(cubeSrc).toContain('flipToHomepagePanel("home-game"');
+    expect(cubeSrc).not.toContain("button-continue-to-game");
+    expect(cubeSrc).not.toContain('flipToHomepagePanel("home-game"');
     expect(scrollSrc).toContain("playHomepageFineFlip");
     expect(scrollSrc).toContain("flipToHomepagePanel");
     expect(scrollSrc).toContain("homepagePanelsAreAdjacent");

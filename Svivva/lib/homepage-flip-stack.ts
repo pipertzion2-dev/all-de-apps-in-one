@@ -3,14 +3,12 @@ export type HomepageFlipPanelId = "home-game" | "home-moves" | "home-beta" | "na
 
 /**
  * Continuous cube scroll order (index 0 = top) after the white intro flips away:
- * beta apps → story → white game face.
- * Wrapping past the white face returns to beta with a fine flip — never an
- * infinite jump onto the story face mid-scroll.
+ * beta apps → story. The white game face is intro-only — scrolling past story
+ * does not open another homepage face.
  */
 export const HOMEPAGE_FLIP_PANELS: readonly HomepageFlipPanelId[] = [
   "home-beta",
   "nav-cube",
-  "home-game",
 ] as const;
 
 export function flipPanelIndex(id: HomepageFlipPanelId): number {
@@ -47,7 +45,8 @@ export function flipPanelFromHash(hash: string): HomepageFlipPanelId | null {
   const id = hash.replace(/^#/, "").trim();
   // Bare `/` lands on beta apps after the game intro flips into the main app.
   if (!id) return "home-beta";
-  if (id === "home-game" || id === "clean-sneaks") return "home-game";
+  // Game is intro / /clean-sneaks only — homepage hash falls through to beta.
+  if (id === "home-game" || id === "clean-sneaks") return "home-beta";
   // Moves Like moved into /play — homepage hashes fall through to beta.
   if (id === "home-moves" || id === "the-moves-like") return "home-beta";
   if (id === "home-beta" || id === "beta-apps") return "home-beta";

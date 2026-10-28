@@ -12,8 +12,8 @@ describe("homepage flip stack", () => {
   it("maps legacy hash ids to flip panels", () => {
     expect(flipPanelFromHash("")).toBe("home-beta");
     expect(flipPanelFromHash("nav-cube")).toBe("nav-cube");
-    expect(flipPanelFromHash("home-game")).toBe("home-game");
-    expect(flipPanelFromHash("clean-sneaks")).toBe("home-game");
+    expect(flipPanelFromHash("home-game")).toBe("home-beta");
+    expect(flipPanelFromHash("clean-sneaks")).toBe("home-beta");
     expect(flipPanelFromHash("home-moves")).toBe("home-beta");
     expect(flipPanelFromHash("the-moves-like")).toBe("home-beta");
     expect(flipPanelFromHash("home-beta")).toBe("home-beta");
@@ -30,11 +30,11 @@ describe("homepage flip stack", () => {
     expect(hashForFlipPanel("home-beta")).toBe("home-beta");
   });
 
-  it("orders continuous cube faces: beta → story → white game", () => {
-    expect(HOMEPAGE_FLIP_PANELS).toEqual(["home-beta", "nav-cube", "home-game"]);
+  it("orders continuous cube faces: beta → story (game is intro-only)", () => {
+    expect(HOMEPAGE_FLIP_PANELS).toEqual(["home-beta", "nav-cube"]);
     expect(flipPanelIndex("home-beta")).toBe(0);
     expect(flipPanelIndex("nav-cube")).toBe(1);
-    expect(flipPanelIndex("home-game")).toBe(2);
+    expect(flipPanelIndex("home-game")).toBe(0);
   });
 
   it("runs a timed 3D cube flip with button-only panel changes", () => {
