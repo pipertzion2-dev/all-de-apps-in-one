@@ -34,11 +34,8 @@ export function HomepageCubePanel({
 
       <div className="px-4 pt-6 pb-2 text-center">
         <h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-          Story, plans, and answers
+          Plans &amp; FAQ
         </h2>
-        <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-          How zzai zzai fits together — Poor Man Protection first, beta apps on the cube.
-        </p>
       </div>
 
       <HomepageAboutSection />

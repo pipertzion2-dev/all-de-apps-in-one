@@ -6,27 +6,27 @@ const LINKS = [
   {
     href: PRODUCT_PROTECTION_PATH,
     title: "Poor Man Protection",
-    description: "Main focus — seal uploads with hashes and timestamps; court-ready packs.",
+    description: "Seal uploads. Export a court pack.",
   },
   {
     href: "/dashboard/hybrid-lab",
     title: "Hybrid² Lab",
-    description: "Fuse two ZZAI modules (H¹), then hybridize listed blends (H²) into one product.",
+    description: "Fuse modules into one product.",
   },
   {
     href: "/seeds",
     title: "ZZAI Seeds",
-    description: "Turn a PDF or YouTube brief into deployable apps.",
+    description: "Brief → deployable apps.",
   },
   {
     href: "/orbit",
-    title: "Orbit SEO & AEO",
-    description: "Growth and indexing autopilot for search and answer engines.",
+    title: "Orbit",
+    description: "Search and answer-engine growth.",
   },
   {
     href: "/tools",
-    title: "Free AI & security tools",
-    description: "Crawlable mini-apps — beta funnel slices, no signup for basics.",
+    title: "Free tools",
+    description: "AI and security mini-apps. No signup for basics.",
   },
 ] as const;
 
@@ -41,14 +41,11 @@ export function HomepageExploreLinks() {
       <div className="mx-auto max-w-3xl space-y-8">
         <div className="space-y-3 text-center">
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#6D91B3]">
-            Also on zzai zzai
+            Explore
           </p>
           <h2 id="homepage-explore-heading" className="text-2xl font-bold sm:text-3xl">
-            Poor Man Protection &amp; the desk
+            Jump in
           </h2>
-          <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-base">
-            Poor Man Protection is the center of the site. The cube holds beta apps.
-          </p>
         </div>
 
         <ul className="grid gap-3 text-left sm:grid-cols-2">

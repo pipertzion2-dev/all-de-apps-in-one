@@ -28,10 +28,10 @@ export function HomepagePricingSection() {
             Pricing
           </Badge>
           <h2 className="text-3xl font-bold sm:text-4xl">
-            Simple, transparent <span className="solid-accent">pricing</span>
+            Simple <span className="solid-accent">pricing</span>
           </h2>
           <p className="mx-auto max-w-2xl text-base text-muted-foreground sm:text-lg">
-            Start with Poor Man Protection, then upgrade when you need the full builder desk.
+            Start free. Upgrade when you need the full desk.
           </p>
         </div>
 

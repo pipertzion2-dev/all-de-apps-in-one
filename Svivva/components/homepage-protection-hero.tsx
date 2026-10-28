@@ -11,7 +11,7 @@ import {
 } from "@/lib/product-positioning";
 import { Button } from "@/components/ui/button";
 
-/** Second-home lead — Poor Man Protection is the main product focus. */
+/** Second-home lead — one product name, one job, one disclaimer. */
 export function HomepageProtectionHero() {
   return (
     <section
@@ -26,9 +26,8 @@ export function HomepageProtectionHero() {
           {PRODUCT_HERO_HEADLINE}
         </h1>
         <p className="text-base font-medium leading-snug text-foreground/90">{PRODUCT_TAGLINE}</p>
-        <p className="mx-auto max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-          {PRODUCT_PROTECTION_PITCH} Sketches, sneaker colorways, lyrics, API schemas — anything you
-          may need to prove you had first. The cube below is beta apps.
+        <p className="mx-auto max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+          {PRODUCT_PROTECTION_PITCH}
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
           <Button asChild className="bg-[#5B8DA8] text-white">

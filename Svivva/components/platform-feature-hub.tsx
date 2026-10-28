@@ -24,7 +24,7 @@ import {
   type MixingBusId,
 } from "@/lib/platform/feature-graph";
 import { FeatureBetaBadge } from "@/components/feature-beta-badge";
-import { isBetaPlatformFeatureId, PRODUCT_HERO_SUBLINE } from "@/lib/product-positioning";
+import { isBetaPlatformFeatureId } from "@/lib/product-positioning";
 import type { FeatureSuggestionResult } from "@/lib/platform/feature-suggestions";
 
 const CamoThreeOverlay = dynamic(
@@ -269,8 +269,8 @@ export function PlatformFeatureHub({
               Beta desk modules
             </h2>
             <p className="text-sm sm:text-base text-muted-foreground max-w-xl">
-              {PRODUCT_HERO_SUBLINE} Patch routes below explore beta channels — core shipping is
-              Hybrid² Lab, guardrails, Projects, Pulse, and Klean Sneaks.
+              Patch routes below. Hybrid² Lab, guardrails, Projects, and Pulse ship; the rest is
+              beta.
             </p>
           </header>
         )}

@@ -14,11 +14,8 @@ export function HomepageFaqSection() {
         <div className="space-y-3 text-center">
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#6D91B3]">FAQ</p>
           <h2 id="homepage-faq-heading" className="text-2xl font-bold sm:text-3xl">
-            Questions about Poor Man Protection
+            FAQ
           </h2>
-          <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-base">
-            Sealing, court packs, the beta apps cube, pricing, and what is still in beta.
-          </p>
         </div>
 
         <div className="space-y-3 text-left">
