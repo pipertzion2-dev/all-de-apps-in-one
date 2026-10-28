@@ -9,11 +9,6 @@ const LINKS = [
     description: "Main focus — seal uploads with hashes and timestamps; court-ready packs.",
   },
   {
-    href: "/clean-sneaks",
-    title: "Klean Sneaks",
-    description: "BALOON8 car×sneaker — one chassis, colorway unlocks, Sneak Vision hazards.",
-  },
-  {
     href: "/dashboard/hybrid-lab",
     title: "Hybrid² Lab",
     description: "Fuse two ZZAI modules (H¹), then hybridize listed blends (H²) into one product.",
@@ -52,8 +47,7 @@ export function HomepageExploreLinks() {
             Poor Man Protection &amp; the desk
           </h2>
           <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-base">
-            Poor Man Protection is the center of the site. The cube holds beta apps. Klean Sneaks
-            stays free on the walk.
+            Poor Man Protection is the center of the site. The cube holds beta apps.
           </p>
         </div>
 

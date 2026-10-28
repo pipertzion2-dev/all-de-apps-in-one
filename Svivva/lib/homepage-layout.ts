@@ -1,6 +1,6 @@
 /** Which below-the-fold homepage sections render. Cube + nav + footer always show. */
 export const HOMEPAGE_SECTIONS = {
-  /** Compact homepage: four cube faces — Moves Like → beta → combined → Klean Sneaks. */
+  /** Compact homepage: intro walk game → beta apps → combined story. */
   scrollSnap: true,
   oaasIntro: false,
   eventTracker: false,

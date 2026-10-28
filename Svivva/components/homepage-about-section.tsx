@@ -11,7 +11,7 @@ import {
   PRODUCT_NAME_LINE,
   PRODUCT_PROTECTION_PATH,
 } from "@/lib/product-positioning";
-import { Footprints, Orbit, Shield, Sprout } from "lucide-react";
+import { Layers, Orbit, Shield, Sprout } from "lucide-react";
 import { FeatureBetaBadge } from "@/components/feature-beta-badge";
 
 const HIGHLIGHTS = [
@@ -21,14 +21,6 @@ const HIGHLIGHTS = [
     description:
       "Main focus — seal uploads with hashes and export a court pack when priority matters.",
     href: PRODUCT_PROTECTION_PATH,
-    beta: false,
-  },
-  {
-    icon: Footprints,
-    title: "Klean Sneaks",
-    description:
-      "Free walk demo — BALOON8 car×sneaker hybrid, colorways, and Sneak Vision hazards.",
-    href: "/clean-sneaks",
     beta: false,
   },
   {
@@ -43,6 +35,13 @@ const HIGHLIGHTS = [
     title: "Orbit",
     description: "Beta — growth and indexing autopilot for search and answer engines.",
     href: "/orbit",
+    beta: true,
+  },
+  {
+    icon: Layers,
+    title: "Hybrid² Lab",
+    description: "Beta — fuse ZZAI modules (H¹), then hybridize listed blends (H²).",
+    href: "/dashboard/hybrid-lab",
     beta: true,
   },
 ] as const;

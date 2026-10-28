@@ -20,10 +20,9 @@ export const PRODUCT_PROTECTION_PITCH =
   "Timestamp your files, seal them with cryptographic hashes, and export a court-ready pack. Supporting evidence of anteriority — not a USPTO patent or Copyright Office registration.";
 
 /** Applications block (below the hero) — focused section intro. */
-export const HOMEPAGE_APPLICATIONS_TITLE =
-  "Protection first. Beta apps on the cube. Klean Sneaks on the walk.";
+export const HOMEPAGE_APPLICATIONS_TITLE = "Protection first. Beta apps on the cube.";
 export const HOMEPAGE_APPLICATIONS_SUBLINE =
-  "zzai zzai is mainly focused on Poor Man Protection. The spinning desk cube holds beta apps (Seeds, Orbit, Protect channels, and more). Klean Sneaks stays free as a walk demo.";
+  "zzai zzai is mainly focused on Poor Man Protection. The spinning desk cube holds beta apps (Seeds, Orbit, Protect channels, and more).";
 
 /** Sap / tree metaphor — quiet work under the surface while you rest and grow. */
 export const PRODUCT_SAP_METAPHOR =
@@ -31,7 +30,7 @@ export const PRODUCT_SAP_METAPHOR =
 
 /** One-sentence pitch (YC / hero / meta). */
 export const PRODUCT_ONE_LINER =
-  "zzai zzai leads with Poor Man Protection — seal sketches, colorways, and files with hashes and court packs. The desk cube is beta apps; Klean Sneaks stays free on the walk.";
+  "zzai zzai leads with Poor Man Protection — seal sketches, colorways, and files with hashes and court packs. The desk cube holds beta apps.";
 
 /** Plain-language main goal (homepage game + product faces). */
 export const PRODUCT_MAIN_GOAL =
@@ -51,11 +50,11 @@ export const HOMEPAGE_HOWTO_SUBLINE =
 
 /** Literal game ↔ product bridge (BALOON8 car×sneaker, Jordan 14 × Ferrari). */
 export const PRODUCT_GAME_HYBRID_METAPHOR =
-  "Protect first, then play — Poor Man Protection on the desk, Klean Sneaks on the BALOON8 walk.";
+  "Protect first, then play — Poor Man Protection on the desk, BALOON8 on the walk.";
 
-/** Last homepage panel — Klean Sneaks. */
-export const HOMEPAGE_GAME_FACE_TITLE = "Klean Sneaks on the walk";
-export const HOMEPAGE_GAME_FACE_SUBLINE = "Klean Sneaks — protect the BALOON8 while you play free.";
+/** Intro walk-game face copy (name kept off the homepage). */
+export const HOMEPAGE_GAME_FACE_TITLE = "Protect the BALOON8 on the walk";
+export const HOMEPAGE_GAME_FACE_SUBLINE = "Keep the car×sneaker hybrid clean while you play free.";
 
 /** Shown under the headline on the platform homepage face (mobile compact). */
 export const HOMEPAGE_PLATFORM_FACE_SUBLINE =
@@ -73,9 +72,9 @@ export const HOMEPAGE_SCROLL_TO_BETA_UP = "↑ Back to beta apps";
 export const HOMEPAGE_SCROLL_TO_BETA = "Scroll ↓ Beta apps";
 /** @deprecated Not used on homepage — kept for lingering imports. */
 export const HOMEPAGE_SCROLL_TO_MOVES = "Open Play";
-/** Open the free Klean Sneaks arena. */
-export const HOMEPAGE_SCROLL_TO_GAME = "Play Klean Sneaks free";
-/** From Klean Sneaks — back up to the combined story face. */
+/** @deprecated Not used on homepage — kept for lingering imports. */
+export const HOMEPAGE_SCROLL_TO_GAME = "Play free";
+/** From the intro walk game — back up to the combined story face. */
 export const HOMEPAGE_SCROLL_TO_COMBINED_UP = "↑ Back to story";
 /** @deprecated Use HOMEPAGE_SCROLL_TO_PROTECTION — kept for lingering imports. */
 export const HOMEPAGE_SCROLL_TO_PLATFORM = HOMEPAGE_SCROLL_TO_PROTECTION;
@@ -85,10 +84,10 @@ export const HOMEPAGE_BETA_CUBE_TITLE = "Beta apps";
 export const HOMEPAGE_BETA_CUBE_SUBLINE =
   "This cube is the beta apps desk — Seeds, Orbit, Protect channels, and the rest. zzai zzai’s main focus is Poor Man Protection above.";
 
-/** Platform desk modules — Klean Sneaks ships; Hybrid² / API / Pulse stay beta. */
+/** Platform desk modules — Hybrid² / API / Pulse stay beta. */
 export const CORE_PLATFORM_FEATURE_IDS = new Set<string>();
 
-/** Homepage cube — only Play (Klean Sneaks) is GA; API and other faces are beta. */
+/** Homepage cube — only Play is GA; API and other faces are beta. */
 export const CORE_CUBE_FACE_IDS = new Set<FeatureId>(["play"]);
 
 function normalizePath(pathname: string): string {

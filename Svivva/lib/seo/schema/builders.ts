@@ -224,7 +224,7 @@ export const HOMEPAGE_HOWTO_STEPS = [
   },
   {
     name: "Explore beta apps",
-    text: "Spin the desk cube for beta apps. Klean Sneaks stays free on the walk.",
+    text: "Spin the desk cube for beta apps — Seeds, Orbit, Protect channels, and more.",
   },
 ] as const;
 

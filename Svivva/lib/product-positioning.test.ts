@@ -10,7 +10,7 @@ import {
 } from "./product-positioning";
 
 describe("product-positioning", () => {
-  it("treats platform desk modules as beta (Klean Sneaks is the GA wedge)", () => {
+  it("treats platform desk modules as beta (Play is the GA wedge)", () => {
     expect(CORE_PLATFORM_FEATURE_IDS.size).toBe(0);
     expect(isCorePlatformFeatureId("hybridization")).toBe(false);
     expect(isCorePlatformFeatureId("api-builder")).toBe(false);
