@@ -1,48 +1,43 @@
 "use client";
 
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { BRAND } from "@/lib/brand";
 import {
   HOMEPAGE_APPLICATIONS_SUBLINE,
   HOMEPAGE_APPLICATIONS_TITLE,
   HOMEPAGE_SCROLL_TO_PROTECTION,
-  PRODUCT_NAME_LINE,
   PRODUCT_PROTECTION_PATH,
 } from "@/lib/product-positioning";
-import { Footprints, Orbit, Shield, Sprout } from "lucide-react";
+import { Layers, Orbit, Shield, Sprout } from "lucide-react";
 import { FeatureBetaBadge } from "@/components/feature-beta-badge";
 
 const HIGHLIGHTS = [
   {
     icon: Shield,
     title: "Poor Man Protection",
-    description:
-      "Main focus — seal uploads with hashes and export a court pack when priority matters.",
+    description: "Hash uploads and export a court pack.",
     href: PRODUCT_PROTECTION_PATH,
-    beta: false,
-  },
-  {
-    icon: Footprints,
-    title: "Klean Sneaks",
-    description:
-      "Free walk demo — BALOON8 car×sneaker hybrid, colorways, and Sneak Vision hazards.",
-    href: "/clean-sneaks",
     beta: false,
   },
   {
     icon: Sprout,
     title: "ZZAI Seeds",
-    description: "Beta — turn a PDF or YouTube brief into deployable apps from the desk cube.",
+    description: "PDF or YouTube brief → deployable apps.",
     href: "/seeds",
     beta: true,
   },
   {
     icon: Orbit,
     title: "Orbit",
-    description: "Beta — growth and indexing autopilot for search and answer engines.",
+    description: "Search and answer-engine growth.",
     href: "/orbit",
+    beta: true,
+  },
+  {
+    icon: Layers,
+    title: "Hybrid² Lab",
+    description: "Fuse modules into one product.",
+    href: "/dashboard/hybrid-lab",
     beta: true,
   },
 ] as const;
@@ -65,9 +60,6 @@ export function HomepageAboutSection() {
           <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-base">
             {HOMEPAGE_APPLICATIONS_SUBLINE}
           </p>
-          <Badge variant="secondary" className="px-4 py-1.5">
-            {PRODUCT_NAME_LINE} on {BRAND.name}
-          </Badge>
         </div>
 
         <ul className="grid gap-3 text-left sm:grid-cols-2">

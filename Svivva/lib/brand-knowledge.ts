@@ -100,15 +100,15 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
         "Hybrid² for AI products — channel×channel fusion, then Klean guardrails on Signal",
       geography: "Remote-first · web SaaS at zzaizzai.com",
       foundedNote:
-        "Independent team shipping Hybrid² module fusion, Klean production guardrails, and the BALOON8 Klean Sneaks demo",
+        "Independent team shipping Hybrid² module fusion, Klean production guardrails, and BALOON8 play demos",
       hosting: "Production on Vercel (team zzai-zzai, project all-de-apps-in-one)",
     },
-    definition: `zzai zzai (ZZAI / zzaizzai.com) — ${PRODUCT_TAGLINE}. ${PRODUCT_ONE_LINER} Klean Sneaks (/clean-sneaks) is the public game demo of the same metaphor; Seeds, Orbit, hardware, advocacy, and other desk modules are in beta.`,
+    definition: `zzai zzai (ZZAI / zzaizzai.com) — ${PRODUCT_ONE_LINER} Desk apps (Seeds, Orbit, and more) are beta.`,
     shortDescription: BRAND.shortDescription,
     longDescription: [
       PRODUCT_ONE_LINER,
       "Core (GA): Hybrid² Lab — fuse any two ZZAI channels (H¹), then hybridize listed blends (H²). API Builder, Projects, and Pulse keep fused endpoints Klean with schema, evals, hazard preview, and rollback.",
-      "Play demo: Klean Sneaks — BALOON8 car×sneaker (one chassis, unlockable colorways), Sneak Vision hazard preview, and mission saves that mirror keeping a hybrid ship Klean.",
+      "Play: BALOON8 car×sneaker walk demo at /clean-sneaks — one chassis, unlockable colorways, Sneak Vision hazard preview, and mission saves that mirror keeping a hybrid ship Klean.",
       "Beta modules (same domain): OaaS patch bay, Seeds, Orbit, hardware builder, Poor Man Protection, free tool hubs, ZZAI Show, education advocacy, and the full ZZAI Play studio.",
     ].join(" "),
     audience:
@@ -283,7 +283,7 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
             : f.id === "hardware"
               ? "Crest — schematics, BOM, manufacturing"
               : f.id === "play"
-                ? "Play — Klean Sneaks demo (keep the product Klean)"
+                ? "Play — BALOON8 walk demo (keep the product Klean)"
                 : f.id === "orbit"
                   ? "Grow — SEO, indexing, launch automation"
                   : "Protect — seals and court packs";
@@ -378,7 +378,7 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
         why: "Main product — seals, hashes, and court packs",
       },
       {
-        title: "Klean Sneaks / ZZAI Play",
+        title: "BALOON8 walk / ZZAI Play",
         path: "/clean-sneaks",
         why: "Indexable Play / entertainment URL (browser game)",
       },
@@ -415,52 +415,36 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
     ],
     faqs: [
       {
-        q: "What is zzai zzai / ZZAI / zzaizzai?",
-        a: `${PRODUCT_ONE_LINER} The public Klean Sneaks game at /clean-sneaks demonstrates the same metaphor; other modules (Seeds, Orbit, hardware, tools hubs) are in beta on the same domain.`,
+        q: "What is zzai zzai?",
+        a: PRODUCT_ONE_LINER,
       },
       {
         q: "Is ZZAI only an AI API builder?",
-        a: "No — the public story leads with Poor Man Protection: seal sketches, colorways, and files with cryptographic hashes and court packs. The desk cube holds beta apps; Klean Sneaks stays free on the walk.",
-      },
-      {
-        q: `What does “${PRODUCT_TAGLINE}” mean?`,
-        a: "Poor Man Protection is zzai zzai’s main focus — timestamp your work, seal it with hashes, and export a court-ready pack. Open /poor-man-protection.",
-      },
-      {
-        q: "How long does it take to ship with ZZAI?",
-        a: "Most teams get a working, tested endpoint live quickly. Describe what you need, define the output schema, deploy — ZZAI handles validation, rollback, and ops.",
-      },
-      {
-        q: "Does ZZAI work with OpenAI and other AI models?",
-        a: "Yes. ZZAI supports OpenAI (GPT-4o, GPT-4, GPT-3.5), Anthropic Claude, Google Gemini, and other LLMs. You can route between models based on cost or quality thresholds.",
-      },
-      {
-        q: "Do I need to write code to use ZZAI?",
-        a: "No. The core workflow is no-code — describe your API in plain English, set the output schema, and deploy. A TypeScript SDK is available for programmatic access.",
-      },
-      {
-        q: "Is ZZAI free to start?",
-        a: "Yes. Free tier with no credit card required. Pro is $49/month; Enterprise is $299/month for teams at scale.",
+        a: "No. The product is Poor Man Protection. Desk apps are beta.",
       },
       {
         q: "What is Poor Man Protection?",
-        a: "A ZZAI workflow that creates timestamped, cryptographically sealed evidentiary packages and court packs. It is not a registered patent, trademark, or copyright with any government office.",
+        a: "Timestamp and hash your files, then export a court pack. Not a government patent or copyright registration.",
+      },
+      {
+        q: "Is ZZAI free to start?",
+        a: "Yes. Free tier, no card. Pro $49/mo; Enterprise $299/mo.",
+      },
+      {
+        q: "Do I need to write code?",
+        a: "No. Describe the API in plain English, set a schema, deploy. SDK optional.",
+      },
+      {
+        q: "Which AI models work?",
+        a: "OpenAI, Anthropic Claude, Google Gemini, and others — route by cost or quality.",
       },
       {
         q: "Where is zzai zzai hosted?",
-        a: "The live site is https://zzaizzai.com on Vercel (team zzai-zzai).",
+        a: "https://zzaizzai.com on Vercel (team zzai-zzai).",
       },
       {
-        q: "What happens if my endpoint returns bad data?",
-        a: "ZZAI validates every response against your JSON schema and automatically retries or repairs malformed outputs. If quality drops below your threshold, auto-rollback reverts to the last good version.",
-      },
-      {
-        q: "What is Klean Sneaks?",
-        a: "Klean Sneaks is a free browser runner at /clean-sneaks built around BALOON8 — a car×sneaker hybrid (Jordan 14 × Ferrari logic) with one chassis and unlockable colorways. Zone-based shoe state, Sneak Vision hazards, and mission saves mirror Hybrid² fusion plus keeping the ship Klean.",
-      },
-      {
-        q: "What is ZZAI Show / events?",
-        a: "ZZAI Show (beta) is the public events hub at /events — live drops, Play sessions, and the model agency signing desk at /events/model-agency (comp card → submission pack). The Show console for hosts is in beta after sign-in.",
+        q: "What if my endpoint returns bad data?",
+        a: "We validate against your schema, retry or repair, and auto-rollback if quality drops.",
       },
     ],
   };

@@ -26,7 +26,6 @@ import { usePlatform } from "@/lib/platform-context";
 import { ZzaiModeToggle } from "@/components/zzai-mode-toggle";
 import { OrbitAdminAccessButton } from "@/components/orbit-admin-access-button";
 import Link from "next/link";
-import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
 import Image from "next/image";
 import zzaiLogo from "@/attached_assets/ZZAI_OFFICIAL_LOGO.png";
 import seedsLogo from "@/attached_assets/Svivva_Seeds_6_1771888740460.png";
@@ -136,7 +135,7 @@ export default function LandingPage() {
   const halfHRef = useRef(400);
   const [flipComplete, setFlipComplete] = useState(false);
 
-  // Returning visitors (and browser Back to /) skip the Klean Sneaks intro once per tab.
+  // Returning visitors (and browser Back to /) skip the walk-game intro once per tab.
   useLayoutEffect(() => {
     try {
       if (sessionStorage.getItem("svivva:homepageIntroComplete") === "1") {
@@ -690,7 +689,7 @@ export default function LandingPage() {
                   href="/clean-sneaks"
                   className="flex h-8 items-center gap-1 rounded-md px-1.5 hover:bg-muted/50 transition-colors sm:px-2"
                   data-testid="link-svivva-play-mobile"
-                  aria-label="Klean Sneaks"
+                  aria-label="Play"
                 >
                   <span className="seeds-holo-text text-base leading-none">&#9835;</span>
                   <span className="seeds-holo-text hidden text-xs font-bold tracking-wide sm:inline">
@@ -812,7 +811,7 @@ export default function LandingPage() {
                       </Link>
                       <Link href="/clean-sneaks">
                         <Button size="sm" variant="outline" className="border-[#5B8DA8]/40">
-                          Klean Sneaks
+                          Play
                         </Button>
                       </Link>
                       <Link href="/dashboard">
@@ -854,7 +853,7 @@ export default function LandingPage() {
                           <p className="text-sm sm:text-base text-muted-foreground max-w-lg">
                             ZZAI fuses AI modules on the Hybrid bus, then keeps every fusion Klean
                             on Signal — hazard preview, schema, rollback.{" "}
-                            <strong>Klean Sneaks</strong> is the literal car×sneaker demo; the
+                            The BALOON8 walk demo is the literal car×sneaker play surface; the
                             mixing-console patch bay below routes <strong>beta</strong> desk
                             modules.
                           </p>
@@ -1126,7 +1125,7 @@ export default function LandingPage() {
                   </h2>
                   <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto">
                     {mode === "digital"
-                      ? "Main goal: Hybrid² fuses AI modules; guardrails keep every fusion Klean in production. Klean Sneaks is BALOON8 — one car×sneaker chassis, colorway unlocks, Sneak Vision hazards."
+                      ? "Main goal: Hybrid² fuses AI modules; guardrails keep every fusion Klean in production. The walk demo is BALOON8 — one car×sneaker chassis, colorway unlocks, Sneak Vision hazards."
                       : "Schematics and BOM workflows — beta on the Crest bus."}
                   </p>
                 </div>
@@ -1301,7 +1300,7 @@ export default function LandingPage() {
                         and storefront creators.
                       </p>
                       <p>
-                        Klean Sneaks and Hybrid² Lab stay available as demos and beta tools. The
+                        The walk game and Hybrid² Lab stay available as demos and beta tools. The
                         homepage leads with Poor Man Protection because that is the product you open
                         first.
                       </p>
@@ -1998,9 +1997,9 @@ export default function LandingPage() {
                   id="clean-sneaks"
                   className="border-t border-white/10 py-16 text-center text-sm text-muted-foreground"
                 >
-                  {KLEAN_SNEAKS.title} is temporarily unavailable.{" "}
+                  The walk game is temporarily unavailable.{" "}
                   <Link href="/clean-sneaks" className="text-[#5B8DA8] underline">
-                    Open the game
+                    Open Play
                   </Link>
                   .
                 </section>
@@ -2012,7 +2011,7 @@ export default function LandingPage() {
                     id="clean-sneaks"
                     className="border-t border-white/10 py-20 text-center text-sm text-muted-foreground"
                   >
-                    Loading {KLEAN_SNEAKS.title}…
+                    Loading Play…
                   </section>
                 }
               >
@@ -2068,7 +2067,7 @@ export default function LandingPage() {
                           href="/clean-sneaks"
                           className="hover:text-foreground transition-colors"
                         >
-                          {KLEAN_SNEAKS.title}
+                          Play
                         </Link>
                       </li>
                       <li>

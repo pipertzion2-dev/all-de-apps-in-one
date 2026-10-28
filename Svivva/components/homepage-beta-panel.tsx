@@ -4,11 +4,7 @@ import dynamic from "next/dynamic";
 import { HomepageHeroBlock } from "@/components/homepage-hero-block";
 import { HomepageProtectionHero } from "@/components/homepage-protection-hero";
 import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
-import {
-  HOMEPAGE_BETA_CUBE_SUBLINE,
-  HOMEPAGE_BETA_CUBE_TITLE,
-  HOMEPAGE_SCROLL_TO_COMBINED,
-} from "@/lib/product-positioning";
+import { HOMEPAGE_SCROLL_TO_COMBINED } from "@/lib/product-positioning";
 
 const PlatformFeatureHub = dynamic(
   () => import("@/components/platform-feature-hub").then((m) => m.PlatformFeatureHub),
@@ -47,15 +43,6 @@ export function HomepageBetaPanel({
       style={{ scrollSnapAlign: "start" }}
     >
       <HomepageProtectionHero />
-
-      <div className="px-4 pt-8 pb-2 text-center sm:pt-12">
-        <h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-          {HOMEPAGE_BETA_CUBE_TITLE}
-        </h2>
-        <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-          {HOMEPAGE_BETA_CUBE_SUBLINE}
-        </p>
-      </div>
 
       <HomepageHeroBlock
         mountCanvas={mountCanvas}

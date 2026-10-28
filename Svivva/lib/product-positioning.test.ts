@@ -10,7 +10,7 @@ import {
 } from "./product-positioning";
 
 describe("product-positioning", () => {
-  it("treats platform desk modules as beta (Klean Sneaks is the GA wedge)", () => {
+  it("treats platform desk modules as beta (Play is the GA wedge)", () => {
     expect(CORE_PLATFORM_FEATURE_IDS.size).toBe(0);
     expect(isCorePlatformFeatureId("hybridization")).toBe(false);
     expect(isCorePlatformFeatureId("api-builder")).toBe(false);
@@ -44,12 +44,14 @@ describe("product-positioning", () => {
     expect(isBetaSurfacePath("/seeds")).toBe(true);
   });
 
-  it("uses Poor Man Protection tagline", () => {
-    expect(PRODUCT_TAGLINE).toMatch(/Poor Man Protection/i);
+  it("uses a short seal/pack tagline", () => {
+    expect(PRODUCT_TAGLINE).toMatch(/court-ready pack|timestamp|hash/i);
+    expect(PRODUCT_TAGLINE.toLowerCase()).not.toContain("poor man protection");
   });
 
   it("leads the homepage with a single focused thesis", () => {
-    expect(PRODUCT_HERO_HEADLINE.length).toBeGreaterThan(20);
-    expect(PRODUCT_HERO_HEADLINE).toMatch(/Poor Man Protection/i);
+    expect(PRODUCT_HERO_HEADLINE.length).toBeGreaterThan(10);
+    expect(PRODUCT_HERO_HEADLINE).toMatch(/Seal what you made/i);
+    expect(PRODUCT_HERO_HEADLINE.toLowerCase()).not.toContain("poor man protection");
   });
 });

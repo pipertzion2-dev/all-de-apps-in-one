@@ -11,7 +11,7 @@ describe("brand-knowledge (SearchDock / AEO entity)", () => {
       expect.arrayContaining(["zzai zzai", "ZZAI", "zzaizzai", "zzaizzai.com", "Svivva"]),
     );
     expect(k.definition.toLowerCase()).toContain("zzaizzai.com");
-    expect(k.definition).toMatch(/Poor Man Protection|Hybrid/i);
+    expect(k.definition).toMatch(/seal|hash|court pack/i);
   });
 
   it("maps the six cube faces and core products", () => {
@@ -36,7 +36,7 @@ describe("brand-knowledge (SearchDock / AEO entity)", () => {
     const p = getSvivvaProductProfile();
     expect(p.name).toBe("zzai zzai");
     expect(p.aliases).toEqual(expect.arrayContaining(["zzaizzai", "ZZAI"]));
-    expect(p.definition).toMatch(/guardrails|schema|rollback|Klean Sneaks/i);
+    expect(p.definition).toMatch(/guardrails|schema|rollback|Poor Man Protection|beta/i);
     expect(p.products.length).toBeGreaterThan(5);
     expect(p.cubeFaces).toHaveLength(6);
     expect(p.pricing).toMatch(/\$49/);
@@ -65,13 +65,15 @@ describe("brand-knowledge (SearchDock / AEO entity)", () => {
     expect(org.description).toMatch(/zzaizzai\.com/);
   });
 
-  it("indexes Klean Sneaks and ZZAI Show events as citation products", () => {
+  it("indexes the walk game and ZZAI Show events as citation products", () => {
     const k = getBrandKnowledge("https://zzaizzai.com");
     expect(k.products.some((p) => p.path === "/clean-sneaks")).toBe(true);
     expect(k.products.some((p) => p.path === "/events")).toBe(true);
     expect(k.citationUrls.some((u) => u.path === "/clean-sneaks")).toBe(true);
     expect(k.citationUrls.some((u) => u.path === "/events")).toBe(true);
-    expect(k.faqs.some((f) => /Klean Sneaks/i.test(f.q))).toBe(true);
+    expect(k.faqs.every((f) => !/Klean Sneaks/i.test(f.q) && !/Klean Sneaks/i.test(f.a))).toBe(
+      true,
+    );
     // Cube / Play citations must be indexable (not /play or /dashboard/*)
     expect(k.cubeFaces.find((f) => f.id === "play")?.path).toBe("/clean-sneaks");
     expect(k.cubeFaces.find((f) => f.id === "orbit")?.path).toBe("/orbit");

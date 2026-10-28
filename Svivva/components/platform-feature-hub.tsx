@@ -24,7 +24,7 @@ import {
   type MixingBusId,
 } from "@/lib/platform/feature-graph";
 import { FeatureBetaBadge } from "@/components/feature-beta-badge";
-import { isBetaPlatformFeatureId, PRODUCT_HERO_SUBLINE } from "@/lib/product-positioning";
+import { isBetaPlatformFeatureId } from "@/lib/product-positioning";
 import type { FeatureSuggestionResult } from "@/lib/platform/feature-suggestions";
 
 const CamoThreeOverlay = dynamic(
@@ -260,7 +260,7 @@ export function PlatformFeatureHub({
           isCompact ? "space-y-8" : "max-w-2xl mx-auto px-4 sm:px-6 space-y-10 relative z-10"
         }
       >
-        {!isCompact && (
+        {!isCompact && !hideBackground && (
           <header className="space-y-3 text-center sm:text-left">
             <p className="text-[11px] uppercase tracking-[0.28em] text-[#5B8DA8] flex flex-wrap items-center justify-center sm:justify-start gap-2">
               {OAAS_NAME} <FeatureBetaBadge compact />
@@ -268,12 +268,13 @@ export function PlatformFeatureHub({
             <h2 id="oaas-heading" className="text-3xl sm:text-4xl font-semibold tracking-tight">
               Beta desk modules
             </h2>
-            <p className="text-sm sm:text-base text-muted-foreground max-w-xl">
-              {PRODUCT_HERO_SUBLINE} Patch routes below explore beta channels — core shipping is
-              Hybrid² Lab, guardrails, Projects, Pulse, and Klean Sneaks.
-            </p>
           </header>
         )}
+        {!isCompact && hideBackground ? (
+          <h2 id="oaas-heading" className="sr-only">
+            Beta desk modules
+          </h2>
+        ) : null}
 
         <form onSubmit={onSubmit} className="space-y-4" aria-label="Patch bay">
           <label htmlFor="oaas-goal" className="sr-only">

@@ -64,22 +64,26 @@ describe("homepage scroll panels", () => {
     expect(betaSrc).toContain("HomepageHeroBlock");
     expect(betaSrc).toContain("PlatformFeatureHub");
     expect(betaSrc).toContain('id="oaas"');
-    expect(betaSrc).toContain("HOMEPAGE_BETA_CUBE_TITLE");
+    expect(betaSrc).not.toContain("HOMEPAGE_BETA_CUBE_TITLE");
+    expect(betaSrc).not.toContain("HOMEPAGE_BETA_CUBE_SUBLINE");
     expect(betaSrc).not.toContain('href="/play"');
     expect(betaSrc).not.toMatch(/Moves Like/i);
     expect(cubeSrc).toContain('id="nav-cube"');
     expect(cubeSrc).toContain("HomepageAboutSection");
     expect(cubeSrc).toContain("HomepageFounderSonSection");
     expect(cubeSrc).toMatch(/HomepageFounderSonSection[\s\S]*HomepagePricingSection/);
-    expect(cubeSrc).toContain('href="/clean-sneaks"');
     expect(cubeSrc).toContain("PRODUCT_PROTECTION_PATH");
+    expect(cubeSrc).not.toContain('href="/clean-sneaks"');
     expect(cubeSrc).not.toContain('href="/play"');
     expect(cubeSrc).not.toContain("HomepageProtectionHero");
     expect(cubeSrc).not.toContain("HomepageMovesLikeHero");
     expect(cubeSrc).not.toContain("HomepageHeroBlock");
     expect(cubeSrc).not.toContain("PlatformFeatureHub");
+    expect(cubeSrc).not.toMatch(/Klean Sneaks/i);
     expect(gameSrc).not.toContain("HomepageMainGoal");
-    expect(gameSrc).toContain("KLEAN_HOMEPAGE_TAGLINE");
+    expect(gameSrc).not.toContain("KLEAN_HOMEPAGE_TAGLINE");
+    expect(gameSrc).toContain("CleanSneaksLogoCube");
+    expect(gameSrc).not.toMatch(/Klean Sneaks/i);
     expect(playHubSrc).toContain("MovesLikeApp");
     expect(playHubSrc).toContain("tab-play-moves");
     expect(playHubSrc).toContain("tab-play-studio");
@@ -89,6 +93,9 @@ describe("homepage scroll panels", () => {
     expect(positioningSrc).toContain('PRODUCT_NAME_LINE = "Poor Man Protection"');
     expect(positioningSrc).toContain('PRODUCT_PROTECTION_PATH = "/poor-man-protection"');
     expect(positioningSrc).not.toMatch(/HOMEPAGE_APPLICATIONS_SUBLINE[\s\S]*Moves Like/);
+    expect(positioningSrc).not.toMatch(/HOMEPAGE_APPLICATIONS_TITLE[\s\S]*Klean Sneaks/);
+    expect(positioningSrc).not.toMatch(/HOMEPAGE_APPLICATIONS_SUBLINE[\s\S]*Klean Sneaks/);
+    expect(positioningSrc).not.toMatch(/HOMEPAGE_SCROLL_TO_GAME[\s\S]*Klean Sneaks/);
     const aboutSrc = readFileSync(
       resolve(__dirname, "../../components/homepage-about-section.tsx"),
       "utf8",
@@ -99,8 +106,12 @@ describe("homepage scroll panels", () => {
     );
     expect(aboutSrc).not.toMatch(/Moves Like/i);
     expect(exploreSrc).not.toMatch(/Moves Like/i);
+    expect(aboutSrc).not.toMatch(/Klean Sneaks/i);
+    expect(exploreSrc).not.toMatch(/Klean Sneaks/i);
     expect(aboutSrc).not.toContain('href="/play"');
     expect(exploreSrc).not.toContain('href="/play"');
+    expect(exploreSrc).not.toContain('href="/clean-sneaks"');
+    expect(aboutSrc).not.toContain('href="/clean-sneaks"');
     const founderSrc = readFileSync(
       resolve(__dirname, "../../components/homepage-founder-son-section.tsx"),
       "utf8",
@@ -116,10 +127,8 @@ describe("homepage scroll panels", () => {
     );
     expect(protectionSrc).not.toContain("Logo by my son");
     expect(protectionSrc).not.toContain("ZZAI_OFFICIAL_LOGO");
-    expect(protectionSrc).not.toContain("Klean Sneaks demo");
-    expect(aboutSrc).not.toContain("Klean Sneaks demo");
-    expect(exploreSrc).not.toContain("Klean Sneaks demo");
-    expect(pageSrc).not.toContain("Klean Sneaks demo");
+    expect(protectionSrc).not.toMatch(/Klean Sneaks/i);
+    expect(pageSrc).not.toMatch(/aria-label="Klean Sneaks"/);
     expect(pageSrc).toContain('data-testid="link-home-brand"');
     expect(pageSrc).toMatch(/link-home-brand[\s\S]*hidden[\s\S]*sm:inline/);
     expect(cubeSrc).toContain("HomepagePricingSection");

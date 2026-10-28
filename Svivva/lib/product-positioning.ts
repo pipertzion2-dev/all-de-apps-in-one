@@ -5,25 +5,22 @@
 
 import type { FeatureId } from "@/components/svivva-artifact/feature-defs";
 
-/** Scale-style homepage thesis — one clear job for the whole page. */
-export const PRODUCT_HERO_HEADLINE = "Seal what you made — Poor Man Protection first.";
+/** Homepage thesis — one job, one line (product name lives in the eyebrow). */
+export const PRODUCT_HERO_HEADLINE = "Seal what you made.";
 
 /** Product name — eyebrows, metadata suffix, and compact labels. */
 export const PRODUCT_NAME_LINE = "Poor Man Protection";
 
-/** Brand slogan — metadata and secondary hero line. */
-export const PRODUCT_TAGLINE =
-  "Poor Man Protection — timestamp, seal, and export a court-ready pack.";
+/** Brand slogan — metadata and secondary lines (keep short; don’t restate the hero). */
+export const PRODUCT_TAGLINE = "Timestamp, hash, and export a court-ready pack.";
 
-/** Desk tool pitch — primary homepage product. */
+/** One supporting sentence under the hero — disclaimer only, not a second pitch. */
 export const PRODUCT_PROTECTION_PITCH =
-  "Timestamp your files, seal them with cryptographic hashes, and export a court-ready pack. Supporting evidence of anteriority — not a USPTO patent or Copyright Office registration.";
+  "Evidence you had it first — not a USPTO patent or Copyright Office registration.";
 
 /** Applications block (below the hero) — focused section intro. */
-export const HOMEPAGE_APPLICATIONS_TITLE =
-  "Protection first. Beta apps on the cube. Klean Sneaks on the walk.";
-export const HOMEPAGE_APPLICATIONS_SUBLINE =
-  "zzai zzai is mainly focused on Poor Man Protection. The spinning desk cube holds beta apps (Seeds, Orbit, Protect channels, and more). Klean Sneaks stays free as a walk demo.";
+export const HOMEPAGE_APPLICATIONS_TITLE = "What we ship";
+export const HOMEPAGE_APPLICATIONS_SUBLINE = "Protection is the product. Desk apps are beta.";
 
 /** Sap / tree metaphor — quiet work under the surface while you rest and grow. */
 export const PRODUCT_SAP_METAPHOR =
@@ -31,38 +28,34 @@ export const PRODUCT_SAP_METAPHOR =
 
 /** One-sentence pitch (YC / hero / meta). */
 export const PRODUCT_ONE_LINER =
-  "zzai zzai leads with Poor Man Protection — seal sketches, colorways, and files with hashes and court packs. The desk cube is beta apps; Klean Sneaks stays free on the walk.";
+  "zzai zzai seals files with hashes and court packs so you can prove you made them first.";
 
 /** Plain-language main goal (homepage game + product faces). */
-export const PRODUCT_MAIN_GOAL =
-  "Open Poor Man Protection to seal what you made, then spin the cube for beta desk apps.";
+export const PRODUCT_MAIN_GOAL = "Seal your work. Spin the cube for beta desk apps.";
 
 /** Shorter hero subline. */
-export const PRODUCT_HERO_SUBLINE =
-  "Cryptographic seals and court packs for what you invent — then beta apps on the cube.";
+export const PRODUCT_HERO_SUBLINE = "Seals and court packs for what you invent.";
 
 /** Max ~12 words — mobile homepage faces only. */
-export const PRODUCT_HOOK_SHORT = "Seal it. Prove it. Protect it.";
+export const PRODUCT_HOOK_SHORT = "Seal it. Prove it.";
 
 /** HowTo section — keep in sync with `HOMEPAGE_HOWTO_STEPS` in seo/schema/builders.ts */
-export const HOMEPAGE_HOWTO_TITLE = "How Poor Man Protection works";
-export const HOMEPAGE_HOWTO_SUBLINE =
-  "Four steps from upload to a sealed, court-oriented pack — the main focus of zzai zzai.";
+export const HOMEPAGE_HOWTO_TITLE = "How it works";
+export const HOMEPAGE_HOWTO_SUBLINE = "Upload → seal → export.";
 
 /** Literal game ↔ product bridge (BALOON8 car×sneaker, Jordan 14 × Ferrari). */
 export const PRODUCT_GAME_HYBRID_METAPHOR =
-  "Protect first, then play — Poor Man Protection on the desk, Klean Sneaks on the BALOON8 walk.";
+  "Protect first, then play — Poor Man Protection on the desk, BALOON8 on the walk.";
 
-/** Last homepage panel — Klean Sneaks. */
-export const HOMEPAGE_GAME_FACE_TITLE = "Klean Sneaks on the walk";
-export const HOMEPAGE_GAME_FACE_SUBLINE = "Klean Sneaks — protect the BALOON8 while you play free.";
+/** Intro walk-game face copy (name kept off the homepage). */
+export const HOMEPAGE_GAME_FACE_TITLE = "Protect the BALOON8 on the walk";
+export const HOMEPAGE_GAME_FACE_SUBLINE = "Keep the car×sneaker hybrid clean while you play free.";
 
 /** Shown under the headline on the platform homepage face (mobile compact). */
-export const HOMEPAGE_PLATFORM_FACE_SUBLINE =
-  "Open Poor Man Protection — seal your work, then explore beta apps on the cube.";
+export const HOMEPAGE_PLATFORM_FACE_SUBLINE = "Seal your work. Explore beta apps below.";
 
 /** Primary CTA — open the main product. */
-export const HOMEPAGE_SCROLL_TO_PROTECTION = "Open Poor Man Protection";
+export const HOMEPAGE_SCROLL_TO_PROTECTION = "Start sealing";
 /** Public path for Poor Man Protection (canonical marketing URL). */
 export const PRODUCT_PROTECTION_PATH = "/poor-man-protection";
 /** From protection / beta — continue to the combined story / pricing face. */
@@ -73,22 +66,21 @@ export const HOMEPAGE_SCROLL_TO_BETA_UP = "↑ Back to beta apps";
 export const HOMEPAGE_SCROLL_TO_BETA = "Scroll ↓ Beta apps";
 /** @deprecated Not used on homepage — kept for lingering imports. */
 export const HOMEPAGE_SCROLL_TO_MOVES = "Open Play";
-/** Open the free Klean Sneaks arena. */
-export const HOMEPAGE_SCROLL_TO_GAME = "Play Klean Sneaks free";
-/** From Klean Sneaks — back up to the combined story face. */
+/** @deprecated Not used on homepage — kept for lingering imports. */
+export const HOMEPAGE_SCROLL_TO_GAME = "Play free";
+/** From the intro walk game — back up to the combined story face. */
 export const HOMEPAGE_SCROLL_TO_COMBINED_UP = "↑ Back to story";
 /** @deprecated Use HOMEPAGE_SCROLL_TO_PROTECTION — kept for lingering imports. */
 export const HOMEPAGE_SCROLL_TO_PLATFORM = HOMEPAGE_SCROLL_TO_PROTECTION;
 
-/** Beta apps face — the cube is the beta desk, not the main product. */
+/** @deprecated Title/subline no longer shown above the homepage desk cube. */
 export const HOMEPAGE_BETA_CUBE_TITLE = "Beta apps";
-export const HOMEPAGE_BETA_CUBE_SUBLINE =
-  "This cube is the beta apps desk — Seeds, Orbit, Protect channels, and the rest. zzai zzai’s main focus is Poor Man Protection above.";
+export const HOMEPAGE_BETA_CUBE_SUBLINE = "Seeds, Orbit, and more — still in beta.";
 
-/** Platform desk modules — Klean Sneaks ships; Hybrid² / API / Pulse stay beta. */
+/** Platform desk modules — Hybrid² / API / Pulse stay beta. */
 export const CORE_PLATFORM_FEATURE_IDS = new Set<string>();
 
-/** Homepage cube — only Play (Klean Sneaks) is GA; API and other faces are beta. */
+/** Homepage cube — only Play is GA; API and other faces are beta. */
 export const CORE_CUBE_FACE_IDS = new Set<FeatureId>(["play"]);
 
 function normalizePath(pathname: string): string {

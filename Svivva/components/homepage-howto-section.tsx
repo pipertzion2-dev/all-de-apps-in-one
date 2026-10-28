@@ -11,9 +11,6 @@ export function HomepageHowToSection() {
     >
       <div className="mx-auto max-w-3xl space-y-8">
         <div className="space-y-3 text-center">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#5B8DA8]">
-            How it works
-          </p>
           <h2 id="homepage-howto-heading" className="text-2xl font-bold sm:text-3xl">
             {HOMEPAGE_HOWTO_TITLE}
           </h2>

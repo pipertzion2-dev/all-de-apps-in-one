@@ -211,20 +211,16 @@ export function eventSeriesSchema(input?: { name?: string; description?: string;
 /** Shared HowTo steps — keep in sync with homepage HowTo HTML. */
 export const HOMEPAGE_HOWTO_STEPS = [
   {
-    name: "Open Poor Man Protection",
-    text: "Start the sealing ceremony — upload a sketch, colorway, lyric sheet, or any file you need to prove you had first.",
+    name: "Upload",
+    text: "Add a sketch, colorway, lyric sheet, or any file.",
   },
   {
-    name: "Hash and timestamp",
-    text: "Cryptographic hashes and dual-axis hybridization lock a timestamped evidentiary package.",
+    name: "Seal",
+    text: "We hash and timestamp it into an evidentiary package.",
   },
   {
-    name: "Export a court pack",
-    text: "Download a court-oriented pack and optional email delivery — supporting evidence of anteriority, not a USPTO filing.",
-  },
-  {
-    name: "Explore beta apps",
-    text: "Spin the desk cube for beta apps. Klean Sneaks stays free on the walk.",
+    name: "Export",
+    text: "Download a court-ready pack. Not a USPTO filing.",
   },
 ] as const;
 
