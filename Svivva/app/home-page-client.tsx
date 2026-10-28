@@ -683,9 +683,9 @@ export default function LandingPage() {
                   Protect
                 </Link>
                 <Link
-                  href="/play"
+                  href="/clean-sneaks"
                   className="rounded-md px-2.5 py-1.5 text-xs font-medium text-foreground/80 transition-colors hover:text-[#5B8DA8]"
-                  data-testid="link-svivva-play-mobile"
+                  data-testid="link-nav-game"
                   aria-label="Game"
                 >
                   Game
@@ -1966,7 +1966,7 @@ export default function LandingPage() {
                   className="border-t border-white/10 py-16 text-center text-sm text-muted-foreground"
                 >
                   Game is temporarily unavailable.{" "}
-                  <Link href="/play" className="text-[#5B8DA8] underline">
+                  <Link href="/clean-sneaks" className="text-[#5B8DA8] underline">
                     Open Game
                   </Link>
                   .
@@ -2031,7 +2031,10 @@ export default function LandingPage() {
                         </Link>
                       </li>
                       <li>
-                        <Link href="/play" className="hover:text-foreground transition-colors">
+                        <Link
+                          href="/clean-sneaks"
+                          className="hover:text-foreground transition-colors"
+                        >
                           Game
                         </Link>
                       </li>
