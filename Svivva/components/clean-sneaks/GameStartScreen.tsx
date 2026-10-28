@@ -77,12 +77,11 @@ export function GameStartScreen({
             interactive ? "cursor-pointer" : ""
           }`}
         />
-        {/* Lift dark collage voids so the start page never reads as a black field. */}
+        {/* Soft lift only — keep collage graphics readable. */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/35 via-white/20 to-white/40 mix-blend-soft-light"
+          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/18 via-transparent to-white/22 mix-blend-soft-light"
         />
-        <div aria-hidden className="pointer-events-none absolute inset-0 bg-white/15" />
       </div>
 
       {!preload && (

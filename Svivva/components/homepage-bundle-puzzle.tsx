@@ -18,8 +18,11 @@ type HomepageBundlePuzzleProps = {
   fillScreen?: boolean;
 };
 
-/** Target on-screen piece size when filling the start viewport. */
-const FILL_PIECE_PX = 128;
+/**
+ * Target on-screen piece size when filling the start viewport.
+ * Larger = fewer pieces, more of each CD-jewel graphic visible.
+ */
+const FILL_PIECE_PX = 260;
 
 type Edge = "flat" | "out" | "in";
 
@@ -156,8 +159,8 @@ export function HomepageBundlePuzzle({
       const w = Math.max(1, window.innerWidth);
       const h = Math.max(1, window.innerHeight);
       setFillGrid({
-        cols: Math.max(5, Math.ceil(w / FILL_PIECE_PX)),
-        rows: Math.max(6, Math.ceil(h / FILL_PIECE_PX)),
+        cols: Math.max(3, Math.ceil(w / FILL_PIECE_PX)),
+        rows: Math.max(3, Math.ceil(h / FILL_PIECE_PX)),
       });
     };
     sync();
@@ -217,10 +220,12 @@ export function HomepageBundlePuzzle({
           {/* White underlay — never show black through tab seams. */}
           <rect x={0} y={0} width={boardW} height={boardH} fill="#ffffff" />
           {pieces.map((piece, i) => {
-            const src = `${BUNDLE_CUBE_FACE_URLS[piece.faceIndex]}?v=puzzle-3`;
+            const src = `${BUNDLE_CUBE_FACE_URLS[piece.faceIndex]}?v=puzzle-4`;
             const x = piece.col * CELL;
             const y = piece.row * CELL;
-            const pad = TAB * CELL;
+            // Fill boards: keep most of the square collage in the cell (light tab bleed).
+            // Compact boards: larger pad so tabs stay filled when pieces are inset.
+            const pad = fillScreen ? TAB * CELL * 0.35 : TAB * CELL;
             const cx = x + CELL / 2;
             const cy = y + CELL / 2;
             const delay = Math.min(i * 28, 700);
@@ -242,7 +247,7 @@ export function HomepageBundlePuzzle({
                   y={y - pad}
                   width={CELL + pad * 2}
                   height={CELL + pad * 2}
-                  preserveAspectRatio="xMidYMid slice"
+                  preserveAspectRatio="xMidYMid meet"
                   clipPath={`url(#${uid}-piece-${i})`}
                   className="transition duration-500 ease-out group-hover:brightness-110"
                 />
