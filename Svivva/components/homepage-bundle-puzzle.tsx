@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useMemo } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { BUNDLE_CUBE_FACE_URLS } from "@/lib/clean-sneaks/assets";
 
 type HomepageBundlePuzzleProps = {
@@ -13,10 +13,13 @@ type HomepageBundlePuzzleProps = {
   rows?: number;
   /**
    * Fill the parent completely (edge-to-edge). Used on the game start screen.
-   * Disables inward piece scale so knobs nest tightly with no gaps.
+   * Stretches the board to the viewport and densifies cols/rows from screen size.
    */
   fillScreen?: boolean;
 };
+
+/** Target on-screen piece size when filling the start viewport. */
+const FILL_PIECE_PX = 128;
 
 type Edge = "flat" | "out" | "in";
 
@@ -142,11 +145,34 @@ function piecePath(spec: PieceSpec): string {
 export function HomepageBundlePuzzle({
   className = "",
   onActivate,
-  cols = 3,
-  rows = 2,
+  cols: colsProp = 3,
+  rows: rowsProp = 2,
   fillScreen = false,
 }: HomepageBundlePuzzleProps) {
   const uid = useId().replace(/:/g, "");
+  const [fillGrid, setFillGrid] = useState({ cols: colsProp, rows: rowsProp });
+
+  useEffect(() => {
+    if (!fillScreen || typeof window === "undefined") return;
+    const sync = () => {
+      const w = Math.max(1, window.innerWidth);
+      const h = Math.max(1, window.innerHeight);
+      setFillGrid({
+        cols: Math.max(5, Math.ceil(w / FILL_PIECE_PX)),
+        rows: Math.max(6, Math.ceil(h / FILL_PIECE_PX)),
+      });
+    };
+    sync();
+    window.addEventListener("resize", sync);
+    window.addEventListener("orientationchange", sync);
+    return () => {
+      window.removeEventListener("resize", sync);
+      window.removeEventListener("orientationchange", sync);
+    };
+  }, [fillScreen, colsProp, rowsProp]);
+
+  const cols = fillScreen ? fillGrid.cols : colsProp;
+  const rows = fillScreen ? fillGrid.rows : rowsProp;
   const pieces = useMemo(() => buildPieces(cols, rows), [cols, rows]);
   const boardW = cols * CELL;
   const boardH = rows * CELL;
@@ -176,7 +202,7 @@ export function HomepageBundlePuzzle({
         </span>
         <svg
           viewBox={`0 0 ${boardW} ${boardH}`}
-          preserveAspectRatio={fillScreen ? "xMidYMid slice" : "xMidYMid meet"}
+          preserveAspectRatio={fillScreen ? "none" : "xMidYMid meet"}
           className={
             fillScreen
               ? "h-full w-full"

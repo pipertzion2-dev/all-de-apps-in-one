@@ -13,9 +13,9 @@ export type GameStartScreenProps = {
   preload?: boolean;
 };
 
-/** Dense interlocking board that fills the start viewport. */
-const START_PUZZLE_COLS = 5;
-const START_PUZZLE_ROWS = 8;
+/** Seed grid — fillScreen densifies from viewport size on mount. */
+const START_PUZZLE_COLS = 8;
+const START_PUZZLE_ROWS = 6;
 
 let coverReadyPromise: Promise<void> | null = null;
 
@@ -77,6 +77,12 @@ export function GameStartScreen({
             interactive ? "cursor-pointer" : ""
           }`}
         />
+        {/* Lift dark collage voids so the start page never reads as a black field. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/35 via-white/20 to-white/40 mix-blend-soft-light"
+        />
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-white/15" />
       </div>
 
       {!preload && (
