@@ -2,6 +2,7 @@
 
 import type { CSSProperties } from "react";
 import { useEffect, useMemo, useState } from "react";
+import { CamoThreeOverlay } from "@/components/camo-three-overlay";
 import { LOADING_WHEEL_URLS } from "@/lib/clean-sneaks/assets";
 import { KLEAN_RUNNER_INTRO_LINE } from "@/lib/clean-sneaks/game-copy";
 
@@ -9,11 +10,11 @@ export type GameStartScreenProps = {
   className?: string;
   style?: CSSProperties;
   onStart?: () => void;
-  /** When true, wheels sit under the load overlay and ignore taps. */
+  /** When true, same wheels+flowers stage acts as the load screen (no Start CTA). */
   preload?: boolean;
 };
 
-/** Square hubcaps large enough that a vmax grid always covers the viewport. */
+/** Square hubcaps on a vmax grid — circles leave flower gaps between them. */
 const WHEEL_COLS = 7;
 const WHEEL_ROWS = 7;
 const WHEEL_COUNT = WHEEL_COLS * WHEEL_ROWS;
@@ -49,7 +50,7 @@ export function preloadMainGameCover(): Promise<void> {
 }
 
 /**
- * Game entry — full-bleed field of spinning iPbw hubcaps.
+ * Game entry + load — white Three.js flowers with spinning iPbw hubcaps on top.
  * Tap starts the runner (not the /play Moves hub).
  */
 export function GameStartScreen({
@@ -82,13 +83,13 @@ export function GameStartScreen({
 
   return (
     <div
-      className={`fixed inset-0 overflow-hidden bg-black ${
-        preload ? "z-[1] pointer-events-none" : "z-[30]"
+      className={`fixed inset-0 overflow-hidden bg-white ${
+        preload ? "z-[40] pointer-events-none" : "z-[30]"
       } ${className ?? ""}`}
       style={style}
-      role={interactive ? "button" : undefined}
-      aria-label={interactive ? "Start game" : undefined}
-      aria-hidden={preload ? true : undefined}
+      role={preload ? "status" : interactive ? "button" : undefined}
+      aria-label={interactive ? "Start game" : preload ? "Loading game" : undefined}
+      aria-live={preload ? "polite" : undefined}
       tabIndex={interactive ? 0 : -1}
       onClick={interactive ? onStart : undefined}
       onKeyDown={
@@ -101,11 +102,16 @@ export function GameStartScreen({
             }
           : undefined
       }
-      data-testid="game-start-wheels-screen"
+      data-testid={preload ? "game-load-wheels-screen" : "game-start-wheels-screen"}
     >
-      {/* Centered square vmax grid — always larger than the viewport on every axis. */}
+      {/* Same white + flowers stage as the homepage Game face. */}
+      <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
+        <CamoThreeOverlay preset="lock" isIntro eagerMount keepMounted className="h-full w-full" />
+      </div>
+
+      {/* Hubcaps sit above flowers; circular clips leave white/flower gaps. */}
       <div
-        className="pointer-events-none absolute left-1/2 top-1/2 grid -translate-x-1/2 -translate-y-1/2"
+        className="pointer-events-none absolute left-1/2 top-1/2 z-[1] grid -translate-x-1/2 -translate-y-1/2"
         style={{
           width: fieldPx,
           height: fieldPx,
@@ -118,7 +124,6 @@ export function GameStartScreen({
           <div
             key={`${wheel.src}-${index}`}
             className="relative min-h-0 min-w-0 overflow-hidden rounded-full"
-            style={{ transform: "scale(1.12)" }}
             data-testid={index < 3 ? `start-wheel-${index}` : undefined}
           >
             <div className={`h-full w-full ${reducedMotion ? "" : wheel.spin}`}>
@@ -134,7 +139,7 @@ export function GameStartScreen({
         ))}
       </div>
 
-      {!preload && (
+      {!preload ? (
         <div
           className="pointer-events-none absolute inset-x-0 z-10 flex flex-col items-center gap-2 px-4"
           style={{ bottom: "max(1.75rem, env(safe-area-inset-bottom, 0px))" }}
@@ -144,25 +149,27 @@ export function GameStartScreen({
             aria-hidden
             style={{
               background:
-                "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.55) 45%, rgba(0,0,0,0.88) 100%)",
+                "linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.35) 40%, rgba(255,255,255,0.92) 100%)",
             }}
           />
           <p
-            className="max-w-[min(92vw,28rem)] text-center text-sm font-semibold uppercase leading-snug tracking-[0.2em] text-white/95 drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)] sm:text-base"
+            className="max-w-[min(92vw,28rem)] text-center text-sm font-semibold uppercase leading-snug tracking-[0.2em] text-black/80 drop-shadow-[0_1px_0_rgba(255,255,255,0.9)] sm:text-base"
             data-testid="text-game-runner-intro"
           >
             {KLEAN_RUNNER_INTRO_LINE}
           </p>
           <p
-            className="text-5xl font-bold uppercase tracking-[0.35em] text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)] sm:text-6xl"
+            className="text-5xl font-bold uppercase tracking-[0.35em] text-black drop-shadow-[0_1px_0_rgba(255,255,255,0.95)] sm:text-6xl"
             data-testid="text-game-start"
           >
             Start
           </p>
-          <p className="animate-pulse text-xs uppercase tracking-[0.35em] text-white/80 sm:text-sm">
+          <p className="animate-pulse text-xs uppercase tracking-[0.35em] text-black/65 sm:text-sm">
             Tap to play
           </p>
         </div>
+      ) : (
+        <p className="sr-only">Loading</p>
       )}
     </div>
   );

@@ -8,7 +8,6 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { CleanSneaksGame3D } from "@/components/clean-sneaks/CleanSneaksGame3D";
-import { GameLoadingWheels } from "@/components/clean-sneaks/GameLoadingWheels";
 import { GameStartScreen } from "@/components/clean-sneaks/GameStartScreen";
 import { SceneErrorBoundary } from "@/components/clean-sneaks/SceneErrorBoundary";
 import { StealTheBundleCardGame } from "@/components/clean-sneaks/StealTheBundleCardGame";
@@ -127,10 +126,11 @@ function CleanSneaksPageContent() {
       data-clean-sneaks-fullscreen=""
       data-klean-reference-ui={uiTheme ? "1" : undefined}
       className={`fixed inset-0 z-[200] flex h-[100dvh] min-h-[100dvh] w-full flex-col overflow-hidden ${
-        preGame ? "bg-[#0a080e]" : uiTheme ? "" : "bg-[#0a0c10]"
+        preGame ? "bg-white" : uiTheme ? "" : "bg-[#0a0c10]"
       }`}
       style={Object.keys(shellThemeStyle).length ? shellThemeStyle : undefined}
     >
+      {/* Load + start share the same white flowers + spinning hubcaps stage. */}
       {!introComplete &&
         playMode === "runner" &&
         (gamePhase === "loading" || gamePhase === "start") && (
@@ -139,10 +139,6 @@ function CleanSneaksPageContent() {
             onStart={gamePhase === "start" ? handleStart : undefined}
           />
         )}
-
-      {gamePhase === "loading" && !introComplete && playMode === "runner" && (
-        <GameLoadingWheels fullscreen />
-      )}
 
       {!preGame && (
         <div
@@ -307,8 +303,8 @@ export default function CleanSneaksGameClient() {
   return (
     <Suspense
       fallback={
-        <div className="fixed inset-0 z-[200] flex h-[100dvh] items-center justify-center bg-black">
-          <GameLoadingWheels fullscreen />
+        <div className="fixed inset-0 z-[200] bg-white">
+          <GameStartScreen preload />
         </div>
       }
     >

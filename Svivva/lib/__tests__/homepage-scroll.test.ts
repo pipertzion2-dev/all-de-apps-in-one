@@ -46,10 +46,13 @@ describe("homepage scroll panels", () => {
     expect(cubeSrc).not.toContain("HomepageScrollHint");
     expect(startSrc).not.toContain("HomepageBundlePuzzle");
     expect(startSrc).toContain("game-start-wheels-screen");
+    expect(startSrc).toContain("game-load-wheels-screen");
     expect(startSrc).toContain("LOADING_WHEEL_URLS");
+    expect(startSrc).toContain("CamoThreeOverlay");
+    expect(startSrc).toContain('preset="lock"');
     expect(startSrc).toContain("Tap to play");
     expect(startSrc).not.toContain("fillScreen");
-    expect(startSrc).toContain("bg-black");
+    expect(startSrc).toContain("bg-white");
   });
 
   it("splits main app faces: beta apps then combined; game is intro; no Moves Like ads", () => {
