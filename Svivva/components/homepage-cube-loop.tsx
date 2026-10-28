@@ -10,6 +10,9 @@ import {
   cubeLoopWrapTarget,
   isNearDocumentBottom,
   isNearDocumentTop,
+  isNearPanelBottom,
+  isNearPanelTop,
+  nearestHomepagePanel,
 } from "@/lib/homepage-cube-loop";
 
 type HomepageCubeLoopProps = {
@@ -21,11 +24,8 @@ function isLoopPanel(id: HomepageFlipPanelId): id is (typeof HOMEPAGE_FLIP_PANEL
 }
 
 /**
- * Edge wrap only — keeps the homepage continuous with a fine cube flip:
- * - Past the white game face (end) → flip forward to beta
- * - Past the top of beta → flip back to the white game face
- *
- * No mid-page infinite jump onto the story face.
+ * Continuous cube wrap with a fine flip:
+ * story (2nd page) → white game (1st page) → beta → story …
  */
 export function HomepageCubeLoop({ enabled = true }: HomepageCubeLoopProps) {
   const lockedUntilRef = useRef(0);
@@ -51,11 +51,19 @@ export function HomepageCubeLoop({ enabled = true }: HomepageCubeLoopProps) {
     };
 
     const tryWrap = (deltaY: number) => {
+      const active = nearestHomepagePanel();
+      const nearPanelBottom = active
+        ? isNearPanelBottom(active, HOMEPAGE_CUBE_LOOP_EDGE_PX)
+        : false;
+      const nearPanelTop = active ? isNearPanelTop(active, HOMEPAGE_CUBE_LOOP_EDGE_PX) : false;
       const target = cubeLoopWrapTarget(deltaY, {
+        activePanel: active,
+        nearPanelBottom,
+        nearPanelTop,
         nearBottom: isNearDocumentBottom(HOMEPAGE_CUBE_LOOP_EDGE_PX),
         nearTop: isNearDocumentTop(HOMEPAGE_CUBE_LOOP_EDGE_PX),
       });
-      if (!target || !isLoopPanel(target)) return false;
+      if (!target || !isLoopPanel(target) || target === active) return false;
       void wrapTo(target, deltaY);
       return true;
     };

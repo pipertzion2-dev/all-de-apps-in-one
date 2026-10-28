@@ -30,10 +30,11 @@ describe("homepage flip stack", () => {
     expect(hashForFlipPanel("home-beta")).toBe("home-beta");
   });
 
-  it("orders two main-app cube faces: beta → combined", () => {
-    expect(HOMEPAGE_FLIP_PANELS).toEqual(["home-beta", "nav-cube"]);
+  it("orders continuous cube faces: beta → story → white game", () => {
+    expect(HOMEPAGE_FLIP_PANELS).toEqual(["home-beta", "nav-cube", "home-game"]);
     expect(flipPanelIndex("home-beta")).toBe(0);
     expect(flipPanelIndex("nav-cube")).toBe(1);
+    expect(flipPanelIndex("home-game")).toBe(2);
   });
 
   it("runs a timed 3D cube flip with button-only panel changes", () => {

@@ -74,8 +74,8 @@ export const HOMEPAGE_SCROLL_WRAP_TO_FIRST = "Flip to start";
 export const HOMEPAGE_SCROLL_TO_BETA = "Scroll ↓ Beta apps";
 /** @deprecated Not used on homepage — kept for lingering imports. */
 export const HOMEPAGE_SCROLL_TO_MOVES = "Open Play";
-/** Open the free game (route /clean-sneaks — label stays brand-neutral on homepage). */
-export const HOMEPAGE_SCROLL_TO_GAME = "Open Game";
+/** After the story face — continue to the white game face. */
+export const HOMEPAGE_SCROLL_TO_GAME = "Continue to game";
 /** From the game face — back up to the combined story face. */
 export const HOMEPAGE_SCROLL_TO_COMBINED_UP = "↑ Back to story";
 /** @deprecated Use HOMEPAGE_SCROLL_TO_PROTECTION — kept for lingering imports. */
