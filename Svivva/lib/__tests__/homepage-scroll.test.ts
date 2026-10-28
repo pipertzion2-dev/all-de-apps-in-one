@@ -36,7 +36,7 @@ describe("homepage scroll panels", () => {
     );
     expect(cubeSrc).toContain("CleanSneaksLogoCube");
     expect(cubeSrc).not.toContain("HomepageBundlePuzzle");
-    expect(cubeSrc).toContain('router.push("/clean-sneaks")');
+    expect(cubeSrc).toContain('window.location.assign("/clean-sneaks")');
     expect(cubeSrc).toContain('id="home-game"');
     expect(cubeSrc).toContain("CamoThreeOverlay");
     expect(cubeSrc).toContain('preset="lock"');
@@ -44,11 +44,11 @@ describe("homepage scroll panels", () => {
     expect(cubeSrc).toContain("Tap cube to play free");
     expect(cubeSrc).not.toContain("button-enter-main-app");
     expect(cubeSrc).not.toContain("HomepageScrollHint");
-    expect(startSrc).not.toContain("HomepageBundlePuzzle");
-    expect(startSrc).toContain("game-start-cover-screen");
-    expect(startSrc).toContain("MAIN_GAME_COVER_URL");
-    expect(startSrc).toContain("img-main-game-cover");
-    expect(startSrc).toContain("bg-black");
+    expect(startSrc).toContain("HomepageBundlePuzzle");
+    expect(startSrc).toContain("game-start-puzzle-screen");
+    expect(startSrc).toContain("Tap puzzle to play");
+    expect(startSrc).not.toContain("fillScreen");
+    expect(startSrc).toMatch(/bg-\[#0a080e\]/);
   });
 
   it("splits main app faces: beta apps then combined; game is intro; no Moves Like ads", () => {
