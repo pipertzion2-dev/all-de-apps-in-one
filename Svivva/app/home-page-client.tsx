@@ -689,11 +689,11 @@ export default function LandingPage() {
                   href="/play"
                   className="flex h-8 items-center gap-1 rounded-md px-1.5 hover:bg-muted/50 transition-colors sm:px-2"
                   data-testid="link-svivva-play-mobile"
-                  aria-label="Play"
+                  aria-label="Game"
                 >
                   <span className="seeds-holo-text text-base leading-none">&#9835;</span>
                   <span className="seeds-holo-text hidden text-xs font-bold tracking-wide sm:inline">
-                    Play
+                    Game
                   </span>
                 </Link>
                 <Link
@@ -1995,9 +1995,9 @@ export default function LandingPage() {
                   id="clean-sneaks"
                   className="border-t border-white/10 py-16 text-center text-sm text-muted-foreground"
                 >
-                  Play is temporarily unavailable.{" "}
+                  Game is temporarily unavailable.{" "}
                   <Link href="/play" className="text-[#5B8DA8] underline">
-                    Open Play
+                    Open Game
                   </Link>
                   .
                 </section>
@@ -2009,7 +2009,7 @@ export default function LandingPage() {
                     id="clean-sneaks"
                     className="border-t border-white/10 py-20 text-center text-sm text-muted-foreground"
                   >
-                    Loading Play…
+                    Loading Game…
                   </section>
                 }
               >
@@ -2062,7 +2062,7 @@ export default function LandingPage() {
                       </li>
                       <li>
                         <Link href="/play" className="hover:text-foreground transition-colors">
-                          Play
+                          Game
                         </Link>
                       </li>
                       <li>

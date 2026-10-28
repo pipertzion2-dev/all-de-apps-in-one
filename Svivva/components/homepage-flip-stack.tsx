@@ -50,7 +50,7 @@ function settledOnPlatform(index: number, target: number, panel: HomepageFlipPan
 
 /**
  * Two full-viewport Dune-style rotateX faces:
- * Klean Sneaks (0) → The Moves Like (1).
+ * Game intro (0) → The Moves Like (1).
  *
  * Panel changes are button/event only — never wheel or scroll hijacking.
  * Wheel/trackpad scroll is native inside the Moves Like overlay so the site

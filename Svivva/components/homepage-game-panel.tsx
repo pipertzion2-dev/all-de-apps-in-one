@@ -16,7 +16,7 @@ type HomepageGamePanelProps = {
   onEnterApp?: () => void;
 };
 
-/** First page — Klean Sneaks cube on white with flowers + digi camo across the full viewport. */
+/** First page — Game cube on white with flowers + digi camo across the full viewport. */
 export function HomepageGamePanel({ asIntro = false, onEnterApp }: HomepageGamePanelProps) {
   const router = useRouter();
 

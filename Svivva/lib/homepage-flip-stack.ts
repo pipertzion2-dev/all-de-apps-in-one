@@ -2,7 +2,7 @@
 export type HomepageFlipPanelId = "home-game" | "home-moves" | "home-beta" | "nav-cube";
 
 /**
- * Cube scroll order (index 0 = top) after the Klean Sneaks intro flips away:
+ * Cube scroll order (index 0 = top) after the game intro flips away:
  * beta apps → combined (about / pricing / FAQ).
  * The Moves Like lives in /play; the game is the first-page intro, not a scroll face.
  */

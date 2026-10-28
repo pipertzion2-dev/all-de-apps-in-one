@@ -65,13 +65,15 @@ describe("brand-knowledge (SearchDock / AEO entity)", () => {
     expect(org.description).toMatch(/zzaizzai\.com/);
   });
 
-  it("indexes Play and ZZAI Show events as citation products", () => {
+  it("indexes Game and ZZAI Show events as citation products", () => {
     const k = getBrandKnowledge("https://zzaizzai.com");
-    expect(k.products.some((p) => p.path === "/clean-sneaks")).toBe(true);
+    expect(k.products.some((p) => p.path === "/clean-sneaks" && p.name === "Game")).toBe(true);
     expect(k.products.some((p) => p.path === "/events")).toBe(true);
     expect(k.citationUrls.some((u) => u.path === "/play")).toBe(true);
     expect(k.citationUrls.some((u) => u.path === "/events")).toBe(true);
-    expect(k.faqs.some((f) => /Klean Sneaks/i.test(f.q))).toBe(true);
+    expect(k.faqs.some((f) => /What is the Game/i.test(f.q))).toBe(true);
+    expect(k.faqs.every((f) => !/Klean Sneaks/i.test(`${f.q} ${f.a}`))).toBe(true);
+    expect(k.cubeFaces.find((f) => f.id === "play")?.name).toBe("Game");
     expect(k.cubeFaces.find((f) => f.id === "play")?.path).toBe("/clean-sneaks");
     expect(k.cubeFaces.find((f) => f.id === "orbit")?.path).toBe("/orbit");
   });
@@ -81,5 +83,6 @@ describe("brand-knowledge (SearchDock / AEO entity)", () => {
     const serialized = JSON.stringify(graph);
     expect(serialized).not.toMatch(/Klean Sneaks/i);
     expect(serialized).not.toMatch(/\bKlean\b/);
+    expect(serialized).toMatch(/Game/);
   });
 });

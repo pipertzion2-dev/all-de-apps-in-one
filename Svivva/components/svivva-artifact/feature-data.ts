@@ -22,13 +22,13 @@ export const ARTIFACT_FEATURES: ArtworkFeature[] = [
   {
     id: "play",
     artwork: MEDIA.artworks.play,
-    artworkAlt: "BREATH_AWAY — ZZAI Play",
-    title: "ZZAI Play",
+    artworkAlt: "BREATH_AWAY — Game",
+    title: "Game",
     subtitle: "Takes your breath away",
     description:
       "AI music composition that writes, voices, and performs hocket arrangements — meend, sitar accents, full-ensemble intelligence.",
     href: "/play",
-    cta: "Open Play",
+    cta: "Open Game",
     accentColor: "#7c3aed",
     accentColorRgb: "124,58,237",
     motifs: ["scan lines", "waveforms", "motion streaks", "neon grid"],

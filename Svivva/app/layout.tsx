@@ -78,7 +78,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "Orbit SEO",
       "Poor Man Protection",
       "ZZAI Show",
-      "ZZAI Play",
+      "Game",
     ],
     openGraph: {
       type: "website",

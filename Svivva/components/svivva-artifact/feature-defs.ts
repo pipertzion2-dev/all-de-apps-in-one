@@ -29,14 +29,14 @@ export const FEATURES: FeatureDef[] = [
   withBeta({
     id: "play",
     index: 0,
-    name: "ZZAI Play",
-    shortLabel: "Play",
+    name: "Game",
+    shortLabel: "Game",
     artworkTitle: "BREATH AWAY",
     artworkSrc: MEDIA.artworks.play,
     tagline: "Car×sneaker hybrid — BALOON8 colorways",
     description:
-      "ZZAI Play — one BALOON8 car×sneaker chassis, unlockable colorways, Sneak Vision hazards, and mission saves that mirror Hybrid² plus production guardrails.",
-    cta: { label: "Open Play", href: FEATURE_PUBLIC_PATHS.play },
+      "Game — one BALOON8 car×sneaker chassis, unlockable colorways, Sneak Vision hazards, and mission saves that mirror Hybrid² plus production guardrails.",
+    cta: { label: "Open Game", href: FEATURE_PUBLIC_PATHS.play },
     accentColor: "#90c4d8",
     motif: "waveform",
     signatureMotion: "scan-lines pulse with rhythm",

@@ -108,8 +108,8 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
     longDescription: [
       PRODUCT_ONE_LINER,
       "Core (GA): Hybrid² Lab — fuse any two ZZAI channels (H¹), then hybridize listed blends (H²). API Builder, Projects, and Pulse keep fused endpoints safe with schema, evals, hazard preview, and rollback.",
-      "Play: ZZAI Play — BALOON8 car×sneaker (one chassis, unlockable colorways), Sneak Vision hazard preview, and mission saves that mirror Hybrid² plus production guardrails.",
-      "Beta modules (same domain): OaaS patch bay, Seeds, Orbit, hardware builder, Poor Man Protection, free tool hubs, ZZAI Show, education advocacy, and the full ZZAI Play studio.",
+      "Game: free BALOON8 car×sneaker walk (one chassis, unlockable colorways), Sneak Vision hazard preview, and mission saves that mirror Hybrid² plus production guardrails.",
+      "Beta modules (same domain): OaaS patch bay, Seeds, Orbit, hardware builder, Poor Man Protection, free tool hubs, ZZAI Show, education advocacy, and the game studio.",
     ].join(" "),
     audience:
       "Founders composing AI product modules who need Hybrid² fusion plus production guardrails — not another thin API wrapper or hand-rolled validation stack.",
@@ -142,7 +142,7 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       "OaaS",
       "Orchestration as a Service",
       "ZZAI Seeds",
-      "ZZAI Play",
+      "Game",
       "Orbit marketing",
       "Poor Man Protection",
       "free AI tools",
@@ -192,18 +192,10 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       },
       {
         id: "play",
-        name: "ZZAI Play",
+        name: "Game",
         path: "/clean-sneaks",
         oneLiner:
           "BALOON8 car×sneaker demo — one hybrid chassis, colorways, Sneak Vision ≈ hazard preview.",
-      },
-      {
-        id: "klean-sneaks",
-        name: "Klean Sneaks",
-        path: "/clean-sneaks",
-        oneLiner:
-          "Free runner — car×sneaker hybrid, unlockable colorways, zone state, Sneak Vision hazards.",
-        audience: "players and entertainment visitors",
       },
       {
         id: "events",
@@ -283,7 +275,7 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
             : f.id === "hardware"
               ? "Crest — schematics, BOM, manufacturing"
               : f.id === "play"
-                ? "Play — free BALOON8 walk demo"
+                ? "Game — free BALOON8 walk demo"
                 : f.id === "orbit"
                   ? "Grow — SEO, indexing, launch automation"
                   : "Protect — seals and court packs";
@@ -318,7 +310,7 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       {
         term: "Cube faces",
         definition:
-          "Six homepage navigators — Seeds, Signal (API), Crest (Hardware), Play, Orbit, Protect — that route one product through the full ship journey.",
+          "Six homepage navigators — Seeds, Signal (API), Crest (Hardware), Game, Orbit, Protect — that route one product through the full ship journey.",
       },
       {
         term: "Prompt-to-API",
@@ -378,9 +370,9 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
         why: "Main product — seals, hashes, and court packs",
       },
       {
-        title: "ZZAI Play",
+        title: "Game",
         path: "/play",
-        why: "Indexable Play / entertainment hub",
+        why: "Indexable game / entertainment hub",
       },
       {
         title: "ZZAI Show events",
@@ -455,12 +447,12 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
         a: "ZZAI validates every response against your JSON schema and automatically retries or repairs malformed outputs. If quality drops below your threshold, auto-rollback reverts to the last good version.",
       },
       {
-        q: "What is Klean Sneaks?",
-        a: "Klean Sneaks is a free browser runner at /clean-sneaks built around BALOON8 — a car×sneaker hybrid (Jordan 14 × Ferrari logic) with one chassis and unlockable colorways. Zone-based shoe state, Sneak Vision hazards, and mission saves mirror Hybrid² fusion plus keeping the ship Klean.",
+        q: "What is the Game on zzai zzai?",
+        a: "The free browser game at /clean-sneaks is a BALOON8 car×sneaker hybrid walk — one chassis, unlockable colorways, zone-based shoe state, and Sneak Vision hazards. Open it from the Game face on the homepage cube.",
       },
       {
         q: "What is ZZAI Show / events?",
-        a: "ZZAI Show (beta) is the public events hub at /events — live drops, Play sessions, and the model agency signing desk at /events/model-agency (comp card → submission pack). The Show console for hosts is in beta after sign-in.",
+        a: "ZZAI Show (beta) is the public events hub at /events — live drops, game sessions, and the model agency signing desk at /events/model-agency (comp card → submission pack). The Show console for hosts is in beta after sign-in.",
       },
     ],
   };

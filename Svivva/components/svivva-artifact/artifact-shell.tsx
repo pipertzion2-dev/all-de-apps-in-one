@@ -78,7 +78,7 @@ export function SvivvaArtifact({ mountCanvas = true }: SvivvaArtifactProps) {
           className="mt-3 text-muted-foreground/80 text-sm"
           style={{ fontFamily: '"Zc", sans-serif' }}
         >
-          Play · Seeds · Hardware · Digital · Orbit · Protect
+          Game · Seeds · Hardware · Digital · Orbit · Protect
         </p>
       </div>
 

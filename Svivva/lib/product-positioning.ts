@@ -52,8 +52,8 @@ export const HOMEPAGE_HOWTO_SUBLINE =
 export const PRODUCT_GAME_HYBRID_METAPHOR =
   "Protect first, then explore — Poor Man Protection on the desk, beta apps on the cube.";
 
-/** Last homepage panel — play / walk face (no product brand name in copy). */
-export const HOMEPAGE_GAME_FACE_TITLE = "Play free on the walk";
+/** Last homepage panel — game / walk face (no product brand name in copy). */
+export const HOMEPAGE_GAME_FACE_TITLE = "Game on the walk";
 export const HOMEPAGE_GAME_FACE_SUBLINE = "Protect the BALOON8 while you play free.";
 
 /** Shown under the headline on the platform homepage face (mobile compact). */
@@ -72,9 +72,9 @@ export const HOMEPAGE_SCROLL_TO_BETA_UP = "↑ Back to beta apps";
 export const HOMEPAGE_SCROLL_TO_BETA = "Scroll ↓ Beta apps";
 /** @deprecated Not used on homepage — kept for lingering imports. */
 export const HOMEPAGE_SCROLL_TO_MOVES = "Open Play";
-/** Open the free play arena (route /clean-sneaks — label stays brand-neutral on homepage). */
-export const HOMEPAGE_SCROLL_TO_GAME = "Play free";
-/** From the play face — back up to the combined story face. */
+/** Open the free game (route /clean-sneaks — label stays brand-neutral on homepage). */
+export const HOMEPAGE_SCROLL_TO_GAME = "Open Game";
+/** From the game face — back up to the combined story face. */
 export const HOMEPAGE_SCROLL_TO_COMBINED_UP = "↑ Back to story";
 /** @deprecated Use HOMEPAGE_SCROLL_TO_PROTECTION — kept for lingering imports. */
 export const HOMEPAGE_SCROLL_TO_PLATFORM = HOMEPAGE_SCROLL_TO_PROTECTION;
@@ -87,7 +87,7 @@ export const HOMEPAGE_BETA_CUBE_SUBLINE =
 /** Platform desk modules — Hybrid² / API / Pulse stay beta. */
 export const CORE_PLATFORM_FEATURE_IDS = new Set<string>();
 
-/** Homepage cube — only Play is GA; API and other faces are beta. */
+/** Homepage cube — only Game is GA; API and other faces are beta. */
 export const CORE_CUBE_FACE_IDS = new Set<FeatureId>(["play"]);
 
 function normalizePath(pathname: string): string {
