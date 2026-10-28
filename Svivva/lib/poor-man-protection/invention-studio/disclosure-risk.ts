@@ -5,13 +5,37 @@ export type DisclosureRiskHit = {
 };
 
 const PATTERNS: Array<{ re: RegExp; phrase: string; severity: "high" | "medium" }> = [
-  { re: /\b(post(ing)?|posted)\b.*\b(online|instagram|tiktok|youtube|twitter|x\.com|linkedin)\b/i, phrase: "public posting", severity: "high" },
+  {
+    re: /\b(post(ing)?|posted)\b.*\b(online|instagram|tiktok|youtube|twitter|x\.com|linkedin)\b/i,
+    phrase: "public posting",
+    severity: "high",
+  },
   { re: /\b(publish|published|publishing)\b/i, phrase: "publishing", severity: "high" },
-  { re: /\b(demo(nstrate|nstration|ing)?|show(n|ing)?\s+at\s+(a\s+)?(trade|fair|conference))\b/i, phrase: "public demonstration", severity: "high" },
-  { re: /\b(sell(ing)?|sold|offer(ing)?\s+for\s+sale|crowdfund)\b/i, phrase: "sale / offer for sale", severity: "high" },
-  { re: /\b(disclose|disclosed|disclosure|publicly\s+share)\b/i, phrase: "public disclosure", severity: "high" },
-  { re: /\b(kickstarter|indiegogo|product\s+hunt)\b/i, phrase: "crowdfunding / launch platforms", severity: "medium" },
-  { re: /\b(open[- ]source|github\s+public)\b/i, phrase: "open-source release", severity: "medium" },
+  {
+    re: /\b(demo(nstrate|nstration|ing)?|show(n|ing)?\s+at\s+(a\s+)?(trade|fair|conference))\b/i,
+    phrase: "public demonstration",
+    severity: "high",
+  },
+  {
+    re: /\b(sell(ing)?|sold|offer(ing)?\s+for\s+sale|crowdfund)\b/i,
+    phrase: "sale / offer for sale",
+    severity: "high",
+  },
+  {
+    re: /\b(disclose|disclosed|disclosure|publicly\s+share)\b/i,
+    phrase: "public disclosure",
+    severity: "high",
+  },
+  {
+    re: /\b(kickstarter|indiegogo|product\s+hunt)\b/i,
+    phrase: "crowdfunding / launch platforms",
+    severity: "medium",
+  },
+  {
+    re: /\b(open[- ]source|github\s+public)\b/i,
+    phrase: "open-source release",
+    severity: "medium",
+  },
 ];
 
 export function scanDisclosureRisk(text: string): DisclosureRiskHit[] {

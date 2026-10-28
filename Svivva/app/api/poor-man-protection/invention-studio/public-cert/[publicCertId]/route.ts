@@ -11,10 +11,7 @@ import { PROOFCHAIN_DISCLAIMER } from "@/lib/poor-man-protection/invention-studi
  * Client-vault certificates are verified via POST body hash check on /protect/proofchain.
  * Server-persisted authorized certs (when synced) may be looked up here.
  */
-export async function GET(
-  _req: NextRequest,
-  ctx: { params: Promise<{ publicCertId: string }> },
-) {
+export async function GET(_req: NextRequest, ctx: { params: Promise<{ publicCertId: string }> }) {
   const { publicCertId } = await ctx.params;
   if (!publicCertId || publicCertId.length < 8) {
     return NextResponse.json({ error: "Invalid certificate id" }, { status: 400 });

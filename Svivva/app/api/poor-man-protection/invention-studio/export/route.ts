@@ -53,8 +53,7 @@ export async function POST(req: NextRequest) {
       filename = `${base}.pdf`;
     } else if (format === "docx") {
       buffer = await buildDisclosureDocx(bundle);
-      contentType =
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+      contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
       filename = `${base}.docx`;
     } else {
       buffer = await buildProtectionZip(bundle);

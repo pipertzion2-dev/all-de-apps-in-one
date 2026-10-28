@@ -6,7 +6,10 @@ import {
   buildReadinessPrompt,
   runReadinessAuditLocal,
 } from "@/lib/poor-man-protection/invention-studio/readiness-auditor";
-import type { InventionBundle, ReadinessIssue } from "@/lib/poor-man-protection/invention-studio/types";
+import type {
+  InventionBundle,
+  ReadinessIssue,
+} from "@/lib/poor-man-protection/invention-studio/types";
 
 export const maxDuration = 90;
 

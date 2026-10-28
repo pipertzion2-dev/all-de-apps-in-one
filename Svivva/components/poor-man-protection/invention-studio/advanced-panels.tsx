@@ -133,9 +133,7 @@ export function PriorArtRadarPanel({ active, onRefresh, busy, setBusy }: PanelPr
           <p className="text-sm text-muted-foreground">Select an invention first.</p>
         ) : (
           <>
-            <DisclosureRiskBanner
-              text={`${active.invention.fields.description} ${question}`}
-            />
+            <DisclosureRiskBanner text={`${active.invention.fields.description} ${question}`} />
             <Textarea
               rows={3}
               placeholder="Natural-language question or extra keywords…"
@@ -172,15 +170,16 @@ export function PriorArtRadarPanel({ active, onRefresh, busy, setBusy }: PanelPr
             {(report || active.priorArtReports?.[0]) && (
               <div className="space-y-2">
                 {(report || active.priorArtReports![0]).hits.map((h) => (
-                  <div key={h.id} className="rounded-lg border border-border/40 p-3 text-sm space-y-1">
+                  <div
+                    key={h.id}
+                    className="rounded-lg border border-border/40 p-3 text-sm space-y-1"
+                  >
                     <div className="flex flex-wrap gap-2 items-center">
                       <span className="font-medium">{h.title}</span>
                       {h.publicationNumber ? (
                         <Badge variant="outline">{h.publicationNumber}</Badge>
                       ) : null}
-                      <Badge variant="outline">
-                        {h.fromLiveApi ? "live API" : "search link"}
-                      </Badge>
+                      <Badge variant="outline">{h.fromLiveApi ? "live API" : "search link"}</Badge>
                     </div>
                     {h.publicationDate ? (
                       <div className="text-xs text-muted-foreground">
@@ -270,7 +269,11 @@ export function ReadinessAuditorPanel({ active, onRefresh, busy, setBusy }: Pane
                 .filter((v) => typeof v === "string")
                 .join(" ")}
             />
-            <Button disabled={busy} className="bg-[#5B8DA8] hover:bg-[#4a7a92]" onClick={() => void run()}>
+            <Button
+              disabled={busy}
+              className="bg-[#5B8DA8] hover:bg-[#4a7a92]"
+              onClick={() => void run()}
+            >
               <RefreshCw className="w-4 h-4 mr-1" />
               {latest ? "Rerun analysis" : "Run analysis"}
             </Button>
@@ -378,7 +381,8 @@ export function SketchTo3DCopilotPanel({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           inventionId: active.invention.id,
-          description: notes || active.invention.fields.howItWorks || active.invention.fields.description,
+          description:
+            notes || active.invention.fields.howItWorks || active.invention.fields.description,
           imageBase64,
           imageMimeType: file?.type,
           imageFileName: file?.name,
@@ -388,7 +392,14 @@ export function SketchTo3DCopilotPanel({
       if (!res.ok) throw new Error(data.error || "Copilot failed");
 
       const comps: StudioComponent[] = (data.suggestedComponents || []).map(
-        (c: { name: string; shape: StudioComponent["shape"]; material: StudioComponent["material"] }, i: number) => ({
+        (
+          c: {
+            name: string;
+            shape: StudioComponent["shape"];
+            material: StudioComponent["material"];
+          },
+          i: number,
+        ) => ({
           id: `cmp_${crypto.randomUUID().replace(/-/g, "").slice(0, 10)}`,
           inventionId: active.invention.id,
           name: c.name,
@@ -475,7 +486,10 @@ export function SketchTo3DCopilotPanel({
               <div className="space-y-1 text-xs">
                 <div className="font-semibold text-sm">Model revisions</div>
                 {(active.modelRevisions || []).slice(0, 6).map((m) => (
-                  <div key={m.id} className="rounded border border-border/40 px-2 py-1.5 flex justify-between gap-2">
+                  <div
+                    key={m.id}
+                    className="rounded border border-border/40 px-2 py-1.5 flex justify-between gap-2"
+                  >
                     <span>{m.label}</span>
                     <Badge variant="outline">
                       {m.preliminaryAiVisualization ? "preliminary AI" : "validated"}
@@ -590,7 +604,10 @@ export function ProofChainPanel({ active, onRefresh, busy, setBusy }: PanelProps
             </label>
             <div className="space-y-2">
               {active.evidence.map((e) => (
-                <div key={e.id} className="rounded-lg border border-border/40 p-3 text-sm space-y-1">
+                <div
+                  key={e.id}
+                  className="rounded-lg border border-border/40 p-3 text-sm space-y-1"
+                >
                   <div className="font-medium">{e.originalFilename}</div>
                   <div className="text-xs font-mono text-[#5B8DA8]">
                     {e.id} · v{e.version} · {e.sha256.slice(0, 20)}…
@@ -646,13 +663,22 @@ export function ProofChainPanel({ active, onRefresh, busy, setBusy }: PanelProps
               <div className="space-y-2">
                 <h4 className="text-sm font-semibold">ProofChain dashboard</h4>
                 {(active.proofChain || []).map((r) => (
-                  <div key={r.id} className="text-xs rounded border border-[#5B8DA8]/25 p-2 font-mono space-y-0.5">
+                  <div
+                    key={r.id}
+                    className="text-xs rounded border border-[#5B8DA8]/25 p-2 font-mono space-y-0.5"
+                  >
                     <div>evidence {r.evidenceId}</div>
                     <div>invention {r.inventionId}</div>
-                    <div>v{r.version} · {r.sha256.slice(0, 24)}…</div>
-                    <div>method {r.verificationMethod} · integrity {r.integrityStatus}</div>
+                    <div>
+                      v{r.version} · {r.sha256.slice(0, 24)}…
+                    </div>
+                    <div>
+                      method {r.verificationMethod} · integrity {r.integrityStatus}
+                    </div>
                     <div>server {r.serverTimestamp || "—"}</div>
-                    <div>TSA {r.trustedTimestampStatus} · chain {r.blockchainStatus}</div>
+                    <div>
+                      TSA {r.trustedTimestampStatus} · chain {r.blockchainStatus}
+                    </div>
                     {r.blockchainTxId ? <div>tx {r.blockchainTxId}</div> : null}
                     {r.publicCertId ? (
                       <div>
@@ -697,10 +723,7 @@ export function MemoryGraphPanel({ active, onRefresh, busy, setBusy }: PanelProp
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const [listening, setListening] = useState(false);
 
-  const snapshot = useMemo(
-    () => (active ? buildMemoryGraph(active) : null),
-    [active],
-  );
+  const snapshot = useMemo(() => (active ? buildMemoryGraph(active) : null), [active]);
 
   useEffect(() => {
     return () => {
@@ -792,9 +815,7 @@ export function MemoryGraphPanel({ active, onRefresh, busy, setBusy }: PanelProp
           <p className="text-sm text-muted-foreground">Select an invention.</p>
         ) : (
           <>
-            <p className="text-sm text-muted-foreground">
-              {summarizeDevelopmentHistory(active)}
-            </p>
+            <p className="text-sm text-muted-foreground">{summarizeDevelopmentHistory(active)}</p>
             <div className="relative h-[320px] rounded-xl border border-[#5B8DA8]/30 bg-[#0c1216] overflow-hidden">
               <svg viewBox="0 0 800 320" className="w-full h-full">
                 {snapshot.edges.map((e, i) => {
@@ -825,14 +846,15 @@ export function MemoryGraphPanel({ active, onRefresh, busy, setBusy }: PanelProp
                   const y = 40 + Math.floor(i / 6) * 90;
                   return (
                     <g key={n.id}>
-                      <circle cx={x} cy={y} r="18" fill="#6B2C4E" stroke="#5B8DA8" strokeWidth="2" />
-                      <text
-                        x={x}
-                        y={y + 32}
-                        textAnchor="middle"
-                        fill="#c8d4dc"
-                        fontSize="9"
-                      >
+                      <circle
+                        cx={x}
+                        cy={y}
+                        r="18"
+                        fill="#6B2C4E"
+                        stroke="#5B8DA8"
+                        strokeWidth="2"
+                      />
+                      <text x={x} y={y + 32} textAnchor="middle" fill="#c8d4dc" fontSize="9">
                         {n.label.slice(0, 18)}
                       </text>
                     </g>
@@ -895,7 +917,10 @@ export function MemoryGraphPanel({ active, onRefresh, busy, setBusy }: PanelProp
             </div>
             <div className="text-xs space-y-1 max-h-40 overflow-auto">
               {snapshot.nodes.map((n) => (
-                <div key={n.id} className="flex justify-between gap-2 border-b border-border/20 py-1">
+                <div
+                  key={n.id}
+                  className="flex justify-between gap-2 border-b border-border/20 py-1"
+                >
                   <span>
                     <Badge variant="outline" className="mr-1">
                       {n.kind}

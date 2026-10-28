@@ -30,13 +30,7 @@ export const PROTOTYPE_STATUSES = [
 
 export type PrototypeStatus = (typeof PROTOTYPE_STATUSES)[number];
 
-export const INVENTION_STATUSES = [
-  "draft",
-  "active",
-  "documenting",
-  "sealed",
-  "archived",
-] as const;
+export const INVENTION_STATUSES = ["draft", "active", "documenting", "sealed", "archived"] as const;
 
 export type InventionStatus = (typeof INVENTION_STATUSES)[number];
 

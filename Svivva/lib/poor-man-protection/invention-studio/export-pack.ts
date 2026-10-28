@@ -20,7 +20,10 @@ export async function buildDisclosurePdf(bundle: InventionBundle): Promise<Buffe
 
   doc.fillColor("#5B8DA8").fontSize(18).text("ZZAI Invention Protection Studio", { align: "left" });
   doc.moveDown(0.3);
-  doc.fillColor("#333").fontSize(11).text("Invention Disclosure (documentation only — not a USPTO filing)");
+  doc
+    .fillColor("#333")
+    .fontSize(11)
+    .text("Invention Disclosure (documentation only — not a USPTO filing)");
   doc.moveDown();
   doc.fontSize(14).fillColor("#6B2C4E").text(disclosure.title);
   doc.moveDown(0.5);
@@ -29,7 +32,10 @@ export async function buildDisclosurePdf(bundle: InventionBundle): Promise<Buffe
 
   for (const section of disclosure.sections) {
     doc.fontSize(11).fillColor("#5B8DA8").text(section.heading);
-    doc.fontSize(10).fillColor("#222").text(section.body || "—", { align: "justify" });
+    doc
+      .fontSize(10)
+      .fillColor("#222")
+      .text(section.body || "—", { align: "justify" });
     doc.moveDown(0.6);
   }
 

@@ -7,7 +7,10 @@ import {
   localAiFallback,
   type AiAssistKind,
 } from "@/lib/poor-man-protection/invention-studio/ai";
-import { INVENTION_CATEGORIES, PROTOTYPE_STATUSES } from "@/lib/poor-man-protection/invention-studio/types";
+import {
+  INVENTION_CATEGORIES,
+  PROTOTYPE_STATUSES,
+} from "@/lib/poor-man-protection/invention-studio/types";
 
 export const maxDuration = 90;
 
@@ -67,7 +70,10 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const parsed = bodySchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid request", details: parsed.error.flatten() }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid request", details: parsed.error.flatten() },
+      { status: 400 },
+    );
   }
 
   const { kind, fields, userNote } = parsed.data;

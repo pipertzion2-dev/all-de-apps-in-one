@@ -80,7 +80,11 @@ describe("advanced invention protection AI modules", () => {
   it("builds memory graph and voice drafts pending confirmation", () => {
     const g = buildMemoryGraph(bundle());
     expect(g.nodes.some((n) => n.kind === "disclosure")).toBe(true);
-    const draft = structureVoiceJournal("inv_x", "Prototype clamp tooth improved grip.", "typed_fallback");
+    const draft = structureVoiceJournal(
+      "inv_x",
+      "Prototype clamp tooth improved grip.",
+      "typed_fallback",
+    );
     expect(draft.confirmed).toBe(false);
     expect(draft.label).toBe("ai_structured_pending_confirmation");
   });

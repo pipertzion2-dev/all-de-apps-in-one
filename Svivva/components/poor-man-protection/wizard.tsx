@@ -576,12 +576,15 @@ export function PoorManProtectionWizard() {
             Invention Protection
           </div>
           <p className="text-sm text-muted-foreground max-w-xl">
-            Document your ideas. Preserve your evidence. Prepare your inventions — notebook, evidence
-            vault, 3D studio, and disclosure prep inside Poor Man Protection.
+            Document your ideas. Preserve your evidence. Prepare your inventions — notebook,
+            evidence vault, 3D studio, and disclosure prep inside Poor Man Protection.
           </p>
         </div>
         <Button asChild className="bg-[#5B8DA8] hover:bg-[#4a7a92] shrink-0">
-          <Link href="/poor-man-protection/invention-studio" data-testid="link-invention-protection-studio">
+          <Link
+            href="/poor-man-protection/invention-studio"
+            data-testid="link-invention-protection-studio"
+          >
             <Layers className="w-4 h-4 mr-1" />
             Open Invention Protection
           </Link>

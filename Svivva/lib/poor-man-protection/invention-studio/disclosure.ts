@@ -19,9 +19,7 @@ const DISCLAIMER =
 
 export function buildInventionDisclosure(bundle: InventionBundle): DisclosureDocument {
   const f = bundle.invention.fields;
-  const inventors = f.inventors
-    .map((i) => `${i.name}${i.role ? ` (${i.role})` : ""}`)
-    .join("; ");
+  const inventors = f.inventors.map((i) => `${i.name}${i.role ? ` (${i.role})` : ""}`).join("; ");
 
   const sections: DisclosureDocument["sections"] = [
     { heading: "Title", body: f.title, source: "user" },
@@ -56,8 +54,7 @@ export function buildInventionDisclosure(bundle: InventionBundle): DisclosureDoc
     },
     {
       heading: "Collaborators",
-      body:
-        f.collaborators.map((c) => `${c.name} — ${c.role}`).join("\n") || "None listed",
+      body: f.collaborators.map((c) => `${c.name} — ${c.role}`).join("\n") || "None listed",
       source: "user",
     },
     {

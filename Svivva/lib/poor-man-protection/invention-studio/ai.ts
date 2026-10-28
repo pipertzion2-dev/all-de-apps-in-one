@@ -59,7 +59,8 @@ export function buildAiMessages(
     missing_details:
       "List missing details that a disclosure typically needs, based only on gaps in the record.",
     summary: "Write a short invention summary using only provided facts. Flag gaps.",
-    abstract: "Draft a technical abstract from provided facts only. No fabricated performance claims.",
+    abstract:
+      "Draft a technical abstract from provided facts only. No fabricated performance claims.",
     detailed_description:
       "Draft a detailed description outline/sections using provided facts; use [MISSING] for gaps.",
     embodiments:
@@ -124,7 +125,9 @@ export function localAiFallback(kind: AiAssistKind, fields: InventionFields): st
       return (
         header +
         `A ${fields.category} invention titled “${fields.title}.” ${fields.description} ` +
-        (fields.problemSolved ? `It addresses: ${fields.problemSolved}. ` : "[MISSING — problem]. ") +
+        (fields.problemSolved
+          ? `It addresses: ${fields.problemSolved}. `
+          : "[MISSING — problem]. ") +
         (fields.howItWorks ? `Operation: ${fields.howItWorks}` : "[MISSING — how it works].")
       );
     case "claim_concepts":

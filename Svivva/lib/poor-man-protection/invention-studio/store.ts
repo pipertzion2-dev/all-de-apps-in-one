@@ -21,11 +21,7 @@ import type {
   TimelineEvent,
   VoiceJournalDraft,
 } from "./types";
-import {
-  INVENTION_EVIDENCE_IDB,
-  INVENTION_STUDIO_PROTOCOL,
-  INVENTION_VAULT_KEY,
-} from "./types";
+import { INVENTION_EVIDENCE_IDB, INVENTION_STUDIO_PROTOCOL, INVENTION_VAULT_KEY } from "./types";
 
 function uid(prefix: string): string {
   return `${prefix}_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
@@ -272,10 +268,7 @@ export async function updateInventionFields(
     invention: {
       ...existing.invention,
       fields,
-      status:
-        existing.invention.status === "draft"
-          ? "documenting"
-          : existing.invention.status,
+      status: existing.invention.status === "draft" ? "documenting" : existing.invention.status,
     },
   };
   bundle = appendTimeline(bundle, {
@@ -395,8 +388,7 @@ export async function addEvidence(
   const sha256 = await sha256File(file);
   const blobKey = `${inventionId}/${uid("blob")}`;
   await putEvidenceBlob(blobKey, file);
-  const version =
-    existing.evidence.filter((e) => e.originalFilename === file.name).length + 1;
+  const version = existing.evidence.filter((e) => e.originalFilename === file.name).length + 1;
   const evidence: EvidenceRecord = {
     id: uid("ev"),
     inventionId,
@@ -445,7 +437,10 @@ export async function verifyEvidenceIntegrity(
   const ok = hash === evidence.sha256;
   const nextEvidence = existing.evidence.map((e) =>
     e.id === evidenceId
-      ? { ...e, verificationStatus: (ok ? "verified" : "failed") as EvidenceRecord["verificationStatus"] }
+      ? {
+          ...e,
+          verificationStatus: (ok ? "verified" : "failed") as EvidenceRecord["verificationStatus"],
+        }
       : e,
   );
   let bundle: InventionBundle = { ...existing, evidence: nextEvidence };
@@ -610,9 +605,7 @@ export async function saveProofChainRecord(
   bundle = {
     ...bundle,
     proofChain: [record, ...(bundle.proofChain || [])],
-    publicCerts: publicCert
-      ? [publicCert, ...(bundle.publicCerts || [])]
-      : bundle.publicCerts,
+    publicCerts: publicCert ? [publicCert, ...(bundle.publicCerts || [])] : bundle.publicCerts,
   };
   bundle = appendTimeline(bundle, {
     title: "ProofChain record",
@@ -673,9 +666,7 @@ export async function confirmVoiceDraft(
     ),
   });
   return addNotebookEntry(inventionId, {
-    kind: draft.suggestedMilestone?.toLowerCase().includes("prototype")
-      ? "prototype"
-      : "note",
+    kind: draft.suggestedMilestone?.toLowerCase().includes("prototype") ? "prototype" : "note",
     title: draft.structuredTitle,
     body: `${draft.structuredBody}\n\n[Voice journal confirmed · source ${draft.source}]`,
   });
@@ -713,9 +704,7 @@ export function setAiTrainingConsent(
   return upsertBundle({ ...existing, aiTrainingConsent: consent });
 }
 
-export function findPublicCertAcrossVault(
-  publicCertId: string,
-): PublicProofCertificate | null {
+export function findPublicCertAcrossVault(publicCertId: string): PublicProofCertificate | null {
   for (const b of listInventionBundles()) {
     const hit = b.publicCerts?.find((c) => c.publicCertId === publicCertId);
     if (hit) return hit;

@@ -108,8 +108,7 @@ type PatentsViewPatent = {
 export async function searchPatentsView(query: string): Promise<PriorArtHit[]> {
   const apiKey = process.env.PATENTSVIEW_API_KEY?.trim();
   const endpoint =
-    process.env.PATENTSVIEW_API_URL?.trim() ||
-    "https://search.patentsview.org/api/v1/patent/";
+    process.env.PATENTSVIEW_API_URL?.trim() || "https://search.patentsview.org/api/v1/patent/";
 
   try {
     const headers: Record<string, string> = {
@@ -187,7 +186,11 @@ export function buildPriorArtReportMarkdown(
     "",
   ];
   if (imageConcepts.length) {
-    lines.push("## Image / sketch concepts (AI-assisted labels)", ...imageConcepts.map((c) => `- ${c}`), "");
+    lines.push(
+      "## Image / sketch concepts (AI-assisted labels)",
+      ...imageConcepts.map((c) => `- ${c}`),
+      "",
+    );
   }
   lines.push("## Live API hits (PatentsView / configured sources)", "");
   if (!live.length) {

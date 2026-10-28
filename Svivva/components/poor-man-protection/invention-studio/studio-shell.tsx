@@ -82,7 +82,10 @@ const Invention3DStudio = dynamic(
     import("@/components/poor-man-protection/invention-studio/invention-3d-studio").then(
       (m) => m.Invention3DStudio,
     ),
-  { ssr: false, loading: () => <div className="h-[420px] animate-pulse rounded-xl bg-[#5B8DA8]/10" /> },
+  {
+    ssr: false,
+    loading: () => <div className="h-[420px] animate-pulse rounded-xl bg-[#5B8DA8]/10" />,
+  },
 );
 
 type SectionId =
@@ -406,9 +409,15 @@ export function InventionProtectionStudioShell() {
                       { label: "Total inventions", value: stats.totalInventions },
                       { label: "Active projects", value: stats.activeProjects },
                       { label: "Saved evidence", value: stats.savedEvidence },
-                      { label: "Documentation progress", value: `${stats.avgDocumentationProgress}%` },
+                      {
+                        label: "Documentation progress",
+                        value: `${stats.avgDocumentationProgress}%`,
+                      },
                     ].map((s) => (
-                      <Card key={s.label} className="border-[#5B8DA8]/25 bg-card/80 backdrop-blur-md">
+                      <Card
+                        key={s.label}
+                        className="border-[#5B8DA8]/25 bg-card/80 backdrop-blur-md"
+                      >
                         <CardHeader className="pb-2">
                           <CardDescription>{s.label}</CardDescription>
                           <CardTitle className="text-3xl text-[#5B8DA8]">{s.value}</CardTitle>
@@ -450,7 +459,9 @@ export function InventionProtectionStudioShell() {
                 <Card className="border-border/50 bg-card/80 backdrop-blur-md">
                   <CardHeader>
                     <CardTitle>My Inventions</CardTitle>
-                    <CardDescription>Private by default. Status, version, last updated.</CardDescription>
+                    <CardDescription>
+                      Private by default. Status, version, last updated.
+                    </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {bundles.length === 0 && (
@@ -635,14 +646,21 @@ export function InventionProtectionStudioShell() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {!active ? (
-                      <p className="text-sm text-muted-foreground">Select or create an invention.</p>
+                      <p className="text-sm text-muted-foreground">
+                        Select or create an invention.
+                      </p>
                     ) : (
                       <>
                         <div className="flex flex-wrap gap-2 items-center">
                           <Badge className="bg-[#5B8DA8]">{active.invention.fields.title}</Badge>
                           <Badge variant="outline">v{active.invention.currentVersion}</Badge>
                           <Badge variant="outline">{active.invention.status}</Badge>
-                          <Button size="sm" variant="outline" disabled={busy} onClick={() => void onSaveFields(false)}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={busy}
+                            onClick={() => void onSaveFields(false)}
+                          >
                             Save fields
                           </Button>
                           <Button
@@ -681,14 +699,19 @@ export function InventionProtectionStudioShell() {
                         />
                         <div className="space-y-2">
                           {active.notebook.map((n) => (
-                            <div key={n.id} className="rounded-lg border border-border/40 p-3 text-sm">
+                            <div
+                              key={n.id}
+                              className="rounded-lg border border-border/40 p-3 text-sm"
+                            >
                               <div className="flex flex-wrap justify-between gap-2">
                                 <span className="font-medium">{n.title}</span>
                                 <span className="text-xs text-muted-foreground">
                                   {new Date(n.createdAt).toLocaleString()} · {n.kind}
                                 </span>
                               </div>
-                              <p className="mt-1 whitespace-pre-wrap text-muted-foreground">{n.body}</p>
+                              <p className="mt-1 whitespace-pre-wrap text-muted-foreground">
+                                {n.body}
+                              </p>
                               <p className="text-[10px] mt-2 font-mono text-[#5B8DA8]">
                                 SHA-256 {n.contentHash.slice(0, 24)}…
                               </p>
@@ -705,7 +728,9 @@ export function InventionProtectionStudioShell() {
                               <span>
                                 v{v.version} · {v.label}
                               </span>
-                              <span className="font-mono text-[#5B8DA8]">{v.contentHash.slice(0, 16)}…</span>
+                              <span className="font-mono text-[#5B8DA8]">
+                                {v.contentHash.slice(0, 16)}…
+                              </span>
                             </div>
                           ))}
                         </div>
@@ -720,7 +745,8 @@ export function InventionProtectionStudioShell() {
                   <CardHeader>
                     <CardTitle>Evidence Vault</CardTitle>
                     <CardDescription>
-                      Sketches, photos, videos, drawings, PDFs, CAD, and 3D models — hashed and private.
+                      Sketches, photos, videos, drawings, PDFs, CAD, and 3D models — hashed and
+                      private.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -758,10 +784,13 @@ export function InventionProtectionStudioShell() {
                                 <Badge variant="outline">{e.verificationStatus}</Badge>
                               </div>
                               <div className="text-xs text-muted-foreground">
-                                ID {e.id} · Invention {e.inventionId} · type {e.fileType || "unknown"} ·
-                                v{e.version} · {new Date(e.uploadDate).toLocaleString()}
+                                ID {e.id} · Invention {e.inventionId} · type{" "}
+                                {e.fileType || "unknown"} · v{e.version} ·{" "}
+                                {new Date(e.uploadDate).toLocaleString()}
                               </div>
-                              <div className="font-mono text-[11px] text-[#5B8DA8]">SHA-256 {e.sha256}</div>
+                              <div className="font-mono text-[11px] text-[#5B8DA8]">
+                                SHA-256 {e.sha256}
+                              </div>
                               <div className="flex flex-wrap gap-2 pt-1">
                                 <Button
                                   size="sm"
@@ -782,7 +811,10 @@ export function InventionProtectionStudioShell() {
                                   size="sm"
                                   variant="outline"
                                   onClick={async () => {
-                                    const res = await verifyEvidenceIntegrity(active.invention.id, e.id);
+                                    const res = await verifyEvidenceIntegrity(
+                                      active.invention.id,
+                                      e.id,
+                                    );
                                     toast({
                                       title: res.ok ? "Verified" : "Failed",
                                       description: res.message,
@@ -832,7 +864,9 @@ export function InventionProtectionStudioShell() {
                 <Card className="border-border/50 bg-card/80 backdrop-blur-md">
                   <CardHeader>
                     <CardTitle>Development Timeline</CardTitle>
-                    <CardDescription>Milestones, evidence, versions, and studio events.</CardDescription>
+                    <CardDescription>
+                      Milestones, evidence, versions, and studio events.
+                    </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {!active ? (
@@ -842,7 +876,9 @@ export function InventionProtectionStudioShell() {
                         <div key={ev.id} className="relative pl-6">
                           <div
                             className="absolute left-1 top-1.5 w-2.5 h-2.5 rounded-full"
-                            style={{ background: i === 0 ? PROTECT_BRAND.steel : PROTECT_BRAND.burgundy }}
+                            style={{
+                              background: i === 0 ? PROTECT_BRAND.steel : PROTECT_BRAND.burgundy,
+                            }}
                           />
                           <div className="text-sm font-medium">{ev.title}</div>
                           <div className="text-xs text-muted-foreground">{ev.detail}</div>
@@ -867,7 +903,9 @@ export function InventionProtectionStudioShell() {
                   </CardHeader>
                   <CardContent>
                     {!active ? (
-                      <p className="text-sm text-muted-foreground">Select an invention to attach a model.</p>
+                      <p className="text-sm text-muted-foreground">
+                        Select an invention to attach a model.
+                      </p>
                     ) : (
                       <Invention3DStudio
                         inventionId={active.invention.id}
@@ -891,8 +929,8 @@ export function InventionProtectionStudioShell() {
                   <CardHeader>
                     <CardTitle>AI Invention Assistant</CardTitle>
                     <CardDescription>
-                      Suggestions are labeled AI-generated and never treated as evidence. No fabricated
-                      dates, specs, or test results.
+                      Suggestions are labeled AI-generated and never treated as evidence. No
+                      fabricated dates, specs, or test results.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3">
@@ -933,9 +971,14 @@ export function InventionProtectionStudioShell() {
                         ) : null}
                         {active.aiSuggestions.length > 0 && (
                           <div className="space-y-2">
-                            <h4 className="text-sm font-semibold">Prior AI suggestions (not evidence)</h4>
+                            <h4 className="text-sm font-semibold">
+                              Prior AI suggestions (not evidence)
+                            </h4>
                             {active.aiSuggestions.slice(0, 5).map((s) => (
-                              <div key={s.id} className="text-xs rounded-lg border border-border/40 p-2">
+                              <div
+                                key={s.id}
+                                className="text-xs rounded-lg border border-border/40 p-2"
+                              >
                                 <Badge variant="outline" className="mb-1">
                                   {s.label} · {s.kind}
                                 </Badge>
@@ -955,7 +998,8 @@ export function InventionProtectionStudioShell() {
                   <CardHeader>
                     <CardTitle>Patent Preparation</CardTitle>
                     <CardDescription>
-                      Documentation preparation only — not actual patent filing. Export PDF, DOCX, or ZIP.
+                      Documentation preparation only — not actual patent filing. Export PDF, DOCX,
+                      or ZIP.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -1084,13 +1128,15 @@ export function InventionProtectionStudioShell() {
                   <CardHeader>
                     <CardTitle>Prior Art Research</CardTitle>
                     <CardDescription>
-                      Jump to official search tools. Studio does not scrape or invent prior-art hits.
+                      Jump to official search tools. Studio does not scrape or invent prior-art
+                      hits.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3 text-sm">
                     <p className="text-muted-foreground">
-                      Use your invention keywords below, then open USPTO Patent Public Search. Record
-                      what <em>you</em> find in the notebook — do not paste fabricated citations.
+                      Use your invention keywords below, then open USPTO Patent Public Search.
+                      Record what <em>you</em> find in the notebook — do not paste fabricated
+                      citations.
                     </p>
                     <Input
                       placeholder="Keywords from your invention…"
@@ -1155,7 +1201,10 @@ export function InventionProtectionStudioShell() {
                           .slice()
                           .reverse()
                           .map((a) => (
-                            <div key={a.id} className="text-xs font-mono border border-border/30 rounded p-2">
+                            <div
+                              key={a.id}
+                              className="text-xs font-mono border border-border/30 rounded p-2"
+                            >
                               {a.at} · {a.event}
                               {a.detail ? ` · ${a.detail}` : ""}
                               <div className="text-[#5B8DA8]">hash {a.eventHash.slice(0, 24)}…</div>

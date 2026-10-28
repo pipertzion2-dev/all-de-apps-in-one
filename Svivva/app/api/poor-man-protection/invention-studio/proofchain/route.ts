@@ -22,7 +22,10 @@ const bodySchema = z.object({
 export async function POST(req: NextRequest) {
   const { user, error } = await requireUser();
   if (error || !user) {
-    return NextResponse.json({ error: "Sign in required for ProofChain server stamp" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Sign in required for ProofChain server stamp" },
+      { status: 401 },
+    );
   }
 
   const parsed = bodySchema.safeParse(await req.json());

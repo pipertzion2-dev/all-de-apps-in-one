@@ -10,7 +10,8 @@ export const IMPLEMENTED_VERIFICATION_METHODS = [
     id: "sha256",
     label: "SHA-256 file hashing",
     implemented: true as const,
-    description: "Browser-side digest stored with each evidence record; re-check compares live blob.",
+    description:
+      "Browser-side digest stored with each evidence record; re-check compares live blob.",
   },
   {
     id: "version_history",
@@ -40,7 +41,8 @@ export const IMPLEMENTED_VERIFICATION_METHODS = [
     id: "proofchain_manifest",
     label: "ProofChain evidence manifest",
     implemented: true as const,
-    description: "Signed manifest hash over evidence metadata + SHA-256; public certs omit private descriptions.",
+    description:
+      "Signed manifest hash over evidence metadata + SHA-256; public certs omit private descriptions.",
   },
 ] as const;
 

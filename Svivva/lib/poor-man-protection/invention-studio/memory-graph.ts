@@ -180,10 +180,11 @@ export function structureVoiceJournal(
   source: VoiceJournalDraft["source"],
 ): VoiceJournalDraft {
   const clean = transcript.trim();
-  const lines = clean.split(/[\n.]+/).map((s) => s.trim()).filter(Boolean);
-  const title =
-    lines[0]?.slice(0, 80) ||
-    `Voice journal ${new Date().toLocaleDateString()}`;
+  const lines = clean
+    .split(/[\n.]+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const title = lines[0]?.slice(0, 80) || `Voice journal ${new Date().toLocaleDateString()}`;
   const body = clean;
   const hints: string[] = [];
   for (const word of ["clamp", "rail", "spring", "motor", "sensor", "housing", "hinge", "gear"]) {

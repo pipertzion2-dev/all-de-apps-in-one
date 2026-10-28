@@ -3,8 +3,14 @@ import { z } from "zod";
 import { requireUser } from "@/lib/auth/require-user";
 import { isAnyAiProviderAvailable, openai, getDefaultModel } from "@/lib/llm/openai";
 import { runPriorArtRadar } from "@/lib/poor-man-protection/invention-studio/prior-art-radar";
-import { localSketchConceptsFromFilename, SKETCH_VISION_SYSTEM } from "@/lib/poor-man-protection/invention-studio/sketch-concepts";
-import { INVENTION_CATEGORIES, PROTOTYPE_STATUSES } from "@/lib/poor-man-protection/invention-studio/types";
+import {
+  localSketchConceptsFromFilename,
+  SKETCH_VISION_SYSTEM,
+} from "@/lib/poor-man-protection/invention-studio/sketch-concepts";
+import {
+  INVENTION_CATEGORIES,
+  PROTOTYPE_STATUSES,
+} from "@/lib/poor-man-protection/invention-studio/types";
 
 export const maxDuration = 90;
 

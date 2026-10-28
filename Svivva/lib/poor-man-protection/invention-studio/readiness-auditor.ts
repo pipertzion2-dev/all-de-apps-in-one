@@ -16,9 +16,7 @@ export function runReadinessAuditLocal(bundle: InventionBundle): ReadinessAudit 
   const f = bundle.invention.fields;
   const issues: ReadinessIssue[] = [];
 
-  const push = (
-    partial: Omit<ReadinessIssue, "id" | "resolved"> & { resolved?: boolean },
-  ) => {
+  const push = (partial: Omit<ReadinessIssue, "id" | "resolved"> & { resolved?: boolean }) => {
     issues.push({ id: uid(), resolved: false, ...partial });
   };
 
@@ -27,7 +25,8 @@ export function runReadinessAuditLocal(bundle: InventionBundle): ReadinessAudit 
       severity: "critical",
       category: "description",
       title: "Technical description is thin",
-      detail: "The disclosure description is short; enablement usually needs more operational detail.",
+      detail:
+        "The disclosure description is short; enablement usually needs more operational detail.",
       followUpQuestion: "Can you describe the preferred embodiment step-by-step in your own words?",
       suggestedAction: "Expand the description with user-written technical detail.",
     });
@@ -71,7 +70,8 @@ export function runReadinessAuditLocal(bundle: InventionBundle): ReadinessAudit 
       category: "dimensions",
       title: "Dimensions / specs missing",
       detail: "Technical specifications are empty.",
-      followUpQuestion: "What dimensions, tolerances, voltages, or ranges matter for the preferred embodiment?",
+      followUpQuestion:
+        "What dimensions, tolerances, voltages, or ranges matter for the preferred embodiment?",
       suggestedAction: "Add measured or intended specs only.",
     });
   }
@@ -81,7 +81,8 @@ export function runReadinessAuditLocal(bundle: InventionBundle): ReadinessAudit 
       category: "embodiments",
       title: "No alternative embodiments",
       detail: "Alternative constructions are not described.",
-      followUpQuestion: "Are there alternative mechanisms or layouts that still solve the same problem?",
+      followUpQuestion:
+        "Are there alternative mechanisms or layouts that still solve the same problem?",
       suggestedAction: "Note at least one alternative you actually considered.",
     });
   }
@@ -95,7 +96,10 @@ export function runReadinessAuditLocal(bundle: InventionBundle): ReadinessAudit 
       suggestedAction: "Add dated development notes (user-entered dates only).",
     });
   }
-  if (bundle.components.length === 0 && bundle.evidence.every((e) => !e.fileType.startsWith("image/"))) {
+  if (
+    bundle.components.length === 0 &&
+    bundle.evidence.every((e) => !e.fileType.startsWith("image/"))
+  ) {
     push({
       severity: "important",
       category: "drawings",
@@ -116,7 +120,10 @@ export function runReadinessAuditLocal(bundle: InventionBundle): ReadinessAudit 
   }
 
   // Contradiction heuristics (simple)
-  if (/plastic/i.test(f.materials) && /all[- ]metal|entirely metal/i.test(f.description + f.howItWorks)) {
+  if (
+    /plastic/i.test(f.materials) &&
+    /all[- ]metal|entirely metal/i.test(f.description + f.howItWorks)
+  ) {
     push({
       severity: "important",
       category: "contradiction",
@@ -134,13 +141,27 @@ export function runReadinessAuditLocal(bundle: InventionBundle): ReadinessAudit 
   const completenessScore = Math.max(5, Math.min(100, 100 - penalty));
 
   const checklist = [
-    { id: "desc", label: "Clear technical description (≥40 chars)", done: !thin(f.description, 40) },
+    {
+      id: "desc",
+      label: "Clear technical description (≥40 chars)",
+      done: !thin(f.description, 40),
+    },
     { id: "how", label: "Operating mechanism documented", done: !thin(f.howItWorks, 30) },
     { id: "comp", label: "Component inventory", done: !thin(f.componentsText, 10) },
     { id: "mat", label: "Materials listed", done: !thin(f.materials, 4) },
     { id: "spec", label: "Technical specs / dimensions", done: !thin(f.technicalSpecs, 10) },
-    { id: "alt", label: "Alternative embodiment noted", done: !thin(f.alternativeImplementations, 10) },
-    { id: "draw", label: "Drawing or 3D callout present", done: bundle.components.length > 0 || bundle.evidence.some((e) => e.fileType.startsWith("image/")) },
+    {
+      id: "alt",
+      label: "Alternative embodiment noted",
+      done: !thin(f.alternativeImplementations, 10),
+    },
+    {
+      id: "draw",
+      label: "Drawing or 3D callout present",
+      done:
+        bundle.components.length > 0 ||
+        bundle.evidence.some((e) => e.fileType.startsWith("image/")),
+    },
     { id: "ev", label: "At least one evidence file hashed", done: bundle.evidence.length > 0 },
     { id: "ver", label: "At least one sealed version", done: bundle.versions.length >= 1 },
   ];

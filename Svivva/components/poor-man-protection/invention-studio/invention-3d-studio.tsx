@@ -10,7 +10,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PROTECT_BRAND } from "@/lib/poor-man-protection/invention-studio/brand";
-import { getMaterialPreset, MATERIAL_PRESETS } from "@/lib/poor-man-protection/invention-studio/materials";
+import {
+  getMaterialPreset,
+  MATERIAL_PRESETS,
+} from "@/lib/poor-man-protection/invention-studio/materials";
 import type { StudioComponent } from "@/lib/poor-man-protection/invention-studio/types";
 
 type Props = {
@@ -54,9 +57,18 @@ export function Invention3DStudio({ inventionId, components, onChange }: Props) 
         if (!c.visible) return;
         let geo: THREE.BufferGeometry;
         if (c.shape === "cylinder") {
-          geo = new THREE.CylinderGeometry(c.dimensions.x / 2, c.dimensions.x / 2, c.dimensions.y, 32);
+          geo = new THREE.CylinderGeometry(
+            c.dimensions.x / 2,
+            c.dimensions.x / 2,
+            c.dimensions.y,
+            32,
+          );
         } else if (c.shape === "sphere") {
-          geo = new THREE.SphereGeometry(Math.max(c.dimensions.x, c.dimensions.y, c.dimensions.z) / 2, 32, 24);
+          geo = new THREE.SphereGeometry(
+            Math.max(c.dimensions.x, c.dimensions.y, c.dimensions.z) / 2,
+            32,
+            24,
+          );
         } else {
           geo = new THREE.BoxGeometry(c.dimensions.x, c.dimensions.y, c.dimensions.z);
         }
@@ -69,9 +81,7 @@ export function Invention3DStudio({ inventionId, components, onChange }: Props) 
           opacity: preset.opacity,
           wireframe,
           emissive:
-            c.id === selectedId
-              ? new THREE.Color(PROTECT_BRAND.steel)
-              : new THREE.Color(0x000000),
+            c.id === selectedId ? new THREE.Color(PROTECT_BRAND.steel) : new THREE.Color(0x000000),
           emissiveIntensity: c.id === selectedId ? 0.35 : 0,
         });
         const mesh = new THREE.Mesh(geo, mat);
@@ -294,7 +304,12 @@ export function Invention3DStudio({ inventionId, components, onChange }: Props) 
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap gap-2">
-        <Button type="button" size="sm" onClick={addComponent} className="bg-[#5B8DA8] hover:bg-[#4a7a92]">
+        <Button
+          type="button"
+          size="sm"
+          onClick={addComponent}
+          className="bg-[#5B8DA8] hover:bg-[#4a7a92]"
+        >
           Add component
         </Button>
         <Button type="button" size="sm" variant="outline" onClick={() => setWireframe((w) => !w)}>
@@ -343,16 +358,17 @@ export function Invention3DStudio({ inventionId, components, onChange }: Props) 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 rounded-xl border border-[#5B8DA8]/25 bg-[#5B8DA8]/5 p-3">
           <div className="space-y-1">
             <Label>Name</Label>
-            <Input value={selected.name} onChange={(e) => patchSelected({ name: e.target.value })} />
+            <Input
+              value={selected.name}
+              onChange={(e) => patchSelected({ name: e.target.value })}
+            />
           </div>
           <div className="space-y-1">
             <Label>Shape</Label>
             <select
               className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
               value={selected.shape}
-              onChange={(e) =>
-                patchSelected({ shape: e.target.value as StudioComponent["shape"] })
-              }
+              onChange={(e) => patchSelected({ shape: e.target.value as StudioComponent["shape"] })}
             >
               <option value="box">Box</option>
               <option value="cylinder">Cylinder</option>
