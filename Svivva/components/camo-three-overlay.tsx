@@ -111,6 +111,8 @@ interface CamoThreeOverlayProps {
   disableFlowers?: boolean;
   /** Pause WebGL animation (keep last frame) while video plays. */
   paused?: boolean;
+  /** Lock WebGL clear — white for homepage, black for game start/load. */
+  sky?: "white" | "black";
 }
 
 export function CamoThreeOverlay({
@@ -121,6 +123,7 @@ export function CamoThreeOverlay({
   keepMounted = false,
   disableFlowers = false,
   paused = false,
+  sky = "white",
 }: CamoThreeOverlayProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -446,7 +449,13 @@ export function CamoThreeOverlay({
         }}
       >
         {flowersActive ? (
-          <ThreeCRTFlowers key={preset} preset={preset} isIntro={isIntro} paused={paused} />
+          <ThreeCRTFlowers
+            key={`${preset}-${sky}`}
+            preset={preset}
+            isIntro={isIntro}
+            paused={paused}
+            sky={sky}
+          />
         ) : null}
       </div>
 
@@ -456,7 +465,9 @@ export function CamoThreeOverlay({
           isCheckout
             ? "opacity-30"
             : isLock
-              ? "opacity-[0.52] md:opacity-[0.58]"
+              ? sky === "black"
+                ? "opacity-[0.72] md:opacity-[0.78]"
+                : "opacity-[0.52] md:opacity-[0.58]"
               : isOaas
                 ? "opacity-38 md:opacity-48 blur-[1.2px]"
                 : useMobileSectionCamo

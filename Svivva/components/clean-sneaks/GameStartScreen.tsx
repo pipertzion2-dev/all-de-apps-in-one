@@ -106,7 +106,14 @@ export function GameStartScreen({
     >
       {/* Black sky + Three.js flowers/camo (same lock preset as homepage Game). */}
       <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
-        <CamoThreeOverlay preset="lock" isIntro eagerMount keepMounted className="h-full w-full" />
+        <CamoThreeOverlay
+          preset="lock"
+          sky="black"
+          isIntro
+          eagerMount
+          keepMounted
+          className="h-full w-full"
+        />
       </div>
 
       {/* Hubcaps sit above flowers; circular clips leave black/flower gaps. */}

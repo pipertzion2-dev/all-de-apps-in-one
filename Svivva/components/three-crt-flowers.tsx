@@ -993,12 +993,15 @@ interface ThreeCRTFlowersProps {
   isIntro?: boolean;
   /** Freeze the render loop (keep last frame) — used while intro video plays. */
   paused?: boolean;
+  /** Lock clear color — homepage stays white; game start/load use black. */
+  sky?: "white" | "black";
 }
 
 export function ThreeCRTFlowers({
   preset = "hero",
   isIntro = false,
   paused = false,
+  sky = "white",
 }: ThreeCRTFlowersProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -1188,9 +1191,9 @@ export function ThreeCRTFlowers({
       powerPreference: isMobile ? "low-power" : "high-performance",
     });
     renderer.setSize(width, height);
-    // Lock first page: opaque white clear; flowers + digi camo fill the frame (no water).
+    // Lock: opaque sky so flowers sit on white (homepage) or black (game start/load).
     if (isLockPreset) {
-      renderer.setClearColor(0xffffff, 1);
+      renderer.setClearColor(sky === "black" ? 0x000000 : 0xffffff, 1);
     } else {
       renderer.setClearColor(0x000000, 0);
     }
@@ -1673,7 +1676,7 @@ export function ThreeCRTFlowers({
         container.removeChild(renderer.domElement);
       }
     };
-  }, [preset, dimensions, isIntro]);
+  }, [preset, dimensions, isIntro, sky]);
 
   if (!webGLAvailable) {
     return null;

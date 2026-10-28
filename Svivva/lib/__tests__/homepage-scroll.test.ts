@@ -50,6 +50,7 @@ describe("homepage scroll panels", () => {
     expect(startSrc).toContain("LOADING_WHEEL_URLS");
     expect(startSrc).toContain("CamoThreeOverlay");
     expect(startSrc).toContain('preset="lock"');
+    expect(startSrc).toContain('sky="black"');
     expect(startSrc).toContain("Tap to play");
     expect(startSrc).not.toContain("fillScreen");
     expect(startSrc).toContain("bg-black");
