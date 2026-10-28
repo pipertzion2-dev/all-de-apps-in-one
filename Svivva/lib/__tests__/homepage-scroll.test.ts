@@ -22,17 +22,17 @@ describe("homepage scroll panels", () => {
     expect(scrollSrc).toContain("scrollToHomepagePanel");
   });
 
-  it("bundle puzzle panel opens the game route directly", () => {
+  it("bundle cube panel opens the game route directly", () => {
     const cubeSrc = readFileSync(
       resolve(__dirname, "../../components/homepage-game-panel.tsx"),
       "utf8",
     );
-    const puzzleSrc = readFileSync(
-      resolve(__dirname, "../../components/homepage-bundle-puzzle.tsx"),
+    const startSrc = readFileSync(
+      resolve(__dirname, "../../components/clean-sneaks/GameStartScreen.tsx"),
       "utf8",
     );
-    expect(cubeSrc).toContain("HomepageBundlePuzzle");
-    expect(cubeSrc).not.toContain("CleanSneaksLogoCube");
+    expect(cubeSrc).toContain("CleanSneaksLogoCube");
+    expect(cubeSrc).not.toContain("HomepageBundlePuzzle");
     expect(cubeSrc).toContain('router.push("/clean-sneaks")');
     expect(cubeSrc).toContain('id="home-game"');
     expect(cubeSrc).toContain("CamoThreeOverlay");
@@ -40,9 +40,8 @@ describe("homepage scroll panels", () => {
     expect(cubeSrc).toContain("bg-white");
     expect(cubeSrc).toContain("button-enter-main-app");
     expect(cubeSrc).not.toContain("HomepageScrollHint");
-    expect(puzzleSrc).toContain("BUNDLE_CUBE_FACE_URLS");
-    expect(puzzleSrc).toContain("homepage-bundle-puzzle");
-    expect(puzzleSrc).toContain("clipPath");
+    expect(startSrc).toContain("HomepageBundlePuzzle");
+    expect(startSrc).toContain("game-start-puzzle-screen");
   });
 
   it("splits main app faces: beta apps then combined; game is intro; no Moves Like ads", () => {

@@ -1,9 +1,14 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { CamoThreeOverlay } from "@/components/camo-three-overlay";
-import { HomepageBundlePuzzle } from "@/components/homepage-bundle-puzzle";
 import { KLEAN_HOMEPAGE_TAGLINE } from "@/lib/clean-sneaks/game-copy";
+
+const CleanSneaksLogoCube = dynamic(
+  () => import("@/components/clean-sneaks/CleanSneaksLogoCube").then((m) => m.CleanSneaksLogoCube),
+  { ssr: false },
+);
 
 type HomepageGamePanelProps = {
   /** Full-screen first page that flips into the main app. */
@@ -11,7 +16,7 @@ type HomepageGamePanelProps = {
   onEnterApp?: () => void;
 };
 
-/** First page — six CD-jewel faces as an interlocking puzzle on white. */
+/** First page — Game cube on white with flowers + digi camo across the full viewport. */
 export function HomepageGamePanel({ asIntro = false, onEnterApp }: HomepageGamePanelProps) {
   const router = useRouter();
 
@@ -42,11 +47,11 @@ export function HomepageGamePanel({ asIntro = false, onEnterApp }: HomepageGameP
         }`}
       >
         <div
-          className="relative mx-auto mt-2 flex min-h-0 w-full max-w-3xl flex-1 items-center justify-center"
+          className="relative mx-auto mt-2 flex min-h-0 w-full max-w-lg flex-1 items-center justify-center"
           data-testid="homepage-bundle-cube"
         >
-          <HomepageBundlePuzzle
-            className="h-auto max-h-[min(62svh,520px)] w-full"
+          <CleanSneaksLogoCube
+            className="h-full max-h-[min(52svh,400px)] w-full"
             onActivate={enterGame}
           />
         </div>
@@ -56,12 +61,12 @@ export function HomepageGamePanel({ asIntro = false, onEnterApp }: HomepageGameP
             className="mt-2 shrink-0 text-center text-[10px] uppercase tracking-[0.25em] text-black/50 sm:text-[11px]"
             data-testid="text-clean-sneaks-goal"
           >
-            {KLEAN_HOMEPAGE_TAGLINE} — tap puzzle to play free
+            {KLEAN_HOMEPAGE_TAGLINE} — tap to play free
           </p>
         ) : (
           <div className="mt-3 flex shrink-0 flex-col items-center gap-3">
             <p className="rounded-full border border-black/15 bg-white px-4 py-1.5 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-black shadow-sm sm:text-xs">
-              Tap puzzle to play · scroll up to enter
+              Tap cube to play · scroll up to enter
             </p>
             <button
               type="button"

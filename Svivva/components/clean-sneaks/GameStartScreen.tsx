@@ -1,7 +1,8 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { MAIN_GAME_COVER_URL } from "@/lib/clean-sneaks/assets";
+import { HomepageBundlePuzzle } from "@/components/homepage-bundle-puzzle";
+import { BUNDLE_CUBE_FACE_URLS, MAIN_GAME_COVER_URL } from "@/lib/clean-sneaks/assets";
 import { KLEAN_RUNNER_INTRO_LINE } from "@/lib/clean-sneaks/game-copy";
 
 export type GameStartScreenProps = {
@@ -14,16 +15,21 @@ export type GameStartScreenProps = {
 
 let coverReadyPromise: Promise<void> | null = null;
 
-/** Warm the start cover JPEG once per session. */
+/** Warm the start cover + puzzle face JPEGs once per session. */
 export function preloadMainGameCover(): Promise<void> {
   if (typeof window === "undefined") return Promise.resolve();
   if (coverReadyPromise) return coverReadyPromise;
-  coverReadyPromise = new Promise((resolve) => {
-    const img = new window.Image();
-    img.onload = () => resolve();
-    img.onerror = () => resolve();
-    img.src = MAIN_GAME_COVER_URL;
-  });
+  coverReadyPromise = Promise.all(
+    [MAIN_GAME_COVER_URL, ...BUNDLE_CUBE_FACE_URLS].map(
+      (src) =>
+        new Promise<void>((resolve) => {
+          const img = new window.Image();
+          img.onload = () => resolve();
+          img.onerror = () => resolve();
+          img.src = src;
+        }),
+    ),
+  ).then(() => undefined);
   return coverReadyPromise;
 }
 
@@ -37,8 +43,8 @@ export function GameStartScreen({
 
   return (
     <div
-      className={`fixed inset-0 overflow-hidden bg-black ${
-        preload ? "z-[1] pointer-events-none" : "z-[30] cursor-pointer"
+      className={`fixed inset-0 overflow-hidden bg-[#0a080e] ${
+        preload ? "z-[1] pointer-events-none" : "z-[30]"
       } ${className ?? ""}`}
       style={style}
       role={interactive ? "button" : undefined}
@@ -56,18 +62,27 @@ export function GameStartScreen({
             }
           : undefined
       }
+      data-testid="game-start-puzzle-screen"
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={MAIN_GAME_COVER_URL}
-        alt=""
-        draggable={false}
-        decoding="sync"
-        fetchPriority="high"
-        className="absolute inset-0 h-full w-full object-cover object-center"
-        style={{ minHeight: "100%", minWidth: "100%" }}
-        data-testid="img-main-game-cover"
+      <div
+        className="pointer-events-none absolute inset-0 opacity-50"
+        aria-hidden
+        style={{
+          background: `
+            radial-gradient(ellipse 60% 50% at 50% 40%, rgba(168,146,193,0.22), transparent 55%),
+            radial-gradient(ellipse 45% 40% at 80% 80%, rgba(91,141,168,0.16), transparent 50%),
+            linear-gradient(180deg, #120e18, #0a080e 55%, #050407)
+          `,
+        }}
       />
+
+      <div className="relative z-[1] flex h-full w-full flex-col items-center justify-center px-3 pb-28 pt-10 sm:px-6 sm:pb-32 sm:pt-14">
+        <HomepageBundlePuzzle
+          className={`pointer-events-none h-auto max-h-[min(58svh,480px)] w-full max-w-3xl ${
+            interactive ? "cursor-pointer" : ""
+          }`}
+        />
+      </div>
 
       {!preload && (
         <div
@@ -87,7 +102,7 @@ export function GameStartScreen({
             Start
           </p>
           <p className="text-xs uppercase tracking-[0.35em] text-white/80 animate-pulse sm:text-sm">
-            Tap to play
+            Tap puzzle to play
           </p>
         </div>
       )}
