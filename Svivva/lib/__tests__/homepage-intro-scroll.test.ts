@@ -31,8 +31,8 @@ describe("homepage intro scroll", () => {
     expect(pageSrc).toContain("text-intro-swipe-cube-twice");
     expect(pageSrc).toContain("safe-area-inset-bottom");
     expect(pageSrc).toMatch(/text-black[\s\S]{0,120}Scroll up to enter/);
-    expect(gameSrc).toContain("scroll up to enter");
-    expect(gameSrc).toMatch(/text-black[\s\S]{0,120}scroll up to enter/);
+    expect(gameSrc).toContain("button-enter-main-app");
+    expect(gameSrc).toContain("CleanSneaksLogoCube");
   });
 
   it("defers heavy homepage 3D until intro completes", () => {

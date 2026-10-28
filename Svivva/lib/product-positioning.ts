@@ -20,8 +20,7 @@ export const PRODUCT_PROTECTION_PITCH =
 
 /** Applications block (below the hero) — focused section intro. */
 export const HOMEPAGE_APPLICATIONS_TITLE = "What we ship";
-export const HOMEPAGE_APPLICATIONS_SUBLINE =
-  "Protection is the product. Desk apps on the cube are beta.";
+export const HOMEPAGE_APPLICATIONS_SUBLINE = "Protection is the product. Desk apps are beta.";
 
 /** Sap / tree metaphor — quiet work under the surface while you rest and grow. */
 export const PRODUCT_SAP_METAPHOR =
@@ -74,7 +73,7 @@ export const HOMEPAGE_SCROLL_TO_COMBINED_UP = "↑ Back to story";
 /** @deprecated Use HOMEPAGE_SCROLL_TO_PROTECTION — kept for lingering imports. */
 export const HOMEPAGE_SCROLL_TO_PLATFORM = HOMEPAGE_SCROLL_TO_PROTECTION;
 
-/** Beta apps face — the cube is the beta desk, not the main product. */
+/** @deprecated Title/subline no longer shown above the homepage desk cube. */
 export const HOMEPAGE_BETA_CUBE_TITLE = "Beta apps";
 export const HOMEPAGE_BETA_CUBE_SUBLINE = "Seeds, Orbit, and more — still in beta.";
 

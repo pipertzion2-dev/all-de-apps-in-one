@@ -64,7 +64,8 @@ describe("homepage scroll panels", () => {
     expect(betaSrc).toContain("HomepageHeroBlock");
     expect(betaSrc).toContain("PlatformFeatureHub");
     expect(betaSrc).toContain('id="oaas"');
-    expect(betaSrc).toContain("HOMEPAGE_BETA_CUBE_TITLE");
+    expect(betaSrc).not.toContain("HOMEPAGE_BETA_CUBE_TITLE");
+    expect(betaSrc).not.toContain("HOMEPAGE_BETA_CUBE_SUBLINE");
     expect(betaSrc).not.toContain('href="/play"');
     expect(betaSrc).not.toMatch(/Moves Like/i);
     expect(cubeSrc).toContain('id="nav-cube"');
@@ -80,7 +81,8 @@ describe("homepage scroll panels", () => {
     expect(cubeSrc).not.toContain("PlatformFeatureHub");
     expect(cubeSrc).not.toMatch(/Klean Sneaks/i);
     expect(gameSrc).not.toContain("HomepageMainGoal");
-    expect(gameSrc).toContain("KLEAN_HOMEPAGE_TAGLINE");
+    expect(gameSrc).not.toContain("KLEAN_HOMEPAGE_TAGLINE");
+    expect(gameSrc).toContain("CleanSneaksLogoCube");
     expect(gameSrc).not.toMatch(/Klean Sneaks/i);
     expect(playHubSrc).toContain("MovesLikeApp");
     expect(playHubSrc).toContain("tab-play-moves");
