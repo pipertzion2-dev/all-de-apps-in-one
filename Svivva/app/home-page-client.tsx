@@ -675,20 +675,20 @@ export default function LandingPage() {
 
               <div className="flex items-center gap-1 sm:gap-2">
                 <Link
+                  href="/clean-sneaks"
+                  className="inline-flex h-8 items-center rounded-md border border-[#5B8DA8]/55 bg-[#5B8DA8]/12 px-3 text-xs font-semibold tracking-wide text-[#5B8DA8] transition-colors hover:bg-[#5B8DA8]/20 hover:text-[#4a7a94]"
+                  data-testid="link-nav-game"
+                  aria-label="Open Game"
+                >
+                  Game
+                </Link>
+                <Link
                   href="/poor-man-protection"
                   className="rounded-md px-2.5 py-1.5 text-xs font-medium text-foreground/80 transition-colors hover:text-[#5B8DA8]"
                   data-testid="link-nav-poor-man-protection"
                   aria-label="Poor Man Protection"
                 >
                   Protect
-                </Link>
-                <Link
-                  href="/clean-sneaks"
-                  className="rounded-md px-2.5 py-1.5 text-xs font-medium text-foreground/80 transition-colors hover:text-[#5B8DA8]"
-                  data-testid="link-nav-game"
-                  aria-label="Game"
-                >
-                  Game
                 </Link>
                 <Link
                   href="/dashboard"
