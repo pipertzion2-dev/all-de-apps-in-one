@@ -2,13 +2,15 @@
 export type HomepageFlipPanelId = "home-game" | "home-moves" | "home-beta" | "nav-cube";
 
 /**
- * Cube scroll order (index 0 = top) after the game intro flips away:
- * beta apps → combined (about / pricing / FAQ).
- * The Moves Like lives in /play; the game is the first-page intro, not a scroll face.
+ * Continuous cube scroll order (index 0 = top) after the white intro flips away:
+ * beta apps → story → white game face.
+ * Wrapping past the white face returns to beta with a fine flip — never an
+ * infinite jump onto the story face mid-scroll.
  */
 export const HOMEPAGE_FLIP_PANELS: readonly HomepageFlipPanelId[] = [
   "home-beta",
   "nav-cube",
+  "home-game",
 ] as const;
 
 export function flipPanelIndex(id: HomepageFlipPanelId): number {

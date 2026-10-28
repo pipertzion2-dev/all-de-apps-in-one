@@ -715,7 +715,7 @@ export default function LandingPage() {
             <div
               className="relative w-full bg-background"
               data-homepage-native-scroll=""
-              data-homepage-cube-faces="2"
+              data-homepage-cube-faces="3"
               data-active-panel={flipInitialPanel}
               style={{ scrollSnapType: "y proximity" }}
             >
@@ -732,6 +732,8 @@ export default function LandingPage() {
               >
                 <HomepageBetaPanel mountCanvas={canMountHeavy3d} interactive={flipComplete} />
                 <HomepageCubePanel mountCanvas={canMountHeavy3d} interactive={flipComplete} />
+                {/* White game face closes the continuous cube after the intro unmounts. */}
+                {flipComplete ? <HomepageGamePanel /> : null}
                 <HomepageCubeLoop enabled={flipComplete} />
               </ClientErrorBoundary>
             </div>

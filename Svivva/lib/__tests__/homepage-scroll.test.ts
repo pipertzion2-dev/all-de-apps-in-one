@@ -7,12 +7,13 @@ describe("homepage scroll panels", () => {
     const pageSrc = readFileSync(resolve(__dirname, "../../app/home-page-client.tsx"), "utf8");
     const scrollSrc = readFileSync(resolve(__dirname, "../homepage-scroll.ts"), "utf8");
     expect(pageSrc).toContain("data-homepage-native-scroll");
-    expect(pageSrc).toContain('data-homepage-cube-faces="2"');
+    expect(pageSrc).toContain('data-homepage-cube-faces="3"');
     expect(pageSrc).toContain("HomepageGamePanel");
     expect(pageSrc).not.toContain("HomepageMovesPanel");
     expect(pageSrc).toContain("HomepageBetaPanel");
     expect(pageSrc).toContain("HomepageCubePanel");
     expect(pageSrc).toContain("HomepageCubeLoop");
+    expect(pageSrc).toMatch(/HomepageBetaPanel[\s\S]*HomepageCubePanel[\s\S]*<HomepageGamePanel/);
     expect(pageSrc).not.toContain("HomepageFlipStack");
     expect(pageSrc).not.toContain("HomepageCubeJourney");
     expect(pageSrc).not.toContain("JourneyCubeCanvas");
@@ -55,9 +56,11 @@ describe("homepage scroll panels", () => {
       resolve(__dirname, "../../components/play/play-hub-client.tsx"),
       "utf8",
     );
-    expect(stackSrc).toMatch(/HOMEPAGE_FLIP_PANELS[\s\S]*"home-beta"[\s\S]*"nav-cube"/);
+    expect(stackSrc).toMatch(
+      /HOMEPAGE_FLIP_PANELS[\s\S]*"home-beta"[\s\S]*"nav-cube"[\s\S]*"home-game"/,
+    );
     expect(pageSrc).toContain('useState<HomepageFlipPanelId>("home-beta")');
-    expect(pageSrc).toMatch(/HomepageBetaPanel[\s\S]*HomepageCubePanel/);
+    expect(pageSrc).toMatch(/HomepageBetaPanel[\s\S]*HomepageCubePanel[\s\S]*HomepageGamePanel/);
     expect(pageSrc).toContain("asIntro");
     expect(pageSrc).toContain("homepage-game-intro");
     expect(betaSrc).toContain('id="home-beta"');

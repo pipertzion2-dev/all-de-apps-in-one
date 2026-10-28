@@ -2,37 +2,48 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "fs";
 import { resolve } from "path";
 import { cubeLoopWrapTarget, nextCubeLoopPanel, prevCubeLoopPanel } from "../homepage-cube-loop";
+import { HOMEPAGE_FLIP_PANELS } from "../homepage-flip-stack";
 
 describe("homepage cube loop", () => {
-  it("wraps forward from the last face to the first", () => {
-    expect(nextCubeLoopPanel("nav-cube")).toBe("home-beta");
+  it("orders faces beta → story → white game", () => {
+    expect([...HOMEPAGE_FLIP_PANELS]).toEqual(["home-beta", "nav-cube", "home-game"]);
+  });
+
+  it("wraps forward from the white game face to beta", () => {
+    expect(nextCubeLoopPanel("home-game")).toBe("home-beta");
+    expect(nextCubeLoopPanel("nav-cube")).toBe("home-game");
     expect(nextCubeLoopPanel("home-beta")).toBe("nav-cube");
   });
 
-  it("wraps backward from the first face to the last", () => {
-    expect(prevCubeLoopPanel("home-beta")).toBe("nav-cube");
-    expect(prevCubeLoopPanel("nav-cube")).toBe("home-beta");
+  it("wraps backward from beta to the white game face", () => {
+    expect(prevCubeLoopPanel("home-beta")).toBe("home-game");
+    expect(prevCubeLoopPanel("home-game")).toBe("nav-cube");
   });
 
   it("maps wheel direction + edge position to a wrap target", () => {
     expect(cubeLoopWrapTarget(40, { nearBottom: true, nearTop: false })).toBe("home-beta");
-    expect(cubeLoopWrapTarget(-40, { nearBottom: false, nearTop: true })).toBe("nav-cube");
+    expect(cubeLoopWrapTarget(-40, { nearBottom: false, nearTop: true })).toBe("home-game");
     expect(cubeLoopWrapTarget(40, { nearBottom: false, nearTop: false })).toBeNull();
     expect(cubeLoopWrapTarget(-40, { nearBottom: true, nearTop: false })).toBeNull();
     expect(cubeLoopWrapTarget(0, { nearBottom: true, nearTop: true })).toBeNull();
   });
 
-  it("mounts the continuous cube loop after the story face on the homepage", () => {
+  it("mounts the white game face after the story face and uses a fine flip wrap", () => {
     const pageSrc = readFileSync(resolve(__dirname, "../../app/home-page-client.tsx"), "utf8");
     const loopSrc = readFileSync(
       resolve(__dirname, "../../components/homepage-cube-loop.tsx"),
       "utf8",
     );
+    const scrollSrc = readFileSync(resolve(__dirname, "../homepage-scroll.ts"), "utf8");
     expect(pageSrc).toContain("HomepageCubeLoop");
-    expect(pageSrc).toMatch(/HomepageCubePanel[\s\S]*HomepageCubeLoop/);
-    expect(loopSrc).toContain('scrollToHomepagePanel("home-beta")');
-    expect(loopSrc).toContain("data-homepage-cube-loop");
-    expect(loopSrc).toContain("HOMEPAGE_SCROLL_WRAP_TO_FIRST");
-    expect(loopSrc).toContain("IntersectionObserver");
+    expect(pageSrc).toContain('data-homepage-cube-faces="3"');
+    expect(pageSrc).toMatch(
+      /HomepageBetaPanel[\s\S]*HomepageCubePanel[\s\S]*HomepageGamePanel[\s\S]*HomepageCubeLoop/,
+    );
+    expect(loopSrc).toContain("flipToHomepagePanel");
+    expect(loopSrc).not.toContain("IntersectionObserver");
+    expect(loopSrc).not.toContain('wrapTo("home-beta")');
+    expect(scrollSrc).toContain("playHomepageFineFlip");
+    expect(scrollSrc).toContain("flipToHomepagePanel");
   });
 });

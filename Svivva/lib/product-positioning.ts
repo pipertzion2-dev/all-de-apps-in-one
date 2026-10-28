@@ -68,8 +68,8 @@ export const PRODUCT_PROTECTION_PATH = "/poor-man-protection";
 export const HOMEPAGE_SCROLL_TO_COMBINED = "More";
 /** From the combined face — back to beta apps. */
 export const HOMEPAGE_SCROLL_TO_BETA_UP = "Back";
-/** From the bottom of the story face — wrap around the cube to the first face. */
-export const HOMEPAGE_SCROLL_WRAP_TO_FIRST = "Back to start";
+/** From the white game face — fine-flip wrap back to beta apps. */
+export const HOMEPAGE_SCROLL_WRAP_TO_FIRST = "Flip to start";
 /** Continue to beta desk apps. */
 export const HOMEPAGE_SCROLL_TO_BETA = "Scroll ↓ Beta apps";
 /** @deprecated Not used on homepage — kept for lingering imports. */

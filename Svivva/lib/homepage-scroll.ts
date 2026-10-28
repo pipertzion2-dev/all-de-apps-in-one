@@ -3,6 +3,7 @@ import {
   hashForFlipPanel,
   type HomepageFlipPanelId,
 } from "./homepage-flip-stack";
+import { playHomepageFineFlip } from "./homepage-fine-flip";
 
 export type HomepageScrollPanelId = HomepageFlipPanelId;
 
@@ -60,6 +61,25 @@ export function scrollToHomepagePanel(id: HomepageScrollPanelId) {
     return;
   }
   dispatchHomepageFlip(id);
+}
+
+/**
+ * Same as {@link scrollToHomepagePanel}, with a short cube-face rotateX first.
+ * Used when wrapping past the ends of the continuous homepage.
+ */
+export async function flipToHomepagePanel(
+  id: HomepageScrollPanelId,
+  opts?: { direction?: "forward" | "back" },
+) {
+  const direction = opts?.direction ?? "forward";
+  await playHomepageFineFlip({ direction });
+  const el = document.getElementById(panelElementId(id));
+  if (el) {
+    el.scrollIntoView({ behavior: "instant" as ScrollBehavior, block: "start" });
+    window.history.replaceState(null, "", `/#${hashForFlipPanel(id)}`);
+    return;
+  }
+  scrollToHomepagePanel(id);
 }
 
 export {

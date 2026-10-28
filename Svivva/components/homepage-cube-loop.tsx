@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import type { HomepageFlipPanelId } from "@/lib/homepage-flip-stack";
 import { HOMEPAGE_FLIP_PANELS } from "@/lib/homepage-flip-stack";
-import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
+import { flipToHomepagePanel } from "@/lib/homepage-scroll";
 import {
   HOMEPAGE_CUBE_LOOP_COOLDOWN_MS,
   HOMEPAGE_CUBE_LOOP_EDGE_PX,
@@ -11,7 +11,6 @@ import {
   isNearDocumentBottom,
   isNearDocumentTop,
 } from "@/lib/homepage-cube-loop";
-import { HOMEPAGE_SCROLL_WRAP_TO_FIRST } from "@/lib/product-positioning";
 
 type HomepageCubeLoopProps = {
   enabled?: boolean;
@@ -22,24 +21,33 @@ function isLoopPanel(id: HomepageFlipPanelId): id is (typeof HOMEPAGE_FLIP_PANEL
 }
 
 /**
- * Continuous cube wrap for the native-scroll homepage:
- * - At the bottom of the last face, scroll/wheel further → first face
- * - At the top of the first face, scroll/wheel up → last face
+ * Edge wrap only — keeps the homepage continuous with a fine cube flip:
+ * - Past the white game face (end) → flip forward to beta
+ * - Past the top of beta → flip back to the white game face
+ *
+ * No mid-page infinite jump onto the story face.
  */
 export function HomepageCubeLoop({ enabled = true }: HomepageCubeLoopProps) {
   const lockedUntilRef = useRef(0);
   const touchStartYRef = useRef<number | null>(null);
-  const sentinelRef = useRef<HTMLElement | null>(null);
+  const wrappingRef = useRef(false);
 
   useEffect(() => {
     if (!enabled) return;
 
-    const wrapTo = (panel: HomepageFlipPanelId) => {
+    const wrapTo = async (panel: HomepageFlipPanelId, deltaY: number) => {
       if (!isLoopPanel(panel)) return;
       const now = Date.now();
-      if (now < lockedUntilRef.current) return;
+      if (now < lockedUntilRef.current || wrappingRef.current) return;
       lockedUntilRef.current = now + HOMEPAGE_CUBE_LOOP_COOLDOWN_MS;
-      scrollToHomepagePanel(panel);
+      wrappingRef.current = true;
+      try {
+        await flipToHomepagePanel(panel, {
+          direction: deltaY > 0 ? "forward" : "back",
+        });
+      } finally {
+        wrappingRef.current = false;
+      }
     };
 
     const tryWrap = (deltaY: number) => {
@@ -48,12 +56,12 @@ export function HomepageCubeLoop({ enabled = true }: HomepageCubeLoopProps) {
         nearTop: isNearDocumentTop(HOMEPAGE_CUBE_LOOP_EDGE_PX),
       });
       if (!target || !isLoopPanel(target)) return false;
-      wrapTo(target);
+      void wrapTo(target, deltaY);
       return true;
     };
 
     const onWheel = (event: WheelEvent) => {
-      if (event.ctrlKey) return;
+      if (event.ctrlKey || wrappingRef.current) return;
       if (!tryWrap(event.deltaY)) return;
       event.preventDefault();
     };
@@ -63,6 +71,7 @@ export function HomepageCubeLoop({ enabled = true }: HomepageCubeLoopProps) {
     };
 
     const onTouchMove = (event: TouchEvent) => {
+      if (wrappingRef.current) return;
       const startY = touchStartYRef.current;
       const y = event.touches[0]?.clientY;
       if (startY == null || y == null) return;
@@ -77,19 +86,6 @@ export function HomepageCubeLoop({ enabled = true }: HomepageCubeLoopProps) {
       touchStartYRef.current = null;
     };
 
-    const sentinel = sentinelRef.current;
-    let observer: IntersectionObserver | null = null;
-    if (sentinel && typeof IntersectionObserver !== "undefined") {
-      observer = new IntersectionObserver(
-        (entries) => {
-          const hit = entries.some((e) => e.isIntersecting && e.intersectionRatio >= 0.45);
-          if (hit) wrapTo("home-beta");
-        },
-        { threshold: [0.45, 0.6, 0.8] },
-      );
-      observer.observe(sentinel);
-    }
-
     window.addEventListener("wheel", onWheel, { passive: false });
     window.addEventListener("touchstart", onTouchStart, { passive: true });
     window.addEventListener("touchmove", onTouchMove, { passive: false });
@@ -97,7 +93,6 @@ export function HomepageCubeLoop({ enabled = true }: HomepageCubeLoopProps) {
     window.addEventListener("touchcancel", onTouchEnd, { passive: true });
 
     return () => {
-      observer?.disconnect();
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchmove", onTouchMove);
@@ -106,26 +101,5 @@ export function HomepageCubeLoop({ enabled = true }: HomepageCubeLoopProps) {
     };
   }, [enabled]);
 
-  if (!enabled) return null;
-
-  return (
-    <section
-      ref={sentinelRef}
-      id="homepage-cube-loop"
-      data-homepage-cube-loop=""
-      data-testid="homepage-cube-loop"
-      className="relative isolate flex items-center justify-center border-t border-border/30 bg-background px-4 py-10"
-      style={{ scrollSnapAlign: "start" }}
-      aria-label="Continue around the cube"
-    >
-      <button
-        type="button"
-        onClick={() => scrollToHomepagePanel("home-beta")}
-        className="text-xs font-medium tracking-wide text-muted-foreground underline-offset-4 transition-colors hover:text-[#5B8DA8] hover:underline"
-        data-testid="button-cube-loop-to-first"
-      >
-        {HOMEPAGE_SCROLL_WRAP_TO_FIRST}
-      </button>
-    </section>
-  );
+  return null;
 }
