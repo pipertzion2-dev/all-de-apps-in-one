@@ -1,7 +1,6 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
 import { CamoThreeOverlay } from "@/components/camo-three-overlay";
 import { KLEAN_HOMEPAGE_TAGLINE } from "@/lib/clean-sneaks/game-copy";
 
@@ -17,10 +16,9 @@ type HomepageGamePanelProps = {
 
 /** First page — Game cube on white with flowers + digi camo across the full viewport. */
 export function HomepageGamePanel({ asIntro = false }: HomepageGamePanelProps) {
-  const router = useRouter();
-
   const enterGame = () => {
-    router.push("/clean-sneaks");
+    // Hard nav so the header/cube Game path never soft-routes into /play.
+    window.location.assign("/clean-sneaks");
   };
 
   return (

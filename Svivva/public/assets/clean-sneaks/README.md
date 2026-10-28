@@ -5,7 +5,7 @@
 ## Main logo
 
 ```
-public/assets/clean-sneaks/karen-the-muscle-logo.jpg
+public/assets/clean-sneaks/karen-the-muscle-logo.png
 ```
 
 Brand logo asset for Karen the Muscle (loading / splash).

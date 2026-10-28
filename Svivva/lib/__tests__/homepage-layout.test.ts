@@ -29,12 +29,13 @@ describe("homepage-layout", () => {
     expect(pageSrc).toContain('data-testid="link-nav-game"');
     expect(pageSrc).toContain('href="/clean-sneaks"');
     expect(pageSrc).toContain('aria-label="Open Game"');
+    expect(pageSrc).toContain('window.location.assign("/clean-sneaks")');
     // Game is the first/action link after the brand so it stays findable past the intro.
     expect(pageSrc.indexOf('data-testid="link-nav-game"')).toBeLessThan(
       pageSrc.indexOf('data-testid="link-nav-poor-man-protection"'),
     );
     expect(pageSrc).not.toMatch(
-      /data-testid="link-nav-game"[\s\S]{0,200}href="\/play"|href="\/play"[\s\S]{0,200}data-testid="link-nav-game"/,
+      /data-testid="link-nav-game"[\s\S]{0,280}href="\/play"|href="\/play"[\s\S]{0,280}data-testid="link-nav-game"/,
     );
     expect(pageSrc).toContain('data-testid="button-start-free"');
     expect(pageSrc).not.toContain("OrbitAdminAccessButton");
