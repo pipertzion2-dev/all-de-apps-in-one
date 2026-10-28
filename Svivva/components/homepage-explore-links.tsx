@@ -10,7 +10,7 @@ const LINKS = [
   },
   {
     href: "/clean-sneaks",
-    title: "Klean Sneaks demo",
+    title: "Klean Sneaks",
     description: "BALOON8 car×sneaker — one chassis, colorway unlocks, Sneak Vision hazards.",
   },
   {

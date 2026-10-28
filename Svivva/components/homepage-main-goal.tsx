@@ -13,7 +13,7 @@ type HomepageMainGoalProps = {
   variant?: "dark" | "light";
   /** compact = tagline + one short line (mobile-first faces) */
   density?: "compact" | "full";
-  /** game = Klean Sneaks demo face; platform = guardrails product story */
+  /** game = Klean Sneaks face; platform = guardrails product story */
   surface?: "platform" | "game";
   className?: string;
 };
