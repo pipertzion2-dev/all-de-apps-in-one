@@ -42,6 +42,11 @@ export function SvivvaArtifact({ mountCanvas = true }: SvivvaArtifactProps) {
       recordVisit(id);
       const busMode = platformModeForCubeFace(id);
       if (busMode) setMode(busMode);
+      // Game face must hard-load /clean-sneaks (puzzle start) — never soft-route to /play.
+      if (id === "play" || target.cta.href === "/clean-sneaks") {
+        window.location.assign(target.cta.href);
+        return;
+      }
       router.push(target.cta.href);
       window.scrollTo(0, 0);
     },
