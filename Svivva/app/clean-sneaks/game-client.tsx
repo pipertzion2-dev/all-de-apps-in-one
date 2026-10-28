@@ -127,11 +127,7 @@ function CleanSneaksPageContent() {
       data-clean-sneaks-fullscreen=""
       data-klean-reference-ui={uiTheme ? "1" : undefined}
       className={`fixed inset-0 z-[200] flex h-[100dvh] min-h-[100dvh] w-full flex-col overflow-hidden ${
-        gamePhase === "loading" || preGame
-          ? "bg-white"
-          : uiTheme
-            ? ""
-            : "bg-[#0a0c10]"
+        gamePhase === "loading" || preGame ? "bg-white" : uiTheme ? "" : "bg-[#0a0c10]"
       }`}
       style={Object.keys(shellThemeStyle).length ? shellThemeStyle : undefined}
     >

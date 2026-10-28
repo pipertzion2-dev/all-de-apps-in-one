@@ -55,10 +55,8 @@ function buildPieces(cols: number, rows: number): PieceSpec[] {
     for (let col = 0; col < cols; col++) {
       const right: Edge = col === cols - 1 ? "flat" : (row + col) % 2 === 0 ? "out" : "in";
       const bottom: Edge = row === rows - 1 ? "flat" : (row + col) % 2 === 0 ? "out" : "in";
-      const left: Edge =
-        col === 0 ? "flat" : opposite((row + (col - 1)) % 2 === 0 ? "out" : "in");
-      const top: Edge =
-        row === 0 ? "flat" : opposite((row - 1 + col) % 2 === 0 ? "out" : "in");
+      const left: Edge = col === 0 ? "flat" : opposite((row + (col - 1)) % 2 === 0 ? "out" : "in");
+      const top: Edge = row === 0 ? "flat" : opposite((row - 1 + col) % 2 === 0 ? "out" : "in");
       pieces.push({
         label: `ibPw ${row * cols + col + 1}`,
         col,
@@ -197,9 +195,7 @@ export function HomepageBundlePuzzle({
         aria-label="Open Steal the Old Man's Bundle puzzle — tap to play"
         data-testid="homepage-bundle-puzzle-activate"
       >
-        <span className="sr-only">
-          {cols * rows} ibPw collage puzzle pieces — tap to play
-        </span>
+        <span className="sr-only">{cols * rows} ibPw collage puzzle pieces — tap to play</span>
         <svg
           viewBox={`0 0 ${boardW} ${boardH}`}
           preserveAspectRatio={fillScreen ? "none" : "xMidYMid meet"}
