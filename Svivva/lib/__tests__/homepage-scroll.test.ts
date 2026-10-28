@@ -12,6 +12,7 @@ describe("homepage scroll panels", () => {
     expect(pageSrc).not.toContain("HomepageMovesPanel");
     expect(pageSrc).toContain("HomepageBetaPanel");
     expect(pageSrc).toContain("HomepageCubePanel");
+    expect(pageSrc).toContain("HomepageCubeLoop");
     expect(pageSrc).not.toContain("HomepageFlipStack");
     expect(pageSrc).not.toContain("HomepageCubeJourney");
     expect(pageSrc).not.toContain("JourneyCubeCanvas");

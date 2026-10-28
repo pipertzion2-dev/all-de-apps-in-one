@@ -17,6 +17,7 @@ import {
   scrollToHomepagePanel,
 } from "@/lib/homepage-scroll";
 import { HomepageBetaPanel } from "@/components/homepage-beta-panel";
+import { HomepageCubeLoop } from "@/components/homepage-cube-loop";
 import { HomepageCubePanel } from "@/components/homepage-cube-panel";
 import { HomepageGamePanel } from "@/components/homepage-game-panel";
 import { HomepageHeroBlock } from "@/components/homepage-hero-block";
@@ -764,6 +765,7 @@ export default function LandingPage() {
               >
                 <HomepageBetaPanel mountCanvas={canMountHeavy3d} interactive={flipComplete} />
                 <HomepageCubePanel mountCanvas={canMountHeavy3d} interactive={flipComplete} />
+                <HomepageCubeLoop enabled={flipComplete} />
               </ClientErrorBoundary>
             </div>
           ) : (
