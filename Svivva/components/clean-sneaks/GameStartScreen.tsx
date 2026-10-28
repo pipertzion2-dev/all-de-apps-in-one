@@ -1,8 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { HomepageBundlePuzzle } from "@/components/homepage-bundle-puzzle";
-import { BUNDLE_CUBE_FACE_URLS, MAIN_GAME_COVER_URL } from "@/lib/clean-sneaks/assets";
+import { MAIN_GAME_COVER_URL } from "@/lib/clean-sneaks/assets";
 import { KLEAN_RUNNER_INTRO_LINE } from "@/lib/clean-sneaks/game-copy";
 
 export type GameStartScreenProps = {
@@ -13,27 +12,18 @@ export type GameStartScreenProps = {
   preload?: boolean;
 };
 
-/** Seed grid — fillScreen densifies from viewport size on mount. */
-const START_PUZZLE_COLS = 8;
-const START_PUZZLE_ROWS = 6;
-
 let coverReadyPromise: Promise<void> | null = null;
 
-/** Warm the start cover + puzzle face JPEGs once per session. */
+/** Warm the start cover JPEG once per session. */
 export function preloadMainGameCover(): Promise<void> {
   if (typeof window === "undefined") return Promise.resolve();
   if (coverReadyPromise) return coverReadyPromise;
-  coverReadyPromise = Promise.all(
-    [MAIN_GAME_COVER_URL, ...BUNDLE_CUBE_FACE_URLS].map(
-      (src) =>
-        new Promise<void>((resolve) => {
-          const img = new window.Image();
-          img.onload = () => resolve();
-          img.onerror = () => resolve();
-          img.src = src;
-        }),
-    ),
-  ).then(() => undefined);
+  coverReadyPromise = new Promise((resolve) => {
+    const img = new window.Image();
+    img.onload = () => resolve();
+    img.onerror = () => resolve();
+    img.src = MAIN_GAME_COVER_URL;
+  });
   return coverReadyPromise;
 }
 
@@ -47,8 +37,8 @@ export function GameStartScreen({
 
   return (
     <div
-      className={`fixed inset-0 overflow-hidden bg-white ${
-        preload ? "z-[1] pointer-events-none" : "z-[30]"
+      className={`fixed inset-0 overflow-hidden bg-black ${
+        preload ? "z-[1] pointer-events-none" : "z-[30] cursor-pointer"
       } ${className ?? ""}`}
       style={style}
       role={interactive ? "button" : undefined}
@@ -66,23 +56,19 @@ export function GameStartScreen({
             }
           : undefined
       }
-      data-testid="game-start-puzzle-screen"
+      data-testid="game-start-cover-screen"
     >
-      <div className="absolute inset-0 z-0">
-        <HomepageBundlePuzzle
-          fillScreen
-          cols={START_PUZZLE_COLS}
-          rows={START_PUZZLE_ROWS}
-          className={`pointer-events-none h-full w-full max-w-none ${
-            interactive ? "cursor-pointer" : ""
-          }`}
-        />
-        {/* Soft lift only — keep collage graphics readable. */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/18 via-transparent to-white/22 mix-blend-soft-light"
-        />
-      </div>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={MAIN_GAME_COVER_URL}
+        alt=""
+        draggable={false}
+        decoding="sync"
+        fetchPriority="high"
+        className="absolute inset-0 h-full w-full object-cover object-center"
+        style={{ minHeight: "100%", minWidth: "100%" }}
+        data-testid="img-main-game-cover"
+      />
 
       {!preload && (
         <div
@@ -90,19 +76,19 @@ export function GameStartScreen({
           style={{ bottom: "max(1.75rem, env(safe-area-inset-bottom, 0px))" }}
         >
           <p
-            className="max-w-[min(92vw,28rem)] rounded-full bg-white/85 px-4 py-1.5 text-center text-sm font-semibold uppercase leading-snug tracking-[0.2em] text-black shadow-sm sm:text-base"
+            className="max-w-[min(92vw,28rem)] text-center text-sm font-semibold uppercase leading-snug tracking-[0.2em] text-white/95 drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)] sm:text-base"
             data-testid="text-game-runner-intro"
           >
             {KLEAN_RUNNER_INTRO_LINE}
           </p>
           <p
-            className="rounded-md bg-white/90 px-5 py-1 text-5xl font-bold uppercase tracking-[0.35em] text-black shadow-md sm:text-6xl"
+            className="text-5xl font-bold uppercase tracking-[0.35em] text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)] sm:text-6xl"
             data-testid="text-game-start"
           >
             Start
           </p>
-          <p className="rounded-full bg-white/85 px-4 py-1 text-xs uppercase tracking-[0.35em] text-black/70 animate-pulse sm:text-sm">
-            Tap puzzle to play
+          <p className="text-xs uppercase tracking-[0.35em] text-white/80 animate-pulse sm:text-sm">
+            Tap to play
           </p>
         </div>
       )}

@@ -26,7 +26,16 @@ describe("homepage-layout", () => {
     expect(pageSrc).toContain('data-testid="homepage-main-nav"');
     expect(pageSrc).toContain('data-testid="link-home-brand"');
     expect(pageSrc).toContain('data-testid="link-nav-poor-man-protection"');
-    expect(pageSrc).toContain('data-testid="link-svivva-play-mobile"');
+    expect(pageSrc).toContain('data-testid="link-nav-game"');
+    expect(pageSrc).toContain('href="/clean-sneaks"');
+    expect(pageSrc).toContain('aria-label="Open Game"');
+    // Game is the first/action link after the brand so it stays findable past the intro.
+    expect(pageSrc.indexOf('data-testid="link-nav-game"')).toBeLessThan(
+      pageSrc.indexOf('data-testid="link-nav-poor-man-protection"'),
+    );
+    expect(pageSrc).not.toMatch(
+      /data-testid="link-nav-game"[\s\S]{0,200}href="\/play"|href="\/play"[\s\S]{0,200}data-testid="link-nav-game"/,
+    );
     expect(pageSrc).toContain('data-testid="button-start-free"');
     expect(pageSrc).not.toContain("OrbitAdminAccessButton");
     expect(pageSrc).not.toContain("button-home-nav-admin-orbit");

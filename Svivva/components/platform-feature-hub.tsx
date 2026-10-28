@@ -262,9 +262,9 @@ export function PlatformFeatureHub({
       >
         {!isCompact && (
           <header className="space-y-3 text-center sm:text-left">
-            <p className="text-[11px] uppercase tracking-[0.28em] text-[#5B8DA8] flex flex-wrap items-center justify-center sm:justify-start gap-2">
+            <div className="text-[11px] uppercase tracking-[0.28em] text-[#5B8DA8] flex flex-wrap items-center justify-center sm:justify-start gap-2">
               {OAAS_NAME} <FeatureBetaBadge compact />
-            </p>
+            </div>
             <h2 id="oaas-heading" className="text-3xl sm:text-4xl font-semibold tracking-tight">
               Beta desk modules
             </h2>

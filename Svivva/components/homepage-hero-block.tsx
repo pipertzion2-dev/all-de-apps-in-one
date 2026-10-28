@@ -41,17 +41,19 @@ export function HomepageHeroBlock({
       } ${className}`}
       style={{ pointerEvents: interactive ? "auto" : "none" }}
     >
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 z-0"
-        aria-hidden
-        style={stacked ? { bottom: 0 } : undefined}
-      >
+      {mountCanvas ? (
         <div
-          className={`w-full overflow-hidden opacity-80 md:opacity-65 ${stacked ? "h-full min-h-[520px]" : "sticky top-0 h-[100svh]"}`}
+          className="pointer-events-none absolute inset-x-0 top-0 z-0"
+          aria-hidden
+          style={stacked ? { bottom: 0 } : undefined}
         >
-          <CamoThreeOverlay preset="oaas" eagerMount keepMounted className="h-full w-full" />
+          <div
+            className={`w-full overflow-hidden ${stacked ? "h-full min-h-[520px] opacity-45 md:opacity-35" : "sticky top-0 h-[100svh] opacity-80 md:opacity-65"}`}
+          >
+            <CamoThreeOverlay preset="oaas" eagerMount keepMounted className="h-full w-full" />
+          </div>
         </div>
-      </div>
+      ) : null}
       <div className="relative z-10">
         <SvivvaArtifact mountCanvas={mountCanvas} />
       </div>
