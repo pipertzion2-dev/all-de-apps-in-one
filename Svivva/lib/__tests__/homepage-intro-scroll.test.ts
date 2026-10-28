@@ -40,7 +40,7 @@ describe("homepage intro scroll", () => {
     expect(pageSrc).toContain("if (!flipComplete) return");
   });
 
-  it("opens with the Klean Sneaks game on white with Three.js flowers", () => {
+  it("opens with the game puzzle on white with Three.js flowers", () => {
     expect(pageSrc).toContain("HomepageGamePanel");
     expect(pageSrc).toContain("asIntro");
     expect(pageSrc).toContain("homepage-game-intro");
@@ -48,7 +48,8 @@ describe("homepage intro scroll", () => {
     expect(gameSrc).toContain("bg-white");
     expect(gameSrc).toContain("CamoThreeOverlay");
     expect(gameSrc).toContain('preset="lock"');
-    expect(gameSrc).toContain("CleanSneaksLogoCube");
+    expect(gameSrc).toContain("HomepageBundlePuzzle");
+    expect(gameSrc).not.toContain("CleanSneaksLogoCube");
   });
 
   it("releases the page from 3D when the intro finishes", () => {
