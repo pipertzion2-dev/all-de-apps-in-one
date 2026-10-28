@@ -570,6 +570,24 @@ export function PoorManProtectionWizard() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-16">
+      <div className="rounded-2xl border border-[#5B8DA8]/30 bg-gradient-to-br from-[#5B8DA8]/15 to-[#6B2C4E]/10 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+        <div className="space-y-1">
+          <div className="text-[10px] uppercase tracking-[0.2em] text-[#5B8DA8] font-semibold">
+            Invention Protection
+          </div>
+          <p className="text-sm text-muted-foreground max-w-xl">
+            Document your ideas. Preserve your evidence. Prepare your inventions — notebook, evidence
+            vault, 3D studio, and disclosure prep inside Poor Man Protection.
+          </p>
+        </div>
+        <Button asChild className="bg-[#5B8DA8] hover:bg-[#4a7a92] shrink-0">
+          <Link href="/poor-man-protection/invention-studio" data-testid="link-invention-protection-studio">
+            <Layers className="w-4 h-4 mr-1" />
+            Open Invention Protection
+          </Link>
+        </Button>
+      </div>
+
       <div className="rounded-2xl border border-[#5B8DA8]/25 bg-[#5B8DA8]/5 p-4 flex gap-3">
         <AlertTriangle className="w-5 h-5 text-[#5B8DA8] shrink-0 mt-0.5" />
         <div className="text-sm text-muted-foreground leading-relaxed space-y-1">

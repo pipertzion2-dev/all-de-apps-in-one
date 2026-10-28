@@ -105,6 +105,21 @@ const digitalCommands: CommandItem[] = [
     section: "Build",
   },
   {
+    title: "Invention Protection",
+    href: "/poor-man-protection/invention-studio",
+    icon: Lightbulb,
+    keywords: [
+      "invention",
+      "disclosure",
+      "evidence vault",
+      "3d studio",
+      "prior art",
+      "notebook",
+      "patent prep",
+    ],
+    section: "Build",
+  },
+  {
     title: "Security",
     href: "/dashboard/security",
     icon: Lock,

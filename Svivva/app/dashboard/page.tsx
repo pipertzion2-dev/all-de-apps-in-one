@@ -433,6 +433,18 @@ function ReturningUserDashboard({
       ],
     },
     {
+      href: "/dashboard/poor-man-protection/invention-studio",
+      title: "Invention Protection",
+      subtitle: "Document your ideas. Preserve your evidence. Prepare your inventions.",
+      icon: Lightbulb,
+      color: "#5B8DA8",
+      shapes: [
+        { shape: "cube" as const, size: 18, x: "left-6", y: "top-5", delay: 0.15, duration: 6 },
+        { shape: "ring" as const, size: 14, x: "right-5", y: "bottom-5", delay: 0.7, duration: 7 },
+        { shape: "sphere" as const, size: 11, x: "right-16", y: "top-8", delay: 1.0, duration: 5 },
+      ],
+    },
+    {
       href: "/dashboard/idea-engine",
       title: "Idea Engine",
       subtitle: "AI finds untapped opportunities for you",

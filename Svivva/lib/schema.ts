@@ -1789,5 +1789,182 @@ export const platformLedgerEntries = pgTable("platform_ledger_entries", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+// ============================================================================
+// INVENTION PROTECTION STUDIO (Poor Man Protection / Cube Protect)
+// Private-by-default invention records. Client vault remains primary for guests;
+// these tables persist authenticated server copies.
+// ============================================================================
+export const inventions = pgTable("inventions", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  category: text("category").notNull().default("other"),
+  status: text("status").notNull().default("draft"),
+  currentVersion: integer("current_version").notNull().default(1),
+  documentationProgress: integer("documentation_progress").notNull().default(0),
+  conceptionDate: text("conception_date"),
+  problemSolved: text("problem_solved"),
+  howItWorks: text("how_it_works"),
+  uniqueFeatures: text("unique_features"),
+  technicalSpecs: text("technical_specs"),
+  materials: text("materials"),
+  componentsText: text("components_text"),
+  alternativeImplementations: text("alternative_implementations"),
+  prototypeStatus: text("prototype_status").notNull().default("concept"),
+  developmentHistory: text("development_history"),
+  privacy: text("privacy").notNull().default("private"),
+  fieldsJson: jsonb("fields_json"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const inventionInventors = pgTable("invention_inventors", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  inventionId: text("invention_id")
+    .notNull()
+    .references(() => inventions.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  email: text("email"),
+  role: text("role").notNull().default("sole_inventor"),
+  contribution: text("contribution"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const inventionVersions = pgTable("invention_versions", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  inventionId: text("invention_id")
+    .notNull()
+    .references(() => inventions.id, { onDelete: "cascade" }),
+  version: integer("version").notNull(),
+  label: text("label").notNull(),
+  fieldsJson: jsonb("fields_json").notNull(),
+  contentHash: text("content_hash").notNull(),
+  source: text("source").notNull().default("user"),
+  note: text("note"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  serverTimestamp: timestamp("server_timestamp").notNull().defaultNow(),
+});
+
+export const inventionEvidence = pgTable("invention_evidence", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  inventionId: text("invention_id")
+    .notNull()
+    .references(() => inventions.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  originalFilename: text("original_filename").notNull(),
+  fileType: text("file_type").notNull(),
+  byteLength: integer("byte_length").notNull(),
+  sha256: text("sha256").notNull(),
+  version: integer("version").notNull().default(1),
+  verificationStatus: text("verification_status").notNull().default("hashed"),
+  storageKey: text("storage_key"),
+  notes: text("notes"),
+  uploadDate: timestamp("upload_date").notNull().defaultNow(),
+  serverTimestamp: timestamp("server_timestamp").notNull().defaultNow(),
+});
+
+export const inventionComponents = pgTable("invention_components", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  inventionId: text("invention_id")
+    .notNull()
+    .references(() => inventions.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  shape: text("shape").notNull().default("box"),
+  dimensionsJson: jsonb("dimensions_json").notNull(),
+  positionJson: jsonb("position_json").notNull(),
+  rotationJson: jsonb("rotation_json").notNull(),
+  material: text("material").notNull().default("aluminum"),
+  calloutNumber: integer("callout_number"),
+  visible: boolean("visible").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const inventionTimelineEvents = pgTable("invention_timeline_events", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  inventionId: text("invention_id")
+    .notNull()
+    .references(() => inventions.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  detail: text("detail"),
+  kind: text("kind").notNull(),
+  hash: text("hash"),
+  at: timestamp("at").notNull().defaultNow(),
+  serverTimestamp: timestamp("server_timestamp").notNull().defaultNow(),
+});
+
+export const inventionCollaborators = pgTable("invention_collaborators", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  inventionId: text("invention_id")
+    .notNull()
+    .references(() => inventions.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  role: text("role").notNull(),
+  email: text("email"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const inventionWitnesses = pgTable("invention_witnesses", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  inventionId: text("invention_id")
+    .notNull()
+    .references(() => inventions.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  email: text("email"),
+  statement: text("statement"),
+  witnessedAt: text("witnessed_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const inventionVerificationRecords = pgTable("invention_verification_records", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  inventionId: text("invention_id")
+    .notNull()
+    .references(() => inventions.id, { onDelete: "cascade" }),
+  evidenceId: text("evidence_id"),
+  method: text("method").notNull(),
+  status: text("status").notNull(),
+  detail: text("detail"),
+  contentHash: text("content_hash"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  serverTimestamp: timestamp("server_timestamp").notNull().defaultNow(),
+});
+
+export const inventionAuditEvents = pgTable("invention_audit_events", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  inventionId: text("invention_id")
+    .notNull()
+    .references(() => inventions.id, { onDelete: "cascade" }),
+  event: text("event").notNull(),
+  detail: text("detail"),
+  prevHash: text("prev_hash"),
+  eventHash: text("event_hash").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  serverTimestamp: timestamp("server_timestamp").notNull().defaultNow(),
+});
+
 export * from "./marketing/schema";
 export * from "./orbit/schema";

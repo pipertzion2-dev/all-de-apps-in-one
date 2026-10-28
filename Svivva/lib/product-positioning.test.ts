@@ -24,7 +24,9 @@ describe("product-positioning", () => {
     expect(isBetaHref("/play")).toBe(false);
     expect(isBetaHref("/the-moves-like")).toBe(false);
     expect(isBetaHref("/poor-man-protection")).toBe(false);
+    expect(isBetaHref("/poor-man-protection/invention-studio")).toBe(false);
     expect(isBetaHref("/dashboard/poor-man-protection")).toBe(false);
+    expect(isBetaHref("/dashboard/poor-man-protection/invention-studio")).toBe(false);
     expect(isBetaHref("/clean-sneaks")).toBe(false);
     expect(isBetaHref("/dashboard/hybrid-lab")).toBe(true);
     expect(isBetaHref("/dashboard/api-builder")).toBe(true);

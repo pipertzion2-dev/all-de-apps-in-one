@@ -134,6 +134,12 @@ const digitalMenuGroups: MenuGroup[] = [
         beta: true,
       },
       {
+        title: "Invention Protection",
+        desc: "Document your ideas. Preserve your evidence. Prepare your inventions.",
+        href: "/dashboard/poor-man-protection/invention-studio",
+        icon: Lightbulb,
+      },
+      {
         title: "Education Advocacy",
         desc: "Rights, vault, human help",
         href: "/dashboard/education-advocacy",
