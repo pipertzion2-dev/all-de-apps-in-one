@@ -91,7 +91,7 @@ export const FEATURE_MINI_APPS: FeatureMiniApp[] = [
     path: "/tools/sketch-hash-stamp",
     name: "Sketch Hash Stamp",
     description:
-      "Hash a sketch in the browser. Poor Man Protection seals, timestamps, and builds a court pack.",
+      "Hash a sketch in the browser. Poor Man Protection seals, timestamps, and builds shareable proof.",
     hub: "cyber-security-mini-apps",
     parentHref: "/poor-man-protection",
     parentLabel: "Poor Man Protection",

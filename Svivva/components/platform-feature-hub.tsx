@@ -36,7 +36,7 @@ const PRESET_SCENES = [
   "Turn my PDF into multiple apps and launch them",
   "Transcribe a YouTube video into deployable apps",
   "Get more traffic for my SaaS",
-  "Blend Seeds with Protect then hybridize that blend with Play",
+  "Turn a brief into apps, seal the idea, then try it in the game",
   "Build an API and ship with evals",
   "Watch Starter Story and apply their tactics",
   "Protect my education and document a school rights issue",
@@ -266,18 +266,18 @@ export function PlatformFeatureHub({
               {OAAS_NAME} <FeatureBetaBadge compact />
             </div>
             <h2 id="oaas-heading" className="text-3xl sm:text-4xl font-semibold tracking-tight">
-              Beta desk modules
+              Beta tools
             </h2>
             <p className="text-sm sm:text-base text-muted-foreground max-w-xl">
-              {PRODUCT_HERO_SUBLINE} Patch routes below explore beta channels — core shipping is
-              Poor Man Protection, Hybrid² Lab, guardrails, Projects, and Pulse.
+              {PRODUCT_HERO_SUBLINE} Describe a goal below to get a suggested path. The core product
+              is Poor Man Protection; combining AI tools is still beta.
             </p>
           </header>
         )}
 
-        <form onSubmit={onSubmit} className="space-y-4" aria-label="Patch bay">
+        <form onSubmit={onSubmit} className="space-y-4" aria-label="Suggest a tool path">
           <label htmlFor="oaas-goal" className="sr-only">
-            Describe your mix
+            Describe what you want to build
           </label>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
             <Input
@@ -295,7 +295,7 @@ export function PlatformFeatureHub({
               data-testid="button-patch-route"
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden /> : null}
-              Patch route
+              Find a path
             </Button>
           </div>
 

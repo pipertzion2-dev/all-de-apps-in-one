@@ -58,12 +58,12 @@ export type MasterProductJourney = {
 };
 
 const FACE_ROLES: Record<FeatureId, string> = {
-  seeds: "Seed the product — PDF or YouTube brief becomes a deployable app suite.",
-  api: "Signal path — turn the product logic into a production API with schema and evals.",
-  hardware: "Crest path — schematics, BOM, suppliers, and manufacturing for the physical SKU.",
-  play: "Aux path — brand audio, stems, and sonic identity for the product.",
-  orbit: "Grow path — SEO, indexing, launch copy, and traffic automation.",
-  security: "Protect path — sketch deposit, group patent seal, and court-ready pack.",
+  seeds: "Turn a PDF or YouTube brief into a suite of apps.",
+  api: "Turn product logic into a live API with checks and safe rollback.",
+  hardware: "Drawings, parts lists, suppliers, and manufacturing for a physical product.",
+  play: "Free game and brand play tools for the product.",
+  orbit: "SEO, indexing, launch copy, and traffic helpers.",
+  security: "Upload sketches, seal them, and download proof you can share.",
 };
 
 function featureById(id: FeatureId): FeatureDef {
@@ -104,13 +104,13 @@ function actionForFace(id: FeatureId, productName: string): string {
     case "api":
       return `Define and ship the “${productName}” API — prompt, schema, evals, deploy.`;
     case "hardware":
-      return `Sketch “${productName}”, run BUILD, source BOM, and hybridize schematics.`;
+      return `Sketch “${productName}”, build a parts list, and plan manufacturing.`;
     case "play":
-      return `Compose stems / sonic branding that matches “${productName}”.`;
+      return `Play and brand tools that match “${productName}”.`;
     case "orbit":
-      return `Launch “${productName}” — SEO pages, indexing, and growth automation.`;
+      return `Launch “${productName}” — SEO pages, indexing, and growth helpers.`;
     case "security":
-      return `Seal “${productName}” sketches and mint the protection / court pack.`;
+      return `Seal “${productName}” sketches and download shareable proof.`;
   }
 }
 

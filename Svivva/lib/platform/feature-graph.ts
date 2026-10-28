@@ -558,9 +558,9 @@ export function formatPatchRoute(titles: string[]): string {
   return titles.join(" → ");
 }
 
-export const OAAS_NAME = "OaaS";
+export const OAAS_NAME = "Tool finder";
 export const OAAS_FULL_NAME = "Orchestration as a Service";
 export const OAAS_TAGLINE =
-  "A mixing-console OS for builders. Every ZZAI module is a channel strip; OaaS is the patch bay that routes your signal to the master bus.";
+  "Describe a goal and get a suggested path across ZZAI tools. Poor Man Protection is the core product; other modules are still in beta.";
 export const OAAS_TECHNICAL_BLURB =
   "Channels patch into subgroup buses (Seed, Build, FX, Grow, Protect, Aux, Advocate), sum through Signal or Crest mains, and print to Master — deploy, launch, advocate, and ship.";

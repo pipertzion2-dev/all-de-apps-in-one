@@ -179,7 +179,7 @@ describe("homepage scroll panels", () => {
     expect(hintSrc).toContain('scrollToHomepagePanel("home-beta")');
   });
 
-  it("mounts the OaaS mixing console on the beta cube face", () => {
+  it("mounts the tool finder on the beta menu face", () => {
     const betaSrc = readFileSync(
       resolve(__dirname, "../../components/homepage-beta-panel.tsx"),
       "utf8",
@@ -192,8 +192,8 @@ describe("homepage scroll panels", () => {
     expect(betaSrc).toContain("hideChannelStrips");
     expect(hubSrc).toContain("BusOverviewFilter");
     expect(hubSrc).toContain("onSubmit");
-    expect(hubSrc).toContain("Patch route");
-    expect(hubSrc).toContain("Beta desk modules");
+    expect(hubSrc).toContain("Find a path");
+    expect(hubSrc).toContain("Beta tools");
     expect(hubSrc).not.toContain("The mixing board for your stack");
   });
 });

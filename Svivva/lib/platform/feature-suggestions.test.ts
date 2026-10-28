@@ -14,7 +14,7 @@ import { suggestFeaturesByKeywords } from "./feature-suggestions";
 
 describe("feature-graph", () => {
   it("exposes OaaS platform constants", () => {
-    expect(OAAS_NAME).toBe("OaaS");
+    expect(OAAS_NAME).toBe("Tool finder");
     expect(OAAS_FULL_NAME).toContain("Orchestration");
   });
 

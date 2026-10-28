@@ -18,8 +18,7 @@ const HIGHLIGHTS = [
   {
     icon: Shield,
     title: "Poor Man Protection",
-    description:
-      "Main focus — seal uploads with hashes and export a court pack when priority matters.",
+    description: "Main focus — seal uploads and download proof when priority matters.",
     href: PRODUCT_PROTECTION_PATH,
     beta: false,
   },
@@ -33,7 +32,7 @@ const HIGHLIGHTS = [
   {
     icon: Sprout,
     title: "ZZAI Seeds",
-    description: "Beta — turn a PDF or YouTube brief into deployable apps from the desk cube.",
+    description: "Beta — turn a PDF or YouTube brief into apps from the homepage menu.",
     href: "/seeds",
     beta: true,
   },

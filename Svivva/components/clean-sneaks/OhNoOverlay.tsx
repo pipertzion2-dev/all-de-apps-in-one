@@ -28,7 +28,7 @@ export function OhNoOverlay({ window, onAction }: OhNoProps) {
       className="pointer-events-auto absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/40 backdrop-blur-[2px]"
       data-testid="oh-no-overlay"
     >
-      <p className="text-xs uppercase tracking-[0.4em] text-[#ffcc66]">Oh No</p>
+      <p className="text-xs uppercase tracking-[0.4em] text-[#ffcc66]">Oh no — save your shoe</p>
       <p className="mt-1 text-lg font-bold text-foreground">
         {hazard} · save the {window.shoe.toUpperCase()} shoe
       </p>
