@@ -195,6 +195,8 @@ export function CleanSneaksGame3D({
   const [npcLine, setNpcLine] = useState<string | null>(null);
   const [ohNo, setOhNo] = useState(stateRef.current.ohNo);
   const [colorwayChosen, setColorwayChosen] = useState(false);
+  /** Discover UI is optional — keep collapsed so Start countdown stays first. */
+  const [showUiCustomize, setShowUiCustomize] = useState(false);
   const [walkCompleteScore, setWalkCompleteScore] = useState(0);
   const [rewardedOpen, setRewardedOpen] = useState(false);
   const [missionOffer, setMissionOffer] = useState<RewardedOffer | null>(null);
@@ -1080,6 +1082,7 @@ export function CleanSneaksGame3D({
                 ? `color-mix(in srgb, ${uiTheme.colors.bgDeep} 78%, transparent)`
                 : undefined,
             }}
+            data-testid="color-pick-overlay"
           >
             <p
               className="seeds-holo-text mb-2 text-xs uppercase tracking-[0.35em]"
@@ -1091,40 +1094,51 @@ export function CleanSneaksGame3D({
               className="mb-3 text-center text-sm"
               style={{ color: uiTheme?.colors.accentSoft ?? "#7EC8D9" }}
             >
-              Pick your BALOON8 colorway — or drop a photo/video to make your own game UI
+              Pick a BALOON8 colorway, then start
             </p>
-            <div className="mb-3 w-full max-w-md">
-              <ReferenceUiRemixPanel
-                compact
-                theme={uiTheme}
-                onThemeApplied={(next) => {
-                  setLocalUiTheme(next);
-                  onUiThemeChange?.(next);
-                  selectColorway(next.nearestColorwayId);
-                }}
-                onThemeCleared={() => {
-                  setLocalUiTheme(null);
-                  onUiThemeChange?.(null);
-                }}
-                onColorwayHint={selectColorway}
-              />
-            </div>
-            <div className="mb-5 w-full max-w-md rounded-lg border border-white/10 bg-black/50 p-3">
+            <div className="mb-4 w-full max-w-md rounded-lg border border-white/10 bg-black/50 p-3">
               <Baloon8ColorwayPicker value={colorwayId} onChange={selectColorway} compact />
             </div>
             <Button
               type="button"
-              className="mb-3 text-white hover:opacity-90"
+              className="mb-3 min-h-11 w-full max-w-md text-white hover:opacity-90"
               style={{ background: uiTheme?.colors.accent ?? "#5B8DA8" }}
               onClick={confirmColorwayAndCountdown}
               data-testid="button-confirm-colorway"
             >
               Start countdown
             </Button>
-            <p className="max-w-xs text-center text-[11px] text-white/45">
-              Remix from a reference to restyle the game · auto-patents the new UI · then Start
-              countdown (or Enter)
+            <p className="mb-5 max-w-xs text-center text-[11px] text-white/45">
+              Or press Enter · customize UI below if you want
             </p>
+
+            <div className="w-full max-w-md">
+              <button
+                type="button"
+                className="mb-2 w-full rounded-lg border border-white/15 bg-black/40 px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-white/75 transition-colors hover:border-white/25 hover:text-white"
+                aria-expanded={showUiCustomize}
+                data-testid="button-toggle-ui-customize"
+                onClick={() => setShowUiCustomize((v) => !v)}
+              >
+                {showUiCustomize ? "Hide custom UI" : "Optional · Discover your perfect UI"}
+              </button>
+              {showUiCustomize ? (
+                <ReferenceUiRemixPanel
+                  compact
+                  theme={uiTheme}
+                  onThemeApplied={(next) => {
+                    setLocalUiTheme(next);
+                    onUiThemeChange?.(next);
+                    selectColorway(next.nearestColorwayId);
+                  }}
+                  onThemeCleared={() => {
+                    setLocalUiTheme(null);
+                    onUiThemeChange?.(null);
+                  }}
+                  onColorwayHint={selectColorway}
+                />
+              ) : null}
+            </div>
           </div>
         )}
 
