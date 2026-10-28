@@ -117,6 +117,9 @@ describe("homepage scroll panels", () => {
     expect(protectionSrc).not.toContain("Logo by my son");
     expect(protectionSrc).not.toContain("ZZAI_OFFICIAL_LOGO");
     expect(protectionSrc).not.toContain("Klean Sneaks demo");
+    expect(aboutSrc).not.toContain("Klean Sneaks demo");
+    expect(exploreSrc).not.toContain("Klean Sneaks demo");
+    expect(pageSrc).not.toContain("Klean Sneaks demo");
     expect(pageSrc).toContain('data-testid="link-home-brand"');
     expect(pageSrc).toMatch(/link-home-brand[\s\S]*hidden[\s\S]*sm:inline/);
     expect(cubeSrc).toContain("HomepagePricingSection");
