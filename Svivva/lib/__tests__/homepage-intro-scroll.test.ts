@@ -28,11 +28,12 @@ describe("homepage intro scroll", () => {
     const panelIdx = pageSrc.indexOf("<HomepageGamePanel");
     expect(hintIdx).toBeGreaterThan(panelIdx);
     expect(panelIdx).toBeGreaterThan(frontIdx);
-    expect(pageSrc).toContain("text-intro-swipe-cube-twice");
+    expect(pageSrc).toContain('data-testid="button-enter-main-app"');
     expect(pageSrc).toContain("safe-area-inset-bottom");
     expect(pageSrc).toMatch(/text-black[\s\S]{0,120}Scroll up to enter/);
-    expect(gameSrc).toContain("scroll up to enter");
-    expect(gameSrc).toMatch(/text-black[\s\S]{0,120}scroll up to enter/);
+    expect(gameSrc).toContain("Tap cube to play free");
+    expect(gameSrc).not.toContain("button-enter-main-app");
+    expect(gameSrc).not.toMatch(/scroll up to enter/i);
   });
 
   it("defers heavy homepage 3D until intro completes", () => {

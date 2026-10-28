@@ -81,16 +81,22 @@ export function SvivvaArtifact({ mountCanvas = true }: SvivvaArtifactProps) {
         {mountCanvas ? (
           <Suspense
             fallback={
-              <div className="w-full h-full flex items-center justify-center text-white/15 text-xs tracking-widest">
-                loading cube…
+              <div
+                className="flex h-full w-full items-center justify-center rounded-2xl border border-border/40 bg-card/40 text-xs tracking-widest text-muted-foreground"
+                data-testid="cube-loading-fallback"
+              >
+                Loading cube…
               </div>
             }
           >
             <ArtifactCanvas active="play" onSelect={handleSelect} />
           </Suspense>
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-white/15 text-xs tracking-widest">
-            loading cube…
+          <div
+            className="flex h-full w-full items-center justify-center rounded-2xl border border-border/40 bg-card/40 text-xs tracking-widest text-muted-foreground"
+            data-testid="cube-loading-placeholder"
+          >
+            Loading cube…
           </div>
         )}
       </div>

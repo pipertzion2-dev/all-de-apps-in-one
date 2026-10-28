@@ -30,8 +30,8 @@ export function GameLoadingWheels({ fullscreen = false }: GameLoadingWheelsProps
     <div
       className={
         fullscreen
-          ? "fixed inset-0 z-[40] flex flex-col items-center justify-center overflow-hidden bg-white"
-          : "relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-white"
+          ? "fixed inset-0 z-[40] flex flex-col items-center justify-center overflow-hidden bg-black/55 backdrop-blur-[2px]"
+          : "relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-black/55"
       }
       style={{
         paddingTop: "env(safe-area-inset-top)",
@@ -41,7 +41,7 @@ export function GameLoadingWheels({ fullscreen = false }: GameLoadingWheelsProps
       aria-label="Loading game"
       aria-live="polite"
     >
-      <div className="relative mb-8 h-[min(28vh,160px)] w-[min(85vw,360px)] shrink-0">
+      <div className="relative mb-8 h-[min(28vh,160px)] w-[min(85vw,360px)] shrink-0 drop-shadow-[0_8px_24px_rgba(0,0,0,0.55)]">
         <Image
           src={KAREN_THE_MUSCLE_LOGO_URL}
           alt="Karen the Muscle"
@@ -54,7 +54,7 @@ export function GameLoadingWheels({ fullscreen = false }: GameLoadingWheelsProps
       </div>
 
       <p
-        className="mb-6 max-w-[min(88vw,22rem)] px-4 text-center text-xs font-semibold uppercase leading-relaxed tracking-[0.18em] text-[#1a3040]/85 sm:text-sm"
+        className="mb-6 max-w-[min(88vw,22rem)] px-4 text-center text-xs font-semibold uppercase leading-relaxed tracking-[0.18em] text-white/90 sm:text-sm"
         data-testid="text-game-loading-intro"
       >
         {KLEAN_RUNNER_INTRO_LINE}

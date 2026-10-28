@@ -41,7 +41,8 @@ describe("homepage scroll panels", () => {
     expect(cubeSrc).toContain("CamoThreeOverlay");
     expect(cubeSrc).toContain('preset="lock"');
     expect(cubeSrc).toContain("bg-white");
-    expect(cubeSrc).toContain("button-enter-main-app");
+    expect(cubeSrc).toContain("Tap cube to play free");
+    expect(cubeSrc).not.toContain("button-enter-main-app");
     expect(cubeSrc).not.toContain("HomepageScrollHint");
     expect(startSrc).not.toContain("HomepageBundlePuzzle");
     expect(startSrc).toContain("game-start-cover-screen");

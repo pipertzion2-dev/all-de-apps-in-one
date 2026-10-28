@@ -13,11 +13,10 @@ const CleanSneaksLogoCube = dynamic(
 type HomepageGamePanelProps = {
   /** Full-screen first page that flips into the main app. */
   asIntro?: boolean;
-  onEnterApp?: () => void;
 };
 
 /** First page — Game cube on white with flowers + digi camo across the full viewport. */
-export function HomepageGamePanel({ asIntro = false, onEnterApp }: HomepageGamePanelProps) {
+export function HomepageGamePanel({ asIntro = false }: HomepageGamePanelProps) {
   const router = useRouter();
 
   const enterGame = () => {
@@ -64,19 +63,9 @@ export function HomepageGamePanel({ asIntro = false, onEnterApp }: HomepageGameP
             {KLEAN_HOMEPAGE_TAGLINE} — tap to play free
           </p>
         ) : (
-          <div className="mt-3 flex shrink-0 flex-col items-center gap-3">
-            <p className="rounded-full border border-black/15 bg-white px-4 py-1.5 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-black shadow-sm sm:text-xs">
-              Tap cube to play · scroll up to enter
-            </p>
-            <button
-              type="button"
-              onClick={() => onEnterApp?.()}
-              className="rounded-full border border-black/20 bg-white px-6 py-2.5 text-xs font-semibold tracking-wide text-black shadow-sm transition-transform active:scale-95"
-              data-testid="button-enter-main-app"
-            >
-              Enter zzai zzai
-            </button>
-          </div>
+          <p className="mt-3 shrink-0 pb-16 text-center text-[10px] uppercase tracking-[0.18em] text-black/45 sm:pb-20 sm:text-[11px]">
+            Tap cube to play free
+          </p>
         )}
       </div>
     </section>
