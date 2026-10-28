@@ -42,6 +42,9 @@ describe("homepage scroll panels", () => {
     expect(cubeSrc).not.toContain("HomepageScrollHint");
     expect(startSrc).toContain("HomepageBundlePuzzle");
     expect(startSrc).toContain("game-start-puzzle-screen");
+    expect(startSrc).toContain("fillScreen");
+    expect(startSrc).toContain("bg-white");
+    expect(startSrc).not.toMatch(/bg-\[#0a080e\]|bg-black/);
   });
 
   it("splits main app faces: beta apps then combined; game is intro; no Moves Like ads", () => {

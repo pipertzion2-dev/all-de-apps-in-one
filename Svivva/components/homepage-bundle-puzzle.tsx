@@ -1,46 +1,75 @@
 "use client";
 
-import { useId } from "react";
+import { useId, useMemo } from "react";
 import { BUNDLE_CUBE_FACE_URLS } from "@/lib/clean-sneaks/assets";
 
 type HomepageBundlePuzzleProps = {
   className?: string;
   /** Fired when the user activates the puzzle (tap / Enter / Space). */
   onActivate?: () => void;
+  /** Columns of interlocking pieces (default 3). */
+  cols?: number;
+  /** Rows of interlocking pieces (default 2). */
+  rows?: number;
+  /**
+   * Fill the parent completely (edge-to-edge). Used on the game start screen.
+   * Disables inward piece scale so knobs nest tightly with no gaps.
+   */
+  fillScreen?: boolean;
 };
 
 type Edge = "flat" | "out" | "in";
 
 type PieceSpec = {
   label: string;
-  col: 0 | 1 | 2;
-  row: 0 | 1;
+  col: number;
+  row: number;
   top: Edge;
   right: Edge;
   bottom: Edge;
   left: Edge;
+  faceIndex: number;
 };
 
 /** Tab size as a fraction of one cell (not the whole board). */
-const TAB = 0.28;
-/** Pull each piece slightly inward so knobs/sockets read clearly. */
-const PIECE_SCALE = 0.93;
+const TAB = 0.26;
+/** Slight inset so knobs read on the compact homepage board. */
+const PIECE_SCALE_COMPACT = 0.93;
+/** Tiny overscale on fill boards so anti-alias seams never flash the underlay. */
+const PIECE_SCALE_FILL = 1.015;
 
-/**
- * Interlocking 3×2 board — outward/inward tabs mate across shared edges.
- * Each tile shows one full CD-jewel collage (not a crop of a single image).
- */
-const PIECES: PieceSpec[] = [
-  { label: "ibPw 1", col: 0, row: 0, top: "flat", right: "out", bottom: "out", left: "flat" },
-  { label: "ibPw 2", col: 1, row: 0, top: "flat", right: "out", bottom: "in", left: "in" },
-  { label: "ibPw 3", col: 2, row: 0, top: "flat", right: "flat", bottom: "out", left: "in" },
-  { label: "ibPw 4", col: 0, row: 1, top: "in", right: "in", bottom: "flat", left: "flat" },
-  { label: "ibPw 5", col: 1, row: 1, top: "out", right: "in", bottom: "flat", left: "out" },
-  { label: "ibPw 6", col: 2, row: 1, top: "in", right: "flat", bottom: "flat", left: "out" },
-];
-
-/** Board is 300×200 viewBox units → each cell 100×100. */
 const CELL = 100;
+
+function opposite(edge: Edge): Edge {
+  if (edge === "out") return "in";
+  if (edge === "in") return "out";
+  return "flat";
+}
+
+function buildPieces(cols: number, rows: number): PieceSpec[] {
+  const pieces: PieceSpec[] = [];
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const right: Edge = col === cols - 1 ? "flat" : (row + col) % 2 === 0 ? "out" : "in";
+      const bottom: Edge = row === rows - 1 ? "flat" : (row + col) % 2 === 0 ? "out" : "in";
+      const left: Edge =
+        col === 0 ? "flat" : opposite((row + (col - 1)) % 2 === 0 ? "out" : "in");
+      const top: Edge =
+        row === 0 ? "flat" : opposite((row - 1 + col) % 2 === 0 ? "out" : "in");
+      pieces.push({
+        label: `ibPw ${row * cols + col + 1}`,
+        col,
+        row,
+        top,
+        right,
+        bottom,
+        left,
+        faceIndex: (row * cols + col) % BUNDLE_CUBE_FACE_URLS.length,
+      });
+    }
+  }
+  return pieces;
+}
 
 function hBump(y: number, x0: number, x1: number, edge: Edge, outwardSign: 1 | -1): string {
   if (edge === "flat") return `L ${x1} ${y}`;
@@ -107,15 +136,33 @@ function piecePath(spec: PieceSpec): string {
 }
 
 /**
- * Six CD-jewel collage faces arranged as an interlocking puzzle on the white game page.
+ * CD-jewel collage faces arranged as an interlocking puzzle.
+ * Compact 3×2 by default; pass cols/rows + fillScreen for a full-bleed start board.
  */
-export function HomepageBundlePuzzle({ className = "", onActivate }: HomepageBundlePuzzleProps) {
+export function HomepageBundlePuzzle({
+  className = "",
+  onActivate,
+  cols = 3,
+  rows = 2,
+  fillScreen = false,
+}: HomepageBundlePuzzleProps) {
   const uid = useId().replace(/:/g, "");
+  const pieces = useMemo(() => buildPieces(cols, rows), [cols, rows]);
+  const boardW = cols * CELL;
+  const boardH = rows * CELL;
+  const scale = fillScreen ? PIECE_SCALE_FILL : PIECE_SCALE_COMPACT;
 
   return (
     <div
-      className={`relative mx-auto aspect-[3/2] w-full max-w-3xl ${className}`}
+      className={
+        fillScreen
+          ? `relative h-full w-full ${className}`
+          : `relative mx-auto aspect-[3/2] w-full max-w-3xl ${className}`
+      }
       data-testid="homepage-bundle-puzzle"
+      data-puzzle-cols={cols}
+      data-puzzle-rows={rows}
+      data-puzzle-fill={fillScreen ? "true" : undefined}
     >
       <button
         type="button"
@@ -124,37 +171,48 @@ export function HomepageBundlePuzzle({ className = "", onActivate }: HomepageBun
         aria-label="Open Steal the Old Man's Bundle puzzle — tap to play"
         data-testid="homepage-bundle-puzzle-activate"
       >
-        <span className="sr-only">Six ibPw collage pieces — tap to play</span>
+        <span className="sr-only">
+          {cols * rows} ibPw collage puzzle pieces — tap to play
+        </span>
         <svg
-          viewBox="0 0 300 200"
-          className="h-full w-full overflow-visible drop-shadow-[0_12px_22px_rgba(0,0,0,0.28)]"
+          viewBox={`0 0 ${boardW} ${boardH}`}
+          preserveAspectRatio={fillScreen ? "xMidYMid slice" : "xMidYMid meet"}
+          className={
+            fillScreen
+              ? "h-full w-full"
+              : "h-full w-full overflow-visible drop-shadow-[0_12px_22px_rgba(0,0,0,0.28)]"
+          }
           role="img"
           aria-hidden
         >
           <defs>
-            {PIECES.map((piece, i) => (
+            {pieces.map((piece, i) => (
               <clipPath key={piece.label} id={`${uid}-piece-${i}`}>
                 <path d={piecePath(piece)} />
               </clipPath>
             ))}
           </defs>
-          {PIECES.map((piece, i) => {
-            const src = `${BUNDLE_CUBE_FACE_URLS[i]}?v=puzzle-2`;
+          {/* White underlay — never show black through tab seams. */}
+          <rect x={0} y={0} width={boardW} height={boardH} fill="#ffffff" />
+          {pieces.map((piece, i) => {
+            const src = `${BUNDLE_CUBE_FACE_URLS[piece.faceIndex]}?v=puzzle-3`;
             const x = piece.col * CELL;
             const y = piece.row * CELL;
-            // Inflate the bitmap so outward tabs still have pixels to show.
             const pad = TAB * CELL;
             const cx = x + CELL / 2;
             const cy = y + CELL / 2;
+            const delay = Math.min(i * 28, 700);
             return (
               <g
                 key={piece.label}
                 className="homepage-puzzle-piece"
                 style={{
-                  animation: `homepagePuzzleIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) ${i * 70}ms both`,
+                  animation: fillScreen
+                    ? `homepagePuzzleIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) ${delay}ms both`
+                    : `homepagePuzzleIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) ${i * 70}ms both`,
                   transformOrigin: `${cx}px ${cy}px`,
                 }}
-                transform={`translate(${cx} ${cy}) scale(${PIECE_SCALE}) translate(${-cx} ${-cy})`}
+                transform={`translate(${cx} ${cy}) scale(${scale}) translate(${-cx} ${-cy})`}
               >
                 <image
                   href={src}
@@ -166,20 +224,19 @@ export function HomepageBundlePuzzle({ className = "", onActivate }: HomepageBun
                   clipPath={`url(#${uid}-piece-${i})`}
                   className="transition duration-500 ease-out group-hover:brightness-110"
                 />
-                {/* Edge so knobs/sockets read as cut puzzle pieces */}
                 <path
                   d={piecePath(piece)}
                   fill="none"
-                  stroke="rgba(255,255,255,0.55)"
-                  strokeWidth={2}
+                  stroke="rgba(255,255,255,0.5)"
+                  strokeWidth={fillScreen ? 1.4 : 2}
                   vectorEffect="non-scaling-stroke"
                   className="pointer-events-none"
                 />
                 <path
                   d={piecePath(piece)}
                   fill="none"
-                  stroke="rgba(0,0,0,0.55)"
-                  strokeWidth={1.1}
+                  stroke="rgba(0,0,0,0.4)"
+                  strokeWidth={fillScreen ? 0.7 : 1.1}
                   vectorEffect="non-scaling-stroke"
                   className="pointer-events-none"
                 />
