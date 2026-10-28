@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import type { HomepageFlipPanelId } from "@/lib/homepage-flip-stack";
+import { HOMEPAGE_FLIP_PANELS } from "@/lib/homepage-flip-stack";
 import { scrollToHomepagePanel } from "@/lib/homepage-scroll";
 import {
   HOMEPAGE_CUBE_LOOP_COOLDOWN_MS,
@@ -15,6 +17,10 @@ type HomepageCubeLoopProps = {
   enabled?: boolean;
 };
 
+function isLoopPanel(id: HomepageFlipPanelId): id is (typeof HOMEPAGE_FLIP_PANELS)[number] {
+  return (HOMEPAGE_FLIP_PANELS as readonly string[]).includes(id);
+}
+
 /**
  * Continuous cube wrap for the native-scroll homepage:
  * - At the bottom of the last face, scroll/wheel further → first face
@@ -28,7 +34,8 @@ export function HomepageCubeLoop({ enabled = true }: HomepageCubeLoopProps) {
   useEffect(() => {
     if (!enabled) return;
 
-    const wrapTo = (panel: "home-beta" | "nav-cube") => {
+    const wrapTo = (panel: HomepageFlipPanelId) => {
+      if (!isLoopPanel(panel)) return;
       const now = Date.now();
       if (now < lockedUntilRef.current) return;
       lockedUntilRef.current = now + HOMEPAGE_CUBE_LOOP_COOLDOWN_MS;
@@ -40,7 +47,7 @@ export function HomepageCubeLoop({ enabled = true }: HomepageCubeLoopProps) {
         nearBottom: isNearDocumentBottom(HOMEPAGE_CUBE_LOOP_EDGE_PX),
         nearTop: isNearDocumentTop(HOMEPAGE_CUBE_LOOP_EDGE_PX),
       });
-      if (!target) return false;
+      if (!target || !isLoopPanel(target)) return false;
       wrapTo(target);
       return true;
     };
