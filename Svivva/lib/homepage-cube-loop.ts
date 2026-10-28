@@ -4,8 +4,8 @@ import { HOMEPAGE_FLIP_PANELS } from "./homepage-flip-stack";
 /** px from a panel edge before a wheel/touch is treated as a cube wrap. */
 export const HOMEPAGE_CUBE_LOOP_EDGE_PX = 64;
 
-/** Ignore further wraps while a wrap animation is in flight. */
-export const HOMEPAGE_CUBE_LOOP_COOLDOWN_MS = 900;
+/** Ignore further wraps while a wrap animation is in flight (matches fine-flip + settle). */
+export const HOMEPAGE_CUBE_LOOP_COOLDOWN_MS = 1400;
 
 export function homepageCubeLoopPanels(): readonly HomepageFlipPanelId[] {
   return HOMEPAGE_FLIP_PANELS;

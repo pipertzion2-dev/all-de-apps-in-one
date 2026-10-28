@@ -75,5 +75,7 @@ describe("homepage cube loop", () => {
     expect(cubeSrc).toContain('flipToHomepagePanel("home-game"');
     expect(scrollSrc).toContain("playHomepageFineFlip");
     expect(scrollSrc).toContain("flipToHomepagePanel");
+    expect(scrollSrc).toContain("homepagePanelsAreAdjacent");
+    expect(scrollSrc).toContain('behavior: "smooth"');
   });
 });
