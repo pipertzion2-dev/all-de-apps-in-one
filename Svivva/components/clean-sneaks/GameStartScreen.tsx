@@ -13,10 +13,12 @@ export type GameStartScreenProps = {
   preload?: boolean;
 };
 
-/** Dense grid — enough to cover phone + desktop without gaps. */
-const WHEEL_COLS = 6;
-const WHEEL_ROWS = 8;
+/** Square hubcaps large enough that a vmax grid always covers the viewport. */
+const WHEEL_COLS = 7;
+const WHEEL_ROWS = 7;
 const WHEEL_COUNT = WHEEL_COLS * WHEEL_ROWS;
+/** Slightly over 100/7 vmax so the field bleeds past every edge. */
+const CELL_VMAX = 16;
 
 const WHEEL_SPINS = [
   "animate-[spin_4.2s_linear_infinite]",
@@ -76,6 +78,8 @@ export function GameStartScreen({
     [],
   );
 
+  const fieldPx = `${WHEEL_COLS * CELL_VMAX}vmax`;
+
   return (
     <div
       className={`fixed inset-0 overflow-hidden bg-black ${
@@ -99,10 +103,12 @@ export function GameStartScreen({
       }
       data-testid="game-start-wheels-screen"
     >
-      {/* Bleed past edges + scale each hubcap so black never peeks through. */}
+      {/* Centered square vmax grid — always larger than the viewport on every axis. */}
       <div
-        className="pointer-events-none absolute inset-[-12%] grid"
+        className="pointer-events-none absolute left-1/2 top-1/2 grid -translate-x-1/2 -translate-y-1/2"
         style={{
+          width: fieldPx,
+          height: fieldPx,
           gridTemplateColumns: `repeat(${WHEEL_COLS}, minmax(0, 1fr))`,
           gridTemplateRows: `repeat(${WHEEL_ROWS}, minmax(0, 1fr))`,
         }}
@@ -112,12 +118,10 @@ export function GameStartScreen({
           <div
             key={`${wheel.src}-${index}`}
             className="relative min-h-0 min-w-0 overflow-hidden rounded-full"
-            style={{ transform: "scale(1.18)" }}
+            style={{ transform: "scale(1.12)" }}
             data-testid={index < 3 ? `start-wheel-${index}` : undefined}
           >
-            <div
-              className={`h-full w-full ${reducedMotion ? "" : wheel.spin}`}
-            >
+            <div className={`h-full w-full ${reducedMotion ? "" : wheel.spin}`}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={wheel.src}
@@ -136,7 +140,7 @@ export function GameStartScreen({
           style={{ bottom: "max(1.75rem, env(safe-area-inset-bottom, 0px))" }}
         >
           <div
-            className="absolute inset-x-0 bottom-0 h-[min(42vh,22rem)] -z-10"
+            className="absolute inset-x-0 bottom-0 -z-10 h-[min(42vh,22rem)]"
             aria-hidden
             style={{
               background:
@@ -155,7 +159,7 @@ export function GameStartScreen({
           >
             Start
           </p>
-          <p className="text-xs uppercase tracking-[0.35em] text-white/80 animate-pulse sm:text-sm">
+          <p className="animate-pulse text-xs uppercase tracking-[0.35em] text-white/80 sm:text-sm">
             Tap to play
           </p>
         </div>
