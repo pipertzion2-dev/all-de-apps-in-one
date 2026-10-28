@@ -83,7 +83,7 @@ export function GameStartScreen({
 
   return (
     <div
-      className={`fixed inset-0 overflow-hidden bg-white ${
+      className={`fixed inset-0 overflow-hidden bg-black ${
         preload ? "z-[40] pointer-events-none" : "z-[30]"
       } ${className ?? ""}`}
       style={style}
@@ -104,12 +104,19 @@ export function GameStartScreen({
       }
       data-testid={preload ? "game-load-wheels-screen" : "game-start-wheels-screen"}
     >
-      {/* Same white + flowers stage as the homepage Game face. */}
+      {/* Black sky + Three.js flowers/camo (same lock preset as homepage Game). */}
       <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
-        <CamoThreeOverlay preset="lock" isIntro eagerMount keepMounted className="h-full w-full" />
+        <CamoThreeOverlay
+          preset="lock"
+          sky="black"
+          isIntro
+          eagerMount
+          keepMounted
+          className="h-full w-full"
+        />
       </div>
 
-      {/* Hubcaps sit above flowers; circular clips leave white/flower gaps. */}
+      {/* Hubcaps sit above flowers; circular clips leave black/flower gaps. */}
       <div
         className="pointer-events-none absolute left-1/2 top-1/2 z-[1] grid -translate-x-1/2 -translate-y-1/2"
         style={{
@@ -149,22 +156,22 @@ export function GameStartScreen({
             aria-hidden
             style={{
               background:
-                "linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.35) 40%, rgba(255,255,255,0.92) 100%)",
+                "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.55) 45%, rgba(0,0,0,0.9) 100%)",
             }}
           />
           <p
-            className="max-w-[min(92vw,28rem)] text-center text-sm font-semibold uppercase leading-snug tracking-[0.2em] text-black/80 drop-shadow-[0_1px_0_rgba(255,255,255,0.9)] sm:text-base"
+            className="max-w-[min(92vw,28rem)] text-center text-sm font-semibold uppercase leading-snug tracking-[0.2em] text-white/95 drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)] sm:text-base"
             data-testid="text-game-runner-intro"
           >
             {KLEAN_RUNNER_INTRO_LINE}
           </p>
           <p
-            className="text-5xl font-bold uppercase tracking-[0.35em] text-black drop-shadow-[0_1px_0_rgba(255,255,255,0.95)] sm:text-6xl"
+            className="text-5xl font-bold uppercase tracking-[0.35em] text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)] sm:text-6xl"
             data-testid="text-game-start"
           >
             Start
           </p>
-          <p className="animate-pulse text-xs uppercase tracking-[0.35em] text-black/65 sm:text-sm">
+          <p className="animate-pulse text-xs uppercase tracking-[0.35em] text-white/80 sm:text-sm">
             Tap to play
           </p>
         </div>

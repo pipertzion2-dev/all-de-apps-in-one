@@ -50,9 +50,10 @@ describe("homepage scroll panels", () => {
     expect(startSrc).toContain("LOADING_WHEEL_URLS");
     expect(startSrc).toContain("CamoThreeOverlay");
     expect(startSrc).toContain('preset="lock"');
+    expect(startSrc).toContain('sky="black"');
     expect(startSrc).toContain("Tap to play");
     expect(startSrc).not.toContain("fillScreen");
-    expect(startSrc).toContain("bg-white");
+    expect(startSrc).toContain("bg-black");
   });
 
   it("splits main app faces: beta apps then combined; game is intro; no Moves Like ads", () => {
