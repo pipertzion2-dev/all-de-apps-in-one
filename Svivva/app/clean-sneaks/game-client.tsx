@@ -295,7 +295,8 @@ function CleanSneaksPageContent() {
         </div>
       </div>
 
-      <OfflineEarningsHost />
+      {/* Keep the spinning-wheel start unobstructed — claim after the run begins. */}
+      {!preGame ? <OfflineEarningsHost /> : null}
       <PendingYearSubClaimHost />
       <KleanShop open={shopOpen} onClose={() => setShopOpen(false)} />
     </div>
