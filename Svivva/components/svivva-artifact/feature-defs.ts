@@ -29,14 +29,14 @@ export const FEATURES: FeatureDef[] = [
   withBeta({
     id: "play",
     index: 0,
-    name: "Klean Sneaks",
+    name: "ZZAI Play",
     shortLabel: "Play",
     artworkTitle: "BREATH AWAY",
     artworkSrc: MEDIA.artworks.play,
     tagline: "Car×sneaker hybrid — BALOON8 colorways",
     description:
-      "Klean Sneaks — one BALOON8 car×sneaker chassis, unlockable colorways, Sneak Vision hazards, and mission saves that mirror Hybrid² + keeping the ship Klean.",
-    cta: { label: "Play Klean Sneaks", href: FEATURE_PUBLIC_PATHS.play },
+      "ZZAI Play — one BALOON8 car×sneaker chassis, unlockable colorways, Sneak Vision hazards, and mission saves that mirror Hybrid² plus production guardrails.",
+    cta: { label: "Open Play", href: FEATURE_PUBLIC_PATHS.play },
     accentColor: "#90c4d8",
     motif: "waveform",
     signatureMotion: "scan-lines pulse with rhythm",
@@ -89,7 +89,7 @@ export const FEATURES: FeatureDef[] = [
   withBeta({
     id: "api",
     index: 4,
-    name: "Keep fusions Klean",
+    name: "Production guardrails",
     shortLabel: "Digital",
     artworkTitle: "BANG ON ME",
     artworkSrc: MEDIA.artworks.api,

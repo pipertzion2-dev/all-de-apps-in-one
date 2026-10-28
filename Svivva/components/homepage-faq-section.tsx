@@ -2,7 +2,10 @@ import { getBrandKnowledge } from "@/lib/brand-knowledge";
 
 /** Crawlable FAQ that mirrors homepage FAQPage JSON-LD (answers always in the DOM). */
 export function HomepageFaqSection() {
-  const faqs = getBrandKnowledge().faqs;
+  /** Homepage must not surface “Klean Sneaks” branding — keep those FAQs off this page. */
+  const faqs = getBrandKnowledge().faqs.filter(
+    (item) => !/klean\s*sneaks|\bklean\b/i.test(`${item.q} ${item.a}`),
+  );
 
   return (
     <section

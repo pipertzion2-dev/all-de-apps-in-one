@@ -224,7 +224,7 @@ export const HOMEPAGE_HOWTO_STEPS = [
   },
   {
     name: "Explore beta apps",
-    text: "Spin the desk cube for beta apps. Klean Sneaks stays free on the walk.",
+    text: "Spin the desk cube for beta apps on zzai zzai.",
   },
 ] as const;
 
@@ -239,7 +239,11 @@ export function siteWideJsonLdGraph() {
 /** Full homepage JSON-LD graph — Organization + WebSite + SoftwareApplication + FAQ + HowTo. */
 export function homepageJsonLdGraph() {
   const k = getBrandKnowledge();
-  const faq = faqPageSchema(k.faqs);
+  /** Keep homepage FAQ/JSON-LD free of Klean Sneaks branding (matches HomepageFaqSection). */
+  const homepageFaqs = k.faqs.filter(
+    (item) => !/klean\s*sneaks|\bklean\b/i.test(`${item.q} ${item.a}`),
+  );
+  const faq = faqPageSchema(homepageFaqs);
   return [
     organizationSchema(),
     websiteSchema(),

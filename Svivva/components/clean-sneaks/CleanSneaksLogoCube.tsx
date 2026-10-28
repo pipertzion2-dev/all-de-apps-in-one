@@ -3,8 +3,6 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { BUNDLE_CUBE_FACE_URLS } from "@/lib/clean-sneaks/assets";
-import { KLEAN_SNEAKS } from "@/lib/clean-sneaks/brand";
-
 type Props = {
   className?: string;
   /** Bust query so cache refreshes when the asset changes. */
@@ -242,7 +240,7 @@ export function CleanSneaksLogoCube({ className = "", cacheBust = "v2", onActiva
       className={className}
       data-testid="clean-sneaks-logo-cube"
       role="img"
-      aria-label={`${KLEAN_SNEAKS.title} Steal Bundle cube — drag to spin, tap to enter`}
+      aria-label="Steal Bundle cube — drag to spin, tap to enter"
     />
   );
 }

@@ -71,9 +71,10 @@ describe("homepage scroll panels", () => {
     expect(cubeSrc).toContain("HomepageAboutSection");
     expect(cubeSrc).toContain("HomepageFounderSonSection");
     expect(cubeSrc).toMatch(/HomepageFounderSonSection[\s\S]*HomepagePricingSection/);
-    expect(cubeSrc).toContain('href="/clean-sneaks"');
+    expect(cubeSrc).toContain('href="/poor-man-protection/invention-studio"');
     expect(cubeSrc).toContain("PRODUCT_PROTECTION_PATH");
     expect(cubeSrc).not.toContain('href="/play"');
+    expect(cubeSrc).not.toMatch(/Klean Sneaks/i);
     expect(cubeSrc).not.toContain("HomepageProtectionHero");
     expect(cubeSrc).not.toContain("HomepageMovesLikeHero");
     expect(cubeSrc).not.toContain("HomepageHeroBlock");
@@ -120,6 +121,13 @@ describe("homepage scroll panels", () => {
     expect(aboutSrc).not.toContain("Klean Sneaks demo");
     expect(exploreSrc).not.toContain("Klean Sneaks demo");
     expect(pageSrc).not.toContain("Klean Sneaks demo");
+    expect(pageSrc).not.toMatch(/Klean Sneaks/i);
+    const featureDefsSrc = readFileSync(
+      resolve(__dirname, "../../components/svivva-artifact/feature-defs.ts"),
+      "utf8",
+    );
+    expect(featureDefsSrc).not.toMatch(/Klean Sneaks/i);
+    expect(featureDefsSrc).not.toContain("Play Klean Sneaks");
     expect(pageSrc).toContain('data-testid="link-home-brand"');
     expect(pageSrc).toMatch(/link-home-brand[\s\S]*hidden[\s\S]*sm:inline/);
     expect(cubeSrc).toContain("HomepagePricingSection");

@@ -97,22 +97,22 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
     entity: {
       category: "AI developer platform",
       subcategory:
-        "Hybrid² for AI products — channel×channel fusion, then Klean guardrails on Signal",
+        "Hybrid² for AI products — channel×channel fusion, then production guardrails on Signal",
       geography: "Remote-first · web SaaS at zzaizzai.com",
       foundedNote:
-        "Independent team shipping Hybrid² module fusion, Klean production guardrails, and the BALOON8 Klean Sneaks demo",
+        "Independent team shipping Hybrid² module fusion, production guardrails, and Poor Man Protection",
       hosting: "Production on Vercel (team zzai-zzai, project all-de-apps-in-one)",
     },
-    definition: `zzai zzai (ZZAI / zzaizzai.com) — ${PRODUCT_TAGLINE}. ${PRODUCT_ONE_LINER} Klean Sneaks (/clean-sneaks) is the public game demo of the same metaphor; Seeds, Orbit, hardware, advocacy, and other desk modules are in beta.`,
+    definition: `zzai zzai (ZZAI / zzaizzai.com) — ${PRODUCT_TAGLINE}. ${PRODUCT_ONE_LINER} Seeds, Orbit, hardware, advocacy, and other desk modules are in beta.`,
     shortDescription: BRAND.shortDescription,
     longDescription: [
       PRODUCT_ONE_LINER,
-      "Core (GA): Hybrid² Lab — fuse any two ZZAI channels (H¹), then hybridize listed blends (H²). API Builder, Projects, and Pulse keep fused endpoints Klean with schema, evals, hazard preview, and rollback.",
-      "Play demo: Klean Sneaks — BALOON8 car×sneaker (one chassis, unlockable colorways), Sneak Vision hazard preview, and mission saves that mirror keeping a hybrid ship Klean.",
+      "Core (GA): Hybrid² Lab — fuse any two ZZAI channels (H¹), then hybridize listed blends (H²). API Builder, Projects, and Pulse keep fused endpoints safe with schema, evals, hazard preview, and rollback.",
+      "Play: ZZAI Play — BALOON8 car×sneaker (one chassis, unlockable colorways), Sneak Vision hazard preview, and mission saves that mirror Hybrid² plus production guardrails.",
       "Beta modules (same domain): OaaS patch bay, Seeds, Orbit, hardware builder, Poor Man Protection, free tool hubs, ZZAI Show, education advocacy, and the full ZZAI Play studio.",
     ].join(" "),
     audience:
-      "Founders composing AI product modules who need Hybrid² fusion plus Klean guardrails — not another thin API wrapper or hand-rolled validation stack.",
+      "Founders composing AI product modules who need Hybrid² fusion plus production guardrails — not another thin API wrapper or hand-rolled validation stack.",
     competitors: [
       "Zapier",
       "Make",
@@ -168,7 +168,7 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
         id: "api",
         name: "API Builder (Signal)",
         path: "/dashboard/api-builder",
-        oneLiner: "Beta — keep Hybrid² fusions Klean: schema, evals, hazard preview, rollback.",
+        oneLiner: "Beta — keep Hybrid² fusions safe: schema, evals, hazard preview, rollback.",
         audience: "developers and no-code builders",
       },
       {
@@ -283,7 +283,7 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
             : f.id === "hardware"
               ? "Crest — schematics, BOM, manufacturing"
               : f.id === "play"
-                ? "Play — Klean Sneaks demo (keep the product Klean)"
+                ? "Play — free BALOON8 walk demo"
                 : f.id === "orbit"
                   ? "Grow — SEO, indexing, launch automation"
                   : "Protect — seals and court packs";
@@ -308,7 +308,7 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       {
         term: PRODUCT_TAGLINE,
         definition:
-          "ZZAI’s tagline: treat shipped AI like something worth keeping Klean — preview hazards, enforce structure live, and roll back before users see a scuff.",
+          "ZZAI’s tagline: treat shipped AI like something worth protecting — preview hazards, enforce structure live, and roll back before users see a scuff.",
       },
       {
         term: "OaaS (Orchestration as a Service)",
@@ -378,9 +378,9 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
         why: "Main product — seals, hashes, and court packs",
       },
       {
-        title: "Klean Sneaks / ZZAI Play",
-        path: "/clean-sneaks",
-        why: "Indexable Play / entertainment URL (browser game)",
+        title: "ZZAI Play",
+        path: "/play",
+        why: "Indexable Play / entertainment hub",
       },
       {
         title: "ZZAI Show events",
@@ -416,11 +416,11 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
     faqs: [
       {
         q: "What is zzai zzai / ZZAI / zzaizzai?",
-        a: `${PRODUCT_ONE_LINER} The public Klean Sneaks game at /clean-sneaks demonstrates the same metaphor; other modules (Seeds, Orbit, hardware, tools hubs) are in beta on the same domain.`,
+        a: `${PRODUCT_ONE_LINER} Other modules (Seeds, Orbit, hardware, tools hubs) are in beta on the same domain.`,
       },
       {
         q: "Is ZZAI only an AI API builder?",
-        a: "No — the public story leads with Poor Man Protection: seal sketches, colorways, and files with cryptographic hashes and court packs. The desk cube holds beta apps; Klean Sneaks stays free on the walk.",
+        a: "No — the public story leads with Poor Man Protection: seal sketches, colorways, and files with cryptographic hashes and court packs. The desk cube holds beta apps.",
       },
       {
         q: `What does “${PRODUCT_TAGLINE}” mean?`,

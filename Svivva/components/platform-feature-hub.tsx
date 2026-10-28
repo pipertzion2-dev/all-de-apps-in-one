@@ -270,7 +270,7 @@ export function PlatformFeatureHub({
             </h2>
             <p className="text-sm sm:text-base text-muted-foreground max-w-xl">
               {PRODUCT_HERO_SUBLINE} Patch routes below explore beta channels — core shipping is
-              Hybrid² Lab, guardrails, Projects, Pulse, and Klean Sneaks.
+              Poor Man Protection, Hybrid² Lab, guardrails, Projects, and Pulse.
             </p>
           </header>
         )}

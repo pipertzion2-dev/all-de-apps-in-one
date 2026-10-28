@@ -185,7 +185,7 @@ export const PLATFORM_FEATURES: PlatformFeature[] = [
     shortTitle: "APIaaS",
     href: "/dashboard/api-builder",
     description:
-      "Channel 02 — after Hybrid²: keep fused endpoints Klean with hazard preview, schema enforcement, deploy on Signal.",
+      "Channel 02 — after Hybrid²: keep fused endpoints safe with hazard preview, schema enforcement, deploy on Signal.",
     bus: "build",
     channel: 2,
     tags: ["api", "backend", "prompt", "endpoint", "deploy", "schema", "channel"],

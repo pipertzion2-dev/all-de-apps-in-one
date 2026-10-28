@@ -68,21 +68,15 @@ export function HomepageMovesLikeHero() {
             >
               Beta apps
             </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="min-h-12 border-white/80 bg-white/50"
-              data-testid="button-hero-klean-sneaks"
-              onClick={() => scrollToHomepagePanel("home-game")}
-            >
-              God moves in Klean Sneaks
+            <Button asChild variant="outline" className="min-h-12 border-white/80 bg-white/50">
+              <Link href="/poor-man-protection">Open Poor Man Protection</Link>
             </Button>
             <Button asChild variant="ghost" className="min-h-11 text-[#6D91B3]">
               <Link href="/play">Practice with front camera</Link>
             </Button>
           </div>
           <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-            Scroll ↓ for beta apps · Klean Sneaks closes the cube
+            Scroll ↓ for beta apps on the cube
           </p>
         </div>
       </div>

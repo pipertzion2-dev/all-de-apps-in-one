@@ -10,7 +10,7 @@ export const BRAND = {
   shortDescription: PRODUCT_ONE_LINER,
   /** Longer entity blurb for AEO / SearchDock / Schema.org (see also lib/brand-knowledge.ts). */
   longDescription:
-    "zzai zzai (ZZAI / zzaizzai.com) leads with Poor Man Protection — seal sketches and files with hashes and court packs. The desk cube holds beta apps; Hybrid², Klean Sneaks (BALOON8), Seeds, Orbit, and the desk patch bay stay on the same domain.",
+    "zzai zzai (ZZAI / zzaizzai.com) leads with Poor Man Protection — seal sketches and files with hashes and court packs. The desk cube holds beta apps; Hybrid², Seeds, Orbit, and the desk patch bay stay on the same domain.",
   contactEmail: "hello@zzaizzai.com",
   /** Strings answer engines and SearchDock should treat as the same entity */
   aliases: ["zzai zzai", "ZZAI", "zzaizzai", "zzaizzai.com", "zzai", "Svivva"] as const,

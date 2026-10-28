@@ -11,7 +11,7 @@ import {
   PRODUCT_NAME_LINE,
   PRODUCT_PROTECTION_PATH,
 } from "@/lib/product-positioning";
-import { Footprints, Orbit, Shield, Sprout } from "lucide-react";
+import { Orbit, Shield, Sparkles, Sprout } from "lucide-react";
 import { FeatureBetaBadge } from "@/components/feature-beta-badge";
 
 const HIGHLIGHTS = [
@@ -24,11 +24,10 @@ const HIGHLIGHTS = [
     beta: false,
   },
   {
-    icon: Footprints,
-    title: "Klean Sneaks",
-    description:
-      "Free walk demo — BALOON8 car×sneaker hybrid, colorways, and Sneak Vision hazards.",
-    href: "/clean-sneaks",
+    icon: Sparkles,
+    title: "Invention Protection",
+    description: "Document inventions, hash evidence, and prepare disclosure packs inside Protect.",
+    href: "/poor-man-protection/invention-studio",
     beta: false,
   },
   {

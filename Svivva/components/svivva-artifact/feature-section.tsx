@@ -21,7 +21,7 @@ const FEATURE_STATS: Record<FeatureId, [string, string, string]> = {
 };
 
 const FEATURE_HEADLINE: Record<FeatureId, [string, string]> = {
-  play: ["KEEP IT CLEAN.", "KLEAN SNEAKS."],
+  play: ["KEEP IT CLEAN.", "ZZAI PLAY."],
   seeds: ["ONE SPEC.", "MANY APPS."],
   orbit: ["ONE ENGINE.", "FULL FUNNEL."],
   security: ["ONE SKETCH.", "COURT-READY PACK."],

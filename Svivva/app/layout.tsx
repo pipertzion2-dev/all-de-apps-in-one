@@ -59,7 +59,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 
   const title = `zzai zzai — ${PRODUCT_TAGLINE}`;
-  const description = `zzai zzai (ZZAI / zzaizzai.com) — ${PRODUCT_ONE_LINER} Try Klean Sneaks at /clean-sneaks; other desk modules are beta.`;
+  const description = `zzai zzai (ZZAI / zzaizzai.com) — ${PRODUCT_ONE_LINER} Open /poor-man-protection to seal your work; other desk modules are beta.`;
 
   return {
     title: {
@@ -77,7 +77,6 @@ export async function generateMetadata(): Promise<Metadata> {
       "ZZAI Seeds",
       "Orbit SEO",
       "Poor Man Protection",
-      "Klean Sneaks",
       "ZZAI Show",
       "ZZAI Play",
     ],
