@@ -30,8 +30,8 @@ export function GameLoadingWheels({ fullscreen = false }: GameLoadingWheelsProps
     <div
       className={
         fullscreen
-          ? "fixed inset-0 z-[40] flex flex-col items-center justify-center overflow-hidden bg-black/55 backdrop-blur-[2px]"
-          : "relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-black/55"
+          ? "fixed inset-0 z-[40] flex flex-col items-center justify-end overflow-hidden bg-transparent pb-[max(2.5rem,env(safe-area-inset-bottom))]"
+          : "relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-transparent"
       }
       style={{
         paddingTop: "env(safe-area-inset-top)",
@@ -41,26 +41,31 @@ export function GameLoadingWheels({ fullscreen = false }: GameLoadingWheelsProps
       aria-label="Loading game"
       aria-live="polite"
     >
-      <div className="relative mb-8 h-[min(28vh,160px)] w-[min(85vw,360px)] shrink-0 drop-shadow-[0_8px_24px_rgba(0,0,0,0.55)]">
-        <Image
-          src={KAREN_THE_MUSCLE_LOGO_URL}
-          alt="Karen the Muscle"
-          fill
-          priority
-          className="object-contain object-center"
-          sizes="(max-width: 768px) 85vw, 360px"
-          data-testid="img-karen-the-muscle-logo"
-        />
-      </div>
+      {!fullscreen ? (
+        <div className="relative mb-8 h-[min(28vh,160px)] w-[min(85vw,360px)] shrink-0 drop-shadow-[0_8px_24px_rgba(0,0,0,0.55)]">
+          <Image
+            src={KAREN_THE_MUSCLE_LOGO_URL}
+            alt="Karen the Muscle"
+            fill
+            priority
+            className="object-contain object-center"
+            sizes="(max-width: 768px) 85vw, 360px"
+            data-testid="img-karen-the-muscle-logo"
+          />
+        </div>
+      ) : null}
 
-      <p
-        className="mb-6 max-w-[min(88vw,22rem)] px-4 text-center text-xs font-semibold uppercase leading-relaxed tracking-[0.18em] text-white/90 sm:text-sm"
-        data-testid="text-game-loading-intro"
-      >
-        {KLEAN_RUNNER_INTRO_LINE}
-      </p>
+      {!fullscreen ? (
+        <p
+          className="mb-6 max-w-[min(88vw,22rem)] px-4 text-center text-xs font-semibold uppercase leading-relaxed tracking-[0.18em] text-white/90 sm:text-sm"
+          data-testid="text-game-loading-intro"
+        >
+          {KLEAN_RUNNER_INTRO_LINE}
+        </p>
+      ) : null}
 
-      {/* Hubcaps spin inside circular clips so square JPEG bounds never overlap. */}
+      {/* Hubcaps spin inside circular clips so square JPEG bounds never overlap.
+          Fullscreen load keeps the puzzle visible underneath — wheels only. */}
       <div className="flex items-center justify-center gap-[min(3.5vw,14px)] px-4">
         {LOADING_WHEEL_URLS.map((src, index) => (
           <div

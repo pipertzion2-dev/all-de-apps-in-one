@@ -8,7 +8,8 @@ import {
 } from "./sneaker-catalog";
 
 /** Main game logo — brand splash. */
-export const KAREN_THE_MUSCLE_LOGO_URL = "/assets/clean-sneaks/karen-the-muscle-logo.jpg";
+/** Transparent PNG — white paper matte removed for dark game stages. */
+export const KAREN_THE_MUSCLE_LOGO_URL = "/assets/clean-sneaks/karen-the-muscle-logo.png";
 
 /**
  * Legacy single-face logo (kept for fallbacks / older references).
