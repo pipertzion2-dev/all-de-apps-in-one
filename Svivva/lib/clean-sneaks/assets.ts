@@ -7,8 +7,7 @@ import {
   type Baloon8ColorwayId,
 } from "./sneaker-catalog";
 
-/** Main game logo — brand splash. */
-/** Transparent PNG — white paper matte removed for dark game stages. */
+/** Main game logo — transparent PNG (white matte removed for dark stages). */
 export const KAREN_THE_MUSCLE_LOGO_URL = "/assets/clean-sneaks/karen-the-muscle-logo.png";
 
 /**
