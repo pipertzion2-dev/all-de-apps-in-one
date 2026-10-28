@@ -55,31 +55,9 @@ export function SvivvaArtifact({ mountCanvas = true }: SvivvaArtifactProps) {
     >
       {/* Same backdrop panel the other over-camo sections use, so the copy stays
           legible against the 3D background instead of sitting directly on it. */}
-      <div className="text-center mb-4 select-none pointer-events-none relative z-[1] max-w-xl bg-background/80 backdrop-blur-lg rounded-2xl p-5 sm:p-8">
-        <p
-          className="text-[10px] uppercase tracking-[0.35em] mb-3 font-mono font-semibold"
-          style={{ color: "#5B8DA8", letterSpacing: "0.28em" }}
-        >
-          Main navigation · 6 faces
-        </p>
-        <h1
-          className="text-3xl md:text-4xl font-light tracking-tight text-foreground"
-          style={{ letterSpacing: "-0.01em" }}
-        >
-          Six products. One cube.
-        </h1>
-        <p
-          className="mt-3 text-sm font-light text-muted-foreground"
-          style={{ letterSpacing: "0.04em" }}
-        >
-          Each face is a product. Drag to rotate. Tap a face — or a name below — to open it.
-        </p>
-        <p
-          className="mt-3 text-muted-foreground/80 text-sm"
-          style={{ fontFamily: '"Zc", sans-serif' }}
-        >
-          Game · Seeds · Hardware · Digital · Orbit · Protect
-        </p>
+      <div className="relative z-[1] mb-2 max-w-xl select-none pointer-events-none px-2 text-center">
+        <h2 className="text-2xl font-light tracking-tight text-foreground sm:text-3xl">One cube</h2>
+        <p className="mt-2 text-sm text-muted-foreground">Drag to rotate. Tap a face to open it.</p>
       </div>
 
       <div

@@ -20,11 +20,18 @@ describe("homepage-layout", () => {
     expect(pageSrc).not.toContain("HomepageFlipStack");
   });
 
-  it("keeps intro minimal and Admin Orbit on main nav", () => {
+  it("keeps intro minimal and a clean main nav", () => {
     const pageSrc = readFileSync(resolve(__dirname, "../../app/home-page-client.tsx"), "utf8");
-    expect(pageSrc).toContain("OrbitAdminAccessButton");
-    expect(pageSrc).toContain("button-home-nav-admin-orbit");
     expect(pageSrc).toContain("button-skip-intro");
+    expect(pageSrc).toContain('data-testid="homepage-main-nav"');
+    expect(pageSrc).toContain('data-testid="link-home-brand"');
+    expect(pageSrc).toContain('data-testid="link-nav-poor-man-protection"');
+    expect(pageSrc).toContain('data-testid="link-svivva-play-mobile"');
+    expect(pageSrc).toContain('data-testid="button-start-free"');
+    expect(pageSrc).not.toContain("OrbitAdminAccessButton");
+    expect(pageSrc).not.toContain("button-home-nav-admin-orbit");
     expect(pageSrc).not.toContain("button-home-intro-admin-orbit");
+    expect(pageSrc).not.toContain('data-testid="link-nav-events"');
+    expect(pageSrc).not.toContain('data-testid="button-signin"');
   });
 });

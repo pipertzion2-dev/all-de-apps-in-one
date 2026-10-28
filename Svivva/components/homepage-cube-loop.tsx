@@ -19,12 +19,10 @@ type HomepageCubeLoopProps = {
  * Continuous cube wrap for the native-scroll homepage:
  * - At the bottom of the last face, scroll/wheel further → first face
  * - At the top of the first face, scroll/wheel up → last face
- * Also renders an in-flow “continue around the cube” control after story content.
  */
 export function HomepageCubeLoop({ enabled = true }: HomepageCubeLoopProps) {
   const lockedUntilRef = useRef(0);
   const touchStartYRef = useRef<number | null>(null);
-
   const sentinelRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -109,37 +107,18 @@ export function HomepageCubeLoop({ enabled = true }: HomepageCubeLoopProps) {
       id="homepage-cube-loop"
       data-homepage-cube-loop=""
       data-testid="homepage-cube-loop"
-      className="relative isolate flex min-h-[min(56svh,420px)] flex-col items-center justify-center gap-3 border-t border-border/40 bg-background px-4 py-16 text-center scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px))] sm:scroll-mt-[calc(4rem+env(safe-area-inset-top,0px))]"
+      className="relative isolate flex items-center justify-center border-t border-border/30 bg-background px-4 py-10"
       style={{ scrollSnapAlign: "start" }}
       aria-label="Continue around the cube"
     >
-      <p className="text-[10px] font-mono uppercase tracking-[0.28em] text-[#5B8DA8]">
-        Continuous cube
-      </p>
-      <p className="max-w-sm text-sm text-muted-foreground">
-        Keep scrolling — the cube wraps to the first face.
-      </p>
       <button
         type="button"
         onClick={() => scrollToHomepagePanel("home-beta")}
-        className="rounded-full border border-[#5B8DA8]/45 bg-background px-6 py-2.5 text-xs font-semibold tracking-wide text-foreground shadow-sm transition-transform active:scale-95"
+        className="text-xs font-medium tracking-wide text-muted-foreground underline-offset-4 transition-colors hover:text-[#5B8DA8] hover:underline"
         data-testid="button-cube-loop-to-first"
       >
         {HOMEPAGE_SCROLL_WRAP_TO_FIRST}
       </button>
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 20 20"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        className="text-muted-foreground"
-        style={{ animation: "scrollBounce 1.5s ease-in-out infinite" }}
-        aria-hidden
-      >
-        <path d="M10 4v12M5 11l5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
     </section>
   );
 }

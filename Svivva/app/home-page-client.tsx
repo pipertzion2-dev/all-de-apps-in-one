@@ -25,7 +25,6 @@ import { HOMEPAGE_PRICING_TIERS } from "@/lib/homepage-pricing";
 import type { HomepageFlipPanelId } from "@/lib/homepage-flip-stack";
 import { usePlatform } from "@/lib/platform-context";
 import { ZzaiModeToggle } from "@/components/zzai-mode-toggle";
-import { OrbitAdminAccessButton } from "@/components/orbit-admin-access-button";
 import Link from "next/link";
 import Image from "next/image";
 import zzaiLogo from "@/attached_assets/ZZAI_OFFICIAL_LOGO.png";
@@ -661,82 +660,50 @@ export default function LandingPage() {
           }
         >
           <nav
-            className="fixed top-0 left-0 right-0 z-[60] border-b border-white/10 backdrop-blur-xl bg-background/80 pt-[env(safe-area-inset-top)]"
+            className="fixed top-0 left-0 right-0 z-[60] border-b border-border/40 bg-background/90 backdrop-blur-md pt-[env(safe-area-inset-top)]"
             style={{ opacity: flipComplete ? 1 : 0, pointerEvents: flipComplete ? "auto" : "none" }}
             data-testid="homepage-main-nav"
           >
-            <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-2 px-3 sm:h-16 sm:gap-3 sm:px-6">
-              <div className="flex shrink-0 items-center gap-2">
-                <ZzaiModeToggle size="xs" />
-                <Link
-                  href="/"
-                  className="hidden whitespace-nowrap text-xs font-semibold tracking-wide text-foreground/90 sm:inline"
-                  data-testid="link-home-brand"
-                >
-                  zzai zzai
-                </Link>
-              </div>
+            <div className="mx-auto flex h-12 max-w-5xl items-center justify-between gap-4 px-4 sm:h-14 sm:px-6">
+              <Link
+                href="/"
+                className="whitespace-nowrap text-sm font-semibold tracking-[0.12em] text-foreground"
+                data-testid="link-home-brand"
+              >
+                zzai zzai
+              </Link>
 
-              <div className="flex min-w-0 flex-1 items-center justify-end gap-0.5 sm:gap-2">
+              <div className="flex items-center gap-1 sm:gap-2">
                 <Link
                   href="/poor-man-protection"
-                  className="flex h-8 items-center gap-1 rounded-md px-1.5 hover:bg-muted/50 transition-colors sm:px-2"
+                  className="rounded-md px-2.5 py-1.5 text-xs font-medium text-foreground/80 transition-colors hover:text-[#5B8DA8]"
                   data-testid="link-nav-poor-man-protection"
                   aria-label="Poor Man Protection"
                 >
-                  <span className="text-xs font-bold tracking-wide text-[#5B8DA8]">Protect</span>
+                  Protect
                 </Link>
                 <Link
                   href="/play"
-                  className="flex h-8 items-center gap-1 rounded-md px-1.5 hover:bg-muted/50 transition-colors sm:px-2"
+                  className="rounded-md px-2.5 py-1.5 text-xs font-medium text-foreground/80 transition-colors hover:text-[#5B8DA8]"
                   data-testid="link-svivva-play-mobile"
                   aria-label="Game"
                 >
-                  <span className="seeds-holo-text text-base leading-none">&#9835;</span>
-                  <span className="seeds-holo-text hidden text-xs font-bold tracking-wide sm:inline">
-                    Game
-                  </span>
+                  Game
                 </Link>
                 <Link
-                  href="/events"
-                  className="flex h-8 items-center gap-1 rounded-md px-1.5 hover:bg-muted/50 transition-colors sm:px-2"
-                  data-testid="link-nav-events"
-                  title="ZZAI Show events"
-                  aria-label="Events"
+                  href="/dashboard"
+                  className="hidden rounded-md px-2.5 py-1.5 text-xs font-medium text-foreground/80 transition-colors hover:text-[#5B8DA8] sm:inline"
+                  data-testid="button-nav-dashboard"
                 >
-                  <Mic2 className="h-3.5 w-3.5 shrink-0 text-[#5B8DA8]" />
-                  <span className="hidden text-xs font-bold tracking-wide text-foreground/90 sm:inline">
-                    Events
-                  </span>
+                  Desk
                 </Link>
-                <OrbitAdminAccessButton data-testid="button-home-nav-admin-orbit" />
-                <Link href="/dashboard" className="hidden sm:block">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-8 px-2.5 text-xs border-[#5B8DA8]/50"
-                    data-testid="button-nav-dashboard"
-                  >
-                    Dashboard
-                  </Button>
-                </Link>
-                <a href="/login" className="hidden md:block">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 px-2 text-xs"
-                    data-testid="button-signin"
-                  >
-                    Sign In
-                  </Button>
-                </a>
                 <a href="/signup">
                   <Button
                     size="sm"
-                    className="h-8 bg-[#5B8DA8] px-2.5 text-xs whitespace-nowrap sm:px-3"
+                    className="ml-1 h-8 bg-[#5B8DA8] px-3 text-xs text-white hover:bg-[#5B8DA8]/90"
                     data-testid="button-start-free"
                   >
-                    Start Free
+                    Start
                   </Button>
                 </a>
               </div>

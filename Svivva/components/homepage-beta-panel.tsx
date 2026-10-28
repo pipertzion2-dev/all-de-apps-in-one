@@ -69,11 +69,11 @@ export function HomepageBetaPanel({
       </div>
 
       {interactive ? (
-        <div className="relative z-20 flex justify-center px-4 py-6">
+        <div className="relative z-20 flex justify-center px-4 py-5">
           <button
             type="button"
             onClick={() => scrollToHomepagePanel("nav-cube")}
-            className="rounded-full border border-[#6D91B3]/40 bg-background/90 px-5 py-2 text-xs font-medium tracking-wide text-foreground shadow-sm backdrop-blur-sm transition-transform active:scale-95"
+            className="text-xs font-medium tracking-wide text-muted-foreground underline-offset-4 transition-colors hover:text-[#5B8DA8] hover:underline"
           >
             {HOMEPAGE_SCROLL_TO_COMBINED}
           </button>

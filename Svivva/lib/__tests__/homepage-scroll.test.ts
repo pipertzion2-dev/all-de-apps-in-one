@@ -72,9 +72,9 @@ describe("homepage scroll panels", () => {
     expect(cubeSrc).toContain("HomepageAboutSection");
     expect(cubeSrc).toContain("HomepageFounderSonSection");
     expect(cubeSrc).toMatch(/HomepageFounderSonSection[\s\S]*HomepagePricingSection/);
-    expect(cubeSrc).toContain('href="/poor-man-protection/invention-studio"');
     expect(cubeSrc).toContain("PRODUCT_PROTECTION_PATH");
     expect(cubeSrc).not.toContain('href="/play"');
+    expect(cubeSrc).not.toContain('href="/poor-man-protection/invention-studio"');
     expect(cubeSrc).not.toMatch(/Klean Sneaks/i);
     expect(cubeSrc).not.toContain("HomepageProtectionHero");
     expect(cubeSrc).not.toContain("HomepageMovesLikeHero");
@@ -130,12 +130,15 @@ describe("homepage scroll panels", () => {
     expect(featureDefsSrc).not.toMatch(/Klean Sneaks/i);
     expect(featureDefsSrc).not.toContain("Play Klean Sneaks");
     expect(pageSrc).toContain('data-testid="link-home-brand"');
-    expect(pageSrc).toMatch(/link-home-brand[\s\S]*hidden[\s\S]*sm:inline/);
+    expect(pageSrc).toContain(
+      'className="whitespace-nowrap text-sm font-semibold tracking-[0.12em] text-foreground"',
+    );
     expect(cubeSrc).toContain("HomepagePricingSection");
     expect(cubeSrc).toContain("HomepageFaqSection");
     expect(cubeSrc).toContain("HomepageHowToSection");
     expect(cubeSrc).toContain("HomepageExploreLinks");
     expect(cubeSrc).toContain("HomepageCubeFaceHint");
+    expect(cubeSrc).not.toContain("button-open-invention-protection");
     expect(cubeSrc).not.toContain("Flip down · game");
   });
 

@@ -32,13 +32,10 @@ export function HomepageCubePanel({
     >
       {interactive ? <HomepageCubeFaceHint /> : null}
 
-      <div className="px-4 pt-6 pb-2 text-center">
+      <div className="px-4 pt-4 pb-2 text-center">
         <h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-          Story, plans, and answers
+          Story &amp; plans
         </h2>
-        <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-          How zzai zzai fits together — Poor Man Protection first, beta apps on the cube.
-        </p>
       </div>
 
       <HomepageAboutSection />
@@ -49,20 +46,13 @@ export function HomepageCubePanel({
       <HomepageFaqSection />
 
       {interactive ? (
-        <div className="relative z-20 flex flex-wrap justify-center gap-3 px-4 py-8">
+        <div className="relative z-20 flex justify-center px-4 py-8">
           <Link
             href={PRODUCT_PROTECTION_PATH}
             className="rounded-full border border-[#5B8DA8]/50 bg-[#5B8DA8] px-6 py-2.5 text-xs font-semibold tracking-wide text-white shadow-sm transition-transform active:scale-95"
             data-testid="button-open-poor-man-protection"
           >
             {HOMEPAGE_SCROLL_TO_PROTECTION}
-          </Link>
-          <Link
-            href="/poor-man-protection/invention-studio"
-            className="rounded-full border border-[#5B8DA8]/45 bg-background px-6 py-2.5 text-xs font-semibold tracking-wide text-foreground shadow-sm transition-transform active:scale-95"
-            data-testid="button-open-invention-protection"
-          >
-            Invention Protection
           </Link>
         </div>
       ) : null}

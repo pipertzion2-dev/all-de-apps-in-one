@@ -7,7 +7,6 @@ import {
   PRODUCT_NAME_LINE,
   PRODUCT_PROTECTION_PATH,
   PRODUCT_PROTECTION_PITCH,
-  PRODUCT_TAGLINE,
 } from "@/lib/product-positioning";
 import { Button } from "@/components/ui/button";
 
@@ -25,10 +24,8 @@ export function HomepageProtectionHero() {
         <h1 className="text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-[2.75rem] lg:leading-[1.12]">
           {PRODUCT_HERO_HEADLINE}
         </h1>
-        <p className="text-base font-medium leading-snug text-foreground/90">{PRODUCT_TAGLINE}</p>
-        <p className="mx-auto max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-          {PRODUCT_PROTECTION_PITCH} Sketches, sneaker colorways, lyrics, API schemas — anything you
-          may need to prove you had first. The cube below is beta apps.
+        <p className="mx-auto max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+          {PRODUCT_PROTECTION_PITCH}
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
           <Button asChild className="bg-[#5B8DA8] text-white">

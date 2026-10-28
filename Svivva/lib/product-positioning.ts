@@ -65,11 +65,11 @@ export const HOMEPAGE_SCROLL_TO_PROTECTION = "Open Poor Man Protection";
 /** Public path for Poor Man Protection (canonical marketing URL). */
 export const PRODUCT_PROTECTION_PATH = "/poor-man-protection";
 /** From protection / beta — continue to the combined story / pricing face. */
-export const HOMEPAGE_SCROLL_TO_COMBINED = "Scroll ↓ More";
+export const HOMEPAGE_SCROLL_TO_COMBINED = "More";
 /** From the combined face — back to beta apps. */
-export const HOMEPAGE_SCROLL_TO_BETA_UP = "↑ Back to beta apps";
+export const HOMEPAGE_SCROLL_TO_BETA_UP = "Back";
 /** From the bottom of the story face — wrap around the cube to the first face. */
-export const HOMEPAGE_SCROLL_WRAP_TO_FIRST = "Continue · first face";
+export const HOMEPAGE_SCROLL_WRAP_TO_FIRST = "Back to start";
 /** Continue to beta desk apps. */
 export const HOMEPAGE_SCROLL_TO_BETA = "Scroll ↓ Beta apps";
 /** @deprecated Not used on homepage — kept for lingering imports. */
@@ -83,8 +83,7 @@ export const HOMEPAGE_SCROLL_TO_PLATFORM = HOMEPAGE_SCROLL_TO_PROTECTION;
 
 /** Beta apps face — the cube is the beta desk, not the main product. */
 export const HOMEPAGE_BETA_CUBE_TITLE = "Beta apps";
-export const HOMEPAGE_BETA_CUBE_SUBLINE =
-  "This cube is the beta apps desk — Seeds, Orbit, Protect channels, and the rest. zzai zzai’s main focus is Poor Man Protection above.";
+export const HOMEPAGE_BETA_CUBE_SUBLINE = "Spin the desk cube for Seeds, Orbit, and the rest.";
 
 /** Platform desk modules — Hybrid² / API / Pulse stay beta. */
 export const CORE_PLATFORM_FEATURE_IDS = new Set<string>();
