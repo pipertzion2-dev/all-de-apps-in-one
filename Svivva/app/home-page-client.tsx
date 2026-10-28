@@ -759,7 +759,7 @@ export default function LandingPage() {
                 <section className="relative z-10 pb-6 sm:pb-8 pt-2">
                   <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center space-y-4">
                     <p className="text-sm text-muted-foreground">
-                      Spin the cube to explore — or jump straight to a channel.
+                      Spin the menu to explore — or jump straight to a tool.
                     </p>
                     <div className="flex flex-wrap items-center justify-center gap-2">
                       <Link href="/blog">
@@ -820,20 +820,20 @@ export default function LandingPage() {
                           <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
                             <Badge className="text-[10px] bg-[#5B8DA8]">Core</Badge>
                             <Badge variant="secondary" className="text-[10px]">
-                              Hybrid² + production guardrails
+                              Combine tools + safety checks
                             </Badge>
                           </div>
                           <p className="text-sm sm:text-base text-muted-foreground max-w-lg">
-                            ZZAI fuses AI modules on the Hybrid bus, then keeps every fusion safe on
-                            Signal — hazard preview, schema, rollback. The mixing-console patch bay
-                            below routes <strong>beta</strong> desk modules.
+                            Combine AI features safely — preview risks, check responses, and roll
+                            back if something breaks. The finder below suggests{" "}
+                            <strong>beta</strong> tools for your goal.
                           </p>
                           <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-1">
                             {[
-                              "16 channel strips",
-                              "6 subgroup buses",
-                              "Signal · Crest mains",
-                              "Master bus out",
+                              "Many tools included",
+                              "Digital + hardware paths",
+                              "Safe deploy checks",
+                              "One-click rollback",
                             ].map((tag) => (
                               <span
                                 key={tag}
@@ -1096,8 +1096,8 @@ export default function LandingPage() {
                   </h2>
                   <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto">
                     {mode === "digital"
-                      ? "Main goal: Poor Man Protection seals your work; Hybrid² fuses AI modules with production guardrails on the desk cube."
-                      : "Schematics and BOM workflows — beta on the Crest bus."}
+                      ? "Main goal: seal your work with Poor Man Protection. Other beta tools on the menu let you combine AI features safely."
+                      : "Hardware drawings and parts lists — still in beta."}
                   </p>
                 </div>
 
@@ -1263,7 +1263,7 @@ export default function LandingPage() {
                       <p>
                         The photo is my son at the computer — the same session where he helped shape
                         the zzai zzai logo. The center of zzai zzai is Poor Man Protection: seal
-                        what you made with hashes and a court-ready pack.
+                        what you made and download proof you can share.
                       </p>
                       <p>
                         Designers and builders use it when they need a timestamped record before
@@ -1271,9 +1271,8 @@ export default function LandingPage() {
                         and storefront creators.
                       </p>
                       <p>
-                        Hybrid² Lab and other desk modules stay available as beta tools. The
-                        homepage leads with Poor Man Protection because that is the product you open
-                        first.
+                        Combining AI tools and other modules stay available as beta. The homepage
+                        leads with Poor Man Protection because that is the product you open first.
                       </p>
                     </div>
                   </div>

@@ -1,44 +1,44 @@
 /**
  * Canonical product story for zzai zzai — homepage, metadata, and beta labeling.
- * Homepage leads with Poor Man Protection; the desk cube is beta apps.
+ * Homepage leads with Poor Man Protection; the spinning menu holds other beta tools.
  */
 
 import type { FeatureId } from "@/components/svivva-artifact/feature-defs";
 
 /** Scale-style homepage thesis — one clear job for the whole page. */
-export const PRODUCT_HERO_HEADLINE = "Seal what you made — Poor Man Protection first.";
+export const PRODUCT_HERO_HEADLINE = "Seal what you made — prove it was yours first.";
 
 /** Product name — eyebrows, metadata suffix, and compact labels. */
 export const PRODUCT_NAME_LINE = "Poor Man Protection";
 
 /** Brand slogan — metadata and secondary hero line. */
 export const PRODUCT_TAGLINE =
-  "Poor Man Protection — timestamp, seal, and export a court-ready pack.";
+  "Poor Man Protection — timestamp, seal, and download proof you can share.";
 
 /** Desk tool pitch — primary homepage product. */
 export const PRODUCT_PROTECTION_PITCH =
-  "Timestamp your files, seal them with cryptographic hashes, and export a court-ready pack. Supporting evidence of anteriority — not a USPTO patent or Copyright Office registration.";
+  "Timestamp your files, seal them with a secure fingerprint, and download proof you can share. This is supporting evidence that you had it first — not a government patent or copyright registration.";
 
 /** Applications block (below the hero) — focused section intro. */
-export const HOMEPAGE_APPLICATIONS_TITLE = "Protection first. Beta apps on the cube.";
+export const HOMEPAGE_APPLICATIONS_TITLE = "Protection first. Extra tools on the menu.";
 export const HOMEPAGE_APPLICATIONS_SUBLINE =
-  "zzai zzai is mainly focused on Poor Man Protection. The spinning desk cube holds beta apps (Seeds, Orbit, Protect channels, and more).";
+  "zzai zzai focuses on Poor Man Protection. Spin the homepage menu for other beta tools — turn a brief into apps, grow search traffic, and more.";
 
 /** Sap / tree metaphor — quiet work under the surface while you rest and grow. */
 export const PRODUCT_SAP_METAPHOR =
-  "Like sap in a tree, zzai zzai keeps creation and guardrails flowing underneath — so you can move, rest, and grow.";
+  "Like sap in a tree, zzai zzai keeps creation and safety checks flowing underneath — so you can move, rest, and grow.";
 
 /** One-sentence pitch (YC / hero / meta). */
 export const PRODUCT_ONE_LINER =
-  "zzai zzai leads with Poor Man Protection — seal sketches, colorways, and files with hashes and court packs. The desk cube holds beta apps.";
+  "zzai zzai helps you prove you made something first — seal sketches and files, then download shareable proof. Other tools live on a spinning homepage menu (still in beta).";
 
 /** Plain-language main goal (homepage game + product faces). */
 export const PRODUCT_MAIN_GOAL =
-  "Open Poor Man Protection to seal what you made, then spin the cube for beta desk apps.";
+  "Open Poor Man Protection to seal what you made, then spin the menu for other beta tools.";
 
 /** Shorter hero subline. */
 export const PRODUCT_HERO_SUBLINE =
-  "Cryptographic seals and court packs for what you invent — then beta apps on the cube.";
+  "Seal and timestamp what you invent, download proof you can share — then try other beta tools on the menu.";
 
 /** Max ~12 words — mobile homepage faces only. */
 export const PRODUCT_HOOK_SHORT = "Seal it. Prove it. Protect it.";
@@ -46,19 +46,19 @@ export const PRODUCT_HOOK_SHORT = "Seal it. Prove it. Protect it.";
 /** HowTo section — keep in sync with `HOMEPAGE_HOWTO_STEPS` in seo/schema/builders.ts */
 export const HOMEPAGE_HOWTO_TITLE = "How Poor Man Protection works";
 export const HOMEPAGE_HOWTO_SUBLINE =
-  "Four steps from upload to a sealed, court-oriented pack — the main focus of zzai zzai.";
+  "Four steps from upload to sealed, shareable proof — the main focus of zzai zzai.";
 
-/** Literal game ↔ product bridge (BALOON8 car×sneaker, Jordan 14 × Ferrari). */
+/** Literal game ↔ product bridge. */
 export const PRODUCT_GAME_HYBRID_METAPHOR =
-  "Protect first, then explore — Poor Man Protection on the desk, beta apps on the cube.";
+  "Protect first, then explore — seal your work, then try other beta tools on the menu.";
 
 /** Last homepage panel — game / walk face (no product brand name in copy). */
-export const HOMEPAGE_GAME_FACE_TITLE = "Game on the walk";
-export const HOMEPAGE_GAME_FACE_SUBLINE = "Protect the BALOON8 while you play free.";
+export const HOMEPAGE_GAME_FACE_TITLE = "Play free";
+export const HOMEPAGE_GAME_FACE_SUBLINE = "Keep your sneaker clean while you play.";
 
 /** Shown under the headline on the platform homepage face (mobile compact). */
 export const HOMEPAGE_PLATFORM_FACE_SUBLINE =
-  "Open Poor Man Protection — seal your work, then explore beta apps on the cube.";
+  "Open Poor Man Protection — seal your work, then explore other beta tools on the menu.";
 
 /** Primary CTA — open the main product. */
 export const HOMEPAGE_SCROLL_TO_PROTECTION = "Open Poor Man Protection";
@@ -69,9 +69,9 @@ export const HOMEPAGE_SCROLL_TO_COMBINED = "More";
 /** From the combined face — back to beta apps. */
 export const HOMEPAGE_SCROLL_TO_BETA_UP = "Back";
 /** From the white game face — fine-flip wrap back to beta apps. */
-export const HOMEPAGE_SCROLL_WRAP_TO_FIRST = "Flip to start";
+export const HOMEPAGE_SCROLL_WRAP_TO_FIRST = "Back to start";
 /** Continue to beta desk apps. */
-export const HOMEPAGE_SCROLL_TO_BETA = "Scroll ↓ Beta apps";
+export const HOMEPAGE_SCROLL_TO_BETA = "Scroll ↓ More tools";
 /** @deprecated Not used on homepage — kept for lingering imports. */
 export const HOMEPAGE_SCROLL_TO_MOVES = "Open Play";
 /** After the story face — continue to the white game face. */
@@ -81,9 +81,10 @@ export const HOMEPAGE_SCROLL_TO_COMBINED_UP = "↑ Back to story";
 /** @deprecated Use HOMEPAGE_SCROLL_TO_PROTECTION — kept for lingering imports. */
 export const HOMEPAGE_SCROLL_TO_PLATFORM = HOMEPAGE_SCROLL_TO_PROTECTION;
 
-/** Beta apps face — the cube is the beta desk, not the main product. */
-export const HOMEPAGE_BETA_CUBE_TITLE = "Beta apps";
-export const HOMEPAGE_BETA_CUBE_SUBLINE = "Spin the desk cube for Seeds, Orbit, and the rest.";
+/** Beta apps face — the cube is the beta menu, not the main product. */
+export const HOMEPAGE_BETA_CUBE_TITLE = "More tools (beta)";
+export const HOMEPAGE_BETA_CUBE_SUBLINE =
+  "Spin the menu for beta tools: turn a brief into apps, grow search traffic, and more.";
 
 /** Platform desk modules — Hybrid² / API / Pulse stay beta. */
 export const CORE_PLATFORM_FEATURE_IDS = new Set<string>();

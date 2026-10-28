@@ -175,7 +175,7 @@ export function videoGameSchema(input?: {
     alternateName: ["KLEAN SNEAKS", "Clean Sneaks"],
     description:
       input?.description ??
-      "ZZAI Play endless runner — keep your kicks clean, steal the old man's bundle, and unlock Steal Bundle casino mode.",
+      "Free browser runner — keep your sneaker clean, then try a short card mini-game for a bundle prize.",
     url: absoluteUrl(path),
     image: absoluteUrl(input?.imagePath ?? "/assets/clean-sneaks/baloon8-sneaker-thumbnail.png"),
     applicationCategory: "GameApplication",
@@ -212,19 +212,19 @@ export function eventSeriesSchema(input?: { name?: string; description?: string;
 export const HOMEPAGE_HOWTO_STEPS = [
   {
     name: "Open Poor Man Protection",
-    text: "Start the sealing ceremony — upload a sketch, colorway, lyric sheet, or any file you need to prove you had first.",
+    text: "Upload a sketch, design finish, lyric sheet, or any file you need to prove you had first.",
   },
   {
-    name: "Hash and timestamp",
-    text: "Cryptographic hashes and dual-axis hybridization lock a timestamped evidentiary package.",
+    name: "Seal and timestamp",
+    text: "We create a secure fingerprint and timestamp so you have a sealed record of what you uploaded.",
   },
   {
-    name: "Export a court pack",
-    text: "Download a court-oriented pack and optional email delivery — supporting evidence of anteriority, not a USPTO filing.",
+    name: "Download your proof",
+    text: "Download a shareable evidence pack (optional email delivery) — proof you had it first, not a USPTO filing.",
   },
   {
-    name: "Explore beta apps",
-    text: "Spin the desk cube for beta apps on zzai zzai.",
+    name: "Try other tools",
+    text: "Spin the homepage menu for other beta tools on zzai zzai.",
   },
 ] as const;
 
@@ -257,7 +257,7 @@ export function homepageJsonLdGraph() {
     howToSchema({
       name: HOMEPAGE_HOWTO_TITLE,
       description:
-        "Seal work with Poor Man Protection on zzai zzai — hash, timestamp, and export a court-ready pack. The desk cube holds beta apps.",
+        "Seal work with Poor Man Protection on zzai zzai — fingerprint, timestamp, and download shareable proof. Other beta tools live on the homepage menu.",
       steps: [...HOMEPAGE_HOWTO_STEPS],
     }),
   ];

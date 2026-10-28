@@ -103,13 +103,13 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
         "Independent team shipping Hybrid² module fusion, production guardrails, and Poor Man Protection",
       hosting: "Production on Vercel (team zzai-zzai, project all-de-apps-in-one)",
     },
-    definition: `zzai zzai (ZZAI / zzaizzai.com) — ${PRODUCT_TAGLINE}. ${PRODUCT_ONE_LINER} Seeds, Orbit, hardware, advocacy, and other desk modules are in beta.`,
+    definition: `zzai zzai (ZZAI / zzaizzai.com) — ${PRODUCT_TAGLINE}. ${PRODUCT_ONE_LINER} Brief-to-apps, SEO growth, hardware helpers, advocacy, and other tools are still in beta.`,
     shortDescription: BRAND.shortDescription,
     longDescription: [
       PRODUCT_ONE_LINER,
-      "Core (GA): Hybrid² Lab — fuse any two ZZAI channels (H¹), then hybridize listed blends (H²). API Builder, Projects, and Pulse keep fused endpoints safe with schema, evals, hazard preview, and rollback.",
-      "Game: free BALOON8 car×sneaker walk (one chassis, unlockable colorways), Sneak Vision hazard preview, and mission saves that mirror Hybrid² plus production guardrails.",
-      "Beta modules (same domain): OaaS patch bay, Seeds, Orbit, hardware builder, Poor Man Protection, free tool hubs, ZZAI Show, education advocacy, and the game studio.",
+      "Core (GA): Poor Man Protection — seal files and download shareable proof. API Builder, Projects, and Pulse keep live endpoints safe with schema checks, risk previews, and rollback.",
+      "Game: free car-sneaker runner — unlock finishes, peek ahead for hazards, and use quick saves.",
+      "Beta tools (same site): tool finder, brief-to-apps, SEO growth, hardware builder, free utilities, ZZAI Show, education advocacy, and the game studio.",
     ].join(" "),
     audience:
       "Founders composing AI product modules who need Hybrid² fusion plus production guardrails — not another thin API wrapper or hand-rolled validation stack.",
@@ -278,7 +278,7 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
                 ? "Game — free BALOON8 walk demo"
                 : f.id === "orbit"
                   ? "Grow — SEO, indexing, launch automation"
-                  : "Protect — seals and court packs";
+                  : "Protect — seals and shareable proof";
       return {
         id: f.id,
         name: f.name,
@@ -330,7 +330,7 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       {
         term: "Poor Man Protection",
         definition:
-          "ZZAI’s IP evidence workflow: cryptographic seals, dual-axis hybridization metadata, and court packs. Supporting evidence of anteriority — not a registered patent, trademark, or copyright.",
+          "ZZAI’s IP evidence workflow: secure seals, timestamps, and downloadable proof packs. Supporting evidence you had it first — not a registered patent, trademark, or copyright.",
       },
     ],
     citationUrls: [
@@ -367,7 +367,7 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       {
         title: "Poor Man Protection",
         path: "/poor-man-protection",
-        why: "Main product — seals, hashes, and court packs",
+        why: "Main product — seals, fingerprints, and shareable proof",
       },
       {
         title: "Game",
@@ -408,15 +408,15 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
     faqs: [
       {
         q: "What is zzai zzai / ZZAI / zzaizzai?",
-        a: `${PRODUCT_ONE_LINER} Other modules (Seeds, Orbit, hardware, tools hubs) are in beta on the same domain.`,
+        a: `${PRODUCT_ONE_LINER} Other tools (turn a brief into apps, SEO growth, hardware helpers, free utilities) are still in beta on the same site.`,
       },
       {
         q: "Is ZZAI only an AI API builder?",
-        a: "No — the public story leads with Poor Man Protection: seal sketches, colorways, and files with cryptographic hashes and court packs. The desk cube holds beta apps.",
+        a: "No — the public story leads with Poor Man Protection: seal sketches and files with a secure fingerprint, then download proof you can share. Other tools are still in beta on the homepage menu.",
       },
       {
         q: `What does “${PRODUCT_TAGLINE}” mean?`,
-        a: "Poor Man Protection is zzai zzai’s main focus — timestamp your work, seal it with hashes, and export a court-ready pack. Open /poor-man-protection.",
+        a: "Poor Man Protection is zzai zzai’s main focus — timestamp your work, seal it, and download proof you can share. Open /poor-man-protection.",
       },
       {
         q: "How long does it take to ship with ZZAI?",
@@ -436,7 +436,7 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       },
       {
         q: "What is Poor Man Protection?",
-        a: "A ZZAI workflow that creates timestamped, cryptographically sealed evidentiary packages and court packs. It is not a registered patent, trademark, or copyright with any government office.",
+        a: "A ZZAI workflow that creates timestamped, securely sealed packages you can download as evidence. It is not a registered patent, trademark, or copyright with any government office.",
       },
       {
         q: "Where is zzai zzai hosted?",
@@ -448,7 +448,7 @@ export function getBrandKnowledge(siteUrl = getSiteUrl()): BrandKnowledge {
       },
       {
         q: "What is the Game on zzai zzai?",
-        a: "The free browser game at /clean-sneaks is a BALOON8 car×sneaker hybrid walk — one chassis, unlockable colorways, zone-based shoe state, and Sneak Vision hazards. Open it from the Game face on the homepage cube.",
+        a: "The free browser game at /clean-sneaks is a runner where you keep a car-sneaker clean, unlock finishes, and peek ahead for hazards. Open it from Game on the homepage menu.",
       },
       {
         q: "What is ZZAI Show / events?",

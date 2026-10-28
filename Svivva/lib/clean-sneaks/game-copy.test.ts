@@ -11,7 +11,7 @@ import {
 describe("Klean Sneaks game copy", () => {
   it("opens with shoe protection theme", () => {
     expect(KLEAN_RUNNER_INTRO_LINE).toMatch(/Protect your shoes/i);
-    expect(KLEAN_RUNNER_INTRO_LINE).toMatch(/Klean/i);
+    expect(KLEAN_RUNNER_INTRO_LINE).toMatch(/clean/i);
   });
 
   it("names the card game with bundle protection theme", () => {
@@ -19,7 +19,7 @@ describe("Klean Sneaks game copy", () => {
   });
 
   it("labels the reference UI remix feature", () => {
-    expect(KLEAN_DISCOVER_PERFECT_UI).toBe("Discover your perfect UI");
+    expect(KLEAN_DISCOVER_PERFECT_UI).toBe("Customize the look");
   });
 
   it("states homepage protection from cameras and wear", () => {

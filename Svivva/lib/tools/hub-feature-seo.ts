@@ -57,7 +57,7 @@ export function buildHubFeatureHtml(page: HubFeaturePage): string {
     },
     {
       q: `Where do I go after trying ${page.keyword}?`,
-      a: `Continue to ${hubLabel} for related checkers, the full tools directory, or sign up on ZZAI when you need production APIs, Seeds, Orbit indexing, or security workflows.`,
+      a: `Continue to ${hubLabel} for related checkers, the full tools directory, or sign up on ZZAI when you need production APIs, brief-to-apps, SEO growth, or security workflows.`,
     },
   ];
 

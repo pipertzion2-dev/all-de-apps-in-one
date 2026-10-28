@@ -1,7 +1,7 @@
 /** Player-facing Klean Sneaks theme — protect shoes & bundles. */
 
 /** Shown on load + start cover before the runner. */
-export const KLEAN_RUNNER_INTRO_LINE = "Protect your shoes — keep them Klean…";
+export const KLEAN_RUNNER_INTRO_LINE = "Protect your shoes — keep them clean…";
 
 /** Homepage game panel + marketing tagline. */
 export const KLEAN_HOMEPAGE_TAGLINE = "Protect the sneaker design from cameras and everyday wear";
@@ -10,7 +10,7 @@ export const KLEAN_HOMEPAGE_TAGLINE = "Protect the sneaker design from cameras a
 export const KLEAN_BUNDLE_CARD_HEADLINE = "Protect your bundle!";
 
 /** Reference-driven UI remix — player inputs a reference; shell restyles + auto-patents. */
-export const KLEAN_DISCOVER_PERFECT_UI = "Discover your perfect UI";
+export const KLEAN_DISCOVER_PERFECT_UI = "Customize the look";
 
 /** German title as lettered on the main Steal Bundle graphic. */
 export const STEAL_BUNDLE_GERMAN_TITLE = "stiehl den alten Manns Bündel";

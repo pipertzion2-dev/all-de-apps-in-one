@@ -1047,7 +1047,7 @@ export function CleanSneaksGame3D({
               data-testid="button-cashout-steal-bundle"
               title={
                 canAffordTable(scoreToCredits(hud.score))
-                  ? "Cash out your walking credits into Steal the Bundle"
+                  ? "Cash out your walking credits into the bundle card game"
                   : `Need ${CREDITS_MIN_ANTE} credits to cash out`
               }
             >
@@ -1094,7 +1094,7 @@ export function CleanSneaksGame3D({
               className="mb-3 text-center text-sm"
               style={{ color: uiTheme?.colors.accentSoft ?? "#7EC8D9" }}
             >
-              Pick a BALOON8 colorway, then start
+              Pick a sneaker finish, then start
             </p>
             <div className="mb-4 w-full max-w-md rounded-lg border border-white/10 bg-black/50 p-3">
               <Baloon8ColorwayPicker value={colorwayId} onChange={selectColorway} compact />
@@ -1120,7 +1120,7 @@ export function CleanSneaksGame3D({
                 data-testid="button-toggle-ui-customize"
                 onClick={() => setShowUiCustomize((v) => !v)}
               >
-                {showUiCustomize ? "Hide custom UI" : "Optional · Discover your perfect UI"}
+                {showUiCustomize ? "Hide custom look" : "Optional · Customize the look"}
               </button>
               {showUiCustomize ? (
                 <ReferenceUiRemixPanel
@@ -1148,14 +1148,14 @@ export function CleanSneaksGame3D({
               {KLEAN_SNEAKS.title}
             </p>
             <p className="mb-1 text-sm text-[#7EC8D9]">
-              {sneaker.label ?? "BALOON8"} · Keep the fit clean
+              {sneaker.label ?? "Sneaker"} · Keep the fit clean
             </p>
             <p className="mb-3 text-[11px] uppercase tracking-wider text-white/50">
-              Color locked · get ready
+              Finish locked · get ready
             </p>
             <CasinoEntryRules className="mb-4" />
             <p className="mb-2 max-w-xs text-center text-[11px] text-white/50">
-              V = Sneak Vision · C = walk style · 1–6 = Oh No saves
+              V = peek ahead · C = walk style · 1–6 = quick saves
             </p>
             <p className="text-6xl font-bold tabular-nums text-foreground sm:text-7xl">
               {countdown > 0 ? countdown : "RUN."}
@@ -1262,7 +1262,7 @@ export function CleanSneaksGame3D({
 
       {!fullscreen && (
         <p className="mt-3 text-center text-[11px] text-muted-foreground sm:text-xs">
-          A/D dodge · Space jump · V Sneak Vision · C walk style · Mobile: swipe / tap vision
+          A/D dodge · Space jump · V peek ahead · C walk style · Mobile: swipe / tap to peek
         </p>
       )}
     </div>

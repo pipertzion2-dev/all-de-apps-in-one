@@ -19,12 +19,12 @@ export function Baloon8ColorwayPicker({ value, onChange, compact }: Props) {
       className={compact ? "space-y-1.5" : "space-y-2"}
       data-testid="baloon8-colorway-picker"
       role="listbox"
-      aria-label="BALOON8 colorway"
+      aria-label="Sneaker finish"
     >
       <p
         className={`uppercase tracking-[0.25em] text-[#5B8DA8]/90 ${compact ? "text-[9px]" : "text-[10px]"}`}
       >
-        BALOON8 · Colorway only
+        Sneaker finish
       </p>
       <div className={`flex flex-wrap ${compact ? "gap-1.5" : "gap-2"}`}>
         {ALL_COLORWAY_IDS.map((id) => {
