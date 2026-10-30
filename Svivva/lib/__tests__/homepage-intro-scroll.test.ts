@@ -9,8 +9,8 @@ describe("homepage intro scroll", () => {
     "utf8",
   );
 
-  it("drives a vertical cube flip on scroll/swipe up", () => {
-    expect(pageSrc).toContain("Scroll up to enter");
+  it("drives a vertical cube flip on scroll down / swipe up", () => {
+    expect(pageSrc).toContain("Scroll down to enter");
     expect(pageSrc).toContain('window.addEventListener("wheel", handleWheel');
     expect(pageSrc).toContain('window.addEventListener("touchmove", handleTouchMove');
     expect(pageSrc).toContain("skipIntroRef");
@@ -19,21 +19,23 @@ describe("homepage intro scroll", () => {
     expect(pageSrc).toContain("rotateX(${angle}deg)");
     expect(pageSrc).toContain("rotateX(${angle - 90}deg)");
     expect(pageSrc).toContain("snapToFinish");
-    expect(pageSrc).toContain("let delta = -e.deltaY");
+    // Desktop/Mac: positive deltaY (scroll down / natural trackpad) advances.
+    expect(pageSrc).toContain("let delta = e.deltaY");
+    expect(pageSrc).not.toContain("let delta = -e.deltaY");
   });
 
-  it("keeps the scroll-up cue on the intro face with high-contrast copy", () => {
-    const hintIdx = pageSrc.indexOf("Scroll up to enter");
+  it("keeps the scroll-down cue on the intro face with high-contrast copy", () => {
+    const hintIdx = pageSrc.indexOf("Scroll down to enter");
     const frontIdx = pageSrc.indexOf("flipFrontRef");
     const panelIdx = pageSrc.indexOf("<HomepageGamePanel");
     expect(hintIdx).toBeGreaterThan(panelIdx);
     expect(panelIdx).toBeGreaterThan(frontIdx);
     expect(pageSrc).toContain('data-testid="button-enter-main-app"');
     expect(pageSrc).toContain("safe-area-inset-bottom");
-    expect(pageSrc).toMatch(/text-black[\s\S]{0,120}Scroll up to enter/);
+    expect(pageSrc).toMatch(/text-black[\s\S]{0,120}Scroll down to enter/);
     expect(gameSrc).toContain("Tap cube to play free");
     expect(gameSrc).not.toContain("button-enter-main-app");
-    expect(gameSrc).not.toMatch(/scroll up to enter/i);
+    expect(gameSrc).not.toMatch(/scroll (up|down) to enter/i);
   });
 
   it("defers heavy homepage 3D until intro completes", () => {
