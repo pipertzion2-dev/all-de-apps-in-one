@@ -447,11 +447,12 @@ export default function LandingPage() {
     };
     window.addEventListener("resize", handleResize);
 
-    // Scroll up / swipe up advances the vertical cube flip into the homepage.
+    // Scroll down (Mac natural / mouse wheel) or swipe up advances the cube flip.
     const handleWheel = (e: WheelEvent) => {
       if (finishingIntroRef.current) return;
       e.preventDefault();
-      let delta = -e.deltaY;
+      // Positive deltaY = scroll down — matches Mac natural trackpad and desktop mice.
+      let delta = e.deltaY;
       if (e.deltaMode === WheelEvent.DOM_DELTA_LINE) delta *= 16;
       if (e.deltaMode === WheelEvent.DOM_DELTA_PAGE) delta *= window.innerHeight * 0.35;
       applyDelta(delta);
@@ -589,10 +590,10 @@ export default function LandingPage() {
                       }}
                       className="flex max-w-[min(92vw,22rem)] flex-col items-center gap-1.5 rounded-full border border-black/20 bg-white px-5 py-2.5 shadow-md transition-transform active:scale-95"
                       data-testid="button-enter-main-app"
-                      aria-label="Enter zzai zzai — scroll up or tap"
+                      aria-label="Enter zzai zzai — scroll down or tap"
                     >
                       <span className="text-center text-xs font-semibold tracking-[0.14em] text-black sm:text-sm">
-                        Scroll up to enter
+                        Scroll down to enter
                       </span>
                       <svg
                         width="22"
@@ -604,7 +605,7 @@ export default function LandingPage() {
                         className="text-black"
                         aria-hidden
                       >
-                        <path d="M10 16V4M5 9l5-5 5 5" />
+                        <path d="M10 4v12M5 11l5 5 5-5" />
                       </svg>
                     </button>
                   </div>
